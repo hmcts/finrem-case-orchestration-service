@@ -1603,6 +1603,10 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    public boolean isApplicantSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isApplicantSolicitorPopulated();
+    }
+
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());

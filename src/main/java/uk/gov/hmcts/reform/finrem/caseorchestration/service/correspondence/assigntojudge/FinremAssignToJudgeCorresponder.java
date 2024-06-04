@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
@@ -18,21 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
-    @Override
-    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (isRespondentSolicitorEmailPopulates(caseDetails)) {
-            log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
-            this.emailRespondentSolicitor(caseDetails);
-        } else {
-            log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(
-                    caseDetails,
-                    authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, CCDConfigConstant.RESPONDENT, authorisationToken);
-        }
-    }
-
     @Autowired
     public FinremAssignToJudgeCorresponder(NotificationService notificationService,
                                            BulkPrintService bulkPrintService,
@@ -44,6 +28,16 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     @Override
     protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
         return intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty();
+    }
+
+    @Override
+    protected boolean shouldSendRespondentSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
+    }
+
+    @Override
+    protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.isApplicantSolicitorEmailPopulated(caseDetails);
     }
 
     @Override
@@ -62,15 +56,11 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
-    
+
     @Override
     protected void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
-    }
-
-    protected boolean isRespondentSolicitorEmailPopulates(FinremCaseDetails caseDetails) {
-        return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
     }
 
 }
