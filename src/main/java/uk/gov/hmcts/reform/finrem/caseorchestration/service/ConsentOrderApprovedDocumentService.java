@@ -74,8 +74,8 @@ public class ConsentOrderApprovedDocumentService {
         CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = detailsCopy.getData();
 
-        if (caseDataService.isConsentedApplication(caseDetails)
-            && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+        if (caseDataService.isConsentedApplication(detailsCopy)
+            && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(detailsCopy.getData()))) {
             fileName = documentConfiguration.getApprovedVariationOrderFileName();
             caseData.put(ORDER_TYPE, VARIATION);
         } else {
@@ -83,17 +83,18 @@ public class ConsentOrderApprovedDocumentService {
             caseData.put(ORDER_TYPE, CONSENT);
         }
 
+        String template = documentConfiguration.getApprovedConsentOrderTemplate(detailsCopy);
         log.info("Generating Approved {} Order Letter {} from {} for bulk print, Case ID: {}",
             caseData.get(ORDER_TYPE),
             fileName,
-            documentConfiguration.getApprovedConsentOrderTemplate(caseDetails),
+            template,
             detailsCopy.getId());
 
         return genericDocumentService.generateDocument(authToken,
-            caseDataService.isContestedApplication(caseDetails)
-                ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
+            caseDataService.isContestedApplication(detailsCopy)
+                ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(detailsCopy)
                 : detailsCopy,
-            documentConfiguration.getApprovedConsentOrderTemplate(caseDetails),
+            template,
             fileName);
     }
 
@@ -153,33 +154,33 @@ public class ConsentOrderApprovedDocumentService {
         return bulkPrintDocuments;
     }
 
-    public void stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken, String caseId) {
+    public void stampAndPopulateContestedConsentApprovedOrderCollection(FinremCaseData caseData, String authToken, String caseId) {
         CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken, caseId);
         List<PensionTypeCollection> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken, caseId);
         populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
-    public CaseDetails generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        CaseDocument orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
-        List<CollectionElement<ApprovedOrder>> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
+    public void generateAndPopulateConsentOrderLetter(FinremCaseDetails finremCaseDetails, String authToken) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+
+        CaseDocument orderLetter = generateApprovedConsentOrderLetter(finremCaseDetailsMapper
+            .mapToCaseDetails(finremCaseDetails), authToken);
+        List<ConsentOrderCollection> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
+            ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder();
             approvedOrder.setOrderLetter(orderLetter);
-            caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
+            caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
         }
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        approvedConsentOrderCategoriser.categorise(finremCaseDetails.getData());
-        return finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        approvedConsentOrderCategoriser.categorise(caseData);
     }
 
-    private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData,
+    private CaseDocument stampAndAnnexContestedConsentOrder(FinremCaseData caseData,
                                                             String authToken,
                                                             String caseId) {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
         CaseDocument pdfDocument =
             genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, authToken, caseId);
-        caseData.put(CONSENT_ORDER, pdfDocument);
+        caseData.setConsentOrder(pdfDocument);
         StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument stampedDoc = genericDocumentService.stampDocument(pdfDocument, authToken, stampType, caseId);
         CaseDocument stampedAndAnnexedDoc =
@@ -188,29 +189,27 @@ public class ConsentOrderApprovedDocumentService {
         return stampedAndAnnexedDoc;
     }
 
-    private void populateContestedConsentOrderCaseDetails(Map<String, Object> caseData, CaseDocument stampedDoc,
+    private void populateContestedConsentOrderCaseDetails(FinremCaseData caseData, CaseDocument stampedDoc,
                                                           List<PensionTypeCollection> pensionDocs) {
-        caseData.put(CONSENT_ORDER, stampedDoc);
-        caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, pensionDocs);
+        caseData.setConsentOrder(stampedDoc);
+        caseData.setConsentPensionCollection(pensionDocs);
 
-        List<CollectionElement<ApprovedOrder>> approvedOrders = Optional.ofNullable(getConsentInContestedApprovedOrderCollection(caseData))
-            .orElse(new ArrayList<>());
+        List<ConsentOrderCollection> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .consentOrder(stampedDoc)
             .pensionDocuments(pensionDocs)
             .build();
 
-        approvedOrders.add(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build());
-        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
+        approvedOrders.add(ConsentOrderCollection.builder().approvedOrder(approvedOrder).build());
+        caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
     }
 
-    private CaseDocument getLatestConsentInContestedConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {
-        });
+    private CaseDocument getLatestConsentInContestedConsentOrder(FinremCaseData caseData) {
+        return caseData.getConsentOrder();
     }
 
-    private List<PensionTypeCollection> consentInContestedStampPensionDocuments(Map<String, Object> caseData,
+    private List<PensionTypeCollection> consentInContestedStampPensionDocuments(FinremCaseData caseData,
                                                                                 String authToken,
                                                                                 String caseId) {
         List<PensionTypeCollection> pensionDocs = getContestedConsentPensionDocuments(caseData);
@@ -218,22 +217,16 @@ public class ConsentOrderApprovedDocumentService {
         return stampPensionDocuments(pensionDocs, authToken, stampType, caseId);
     }
 
-    private List<PensionTypeCollection> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
-        if (ObjectUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
-            return new ArrayList<>();
-        }
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {
-        });
+    private List<PensionTypeCollection> getContestedConsentPensionDocuments(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getConsentPensionCollection()).orElse(new ArrayList<>());
     }
 
-    List<CollectionElement<ApprovedOrder>> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
-        });
+    List<ConsentOrderCollection> getConsentInContestedApprovedOrderCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders())
+            .orElse(new ArrayList<>());
     }
 
-    public CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails caseDetails) {
-
-        CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+    private CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails detailsCopy) {
         Map<String, Object> caseData = detailsCopy.getData();
 
         caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, caseData.get(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME));
