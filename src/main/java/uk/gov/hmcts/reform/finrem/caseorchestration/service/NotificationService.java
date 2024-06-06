@@ -152,7 +152,8 @@ public class NotificationService {
     }
 
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
-        sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+        sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper
+            .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails)));
     }
 
     /**
@@ -169,7 +170,8 @@ public class NotificationService {
 
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails);
+            finremNotificationRequestMapper
+                .getNotificationRequestForRespondentSolicitor(finremCaseDetails, !isRespondentSolicitorDigital(finremCaseDetails));
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
@@ -1601,6 +1603,10 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    public boolean isApplicantSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isApplicantSolicitorPopulated();
+    }
+
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
@@ -1611,6 +1617,10 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
+    public boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
+        return checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    }
+
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -1619,6 +1629,14 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
+        return checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isRespondentSolicitorPopulated();
     }
 
     public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
