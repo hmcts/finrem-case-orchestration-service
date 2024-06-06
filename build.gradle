@@ -49,7 +49,7 @@ def versions = [
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2023.0.2"
+    springCloudBomVersion = "2023.0.1"
     restAssuredBomVersion = "5.4.0"
 }
 
@@ -357,6 +357,8 @@ bootWithCCD {
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
     environment("FEATURE_SEND_LETTER_RECIPIENT_CHECK", "false")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+    environment("IDAM_DATA_STORE_SYSTEM_USER_USERNAME", "data.store.idam.system.user@mailinator.com")
+    environment("IDAM_DATA_STORE_SYSTEM_USER_PASSWORD", "QUFUUGE1NXdvcmQxMQ==")
 
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
