@@ -91,6 +91,8 @@ public enum EventType {
 
     UNHIDE_CASE("FR_unhideCase"),
 
+    GENERAL_APPLICATION_CONTESTED_CREATE("FR_createGeneralApplication"),
+
     @JsonEnumDefaultValue
     NONE("");
 

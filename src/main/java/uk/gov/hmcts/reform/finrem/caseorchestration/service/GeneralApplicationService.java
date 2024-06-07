@@ -394,6 +394,18 @@ public class GeneralApplicationService {
         });
     }
 
+    public void updateCaseDataStart(FinremCaseData finremCaseData, String authorisationToken) {
+        // todo, figure out how best to write this
+        // consider starting with a test
+        // look at how other tests of this class build the test data and copy
+        // you want to build case details with all the CCD fields, but as FinremCaseData
+        // givenGeneralApplication_shouldGetInterimGeneralApplicationList() is a good example
+        // to look at in GeneralApplicationServiceTest.java
+        // Then the test should confirm that after running these - they're all gone,
+        // Then point handler at this function, and remove updateCaseDataStart and refactor
+        // tests to use this function./
+    }
+
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
         Stream.of(GENERAL_APPLICATION_RECEIVED_FROM,
             GENERAL_APPLICATION_HEARING_REQUIRED,
@@ -405,6 +417,7 @@ public class GeneralApplicationService {
         ).forEach(caseData::remove);
         caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
     }
+
 
     public void updateGeneralApplicationCollectionData(List<GeneralApplicationCollectionData> generalApplications,
                                                        FinremCaseDetails caseDetails) {
