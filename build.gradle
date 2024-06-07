@@ -6,16 +6,16 @@ plugins {
     id 'org.springframework.boot' version '3.2.5'
     id 'com.github.ben-manes.versions' version '0.51.0'
     id 'uk.gov.hmcts.java' version '0.12.62'
-    id 'au.com.dius.pact' version '4.6.9'
+    id 'au.com.dius.pact' version '4.6.10'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1240'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1252'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '33.2.0-jre',
+        guava                : '33.2.1-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.2',
         commonsIo            : '2.16.1',
@@ -445,7 +445,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.1:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.2:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
