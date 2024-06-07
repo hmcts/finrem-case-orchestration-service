@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDe
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetailsForVariationOrder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
@@ -78,7 +79,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @ExtendWith(MockitoExtension.class)
@@ -179,8 +179,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContestedAndApplyCategoryWhenCaseFileViewEnabled() {
-        CaseDetails copyCaseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        String jsonResource = "/fixtures/contested/consent-in-contested-application-approved.json";
+        CaseDetails copyCaseDetails = caseDetailsFromResource(jsonResource, mapper);
+
         when(documentHelper.deepCopy(any(), any())).thenReturn(copyCaseDetails);
         when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
         when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
@@ -188,6 +189,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
         when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
+
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
         List<ConsentOrderCollection> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
             finremCaseDetails.getData());
@@ -199,8 +203,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContestedWithoutApplyingCategoryWhenCaseFileViewDisabled() {
-        CaseDetails copyCaseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        String jsonResource = "/fixtures/contested/consent-in-contested-application-approved.json";
+        CaseDetails copyCaseDetails = caseDetailsFromResource(jsonResource, mapper);
+
         when(documentHelper.deepCopy(any(), any())).thenReturn(copyCaseDetails);
         when(documentConfiguration.getApprovedConsentOrderNotificationFileName()).thenReturn(FILE_NAME);
         when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class), anyString(), anyString()))
@@ -208,6 +213,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderFileName()).thenReturn(FILE_NAME);
         when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(false);
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
         List<ConsentOrderCollection> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
             finremCaseDetails.getData());
@@ -316,20 +323,20 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(stampPensionDocuments, hasSize(1));
     }
 
-//    @Test
-//    public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
-//        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
-//            .thenReturn(document());
-//        CaseDetails caseDetails = defaultConsentedCaseDetails();
-//        Map<String, Object> caseData = caseDetails.getData();
-//        caseData.put(CONSENT_ORDER, caseDocument());
-//
-//        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
-//        assertThat(getDocumentList(caseData), hasSize(1));
-//
-//        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
-//        assertThat(getDocumentList(caseData), hasSize(2));
-//    }
+    @Test
+    public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+            .thenReturn(document());
+        FinremCaseDetails caseDetails = defaultConsentedFinremCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        caseData.setConsentOrder(caseDocument());
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
+        assertThat(getDocumentList(caseData), hasSize(1));
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
+        assertThat(getDocumentList(caseData), hasSize(2));
+    }
 
     @Test
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
@@ -422,9 +429,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, AUTH_TOKEN), equalTo(false));
     }
 
-    private List<CaseDocument> getDocumentList(Map<String, Object> data) {
-        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
-        });
+    private List<ConsentOrderCollection> getDocumentList(FinremCaseData data) {
+        return Optional.ofNullable(data.getConsentOrderWrapper().getContestedConsentedApprovedOrders()).orElse(new ArrayList<>());
     }
 
     private FinremCaseDetails finremCaseDetails() {
