@@ -190,7 +190,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
 
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
+        finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
 
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
         List<ConsentOrderCollection> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
@@ -214,7 +214,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentConfiguration.getApprovedConsentOrderTemplate(any())).thenReturn("approvedConsentOrderTemplate");
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(false);
 
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
+        finremCaseDetails = finremCaseDetailsFromResource(jsonResource, mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(finremCaseDetails, AUTH_TOKEN);
         List<ConsentOrderCollection> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
             finremCaseDetails.getData());
@@ -327,8 +327,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
         when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
             .thenReturn(document());
-        FinremCaseDetails caseDetails = defaultConsentedFinremCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        finremCaseDetails = defaultConsentedFinremCaseDetails();
+        FinremCaseData caseData = finremCaseDetails.getData();
         caseData.setConsentOrder(caseDocument());
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
