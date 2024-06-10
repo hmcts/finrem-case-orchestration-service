@@ -114,7 +114,7 @@ public class ConsentOrderPrintService {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
-        getOrderDocuments(caseDetails,caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+        getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
@@ -147,12 +147,13 @@ public class ConsentOrderPrintService {
             } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
                 && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
                 bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
+            } else if (!isNull(generalOrder) && orderDocuments.isEmpty()) {
+                bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else {
                 bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
             }
         }
     }
-
 
 
     public boolean shouldPrintOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
