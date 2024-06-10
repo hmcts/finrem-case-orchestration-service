@@ -14,13 +14,13 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_DRAFT_ORDER;
     }
 
 
     @Override
-    protected DocumentCategory getQuestionnairesDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_QUESTIONNAIRES;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_OTHER;
     }
 
 
@@ -32,6 +32,11 @@ public class ApplicantFdrDocumentCategoriser extends PartyFdrDocumentCategoriser
     @Override
     protected DocumentCategory getPositionStatementsDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POSITION_STATEMENTS;
+    }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_APPLICANT_POINTS_OF_CLAIM_OR_DEFENCE;
     }
 
 }

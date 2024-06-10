@@ -51,19 +51,19 @@ public class GeneralEmailDocumentCategoriser extends DocumentCategoriser {
                                                    IntervenerWrapper intervenerOneWrapper, IntervenerWrapper intervenerTwoWrapper,
                                                    IntervenerWrapper intervenerThreeWrapper, IntervenerWrapper intervenerFourWrapper) {
         if (recipientHasApplicantRole(emailAddress, detailsWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_APPLICANT.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId();
         } else if (recipientHasRespondentRole(emailAddress, detailsWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_RESPONDENT.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT.getDocumentCategoryId();
         } else if (recipientHasIntervenerRole(emailAddress, intervenerOneWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1.getDocumentCategoryId();
         } else if (recipientHasIntervenerRole(emailAddress, intervenerTwoWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2.getDocumentCategoryId();
         } else if (recipientHasIntervenerRole(emailAddress, intervenerThreeWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3.getDocumentCategoryId();
         } else if (recipientHasIntervenerRole(emailAddress, intervenerFourWrapper)) {
-            return DocumentCategory.CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4.getDocumentCategoryId();
         } else {
-            return DocumentCategory.CORRESPONDENCE_OTHER.getDocumentCategoryId();
+            return DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId();
         }
     }
 

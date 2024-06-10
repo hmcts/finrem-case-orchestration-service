@@ -24,17 +24,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -42,11 +43,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -65,7 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
@@ -98,55 +96,22 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
 public class NotificationServiceTest extends BaseServiceTest {
-
-    private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
-    private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
-    private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
-    private static final String END_POINT_PREPARE_FOR_HEARING = "http://localhost:8086/notify/prepare-for-hearing";
-    private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/consent-order-not-approved";
-    private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT = "http://localhost:8086/notify/consent-order-not-approved-sent";
-    private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
-    private static final String END_POINT_CONSENT_ORDER_AVAILABLE_CTSC = "http://localhost:8086/notify/consent-order-available-ctsc";
-    private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/contested/hwf-successful";
-    private static final String END_POINT_CONTESTED_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
-    private static final String END_POINT_CONTEST_ORDER_APPROVED = "http://localhost:8086/notify/contested/order-approved";
-    private static final String END_POINT_CONTESTED_DRAFT_ORDER = "http://localhost:8086/notify/contested/draft-order";
-    private static final String END_POINT_GENERAL_EMAIL_CONSENT = "http://localhost:8086/notify/general-email";
-    private static final String END_POINT_GENERAL_EMAIL_CONTESTED = "http://localhost:8086/notify/contested/general-email";
-    private static final String END_POINT_CONTEST_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/order-not-approved";
-    private static final String END_POINT_CONTESTED_CONSENT_ORDER_APPROVED = "http://localhost:8086/notify/contested/consent-order-approved";
-    private static final String END_POINT_CONTESTED_CONSENT_GENERAL_ORDER = "http://localhost:8086/notify/contested/consent-general-order";
-    private static final String END_POINT_CONTESTED_GENERAL_ORDER = "http://localhost:8086/notify/contested/general-order";
-    private static final String END_POINT_CONSENTED_GENERAL_ORDER = "http://localhost:8086/notify/general-order";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE =
-        "http://localhost:8086/notify/contested/general-application-refer-to-judge";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REJECTED =
-        "http://localhost:8086/notify/contested/general-application-rejected";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME =
-        "http://localhost:8086/notify/contested/general-application-outcome";
-    private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
-    private static final String END_POINT_CONTESTED_INTERIM_HEARING = "http://localhost:8086/notify/contested/prepare-for-interim-hearing-sent";
-    private static final String END_POINT_TRANSFER_TO_LOCAL_COURT = "http://localhost:8086/notify/transfer-to-local-court";
-    private static final String END_POINT_NOTICE_OF_CHANGE_CONSENTED = "http://localhost:8086/notify/notice-of-change";
-    private static final String END_POINT_NOTICE_OF_CHANGE_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change";
-    private static final String END_POINT_NOC_CASEWORKER_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change/caseworker";
-    private static final String END_POINT_NOC_CASEWORKER_CONSENTED = "http://localhost:8086/notify/notice-of-change/caseworker";
-    private static final String END_POINT_UPDATE_FRC_INFORMATION = "http://localhost:8086/notify/contested/update-frc-information";
-    private static final String END_POINT_UPDATE_FRC_INFO_COURT = "http://localhost:8086/notify/contested/update-frc-information/court";
-    private static final String END_POINT_LIST_FOR_HEARING_SUCCESSFUL = "http://localhost:8086/notify/list-for-hearing";
-    private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
-    private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
     private static final String INTERVENER_SOL_EMAIL = "intervenerSol@email.com";
 
-    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
     @Autowired
@@ -357,26 +322,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendConsentOrderAvailableIntervenerSolNotificationEmail() {
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
-    }
-
-    @Test
-    public void sendFinremConsentOrderAvailableIntervenerSolNotificationEmail() {
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
-    }
-
-    @Test
     public void sendConsentOrderAvailableNotificationCtscEmail() {
         notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest.getCaseDetails());
 
@@ -400,7 +345,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
 
@@ -410,27 +355,47 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     @Test
-    public void sendContestOrderApprovedEmailIntervenerSolicitor() {
+    public void sendContestOrderApprovedEmailIntervener1Solicitor() {
         notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
+            dataKeysWrapper, IntervenerType.INTERVENER_ONE);
 
         verify(notificationRequestMapper, timeout(100).times(1))
             .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER1);
     }
 
     @Test
-    public void sendFinremContestOrderApprovedEmailIntervenerSolicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
+    public void sendContestOrderApprovedEmailIntervener2Solicitor() {
+        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
+            dataKeysWrapper, IntervenerType.INTERVENER_TWO);
 
-        verify(finremNotificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(), dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER2);
+    }
+
+    @Test
+    public void sendContestOrderApprovedEmailIntervener3Solicitor() {
+        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
+            dataKeysWrapper, IntervenerType.INTERVENER_THREE);
+
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER3);
+    }
+
+    @Test
+    public void sendContestOrderApprovedEmailIntervener4Solicitor() {
+        notificationService.sendContestOrderApprovedEmailIntervener(callbackRequest.getCaseDetails(),
+            dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
+
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED_INTERVENER4);
     }
 
     @Test
@@ -466,15 +431,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER);
-    }
-
-    @Test
-    public void sendContestOrderApprovedEmail() {
-        notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper, timeout(100).times(1))
-            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
     }
 
     @Test
@@ -722,26 +678,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
-    }
-
-    @Test
-    public void sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor() {
-        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
-    }
-
-    @Test
-    public void sendFinremConsentOrderNotApprovedSentEmailToIntervenerSolicitor() {
-        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
-
-        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
-            dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_NOT_APPROVED_SENT);
     }
 
@@ -1033,7 +969,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendGeneralApplicationRejectionEmailIntervenerSolicitor() {
         finremCallbackRequest = getContestedNewCallbackRequest();
-        IntervenerWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().build();
+        IntervenerWrapper intervenerOneWrapper = IntervenerOne.builder().build();
         notificationService.sendGeneralApplicationRejectionEmailToIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
             intervenerOneWrapper);
         verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(finremCallbackRequest.getCaseDetails(),
@@ -1203,92 +1139,92 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailIfIntervenerOneSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
-            IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.YES)
+        FinremCaseData caseData = FinremCaseData.builder().intervenerOne(
+            IntervenerOne.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOne()));
     }
 
     @Test
     public void shouldNotEmailIfIntervenerOneSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerOneWrapper(
-            IntervenerOneWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseData caseData = FinremCaseData.builder().intervenerOne(
+            IntervenerOne.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOneWrapper()));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOne()));
     }
 
     @Test
     public void shouldEmailIfIntervenerTwoSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
-            IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.YES)
+        FinremCaseData caseData = FinremCaseData.builder().intervenerTwo(
+            IntervenerTwo.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_2.getCcdCode())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwo()));
     }
 
     @Test
     public void shouldNotEmailIfIntervenerTwoSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerTwoWrapper(
-            IntervenerTwoWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseData caseData = FinremCaseData.builder().intervenerTwo(
+            IntervenerTwo.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_2.getCcdCode())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwoWrapper()));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerTwo()));
     }
 
     @Test
     public void shouldEmailIfIntervenerThreeSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
-            IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.YES)
+        FinremCaseData caseData = FinremCaseData.builder().intervenerThree(
+            IntervenerThree.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_3.getCcdCode())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThree()));
     }
 
     @Test
     public void shouldNotEmailIfIntervenerThreeSolicitorIsNotPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerThreeWrapper(
-            IntervenerThreeWrapper.builder().intervenerRepresented(YesOrNo.NO).build()).build();
+        FinremCaseData caseData = FinremCaseData.builder().intervenerThree(
+            IntervenerThree.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_3.getCcdCode())).thenReturn(false);
-        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThreeWrapper()));
+        assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThree()));
     }
 
     @Test
     public void shouldEmailIfIntervenerFourSolicitorIsPopulated() {
-        FinremCaseData caseData = FinremCaseData.builder().intervenerFourWrapper(
-            IntervenerFourWrapper.builder().intervenerRepresented(YesOrNo.YES)
+        FinremCaseData caseData = FinremCaseData.builder().intervenerFour(
+            IntervenerFour.builder().intervenerRepresented(YesOrNo.YES)
                 .intervenerSolEmail(INTERVENER_SOL_EMAIL)
                 .intervenerSolName("name").build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_4.getCcdCode())).thenReturn(true);
-        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFourWrapper()));
+        assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerFour()));
     }
 
     @Test
     public void shouldEmailIntervenerSolicitorIfIntervenerSolicitorWasPopulated() {
-        IntervenerWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerWrapper wrapper = new IntervenerOne();
         FinremCaseData caseData = FinremCaseData.builder().build();
         IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
         wrapper.setIntervenerSolEmail("intvrsol@email.com");
@@ -1299,7 +1235,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailIntervenerSolicitorIfIntervenerSolicitorWasNotPopulated() {
-        IntervenerWrapper wrapper = new IntervenerOneWrapper();
+        IntervenerWrapper wrapper = new IntervenerOne();
         FinremCaseData caseData = FinremCaseData.builder().build();
         IntervenerChangeDetails changeDetails = new IntervenerChangeDetails();
         changeDetails.setIntervenerDetails(wrapper);
@@ -1380,20 +1316,20 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendInterimHearingNotificationEmailToApplicantSolicitor() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+        List<InterimHearingCollection> interimHearingList =
+            callbackRequest.getCaseDetails().getData().getInterimWrapper().getInterimHearingsScreenField();
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
-        when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class), any()))
+            .thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
@@ -1405,20 +1341,21 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendInterimHearingNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+        List<InterimHearingCollection> interimHearingList =
+            callbackRequest.getCaseDetails().getData().getInterimWrapper().getInterimHearingsScreenField();
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
-        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
+            any(FinremCaseDetails.class), any()))
+            .thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
@@ -1429,21 +1366,21 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendInterimHearingNotificationEmailToIntervenerSolicitor() {
-        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        FinremCallbackRequest callbackRequest = buildHearingFinremCallbackRequest(INTERIM_HEARING_JSON);
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+        List<InterimHearingCollection> interimHearingList =
+            callbackRequest.getCaseDetails().getData().getInterimWrapper().getInterimHearingsScreenField();
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingCollection::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
-        when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(CaseDetails.class), anyMap(),
-            any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
+        when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            any(FinremCaseDetails.class), anyMap(), any(SolicitorCaseDataKeysWrapper.class)))
+            .thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(), data,
@@ -1497,7 +1434,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void checkIsIntervenerSolicitorDigitalAndEmailPopulated() {
         callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_SOLICITOR_EMAIL);
-        IntervenerOneWrapper intervenerWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerWrapper = IntervenerOne.builder()
             .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build();
         when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
@@ -1515,10 +1452,10 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void checkFinremIsIntervenerSolicitorDigitalAndEmailPopulated() {
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        caseData.getIntervenerOneWrapper().setIntervenerSolEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getIntervenerOne().setIntervenerSolEmail(TEST_SOLICITOR_EMAIL);
         when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
 
-        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOneWrapper(),
+        boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseData.getIntervenerOne(),
             finremCallbackRequest.getCaseDetails());
         assertTrue(actual);
         verify(checkSolicitorIsDigitalService).isIntervenerSolicitorDigital(finremCallbackRequest.getCaseDetails().getId().toString(),
@@ -1528,19 +1465,19 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldReturnCaseDataKeysForIntervenersSolicitor() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .intervenerOneWrapper(IntervenerOneWrapper.builder()
+            .intervenerOne(IntervenerOne.builder()
                 .intervenerSolName("1Name")
                 .intervenerSolEmail("1Email")
                 .intervenerSolicitorReference("1Ref").build())
-            .intervenerTwoWrapper(IntervenerTwoWrapper.builder()
+            .intervenerTwo(IntervenerTwo.builder()
                 .intervenerSolName("2Name")
                 .intervenerSolEmail("2Email")
                 .intervenerSolicitorReference("2Ref").build())
-            .intervenerThreeWrapper(IntervenerThreeWrapper.builder()
+            .intervenerThree(IntervenerThree.builder()
                 .intervenerSolName("3Name")
                 .intervenerSolEmail("3Email")
                 .intervenerSolicitorReference("3Ref").build())
-            .intervenerFourWrapper(IntervenerFourWrapper.builder()
+            .intervenerFour(IntervenerFour.builder()
                 .intervenerSolName("4Name")
                 .intervenerSolEmail("4Email")
                 .intervenerSolicitorReference("4Ref").build())

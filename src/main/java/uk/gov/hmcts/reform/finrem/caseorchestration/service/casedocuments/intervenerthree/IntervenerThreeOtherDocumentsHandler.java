@@ -16,13 +16,8 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     }
 
     @Override
-    protected DocumentCategory getMiscellaneousOrOtherDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MISCELLANEOUS_OR_OTHER;
-    }
-
-    @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_PENSION_PLAN;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_OTHER;
     }
 
     @Override
@@ -38,11 +33,6 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
     @Override
     protected DocumentCategory getHearingDocumentsCategoryES2() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_ES2;
-    }
-
-    @Override
-    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
     @Override
@@ -65,6 +55,10 @@ public class IntervenerThreeOtherDocumentsHandler extends OtherDocumentsHandler 
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
     }
 
+    @Override
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_3;
+    }
 
     @Override
     protected DocumentCategory getFdrDocumentsAndFdrBundleWithoutPrejudiceOffersCategory() {

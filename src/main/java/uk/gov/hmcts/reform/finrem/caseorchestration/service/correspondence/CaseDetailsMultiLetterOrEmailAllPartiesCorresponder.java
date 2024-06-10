@@ -86,7 +86,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         List<IntervenerHearingNoticeCollection> intervenerHearingNoticesCollection =
             intervenerWrapper.getIntervenerHearingNoticesCollection(finremCaseDetails.getData());
         caseDocuments.forEach(cd -> intervenerHearingNoticesCollection.add(getHearingNoticesDocumentCollection(cd)));
-        caseDetails.getData().put(intervenerWrapper.getIntervenerHearingNoticesCollectionName(), intervenerHearingNoticesCollection);
+        caseDetails.getData().put(intervenerWrapper.getIntervenerHearingNoticesCollectionName().getValue(), intervenerHearingNoticesCollection);
         return caseDocuments;
     }
 

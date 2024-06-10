@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -28,10 +29,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEma
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
@@ -206,6 +207,7 @@ public class FinremCaseData {
     private List<FastTrackReason> fastTrackDecisionReason;
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
+    private EstimatedAssetV2 estimatedAssetsChecklistV2;
     private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;
@@ -218,6 +220,8 @@ public class FinremCaseData {
     private String mediatorRegistrationNumber;
     private String familyMediatorServiceName;
     private String soleTraderName;
+    private CaseDocument uploadMediatorDocument;
+    private CaseDocument uploadMediatorDocumentPaperCase;
     private String mediatorRegistrationNumber1;
     private String familyMediatorServiceName1;
     private String soleTraderName1;
@@ -226,6 +230,7 @@ public class FinremCaseData {
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
     private List<DocumentCollection> hearingNoticesDocumentCollection;
+    private Map<String, Object> courtDetails;
 
     private HearingTypeDirection hearingType;
     private String timeEstimate;
@@ -308,23 +313,24 @@ public class FinremCaseData {
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
 
-    @Getter(AccessLevel.NONE)
-    @JsonProperty("intervener1")
-    private IntervenerOneWrapper intervenerOneWrapper;
-
-    @Getter(AccessLevel.NONE)
-    @JsonProperty("intervener2")
-    private IntervenerTwoWrapper intervenerTwoWrapper;
-
-    @Getter(AccessLevel.NONE)
-    @JsonProperty("intervener3")
-    private IntervenerThreeWrapper intervenerThreeWrapper;
 
     private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
 
     @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener1")
+    private IntervenerOne intervenerOne;
+
+    @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener2")
+    private IntervenerTwo intervenerTwo;
+
+    @Getter(AccessLevel.NONE)
+    @JsonProperty("intervener3")
+    private IntervenerThree intervenerThree;
+
+    @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
-    private IntervenerFourWrapper intervenerFourWrapper;
+    private IntervenerFour intervenerFour;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
@@ -374,7 +380,7 @@ public class FinremCaseData {
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
-    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
+    private List<ManageScannedDocumentCollection> manageScannedDocumentCollection;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
@@ -395,7 +401,9 @@ public class FinremCaseData {
 
     private YesOrNo isNocRejected;
 
-    private YesOrNo isCfvCategoriesAppliedFlag;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CfvMigrationWrapper cfvMigrationWrapper;
 
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
@@ -521,71 +529,71 @@ public class FinremCaseData {
 
     @JsonIgnore
     public List<IntervenerWrapper> getInterveners() {
-        return List.of(getIntervenerOneWrapper(), getIntervenerTwoWrapper(), getIntervenerThreeWrapper(), getIntervenerFourWrapper());
+        return List.of(getIntervenerOne(), getIntervenerTwo(), getIntervenerThree(), getIntervenerFour());
     }
 
 
     @JsonIgnore
-    public IntervenerOneWrapper getIntervenerOneWrapper() {
-        if (intervenerOneWrapper == null) {
-            this.intervenerOneWrapper = IntervenerOneWrapper.builder().build();
+    public IntervenerOne getIntervenerOne() {
+        if (intervenerOne == null) {
+            this.intervenerOne = IntervenerOne.builder().build();
         }
-        return intervenerOneWrapper;
+        return intervenerOne;
     }
 
     @JsonIgnore
-    public IntervenerOneWrapper getIntervenerOneWrapperIfPopulated() {
-        if (intervenerOneWrapper != null) {
-            return this.intervenerOneWrapper;
-        }
-        return null;
-    }
-
-    @JsonIgnore
-    public IntervenerTwoWrapper getIntervenerTwoWrapper() {
-        if (intervenerTwoWrapper == null) {
-            this.intervenerTwoWrapper = IntervenerTwoWrapper.builder().build();
-        }
-        return intervenerTwoWrapper;
-    }
-
-    @JsonIgnore
-    public IntervenerTwoWrapper getIntervenerTwoWrapperIfPopulated() {
-        if (intervenerTwoWrapper != null) {
-            return this.intervenerTwoWrapper;
+    public IntervenerOne getIntervenerOneWrapperIfPopulated() {
+        if (intervenerOne != null) {
+            return this.intervenerOne;
         }
         return null;
     }
 
     @JsonIgnore
-    public IntervenerThreeWrapper getIntervenerThreeWrapper() {
-        if (intervenerThreeWrapper == null) {
-            this.intervenerThreeWrapper = IntervenerThreeWrapper.builder().build();
+    public IntervenerTwo getIntervenerTwo() {
+        if (intervenerTwo == null) {
+            this.intervenerTwo = IntervenerTwo.builder().build();
         }
-        return intervenerThreeWrapper;
+        return intervenerTwo;
     }
 
     @JsonIgnore
-    public IntervenerThreeWrapper getIntervenerThreeWrapperIfPopulated() {
-        if (intervenerThreeWrapper != null) {
-            return this.intervenerThreeWrapper;
+    public IntervenerTwo getIntervenerTwoWrapperIfPopulated() {
+        if (intervenerTwo != null) {
+            return this.intervenerTwo;
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public IntervenerThree getIntervenerThree() {
+        if (intervenerThree == null) {
+            this.intervenerThree = IntervenerThree.builder().build();
+        }
+        return intervenerThree;
+    }
+
+    @JsonIgnore
+    public IntervenerThree getIntervenerThreeWrapperIfPopulated() {
+        if (intervenerThree != null) {
+            return this.intervenerThree;
         }
         return null;
     }
 
 
     @JsonIgnore
-    public IntervenerFourWrapper getIntervenerFourWrapper() {
-        if (intervenerFourWrapper == null) {
-            this.intervenerFourWrapper = IntervenerFourWrapper.builder().build();
+    public IntervenerFour getIntervenerFour() {
+        if (intervenerFour == null) {
+            this.intervenerFour = IntervenerFour.builder().build();
         }
-        return intervenerFourWrapper;
+        return intervenerFour;
     }
 
     @JsonIgnore
-    public IntervenerFourWrapper getIntervenerFourWrapperIfPopulated() {
-        if (intervenerFourWrapper != null) {
-            return this.intervenerFourWrapper;
+    public IntervenerFour getIntervenerFourWrapperIfPopulated() {
+        if (intervenerFour != null) {
+            return this.intervenerFour;
         }
         return null;
     }
@@ -897,13 +905,11 @@ public class FinremCaseData {
         return Optional.ofNullable(courtList).orElse(new DefaultCourt());
     }
 
-
     @JsonIgnore
     public List<String> getSelectedParties() {
         DynamicMultiSelectList parties = this.getPartiesOnCase();
         return this.getSelectedParties(parties);
     }
-
 
     @JsonIgnore
     public List<String> getSelectedParties(DynamicMultiSelectList parties) {
@@ -913,5 +919,25 @@ public class FinremCaseData {
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
+    @JsonIgnore
+    public List<IntervenerHearingNoticeCollection> getIntervenerCollection(
+        IntervenerHearingNoticeCollectionName collectionName) {
+
+        return switch (collectionName) {
+            case INTV_1 -> getIntv1HearingNoticesCollection();
+            case INTV_2 -> getIntv2HearingNoticesCollection();
+            case INTV_3 -> getIntv3HearingNoticesCollection();
+            case INTV_4 -> getIntv4HearingNoticesCollection();
+        };
+    }
+
+    @JsonIgnore
+    public CfvMigrationWrapper getCfvMigrationWrapper() {
+        if (cfvMigrationWrapper == null) {
+            this.cfvMigrationWrapper = new CfvMigrationWrapper();
+        }
+
+        return cfvMigrationWrapper;
+    }
 }
 

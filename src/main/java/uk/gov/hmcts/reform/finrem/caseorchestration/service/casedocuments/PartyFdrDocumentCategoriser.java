@@ -17,12 +17,14 @@ public abstract class PartyFdrDocumentCategoriser {
                 return DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY;
             case WITHOUT_PREJUDICE_OFFERS:
                 return getWithoutPrejudiceDocumentCategory();
-            case QUESTIONNAIRE:
-                return getQuestionnairesDocumentCategory();
+            case OTHER:
+                return getOtherDocumentCategory();
             case PENSION_REPORT, EXPERT_EVIDENCE:
                 return DocumentCategory.FDR_REPORTS;
             case PRE_HEARING_DRAFT_ORDER:
                 return getHearingDraftOrderDocumentCategory();
+            case POINTS_OF_CLAIM_OR_DEFENCE:
+                return getPointsOfClaimOrDefenceDocumentCategory();
             default:
                 return getDefaultDocumentCategory();
         }
@@ -32,7 +34,9 @@ public abstract class PartyFdrDocumentCategoriser {
 
     protected abstract DocumentCategory getHearingDraftOrderDocumentCategory();
 
-    protected abstract DocumentCategory getQuestionnairesDocumentCategory();
+    protected abstract DocumentCategory getPointsOfClaimOrDefenceDocumentCategory();
+
+    protected abstract DocumentCategory getOtherDocumentCategory();
 
     protected abstract DocumentCategory getWithoutPrejudiceDocumentCategory();
 

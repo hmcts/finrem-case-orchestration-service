@@ -7,6 +7,9 @@
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "cfcCourtList": "FR_s_CFCList_9",
+      "regionList": "london",
+      "londonFRCList": "cfc",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
@@ -116,6 +119,16 @@
       },
       "generalLetterCreatedBy": "",
       "generalLetterBody": "Test content for the letter body",
+      "generalLetterUploadedDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+            "document_filename": "example_document.pdf",
+            "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+          }
+        }
+      ],
       "generalLetterCollection": [
         {
           "id": "1",

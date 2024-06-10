@@ -14,8 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -69,55 +70,55 @@ class FinremContestedSendOrderCorresponderTest {
     @Test
     void emailIntervener1Solicitor() {
         FinremCaseData data = caseDetails.getData();
-        data.getIntervenerTwoWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerThreeWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
-        IntervenerWrapper wrapper = data.getIntervenerOneWrapper();
+        data.getIntervenerTwo().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerThree().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerFour().setIntervenerCorrespondenceEnabled(false);
+        IntervenerWrapper wrapper = data.getIntervenerOne();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_ONE);
     }
 
     @Test
     void emailIntervener2Solicitor() {
         FinremCaseData data = caseDetails.getData();
-        data.getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerThreeWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
-        IntervenerWrapper wrapper = data.getIntervenerTwoWrapper();
+        data.getIntervenerOne().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerThree().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerFour().setIntervenerCorrespondenceEnabled(false);
+        IntervenerWrapper wrapper = data.getIntervenerTwo();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_TWO);
     }
 
     @Test
     void emailIntervener3Solicitor() {
         FinremCaseData data = caseDetails.getData();
-        data.getIntervenerTwoWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerFourWrapper().setIntervenerCorrespondenceEnabled(false);
-        IntervenerWrapper wrapper = data.getIntervenerThreeWrapper();
+        data.getIntervenerTwo().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerOne().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerFour().setIntervenerCorrespondenceEnabled(false);
+        IntervenerWrapper wrapper = data.getIntervenerThree();
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(TEST_SOLICITOR_EMAIL).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_THREE);
     }
 
     @Test
     void emailIntervener4Solicitor() {
         FinremCaseData data = caseDetails.getData();
-        data.getIntervenerTwoWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerThreeWrapper().setIntervenerCorrespondenceEnabled(false);
-        data.getIntervenerOneWrapper().setIntervenerCorrespondenceEnabled(false);
-        IntervenerWrapper wrapper = data.getIntervenerFourWrapper();
+        data.getIntervenerTwo().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerThree().setIntervenerCorrespondenceEnabled(false);
+        data.getIntervenerOne().setIntervenerCorrespondenceEnabled(false);
+        IntervenerWrapper wrapper = data.getIntervenerFour();
         wrapper.setIntervenerEmail(TEST_SOLICITOR_EMAIL);
         SolicitorCaseDataKeysWrapper dataKeysWrapper
             = SolicitorCaseDataKeysWrapper.builder().solicitorEmailKey(wrapper.getIntervenerEmail()).build();
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class))).thenReturn(dataKeysWrapper);
         corresponder.emailIntervenerSolicitor(wrapper, caseDetails);
-        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper);
+        verify(notificationService).sendContestOrderApprovedEmailIntervener(caseDetails, dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
     }
 
     @Test
@@ -132,13 +133,13 @@ class FinremContestedSendOrderCorresponderTest {
 
     @Test
     void shouldSendLettersToInterveners() {
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
 
-        caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
+        caseDetails.getData().setIntervenerOne(intervenerOne);
 
         List<OrderSentToPartiesCollection> orders = new ArrayList<>();
         orders.add(OrderSentToPartiesCollection.builder().value(SendOrderDocuments.builder().caseDocument(caseDocument()).build()).build());
@@ -146,13 +147,13 @@ class FinremContestedSendOrderCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(false);
 
         corresponder.sendCorrespondence(caseDetails, "authToken");
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(FinremCaseDetails.class),
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, caseDetails);
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(FinremCaseDetails.class),
             anyString(), anyList());
     }
 

@@ -82,7 +82,7 @@ public class RespondentOtherDocumentsCollectionServiceTest extends BaseManageDoc
 
         assertThat(
             collectionService.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.RESPONDENT),
-            is(DocumentCategory.RESPONDENT_DOCUMENTS_PENSION_PLAN)
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(

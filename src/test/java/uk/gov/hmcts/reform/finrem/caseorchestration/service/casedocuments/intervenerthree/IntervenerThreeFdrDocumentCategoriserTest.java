@@ -28,15 +28,13 @@ public class IntervenerThreeFdrDocumentCategoriserTest {
         assertEquals(DocumentCategory.FDR_JOINT_DOCUMENTS_CHRONOLOGY,
             categoriser.getDocumentCategory(CaseDocumentType.CHRONOLOGY));
 
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_QUESTIONNAIRES,
-            categoriser.getDocumentCategory(CaseDocumentType.QUESTIONNAIRE));
-
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_PRE_HEARING_DRAFT_ORDER,
-            categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
-
-
-        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3,
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_OTHER,
             categoriser.getDocumentCategory(CaseDocumentType.OTHER));
 
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_DRAFT_ORDER,
+            categoriser.getDocumentCategory(CaseDocumentType.PRE_HEARING_DRAFT_ORDER));
+
+        assertEquals(DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE,
+            categoriser.getDocumentCategory(CaseDocumentType.POINTS_OF_CLAIM_OR_DEFENCE));
     }
 }

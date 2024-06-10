@@ -76,8 +76,7 @@ public class AdditionalHearingDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>)
-            courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
-
+            courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedHearingCourt(caseData)));
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE),

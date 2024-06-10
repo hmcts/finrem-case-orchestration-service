@@ -62,7 +62,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
     public void assertCorrectCategoryAssignedFromDocumentType() {
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.OTHER, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MISCELLANEOUS_OR_OTHER)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_OTHER)
         );
 
         assertThat(
@@ -82,7 +82,7 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.PENSION_PLAN, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_PENSION_PLAN)
+            is(DocumentCategory.REPORTS)
         );
 
         assertThat(
@@ -102,12 +102,12 @@ public class IntervenerOneOtherDocumentsHandlerTest extends BaseManageDocumentsH
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.MORTGAGE_CAPACITIES, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
         );
 
         assertThat(
             handler.getDocumentCategoryFromDocumentType(CaseDocumentType.HOUSING_PARTICULARS, CaseDocumentParty.INTERVENER_ONE),
-            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS)
+            is(DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_1)
         );
 
         assertThat(

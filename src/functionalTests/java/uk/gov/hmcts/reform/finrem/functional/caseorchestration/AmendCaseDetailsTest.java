@@ -4,7 +4,6 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +12,21 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_ABUSE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTIONS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
@@ -26,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
+
 
 @RunWith(SerenityRunner.class)
 public class AmendCaseDetailsTest extends IntegrationTestBase {
@@ -44,30 +56,22 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyAmendDivorceDetailsD81Individual() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-divorce-details-d81-individual1.json");
-
-        if (jsonPathEvaluator.get("d81Joint") != null) {
-            Assert.fail("The d81Joint is still showing in the result even after selecting individual.");
-        }
+        checkIsNull("d81Joint", ", even after selecting individual,", jsonPathEvaluator);
     }
 
     @Test
     public void verifyAmendDivorceDetailsD81Joint() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir, "amend-divorce-details-d81-joint.json");
-
-        if (jsonPathEvaluator.get("d81Applicant") != null
-            || jsonPathEvaluator.get("d81Respondent") != null) {
-            Assert.fail("The d81Applicant or d81Respondent is still showing in the result even after selecting d81Joint.");
-        }
+        String message = ", even after selecting d81Joint,";
+        checkIsNull("d81Applicant", message, jsonPathEvaluator);
+        checkIsNull("d81Respondent", message, jsonPathEvaluator);
     }
 
     @Test
     public void verifyAmendDivorceDetailsDecreeAbsolute() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-divorce-details-decree-absolute1.json");
-
-        if (jsonPathEvaluator.get("divorceDecreeNisiDate") != null) {
-            Assert.fail("The divorceDecreeNisiDate is still showing in the result even after selecting decree Absolute.");
-        }
+        checkIsNull("divorceDecreeNisiDate", ", even after selecting decree absolute,", jsonPathEvaluator);
     }
 
     @Test
@@ -75,50 +79,48 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-divorce-details-decree-nisi1.json");
 
-        Assert.assertNull("The divorceDecreeAbsoluteDate is still showing in the result even after selecting decree Absolute.",
-            jsonPathEvaluator.get("divorceDecreeAbsoluteDate"));
+        checkIsNull("divorceDecreeAbsoluteDate", ", even after selecting decree Absolute,", jsonPathEvaluator);
     }
-
 
     @Test
     public void verifyAmendPeriodicPaymentOrder() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir, "amend-periodic-payment-order1.json");
-
-        if (jsonPathEvaluator.get("natureOfApplication6") != null || jsonPathEvaluator.get("natureOfApplication7") != null) {
-            Assert.fail("The periodic payment details with written agreement for children is still showing in the result.");
-        }
+        String message = " associated with periodic payment details and written agreement for children";
+        checkIsNull("natureOfApplication6", message, jsonPathEvaluator);
+        checkIsNull("natureOfApplication7", message, jsonPathEvaluator);
     }
 
     @Test
     public void verifyAmendPeriodicPaymentOrderwithoutagreement() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-periodic-payment-order-without-agreement1.json");
-
-        if (jsonPathEvaluator.get("natureOfApplication6") == null || jsonPathEvaluator.get("natureOfApplication7") == null) {
-            Assert.fail("The periodic payment details with written agreement for children is not showing in the result.");
-        }
+        String message = " associated with periodic payment details and written agreement for children";
+        checkNotNull("natureOfApplication6", message, jsonPathEvaluator);
+        checkNotNull("natureOfApplication7", message, jsonPathEvaluator);
     }
 
     @Test
     public void verifyAmendPropertyAdjustmentDetails() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-property-adjustment-details1.json");
-
-        if (jsonPathEvaluator.get("natureOfApplication3a") == null || jsonPathEvaluator.get("natureOfApplication3b") == null) {
-            Assert.fail("The property adjustment details with written agreement is not showing in the result.");
-        }
+        String message = " associated with property adjustment details and written agreement";
+        checkNotNull("natureOfApplication3a", message, jsonPathEvaluator);
+        checkNotNull("natureOfApplication3b", message, jsonPathEvaluator);
     }
 
     @Test
     public void verifyAmendRemovePeriodicPaymentOrder() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-remove-periodic-payment-order1.json");
-
-        if (jsonPathEvaluator.get("natureOfApplication5") != null
-            || jsonPathEvaluator.get("natureOfApplication6") != null
-            || jsonPathEvaluator.get("natureOfApplication7") != null
-            || jsonPathEvaluator.get("orderForChildrenQuestion1") != null) {
-            Assert.fail("The periodic payment details with written agreement for children is still showing in the result.");
+        String message = " associated with periodic payment details and written agreement for children";
+        String[] fields = {
+            "natureOfApplication5",
+            "natureOfApplication6",
+            "natureOfApplication7",
+            "orderForChildrenQuestion1"
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -126,12 +128,15 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyAmendRemovePropertyAdjustmentDetails() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "remove-property-adjustment-details1.json");
-
-        if (jsonPathEvaluator.get("natureOfApplication5") != null
-            || jsonPathEvaluator.get("natureOfApplication6") != null
-            || jsonPathEvaluator.get("natureOfApplication7") != null
-            || jsonPathEvaluator.get("orderForChildrenQuestion1") != null) {
-            Assert.fail("The property adjustment details with written agreement is still showing in the result.");
+        String message = " associated with property adjustment details and written agreement";
+        String[] fields = {
+            "natureOfApplication5",
+            "natureOfApplication6",
+            "natureOfApplication7",
+            "orderForChildrenQuestion1"
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -139,15 +144,18 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyAmendRemoveRespondentSolicitorDetails() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "remove-respondent-solicitor-details1.json");
-
-        if (jsonPathEvaluator.get(RESP_SOLICITOR_FIRM) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_NAME) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_REFERENCE) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_ADDRESS) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_DX_NUMBER) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_EMAIL) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_PHONE) != null) {
-            Assert.fail("The respondent Solicitor Details are still showing in the result.");
+        String message = " associated with the respondent solicitor details";
+        String[] fields = {
+            RESP_SOLICITOR_FIRM,
+            RESP_SOLICITOR_NAME,
+            RESP_SOLICITOR_REFERENCE,
+            RESP_SOLICITOR_ADDRESS,
+            RESP_SOLICITOR_DX_NUMBER,
+            RESP_SOLICITOR_EMAIL,
+            RESP_SOLICITOR_PHONE
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -155,101 +163,87 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, contestedDir,
             "amend-divorce-details-decree-nisi-handler.json");
-
-        if (jsonPathEvaluator.get("divorceUploadEvidence2") != null
-            || jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null) {
-
-            Assert.fail("The decree nisi file is still showing in the result.");
-        }
+        checkIsNull("divorceUploadEvidence2", null, jsonPathEvaluator);
+        checkIsNull("divorceDecreeAbsoluteDate", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, contestedDir,
             "amend-divorce-details-decree-absolute-handler.json");
-
-        if (jsonPathEvaluator.get("divorceUploadEvidence1") != null
-            || jsonPathEvaluator.get("divorceDecreeNisiDate") != null) {
-
-            Assert.fail("The decree Absolute file is still showing in the result.");
-        }
+        checkIsNull("divorceUploadEvidence1", null, jsonPathEvaluator);
+        checkIsNull("divorceDecreeNisiDate", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() {
-
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-property-adjustment-order-details1.json");
-
-        if (jsonPathEvaluator.get("propertyAddress") != null
-            || jsonPathEvaluator.get("mortgageDetail") != null
-            || jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null) {
-
-            Assert.fail("The property details are still showing in the result.");
+        String message = " associated with property details";
+        String[] fields = {
+            "propertyAddress",
+            "mortgageDetail",
+            "propertyAdjutmentOrderDetail"
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
     @Test
     public void verifyRemoveAdditionalPropertyDetailsForContested() {
-
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-additional-property-details1.json");
-
-        if (jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null) {
-
-            Assert.fail("The additional property details are still showing in the result.");
-        }
+        checkIsNull("propertyAdjutmentOrderDetail", " associated with additional property details", jsonPathEvaluator);
     }
 
     @Test
     public void verifyRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() {
-
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-periodic-payment-order-details1.json");
-
-        if (jsonPathEvaluator.get("paymentForChildrenDecision") != null
-            || jsonPathEvaluator.get("benefitForChildrenDecision") != null
-            || jsonPathEvaluator.get("benefitPaymentChecklist") != null) {
-
-            Assert.fail("The periodic payment details are still showing in the result.");
+        String message = " associated with periodic payment details";
+        String[] fields = {
+            "paymentForChildrenDecision",
+            "benefitForChildrenDecision",
+            "benefitPaymentChecklist"
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() {
-
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "update-periodic-payment-details-for-no-payment-for-children1.json");
-
-        if (jsonPathEvaluator.get("benefitForChildrenDecision") != null
-            || jsonPathEvaluator.get("benefitPaymentChecklist") != null) {
-            Assert.fail("The periodic payment details are still showing even after payment for children is unchecked for contested in the result.");
-        }
+        String message = " associated with the periodic payment details, even after payment for children is unchecked,";
+        checkIsNull("benefitForChildrenDecision", message, jsonPathEvaluator);
+        checkIsNull("benefitPaymentChecklist", message, jsonPathEvaluator);
     }
 
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "update-periodic-payment-details-with-benefits-for-children1.json");
-
-        if (jsonPathEvaluator.get("benefitPaymentChecklist") != null) {
-            Assert.fail("The benefitPaymentCheckList is still showing in the result.");
-        }
+        checkIsNull("benefitPaymentChecklist", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-respondent-solicitor-details1.json");
-
-        if (jsonPathEvaluator.get(RESP_SOLICITOR_NAME) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_FIRM) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_REFERENCE) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_EMAIL) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_ADDRESS) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_PHONE) != null
-            || jsonPathEvaluator.get(RESP_SOLICITOR_DX_NUMBER) != null) {
-            Assert.fail("The respondent solicitor details are still showing in the result.");
+        String message = " associated with the respondent solicitor details";
+        String[] fields = {
+            RESP_SOLICITOR_NAME,
+            RESP_SOLICITOR_FIRM,
+            RESP_SOLICITOR_REFERENCE,
+            RESP_SOLICITOR_EMAIL,
+            RESP_SOLICITOR_ADDRESS,
+            RESP_SOLICITOR_PHONE,
+            RESP_SOLICITOR_DX_NUMBER
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -257,11 +251,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-respondent-address-details1.json");
-
-        if (jsonPathEvaluator.get(RESPONDENT_ADDRESS) != null
-            || jsonPathEvaluator.get(RESPONDENT_PHONE) != null
-            || jsonPathEvaluator.get(RESPONDENT_EMAIL) != null) {
-            Assert.fail("The respondent solicitor address details are still showing in the result.");
+        String message = " associated with the respondent solicitor address details";
+        String[] fields = {
+            RESPONDENT_ADDRESS,
+            RESPONDENT_PHONE,
+            RESPONDENT_EMAIL
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -269,34 +266,31 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyUpdateFastTrackDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-respondent-address-details1.json");
-
-        if (jsonPathEvaluator.get("fastTrackDecisionReason") != null) {
-            Assert.fail("The fastTrackDecisionReason  details are still showing in the result.");
-        }
+        checkIsNull("fastTrackDecisionReason", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyShouldNotUpdateFastTrackDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-respondent-solicitor-details1.json");
-
-        if (jsonPathEvaluator.get("fastTrackDecisionReason") == null) {
-            Assert.fail("The fastTrackDecisionReason  details are not showing in the result.");
-        }
+        checkNotNull("fastTrackDecisionReason", null, jsonPathEvaluator);
     }
 
     @Test
-    public void verifyShouldRemoveComplexityDetailsForContested() {
+    public void verifyShouldUpdateComplexityDetailsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-complexity-details1.json");
-
-        if (jsonPathEvaluator.get("estimatedAssetsChecklist") != null
-            || jsonPathEvaluator.get("netValueOfHome") != null
-            || jsonPathEvaluator.get("potentialAllegationChecklist") != null
-            || jsonPathEvaluator.get("otherReasonForComplexity") != null
-            || jsonPathEvaluator.get("otherReasonForComplexityText") != null
-            || jsonPathEvaluator.get("detailPotentialAllegation") != null) {
-            Assert.fail("The complexity details for contested are still showing in the result.");
+        String message = ", associated with the complexity details,";
+        String[] fields = {
+            "estimatedAssetsChecklist",
+            "netValueOfHome",
+            "potentialAllegationChecklist",
+            "otherReasonForComplexity",
+            "otherReasonForComplexityText",
+            "detailPotentialAllegation"
+        };
+        for (String field : fields) {
+            checkNotNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -304,138 +298,56 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyShouldRemoveAdditionalReasonForComplexityForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-other-reason-for-complexity1.json");
-
-        if (jsonPathEvaluator.get("otherReasonForComplexityText") != null) {
-            Assert.fail("The other complexity details are not showing in the result.");
-        }
+        checkIsNull("otherReasonForComplexityText", null, jsonPathEvaluator);
     }
 
     @Test
     public void verifyShouldRemoveReasonForLocalCourtForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "is-applicant-home-court1.json");
-
-        if (jsonPathEvaluator.get("reasonForLocalCourt") != null) {
-            Assert.fail("The reason for local court details are not showing in the result.");
-        }
+        checkIsNull("reasonForLocalCourt", null, jsonPathEvaluator);
     }
 
     @Test
-    public void verifyShouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() {
+    public void verifyShouldRemoveMiamExemptionsAndCertificationWhenApplicantAttendedMiamForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "remove-exceptions-when-applicant-attended-miam1.json");
-
-        if (jsonPathEvaluator.get(CLAIMING_EXEMPTION_MIAM) != null
-            || jsonPathEvaluator.get("familyMediatorMIAM") != null
-            || jsonPathEvaluator.get("MIAMExemptionsChecklist") != null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") != null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are still showing in the result.");
+        String message = " associated with the Miam exemption or certification details";
+        String[] fields = {
+            CLAIMING_EXEMPTION_MIAM,
+            FAMILY_MEDIATOR_MIAM,
+            MIAM_EXEMPTIONS_CHECKLIST,
+            MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
+            MIAM_URGENCY_CHECKLIST,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
+            MIAM_OTHER_GROUNDS_CHECKLIST,
+            MIAM_DOMESTIC_ABUSE_TEXTBOX,
+            MIAM_URGENCY_TEXTBOX,
+            MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
+            MIAM_OTHER_GROUNDS_TEXTBOX,
+            MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX,
+            "soleTraderName1",
+            "familyMediatorServiceName1",
+            "mediatorRegistrationNumber1"
+        };
+        for (String field : fields) {
+            checkIsNull(field, message, jsonPathEvaluator);
         }
     }
 
     @Test
-    public void verifyShouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "update-miam-exceptions-when-applicant-not-claiming-exemption1.json");
-
-        if (jsonPathEvaluator.get(APPLICANT_ATTENDED_MIAM) == null
-            || jsonPathEvaluator.get("claimingExemptionMIAM") == null
-            || jsonPathEvaluator.get("familyMediatorMIAM") != null
-            || jsonPathEvaluator.get("MIAMExemptionsChecklist") != null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") != null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "update-miam-exceptions-when-applicant-attended-family-mediator1.json");
-
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") != null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") != null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldRemoveDomesticViolenceCheckListForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-domestic-violence-checklist1.json");
-
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") != null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") == null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldRemoveUrgencyCheckListForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-urgency-checklist1.json");
-
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") == null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null) {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldRemovePreviousMiamAttendanceCheckListForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-previousMiamAttendance-checklist1.json");
-        System.out.println("response content : " + jsonPathEvaluator.prettyPrint());
-
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") == null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") == null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldRemoveOtherGroundsMiamCheckListForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
-            "remove-other-checklist1.json");
-
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") == null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") == null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
-        }
-    }
-
-    @Test
-    public void verifyShouldNotRemoveMiamCheckListForContested() {
+    public void verifyShouldNotRemoveMiamCheckListsForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
             "do-not-remove-checklists1.json");
+        String message = " associated with Miam exemptions when the applicant did not attend a Miam and is claiming exemption";
+        checkExemptionFieldsNotNull(message);
+        checkIsNull("familyMediatorMIAM", " which is a legacy field", jsonPathEvaluator);
+    }
 
-        if (jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
-            || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") == null
-            || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") == null
-            || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
-            || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are removed in the result.");
+    private void checkExemptionFieldsNotNull(String message) {
+        String[] fields = getMiamExemptionFields();
+        for (String field : fields) {
+            checkNotNull(field, message, jsonPathEvaluator);
         }
     }
 
@@ -443,49 +355,37 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     public void verifyShouldUpdateCaseDataWithLatestConsentOrder() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-consent-order-by-solicitor.json");
-
-        if (jsonPathEvaluator.get(LATEST_CONSENT_ORDER) == null) {
-            Assert.fail("The latestConsentOrder field is not available.");
-        }
+        checkNotNull(LATEST_CONSENT_ORDER, null,
+            jsonPathEvaluator);
     }
 
     @Test
     public void verifyShouldSetLatestDraftConsentOrderWhenACaseIsCreated() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "draft-consent-order.json");
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file1.binary"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file1"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file1"));
+        checkLatestConsentOrderDocument("http://file1.binary", "file1", "http://file1");
     }
 
     @Test
     public void verifyShouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-consent-order-by-solicitor.json");
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file2.binary"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file2"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file2"));
+        checkLatestConsentOrderDocument("http://file2.binary", "file2", "http://file2");
     }
 
     @Test
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "amend-consent-order-by-caseworker.json");
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"),
-            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"),
-            is("Notification for ABC - Contested.docx"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"),
-            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
+        checkLatestConsentOrderDocument("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary",
+            "Notification for ABC - Contested.docx", "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838");
     }
 
     @Test
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolicitor() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, consentedDir,
             "respond-to-order-solicitor.json");
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://doc1/binary"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("doc1"));
-        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://doc1"));
+        checkLatestConsentOrderDocument("http://doc1/binary", "doc1", "http://doc1");
     }
 
     private JsonPath amendCaseDetails(String url, String journeyType, String jsonFileName) {
@@ -498,4 +398,35 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         assertEquals(200, response.getStatusCode());
         return response.jsonPath().setRoot("data");
     }
+
+    private void checkLatestConsentOrderDocument(String url, String file1, String url1) {
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is(url));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is(file1));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is(url1));
+    }
+
+    private void checkNotNull(String field, String message, JsonPath jsonPathEvaluator) {
+        assertNotNull("The field " + field + message + " is not showing in the result.", jsonPathEvaluator.get(field));
+    }
+
+    private void checkIsNull(String field, String message, JsonPath jsonPathEvaluator) {
+        assertNull("The field " + field + message + " is still showing in the result.", jsonPathEvaluator.get(field));
+    }
+
+    private String[] getMiamExemptionFields() {
+        return new String[]{
+            CLAIMING_EXEMPTION_MIAM,
+            MIAM_EXEMPTIONS_CHECKLIST,
+            MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
+            MIAM_URGENCY_CHECKLIST,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
+            MIAM_OTHER_GROUNDS_CHECKLIST,
+            MIAM_DOMESTIC_ABUSE_TEXTBOX,
+            MIAM_URGENCY_TEXTBOX,
+            MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
+            MIAM_OTHER_GROUNDS_TEXTBOX,
+            MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX
+        };
+    }
+
 }

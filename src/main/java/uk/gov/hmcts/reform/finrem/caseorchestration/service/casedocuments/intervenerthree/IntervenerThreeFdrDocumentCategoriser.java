@@ -13,12 +13,12 @@ public class IntervenerThreeFdrDocumentCategoriser extends PartyFdrDocumentCateg
 
     @Override
     protected DocumentCategory getHearingDraftOrderDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_PRE_HEARING_DRAFT_ORDER;
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_DRAFT_ORDER;
     }
 
     @Override
-    protected DocumentCategory getQuestionnairesDocumentCategory() {
-        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_QUESTIONNAIRES;
+    protected DocumentCategory getOtherDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_OTHER;
     }
 
     @Override
@@ -29,5 +29,10 @@ public class IntervenerThreeFdrDocumentCategoriser extends PartyFdrDocumentCateg
     @Override
     protected DocumentCategory getPositionStatementsDocumentCategory() {
         return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_POSITION_STATEMENTS;
+    }
+
+    @Override
+    protected DocumentCategory getPointsOfClaimOrDefenceDocumentCategory() {
+        return DocumentCategory.FDR_DOCUMENTS_AND_FDR_BUNDLE_INTERVENER_3_POINTS_OF_CLAIM_OR_DEFENCE;
     }
 }

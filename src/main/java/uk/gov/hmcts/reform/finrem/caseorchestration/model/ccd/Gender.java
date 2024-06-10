@@ -12,7 +12,8 @@ import java.util.Arrays;
 public enum Gender {
     MALE("Male"),
     FEMALE("Female"),
-    NOT_GIVEN("notGiven");
+    NOT_GIVEN("notGiven"),
+    EMPTY("");
 
     private final String value;
 

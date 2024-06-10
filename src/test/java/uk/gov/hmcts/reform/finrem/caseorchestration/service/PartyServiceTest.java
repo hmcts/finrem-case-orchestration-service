@@ -29,7 +29,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotdigital_thenPartyListDefaultSelectedAppAndResp() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotDigital_thenPartyListDefaultSelectedAppAndResp() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -44,21 +44,21 @@ class PartyServiceTest {
         data.setRespondentOrganisationPolicy(getOrganisation(null,null,
             CaseRole.RESP_SOLICITOR.getCcdCode()));
 
-        data.getIntervenerOneWrapper().setIntervenerName("Intv1");
-        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation(null,null,
+        data.getIntervenerOne().setIntervenerName("Intv1");
+        data.getIntervenerOne().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
 
-        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation(null,null,
+        data.getIntervenerTwo().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
-        data.getIntervenerTwoWrapper().setIntervenerName("Intv2");
+        data.getIntervenerTwo().setIntervenerName("Intv2");
 
-        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation(null,null,
+        data.getIntervenerThree().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
-        data.getIntervenerThreeWrapper().setIntervenerName("Intv3");
+        data.getIntervenerThree().setIntervenerName("Intv3");
 
-        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation(null,null,
+        data.getIntervenerFour().setIntervenerOrganisation(getOrganisation(null,null,
             CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
-        data.getIntervenerFourWrapper().setIntervenerName("Intv4");
+        data.getIntervenerFour().setIntervenerName("Intv4");
 
 
         DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
@@ -69,7 +69,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAredigitalAndAllSelected_thenPartyList() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreDigitalAndAllSelected_thenPartyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -78,13 +78,13 @@ class PartyServiceTest {
             CaseRole.APP_SOLICITOR.getCcdCode()));
         data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
             CaseRole.RESP_SOLICITOR.getCcdCode()));
-        data.getIntervenerOneWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
+        data.getIntervenerOne().setIntervenerOrganisation(getOrganisation("ORGINTV1","intervener1",
             CaseRole.INTVR_SOLICITOR_1.getCcdCode()));
-        data.getIntervenerTwoWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
+        data.getIntervenerTwo().setIntervenerOrganisation(getOrganisation("ORGINTV2","intervener2",
             CaseRole.INTVR_SOLICITOR_2.getCcdCode()));
-        data.getIntervenerThreeWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
+        data.getIntervenerThree().setIntervenerOrganisation(getOrganisation("ORGINTV3","intervener3",
             CaseRole.INTVR_SOLICITOR_3.getCcdCode()));
-        data.getIntervenerFourWrapper().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
+        data.getIntervenerFour().setIntervenerOrganisation(getOrganisation("ORGINTV4","intervener4",
             CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
 
 
@@ -106,6 +106,29 @@ class PartyServiceTest {
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+    }
+
+    @Test
+    void givenACcdCallbackContestedCase_whenAllPartiesUnrepresentSelected_thengetUnrepresentedParties() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setCcdCaseType(CONTESTED);
+        data.getContactDetailsWrapper().setApplicantFmName("Tony");
+        data.getContactDetailsWrapper().setApplicantLname("B");
+
+        data.getContactDetailsWrapper().setRespondentFmName("Tony");
+        data.getContactDetailsWrapper().setRespondentLname("C");
+
+        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
+
+        Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
+        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+
+        Assertions.assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(0).getCode(),
+            "selected unrepresented applicant");
+        Assertions.assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(1).getCode(),
+            "selected unrepresented respondent");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {

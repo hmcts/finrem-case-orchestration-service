@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -95,24 +95,24 @@ public abstract class HearingCorrespondenceBaseTest {
     public void shouldEmailInterveners() {
 
         ObjectMapper mapper = new ObjectMapper();
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
-        caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOneWrapper, Map.class));
+        caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOne, Map.class));
         caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isContestedApplication(any())).thenReturn(true);
+        when(notificationService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
 
         FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
+            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOne(intervenerOne).build()).build();
         Mockito.lenient().when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class))).thenReturn(finremCaseDetails);
-        Mockito.lenient().when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOneWrapper.class),
+        Mockito.lenient().when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerOne.class),
             any(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOneWrapper))
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOne))
             .thenReturn(SolicitorCaseDataKeysWrapper.builder().build());
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
@@ -129,12 +129,12 @@ public abstract class HearingCorrespondenceBaseTest {
     public void shouldSendLettersToInterveners() {
 
         ObjectMapper mapper = new ObjectMapper();
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+        IntervenerOne intervenerOne = IntervenerOne.builder()
             .intervenerName("Intervener 1")
             .intervenerEmail("Intervener email")
             .intervenerCorrespondenceEnabled(Boolean.TRUE)
             .build();
-        caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOneWrapper, Map.class));
+        caseDetails.getData().put("intervener1", mapper.convertValue(intervenerOne, Map.class));
         caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
@@ -142,17 +142,17 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isContestedApplication(caseDetails)).thenReturn(true);
 
         FinremCaseDetails finremCaseDetails =
-            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOneWrapper(intervenerOneWrapper).build()).build();
+            FinremCaseDetails.builder().data(FinremCaseData.builder().intervenerOne(intervenerOne).build()).build();
         Mockito.lenient().when(finremCaseDetailsMapper
             .mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
         Mockito.lenient().when(notificationService
-            .isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOneWrapper, finremCaseDetails)).thenReturn(false);
+            .isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, finremCaseDetails)).thenReturn(false);
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
-        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOneWrapper.class), any(CaseDetails.class), anyString(), anyList());
+        verify(bulkPrintService).printIntervenerDocuments(any(IntervenerOne.class), any(CaseDetails.class), anyString(), anyList());
     }
 
 

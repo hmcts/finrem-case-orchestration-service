@@ -90,7 +90,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setApplicantEmail("test@gmail.com");
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_APPLICANT);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_APPLICANT);
     }
 
     @Test
@@ -98,46 +98,46 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setRespondentSolicitorEmail("test@gmail.com");
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_RESPONDENT);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_RESPONDENT);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForIntervener1Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOneWrapper());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_1);
+        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOne());
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForIntervener2Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwoWrapper());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_2);
+        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwo());
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForIntervener3Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThreeWrapper());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_3);
+        setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThree());
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForIntervener4Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFourWrapper());
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_INTERVENER_4);
+        setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFour());
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4);
     }
 
     @Test
     public void givenContestedCallbackRequest_whenHandledForUnrecognisedRecipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
-        verifyDocumentCategory(callbackRequest, DocumentCategory.CORRESPONDENCE_OTHER);
+        verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_OTHER);
     }
 
     @Test

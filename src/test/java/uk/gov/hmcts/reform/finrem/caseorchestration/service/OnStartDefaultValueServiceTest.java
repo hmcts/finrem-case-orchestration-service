@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
@@ -41,9 +44,6 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     @Mock
     private IdamService idamService;
 
-    public OnStartDefaultValueServiceTest() {
-    }
-
     @Test
     public void setDefaultDate() {
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -58,6 +58,20 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         assertEquals(NO_VALUE,callbackRequest.getCaseDetails().getData().get(CIVIL_PARTNERSHIP));
     }
 
+    @Test
+    public void defaultCivilPartnership_defaultValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        service.defaultCivilPartnershipField(callbackRequest);
+        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
+    }
+
+    @Test
+    public void defaultCivilPartnership_userValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.YES);
+        service.defaultCivilPartnershipField(callbackRequest);
+        assertEquals(YES_VALUE, callbackRequest.getCaseDetails().getData().getCivilPartnership().getYesOrNo());
+    }
 
     @Test
     public void defaultTypeOfApplication_defaultValue() {
@@ -67,12 +81,30 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     }
 
     @Test
-    public void defaultTypeOfApplication_userChoosen() {
+    public void defaultTypeOfApplication_userValue() {
         var schedule1 = "Under paragraph 1 or 2 of schedule 1 children act 1989";
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(TYPE_OF_APPLICATION, schedule1);
         service.defaultTypeOfApplication(callbackRequest);
         assertEquals(schedule1,callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void defaultTypeOfApplication_defaultValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        service.defaultTypeOfApplication(callbackRequest);
+        assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.getText(),
+            callbackRequest.getCaseDetails().getData().getScheduleOneWrapper().getTypeOfApplication().getText());
+    }
+
+    @Test
+    public void defaultTypeOfApplication_userValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        callbackRequest.getCaseDetails().getData().getScheduleOneWrapper().setTypeOfApplication(
+            Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989);
+        service.defaultTypeOfApplication(callbackRequest);
+        assertEquals(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989.getText(),
+            callbackRequest.getCaseDetails().getData().getScheduleOneWrapper().getTypeOfApplication().getText());
     }
 
     @Test
@@ -113,6 +145,20 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
     }
 
+    @Test
+    public void defaultUrgencyQuestion_defaultValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        service.defaultUrgencyQuestion(callbackRequest);
+        assertEquals(YesOrNo.NO, callbackRequest.getCaseDetails().getData().getPromptForUrgentCaseQuestion());
+    }
+
+    @Test
+    public void defaultUrgencyQuestion_userValue_finremRequest() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        callbackRequest.getCaseDetails().getData().setPromptForUrgentCaseQuestion(YesOrNo.YES);
+        service.defaultUrgencyQuestion(callbackRequest);
+        assertEquals(YesOrNo.YES, callbackRequest.getCaseDetails().getData().getPromptForUrgentCaseQuestion());
+    }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();

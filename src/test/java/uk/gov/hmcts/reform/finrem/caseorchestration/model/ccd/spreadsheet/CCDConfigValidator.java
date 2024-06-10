@@ -52,7 +52,7 @@ public class CCDConfigValidator {
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
-    private List<String> finremCaseDataFieldsToIgnore = Arrays.asList("ccdCaseId");
+    private List<String> finremCaseDataFieldsToIgnore = List.of("ccdCaseId", "courtDetails", "d11", "isCfvCategoriesAppliedFlag");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT, REFUSAL_ORDER_CT);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
@@ -186,7 +186,7 @@ public class CCDConfigValidator {
         for (Class clazz : finremCaseDataClasses) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (finremCaseDataFieldsToIgnore.contains(field.getName())) {
-                    break;
+                    continue;
                 }
                 log.info("Looking for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
                 boolean found = false;
@@ -335,14 +335,26 @@ public class CCDConfigValidator {
     }
 
     private static Field[] getAllDeclaredFields(Class<?> frClass) {
+        List<Field[]> fields = new ArrayList<>();
+        fields.add(frClass.getDeclaredFields());
+        fields.add(getJsonUnwrappedFields(frClass));
+
         if (frClass.getSuperclass() != null) {
-            return Stream.of(frClass.getDeclaredFields(), getAllDeclaredFields(frClass.getSuperclass()))
-                .flatMap(Stream::of)
-                .toArray(Field[]::new);
+            fields.add(getAllDeclaredFields(frClass.getSuperclass()));
         }
-        return frClass.getDeclaredFields();
+
+        return fields.stream()
+            .flatMap(Stream::of)
+            .toArray(Field[]::new);
     }
 
+    private static Field[] getJsonUnwrappedFields(Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredFields())
+            .filter(f -> f.isAnnotationPresent(JsonUnwrapped.class))
+            .map(f -> f.getType().getDeclaredFields())
+            .flatMap(Stream::of)
+            .toArray(Field[]::new);
+    }
 
     private List<String> validateFixedListCaseField(List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes, Field field) {
 

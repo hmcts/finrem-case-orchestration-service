@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScannedDocumentCollection {
+    private String id;
     private ScannedDocument value;
 }
