@@ -395,15 +395,16 @@ public class GeneralApplicationService {
     }
 
     public void updateCaseDataStart(FinremCaseData finremCaseData, String authorisationToken) {
-        // todo, figure out how best to write this
-        // consider starting with a test
-        // look at how other tests of this class build the test data and copy
-        // you want to build case details with all the CCD fields, but as FinremCaseData
-        // givenGeneralApplication_shouldGetInterimGeneralApplicationList() is a good example
-        // to look at in GeneralApplicationServiceTest.java
-        // Then the test should confirm that after running these - they're all gone,
-        // Then point handler at this function, and remove updateCaseDataStart and refactor
-        // tests to use this function./
+        // todo, follow up whether authorisationToken is required
+        finremCaseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                ga -> {
+                   ga.getValue().setGeneralApplicationReceivedFrom(null);
+                   ga.getValue().setGeneralApplicationHearingRequired(null);
+                   ga.getValue().setGeneralApplicationTimeEstimate(null);
+                   ga.getValue().setGeneralApplicationSpecialMeasures(null);
+                   ga.getValue().setGeneralApplicationDocument(null);
+                   ga.getValue().setGeneralApplicationDraftOrder(null);
+                });
     }
 
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {

@@ -380,7 +380,7 @@ public class GeneralApplicationServiceTest {
 
 
     @Test
-    public void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
+    public void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeletedOld() {
 
         String[] generalAppParameters = {GENERAL_APPLICATION_RECEIVED_FROM,
             GENERAL_APPLICATION_HEARING_REQUIRED,
@@ -395,6 +395,42 @@ public class GeneralApplicationServiceTest {
 
         Stream.of(generalAppParameters)
             .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
+    }
+
+    @Test
+    public void givenGeneralApplicationWithPreviousData_whenUpdateCaseDataStart_thenPreviousDataDeleted() {
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        GeneralApplicationsCollection generalApplications = GeneralApplicationsCollection
+                .builder().id(UUID.randomUUID()).build();
+
+        GeneralApplicationItems generalApplicationItems =
+                GeneralApplicationItems.builder()
+                        .generalApplicationReceivedFrom("Received from data")
+                        .generalApplicationHearingRequired("Hearing required data")
+                        .generalApplicationTimeEstimate("Time estimate data")
+                        .generalApplicationSpecialMeasures("Special measures data")
+                        .generalApplicationDocument(getCaseDocument(WORD_FORMAT_EXTENSION))
+                        .generalApplicationDraftOrder(getCaseDocument(PDF_FORMAT_EXTENSION))
+                        .build();
+
+        generalApplications.setValue(generalApplicationItems);
+
+        caseData.getGeneralApplicationWrapper().getGeneralApplications().set(0, generalApplications);
+
+        generalApplicationService.updateCaseDataStart(caseData, AUTH_TOKEN);
+
+        caseData.getGeneralApplicationWrapper().getGeneralApplications().forEach(
+                ga -> {
+                    assertNull(ga.getValue().getGeneralApplicationReceivedFrom());
+                    assertNull(ga.getValue().getGeneralApplicationHearingRequired());
+                    assertNull( ga.getValue().getGeneralApplicationTimeEstimate());
+                    assertNull(ga.getValue().getGeneralApplicationSpecialMeasures());
+                    assertNull(ga.getValue().getGeneralApplicationDocument());
+                    assertNull(ga.getValue().getGeneralApplicationDraftOrder());
+                });
     }
 
     @Test
