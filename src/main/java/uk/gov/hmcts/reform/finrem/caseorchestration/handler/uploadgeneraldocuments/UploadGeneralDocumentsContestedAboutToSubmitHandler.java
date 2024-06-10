@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadgeneraldocuments;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
@@ -24,6 +24,7 @@ import java.util.List;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Slf4j
 @Service
@@ -54,22 +55,21 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = finremCaseDetails.getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         uploadedGeneralDocumentHelper.addUploadDateToNewDocuments(
             caseData,
             callbackRequest.getCaseDetailsBefore().getData());
 
-        List<String> warnings = new ArrayList<>();
-        List<UploadGeneralDocumentCollection> newDocuments = getNewlyUploadedDocuments(
-                callbackRequest.getCaseDetails().getData().getUploadGeneralDocuments(),
-                callbackRequest.getCaseDetailsBefore().getData().getUploadGeneralDocuments());
-        if (ObjectUtils.isNotEmpty(newDocuments)) {
-            newDocuments.forEach(d -> {
-                List<String> documentWarnings = documentCheckerService.getWarnings(d.getValue().getDocumentLink(),
-                        callbackRequest.getCaseDetails(), userAuthorisation);
-                warnings.addAll(documentWarnings);
-            });
+        final List<String> warnings = getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
+                .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
+                .flatMap(List::stream)
+                .toList();
+        if (!warnings.isEmpty()) {
+            log.info("Number of warnings encountered when uploading general document for a case {}: {}",
+                    finremCaseDetails.getId(), warnings.size());
         }
 
         List<UploadGeneralDocumentCollection> uploadedDocuments = caseData.getUploadGeneralDocuments();
@@ -86,13 +86,13 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
                 .data(caseData).build();
     }
 
-    private List<UploadGeneralDocumentCollection> getNewlyUploadedDocuments(
-            List<UploadGeneralDocumentCollection> uploadedDocuments,
-            List<UploadGeneralDocumentCollection> previousDocuments) {
+    private List<UploadGeneralDocumentCollection> getNewlyUploadedDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        List<UploadGeneralDocumentCollection> uploadedDocuments = caseData.getUploadGeneralDocuments();
+        List<UploadGeneralDocumentCollection> previousDocuments = caseDataBefore.getUploadGeneralDocuments();
 
-        if (ObjectUtils.isEmpty(uploadedDocuments)) {
+        if (isEmpty(uploadedDocuments)) {
             return Collections.emptyList();
-        } else if (ObjectUtils.isEmpty(previousDocuments)) {
+        } else if (isEmpty(previousDocuments)) {
             return uploadedDocuments;
         }
 
