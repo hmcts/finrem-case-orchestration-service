@@ -90,7 +90,7 @@ class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
             .uploadGeneralDocuments(List.of(
                 UploadGeneralDocumentCollection.builder()
                     .value(UploadGeneralDocument.builder()
-                        .documentLink(buildCaseDocument("newUrl", "newBinaryUrl1", "newFilename"))
+                        .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
                         .build())
                     .build()
             ))
@@ -99,9 +99,47 @@ class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
         List<UploadGeneralDocumentCollection> actual = uploadedGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
         List<UploadGeneralDocumentCollection> expected = List.of(UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder()
-                .documentLink(buildCaseDocument("newUrl", "newBinaryUrl1", "newFilename"))
+                .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
                 .build())
             .build());
+
+        assertEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenContestedCaseWithoutExistingGeneralDocument_whenNewGeneralDocumentsUploaded_thenReturnMultipleNewGeneralDocument(
+        List<UploadGeneralDocumentCollection> existing) {
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .uploadGeneralDocuments(existing)
+            .build();
+        FinremCaseData caseData = caseDataBefore.toBuilder()
+            .uploadGeneralDocuments(List.of(
+                UploadGeneralDocumentCollection.builder()
+                    .value(UploadGeneralDocument.builder()
+                        .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+                        .build())
+                    .build(),
+                UploadGeneralDocumentCollection.builder()
+                    .value(UploadGeneralDocument.builder()
+                        .documentLink(buildCaseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
+                        .build())
+                    .build()
+            ))
+            .build();
+
+        List<UploadGeneralDocumentCollection> actual = uploadedGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> expected = List.of(
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder()
+                    .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+                    .build())
+                .build(),
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder()
+                    .documentLink(buildCaseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
+                    .build())
+                .build());
 
         assertEquals(expected, actual);
     }
