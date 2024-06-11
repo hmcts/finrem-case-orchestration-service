@@ -1,7 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -13,7 +17,8 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
-public class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
+@ExtendWith(SpringExtension.class)
+class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private UploadedGeneralDocumentService uploadedGeneralDocumentService;
@@ -51,10 +56,12 @@ public class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void givenContestedCaseWithoutExistingGeneralDocument_whenNewGeneralDocumentUploaded_thenReturnNewGeneralDocument() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenContestedCaseWithoutExistingGeneralDocument_whenNewGeneralDocumentUploaded_thenReturnNewGeneralDocument(
+        List<UploadGeneralDocumentCollection> existing) {
         FinremCaseData caseDataBefore = FinremCaseData.builder()
-            .uploadGeneralDocuments(List.of())
+            .uploadGeneralDocuments(existing)
             .build();
         FinremCaseData caseData = caseDataBefore.toBuilder()
             .uploadGeneralDocuments(List.of(
