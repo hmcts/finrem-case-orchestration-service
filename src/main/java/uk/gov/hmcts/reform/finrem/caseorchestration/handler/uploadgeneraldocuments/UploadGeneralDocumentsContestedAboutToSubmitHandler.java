@@ -17,14 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Slf4j
 @Service
@@ -63,7 +60,7 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
             caseData,
             callbackRequest.getCaseDetailsBefore().getData());
 
-        final List<String> warnings = getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
+        final List<String> warnings = uploadedGeneralDocumentHelper.getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .toList();
@@ -84,28 +81,6 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .warnings(warnings)
                 .data(caseData).build();
-    }
-
-    private List<UploadGeneralDocumentCollection> getNewlyUploadedDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        List<UploadGeneralDocumentCollection> uploadedDocuments = caseData.getUploadGeneralDocuments();
-        List<UploadGeneralDocumentCollection> previousDocuments = caseDataBefore.getUploadGeneralDocuments();
-
-        if (isEmpty(uploadedDocuments)) {
-            return Collections.emptyList();
-        } else if (isEmpty(previousDocuments)) {
-            return uploadedDocuments;
-        }
-
-        List<UploadGeneralDocumentCollection> newlyUploadedDocuments = new ArrayList<>();
-        uploadedDocuments.forEach(d -> {
-            boolean exists = previousDocuments.stream()
-                    .anyMatch(pd -> pd.getValue().getDocumentLink().getDocumentUrl().equals(d.getValue().getDocumentLink().getDocumentUrl()));
-            if (!exists) {
-                newlyUploadedDocuments.add(d);
-            }
-        });
-
-        return newlyUploadedDocuments;
     }
 
 }
