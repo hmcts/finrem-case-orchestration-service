@@ -10,9 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
@@ -21,8 +19,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Objects;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -97,20 +93,6 @@ public class BaseHandlerTestSetup {
             return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    protected void assertCanHandle(CallbackHandler handler, CallbackType expectedCallbackType, CaseType expectedCaseType,
-                                   EventType expectedEventType) {
-        for (CallbackType callbackType : CallbackType.values()) {
-            for (CaseType caseType : CaseType.values()) {
-                for (EventType eventType : EventType.values()) {
-                    boolean expectedOutcome = callbackType == expectedCallbackType
-                            && caseType == expectedCaseType
-                            && eventType == expectedEventType; // This condition will always be true
-                    assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
-                }
-            }
         }
     }
 }
