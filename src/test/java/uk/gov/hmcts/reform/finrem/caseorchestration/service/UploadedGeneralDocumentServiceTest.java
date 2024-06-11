@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -24,7 +24,7 @@ class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
     private UploadedGeneralDocumentService uploadedGeneralDocumentService;
 
     @Test
-    public void givenContestedCaseWithExistingGeneralDocument_whenNewGeneralDocumentUploaded_thenReturnNewGeneralDocument() {
+    void givenContestedCaseWithExistingGeneralDocument_whenNewGeneralDocumentUploaded_thenReturnNewGeneralDocument() {
         final List<UploadGeneralDocumentCollection> existingGeneralDocument = List.of(
             UploadGeneralDocumentCollection.builder()
                 .value(UploadGeneralDocument.builder()
@@ -52,6 +52,29 @@ class UploadedGeneralDocumentServiceTest extends BaseServiceTest {
                 .documentLink(buildCaseDocument("newUrl", "newBinaryUrl1", "newFilename"))
                 .build())
             .build());
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void givenContestedCaseWithExistingGeneralDocument_whenNoNewGeneralDocumentUploaded_thenReturnAnEmptyList() {
+        final List<UploadGeneralDocumentCollection> existingGeneralDocument = List.of(
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder()
+                    .documentLink(buildCaseDocument("url1", "binaryUrl1", "filename1"))
+                    .build())
+                .build()
+        );
+
+        FinremCaseData caseDataBefore = FinremCaseData.builder()
+            .uploadGeneralDocuments(existingGeneralDocument)
+            .build();
+        FinremCaseData caseData = caseDataBefore.toBuilder()
+            .uploadGeneralDocuments(existingGeneralDocument)
+            .build();
+
+        List<UploadGeneralDocumentCollection> actual = uploadedGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> expected = List.of();
 
         assertEquals(expected, actual);
     }
