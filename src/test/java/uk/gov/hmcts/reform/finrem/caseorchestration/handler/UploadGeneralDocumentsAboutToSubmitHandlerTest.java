@@ -69,6 +69,13 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
+        assertThat(uploadGeneralDocumentsAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_GENERAL_DOCUMENT),
+            is(false));
+    }
+
+    @Test
     public void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDate() {
 
         CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension",
