@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadgeneraldocuments;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -63,6 +64,7 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
         final List<String> warnings = uploadedGeneralDocumentHelper.getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
+                .filter(ObjectUtils::isNotEmpty)
                 .toList();
         if (!warnings.isEmpty()) {
             log.info("Number of warnings encountered when uploading general document for a case {}: {}",
