@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
@@ -18,10 +17,10 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 @ExtendWith(SpringExtension.class)
-class UploadGeneralDocumentServiceTest extends BaseServiceTest {
+class DocumentUploadServiceV2Test extends BaseServiceTest {
 
     @Autowired
-    private UploadGeneralDocumentService uploadGeneralDocumentService;
+    private DocumentUploadServiceV2 documentUploadService;
 
     @Test
     void givenContestedCaseWithExistingGeneralDocument_whenNewGeneralDocumentUploaded_thenReturnNewGeneralDocument() {
@@ -46,7 +45,7 @@ class UploadGeneralDocumentServiceTest extends BaseServiceTest {
             )).toList())
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = uploadGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
         List<UploadGeneralDocumentCollection> expected = List.of(UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder()
                 .documentLink(buildCaseDocument("newUrl", "newBinaryUrl1", "newFilename"))
@@ -73,7 +72,7 @@ class UploadGeneralDocumentServiceTest extends BaseServiceTest {
             .uploadGeneralDocuments(existingGeneralDocument)
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = uploadGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
         List<UploadGeneralDocumentCollection> expected = List.of();
 
         assertEquals(expected, actual);
@@ -96,7 +95,7 @@ class UploadGeneralDocumentServiceTest extends BaseServiceTest {
             ))
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = uploadGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
         List<UploadGeneralDocumentCollection> expected = List.of(UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder()
                 .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
@@ -128,7 +127,7 @@ class UploadGeneralDocumentServiceTest extends BaseServiceTest {
             ))
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = uploadGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
         List<UploadGeneralDocumentCollection> expected = List.of(
             UploadGeneralDocumentCollection.builder()
                 .value(UploadGeneralDocument.builder()

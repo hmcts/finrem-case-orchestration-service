@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadgeneraldocuments.UploadGeneralDocumentsAboutToSubmitHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
@@ -58,7 +58,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
             new FinremCaseDetailsMapper(objectMapper);
         uploadGeneralDocumentsAboutToSubmitHandler =
             new UploadGeneralDocumentsAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService,
-                new UploadGeneralDocumentService(), uploadGeneralDocumentsCategoriser);
+                new DocumentUploadServiceV2(), uploadGeneralDocumentsCategoriser);
     }
 
     @Test
