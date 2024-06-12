@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -409,11 +410,7 @@ public abstract class BaseServiceTest extends BaseTest {
     }
 
     protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        CaseDocument document = new CaseDocument();
-        document.setDocumentUrl(url);
-        document.setDocumentBinaryUrl(binaryUrl);
-        document.setDocumentFilename(filename);
-        return document;
+        return TestResource.buildCaseDocument(url, binaryUrl, filename);
     }
 
     protected CallbackRequest buildHearingCallbackRequest(String payloadJson) {

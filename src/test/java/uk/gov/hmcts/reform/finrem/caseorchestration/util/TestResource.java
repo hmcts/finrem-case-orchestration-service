@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.util;
 
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
@@ -37,5 +38,18 @@ public class TestResource {
             .fileName(FILE_NAME)
             .binaryUrl(BINARY_URL)
             .build();
+    }
+
+    public static CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
+        return buildCaseDocument(url, binaryUrl, filename, null);
+    }
+
+    public static CaseDocument buildCaseDocument(String url, String binaryUrl, String filename, String categoryId) {
+        CaseDocument document = new CaseDocument();
+        document.setDocumentUrl(url);
+        document.setDocumentBinaryUrl(binaryUrl);
+        document.setDocumentFilename(filename);
+        document.setCategoryId(categoryId);
+        return document;
     }
 }

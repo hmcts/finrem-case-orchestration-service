@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -55,9 +57,6 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        // TODO setting upload date to new uploaded general documents
-        // uploadGeneralDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore)
-
         final List<String> warnings = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
@@ -68,13 +67,14 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
                     finremCaseDetails.getId(), warnings.size());
         }
 
-        List<UploadGeneralDocumentCollection> uploadedDocuments = caseData.getUploadGeneralDocuments();
-
+        // Do sorting
+        List<UploadGeneralDocumentCollection> uploadedDocuments = new ArrayList<>(ofNullable(caseData.getUploadGeneralDocuments())
+            .orElse(List.of()));
         uploadedDocuments.sort(comparing(UploadGeneralDocumentCollection::getValue,
             comparing(UploadGeneralDocument::getGeneralDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
-
         caseData.setUploadGeneralDocuments(uploadedDocuments);
 
+        // Execute the categoriser for CFV
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
