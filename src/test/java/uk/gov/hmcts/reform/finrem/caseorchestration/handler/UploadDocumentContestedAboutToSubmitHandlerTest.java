@@ -30,7 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
+public class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "token:)";
     public static final String CASE_ID = "1234567890";
@@ -42,7 +42,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     private DocumentCheckerService documentCheckerService;
     @Mock
     private UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
-    private UploadGeneralDocumentsAboutToSubmitHandler uploadGeneralDocumentsAboutToSubmitHandler;
+    private UploadDocumentContestedAboutToSubmitHandler uploadDocumentContestedAboutToSubmitHandler;
 
     private final List<UploadGeneralDocumentCollection> uploadDocumentList = new ArrayList<>();
     private final List<UploadGeneralDocumentCollection> existingDocumentList = new ArrayList<>();
@@ -55,22 +55,22 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
         caseDetailsBefore = buildCaseDetails();
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(objectMapper);
-        uploadGeneralDocumentsAboutToSubmitHandler =
-            new UploadGeneralDocumentsAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService,
+        uploadDocumentContestedAboutToSubmitHandler =
+            new UploadDocumentContestedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService,
                 new DocumentUploadServiceV2(), uploadGeneralDocumentsCategoriser);
     }
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
-        assertThat(uploadGeneralDocumentsAboutToSubmitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_GENERAL_DOCUMENT),
+        assertThat(uploadDocumentContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_DOCUMENT_CONTESTED),
             is(true));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
-        assertThat(uploadGeneralDocumentsAboutToSubmitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_GENERAL_DOCUMENT),
+        assertThat(uploadDocumentContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_DOCUMENT_CONTESTED),
             is(false));
     }
 
@@ -96,7 +96,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
         expectedDocumentIdList.add(newDoc);
         expectedDocumentIdList.add(oldDoc);
 
-        handledDocumentIdList.addAll(uploadGeneralDocumentsAboutToSubmitHandler.handle(
+        handledDocumentIdList.addAll(uploadDocumentContestedAboutToSubmitHandler.handle(
                 FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
                 AUTH_TOKEN).getData().getUploadGeneralDocuments());
 

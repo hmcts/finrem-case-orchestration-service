@@ -10,41 +10,31 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
-import java.util.Comparator;
 import java.util.List;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
 
 @Slf4j
 @Service
-public class UploadGeneralDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentCheckerService documentCheckerService;
     private final DocumentUploadServiceV2 documentUploadService;
-    private final UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
 
-    public UploadGeneralDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                      DocumentCheckerService documentCheckerService,
-                                                      DocumentUploadServiceV2 documentUploadService,
-                                                      UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser) {
+    public UploadDocumentConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                       DocumentCheckerService documentCheckerService,
+                                                       DocumentUploadServiceV2 documentUploadService) {
         super(mapper);
         this.documentCheckerService = documentCheckerService;
         this.documentUploadService = documentUploadService;
-        this.uploadGeneralDocumentsCategoriser = uploadGeneralDocumentsCategoriser;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.UPLOAD_GENERAL_DOCUMENT.equals(eventType);
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.UPLOAD_DOCUMENT_CONSENTED.equals(eventType);
     }
 
     @Override
@@ -55,27 +45,15 @@ public class UploadGeneralDocumentsAboutToSubmitHandler extends FinremCallbackHa
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        // TODO setting upload date to new uploaded general documents
-        // uploadGeneralDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore)
-
-        final List<String> warnings = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore).stream()
+        final List<String> warnings = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)
                 .toList();
         if (!warnings.isEmpty()) {
-            log.info("Number of warnings encountered when uploading general document for a case {}: {}",
+            log.info("Number of warnings encountered when uploading document for a case {}: {}",
                     finremCaseDetails.getId(), warnings.size());
         }
-
-        List<UploadGeneralDocumentCollection> uploadedDocuments = caseData.getUploadGeneralDocuments();
-
-        uploadedDocuments.sort(comparing(UploadGeneralDocumentCollection::getValue,
-            comparing(UploadGeneralDocument::getGeneralDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
-
-        caseData.setUploadGeneralDocuments(uploadedDocuments);
-
-        uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .warnings(warnings)
