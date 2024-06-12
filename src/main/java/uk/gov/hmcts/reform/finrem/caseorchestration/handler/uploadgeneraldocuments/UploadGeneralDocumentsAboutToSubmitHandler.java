@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -26,19 +26,19 @@ import static java.util.Comparator.nullsLast;
 
 @Slf4j
 @Service
-public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadGeneralDocumentsAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentCheckerService documentCheckerService;
-    private final UploadedGeneralDocumentService uploadedGeneralDocumentHelper;
+    private final UploadGeneralDocumentService uploadGeneralDocumentService;
     private final UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
 
-    public UploadGeneralDocumentsContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                               DocumentCheckerService documentCheckerService,
-                                                               UploadedGeneralDocumentService uploadedGeneralDocumentHelper,
-                                                               UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser) {
+    public UploadGeneralDocumentsAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                                      DocumentCheckerService documentCheckerService,
+                                                      UploadGeneralDocumentService uploadGeneralDocumentService,
+                                                      UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser) {
         super(mapper);
         this.documentCheckerService = documentCheckerService;
-        this.uploadedGeneralDocumentHelper = uploadedGeneralDocumentHelper;
+        this.uploadGeneralDocumentService = uploadGeneralDocumentService;
         this.uploadGeneralDocumentsCategoriser = uploadGeneralDocumentsCategoriser;
     }
 
@@ -57,11 +57,9 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        uploadedGeneralDocumentHelper.addUploadDateToNewDocuments(
-            caseData,
-            callbackRequest.getCaseDetailsBefore().getData());
+        uploadGeneralDocumentService.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
-        final List<String> warnings = uploadedGeneralDocumentHelper.getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
+        final List<String> warnings = uploadGeneralDocumentService.getNewlyUploadedDocuments(caseData, caseDataBefore).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)
@@ -81,8 +79,8 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandler extends FinremC
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .warnings(warnings)
-                .data(caseData).build();
+            .warnings(warnings)
+            .data(caseData).build();
     }
 
 }

@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadgeneraldocuments.UploadGeneralDocumentsContestedAboutToSubmitHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadgeneraldocuments.UploadGeneralDocumentsAboutToSubmitHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadGeneralDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -31,7 +31,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadGeneralDocumentsContestedAboutToSubmitHandlerTest {
+public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "token:)";
     public static final String CASE_ID = "1234567890";
@@ -43,7 +43,7 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandlerTest {
     private DocumentCheckerService documentCheckerService;
     @Mock
     private UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
-    private UploadGeneralDocumentsContestedAboutToSubmitHandler uploadGeneralDocumentsContestedAboutToSubmitHandler;
+    private UploadGeneralDocumentsAboutToSubmitHandler uploadGeneralDocumentsAboutToSubmitHandler;
 
     private final List<UploadGeneralDocumentCollection> uploadDocumentList = new ArrayList<>();
     private final List<UploadGeneralDocumentCollection> existingDocumentList = new ArrayList<>();
@@ -56,14 +56,14 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandlerTest {
         caseDetailsBefore = buildCaseDetails();
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(objectMapper);
-        uploadGeneralDocumentsContestedAboutToSubmitHandler =
-            new UploadGeneralDocumentsContestedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService,
-                new UploadedGeneralDocumentService(objectMapper), uploadGeneralDocumentsCategoriser);
+        uploadGeneralDocumentsAboutToSubmitHandler =
+            new UploadGeneralDocumentsAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService,
+                new UploadGeneralDocumentService(), uploadGeneralDocumentsCategoriser);
     }
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
-        assertThat(uploadGeneralDocumentsContestedAboutToSubmitHandler
+        assertThat(uploadGeneralDocumentsAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_GENERAL_DOCUMENT),
             is(true));
     }
@@ -90,7 +90,7 @@ public class UploadGeneralDocumentsContestedAboutToSubmitHandlerTest {
         expectedDocumentIdList.add(newDoc);
         expectedDocumentIdList.add(oldDoc);
 
-        handledDocumentIdList.addAll(uploadGeneralDocumentsContestedAboutToSubmitHandler.handle(
+        handledDocumentIdList.addAll(uploadGeneralDocumentsAboutToSubmitHandler.handle(
                 FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
                 AUTH_TOKEN).getData().getUploadGeneralDocuments());
 

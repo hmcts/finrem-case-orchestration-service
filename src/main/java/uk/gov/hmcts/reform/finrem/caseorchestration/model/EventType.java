@@ -15,6 +15,7 @@ public enum EventType {
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     UPLOAD_CONFIDENTIAL_DOCUMENT("FR_uploadConfidentialDocument"),
+    UPLOAD_GENERAL_DOCUMENT_CONSENTED("FR_uploadDocument"),
     UPLOAD_GENERAL_DOCUMENT("FR_uploadGeneralDocument"),
     INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
