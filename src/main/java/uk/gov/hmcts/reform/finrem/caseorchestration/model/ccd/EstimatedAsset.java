@@ -10,12 +10,10 @@ import java.util.Arrays;
 public enum EstimatedAsset {
 
     UNABLE_TO_QUANTIFY("estimatedAssetsChecklist_1"),
-    UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS("estimatedAssetsChecklist_6"),
     UNDER_ONE_MILLION("estimatedAssetsChecklist_2"),
     ONE_TO_FIVE_MILLION("estimatedAssetsChecklist_3"),
     FIVE_TO_TEN_MILLION("estimatedAssetsChecklist_4"),
     OVER_TEN_MILLION("estimatedAssetsChecklist_5");
-
     private final String id;
 
     @JsonValue
