@@ -87,17 +87,17 @@ public class FinremAssignToJudgeCorresponderTest {
 
     @Test
     public void shouldEmailApplicantSolcitor() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
+        verify(notificationService).isApplicantSolicitorEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Test
     public void emailRespondentSolicitor() {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
-        verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
+        verify(notificationService).isRespondentSolicitorEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 
@@ -175,8 +175,8 @@ public class FinremAssignToJudgeCorresponderTest {
 
     @Test
     public void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
         caseDetails.getData().getIntervenerOne().setIntervenerName("intervenerName");
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(),
