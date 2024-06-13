@@ -5,7 +5,11 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.IOException;
 
-public class PdfToText {
+class PdfToText {
+
+    private PdfToText() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static String textContent(byte[] bytes) throws IOException {
         try (PDDocument document = PDDocument.load(bytes)) {
@@ -18,4 +22,5 @@ public class PdfToText {
         String content = textContent(bytes);
         return content.split(System.lineSeparator());
     }
+
 }

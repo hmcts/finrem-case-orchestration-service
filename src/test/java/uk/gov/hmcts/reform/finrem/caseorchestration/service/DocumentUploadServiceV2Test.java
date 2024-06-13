@@ -136,6 +136,7 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
             ),
 
             // 2. uploadDocuments
+            // 2.1 with new doc
             Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
                     finremCaseDataBuilder.uploadDocuments(existingUploadDocument);
                     return finremCaseDataBuilder;
