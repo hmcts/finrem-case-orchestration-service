@@ -87,8 +87,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
             .uploadGeneralDocuments(List.of(
                 createGeneralUploadDocumentItem(
                     UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-                    buildCaseDocument("/fileUrl", "document.extension",
-                        "/binaryUrl", ""), LocalDate.now(), "New Example", "newDocument.filename")
+                    createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
             )))
             .build();
 
@@ -110,17 +109,13 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDateAndCategoriserInvoked() {
-        CaseDocument documentLink = buildCaseDocument("/fileUrl", "document.extension",
-            "/binaryUrl", "");
-
-
         UploadGeneralDocumentCollection oldDoc = createGeneralUploadDocumentItem(
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT,
-            "Old email content", documentLink, LocalDate.now().minusDays(1),
+            "Old email content", createCaseDocument(), LocalDate.now().minusDays(1),
             "Old Example", "oldDocument.filename");
         UploadGeneralDocumentCollection newDoc = createGeneralUploadDocumentItem(
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-            documentLink, LocalDate.now(), "New Example", "newDocument.filename");
+            createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename");
 
         FinremCaseDetails finremCaseDetails = getContestedFinremCaseDetailsBuilder(FinremCaseData.builder()
             .uploadGeneralDocuments(List.of(newDoc, oldDoc)))
@@ -142,9 +137,13 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         verify(uploadGeneralDocumentsCategoriser).categorise(finremCaseDetails.getData());
     }
 
-    protected UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent,
-                                                                              CaseDocument link, LocalDate dateAdded, String comment,
-                                                                              String fileName) {
+    private CaseDocument createCaseDocument() {
+        return buildCaseDocument("/fileUrl", "/binaryUrl","document.extension");
+    }
+
+    private UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent,
+                                                                            CaseDocument link, LocalDate dateAdded, String comment,
+                                                                            String fileName) {
         return UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument
                 .builder()
