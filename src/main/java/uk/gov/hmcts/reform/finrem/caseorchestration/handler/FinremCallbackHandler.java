@@ -14,7 +14,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
