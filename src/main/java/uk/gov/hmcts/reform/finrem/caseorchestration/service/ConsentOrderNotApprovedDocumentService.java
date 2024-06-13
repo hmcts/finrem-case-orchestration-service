@@ -52,7 +52,7 @@ public class ConsentOrderNotApprovedDocumentService {
         addEitherNotApprovedOrderOrGeneralOrderIfApplicable(caseDetails, documents, authorisationToken);
 
         return documents.size() == 1
-            ? emptyList()
+            ? emptyList() // if only cover letter then print nothing
             : documents;
     }
 
