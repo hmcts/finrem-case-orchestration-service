@@ -63,12 +63,12 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventUploadDocumentContested_thenHandlerCanHandleReturnTrue() {
         assertThat(underTest.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_DOCUMENT_CONTESTED)).isTrue();
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventUploadGeneralDocument_thenHandlerCanHandle() {
+    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventUploadDocumentContested_thenHandlerCanHandleReturnFalse() {
         assertThat(underTest.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPLOAD_DOCUMENT_CONTESTED)).isFalse();
     }
 
