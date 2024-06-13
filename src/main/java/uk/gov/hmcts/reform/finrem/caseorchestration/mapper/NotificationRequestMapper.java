@@ -323,6 +323,8 @@ public class NotificationRequestMapper {
             notificationRequest.setRespondentName(Objects.toString(respName));
         }
         notificationRequest.setHearingType(Objects.toString(caseData.get(HEARING_TYPE), ""));
+        // Quick fix for DFR-3135
+        notificationRequest.setIsNotDigital(false);
         return notificationRequest;
     }
 
