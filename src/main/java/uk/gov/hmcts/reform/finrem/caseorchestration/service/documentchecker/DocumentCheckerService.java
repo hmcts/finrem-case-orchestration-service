@@ -29,7 +29,6 @@ public class DocumentCheckerService {
             .filter(dc -> dc.canCheck(caseDocument))
             .toList();
 
-
         if (documentCheckersForDocument.isEmpty()) {
             return Collections.emptyList();
         }

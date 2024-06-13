@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.util;
 
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
@@ -18,6 +21,8 @@ public class TestResource {
     public static final String CREATED_ON = "20th October 2018";
     public static final String MIME_TYPE = "app/pdf";
     public static final String CREATED_BY = "user";
+    public static final String CASE_ID = "1234567890";
+    public static final String AUTH_TOKEN = "token:)";
 
     public static List<FileUploadResponse> fileUploadResponse() {
         FileUploadResponse response = new FileUploadResponse();
@@ -38,6 +43,24 @@ public class TestResource {
             .fileName(FILE_NAME)
             .binaryUrl(BINARY_URL)
             .build();
+    }
+
+    public static FinremCaseDetails.FinremCaseDetailsBuilder getContestedFinremCaseDetailsBuilder(
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder) {
+        return getFinremCaseDetailsBuilder(finremCaseDataBuilder, CaseType.CONTESTED);
+    }
+
+    public static FinremCaseDetails.FinremCaseDetailsBuilder getConsentedFinremCaseDetailsBuilder(
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder) {
+        return getFinremCaseDetailsBuilder(finremCaseDataBuilder, CaseType.CONSENTED);
+    }
+
+    private static FinremCaseDetails.FinremCaseDetailsBuilder getFinremCaseDetailsBuilder(FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder,
+                                                                                          CaseType caseType) {
+        FinremCaseData finremCaseData = finremCaseDataBuilder.build();
+        return FinremCaseDetails.builder().id(Long.valueOf(CASE_ID))
+            .caseType(caseType)
+            .data(finremCaseData);
     }
 
     public static CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
