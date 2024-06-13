@@ -57,7 +57,8 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        final List<String> warnings = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore).stream()
+        final List<String> warnings = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadGeneralDocuments)
+            .stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)

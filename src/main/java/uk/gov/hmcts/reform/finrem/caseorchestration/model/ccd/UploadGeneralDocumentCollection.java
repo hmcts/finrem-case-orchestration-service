@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadGeneralDocumentCollection {
+public class UploadGeneralDocumentCollection implements CaseDocumentCollection<UploadGeneralDocument> {
     private UploadGeneralDocument value;
 }

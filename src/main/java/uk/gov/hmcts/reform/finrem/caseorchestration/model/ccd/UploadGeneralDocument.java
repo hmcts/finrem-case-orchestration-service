@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadGeneralDocument {
+public class UploadGeneralDocument implements HasCaseDocument {
     @JsonProperty("DocumentType")
     private UploadGeneralDocumentType documentType;
     @JsonProperty("DocumentEmailContent")

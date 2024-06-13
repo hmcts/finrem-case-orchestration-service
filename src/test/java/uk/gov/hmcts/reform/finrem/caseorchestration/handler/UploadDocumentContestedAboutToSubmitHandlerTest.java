@@ -76,7 +76,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
-        when(documentUploadService.getNewUploadGeneralDocuments(any(), any())).thenReturn(List.of(
+        when(documentUploadService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadGeneralDocumentCollection.builder()
                 .value(UploadGeneralDocument.builder().build())
                 .build()

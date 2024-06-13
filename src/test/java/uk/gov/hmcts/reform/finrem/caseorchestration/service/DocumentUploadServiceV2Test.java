@@ -45,7 +45,8 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
             )).toList())
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments);
         List<UploadGeneralDocumentCollection> expected = List.of(UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder()
                 .documentLink(buildCaseDocument("newUrl", "newBinaryUrl1", "newFilename"))
@@ -72,7 +73,8 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
             .uploadGeneralDocuments(existingGeneralDocument)
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments);
         List<UploadGeneralDocumentCollection> expected = List.of();
 
         assertEquals(expected, actual);
@@ -95,7 +97,8 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
             ))
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments);
         List<UploadGeneralDocumentCollection> expected = List.of(UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder()
                 .documentLink(buildCaseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
@@ -127,7 +130,8 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
             ))
             .build();
 
-        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadGeneralDocuments(caseData, caseDataBefore);
+        List<UploadGeneralDocumentCollection> actual = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments);
         List<UploadGeneralDocumentCollection> expected = List.of(
             UploadGeneralDocumentCollection.builder()
                 .value(UploadGeneralDocument.builder()
