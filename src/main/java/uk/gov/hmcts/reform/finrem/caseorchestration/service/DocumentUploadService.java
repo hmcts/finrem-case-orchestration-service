@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,11 +45,13 @@ public abstract class DocumentUploadService<T extends CaseDocumentTabData> {
     }
 
     public void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        List<UploadCaseDocumentCollection> allDocuments = caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
-        List<UploadCaseDocumentCollection> documentsBeforeEvent = caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
+        List<T> allDocuments = (List<T>) caseData.getUploadCaseDocumentWrapper().getAllManageableCollections();
+        List<T> documentsBeforeEvent = (List<T>) caseDataBefore.getUploadCaseDocumentWrapper().getAllManageableCollections();
 
-        allDocuments.forEach(document -> addDateToNewDocuments((List<T>) documentsBeforeEvent, (T) document));
+        allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
     }
+
+
 
     private void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
         if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
