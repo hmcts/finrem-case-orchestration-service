@@ -7,7 +7,6 @@ import ch.qos.logback.core.read.ListAppender;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TestLogger extends ListAppender<ILoggingEvent> implements AutoCloseable {
 
@@ -35,7 +34,7 @@ public class TestLogger extends ListAppender<ILoggingEvent> implements AutoClose
         return this.list.stream()
             .filter(event -> Level.ERROR.equals(event.getLevel()))
             .map(e -> e.getThrowableProxy().getClassName())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<String> getErrorThrowableMessages() {
