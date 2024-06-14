@@ -49,7 +49,7 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00096-size-update.docx");
+        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00096.docx");
         config.setHelpWithFeesSuccessfulNotificationFileName("HelpWithFeesSuccessfulNotificationLetter.pdf");
 
         when(docmosisPdfGenerationServiceMock.generateDocFrom(any(), any()))

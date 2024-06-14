@@ -83,9 +83,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
                     .fileUrl("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64")
                     .build()));
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318-size-update.docx");
+        config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318.docx");
         config.setAssignedToJudgeNotificationFileName("AssignedToJudgeNotificationLetter.pdf");
-        config.setConsentInContestedAssignedToJudgeNotificationFileName("FL-FRM-LET-ENG-00578-size-update.docx");
+        config.setConsentInContestedAssignedToJudgeNotificationFileName("FL-FRM-LET-ENG-00578.docx");
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)

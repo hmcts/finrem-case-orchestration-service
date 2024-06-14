@@ -49,7 +49,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00552-size-update.docx");
+        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00552.docx");
         config.setHelpWithFeesSuccessfulNotificationFileName("ManualPaymentLetter.pdf");
     }
 
