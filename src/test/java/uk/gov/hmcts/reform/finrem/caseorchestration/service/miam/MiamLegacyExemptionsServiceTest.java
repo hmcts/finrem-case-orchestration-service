@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.miam;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -108,6 +109,21 @@ class MiamLegacyExemptionsServiceTest {
 
         assertThat(miamLegacyExemptionsService.getInvalidLegacyExemptions(caseData))
             .hasSize(expectedInvalidExemptions);
+    }
+
+    @Test
+    void testRemoveLegacyExemptions() {
+        Map<String, Object> caseData = createCaseData(FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_1,
+            FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1);
+        MiamLegacyExemptionsService miamLegacyExemptionsService = new MiamLegacyExemptionsService();
+        miamLegacyExemptionsService.removeLegacyExemptions(caseData);
+        assertThat(caseData.containsKey(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST)).isFalse();
+        assertThat(caseData.containsKey(MIAM_OTHER_GROUNDS_CHECKLIST)).isFalse();
+
+        // Repeat test to ensure it works on case data with no legacy exemptions
+        miamLegacyExemptionsService.removeLegacyExemptions(caseData);
+        assertThat(caseData.containsKey(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST)).isFalse();
+        assertThat(caseData.containsKey(MIAM_OTHER_GROUNDS_CHECKLIST)).isFalse();
     }
 
     private static Stream<Arguments> legacyExemptions() {

@@ -132,6 +132,11 @@ public class MiamLegacyExemptionsService {
         }
     }
 
+    public void removeLegacyExemptions(Map<String, Object> caseData) {
+        caseData.remove(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST);
+        caseData.remove(MIAM_OTHER_GROUNDS_CHECKLIST);
+    }
+
     public List<String> getInvalidLegacyExemptions(MiamWrapper miamWrapper) {
         return getInvalidLegacyExemptions(miamWrapper.getMiamPreviousAttendanceChecklist(),
             miamWrapper.getMiamOtherGroundsChecklist());
