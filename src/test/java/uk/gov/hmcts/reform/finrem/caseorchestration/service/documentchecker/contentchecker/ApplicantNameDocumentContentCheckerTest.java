@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -11,15 +13,20 @@ class ApplicantNameDocumentContentCheckerTest {
 
     private final ApplicantNameDocumentContentChecker underTest = new ApplicantNameDocumentContentChecker();
 
-    @Test
-    void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndLastName() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "The applicant is Joe Bloggs",
+        "The applicant is Joe Bloggs ",
+        " The applicant is Joe Blogg",
+        " The applicant is Joe Bloggs "})
+    void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndLastName(String validContent) {
         assertThat(underTest.getWarning(
             getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
                 .contactDetailsWrapper(ContactDetailsWrapper.builder()
                     .applicantFmName("Joe")
                     .applicantLname("Bloggs")
                     .build())).build(),
-            new String[] {"The applicant is Joe Bloggs"}))
+            new String[] {validContent}))
             .isNull();
     }
 
