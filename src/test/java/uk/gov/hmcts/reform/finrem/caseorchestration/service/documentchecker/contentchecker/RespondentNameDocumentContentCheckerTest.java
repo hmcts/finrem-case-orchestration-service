@@ -58,4 +58,12 @@ class RespondentNameDocumentContentCheckerTest {
             new String[] {}))
             .isNull();
     }
+
+    @Test
+    void givenCaseDataWithoutContactDetailsWrapper_whenContentProvided() {
+        assertThat(underTest.getWarning(
+            getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()).build(),
+            new String[] {"The respondent is Joe Bloggs"}))
+            .isNull();
+    }
 }

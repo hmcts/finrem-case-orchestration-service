@@ -1,11 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 public class RespondentNameDocumentContentChecker implements DocumentContentChecker {
@@ -26,7 +31,11 @@ public class RespondentNameDocumentContentChecker implements DocumentContentChec
     }
 
     private boolean contentNameNotEqualsCaseName(FinremCaseData caseData, String content) {
-        return !getRespondentNameFromCase(caseData).equals(getRespondentNameFromContent(content.trim()));
+        String respondentName = getRespondentNameFromCase(caseData);
+        if (isEmpty(trim(respondentName))) {
+            return false;
+        }
+        return !respondentName.equals(getRespondentNameFromContent(content.trim()));
     }
 
     private String getRespondentNameFromContent(String text) {
@@ -35,6 +44,7 @@ public class RespondentNameDocumentContentChecker implements DocumentContentChec
 
     private String getRespondentNameFromCase(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
-        return contactDetails.getRespondentFmName() + " " + contactDetails.getRespondentLname();
+        return ofNullable(contactDetails.getRespondentFmName()).orElse(StringUtils.EMPTY) + SPACE
+            + ofNullable(contactDetails.getRespondentLname()).orElse(StringUtils.EMPTY);
     }
 }
