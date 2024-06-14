@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollect
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
@@ -46,10 +47,14 @@ public class ChildrenInfoMapper {
             dob = transformFormDateIntoCcdDate("childInfo" + index + ".dateOfBirth", childsDob);
         }
 
+        String gender = getValueOrEmptyString(index, ocrDataFields, GENDER);
+        Optional<String > optionalGender = (StringUtils.isNotBlank(gender)) ?
+            Optional.of(gender) : Optional.empty();
+
         return ChildInfo.builder()
             .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
             .dateOfBirth(dob)
-            .gender(getValueFromOcrDataFields(GENDER + index, ocrDataFields).orElse("notGiven"))
+            .gender(optionalGender.orElse("notGiven"))
             .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))
             .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_RESPONDENT))
             .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, COUNTRY))
