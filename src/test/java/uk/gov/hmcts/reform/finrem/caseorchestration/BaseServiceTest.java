@@ -409,6 +409,10 @@ public abstract class BaseServiceTest extends BaseTest {
         }
     }
 
+    protected CaseDocument buildCaseDocument() {
+        return TestResource.buildCaseDocument();
+    }
+
     protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
         return TestResource.buildCaseDocument(url, binaryUrl, filename);
     }

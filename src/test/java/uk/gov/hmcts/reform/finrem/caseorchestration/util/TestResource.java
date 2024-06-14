@@ -63,6 +63,10 @@ public class TestResource {
             .data(finremCaseData);
     }
 
+    public static CaseDocument buildCaseDocument() {
+        return buildCaseDocument("url", "binaryUrl", "filename");
+    }
+
     public static CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
         return buildCaseDocument(url, binaryUrl, filename, null);
     }
