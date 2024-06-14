@@ -134,6 +134,17 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
                         .build()
                 )
             ),
+            // 1.5 removing existing doc
+            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+                List.of()
+            ),
 
             // 2. uploadDocuments
             // 2.1 with new doc
