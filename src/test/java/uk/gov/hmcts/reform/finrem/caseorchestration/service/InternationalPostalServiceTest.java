@@ -124,7 +124,6 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         );
     }
 
-
     @ParameterizedTest
     @MethodSource
     void givenContestedCase_whenRecipientResidesInUK_thenReturnFalse(FinremCaseData caseData,
@@ -155,7 +154,6 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
             Arguments.of(finremCaseData, null, false)
         );
     }
-
 
     @ParameterizedTest
     @MethodSource
@@ -191,7 +189,6 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         );
     }
 
-
     @ParameterizedTest
     @MethodSource
     void givenContestedCaseLegacyStyle_whenRecipientNotResidesOutsideOfUK_thenReturnTrue(Map<String, Object> caseData,
@@ -215,7 +212,6 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
         IntervenerWrapper intervenerWrapper4 = IntervenerFour.builder().intervenerResideOutsideUK(YesOrNo.NO).build();
         caseData.put("intervener4", intervenerWrapper4);
 
-
         return Stream.of(
             Arguments.of(caseData, APPLICANT, false),
             Arguments.of(caseData, RESPONDENT, false),
@@ -225,7 +221,6 @@ class InternationalPostalServiceTest extends BaseServiceTest  {
             Arguments.of(caseData, INTERVENER4, false)
         );
     }
-
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
