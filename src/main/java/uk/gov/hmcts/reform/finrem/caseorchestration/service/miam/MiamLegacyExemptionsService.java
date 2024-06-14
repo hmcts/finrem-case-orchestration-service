@@ -132,16 +132,30 @@ public class MiamLegacyExemptionsService {
         }
     }
 
+    /**
+     * Remove any MIAM legacy exemption data.
+     * @param caseData case data to update
+     */
     public void removeLegacyExemptions(Map<String, Object> caseData) {
         caseData.remove(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST);
         caseData.remove(MIAM_OTHER_GROUNDS_CHECKLIST);
     }
 
+    /**
+     * Gets text of all legacy exemptions.
+     * @param miamWrapper MIAM data
+     * @return list of legacy exemptions text
+     */
     public List<String> getInvalidLegacyExemptions(MiamWrapper miamWrapper) {
         return getInvalidLegacyExemptions(miamWrapper.getMiamPreviousAttendanceChecklist(),
             miamWrapper.getMiamOtherGroundsChecklist());
     }
 
+    /**
+     * Gets the text of all legacy exemptions.
+     * @param caseData case data
+     * @return list of legacy exemptions text
+     */
     public List<String> getInvalidLegacyExemptions(Map<String, Object> caseData) {
         MiamPreviousAttendance miamPreviousAttendance = getMiamPreviousAttendance(caseData);
         MiamOtherGrounds miamOtherGrounds = getMiamOtherGrounds(caseData);
