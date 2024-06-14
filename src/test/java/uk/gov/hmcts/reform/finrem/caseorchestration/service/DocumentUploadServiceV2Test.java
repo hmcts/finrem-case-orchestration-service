@@ -67,7 +67,7 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
                         .build())
                     .build())
             ),
-            // 1.2 without new doc
+            // 1.2 without new doc - no change
             Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
                     finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
                     return finremCaseDataBuilder;
@@ -139,9 +139,8 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
                     finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
                     return finremCaseDataBuilder;
                 },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    return finremCaseDataBuilder;
-                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder ->
+                    finremCaseDataBuilder,
                 (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
                 List.of()
             ),
@@ -180,7 +179,7 @@ class DocumentUploadServiceV2Test extends BaseServiceTest {
         Function<FinremCaseData, List<CaseDocumentCollection<?>>> accessor,
         List<CaseDocumentCollection<?>> expectedReturn) {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
-        FinremCaseData caseData = caseDataModifier.apply(caseDataBefore.toBuilder()).build();
+        FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();
         assertEquals(expectedReturn, documentUploadService.getNewUploadDocuments(caseData, caseDataBefore, accessor));
     }
 }
