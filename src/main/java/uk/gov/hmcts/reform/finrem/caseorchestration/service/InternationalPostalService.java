@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
@@ -35,10 +34,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Service
-@RequiredArgsConstructor
 public class InternationalPostalService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public InternationalPostalService() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     /**
      * Validates the given FinremCaseData for any errors related to contact details.
@@ -181,32 +183,27 @@ public class InternationalPostalService {
     }
 
     private IntervenerWrapper convertToIntervener1Wrapper(Object object) {
-        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<IntervenerOne>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener2Wrapper(Object object) {
-        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<IntervenerTwo>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener3Wrapper(Object object) {
-        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<IntervenerThree>() {
         });
     }
 
     private IntervenerWrapper convertToIntervener4Wrapper(Object object) {
-        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<IntervenerFour>() {
         });
     }
 
     private Address getAddress(Object object) {
         if (object != null) {
-            objectMapper.registerModule(new JavaTimeModule());
             return objectMapper.convertValue(object, new TypeReference<>() {
             });
         }
