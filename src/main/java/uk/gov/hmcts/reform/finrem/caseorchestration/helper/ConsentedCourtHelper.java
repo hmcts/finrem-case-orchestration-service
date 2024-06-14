@@ -220,6 +220,7 @@ public class ConsentedCourtHelper {
         .put("FR_kent_surreyList_8", "Worthing County Court and Family Court")
         .put("FR_kent_surreyList_9", "Hastings County Court and Family Court Hearing Centre")
         .put("FR_kent_surreyList_10", "Horsham County Court and Family Court")
+        .put("FR_kent_surreyList_11", "Thanet County Court and Family Court")
         .build();
     private static Map<String, String> seOtherMap = ImmutableMap.<String, String>builder()
         .put("FR_SEList_1", "Basildon Magistrates Court and Family Court")

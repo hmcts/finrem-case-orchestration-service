@@ -248,6 +248,9 @@ public class ConsentedCourtHelperTest {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surreyList_10", "Horsham County Court and Family Court");
 
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surreyList_11", "Thanet Family Court Hearing Centre");
+
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, "invalid", KENTFRC_COURTLIST,
             "FR_kent_surreyList_10", "");
 
