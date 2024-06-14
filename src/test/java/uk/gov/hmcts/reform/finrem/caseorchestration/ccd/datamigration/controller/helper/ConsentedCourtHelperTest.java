@@ -274,10 +274,10 @@ public class ConsentedCourtHelperTest {
             NORWICH, "Norwich Combined Court Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
-            IPSWICH, "Ipswich County Court and Faily Hearing Centre");
+            IPSWICH, "Ipswich County Court and Family Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
-            CHELMSFORD, "Chelmsford County Court and Family Hearing Centre");
+            CHELMSFORD, "Chelmsford Justice Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
             SOUTHEND, "Southend County Court and Family Court");
@@ -336,7 +336,7 @@ public class ConsentedCourtHelperTest {
             "FR_SEList_5", "Cambridge County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, OTHER, SEOTHER_COURTLIST,
-            "FR_SEList_6", "Chelmsford County Court and Family Hearing Centre");
+            "FR_SEList_6", "Chelmsford Justice Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, OTHER, SEOTHER_COURTLIST,
             "FR_SEList_7", "Colchester Magistrates Court and Family Court");
@@ -381,7 +381,7 @@ public class ConsentedCourtHelperTest {
             "FR_SEList_20", "Watford County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, OTHER, SEOTHER_COURTLIST,
-            "FR_SEList_21", "Thanet County Court and Family Court");
+            "FR_SEList_21", "Thanet Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, "invalid", SEOTHER_COURTLIST,
             "FR_SEList_21", "");
