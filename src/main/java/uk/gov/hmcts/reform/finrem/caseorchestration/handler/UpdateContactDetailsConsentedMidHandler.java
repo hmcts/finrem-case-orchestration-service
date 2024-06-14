@@ -23,7 +23,6 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
         this.postalService = postalService;
     }
 
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
@@ -42,6 +41,4 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(postalService.validate(caseData)).build();
     }
-
-
 }

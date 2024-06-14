@@ -23,7 +23,6 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         this.postalService = postalService;
     }
 
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
@@ -41,6 +40,4 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(postalService.validate(caseData)).build();
     }
-
-
 }
