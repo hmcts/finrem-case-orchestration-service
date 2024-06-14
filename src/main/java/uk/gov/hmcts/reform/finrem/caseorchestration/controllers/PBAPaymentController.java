@@ -24,8 +24,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,12 +55,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class PBAPaymentController extends BaseController {
 
+    private static final String MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE =
+        "The following MIAM exemptions that are no longer valid. Please re-submit the exemptions using Amend Application Details.";
+
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
     private final CaseDataService caseDataService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
     private final PrdOrganisationService prdOrganisationService;
+    private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -107,7 +113,15 @@ public class PBAPaymentController extends BaseController {
 
         validateCaseData(callbackRequest);
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
+        if (miamLegacyExemptionsService.isLegacyExemptionsInvalid(mapOfCaseData)) {
+            return miamInvalidLegacyExemptionsFailure(mapOfCaseData);
+        }
 
+        return assignApplicantSolicitor(caseDetails, authToken);
+    }
+
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignApplicantSolicitor(CaseDetails caseDetails,
+                                                                                          String authToken) {
         if (assignCaseAccessService.isCreatorRoleActiveOnCase(caseDetails)) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
@@ -144,6 +158,7 @@ public class PBAPaymentController extends BaseController {
             log.info("Applicant Policy Already Applied, Case ID: {}", caseDetails.getId());
         }
 
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
         mapOfCaseData.put(SUBMIT_CASE_DATE, LocalDate.now());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
@@ -188,6 +203,19 @@ public class PBAPaymentController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of(paymentError))
+            .build());
+    }
+
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> miamInvalidLegacyExemptionsFailure(Map<String, Object> caseData) {
+        List<String> invalidLegacyExemptions = miamLegacyExemptionsService.getInvalidLegacyExemptions(caseData);
+
+        List<String> errors = new ArrayList<>();
+        errors.add(MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE);
+        errors.addAll(invalidLegacyExemptions);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .errors(errors)
             .build());
     }
 }
