@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,24 +22,29 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.AUTH_TOKEN;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class DocumentCheckerServiceTest extends BaseServiceTest {
-
 
     @TestLogs
     private final TestLogger logs = new TestLogger(DocumentCheckerService.class);
 
-    @Autowired
+    @InjectMocks
     private DocumentCheckerService underTest;
 
-    @MockBean
+    @Mock
     private DocxDocumentChecker docxDocumentChecker;
 
-    @MockBean
+    @Mock
     private DuplicateFilenameDocumentChecker duplicateFilenameDocumentChecker;
 
-    @MockBean
+    @Mock
     private EvidenceManagementDownloadService downloadService;
+
+    @BeforeEach
+    public void setUp() {
+        List<DocumentChecker> documentCheckers = Arrays.asList(docxDocumentChecker, duplicateFilenameDocumentChecker);
+        underTest = new DocumentCheckerService(downloadService, documentCheckers);
+    }
 
     @Test
     void testSingleWarningReturnedByDocxDocumentChecker() throws DocumentContentCheckerException {
@@ -66,7 +73,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testIfDockerCheckerThrowDocumentContentCheckerException() throws DocumentContentCheckerException {
+    void testIfDocxCheckerThrowDocumentContentCheckerException() throws DocumentContentCheckerException {
         final CaseDocument caseDocument = buildCaseDocument();
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
         when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any()))
@@ -74,5 +81,14 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
         underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
         assertThat(logs.getErrors()).isNotEmpty().contains("Unexpected error when getting warnings from " + DocxDocumentChecker.class.getName());
+    }
+
+    @Test
+    void testNoDocumentCheckerCanCheck(){
+        final CaseDocument caseDocument = buildCaseDocument();
+        when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(false);
+        when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(false);
+
+        assertThat(underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN)).isEmpty();
     }
 }
