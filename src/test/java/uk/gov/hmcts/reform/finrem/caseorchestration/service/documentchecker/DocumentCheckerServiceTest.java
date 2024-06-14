@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.List;
 
@@ -21,8 +23,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.AUT
 @ExtendWith(SpringExtension.class)
 class DocumentCheckerServiceTest extends BaseServiceTest {
 
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(DocumentCheckerService.class);
+
     @Autowired
-    private DocumentCheckerService documentCheckerService;
+    private DocumentCheckerService underTest;
 
     @MockBean
     private DocxDocumentChecker docxDocumentChecker;
@@ -41,7 +47,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
         when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any())).thenReturn(List.of("docx warning"));
 
-        List<String> actual = documentCheckerService.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
         assertThat(actual).containsExactly("docx warning");
     }
 
@@ -55,7 +61,18 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
         when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(true);
         when(duplicateFilenameDocumentChecker.getWarnings(eq(caseDocument), any(), any())).thenReturn(List.of("duplicate warning"));
 
-        List<String> actual = documentCheckerService.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
         assertThat(actual).contains("docx warning", "duplicate warning");
+    }
+
+    @Test
+    void testIfDockerCheckerThrowDocumentContentCheckerException() throws DocumentContentCheckerException {
+        final CaseDocument caseDocument = buildCaseDocument();
+        when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
+        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any()))
+            .thenThrow(new DocumentContentCheckerException(new RuntimeException("test")));
+
+        underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        assertThat(logs.getErrors()).isNotEmpty().contains("Unexpected error when getting warnings from " + DocxDocumentChecker.class.getName());
     }
 }

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.String.format;
+
 @Service
 @Slf4j
 public class DocumentCheckerService {
@@ -40,7 +42,7 @@ public class DocumentCheckerService {
             try {
                 warnings.addAll(dc.getWarnings(caseDocument, bytes, caseDetails));
             } catch (DocumentContentCheckerException e) {
-                log.error("Unexpected error", e);
+                log.error(format("Unexpected error when getting warnings from %s", dc.getClass().getName()), e);
             }
         });
 
