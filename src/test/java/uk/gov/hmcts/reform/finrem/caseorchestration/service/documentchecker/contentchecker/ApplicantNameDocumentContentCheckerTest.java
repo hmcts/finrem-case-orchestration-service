@@ -15,10 +15,10 @@ class ApplicantNameDocumentContentCheckerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "The applicant is Joe Bloggs",
-        "The applicant is Joe Bloggs ",
-        " The applicant is Joe Blogg",
-        " The applicant is Joe Bloggs ",
+        "1. The applicant is Joe Bloggs",
+        "1. The applicant is Joe Bloggs ",
+        " 1. The applicant is Joe Bloggs",
+        " 1. The applicant is Joe Bloggs ",
         "whatever"})
     void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndLastName(String validContent) {
         assertThat(underTest.getWarning(
