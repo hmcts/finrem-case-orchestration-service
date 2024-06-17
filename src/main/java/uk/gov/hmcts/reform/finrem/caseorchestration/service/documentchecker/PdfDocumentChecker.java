@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.cont
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PdfDocumentChecker implements DocumentChecker {
@@ -33,6 +34,7 @@ public class PdfDocumentChecker implements DocumentChecker {
 
             return documentContentCheckers.stream()
                 .map(dcc -> dcc.getWarning(caseDetails, content))
+                .filter(Objects::nonNull)
                 .toList();
         } catch (IOException e) {
             throw new DocumentContentCheckerException(e);
