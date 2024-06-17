@@ -46,10 +46,11 @@ class DocxDocumentCheckerTest {
         underTest = new DocxDocumentChecker(documentContentCheckers);
     }
 
-    @Test
-    void testCanCheck_withDocxExtension() {
+    @ParameterizedTest
+    @ValueSource(strings = {"test.docx", "test.DOCX", "test.DOCx"})
+    void testCanCheck_withDocxExtension(String filename) {
         CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentFilename("test.docx");
+        caseDocument.setDocumentFilename(filename);
 
         assertThat(underTest.canCheck(caseDocument)).isTrue();
     }

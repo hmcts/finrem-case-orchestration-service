@@ -18,7 +18,8 @@ class RespondentNameDocumentContentCheckerTest {
         "The respondent is Joe Bloggs",
         "The respondent is Joe Bloggs ",
         " The respondent is Joe Bloggs",
-        " The respondent is Joe Bloggs "})
+        " The respondent is Joe Bloggs ",
+        "whatever"})
     void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndLastName(String validContent) {
         assertThat(underTest.getWarning(
             getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
