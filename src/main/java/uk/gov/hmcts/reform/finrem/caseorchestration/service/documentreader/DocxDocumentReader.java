@@ -14,8 +14,8 @@ public class DocxDocumentReader {
     public String[] getContent(byte[] bytes) throws IOException {
         InputStream is = new ByteArrayInputStream(bytes);
         XWPFDocument wordDoc = new XWPFDocument(is);
-            XWPFWordExtractor extractor = new XWPFWordExtractor(wordDoc);
-            String content = extractor.getText();
-            return content.split(System.lineSeparator());
+        XWPFWordExtractor extractor = new XWPFWordExtractor(wordDoc);
+        String content = extractor.getText();
+        return content.split(System.lineSeparator());
     }
 }
