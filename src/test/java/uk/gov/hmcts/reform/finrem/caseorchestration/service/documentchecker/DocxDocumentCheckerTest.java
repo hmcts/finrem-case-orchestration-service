@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.CaseNumberDocumentContentChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.DocumentContentChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.RespondentNameDocumentContentChecker;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentreader.DocxDocumentReader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,11 +40,14 @@ class DocxDocumentCheckerTest {
     @Mock
     private CaseNumberDocumentContentChecker caseNumberDocumentContentChecker;
 
+    @Mock
+    private DocxDocumentReader docxDocumentReader;
+
     @BeforeEach
     public void setUp() {
         List<DocumentContentChecker> documentContentCheckers = Arrays.asList(respondentNameDocumentContentChecker,
             caseNumberDocumentContentChecker);
-        underTest = new DocxDocumentChecker(documentContentCheckers);
+        underTest = new DocxDocumentChecker(docxDocumentReader, documentContentCheckers);
     }
 
     @ParameterizedTest
@@ -66,6 +70,7 @@ class DocxDocumentCheckerTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1})
     void testGetWarnings_withValidContent(int testCase) throws DocumentContentCheckerException, IOException {
+        when(docxDocumentReader.getContent(any())).thenReturn(new String[0]);
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentFilename("generalOrder.docx");
         FinremCaseDetails caseDetails = new FinremCaseDetails();
@@ -91,7 +96,8 @@ class DocxDocumentCheckerTest {
     }
 
     @Test
-    void testGetWarnings_whenGivenFileCannotBeRead() {
+    void testGetWarnings_whenGivenFileCannotBeRead() throws IOException {
+        when(docxDocumentReader.getContent(any())).thenThrow(new IOException("test"));
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentFilename("test.docx");
         FinremCaseDetails caseDetails = new FinremCaseDetails();

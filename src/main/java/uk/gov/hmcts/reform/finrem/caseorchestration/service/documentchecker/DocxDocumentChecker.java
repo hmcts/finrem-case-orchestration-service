@@ -1,24 +1,24 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.DocumentContentChecker;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentreader.DocxDocumentReader;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
 @Component
 public class DocxDocumentChecker implements DocumentChecker {
 
+    private final DocxDocumentReader docxDocumentReader;
+
     private final List<DocumentContentChecker> documentContentCheckers;
 
-    public DocxDocumentChecker(List<DocumentContentChecker> documentContentCheckers) {
+    public DocxDocumentChecker(DocxDocumentReader docxDocumentReader, List<DocumentContentChecker> documentContentCheckers) {
+        this.docxDocumentReader = docxDocumentReader;
         this.documentContentCheckers = documentContentCheckers;
     }
 
@@ -39,12 +39,8 @@ public class DocxDocumentChecker implements DocumentChecker {
     }
 
     private String[] getContent(byte[] caseDocument) throws DocumentContentCheckerException {
-        InputStream is = new ByteArrayInputStream(caseDocument);
-        try (XWPFDocument wordDoc = new XWPFDocument(is)) {
-            XWPFWordExtractor extractor = new XWPFWordExtractor(wordDoc);
-            String content = extractor.getText();
-            return content.split(System.lineSeparator());
-
+        try {
+            return docxDocumentReader.getContent(caseDocument);
         } catch (Exception e) {
             throw new DocumentContentCheckerException(e);
         }
