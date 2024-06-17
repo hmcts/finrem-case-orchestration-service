@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,5 +80,9 @@ public class TestResource {
         document.setDocumentFilename(filename);
         document.setCategoryId(categoryId);
         return document;
+    }
+
+    public static Path getPathFromResources(String fileName) {
+        return Paths.get("src/test/resources/" + fileName);
     }
 }

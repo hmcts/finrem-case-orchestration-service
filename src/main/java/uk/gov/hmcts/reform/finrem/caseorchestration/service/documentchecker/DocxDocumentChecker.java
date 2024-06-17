@@ -9,9 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.DocumentContentChecker;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class DocxDocumentChecker implements DocumentChecker {
@@ -34,6 +34,7 @@ public class DocxDocumentChecker implements DocumentChecker {
 
         return documentContentCheckers.stream()
             .map(dcc -> dcc.getWarning(caseDetails, content))
+            .filter(Objects::nonNull)
             .toList();
     }
 
@@ -44,7 +45,7 @@ public class DocxDocumentChecker implements DocumentChecker {
             String content = extractor.getText();
             return content.split(System.lineSeparator());
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new DocumentContentCheckerException(e);
         }
     }

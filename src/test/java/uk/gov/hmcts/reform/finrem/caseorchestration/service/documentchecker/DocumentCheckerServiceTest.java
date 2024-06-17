@@ -84,7 +84,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testNoDocumentCheckerCanCheck(){
+    void testNoDocumentCheckerCanCheck() {
         final CaseDocument caseDocument = buildCaseDocument();
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(false);
         when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(false);
