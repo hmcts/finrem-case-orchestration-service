@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 @Component
 public class DuplicateFilenameDocumentChecker implements DocumentChecker {
 
@@ -24,7 +26,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         throws DocumentContentCheckerException {
 
         FinremCaseData caseData = caseDetails.getData();
-        if (isDuplicateFilename(caseDocument, caseData::getAdditionalDocument)) {
+        if (isNotEmpty(caseData.getAdditionalDocument()) && isDuplicateFilename(caseDocument, caseData::getAdditionalDocument)) {
             return List.of(WARNING);
         }
         if (isDuplicateFilename(caseDocument, caseData.getGeneralOrderWrapper()::getGeneralOrderLatestDocument)) {
