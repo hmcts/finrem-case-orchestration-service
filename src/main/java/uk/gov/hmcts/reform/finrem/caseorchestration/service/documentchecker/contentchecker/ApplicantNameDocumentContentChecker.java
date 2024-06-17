@@ -39,7 +39,7 @@ public class ApplicantNameDocumentContentChecker implements DocumentContentCheck
     }
 
     private String getApplicantNameFromContent(String text) {
-        return text.replace("1. The applicant is ", "").trim();
+        return text.replace("1. The applicant is", "").trim();
     }
 
     private String getApplicantNameFromCase(FinremCaseData caseData) {
