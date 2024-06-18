@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generator.BaseContestedLetterDetailsGenerator;
 
 import java.time.LocalDate;
@@ -35,8 +36,9 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
     public GeneralApplicationRejectionLetterGenerator(ObjectMapper objectMapper,
                                                       CaseDataService caseDataService,
                                                       DocumentHelper documentHelper,
-                                                      LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper) {
-        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
+                                                      LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
+                                                      InternationalPostalService postalService) {
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper, postalService);
         this.objectMapper = objectMapper;
     }
 

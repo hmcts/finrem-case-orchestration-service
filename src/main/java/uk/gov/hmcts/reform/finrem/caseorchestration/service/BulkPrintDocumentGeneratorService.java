@@ -29,6 +29,7 @@ public class BulkPrintDocumentGeneratorService {
 
     private static final String FILE_NAMES = "fileNames";
     private static final String RECIPIENTS = "recipients";
+    private static final String IS_INTERNATIONAL = "isInternational";
 
     private final AuthTokenGenerator authTokenGenerator;
     private final FeatureToggleService featureToggleService;
@@ -39,7 +40,9 @@ public class BulkPrintDocumentGeneratorService {
      */
 
 
-    public UUID send(final BulkPrintRequest bulkPrintRequest, final String recipient,
+    public UUID send(final BulkPrintRequest bulkPrintRequest,
+                     final String recipient,
+                     boolean isInternational,
                      final List<byte[]> listOfDocumentsAsByteArray) {
 
         String letterType = bulkPrintRequest.getLetterType();
@@ -52,14 +55,18 @@ public class BulkPrintDocumentGeneratorService {
             .toList();
 
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
-            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, recipient, letterType, bulkPrintRequest)));
+            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER,
+                getAdditionalData(caseId, recipient, isInternational, letterType, bulkPrintRequest)));
 
         log.info("Letter service produced the following letter Id {} for party {} and  Case ID: {}", sendLetterResponse.letterId, recipient, caseId);
         return sendLetterResponse.letterId;
     }
 
 
-    private Map<String, Object> getAdditionalData(final String caseId, final String recipient, final String letterType,
+    private Map<String, Object> getAdditionalData(final String caseId,
+                                                  final String recipient,
+                                                  final boolean isInternational,
+                                                  final String letterType,
                                                   final BulkPrintRequest bulkPrintRequest) {
         final Map<String, Object> additionalData = new HashMap<>();
         additionalData.put(LETTER_TYPE_KEY, letterType);
@@ -74,7 +81,9 @@ public class BulkPrintDocumentGeneratorService {
         } else {
             additionalData.put(RECIPIENTS, new String[]{"%s:%d".formatted(recipient, System.nanoTime())});
         }
-        log.info("sending additional data {}  party is {} and Case ID: {}", additionalData, recipient, caseId);
+        additionalData.put(IS_INTERNATIONAL, isInternational);
+        log.info("sending additional data {}  party is {}, isInternational {}, and Case ID: {}",
+            additionalData, recipient, isInternational, caseId);
         return additionalData;
     }
 

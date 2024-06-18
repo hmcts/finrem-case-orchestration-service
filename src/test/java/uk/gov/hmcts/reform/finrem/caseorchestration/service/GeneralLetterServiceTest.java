@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
@@ -40,7 +41,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,6 +96,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private FeatureToggleService featureToggleService;
     @MockBean
     private BulkPrintDocumentService bulkPrintDocumentService;
+    @MockBean
+    private InternationalPostalService postalService;
 
     CaseDocument uploadedDocument;
     FinremCaseDetails generalLetterCaseDetails;
@@ -244,7 +249,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
         wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
             DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
+        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), anyBoolean(), any());
     }
 
     @Test
@@ -262,6 +267,45 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         generalLetterService.validateEncryptionOnUploadedDocuments(caseDocuments, caseId, auth, errors);
         verify(bulkPrintDocumentService, times(1)).validateEncryptionOnUploadedDocument(
             doc1.getValue(), caseId, new ArrayList<>(), auth);
+    }
+
+    @Test
+    public void generateGeneralLetterForApplicantForGivenConsentedCaseAndApplicantResideInternational() {
+        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
+        FinremCaseData caseData = caseDetails.getData();
+        caseData.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
+        DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT, APPLICANT, false);
+        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
+        when(postalService.isRecipientResideOutsideOfUK((FinremCaseData) any(), anyString())).thenReturn(true);
+
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertThat(generalLetterData, hasSize(2));
+
+        CaseDocument expectedGeneratedLetter = caseDocument();
+        verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null, expectedGeneratedLetter);
+        verifyDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), null, expectedGeneratedLetter);
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Street\n"
+            + "Second Address Line\n"
+            + "Third Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE\n"
+            + "United Kingdom"));
+        verifyLitigantNames(data);
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
+        verify(caseDataService).buildFullApplicantName((CaseDetails) any());
+        verify(caseDataService).buildFullRespondentName((CaseDetails) any());
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {
