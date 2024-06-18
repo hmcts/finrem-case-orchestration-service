@@ -7,6 +7,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+/**
+ * Fixed list options for MIAM Other Grounds.
+ *
+ * Replaces {@link MiamOtherGrounds} for new cases.
+ */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum MiamOtherGroundsV2 {
