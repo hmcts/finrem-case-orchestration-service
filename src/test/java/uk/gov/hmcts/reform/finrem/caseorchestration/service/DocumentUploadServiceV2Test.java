@@ -1,12 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
@@ -21,11 +17,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-class DocumentUploadServiceV2Test extends BaseServiceTest {
+class DocumentUploadServiceV2Test {
 
-    @Autowired
-    private DocumentUploadServiceV2 documentUploadService;
+    private DocumentUploadServiceV2 documentUploadService = new DocumentUploadServiceV2();
 
     private static Stream<Arguments> provideArguments() {
         final List<UploadGeneralDocumentCollection> existingUploadGeneralDocument = List.of(
