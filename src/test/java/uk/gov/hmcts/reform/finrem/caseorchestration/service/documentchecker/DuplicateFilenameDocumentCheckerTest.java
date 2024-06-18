@@ -25,7 +25,7 @@ class DuplicateFilenameDocumentCheckerTest {
     private static final String WARNING = "A document with this filename already exists on the case";
 
     @Mock
-    private CaseDocument inptuCaseDocument;
+    private CaseDocument caseDocument;
     @Mock
     private FinremCaseDetails caseDetails;
     @Mock
@@ -43,14 +43,14 @@ class DuplicateFilenameDocumentCheckerTest {
     @BeforeEach
     public void setUp() {
         underTest = new DuplicateFilenameDocumentChecker();
-        when(inptuCaseDocument.getDocumentFilename()).thenReturn("inputFilename");
+        when(caseDocument.getDocumentFilename()).thenReturn("inputFilename");
     }
 
     @Test
     void testCanCheck_alwaysReturnsTrue() {
         assertThat(underTest.canCheck(new CaseDocument())).isTrue();
         assertThat(underTest.canCheck(null)).isTrue();
-        assertThat(underTest.canCheck(inptuCaseDocument)).isTrue();
+        assertThat(underTest.canCheck(caseDocument)).isTrue();
     }
 
     @Test
@@ -63,7 +63,7 @@ class DuplicateFilenameDocumentCheckerTest {
         when(generalOrderWrapper.getGeneralOrderLatestDocument()).thenReturn(generalOrderDocument);
         when(additionalDocument.getDocumentFilename()).thenReturn("additionalDocumentFilename");
 
-        List<String> warnings = underTest.getWarnings(inptuCaseDocument, new byte[0], caseDetails);
+        List<String> warnings = underTest.getWarnings(caseDocument, new byte[0], caseDetails);
 
         assertThat(warnings).isEmpty();
     }
@@ -77,7 +77,7 @@ class DuplicateFilenameDocumentCheckerTest {
 
         when(generalOrderWrapper.getGeneralOrderLatestDocument()).thenReturn(generalOrderDocument);
 
-        List<String> warnings = underTest.getWarnings(inptuCaseDocument, new byte[0], caseDetails);
+        List<String> warnings = underTest.getWarnings(caseDocument, new byte[0], caseDetails);
 
         assertThat(warnings).isEmpty();
     }
@@ -88,7 +88,7 @@ class DuplicateFilenameDocumentCheckerTest {
         when(caseData.getAdditionalDocument()).thenReturn(additionalDocument);
         when(additionalDocument.getDocumentFilename()).thenReturn("inputFilename");
 
-        List<String> warnings = underTest.getWarnings(inptuCaseDocument, new byte[0], caseDetails);
+        List<String> warnings = underTest.getWarnings(caseDocument, new byte[0], caseDetails);
 
         assertThat(warnings).hasSize(1).containsExactly(WARNING);
     }
@@ -102,14 +102,14 @@ class DuplicateFilenameDocumentCheckerTest {
         when(generalOrderWrapper.getGeneralOrderLatestDocument()).thenReturn(generalOrderDocument);
         when(caseData.getGeneralOrderWrapper()).thenReturn(generalOrderWrapper);
 
-        List<String> warnings = underTest.getWarnings(inptuCaseDocument, new byte[0], caseDetails);
+        List<String> warnings = underTest.getWarnings(caseDocument, new byte[0], caseDetails);
 
         assertThat(warnings).hasSize(1).containsExactly(WARNING);
     }
 
     @Test
     void testGetWarnings_NoCaseData() throws DocumentContentCheckerException {
-        List<String> warnings = underTest.getWarnings(inptuCaseDocument, new byte[0], FinremCaseDetails.builder()
+        List<String> warnings = underTest.getWarnings(caseDocument, new byte[0], FinremCaseDetails.builder()
             .data(FinremCaseData.builder().build())
             .build());
 
