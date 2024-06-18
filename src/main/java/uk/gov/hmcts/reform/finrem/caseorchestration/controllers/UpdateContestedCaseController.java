@@ -123,26 +123,9 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedComplexityDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("addToComplexityListOfCourts"), "falseNo")) {
-            removeContestedComplexityDetails(caseData);
-        } else {
-            updateComplexityDetails(caseData);
-        }
-    }
-
-    private void updateComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
             caseData.put("otherReasonForComplexityText", null);
         }
-    }
-
-    private void removeContestedComplexityDetails(Map<String, Object> caseData) {
-        caseData.put("estimatedAssetsChecklist", null);
-        caseData.put("netValueOfHome", null);
-        caseData.put("potentialAllegationChecklist", null);
-        caseData.put("otherReasonForComplexity", null);
-        caseData.put("otherReasonForComplexityText", null);
-        caseData.put("detailPotentialAllegation", null);
     }
 
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {

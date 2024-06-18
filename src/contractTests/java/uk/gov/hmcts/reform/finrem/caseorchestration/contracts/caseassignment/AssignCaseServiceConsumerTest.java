@@ -34,11 +34,11 @@ import static org.mockito.BDDMockito.given;
 public class AssignCaseServiceConsumerTest extends BaseTest {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String authorizationToken = "Bearer some-access-token";
+    private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String CASE_ID = "1583841721773828";
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
-    private final String someServiceAuthToken = "someServiceAuthToken";
+    private static final String SOME_SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,7 +62,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
             .given("Assign a user to a case")
             .uponReceiving("A request for that case to be assigned")
             .method("POST")
-            .headers(SERVICE_AUTHORIZATION_HEADER, someServiceAuthToken, AUTHORIZATION_HEADER, authorizationToken)
+            .headers(SERVICE_AUTHORIZATION_HEADER, SOME_SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .body(createJsonObject(buildAssignCaseRequest()))
             .path("/case-assignments")
             .query("use_user_token=true")
@@ -86,11 +86,11 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
         given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl())
             .willReturn("http://localhost:8889/case-assignments");
-        given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
+        given(authTokenGenerator.generate()).willReturn(SOME_SERVICE_AUTH_TOKEN);
 
         assignCaseAccessService
             .assignCaseAccess(CaseDetails.builder().id(Long.parseLong(CASE_ID)).caseTypeId(CaseType.CONTESTED.getCcdType()).build(),
-                authorizationToken);
+                AUTHORIZATION_TOKEN);
 
     }
 

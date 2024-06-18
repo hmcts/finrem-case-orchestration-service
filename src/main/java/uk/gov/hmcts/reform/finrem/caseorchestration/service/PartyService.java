@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -43,14 +44,17 @@ public class PartyService {
 
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
+        List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
+        selectedActiveCaseParties.addAll(getActiveSolicitors(caseData));
+        selectedActiveCaseParties.addAll(getUnrepresentedParties(caseData));
 
-        List<DynamicMultiSelectListElement> activeSolicitors = getActiveSolicitors(caseData);
-        activeCaseParties.addAll(activeSolicitors);
+        List<DynamicMultiSelectListElement> activeCaseParties = new ArrayList<>();
+        activeCaseParties.addAll(getActiveSolicitors(caseData));
+        activeCaseParties.addAll(getUnrepresentedParties(caseData));
         activeCaseParties.addAll(getActiveInterveners(caseData));
 
         return DynamicMultiSelectList.builder()
-            .value(activeSolicitors)
+            .value(selectedActiveCaseParties)
             .listItems(activeCaseParties)
             .build();
     }
@@ -76,6 +80,26 @@ public class PartyService {
 
         return activeSolicitors;
     }
+
+    private List<DynamicMultiSelectListElement> getUnrepresentedParties(FinremCaseData caseData) {
+
+        List<DynamicMultiSelectListElement> unrepresentedParties = new ArrayList<>();
+
+        if (!caseData.isApplicantRepresentedByASolicitor() && caseData.getApplicantOrganisationPolicy() == null) {
+            DynamicMultiSelectListElement appMultiSelectListElement = getDynamicMultiSelectListElement(CaseRole.APP_SOLICITOR.getCcdCode(),
+                DISPLAY_LABEL.formatted(APPLICANT, caseData.getFullApplicantName()));
+            unrepresentedParties.add(appMultiSelectListElement);
+        }
+
+        if (!caseData.isRespondentRepresentedByASolicitor() && caseData.getRespondentOrganisationPolicy() == null) {
+            DynamicMultiSelectListElement respMultiSelectListElement = getDynamicMultiSelectListElement(CaseRole.RESP_SOLICITOR.getCcdCode(),
+                DISPLAY_LABEL.formatted(RESPONDENT, caseData.getRespondentFullName()));
+            unrepresentedParties.add(respMultiSelectListElement);
+        }
+
+        return unrepresentedParties;
+    }
+
 
     private List<DynamicMultiSelectListElement> getActiveInterveners(FinremCaseData caseData) {
 

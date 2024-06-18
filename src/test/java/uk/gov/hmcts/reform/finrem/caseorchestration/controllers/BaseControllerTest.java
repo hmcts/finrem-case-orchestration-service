@@ -54,10 +54,6 @@ public abstract class BaseControllerTest extends BaseTest {
         loadRequestContentWith("/fixtures/bulkprint/bulk-print-paper-application.json");
     }
 
-    protected void doValidConsentInContestWithPensionData() {
-        loadRequestContentWith("/fixtures/contested/consent-in-contested-with-pension.json");
-    }
-
     protected void doValidRefusalOrder() {
         loadRequestContentWith("/fixtures/refusal-order-contested.json");
     }

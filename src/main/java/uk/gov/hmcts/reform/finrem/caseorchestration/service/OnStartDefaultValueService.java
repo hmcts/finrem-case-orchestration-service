@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -20,10 +19,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class OnStartDefaultValueService {
 
     @Autowired
@@ -34,15 +33,32 @@ public class OnStartDefaultValueService {
     }
 
     public void defaultCivilPartnershipField(FinremCallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.NO);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        if (caseData.getCivilPartnership() == null) {
+            caseData.setCivilPartnership(YesOrNo.NO);
+        }
     }
 
     public void defaultUrgencyQuestion(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
     }
 
+    public void defaultUrgencyQuestion(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        if (caseData.getPromptForUrgentCaseQuestion() == null) {
+            caseData.setPromptForUrgentCaseQuestion(YesOrNo.NO);
+        }
+    }
+
     public void defaultTypeOfApplication(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
+    }
+
+    public void defaultTypeOfApplication(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        if (caseData.getScheduleOneWrapper().getTypeOfApplication() == null) {
+            caseData.getScheduleOneWrapper().setTypeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS);
+        }
     }
 
     public void defaultIssueDate(FinremCallbackRequest callbackRequest) {

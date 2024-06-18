@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
+@Slf4j
 @Component
 public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
@@ -26,6 +28,16 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
     @Override
     protected boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper) {
         return intervenerWrapper.getIntervenerName() != null && !intervenerWrapper.getIntervenerName().isEmpty();
+    }
+
+    @Override
+    protected boolean shouldSendRespondentSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.isRespondentSolicitorEmailPopulated(caseDetails);
+    }
+
+    @Override
+    protected boolean shouldSendApplicantSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.isApplicantSolicitorEmailPopulated(caseDetails);
     }
 
     @Override
