@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_REGION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT_DARTFORD_COURTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
@@ -273,7 +273,7 @@ public class CaseHearingFunctionsTest {
     public void shouldPopulateKentCourtDetails() {
         Map<String, Object> caseData = ImmutableMap.of(
             REGION, SOUTHEAST,
-            SOUTHEAST_FRC_LIST, KENTFRC,
+            SOUTHEAST_FRC_LIST, KENT,
             KENTFRC_COURTLIST, KENT_DARTFORD_COURTS);
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
@@ -287,9 +287,9 @@ public class CaseHearingFunctionsTest {
     public void shouldPopulateKentCourtDetailsFinrem() {
 
         AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHEAST)
-            .southEastFrcList(RegionSouthEastFrc.KENT)
+            .southEastFrcList(RegionSouthEastFrc.KENT_FRC)
             .courtListWrapper(
-                DefaultCourtListWrapper.builder().kentSurreyCourtList(KentSurreyCourt.KENT_DARTFORD_COURTS)
+                DefaultCourtListWrapper.builder().kentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_3)
                     .build())
             .build();
 
