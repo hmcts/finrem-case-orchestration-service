@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 public class SolicitorAddresseeGenerator implements AddresseeGenerator {
 
     private final DocumentHelper documentHelper;
+    private final InternationalPostalService postalService;
 
     public Addressee generate(CaseDetails caseDetails,
                               ChangedRepresentative changedRepresentative,
@@ -32,7 +34,8 @@ public class SolicitorAddresseeGenerator implements AddresseeGenerator {
         return Addressee.builder()
             .name(changedRepresentative.getName())
             .formattedAddress(documentHelper.formatAddressForLetterPrinting(
-                ((Map) caseDetails.getData().get(getSolicitorAddressKey(party, caseDetails))))).build();
+                ((Map) caseDetails.getData().get(getSolicitorAddressKey(party, caseDetails))),
+                postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), party))).build();
     }
 
     private String getSolicitorAddressKey(String party, CaseDetails caseDetails) {

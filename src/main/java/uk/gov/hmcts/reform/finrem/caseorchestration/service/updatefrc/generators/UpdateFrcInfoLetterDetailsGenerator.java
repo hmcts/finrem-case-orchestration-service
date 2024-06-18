@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generator.BaseContestedLetterDetailsGenerator;
 
 import java.time.LocalDate;
@@ -28,8 +29,9 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
 
 
     public UpdateFrcInfoLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper,
-                                               LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper) {
-        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper);
+                                               LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
+                                               InternationalPostalService postalService) {
+        super(caseDataService, documentHelper, letterAddresseeGeneratorMapper, postalService);
     }
 
     @Override
