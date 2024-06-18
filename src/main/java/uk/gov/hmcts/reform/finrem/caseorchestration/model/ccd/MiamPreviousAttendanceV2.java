@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 /**
  * Fixed list options for MIAM Previous Attendance.
- *
  * Replaces {@link MiamPreviousAttendance} for new cases.
  */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
