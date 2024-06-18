@@ -700,4 +700,7 @@ public class CCDConfigConstant {
     public static final String HEARING_BEDFORDSHIRE_COURT_LIST = "hearing_bedfordshireCourtList";
     public static final String HEARING_THAMESVALLEY_COURT_LIST = "hearing_thamesvalleyCourtList";
 
+    //international postal flag
+    public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";
+    public static final String RESPONDENT_RESIDE_OUTSIDE_UK = "respondentResideOutsideUK";
 }
