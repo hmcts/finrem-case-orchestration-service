@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.InputStream;
@@ -105,6 +106,8 @@ public class DocumentHelperTest {
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private InternationalPostalService postalService;
 
     @Before
     public void setup() {
@@ -112,7 +115,8 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper, letterAddresseeGenerator);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService,
+            service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
     }
 
     @Test
@@ -378,11 +382,11 @@ public class DocumentHelperTest {
         testAddressMap.put("AddressLine2", "Second Address Line");
         testAddressMap.put("AddressLine3", "Third Address Line");
         testAddressMap.put("County", "Greater London");
-        testAddressMap.put("Country", "England");
+        testAddressMap.put("Country", "United kingdom");
         testAddressMap.put("PostTown", "London");
         testAddressMap.put("PostCode", "SW1");
 
-        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap, true);
 
         String expectedAddress = """
             50 Applicant Street
@@ -390,7 +394,8 @@ public class DocumentHelperTest {
             Third Address Line
             Greater London
             London
-            SW1""";
+            SW1
+            United kingdom""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -406,7 +411,7 @@ public class DocumentHelperTest {
         testAddressMap.put("PostTown", null);
         testAddressMap.put("PostCode", "SW1");
 
-        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap, false);
         String expectedAddress = "50 Applicant Street" + "\n" + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
@@ -424,14 +429,15 @@ public class DocumentHelperTest {
         testAddressMap.put("PostTown", "London");
         testAddressMap.put("PostCode", "SW1");
 
-        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap, true);
         String expectedAddress = """
             50 Applicant Street
             Second Address Line
             Third Address Line
             Greater London
             London
-            SW1""";
+            SW1
+            England""";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -443,7 +449,7 @@ public class DocumentHelperTest {
         testAddressMap.put("AddressLine2", "");
         testAddressMap.put("PostCode", null);
 
-        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap, false);
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
@@ -460,7 +466,7 @@ public class DocumentHelperTest {
         testAddressMap.put("PostTown", null);
         testAddressMap.put("PostCode", null);
 
-        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap, false);
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
