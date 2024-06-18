@@ -5,6 +5,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.StringDecorator;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.getConsentedFinremCaseDetailsBuilder;
@@ -16,19 +19,40 @@ class ApplicantNameDocumentContentCheckerTest {
     @ParameterizedTest
     @ValueSource(strings = {
         "1. The applicant is Joe Bloggs",
-        "1. The applicant is Joe Bloggs ",
-        " 1. The applicant is Joe Bloggs",
-        " 1. The applicant is Joe Bloggs ",
         "whatever"})
     void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndLastName(String validContent) {
-        assertThat(underTest.getWarning(
-            getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .applicantFmName("Joe")
-                    .applicantLname("Bloggs")
-                    .build())).build(),
-            new String[] {validContent}))
-            .isNull();
+        Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+            Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
+                Arrays.stream(StringDecorator.values()).forEach(lnameDecorator ->
+                    assertThat(underTest.getWarning(
+                        getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
+                            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                                .applicantFmName(fmNameDecorator.decorate("Joe"))
+                                .applicantLname(lnameDecorator.decorate("Bloggs"))
+                                .build())).build(),
+                        new String[]{validContentDecorator.decorate(validContent)}))
+                        .isNull()
+                )
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "1. The applicant is Joe",
+        "whatever"})
+    void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndEmptyLastName(String validContent) {
+        Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+            Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
+                assertThat(underTest.getWarning(
+                    getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
+                        .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                            .applicantFmName(fmNameDecorator.decorate("Joe"))
+                            .build())).build(),
+                    new String[]{validContentDecorator.decorate(validContent)}))
+                    .isNull()
+            )
+        );
     }
 
     @Test
@@ -36,10 +60,10 @@ class ApplicantNameDocumentContentCheckerTest {
         assertThat(underTest.getWarning(
             getConsentedFinremCaseDetailsBuilder(FinremCaseData.builder()
                 .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .applicantFmName("Joey")
+                    .applicantFmName("Joe")
                     .applicantLname("Bloggs")
                     .build())).build(),
-            new String[] {"1. The applicant is Joe Bloggs"}))
+            new String[] {"1. The applicant is Amy Clarks"}))
             .isEqualTo("Applicant name may not match");
     }
 

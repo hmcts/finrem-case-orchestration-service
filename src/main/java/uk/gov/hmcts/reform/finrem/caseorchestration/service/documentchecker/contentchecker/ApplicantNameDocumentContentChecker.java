@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -32,7 +33,7 @@ public class ApplicantNameDocumentContentChecker implements DocumentContentCheck
 
     private boolean contentNameNotEqualsCaseName(FinremCaseData caseData, String content) {
         String applicantName = getApplicantNameFromCase(caseData);
-        if (isEmpty(trim(applicantName))) {
+        if (isEmpty(applicantName)) {
             return false;
         }
         return !applicantName.equals(getApplicantNameFromContent(content.trim()));
@@ -44,7 +45,7 @@ public class ApplicantNameDocumentContentChecker implements DocumentContentCheck
 
     private String getApplicantNameFromCase(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
-        return ofNullable(contactDetails.getApplicantFmName()).orElse(StringUtils.EMPTY) + SPACE
-            + ofNullable(contactDetails.getApplicantLname()).orElse(StringUtils.EMPTY);
+        return trim(trim(ofNullable(contactDetails.getApplicantFmName()).orElse(StringUtils.EMPTY)) + SPACE
+            + trim(ofNullable(contactDetails.getApplicantLname()).orElse(StringUtils.EMPTY)));
     }
 }
