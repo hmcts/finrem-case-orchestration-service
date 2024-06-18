@@ -115,7 +115,8 @@ public class ConsentOrderPrintService {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
         getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
-        DocumentHelper.PaperNotificationRecipient docRespondent = uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+        DocumentHelper.PaperNotificationRecipient docRespondent;
+        docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
         bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
