@@ -33,6 +33,7 @@ public class ConsentOrderPrintService {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final InternationalPostalService postalService;
 
     public void sendConsentOrderToBulkPrint(FinremCaseDetails finremCaseDetails,
                                             FinremCaseDetails finremCaseDetailsBefore,
@@ -115,11 +116,13 @@ public class ConsentOrderPrintService {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
         getOrderDocuments(caseDetails,caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+        FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
             RESPONDENT,
             bulkPrintDocuments,
+            postalService.isRespondentResideOutsideOfUK(caseData),
             authorisationToken);
     }
 
