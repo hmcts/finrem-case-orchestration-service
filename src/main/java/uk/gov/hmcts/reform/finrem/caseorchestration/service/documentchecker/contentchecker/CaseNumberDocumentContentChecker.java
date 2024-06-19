@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 @Component
 public class CaseNumberDocumentContentChecker implements DocumentContentChecker {
 
@@ -21,7 +23,7 @@ public class CaseNumberDocumentContentChecker implements DocumentContentChecker 
     }
 
     private boolean containsCaseNumber(String text) {
-        return text.contains("Case number");
+        return defaultString(text).contains("Case number");
     }
 
     private boolean contentCaseNumberNotEqualsCaseNumber(FinremCaseDetails caseDetails, String content) {
@@ -35,6 +37,5 @@ public class CaseNumberDocumentContentChecker implements DocumentContentChecker 
     private long getCaseNumberFromContent(String text) {
         return Long.parseLong(CharMatcher.inRange('0', '9').retainFrom(text));
     }
-
 
 }

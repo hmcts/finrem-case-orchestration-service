@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.con
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -17,7 +18,8 @@ class CaseNumberDocumentContentCheckerTest {
     private final CaseNumberDocumentContentChecker underTest = new CaseNumberDocumentContentChecker();
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567890", "whatever"})
+    @ValueSource(strings = {"Case number 1234567890", "whatever", ""})
+    @NullSource
     void givenCaseData_whenContentContainCaseNumber(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
             assertThat(underTest.getWarning(FinremCaseDetailsBuilderFactory.from().build(),
@@ -31,7 +33,8 @@ class CaseNumberDocumentContentCheckerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567890", "whatever"})
+    @ValueSource(strings = {"Case number 1234567890", "whatever", ""})
+    @NullSource
     void givenCaseDataWithoutId_whenContentDoesNotMatchCaseNumber(String content) {
         Arrays.stream(StringDecorator.values()).forEach(contentDecorator ->
             assertThat(underTest.getWarning(FinremCaseDetails.builder().build(), new String[] {contentDecorator.decorate(content)})).isNull()

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.con
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -19,7 +20,8 @@ class RespondentNameDocumentContentCheckerTest {
     @ParameterizedTest
     @ValueSource(strings = {
         "The respondent is Joe Bloggs",
-        "whatever"})
+        "whatever", ""})
+    @NullSource
     void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndLastName(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
             Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
@@ -38,7 +40,8 @@ class RespondentNameDocumentContentCheckerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"The respondent is Joe", "whatever"})
+    @ValueSource(strings = {"The respondent is Joe", "whatever", ""})
+    @NullSource
     void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndEmptyLastName(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
             Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->

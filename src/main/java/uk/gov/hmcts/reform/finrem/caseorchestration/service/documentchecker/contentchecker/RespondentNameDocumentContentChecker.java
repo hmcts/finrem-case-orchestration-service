@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.SPACE;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -28,7 +29,7 @@ public class RespondentNameDocumentContentChecker implements DocumentContentChec
     }
 
     private boolean containsTheRespondentIs(String text) {
-        return text.contains("The respondent is");
+        return defaultString(text).contains("The respondent is");
     }
 
     private boolean contentNameNotEqualsCaseName(FinremCaseData caseData, String content) {

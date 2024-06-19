@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.con
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -17,9 +18,8 @@ class ApplicantNameDocumentContentCheckerTest {
     private final ApplicantNameDocumentContentChecker underTest = new ApplicantNameDocumentContentChecker();
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "1. The applicant is Joe Bloggs",
-        "whatever"})
+    @ValueSource(strings = {"1. The applicant is Joe Bloggs", "whatever", ""})
+    @NullSource
     void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndLastName(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
             Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
@@ -38,9 +38,8 @@ class ApplicantNameDocumentContentCheckerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "1. The applicant is Joe",
-        "whatever"})
+    @ValueSource(strings = {"1. The applicant is Joe","whatever", ""})
+    @NullSource
     void givenCaseData_whenContentContainsNameMatchesApplicantFirstNameAndEmptyLastName(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
             Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
