@@ -48,13 +48,11 @@ public class ChildrenInfoMapper {
         }
 
         String gender = getValueOrEmptyString(index, ocrDataFields, GENDER);
-        Optional<String> optionalGender = (StringUtils.isNotBlank(gender))
-            ? Optional.of(gender) : Optional.empty();
 
         return ChildInfo.builder()
             .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
             .dateOfBirth(dob)
-            .gender(optionalGender.orElse("notGiven"))
+            .gender(StringUtils.isNotBlank(gender) ? gender : "notGiven")
             .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))
             .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_RESPONDENT))
             .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, COUNTRY))

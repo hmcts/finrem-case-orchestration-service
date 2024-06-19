@@ -186,7 +186,6 @@ public class FormAToCaseTransformerTest {
         assertNotGivenChildrenInfo(transformedCaseData);
     }
 
-
     @Test
     public void shouldNotReturnUnexpectedField() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
