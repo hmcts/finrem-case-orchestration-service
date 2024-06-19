@@ -48,8 +48,8 @@ public class ChildrenInfoMapper {
         }
 
         String gender = getValueOrEmptyString(index, ocrDataFields, GENDER);
-        Optional<String > optionalGender = (StringUtils.isNotBlank(gender)) ?
-            Optional.of(gender) : Optional.empty();
+        Optional<String> optionalGender = (StringUtils.isNotBlank(gender))
+            ? Optional.of(gender) : Optional.empty();
 
         return ChildInfo.builder()
             .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
