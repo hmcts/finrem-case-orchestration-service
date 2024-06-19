@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -35,11 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.buildCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.getContestedFinremCaseDetailsBuilder;
 
 @ExtendWith(SpringExtension.class)
 class UploadDocumentContestedAboutToSubmitHandlerTest {
@@ -79,15 +79,17 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         ));
         when(documentCheckerService.getWarnings(any(), any(), any())).thenReturn(expectedWarnings);
 
-        FinremCaseDetails finremCaseDetails = getContestedFinremCaseDetailsBuilder(FinremCaseData.builder()
-            .uploadGeneralDocuments(List.of(
-                createGeneralUploadDocumentItem(
-                    UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-                    createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
-            )))
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder()
+                .uploadGeneralDocuments(List.of(
+                    createGeneralUploadDocumentItem(
+                        UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
+                        createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
+                ))
+            )
             .build();
-
-        FinremCaseDetails finremCaseDetailsBefore = getContestedFinremCaseDetailsBuilder(FinremCaseData.builder()).build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetailsBuilderFactory
+            .from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder())
+            .build();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
             FinremCallbackRequest.builder()
@@ -113,11 +115,11 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
             createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename");
 
-        FinremCaseDetails finremCaseDetails = getContestedFinremCaseDetailsBuilder(FinremCaseData.builder()
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder()
             .uploadGeneralDocuments(List.of(newDoc, oldDoc)))
             .build();
-        FinremCaseDetails finremCaseDetailsBefore =  getContestedFinremCaseDetailsBuilder(FinremCaseData.builder()
-            .uploadGeneralDocuments(List.of(oldDoc)))
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED,
+                FinremCaseData.builder().uploadGeneralDocuments(List.of(oldDoc)))
             .build();
 
         List<UploadGeneralDocumentCollection> expectedDocumentIdList = new ArrayList<>();
@@ -134,7 +136,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     }
 
     private CaseDocument createCaseDocument() {
-        return buildCaseDocument("/fileUrl", "/binaryUrl","document.extension");
+        return caseDocument("/fileUrl", "/binaryUrl","document.extension");
     }
 
     private UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent,

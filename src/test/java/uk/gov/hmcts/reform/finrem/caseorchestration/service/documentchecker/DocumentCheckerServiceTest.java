@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentCheckerServiceTest extends BaseServiceTest {
@@ -48,7 +49,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
     @Test
     void testSingleWarningReturnedByDocxDocumentChecker() throws DocumentContentCheckerException {
-        final CaseDocument caseDocument = buildCaseDocument();
+        final CaseDocument caseDocument = caseDocument();
 
         when(downloadService.download(any(), eq(AUTH_TOKEN))).thenReturn(new byte[]{});
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
@@ -60,7 +61,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
     @Test
     void testMultipleWarningsReturnedCheckers() throws DocumentContentCheckerException {
-        final CaseDocument caseDocument = buildCaseDocument();
+        final CaseDocument caseDocument = caseDocument();
 
         when(downloadService.download(any(), eq(AUTH_TOKEN))).thenReturn(new byte[]{});
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
@@ -74,7 +75,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
     @Test
     void testIfDocxCheckerThrowDocumentContentCheckerException() throws DocumentContentCheckerException {
-        final CaseDocument caseDocument = buildCaseDocument();
+        final CaseDocument caseDocument = caseDocument();
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
         when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any()))
             .thenThrow(new DocumentContentCheckerException(new RuntimeException("test")));
@@ -85,7 +86,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
     @Test
     void testNoDocumentCheckerCanCheck() {
-        final CaseDocument caseDocument = buildCaseDocument();
+        final CaseDocument caseDocument = caseDocument();
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(false);
         when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(false);
 

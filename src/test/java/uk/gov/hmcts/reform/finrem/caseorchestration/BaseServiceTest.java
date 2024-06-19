@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
@@ -409,12 +409,8 @@ public abstract class BaseServiceTest extends BaseTest {
         }
     }
 
-    protected CaseDocument buildCaseDocument() {
-        return TestResource.buildCaseDocument();
-    }
-
     protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        return TestResource.buildCaseDocument(url, binaryUrl, filename);
+        return caseDocument(url, filename, binaryUrl);
     }
 
     protected CallbackRequest buildHearingCallbackRequest(String payloadJson) {
