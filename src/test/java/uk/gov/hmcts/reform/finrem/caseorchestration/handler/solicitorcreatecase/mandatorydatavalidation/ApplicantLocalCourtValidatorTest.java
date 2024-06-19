@@ -80,7 +80,8 @@ class ApplicantLocalCourtValidatorTest {
             Arguments.of(NewportCourt.FR_newportList_3.getId(), true),
             Arguments.of(SwanseaCourt.FR_swanseaList_1.getId(), true),
             Arguments.of(NorthWalesCourt.WELSHPOOL.getId(), true),
-            Arguments.of(HighCourt.HIGHCOURT_COURT.getId(), true)
-        );
+            Arguments.of(HighCourt.HIGHCOURT_COURT.getId(), true),
+            Arguments.of(KentSurreyCourt.FR_kent_surreyList_11.getId(), true)
+            );
     }
 }

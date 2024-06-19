@@ -302,6 +302,26 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("family.dartford.countycourt@justice.gov.uk"));
     }
 
+
+    @Test
+    public void shouldPopulateKentThanetCourtDetailsFinrem() {
+
+        AllocatedRegionWrapper regionWrapper = AllocatedRegionWrapper.builder().regionList(Region.SOUTHEAST)
+            .southEastFrcList(RegionSouthEastFrc.KENT_FRC)
+            .courtListWrapper(
+                DefaultCourtListWrapper.builder().kentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_11)
+                    .build())
+            .build();
+
+        FinremCaseData caseData = getFinremCaseData(regionWrapper);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Thanet Family Court Hearing Centre"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("2nd Floor, The Courthouse, Cecil Square, Margate, Kent CT9 1RL"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01227 819200"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("Family.canterbury.countycourt@justice.gov.uk"));
+    }
+
     @Test
     public void shouldPopulateDurhamCourtDetails() {
         Map<String, Object> caseData = ImmutableMap.of(
