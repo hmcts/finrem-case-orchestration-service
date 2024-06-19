@@ -93,6 +93,8 @@ public enum EventType {
 
     UNHIDE_CASE("FR_unhideCase"),
 
+    APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
+
     @JsonEnumDefaultValue
     NONE("");
 
