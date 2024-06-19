@@ -1,5 +1,8 @@
 {
   "event_id" : "FR_applicationPaymentSubmission",
+  "case_details_before" : {
+    "state" : "applicationIssued"
+  },
   "case_details" : {
     "id" : "1234",
     "jurisdiction" : "DIVORCE",
