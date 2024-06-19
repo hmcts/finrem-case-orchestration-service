@@ -6,8 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-
 @Component
 public class CaseNumberDocumentContentChecker implements DocumentContentChecker {
 
@@ -31,7 +29,7 @@ public class CaseNumberDocumentContentChecker implements DocumentContentChecker 
         if (caseDetails.getId() == null) {
             return false;
         }
-        return caseNumberFromContent != ofNullable(caseDetails.getId()).orElse(0L);
+        return caseNumberFromContent != caseDetails.getId();
     }
 
     private long getCaseNumberFromContent(String text) {
