@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ParentLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 @Slf4j
 public abstract class BaseContestedLetterDetailsGenerator<T> {
@@ -17,12 +18,16 @@ public abstract class BaseContestedLetterDetailsGenerator<T> {
     protected final CaseDataService caseDataService;
     protected final DocumentHelper documentHelper;
     protected final LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
+    protected final InternationalPostalService postalService;
 
-    protected BaseContestedLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper,
-                                                  LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper) {
+    protected BaseContestedLetterDetailsGenerator(CaseDataService caseDataService,
+                                                  DocumentHelper documentHelper,
+                                                  LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper,
+                                                  InternationalPostalService postalService) {
         this.caseDataService = caseDataService;
         this.documentHelper = documentHelper;
         this.letterAddresseeGeneratorMapper = letterAddresseeGeneratorMapper;
+        this.postalService = postalService;
     }
 
     public abstract ParentLetterDetails generate(CaseDetails caseDetails,
@@ -31,8 +36,10 @@ public abstract class BaseContestedLetterDetailsGenerator<T> {
 
     protected Addressee getAddressee(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
         AddresseeDetails addresseeDetails = letterAddresseeGeneratorMapper.generate(caseDetails, recipient);
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString());
         return Addressee.builder().name(addresseeDetails.getAddresseeName())
-            .formattedAddress(documentHelper.formatAddressForLetterPrinting(addresseeDetails.getAddressToSendTo())).build();
+            .formattedAddress(documentHelper.formatAddressForLetterPrinting(addresseeDetails.getAddressToSendTo(),
+                recipientResideOutsideOfUK)).build();
     }
 
 }
