@@ -49,14 +49,13 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         FinremCaseData caseData = caseDetails.getData();
         if (YesOrNo.NO.equals(caseData.getHelpWithFeesQuestion())) {
             String pbaNumber = Objects.toString(caseData.getPbaNumber());
-            log.info("Validating PBA Number: {}", pbaNumber);
+            log.info("Validating PBA Number: {} for Case ID: {}", pbaNumber, caseDetails.getId());
             if (!pbaValidationService.isValidPBA(userAuthorisation, pbaNumber)) {
                 log.info("PBA number is invalid for Case ID: {}", caseDetails.getId());
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                     .errors(List.of("PBA Account Number is not valid, please enter a valid one."))
                     .build();
             }
-            log.info("PBA number is valid.");
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
