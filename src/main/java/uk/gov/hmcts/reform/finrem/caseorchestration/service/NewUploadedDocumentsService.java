@@ -11,13 +11,8 @@ import java.util.function.Function;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
-/**
- * Service class for managing any document uploads in Financial Remedy Service.
- * Unlike the abstract class uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadService
- * which is designed to handle generic uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData.
- */
 @Service
-public class DocumentUploadServiceV2 {
+public class NewUploadedDocumentsService {
 
     public <T extends CaseDocumentCollection<?>> List<T> getNewUploadDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore,
                                                                                Function<FinremCaseData, List<T>> accessor) {

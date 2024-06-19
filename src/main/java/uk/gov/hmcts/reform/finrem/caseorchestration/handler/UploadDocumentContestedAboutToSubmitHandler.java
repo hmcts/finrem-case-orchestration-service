@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
@@ -29,16 +29,16 @@ import static java.util.Optional.ofNullable;
 public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentCheckerService documentCheckerService;
-    private final DocumentUploadServiceV2 documentUploadService;
+    private final NewUploadedDocumentsService newUploadedDocumentsService;
     private final UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser;
 
     public UploadDocumentContestedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                        DocumentCheckerService documentCheckerService,
-                                                       DocumentUploadServiceV2 documentUploadService,
+                                                       NewUploadedDocumentsService newUploadedDocumentsService,
                                                        UploadGeneralDocumentsCategoriser uploadGeneralDocumentsCategoriser) {
         super(mapper);
         this.documentCheckerService = documentCheckerService;
-        this.documentUploadService = documentUploadService;
+        this.newUploadedDocumentsService = newUploadedDocumentsService;
         this.uploadGeneralDocumentsCategoriser = uploadGeneralDocumentsCategoriser;
     }
 
@@ -57,8 +57,8 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        final List<String> warnings = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadGeneralDocuments)
-            .stream()
+        final List<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)

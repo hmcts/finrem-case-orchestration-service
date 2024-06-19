@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -48,14 +48,14 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     private DocumentCheckerService documentCheckerService;
 
     @Mock
-    private DocumentUploadServiceV2 documentUploadService;
+    private NewUploadedDocumentsService newUploadedDocumentsService;
 
     private UploadDocumentConsentedAboutToSubmitHandler underTest;
 
     @BeforeEach
     public void setUpTest() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService, documentUploadService);
+        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService, newUploadedDocumentsService);
     }
 
     @Test
@@ -67,7 +67,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
-        when(documentUploadService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadDocumentCollection.builder()
                 .value(UploadDocument.builder().build())
                 .build()

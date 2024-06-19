@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
 import java.util.List;
@@ -20,14 +20,14 @@ import java.util.List;
 public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentCheckerService documentCheckerService;
-    private final DocumentUploadServiceV2 documentUploadService;
+    private final NewUploadedDocumentsService newUploadedDocumentsService;
 
     public UploadDocumentConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                        DocumentCheckerService documentCheckerService,
-                                                       DocumentUploadServiceV2 documentUploadService) {
+                                                       NewUploadedDocumentsService newUploadedDocumentsService) {
         super(mapper);
         this.documentCheckerService = documentCheckerService;
-        this.documentUploadService = documentUploadService;
+        this.newUploadedDocumentsService = newUploadedDocumentsService;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        final List<String> warnings = documentUploadService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadDocuments)
+        final List<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadDocuments)
             .stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)

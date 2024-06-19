@@ -17,9 +17,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DocumentUploadServiceV2Test {
+class NewUploadedDocumentsServiceTest {
 
-    private DocumentUploadServiceV2 documentUploadService = new DocumentUploadServiceV2();
+    private NewUploadedDocumentsService underTest = new NewUploadedDocumentsService();
 
     private static Stream<Arguments> provideArguments() {
         final List<UploadGeneralDocumentCollection> existingUploadGeneralDocument = List.of(
@@ -174,6 +174,6 @@ class DocumentUploadServiceV2Test {
         List<CaseDocumentCollection<?>> expectedReturn) {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
         FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();
-        assertEquals(expectedReturn, documentUploadService.getNewUploadDocuments(caseData, caseDataBefore, accessor));
+        assertEquals(expectedReturn, underTest.getNewUploadDocuments(caseData, caseDataBefore, accessor));
     }
 }

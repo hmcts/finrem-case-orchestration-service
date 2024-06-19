@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentUploadServiceV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadGeneralDocumentsCategoriser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -48,7 +48,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     private final TestLogger logs = new TestLogger(UploadDocumentContestedAboutToSubmitHandler.class);
 
     @Mock
-    private DocumentUploadServiceV2 documentUploadService;
+    private NewUploadedDocumentsService newUploadedDocumentsService;
     @Mock
     private DocumentCheckerService documentCheckerService;
     @Mock
@@ -60,7 +60,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     public void setUpTest() {
         underTest = new UploadDocumentContestedAboutToSubmitHandler(
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
-            documentCheckerService, documentUploadService, uploadGeneralDocumentsCategoriser);
+            documentCheckerService, newUploadedDocumentsService, uploadGeneralDocumentsCategoriser);
     }
 
     @Test
@@ -72,7 +72,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
-        when(documentUploadService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadGeneralDocumentCollection.builder()
                 .value(UploadGeneralDocument.builder().build())
                 .build()
