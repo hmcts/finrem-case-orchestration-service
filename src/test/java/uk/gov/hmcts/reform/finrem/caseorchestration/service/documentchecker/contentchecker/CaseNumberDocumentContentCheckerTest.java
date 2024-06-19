@@ -22,7 +22,7 @@ class CaseNumberDocumentContentCheckerTest {
     @NullSource
     void givenCaseData_whenContentContainCaseNumber(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
-            assertThat(underTest.getWarning(FinremCaseDetailsBuilderFactory.from().build(),
+            assertThat(underTest.getWarning(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID)).build(),
                 new String[]{validContentDecorator.decorate(validContent)})).isNull());
     }
 
