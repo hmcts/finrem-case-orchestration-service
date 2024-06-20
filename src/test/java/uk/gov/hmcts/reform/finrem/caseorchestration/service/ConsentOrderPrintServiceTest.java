@@ -147,6 +147,11 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     public void when_general_order_and_approved_order_then_send_latest_order_send_approve_order() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument
+            .builder()
+            .binaryFileUrl(BINARY_URL)
+            .fileName("NotApprovedCoverLetter.pdf")
+            .build();
 
         caseDetailsBefore.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
@@ -159,6 +164,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(bulkPrintDocumentList());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(bulkPrintDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
@@ -172,6 +179,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
+            .collect(Collectors.toList()), hasItem("NotApprovedCoverLetter.pdf"));
     }
 
     @Test
