@@ -232,6 +232,11 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     public void when_general_order_and_approved_order_then_send_latest_order_send_general_order() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument
+            .builder()
+            .binaryFileUrl(BINARY_URL)
+            .fileName("NotApprovedCoverLetter.pdf")
+            .build();
 
         CaseDocument generalOrder = caseDocument(DOC_URL, "GeneralOrder.pdf", BINARY_URL);
 
@@ -250,6 +255,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(bulkPrintDocumentList());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(bulkPrintDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
