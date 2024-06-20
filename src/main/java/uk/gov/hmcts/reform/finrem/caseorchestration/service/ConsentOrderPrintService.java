@@ -33,6 +33,7 @@ public class ConsentOrderPrintService {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final InternationalPostalService postalService;
 
     public void sendConsentOrderToBulkPrint(FinremCaseDetails finremCaseDetails,
                                             FinremCaseDetails finremCaseDetailsBefore,
@@ -118,11 +119,13 @@ public class ConsentOrderPrintService {
         DocumentHelper.PaperNotificationRecipient docRespondent;
         docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
         bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
+        FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
             RESPONDENT,
             bulkPrintDocuments,
+            postalService.isRespondentResideOutsideOfUK(caseData),
             authorisationToken);
     }
 

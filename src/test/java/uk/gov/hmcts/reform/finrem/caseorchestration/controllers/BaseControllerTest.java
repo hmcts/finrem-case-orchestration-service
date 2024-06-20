@@ -11,7 +11,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRunner;
 
 import java.io.File;
@@ -20,14 +19,14 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 
 public abstract class BaseControllerTest extends BaseTest {
 
-    @Autowired protected WebApplicationContext applicationContext;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected WebApplicationContext applicationContext;
+    @Autowired
+    protected ObjectMapper objectMapper;
     @MockBean
     protected ScheduledTaskRunner taskRunner;
 
@@ -44,47 +43,31 @@ public abstract class BaseControllerTest extends BaseTest {
     }
 
     protected void doValidCaseDataSetUp() {
-        loadRequestContentWith("/fixtures/pba-validate.json");
+        loadRequestContentWith("/fixtures/submit-general-application.json");
     }
 
     protected void doValidCourtDataSetUp() {
         loadRequestContentWith("/fixtures/validateCourtForSolicitor.json");
     }
 
-    protected void doValidConsentOrderApprovedSetup() {
-        loadRequestContentWith("/fixtures/contested/consent-in-contested-application-approved.json");
-    }
-
     protected void doValidCaseDataSetUpForPaperApplication() {
         loadRequestContentWith("/fixtures/bulkprint/bulk-print-paper-application.json");
-    }
-
-    protected void doValidCaseDataSetUpNoPensionCollection() {
-        loadRequestContentWith("/fixtures/bulkprint/bulk-print-no-pension-collection.json");
-    }
-
-    protected void doMissingLatestConsentOrder() {
-        loadRequestContentWith("/fixtures/hwf.json");
     }
 
     protected void doValidRefusalOrder() {
         loadRequestContentWith("/fixtures/refusal-order-contested.json");
     }
 
-    protected void doValidCaseDataSetUpForAdditionalHearing() {
-        loadRequestContentWith("/fixtures/bulkprint/bulk-print-additional-hearing.json");
-    }
-
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
 
     protected CallbackRequest buildNoCCaseworkerCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -93,25 +76,9 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(Long.valueOf(120)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(120L).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
-    }
-
-    protected CallbackRequest buildCallbackInterimRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_EMAIL, "abc@mailinator.com");
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, "YES");
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
-    }
-
-    protected CaseDocument getCaseDocument() {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl("http://doc1");
-        caseDocument.setDocumentBinaryUrl("http://doc1/binary");
-        caseDocument.setDocumentFilename("doc1");
-        return caseDocument;
     }
 
     protected String resourceContentAsString(String resourcePath) {
