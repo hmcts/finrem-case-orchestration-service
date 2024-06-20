@@ -508,9 +508,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void givenGeneralOrderIssuedAfterNotApprovedConsentOrder_whenSendOrderToBulkPrint_generalOrderIsPrinted() {
-        CaseDetails caseDetails = caseDetailsFromResource(
+        final CaseDetails caseDetails = caseDetailsFromResource(
             "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
-        CaseDetails caseDetailsbefore = caseDetailsFromResource(
+        final CaseDetails caseDetailsbefore = caseDetailsFromResource(
             "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
 
         BulkPrintDocument bulkPrintDocument = BulkPrintDocument
