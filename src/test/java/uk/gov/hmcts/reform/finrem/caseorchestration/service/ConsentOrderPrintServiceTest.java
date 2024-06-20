@@ -392,10 +392,18 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument
+            .builder()
+            .binaryFileUrl(BINARY_URL)
+            .fileName("NotApprovedCoverLetter.pdf")
+            .build();
+
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), anyString()))
             .thenReturn(emptyList());
         when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT))).thenReturn(bulkPrintDocument);
 
         CaseDetails caseDetailsBefore = caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
@@ -404,6 +412,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
+            .collect(Collectors.toList()), hasItem("NotApprovedCoverLetter.pdf"));
     }
 
     @Test
@@ -498,6 +508,17 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void givenGeneralOrderIssuedAfterNotApprovedConsentOrder_whenSendOrderToBulkPrint_generalOrderIsPrinted() {
+        CaseDetails caseDetails = caseDetailsFromResource(
+            "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
+        CaseDetails caseDetailsbefore = caseDetailsFromResource(
+            "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
+
+        BulkPrintDocument bulkPrintDocument = BulkPrintDocument
+            .builder()
+            .binaryFileUrl(BINARY_URL)
+            .fileName("NotApprovedCoverLetter.pdf")
+            .build();
+
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
@@ -507,10 +528,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
             FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build(),
             FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build()));
-        CaseDetails caseDetails = caseDetailsFromResource(
-            "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
-        CaseDetails caseDetailsbefore = caseDetailsFromResource(
-            "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT))).thenReturn(bulkPrintDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsbefore,
             APPROVE_ORDER, AUTH_TOKEN);
