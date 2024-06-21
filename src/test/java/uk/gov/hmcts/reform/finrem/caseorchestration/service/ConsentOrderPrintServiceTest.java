@@ -218,8 +218,11 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(),
-            any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService, times(2)).bulkPrint(
+            bulkPrintRequestArgumentCaptor.capture(),
+            anyString(),
+            eq(AUTH_TOKEN)
+        );
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
