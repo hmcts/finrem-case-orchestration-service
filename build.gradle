@@ -26,7 +26,7 @@ def versions = [
         mockito              : '3.12.4',
         pact                 : '4.6.10',
         pdfbox               : '2.0.31',
-        reformLogging        : '6.1.4',
+        reformLogging        : '6.1.5',
         serenity             : '4.1.20',
         serviceTokenGenerator: '5.1.2',
         springDoc            : '1.8.0',
@@ -445,7 +445,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.2:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.3:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
