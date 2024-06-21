@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,9 @@ class SolicitorCreateConsentedMidHandlerTest {
 
     @Mock
     private ConsentOrderService consentOrderService;
+
+    @Mock
+    private InternationalPostalService postalService;
 
     @Test
     void given_case_whenEvent_type_is_amendApp_thenCanHandle() {
@@ -54,6 +58,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(consentOrderService).performCheck(callbackRequest, AUTH_TOKEN);
+        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
     }
 
     private CallbackRequest buildCallbackRequest() {

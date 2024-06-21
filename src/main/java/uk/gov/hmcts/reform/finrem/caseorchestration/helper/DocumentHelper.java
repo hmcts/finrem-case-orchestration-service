@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.AddresseeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.IOException;
@@ -97,7 +98,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
@@ -135,6 +135,7 @@ public class DocumentHelper {
     private final GenericDocumentService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final LetterAddresseeGeneratorMapper letterAddresseeGenerator;
+    private final InternationalPostalService postalService;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -366,14 +367,6 @@ public class DocumentHelper {
         });
     }
 
-    public CaseDocument getGeneralLetterUploadedDocument(Map<String, Object> caseData) {
-        if (isNull(caseData.get(GENERAL_LETTER_UPLOADED_DOCUMENT))) {
-            log.info("General letter uploaded document is not present for case");
-            return null;
-        }
-
-        return convertToCaseDocument(caseData.get(GENERAL_LETTER_UPLOADED_DOCUMENT));
-    }
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
@@ -459,24 +452,25 @@ public class DocumentHelper {
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetailsCopy, recipient);
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString());
         return prepareLetterTemplateData(caseDetailsCopy, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
-            addresseeDetails.getAddressToSendTo(), isConsentedApplication);
+            addresseeDetails.getAddressToSendTo(), isConsentedApplication, recipientResideOutsideOfUK);
     }
 
     public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
 
         AddresseeDetails addresseeDetails = letterAddresseeGenerator.generate(caseDetails, recipient);
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString());
         return prepareLetterTemplateData(caseDetails, nullToEmpty(addresseeDetails.getReference()), addresseeDetails.getAddresseeName(),
-            addresseeDetails.getFinremAddressToSendTo());
+            addresseeDetails.getFinremAddressToSendTo(), recipientResideOutsideOfUK);
     }
 
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
-     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address)}</p>
+     * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address, boolean)}</p>
      *
      * @param caseDetailsCopy the casedetails
      * @param reference String
@@ -491,7 +485,8 @@ public class DocumentHelper {
     @SuppressWarnings("java:S1133")
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
                                                   Map<String, Object> addressToSendTo,
-                                                  boolean isConsentedApplication) {
+                                                  boolean isConsentedApplication,
+                                                  boolean isInternational) {
 
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
@@ -502,7 +497,7 @@ public class DocumentHelper {
         if (caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
-                .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
+                .formattedAddress(formatAddressForLetterPrinting(addressToSendTo, isInternational))
                 .build();
 
             caseData.put(CASE_NUMBER, ccdNumber);
@@ -524,7 +519,8 @@ public class DocumentHelper {
 
 
     private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
-                                                  Address addressToSendTo) {
+                                                  Address addressToSendTo,
+                                                  boolean recipientResideOutsideOfUK) {
         Long caseId = finremCaseDetails.getId();
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         Map<String, Object> caseData = caseDetails.getData();
@@ -535,7 +531,7 @@ public class DocumentHelper {
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
-                .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo))
+                .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo, recipientResideOutsideOfUK))
                 .build();
 
             caseData.put(CASE_NUMBER, ccdNumber);
@@ -585,7 +581,8 @@ public class DocumentHelper {
             }
         }
 
-        return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
+        return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo,
+            postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient.toString()));
     }
 
     private boolean isIntervenerPresent(PaperNotificationRecipient recipient) {
@@ -615,10 +612,11 @@ public class DocumentHelper {
         }
     }
 
-    public String formatAddressForLetterPrinting(Map<String, Object> address) {
+    public String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
-                .map(address::get)
+            Stream<String> addressLines = Stream.of("AddressLine1", "AddressLine2", "AddressLine3",
+                "County", "PostTown", "PostCode", isInternational ? "Country" : "");
+            return addressLines.map(address::get)
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .filter(StringUtils::isNotEmpty)
