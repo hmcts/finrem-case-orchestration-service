@@ -121,7 +121,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     public void when_general_order_added_it_should_send_general_order_not_approve_order() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
 
-
         caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         CaseDataService caseDataService = mock(CaseDataService.class);
         when(caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData())).thenReturn(true);
@@ -222,11 +221,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(genericDocumentService, times(2)).bulkPrint(
-            bulkPrintRequestArgumentCaptor.capture(),
-            anyString(),
-            eq(AUTH_TOKEN)
-        );
+        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(),
+            any(), anyBoolean(), eq(AUTH_TOKEN));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
             .collect(Collectors.toList()), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
@@ -280,28 +276,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             .collect(Collectors.toList()), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
             .collect(Collectors.toList()), hasItem("GeneralOrder.pdf"));
-    }
-
-
-    public static FinremCaseDetails defaultContestedFinremCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        caseData.setCcdCaseType(CaseType.CONSENTED);
-
-        List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
-        ApprovedOrder approvedOrder = ApprovedOrder.builder()
-            .consentOrder(caseDocument())
-            .orderLetter(caseDocument())
-            .build();
-        approvedOrderCollection.add(ConsentOrderCollection.builder()
-            .approvedOrder(approvedOrder)
-            .build());
-        caseData.setApprovedOrderCollection(approvedOrderCollection);
-        return FinremCaseDetails.builder()
-            .caseType(CaseType.CONTESTED)
-            .id(987654321L)
-            .state(State.APPLICATION_SUBMITTED)
-            .data(caseData)
-            .build();
     }
 
     @Test
@@ -559,7 +533,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         caseDetails.getData().put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
         caseDetails.getData().put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
 
-
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
         when(coverSheetService.generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN))).thenReturn(caseDocument);
@@ -593,5 +566,103 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService, never()).generateApplicantCoverSheet(any(FinremCaseDetails.class), any());
         verify(coverSheetService, never()).generateRespondentCoverSheet(any(FinremCaseDetails.class), any());
+    }
+
+    @Test
+    public void givenConsentedCaseWithGeneralOrderAndNoApprovedOrder_whenSendConsentOrderToBulkPrint_thenPrintsThreeDocs() {
+        // Arrange
+        FinremCaseDetails caseDetails = consentedCaseDetailsWithGeneralOrder();
+
+        BulkPrintDocument generalOrder = BulkPrintDocument.builder()
+            .fileName("generalOrder.pdf")
+            .binaryFileUrl(BINARY_URL)
+            .build();
+        BulkPrintDocument consentOrderNotApprovedCoverLetter = BulkPrintDocument.builder()
+            .fileName("consentOrderNotApprovedCoverLetter.pdf")
+            .build();
+
+        // Applicant documents for bulk print
+        CaseDocument applicantCoverSheet = caseDocument(DOC_URL, "applicantCoverSheet.pdf", BINARY_URL);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(applicantCoverSheet);
+        List<BulkPrintDocument> applicantLetterPackDocs = List.of(
+            generalOrder, consentOrderNotApprovedCoverLetter
+        );
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
+            .thenReturn(applicantLetterPackDocs);
+
+        // Respondent documents for bulk print
+        CaseDocument respondentCoverSheet = caseDocument(DOC_URL, "respondentCoverSheet.pdf", BINARY_URL);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(respondentCoverSheet);
+        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, AUTH_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(consentOrderNotApprovedCoverLetter);
+
+        FinremCaseDetails caseDetailsBefore = consentedCaseDetailsWithGeneralOrder();
+
+        // Act
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, SEND_ORDER, AUTH_TOKEN);
+
+        // Assert
+        verify(genericDocumentService, times(1)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), eq(APPLICANT),
+            eq(false), eq(AUTH_TOKEN));
+        verify(genericDocumentService, times(1)).bulkPrint(bulkPrintRequestArgumentCaptor.capture(), eq(RESPONDENT),
+            eq(false), eq(AUTH_TOKEN));
+
+        List<BulkPrintRequest> bulkPrintRequests = bulkPrintRequestArgumentCaptor.getAllValues();
+        assertThat(bulkPrintRequests, hasSize(2));
+
+        // Applicant documents
+        BulkPrintRequest applicantBulkPrintRequest = bulkPrintRequests.get(0);
+        List<String> applicantBulkPrintDocumentFilenames = applicantBulkPrintRequest.getBulkPrintDocuments().stream()
+            .map(BulkPrintDocument::getFileName)
+            .toList();
+        assertThat(applicantBulkPrintDocumentFilenames, containsInAnyOrder("generalOrder.pdf",
+            "consentOrderNotApprovedCoverLetter.pdf", "applicantCoverSheet.pdf"));
+
+        // Respondent documents
+        BulkPrintRequest respondentBulkPrintRequest = bulkPrintRequests.get(1);
+        List<String> respondentBulkPrintDocumentFilenames = respondentBulkPrintRequest.getBulkPrintDocuments().stream()
+            .map(BulkPrintDocument::getFileName)
+            .toList();
+        assertThat(respondentBulkPrintDocumentFilenames, containsInAnyOrder("generalOrder.pdf",
+            "consentOrderNotApprovedCoverLetter.pdf", "respondentCoverSheet.pdf"));
+    }
+
+    private FinremCaseDetails defaultContestedFinremCaseDetails() {
+        List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
+        ApprovedOrder approvedOrder = ApprovedOrder.builder()
+            .consentOrder(caseDocument())
+            .orderLetter(caseDocument())
+            .build();
+        approvedOrderCollection.add(ConsentOrderCollection.builder()
+            .approvedOrder(approvedOrder)
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .approvedOrderCollection(approvedOrderCollection)
+            .build();
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(987654321L)
+            .state(State.APPLICATION_SUBMITTED)
+            .data(caseData)
+            .build();
+    }
+
+    private FinremCaseDetails consentedCaseDetailsWithGeneralOrder() {
+        GeneralOrderWrapper generalOrderWrapper = GeneralOrderWrapper.builder()
+            .generalOrderLatestDocument(caseDocument(DOC_URL, "generalOrder.pdf", BINARY_URL))
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .generalOrderWrapper(generalOrderWrapper)
+            .build();
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .id(987654321L)
+            .state(State.APPLICATION_SUBMITTED)
+            .data(caseData)
+            .build();
     }
 }
