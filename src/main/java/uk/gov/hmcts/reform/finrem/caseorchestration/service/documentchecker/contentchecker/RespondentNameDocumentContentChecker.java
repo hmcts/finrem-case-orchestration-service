@@ -1,18 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 public class RespondentNameDocumentContentChecker implements DocumentContentChecker {
@@ -45,8 +40,7 @@ public class RespondentNameDocumentContentChecker implements DocumentContentChec
     }
 
     private String getRespondentNameFromCase(FinremCaseData caseData) {
-        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
-        return trim(trim(ofNullable(contactDetails.getRespondentFmName()).orElse(StringUtils.EMPTY)) + SPACE
-            + trim(ofNullable(contactDetails.getRespondentLname()).orElse(StringUtils.EMPTY)));
+        return caseData.getRespondentFullName();
+
     }
 }
