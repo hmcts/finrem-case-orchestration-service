@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocuments
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,19 +47,19 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        final List<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadDocuments)
+        final Set<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, FinremCaseData::getUploadDocuments)
             .stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)
-                .toList();
+                .collect(Collectors.toSet());
         if (!warnings.isEmpty()) {
             log.info("Number of warnings encountered when uploading document for a case {}: {}",
                     finremCaseDetails.getId(), warnings.size());
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(warnings)
+            .warnings((warnings.stream().sorted().toList()))
             .data(caseData).build();
     }
 

@@ -70,7 +70,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
+    void givenValidCaseData_whenWarningIsDetected_thenPopulateWarning(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
         when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadGeneralDocumentCollection.builder()
@@ -100,6 +100,43 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
                 "Number of warnings encountered when uploading general document for a case %s: %s", CASE_ID, 1));
+        } else {
+            assertThat(logs.getInfos()).isEmpty();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder().build())
+                .build()
+        ));
+        when(documentCheckerService.getWarnings(any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "2warnings", "1warnings")
+            : List.of());
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder()
+                .uploadGeneralDocuments(List.of(
+                    createGeneralUploadDocumentItem(
+                        UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
+                        createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
+                ))
+            )
+            .build();
+        FinremCaseDetails finremCaseDetailsBefore = FinremCaseDetailsBuilderFactory
+            .from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder())
+            .build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
+            FinremCallbackRequest.builder()
+                .caseDetails(finremCaseDetails)
+                .caseDetailsBefore(finremCaseDetailsBefore).build(),
+            AUTH_TOKEN);
+        assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings") : List.of());
+        if (hasWarnings) {
+            assertThat(logs.getInfos()).containsExactly(format(
+                "Number of warnings encountered when uploading general document for a case %s: %s", CASE_ID, 2));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }

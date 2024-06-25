@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.Docu
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
@@ -57,12 +59,12 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        final List<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
+        final Set<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
             FinremCaseData::getUploadGeneralDocuments).stream()
                 .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)
-                .toList();
+                .collect(Collectors.toSet());
         if (!warnings.isEmpty()) {
             log.info("Number of warnings encountered when uploading general document for a case {}: {}",
                     finremCaseDetails.getId(), warnings.size());
@@ -79,7 +81,7 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(warnings)
+            .warnings(warnings.stream().sorted().toList())
             .data(caseData).build();
     }
 
