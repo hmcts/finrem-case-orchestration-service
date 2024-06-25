@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,7 @@ class BulkPrintDocumentServiceTest {
     private static final String DOC_FILE_NAME = "abc.docx";
     public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
+    private final byte[] someFlattenedBytes = "ainhsdcnoih_flattened".getBytes();
     @InjectMocks
     private BulkPrintDocumentService service;
 
@@ -48,6 +50,7 @@ class BulkPrintDocumentServiceTest {
     @Test
     void downloadDocuments() {
         when(evidenceManagementService.download(FILE_URL, AUTH)).thenReturn(someBytes);
+        when(documentConversionService.flattenPdfDocument(someBytes)).thenReturn(someFlattenedBytes);
 
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
             .bulkPrintDocuments(singletonList(BulkPrintDocument.builder()
@@ -57,7 +60,7 @@ class BulkPrintDocumentServiceTest {
             .build();
 
         List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH);
-        assertThat(result.get(0), is(equalTo(someBytes)));
+        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
     }
 
     @Test
@@ -77,6 +80,7 @@ class BulkPrintDocumentServiceTest {
     @Test
     void validateEncryptionOnUploadedDocumentWhenInvalidByteSupplied() {
         when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(someBytes);
+        when(documentConversionService.flattenPdfDocument(someBytes)).thenReturn(someFlattenedBytes);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
             .bulkPrintDocuments(singletonList(BulkPrintDocument.builder()
@@ -86,7 +90,7 @@ class BulkPrintDocumentServiceTest {
             .build();
 
         List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH);
-        assertThat(result.get(0), is(equalTo(someBytes)));
+        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
 
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);

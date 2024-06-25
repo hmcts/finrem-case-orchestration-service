@@ -30,7 +30,8 @@ public class BulkPrintDocumentService {
             .toList();
         log.info("Download document count for bulk print {} for Case ID: {} ", documents.size(),
             caseId);
-        return documents;
+
+        return documents.stream().map(documentConversionService::flattenPdfDocument).toList();
     }
 
     @SuppressWarnings("java:S3776")
