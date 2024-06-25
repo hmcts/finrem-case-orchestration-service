@@ -53,9 +53,10 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
         when(downloadService.download(any(), eq(AUTH_TOKEN))).thenReturn(new byte[]{});
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
-        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any())).thenReturn(List.of("docx warning"));
+        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any(), any())).thenReturn(List.of("docx warning"));
 
-        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().build(),
+            AUTH_TOKEN);
         assertThat(actual).containsExactly("docx warning");
     }
 
@@ -65,11 +66,12 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
 
         when(downloadService.download(any(), eq(AUTH_TOKEN))).thenReturn(new byte[]{});
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
-        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any())).thenReturn(List.of("docx warning"));
+        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any(), any())).thenReturn(List.of("docx warning"));
         when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(true);
-        when(duplicateFilenameDocumentChecker.getWarnings(eq(caseDocument), any(), any())).thenReturn(List.of("duplicate warning"));
+        when(duplicateFilenameDocumentChecker.getWarnings(eq(caseDocument), any(), any(), any())).thenReturn(List.of("duplicate warning"));
 
-        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        List<String> actual = underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().build(),
+            AUTH_TOKEN);
         assertThat(actual).contains("docx warning", "duplicate warning");
     }
 
@@ -77,10 +79,10 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
     void testIfDocxCheckerThrowDocumentContentCheckerException() throws DocumentContentCheckerException {
         final CaseDocument caseDocument = caseDocument();
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(true);
-        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any()))
+        when(docxDocumentChecker.getWarnings(eq(caseDocument), any(), any(), any()))
             .thenThrow(new DocumentContentCheckerException(new RuntimeException("test")));
 
-        underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN);
+        underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().build(), AUTH_TOKEN);
         assertThat(logs.getErrors()).isNotEmpty().contains("Unexpected error when getting warnings from " + DocxDocumentChecker.class.getName());
     }
 
@@ -90,6 +92,7 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
         when(docxDocumentChecker.canCheck(caseDocument)).thenReturn(false);
         when(duplicateFilenameDocumentChecker.canCheck(caseDocument)).thenReturn(false);
 
-        assertThat(underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), AUTH_TOKEN)).isEmpty();
+        assertThat(underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().build(), AUTH_TOKEN))
+            .isEmpty();
     }
 }

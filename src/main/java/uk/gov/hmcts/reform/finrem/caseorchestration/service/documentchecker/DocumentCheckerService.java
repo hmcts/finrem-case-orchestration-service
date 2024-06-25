@@ -26,7 +26,7 @@ public class DocumentCheckerService {
         this.documentCheckers = documentCheckers;
     }
 
-    public List<String> getWarnings(CaseDocument caseDocument, FinremCaseDetails caseDetails, String authToken) {
+    public List<String> getWarnings(CaseDocument caseDocument, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails, String authToken) {
         List<DocumentChecker> documentCheckersForDocument = documentCheckers.stream()
             .filter(dc -> dc.canCheck(caseDocument))
             .toList();
@@ -40,7 +40,7 @@ public class DocumentCheckerService {
         List<String> warnings = new ArrayList<>();
         documentCheckersForDocument.forEach(dc -> {
             try {
-                warnings.addAll(dc.getWarnings(caseDocument, bytes, caseDetails));
+                warnings.addAll(dc.getWarnings(caseDocument, bytes, beforeCaseDetails, caseDetails));
             } catch (DocumentContentCheckerException e) {
                 log.error(format("Unexpected error when getting warnings from %s", dc.getClass().getName()), e);
             }

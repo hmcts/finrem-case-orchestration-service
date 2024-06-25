@@ -55,13 +55,15 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        FinremCaseDetails beforeFinremCaseDetails = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
         final Set<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
             FinremCaseData::getUploadGeneralDocuments).stream()
-                .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), finremCaseDetails, userAuthorisation))
+                .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), beforeFinremCaseDetails, finremCaseDetails,
+                    userAuthorisation))
                 .flatMap(List::stream)
                 .filter(ObjectUtils::isNotEmpty)
                 .collect(Collectors.toSet());

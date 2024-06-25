@@ -82,7 +82,7 @@ class PdfDocumentCheckerTest {
         when(caseNumberDocumentContentChecker.getWarning(eq(caseDetails), any(String[].class)))
             .thenReturn(testCase == 1 ? null : "Warning2");
 
-        List<String> warnings = underTest.getWarnings(caseDocument, documentBytes, caseDetails);
+        List<String> warnings = underTest.getWarnings(caseDocument, documentBytes, caseDetails, caseDetails);
 
         assertThat(warnings).hasSize(testCase == 1 ? 1 : 2).contains("Warning1");
 
@@ -103,7 +103,7 @@ class PdfDocumentCheckerTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         byte[] documentBytes = "Invalid content".getBytes();
 
-        assertThatThrownBy(() -> underTest.getWarnings(caseDocument, documentBytes, caseDetails))
+        assertThatThrownBy(() -> underTest.getWarnings(caseDocument, documentBytes, caseDetails, caseDetails))
             .isInstanceOf(DocumentContentCheckerException.class);
     }
 }

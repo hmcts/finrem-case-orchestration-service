@@ -28,7 +28,7 @@ public class DocxDocumentChecker implements DocumentChecker {
     }
 
     @Override
-    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails caseDetails)
+    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
         throws DocumentContentCheckerException {
         String[] content = getContent(bytes);
 

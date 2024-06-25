@@ -9,6 +9,6 @@ public interface DocumentChecker {
 
     boolean canCheck(CaseDocument caseDocument);
 
-    List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails caseDetails)
+    List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
         throws DocumentContentCheckerException;
 }

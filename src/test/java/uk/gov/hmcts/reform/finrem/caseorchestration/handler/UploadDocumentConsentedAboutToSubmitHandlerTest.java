@@ -72,7 +72,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
                 .value(UploadDocument.builder().build())
                 .build()
         ));
-        when(documentCheckerService.getWarnings(any(), any(), any())).thenReturn(expectedWarnings);
+        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(expectedWarnings);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, FinremCaseData.builder()
             .uploadDocuments(List.of(
@@ -108,7 +108,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
                 .value(UploadDocument.builder().build())
                 .build()
         ));
-        when(documentCheckerService.getWarnings(any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "1warnings","1warnings")
+        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "1warnings","1warnings")
             : List.of());
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, FinremCaseData.builder()

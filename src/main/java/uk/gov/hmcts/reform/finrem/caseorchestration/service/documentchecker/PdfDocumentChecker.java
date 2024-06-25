@@ -30,7 +30,7 @@ public class PdfDocumentChecker implements DocumentChecker {
     }
 
     @Override
-    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails caseDetails)
+    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
         throws DocumentContentCheckerException {
         try {
             String[] content = getContent(bytes);
