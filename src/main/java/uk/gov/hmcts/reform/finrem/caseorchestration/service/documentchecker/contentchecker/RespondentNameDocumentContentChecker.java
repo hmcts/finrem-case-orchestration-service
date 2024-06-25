@@ -41,6 +41,5 @@ public class RespondentNameDocumentContentChecker implements DocumentContentChec
 
     private String getRespondentNameFromCase(FinremCaseData caseData) {
         return caseData.getRespondentFullName();
-
     }
 }
