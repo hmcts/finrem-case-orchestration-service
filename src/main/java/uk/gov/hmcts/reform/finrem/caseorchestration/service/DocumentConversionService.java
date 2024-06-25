@@ -61,13 +61,13 @@ public class DocumentConversionService {
     }
 
     public byte[] flattenPdfDocument(byte[] document) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
         try {
             PDDocument doc = PDDocument.load(document);
             PDAcroForm pDAcroForm = doc.getDocumentCatalog().getAcroForm();
 
             pDAcroForm.flatten();
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             doc.save(bos);
             doc.close();
             return bos.toByteArray();
