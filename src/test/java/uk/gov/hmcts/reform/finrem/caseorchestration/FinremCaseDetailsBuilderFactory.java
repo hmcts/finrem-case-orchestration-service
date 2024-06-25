@@ -29,7 +29,8 @@ public class FinremCaseDetailsBuilderFactory {
     }
 
     public static FinremCaseDetailsBuilder from(Long id, CaseType caseType, FinremCaseDataBuilder caseDataBuilder) {
-        return from(id, caseType, caseDataBuilder == null ? FinremCaseData.builder().build() : caseDataBuilder.build());
+        return from(id, caseType, caseDataBuilder == null ? FinremCaseData.builder().ccdCaseType(caseType).build()
+            : caseDataBuilder.ccdCaseType(caseType).build());
     }
 
     public static FinremCaseDetailsBuilder from(Long id, FinremCaseDataBuilder caseDataBuilder) {
@@ -37,7 +38,8 @@ public class FinremCaseDetailsBuilderFactory {
     }
 
     public static FinremCaseDetailsBuilder from(CaseType caseType, FinremCaseDataBuilder caseDataBuilder) {
-        return from(null, caseType, caseDataBuilder.build());
+        return from(null, caseType, (caseDataBuilder == null ? FinremCaseData.builder() : caseDataBuilder)
+            .ccdCaseType(caseType).build());
     }
 
     public static FinremCaseDetailsBuilder from(FinremCaseDataBuilder caseDataBuilder) {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -12,84 +13,167 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.StringDecorator;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 class RespondentNameDocumentContentCheckerTest {
 
     private final RespondentNameDocumentContentChecker underTest = new RespondentNameDocumentContentChecker();
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "The respondent is Joe Bloggs",
-        "whatever", ""})
-    @NullSource
-    void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndLastName(String validContent) {
-        Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
-            Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
-                Arrays.stream(StringDecorator.values()).forEach(lnameDecorator ->
+    @Nested
+    class Contested {
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "The respondent is Joe Bloggs",
+            "whatever", ""})
+        @NullSource
+        void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndLastName(String validContent) {
+            Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+                Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
+                    Arrays.stream(StringDecorator.values()).forEach(lnameDecorator ->
+                        assertThat(underTest.getWarning(
+                            FinremCaseDetailsBuilderFactory.from(CONTESTED, FinremCaseData.builder()
+                                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                                    .respondentFmName(fmNameDecorator.decorate("Joe"))
+                                    .respondentLname(lnameDecorator.decorate("Bloggs"))
+                                    .build())).build(),
+                            new String[]{validContentDecorator.decorate(validContent)}))
+                            .isNull()
+                    )
+                )
+            );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"The respondent is Joe", "whatever", ""})
+        @NullSource
+        void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndEmptyLastName(String validContent) {
+            Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+                Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
                     assertThat(underTest.getWarning(
-                        FinremCaseDetailsBuilderFactory.from(FinremCaseData.builder()
+                        FinremCaseDetailsBuilderFactory.from(CONTESTED, FinremCaseData.builder()
                             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                                 .respondentFmName(fmNameDecorator.decorate("Joe"))
-                                .respondentLname(lnameDecorator.decorate("Bloggs"))
                                 .build())).build(),
                         new String[]{validContentDecorator.decorate(validContent)}))
                         .isNull()
                 )
-            )
-        );
+            );
+        }
+
+        @Test
+        void givenCaseData_whenContentContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONTESTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .respondentFmName("Joe")
+                        .respondentLname("Bloggs")
+                        .build())).build(),
+                new String[]{"The respondent is Amy Clarks"}))
+                .isEqualTo("Respondent name may not match");
+        }
+
+        @Test
+        void givenCaseData_whenOneOfTheContentsContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONTESTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .respondentFmName("Joey")
+                        .respondentLname("Bloggs")
+                        .build())).build(),
+                new String[]{"The respondent is Joe Bloggs", "Whatever", "Whenever"}))
+                .isEqualTo("Respondent name may not match");
+        }
+
+        @Test
+        void givenCaseData_whenEmptyContentProvided() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONTESTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .respondentFmName("Joey")
+                        .respondentLname("Bloggs")
+                        .build())).build(),
+                new String[]{}))
+                .isNull();
+        }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"The respondent is Joe", "whatever", ""})
-    @NullSource
-    void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndEmptyLastName(String validContent) {
-        Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
-            Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
-                assertThat(underTest.getWarning(
-                    FinremCaseDetailsBuilderFactory.from(FinremCaseData.builder()
-                        .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                            .respondentFmName(fmNameDecorator.decorate("Joe"))
-                            .build())).build(),
-                    new String[]{validContentDecorator.decorate(validContent)}))
-                    .isNull()
-            )
-        );
-    }
+    @Nested
+    class Consented {
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "The respondent is Joe Bloggs",
+            "whatever", ""})
+        @NullSource
+        void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndLastName(String validContent) {
+            Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+                Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
+                    Arrays.stream(StringDecorator.values()).forEach(lnameDecorator ->
+                        assertThat(underTest.getWarning(
+                            FinremCaseDetailsBuilderFactory.from(CONSENTED, FinremCaseData.builder()
+                                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                                    .appRespondentFmName(fmNameDecorator.decorate("Joe"))
+                                    .appRespondentLName(lnameDecorator.decorate("Bloggs"))
+                                    .build())).build(),
+                            new String[]{validContentDecorator.decorate(validContent)}))
+                            .isNull()
+                    )
+                )
+            );
+        }
 
-    @Test
-    void givenCaseData_whenContentContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
-        assertThat(underTest.getWarning(
-                FinremCaseDetailsBuilderFactory.from(FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .respondentFmName("Joe")
-                    .respondentLname("Bloggs")
-                    .build())).build(),
-            new String[] {"The respondent is Amy Clarks"}))
-            .isEqualTo("Respondent name may not match");
-    }
+        @ParameterizedTest
+        @ValueSource(strings = {"The respondent is Joe", "whatever", ""})
+        @NullSource
+        void givenCaseData_whenContentContainsNameMatchesRespondentFirstNameAndEmptyLastName(String validContent) {
+            Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
+                Arrays.stream(StringDecorator.values()).forEach(fmNameDecorator ->
+                    assertThat(underTest.getWarning(
+                        FinremCaseDetailsBuilderFactory.from(CONSENTED, FinremCaseData.builder()
+                            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                                .appRespondentFmName(fmNameDecorator.decorate("Joe"))
+                                .build())).build(),
+                        new String[]{validContentDecorator.decorate(validContent)}))
+                        .isNull()
+                )
+            );
+        }
 
-    @Test
-    void givenCaseData_whenOneOfTheContentsContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
-        assertThat(underTest.getWarning(
-            FinremCaseDetailsBuilderFactory.from(FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .respondentFmName("Joey")
-                    .respondentLname("Bloggs")
-                    .build())).build(),
-            new String[] {"The respondent is Joe Bloggs", "Whatever", "Whenever"}))
-            .isEqualTo("Respondent name may not match");
-    }
+        @Test
+        void givenCaseData_whenContentContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONSENTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .appRespondentFmName("Joe")
+                        .appRespondentLName("Bloggs")
+                        .build())).build(),
+                new String[]{"The respondent is Amy Clarks"}))
+                .isEqualTo("Respondent name may not match");
+        }
 
-    @Test
-    void givenCaseData_whenEmptyContentProvided() {
-        assertThat(underTest.getWarning(
-            FinremCaseDetailsBuilderFactory.from(FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .respondentFmName("Joey")
-                    .respondentLname("Bloggs")
-                    .build())).build(),
-            new String[] {}))
-            .isNull();
+        @Test
+        void givenCaseData_whenOneOfTheContentsContainsNameDoesNotMatchRespondentFirstNameAndLastName() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONSENTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .appRespondentFmName("Joey")
+                        .appRespondentLName("Bloggs")
+                        .build())).build(),
+                new String[]{"The respondent is Joe Bloggs", "Whatever", "Whenever"}))
+                .isEqualTo("Respondent name may not match");
+        }
+
+        @Test
+        void givenCaseData_whenEmptyContentProvided() {
+            assertThat(underTest.getWarning(
+                FinremCaseDetailsBuilderFactory.from(CONSENTED, FinremCaseData.builder()
+                    .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                        .appRespondentFmName("Joey")
+                        .appRespondentLName("Bloggs")
+                        .build())).build(),
+                new String[]{}))
+                .isNull();
+        }
     }
 
     @Test
