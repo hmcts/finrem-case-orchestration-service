@@ -50,7 +50,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
         FinremCaseData caseData = caseDetails.getData();
 
-        if (checkPostCodeDetails(caseData)) {
+        if (checkApplicantPostCodeDetails(caseData)) {
             errors.add("Postcode field is required for applicant address.");
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
         }
@@ -66,9 +66,9 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
-    private boolean checkPostCodeDetails(FinremCaseData caseData) {
+    private boolean checkApplicantPostCodeDetails(FinremCaseData caseData) {
         String postCode = caseData.isApplicantRepresentedByASolicitor()
-            ? caseData.getAppPostcode()
+            ? caseData.getApplicantPostcode()
             : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
 
         return StringUtils.isEmpty(postCode);

@@ -725,7 +725,7 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public String getAppPostcode() {
+    public String getApplicantPostcode() {
         return isConsentedApplication()
             ? getContactDetailsWrapper().getSolicitorAddress().getPostCode()
             : getContactDetailsWrapper().getApplicantSolicitorAddress().getPostCode();
