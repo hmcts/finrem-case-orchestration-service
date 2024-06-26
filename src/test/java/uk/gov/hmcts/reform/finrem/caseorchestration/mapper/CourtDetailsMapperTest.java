@@ -41,8 +41,8 @@ public class CourtDetailsMapperTest {
 
         assertThat(courtDetails.getCourtName(), is("Bromley County Court And Family Court"));
         assertThat(courtDetails.getCourtAddress(), is("Bromley County Court, College Road, Bromley, BR1 3PX"));
-        assertThat(courtDetails.getEmail(), is("family.bromley.countycourt@justice.gov.uk"));
-        assertThat(courtDetails.getPhoneNumber(), is("0208 290 9620"));
+        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
+        assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class CourtDetailsMapperTest {
 
         assertThat(courtDetails.getCourtName(), is("Croydon County Court And Family Court"));
         assertThat(courtDetails.getCourtAddress(), is("Croydon County Court, Altyre Road, Croydon, CR9 5AB"));
-        assertThat(courtDetails.getEmail(), is("family.croydon.countycourt@justice.gov.uk"));
+        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
         assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
     }
 
@@ -68,8 +68,8 @@ public class CourtDetailsMapperTest {
         assertThat(courtDetails.getCourtName(), is("Barnet Civil And Family Courts Centre"));
         assertThat(courtDetails.getCourtAddress(), is("Barnet County Court, St Marys Court, "
             + "Regents Park Road, Finchley Central, London, N3 1BQ"));
-        assertThat(courtDetails.getEmail(), is("family.barnet.countycourt@justice.gov.uk"));
-        assertThat(courtDetails.getPhoneNumber(), is("0208 371 7111"));
+        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
+        assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
     }
 
     @Test

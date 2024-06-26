@@ -3,12 +3,12 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '5.0.0.4638'
-    id 'org.springframework.boot' version '3.3.0'
+    id 'org.springframework.boot' version '3.3.1'
     id 'com.github.ben-manes.versions' version '0.51.0'
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.10'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1277'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1281'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -33,8 +33,8 @@ def versions = [
         wiremock             : '3.0.1',
         apacheLogging        : '2.23.1',
         idamClient           : '3.0.3',
-        jjwt                 : '0.12.5',
-        skyscreamer          : '1.5.1',
+        jjwt                 : '0.12.6',
+        skyscreamer          : '1.5.2',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '2.9.2',
