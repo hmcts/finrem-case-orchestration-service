@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.FinremGeneralOrderRaisedConsentedCorresponder;
 
 import java.util.stream.Stream;
 
@@ -41,7 +41,7 @@ class CreateGeneralOrderConsentedSubmittedTest {
     private FinremCaseDetailsMapper mapper;
 
     @Mock
-    private FinremGeneralOrderRaisedCorresponder corresponder;
+    private FinremGeneralOrderRaisedConsentedCorresponder corresponder;
 
     @ParameterizedTest
     @MethodSource

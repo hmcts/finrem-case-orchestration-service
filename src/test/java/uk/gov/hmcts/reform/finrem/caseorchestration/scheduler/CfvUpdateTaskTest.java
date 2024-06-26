@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantFdrDocumentCategoriser;
@@ -84,7 +85,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Docume
 @ContextConfiguration(classes = {
     ObjectMapper.class, FinremCaseDetailsMapper.class,
     CfvUpdateTask.class,
-    CfvUpdateTaskDocumentCategoriser.class, DocumentHelper.class, CaseDataService.class,
+    CfvUpdateTaskDocumentCategoriser.class, DocumentHelper.class,
+    CaseDataService.class, InternationalPostalService.class,
     UploadedDraftOrderCategoriser.class, GeneralApplicationsCategoriser.class, SendOrdersCategoriser.class,
     ApplicantOtherDocumentsHandler.class, RespondentOtherDocumentsHandler.class,
     IntervenerOneOtherDocumentsHandler.class, IntervenerTwoOtherDocumentsHandler.class,
@@ -149,7 +151,7 @@ class CfvUpdateTaskTest {
 
         cfvUpdateTask.executeTask(caseDetails);
 
-        assertThat(caseDetails.getData().getCfvMigrationWrapper().getCfvMigrationVersion()).isEqualTo("1");
+        assertThat(caseDetails.getData().getCfvMigrationWrapper().getCfvSearchableMigrationVersion()).isEqualTo("1");
         verifyDraftDirectionWrapper(caseData.getDraftDirectionWrapper());
         verifyGeneralApplicationsWrapper(caseData.getGeneralApplicationWrapper());
         verifyOrdersSentToParties(caseData.getOrdersSentToPartiesCollection());

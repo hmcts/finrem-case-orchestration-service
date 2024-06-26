@@ -84,12 +84,15 @@ public enum EventType {
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
 
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
+    UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
 
     CONSENT_SEND_ORDER_FOR_APPROVED_ORDER("FR_sendOrderForApproved"),
 
     HIDE_CASE("FR_hideCase"),
 
     UNHIDE_CASE("FR_unhideCase"),
+
+    APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
 
     @JsonEnumDefaultValue
     NONE("");

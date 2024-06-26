@@ -111,6 +111,11 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
 
     @Test
     public void givenNoHandler_WhenDispatch_ThenNoErrors() {
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getId()).thenReturn(1L);
+        when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
+        when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
+
 
         CallbackDispatchService callbackDispatchService =
             new CallbackDispatchService(Collections.emptyList());

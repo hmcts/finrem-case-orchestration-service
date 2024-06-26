@@ -109,7 +109,7 @@ public class CfvUpdateTask extends BaseTask {
 
     private String buildSearchString(final String state, int pageSize) {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .mustNot(QueryBuilders.existsQuery("data.cfvMigrationVersion"))
+            .mustNot(QueryBuilders.existsQuery("data.cfvSearchableMigrationVersion"))
             .filter(new TermQueryBuilder("state.keyword", state));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
@@ -151,7 +151,7 @@ public class CfvUpdateTask extends BaseTask {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         log.info("Executing {} for case id {}", TASK_NAME, finremCaseDetails.getId());
         documentCategoriser.categoriseDocuments(finremCaseData);
-        finremCaseData.getCfvMigrationWrapper().setCfvMigrationVersion("1");
+        finremCaseData.getCfvMigrationWrapper().setCfvSearchableMigrationVersion("1");
         log.info("Executed {} for case id {}", TASK_NAME, finremCaseDetails.getId());
     }
 }

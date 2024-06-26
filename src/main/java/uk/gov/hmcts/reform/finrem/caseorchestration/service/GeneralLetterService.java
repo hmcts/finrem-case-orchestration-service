@@ -72,6 +72,7 @@ public class GeneralLetterService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CaseDataService caseDataService;
     private final CreateGeneralLetterDocumentCategoriser createGeneralLetterDocumentCategoriser;
+    private final InternationalPostalService postalService;
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -186,8 +187,10 @@ public class GeneralLetterService {
     private void populateNameAddressAndReference(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        String addressee = finremCaseDetails.getData().getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(finremCaseDetails.getData(), addressee);
         Addressee generalLetterAddressee = Addressee.builder().name(getRecipientName(finremCaseDetails))
-                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(finremCaseDetails))).build();
+                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(finremCaseDetails), recipientResideOutsideOfUK)).build();
         String reference = getRecipientSolicitorReference(finremCaseDetails);
         data.put(ADDRESSEE, generalLetterAddressee);
         data.put("reference", reference);
@@ -263,24 +266,28 @@ public class GeneralLetterService {
                     generalLetterUploadedDocumentCollection.getValue())
                 )
             ));
+        String recipient = generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode();
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
-            generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode(),
-            bulkPrintDocuments, authorisationToken);
+            recipient,
+            bulkPrintDocuments,
+            postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
+            authorisationToken);
     }
 
-    public static String formatAddressForLetterPrinting(Address address) {
-        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
+    private String formatAddressForLetterPrinting(Address address, boolean isInternational) {
+        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class), isInternational);
     }
 
-    private static String formatAddressForLetterPrinting(Map<String, Object> address) {
+    private String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
-                    .map(address::get)
-                    .filter(Objects::nonNull)
-                    .map(Object::toString)
-                    .filter(StringUtils::isNotEmpty)
-                    .filter(s -> !s.equals("null"))
-                    .collect(Collectors.joining("\n"));
+            Stream<String> addressLines = Stream.of("AddressLine1", "AddressLine2", "AddressLine3",
+                "County", "PostTown", "PostCode", isInternational ? "Country" : "");
+            return addressLines.map(address::get)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .filter(StringUtils::isNotEmpty)
+                .filter(s -> !s.equals("null"))
+                .collect(Collectors.joining("\n"));
         }
         return "";
     }

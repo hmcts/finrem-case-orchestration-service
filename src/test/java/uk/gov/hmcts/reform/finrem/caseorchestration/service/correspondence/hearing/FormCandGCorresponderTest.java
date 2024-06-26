@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,8 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private GenericDocumentService service;
+    @Mock
+    private InternationalPostalService postalService;
 
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
@@ -49,7 +52,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService, finremCaseDetailsMapper,
                 new DocumentHelper(objectMapper, new CaseDataService(objectMapper),
-                    service, finremCaseDetailsMapper, letterAddresseeGenerator), objectMapper);
+                    service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService), objectMapper);
     }
 
     @Test
