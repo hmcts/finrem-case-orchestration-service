@@ -65,9 +65,9 @@ public class DocumentConversionService {
 
         try {
             PDDocument doc = PDDocument.load(document);
-            PDAcroForm pDAcroForm = doc.getDocumentCatalog().getAcroForm();
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
 
-            pDAcroForm.flatten();
+            acroForm.flatten();
             doc.save(bos);
             doc.close();
             return bos.toByteArray();

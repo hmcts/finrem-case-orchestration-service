@@ -1,9 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
-
-import org.apache.commons.io.FileUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentConversionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
