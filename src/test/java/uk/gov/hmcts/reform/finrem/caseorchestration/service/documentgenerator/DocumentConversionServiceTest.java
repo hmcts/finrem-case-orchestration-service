@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,16 +70,12 @@ public class DocumentConversionServiceTest {
         String editedPdfFixture = "/fixtures/D11Edited.pdf";
         byte[] editedPdfBytes = loadResource(editedPdfFixture);
 
-        String flatPdfFixture = "/fixtures/D11Edited-flat.pdf";
+        String flatPdfFixture = "/fixtures/D11Edited-flattened.pdf";
         byte[] expectedFlatPdfBytes = loadResource(flatPdfFixture);
 
         byte[] result = documentConversionService.flattenPdfDocument(editedPdfBytes);
 
-        assertThat(result, is(expectedFlatPdfBytes));
-
-        //TODO: Looks like the flattened expected has also been compressed by flattening tool used, need to produce expected file
-        // that results in the same as PDFbox flattening. Also may be worth reducing size of test PDF to one page for speed.
-        
+        assertThat(expectedFlatPdfBytes, is(result));
     }
 
     @Test
