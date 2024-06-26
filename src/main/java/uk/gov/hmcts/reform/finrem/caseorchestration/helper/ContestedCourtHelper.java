@@ -175,6 +175,7 @@ public class ContestedCourtHelper {
         .put("FR_kent_surrey_hc_list_8", "Worthing County Court and Family Court")
         .put("FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre")
         .put("FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre")
         .build();
     private static final Map<String, String> newportMap = ImmutableMap.<String, String>builder()
         .put("FR_newport_hc_list_1", "Newport Civil and Family Court")
