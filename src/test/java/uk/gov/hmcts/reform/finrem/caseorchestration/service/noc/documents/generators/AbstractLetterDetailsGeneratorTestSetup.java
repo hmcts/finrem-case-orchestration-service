@@ -92,8 +92,8 @@ public class AbstractLetterDetailsGeneratorTestSetup {
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
             is("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP"));
-        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0207 421 8594"));
-        assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("cfc.fru@justice.gov.uk"));
+        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0300 123 5577"));
+        assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("FRCLondon@justice.gov.uk"));
     }
 
     protected void assertConsentedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
