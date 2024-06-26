@@ -725,6 +725,14 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public String getAppPostcode() {
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorAddress().getPostCode()
+            : getContactDetailsWrapper().getApplicantSolicitorAddress().getPostCode();
+    }
+
+
+    @JsonIgnore
     public boolean isRespAddressConfidential() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
     }
