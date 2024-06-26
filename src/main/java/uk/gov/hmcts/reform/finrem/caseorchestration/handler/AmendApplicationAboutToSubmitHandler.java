@@ -72,7 +72,6 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
             : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
 
         return StringUtils.isEmpty(postCode);
-
     }
 
     private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
