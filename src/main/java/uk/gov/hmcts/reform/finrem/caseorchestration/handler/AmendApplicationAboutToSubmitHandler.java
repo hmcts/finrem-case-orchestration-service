@@ -50,8 +50,10 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
         FinremCaseData caseData = caseDetails.getData();
 
-        if (checkApplicantPostCodeDetails(caseData)) {
-            errors.add("Postcode field is required for applicant address.");
+        checkApplicantPostCodeDetails(caseData, errors);
+        checkRespondentPostCodeDetails(caseData, errors);
+
+        if (!errors.isEmpty()) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
         }
 
@@ -66,12 +68,24 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
-    private boolean checkApplicantPostCodeDetails(FinremCaseData caseData) {
+    private void checkApplicantPostCodeDetails(FinremCaseData caseData, List<String> errors) {
         String postCode = caseData.isApplicantRepresentedByASolicitor()
             ? caseData.getApplicantPostcode()
             : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
 
-        return StringUtils.isEmpty(postCode);
+        if (StringUtils.isEmpty(postCode)) {
+            errors.add("Postcode field is required for applicant address.");
+        }
+    }
+
+    private void checkRespondentPostCodeDetails(FinremCaseData caseData, List<String> errors) {
+        String postCode = caseData.isRespondentRepresentedByASolicitor()
+            ? caseData.getRespondentPostcode()
+            : caseData.getContactDetailsWrapper().getRespondentAddress().getPostCode();
+
+        if (StringUtils.isEmpty(postCode)) {
+            errors.add("Postcode field is required for respondent address.");
+        }
     }
 
     private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
