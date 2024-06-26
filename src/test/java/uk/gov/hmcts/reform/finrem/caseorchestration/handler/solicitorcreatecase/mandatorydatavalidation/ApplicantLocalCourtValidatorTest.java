@@ -72,7 +72,7 @@ class ApplicantLocalCourtValidatorTest {
             Arguments.of(ClevelandCourt.FR_CLEVELAND_HC_LIST_5.getId(), true),
             Arguments.of(NwYorkshireCourt.BRADFORD_COURT.getId(), true),
             Arguments.of(HumberCourt.FR_humberList_4.getId(), true),
-            Arguments.of(KentSurreyCourt.KENT_DARTFORD_COURTS.getId(), true),
+            Arguments.of(KentSurreyCourt.FR_kent_surreyList_3.getId(), true),
             Arguments.of(BedfordshireCourt.IPSWICH.getId(), true),
             Arguments.of(DevonCourt.YEOVIL.getId(), true),
             Arguments.of(DorsetCourt.ISLE_OF_WIGHT.getId(), true),
@@ -80,7 +80,8 @@ class ApplicantLocalCourtValidatorTest {
             Arguments.of(NewportCourt.FR_newportList_3.getId(), true),
             Arguments.of(SwanseaCourt.FR_swanseaList_1.getId(), true),
             Arguments.of(NorthWalesCourt.WELSHPOOL.getId(), true),
-            Arguments.of(HighCourt.HIGHCOURT_COURT.getId(), true)
-        );
+            Arguments.of(HighCourt.HIGHCOURT_COURT.getId(), true),
+            Arguments.of(KentSurreyCourt.FR_kent_surreyList_11.getId(), true)
+            );
     }
 }
