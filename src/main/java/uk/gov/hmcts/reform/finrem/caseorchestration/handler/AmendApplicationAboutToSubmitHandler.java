@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -45,8 +46,14 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+        List<String> errors = new ArrayList<>();
 
         FinremCaseData caseData = caseDetails.getData();
+
+        if (checkPostCodeDetails(caseData)) {
+            errors.add("Postcode field is required for applicant address.");
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        }
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
@@ -56,7 +63,16 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+    }
+
+    private boolean checkPostCodeDetails(FinremCaseData caseData) {
+        String postCode = caseData.isApplicantRepresentedByASolicitor()
+            ? caseData.getAppPostcode()
+            : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
+
+        return StringUtils.isEmpty(postCode);
+
     }
 
     private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
