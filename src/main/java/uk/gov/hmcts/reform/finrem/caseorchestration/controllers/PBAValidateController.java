@@ -54,7 +54,7 @@ public class PBAValidateController extends BaseController {
                     .errors(List.of("PBA Account Number is not valid, please enter a valid one."))
                     .build());
             }
-            log.info("PBA number is valid.");
+            log.info("PBA number is valid");
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
