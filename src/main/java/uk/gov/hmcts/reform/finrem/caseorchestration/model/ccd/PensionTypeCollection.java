@@ -7,14 +7,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PensionTypeCollection {
+public class PensionTypeCollection implements CaseDocumentsDiscovery {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
     private PensionType typedCaseDocument;
+
+    @Override
+    public List<CaseDocument> discover() {
+        return ofNullable(typedCaseDocument)
+            .map(PensionType::getPensionDocument)
+            .map(List::of)
+            .orElse(List.of());
+    }
 }
