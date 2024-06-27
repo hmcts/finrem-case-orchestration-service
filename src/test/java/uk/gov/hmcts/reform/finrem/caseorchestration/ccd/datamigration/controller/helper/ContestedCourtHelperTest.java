@@ -177,6 +177,8 @@ public class ContestedCourtHelperTest {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, "invalid", KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "");
 
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", "");
