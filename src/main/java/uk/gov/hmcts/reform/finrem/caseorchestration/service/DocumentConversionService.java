@@ -72,7 +72,7 @@ public class DocumentConversionService {
             doc.close();
             return bos.toByteArray();
         } catch (IOException e) {
-            log.error("Unable to flatten document");
+            log.error("Unable to flatten document", e);
         }
         return document;
     }
