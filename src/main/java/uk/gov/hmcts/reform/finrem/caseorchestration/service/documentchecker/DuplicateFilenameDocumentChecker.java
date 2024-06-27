@@ -63,17 +63,17 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
     }
 
     private static void processList(List<?> list, List<CaseDocument> allDocuments) {
-        final String METHOD_NAME = "discover";
+        String methodName = "discover";
         if (list != null) {
             for (Object item : list) {
                 try {
                     // Invoke the 'discover' method on each item in the list
-                    Method discoverMethod = item.getClass().getMethod(METHOD_NAME);
+                    Method discoverMethod = item.getClass().getMethod(methodName);
                     @SuppressWarnings("unchecked")
                     List<CaseDocument> documents = (List<CaseDocument>) discoverMethod.invoke(item);
                     allDocuments.addAll(documents);
                 } catch (Exception e) {
-                    log.error("Fail to invoke " + METHOD_NAME + "()", e);
+                    log.error("Fail to invoke " + methodName + "()", e);
                 }
             }
         }
@@ -104,8 +104,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                     Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                     // Ensure the list has a single parameterized type argument
-                    if (actualTypeArguments.length == 1 &&
-                        CaseDocumentsDiscovery.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
+                    if (actualTypeArguments.length == 1 && CaseDocumentsDiscovery.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
 
                         // Get the value of the field and process the list
                         List<?> list = (List<?>) field.get(caseData);
