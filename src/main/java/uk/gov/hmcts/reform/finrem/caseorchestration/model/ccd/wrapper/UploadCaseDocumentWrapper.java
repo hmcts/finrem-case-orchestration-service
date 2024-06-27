@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentsDiscovery;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -30,7 +29,6 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@Slf4j
 public class UploadCaseDocumentWrapper implements CaseDocumentsDiscovery {
     private List<UploadCaseDocumentCollection> uploadCaseDocument;
     private List<UploadCaseDocumentCollection> fdrCaseDocumentCollection;
@@ -351,7 +349,7 @@ public class UploadCaseDocumentWrapper implements CaseDocumentsDiscovery {
                             .toList()
                     );
                 } catch (IllegalAccessException e) {
-                    log.info("Fail to implement discover() using reflection.", e);
+                    throw new RuntimeException("Fail to implement discover() using reflection.", e);
                 }
             }
         }
