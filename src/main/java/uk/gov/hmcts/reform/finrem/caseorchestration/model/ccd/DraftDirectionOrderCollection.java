@@ -15,7 +15,7 @@ import static java.util.Optional.ofNullable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftDirectionOrderCollection implements CaseDocumentsDiscovery{
+public class DraftDirectionOrderCollection implements CaseDocumentsDiscovery {
     private DraftDirectionOrder value;
 
     @Override

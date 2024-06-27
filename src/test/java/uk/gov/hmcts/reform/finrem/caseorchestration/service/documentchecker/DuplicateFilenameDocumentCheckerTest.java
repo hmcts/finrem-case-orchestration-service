@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
@@ -59,6 +61,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -978,6 +981,118 @@ class DuplicateFilenameDocumentCheckerTest {
                         .judgesAmendedOrderCollection(List.of(DraftDirectionOrderCollection.builder()
                             .value(DraftDirectionOrder.builder()
                                 .uploadDraftDocument(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterPreview()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterPreview(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterUploadedDocument()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterUploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterUploadedDocuments()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterUploadedDocuments(List.of(DocumentCollection.builder()
+                            .value(DUPLICATED_CASE_DOCUMENT)
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterCollection_generatedLetter()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterCollection(List.of(GeneralLetterCollection.builder()
+                            .value(GeneralLetter.builder()
+                                .generatedLetter(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterCollection_generalLetterUploadedDocument()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterCollection(List.of(GeneralLetterCollection.builder()
+                            .value(GeneralLetter.builder()
+                                .generalLetterUploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInGeneralLetterWrapper_generalLetterCollection_generalLetterUploadedDocuments()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .generalLetterWrapper(GeneralLetterWrapper.builder()
+                        .generalLetterCollection(List.of(GeneralLetterCollection.builder()
+                            .value(GeneralLetter.builder()
+                                .generalLetterUploadedDocuments(List.of(DocumentCollection.builder()
+                                    .value(DUPLICATED_CASE_DOCUMENT)
+                                    .build()))
                                 .build())
                             .build()))
                         .build())
