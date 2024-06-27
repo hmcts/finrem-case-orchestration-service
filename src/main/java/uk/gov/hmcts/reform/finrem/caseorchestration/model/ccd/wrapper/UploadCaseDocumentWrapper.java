@@ -8,9 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentsDiscovery;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CaseDocumentCollectionType;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,13 +22,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class UploadCaseDocumentWrapper {
+@Slf4j
+public class UploadCaseDocumentWrapper implements CaseDocumentsDiscovery {
     private List<UploadCaseDocumentCollection> uploadCaseDocument;
     private List<UploadCaseDocumentCollection> fdrCaseDocumentCollection;
     private List<UploadCaseDocumentCollection> appCorrespondenceCollection;
@@ -316,6 +323,40 @@ public class UploadCaseDocumentWrapper {
             collection = new ArrayList<>();
         }
         return collection;
+    }
+
+    @Override
+    public List<CaseDocument> discover() {
+        List<CaseDocument> result = new ArrayList<>();
+
+        // Get all fields of the class
+        Field[] fields = this.getClass().getDeclaredFields();
+
+        for (Field field : fields) {
+            // Check if the field is of type List<UploadCaseDocumentCollection>
+            if (field.getType().equals(List.class)) {
+                try {
+                    // Make the field accessible
+                    field.setAccessible(true);
+
+                    // Get the value of the field
+                    List<UploadCaseDocumentCollection> collection = (List<UploadCaseDocumentCollection>) field.get(this);
+
+                    // Process the collection
+                    result.addAll(
+                        ofNullable(collection)
+                            .orElse(List.of())
+                            .stream()
+                            .flatMap(c -> c.discover().stream())
+                            .toList()
+                    );
+                } catch (IllegalAccessException e) {
+                    log.info("Fail to implement discover() using reflection.", e);
+                }
+            }
+        }
+
+        return result;
     }
 }
 

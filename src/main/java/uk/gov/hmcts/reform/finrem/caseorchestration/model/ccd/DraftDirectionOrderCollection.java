@@ -6,11 +6,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftDirectionOrderCollection {
+public class DraftDirectionOrderCollection implements CaseDocumentsDiscovery{
     private DraftDirectionOrder value;
+
+    @Override
+    public List<CaseDocument> discover() {
+        return ofNullable(value)
+            .map(DraftDirectionOrder::getUploadDraftDocument)
+            .map(List::of)
+            .orElse(List.of());
+    }
 }

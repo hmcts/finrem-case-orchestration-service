@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,7 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Deprecated
-public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
+public class ConfidentialUploadedDocumentData implements CaseDocumentTabData, CaseDocumentsDiscovery {
     private String id;
     private UploadConfidentialDocument value;
 
@@ -32,5 +35,13 @@ public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
         if (value != null) {
             value.setConfidentialDocumentUploadDateTime(date);
         }
+    }
+
+    @Override
+    public List<CaseDocument> discover() {
+        return ofNullable(value)
+            .map(UploadConfidentialDocument::getDocumentLink)
+            .map(List::of)
+            .orElse(List.of());
     }
 }

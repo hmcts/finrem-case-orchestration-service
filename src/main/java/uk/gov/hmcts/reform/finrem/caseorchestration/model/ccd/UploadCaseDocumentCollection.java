@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -18,7 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class UploadCaseDocumentCollection implements CaseDocumentTabData {
+public class UploadCaseDocumentCollection implements CaseDocumentTabData, CaseDocumentsDiscovery {
 
     private String id;
 
@@ -38,5 +41,13 @@ public class UploadCaseDocumentCollection implements CaseDocumentTabData {
         if (uploadCaseDocument != null && uploadCaseDocument.getCaseDocumentUploadDateTime() == null) {
             uploadCaseDocument.setCaseDocumentUploadDateTime(date);
         }
+    }
+
+    @Override
+    public List<CaseDocument> discover() {
+        return ofNullable(uploadCaseDocument)
+            .map(UploadCaseDocument::getCaseDocuments)
+            .map(List::of)
+            .orElse(List.of());
     }
 }

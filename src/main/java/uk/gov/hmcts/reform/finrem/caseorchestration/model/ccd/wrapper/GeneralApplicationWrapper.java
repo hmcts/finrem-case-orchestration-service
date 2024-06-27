@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantAndRespondentEvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentsDiscovery;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
@@ -20,6 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -27,7 +32,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralApplicationWrapper {
+public class GeneralApplicationWrapper implements CaseDocumentsDiscovery {
     private YesOrNo generalApplicationDirectionsHearingRequired;
     private String generalApplicationReceivedFrom;
     private ApplicantAndRespondentEvidenceParty appRespGeneralApplicationReceivedFrom;
@@ -76,4 +81,46 @@ public class GeneralApplicationWrapper {
     private String generalApplicationReferDetail;
     private DynamicList generalApplicationOutcomeList;
     private DynamicList generalApplicationDirectionsList;
+
+    @Override
+    public List<CaseDocument> discover() {
+        return Stream.of(
+                Stream.of(generalApplicationDirectionsDocument,
+                    generalApplicationDocument,
+                    generalApplicationLatestDocument,
+                    generalApplicationDraftOrder
+                ),
+                ofNullable(generalApplicationIntvrOrders)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(generalApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(appRespGeneralApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(intervener1GeneralApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(intervener2GeneralApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(intervener3GeneralApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream()),
+                ofNullable(intervener4GeneralApplications)
+                    .orElse(List.of())
+                    .stream()
+                    .flatMap(d -> d.discover().stream())
+            )
+            .flatMap(s -> s)
+            .filter(Objects::nonNull)
+            .toList();
+    }
 }
