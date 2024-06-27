@@ -151,8 +151,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         assertThat(data2, allOf(
             Matchers.<String, Object>hasEntry("CCDCaseNumber", 123L),
             Matchers.hasEntry("CourtAddress", "Bromley County Court, College Road, Bromley, BR1 3PX"),
-            Matchers.hasEntry("CourtPhone", "0208 290 9620"),
-            Matchers.hasEntry("CourtEmail", "family.bromley.countycourt@justice.gov.uk"),
+            Matchers.hasEntry("CourtPhone", "0300 123 5577"),
+            Matchers.hasEntry("CourtEmail", "FRCLondon@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Poor"),
             Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.hasEntry("HearingTime", "1200"),
@@ -212,8 +212,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         assertThat(data2, allOf(
             Matchers.<String, Object>hasEntry("CCDCaseNumber", 123L),
             Matchers.hasEntry("CourtAddress", "Bromley County Court, College Road, Bromley, BR1 3PX"),
-            Matchers.hasEntry("CourtPhone", "0208 290 9620"),
-            Matchers.hasEntry("CourtEmail", "family.bromley.countycourt@justice.gov.uk"),
+            Matchers.hasEntry("CourtPhone", "0300 123 5577"),
+            Matchers.hasEntry("CourtEmail", "FRCLondon@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Poor"),
             Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.hasEntry("HearingTime", "1200"),
