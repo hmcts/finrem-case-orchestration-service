@@ -14,13 +14,15 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderRefusalHolder {
+public class OrderRefusalHolder implements CaseDocumentsDiscovery {
     private String orderRefusalAfterText;
     private List<OrderRefusalOption> orderRefusal;
     private String orderRefusalOther;
@@ -32,4 +34,11 @@ public class OrderRefusalHolder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate orderRefusalDate;
     private String orderRefusalAddComments;
+
+    @Override
+    public List<CaseDocument> discover() {
+        return ofNullable(orderRefusalDocs)
+            .map(List::of)
+            .orElse(List.of());
+    }
 }

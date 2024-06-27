@@ -10,14 +10,19 @@ import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 
 import java.util.List;
@@ -180,6 +185,87 @@ class DuplicateFilenameDocumentCheckerTest {
                     .otherDocumentsCollection(List.of(OtherDocumentCollection.builder()
                         .value(OtherDocument.builder()
                             .uploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()))
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInAdditionalCicDocuments() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .additionalCicDocuments(List.of(DocumentCollection.builder()
+                        .value(DUPLICATED_CASE_DOCUMENT)
+                        .build()))
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInOrderRefusalCollection() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .orderRefusalCollection(List.of(OrderRefusalCollection.builder()
+                        .value(OrderRefusalHolder.builder()
+                            .orderRefusalDocs(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()))
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInOrderRefusalCollectionNew() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .orderRefusalCollectionNew(List.of(OrderRefusalCollection.builder()
+                        .value(OrderRefusalHolder.builder()
+                            .orderRefusalDocs(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()))
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInOrderRefusalOnScreen() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .orderRefusalOnScreen(OrderRefusalHolder.builder()
+                        .orderRefusalDocs(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInUploadConsentOrderDocuments() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .uploadConsentOrderDocuments(List.of(UploadConsentOrderDocumentCollection.builder()
+                        .value(UploadConsentOrderDocument.builder()
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
                             .build())
                         .build()))
                     .build())
