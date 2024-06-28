@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SendOrderDocuments {
+public class SendOrderDocuments implements HasCaseDocument {
 
     @JsonProperty("bulkPrintDocument")
     CaseDocument caseDocument;
