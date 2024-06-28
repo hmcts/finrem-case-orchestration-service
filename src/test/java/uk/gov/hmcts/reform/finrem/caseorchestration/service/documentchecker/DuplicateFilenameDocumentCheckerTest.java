@@ -919,6 +919,22 @@ class DuplicateFilenameDocumentCheckerTest {
     }
 
     @Test
+    void shouldNotGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeConsented() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONSENTED).build(),
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONSENTED, FinremCaseData.builder()
+                .uploadDocuments(List.of(
+                    UploadDocumentCollection.builder().value(UploadDocument.builder()
+                            .documentComment("1")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()
+                ))).build());
+
+        assertThat(warnings).isEmpty();
+    }
+
+    @Test
     void testGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContented() throws DocumentContentCheckerException {
         List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
             FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED).build(),
@@ -936,5 +952,21 @@ class DuplicateFilenameDocumentCheckerTest {
                         .build()
                 ))).build());
         assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void shouldNotetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContented() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED).build(),
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED, FinremCaseData.builder()
+                .uploadGeneralDocuments(List.of(
+                    UploadGeneralDocumentCollection.builder().value(UploadGeneralDocument.builder()
+                            .documentComment("1")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()
+                ))).build());
+
+        assertThat(warnings).isEmpty();
     }
 }

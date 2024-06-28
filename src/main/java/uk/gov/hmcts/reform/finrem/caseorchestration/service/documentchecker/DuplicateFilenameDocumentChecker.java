@@ -109,13 +109,13 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                 && ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
                     .map(d -> ofNullable(d.getValue()).orElse(UploadDocument.builder().build()).getDocumentLink())
                     .filter(Objects::nonNull)
-                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d))))
+                    .filter(d -> isDuplicateFilename(caseDocument, () -> List.of(d))).count() > 1)
                 ||
                 (newCaseData.isContestedApplication()
                     && ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
                         .map(d -> ofNullable(d.getValue()).orElse(UploadGeneralDocument.builder().build()).getDocumentLink())
                         .filter(Objects::nonNull)
-                        .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d))))
+                    .filter(d -> isDuplicateFilename(caseDocument, () -> List.of(d))).count() > 1)
         ) {
             return List.of(WARNING);
         }
