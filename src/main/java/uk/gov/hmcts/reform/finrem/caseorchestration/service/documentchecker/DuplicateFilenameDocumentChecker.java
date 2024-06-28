@@ -105,19 +105,17 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         // check if duplication occurs on uploading documents
         FinremCaseData newCaseData = caseDetails.getData();
         if (
-            (newCaseData.isConsentedApplication() &&
-                ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
+            (newCaseData.isConsentedApplication()
+                && ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
                     .map(d -> ofNullable(d.getValue()).orElse(UploadDocument.builder().build()).getDocumentLink())
                     .filter(Objects::nonNull)
-                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)))
-            )
-            ||
-            (newCaseData.isContestedApplication() &&
-                ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
-                    .map(d -> ofNullable(d.getValue()).orElse(UploadGeneralDocument.builder().build()).getDocumentLink())
-                    .filter(Objects::nonNull)
-                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)))
-            )
+                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d))))
+                ||
+                (newCaseData.isContestedApplication()
+                    && ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
+                        .map(d -> ofNullable(d.getValue()).orElse(UploadGeneralDocument.builder().build()).getDocumentLink())
+                        .filter(Objects::nonNull)
+                        .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d))))
         ) {
             return List.of(WARNING);
         }
