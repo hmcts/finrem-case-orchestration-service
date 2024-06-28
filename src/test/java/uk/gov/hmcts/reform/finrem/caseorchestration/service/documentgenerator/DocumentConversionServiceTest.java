@@ -62,6 +62,7 @@ public class DocumentConversionServiceTest {
     @Test
     public void flattenPdfDocument() throws IOException {
 
+        // Note: Already flat PDFs are unchanged by flattening (see flattenFlattenedD11.pdf)
         String editedPdfFixture = "/fixtures/D11Edited.pdf";
         byte[] editedPdfBytes = loadResource(editedPdfFixture);
 
@@ -71,6 +72,17 @@ public class DocumentConversionServiceTest {
         byte[] result = documentConversionService.flattenPdfDocument(editedPdfBytes);
 
         assertThat(expectedFlatPdfBytes, is(result));
+    }
+
+    @Test
+    public void flattenNonPdfDocumentHandleException() throws IOException {
+
+        String toBeFlattenedFile = "/fixtures/MockD11Word.docx";
+        byte[] toBeFlattenedbytes = loadResource(toBeFlattenedFile);
+
+        byte[] result = documentConversionService.flattenPdfDocument(toBeFlattenedbytes);
+
+        assertThat(toBeFlattenedbytes, is(result));
     }
 
     @Test
