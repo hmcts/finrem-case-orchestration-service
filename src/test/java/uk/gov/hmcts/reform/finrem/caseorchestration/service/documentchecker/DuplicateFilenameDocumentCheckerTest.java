@@ -14,11 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
@@ -47,11 +50,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
@@ -60,6 +67,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -82,6 +92,8 @@ class DuplicateFilenameDocumentCheckerTest {
     private static final String DUPLICATED_FILENAME = "newFilename.pdf";
 
     private static final CaseDocument DUPLICATED_CASE_DOCUMENT = CaseDocument.builder().documentFilename(DUPLICATED_FILENAME).build();
+
+    private static final Document DUPLICATED_DOCUMENT = Document.builder().filename(DUPLICATED_FILENAME).build();
 
     @InjectMocks
     private DuplicateFilenameDocumentChecker underTest;
@@ -1133,6 +1145,334 @@ class DuplicateFilenameDocumentCheckerTest {
                                 .value(GeneralEmailHolder.builder()
                                     .generalEmailUploadedDocument(DUPLICATED_CASE_DOCUMENT)
                                     .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentD81Joint()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentD81Joint(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentD81Applicant()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentD81Applicant(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentD81Respondent()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentD81Respondent(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentMiniFormA()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentMiniFormA(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_uploadApprovedConsentOrder()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .uploadApprovedConsentOrder(DUPLICATED_CASE_DOCUMENT)
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_latestDraftDirectionOrder()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .latestDraftDirectionOrder(DraftDirectionOrder.builder()
+                            .uploadDraftDocument(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentOtherCollection()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentOtherCollection(List.of(OtherDocumentCollection.builder()
+                            .value(OtherDocument.builder()
+                                .uploadedDocument(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentedNotApprovedOrders_consentOrder()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentedNotApprovedOrders(List.of(ConsentOrderCollection.builder()
+                                .approvedOrder(ApprovedOrder.builder()
+                                    .consentOrder(DUPLICATED_CASE_DOCUMENT)
+                                    .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentedNotApprovedOrders_orderLetter()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentedNotApprovedOrders(List.of(ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_consentedNotApprovedOrders_pensionDocuments()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .consentedNotApprovedOrders(List.of(ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .pensionDocuments(List.of(PensionTypeCollection.builder()
+                                    .typedCaseDocument(PensionType.builder()
+                                        .pensionDocument(DUPLICATED_CASE_DOCUMENT)
+                                        .build())
+                                    .build()))
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_uploadConsentOrder()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .uploadConsentOrder(List.of(UploadConsentOrderCollection.builder()
+                            .value(UploadConsentOrder.builder()
+                                .documentLink(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_otherVariationCollection()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .otherVariationCollection(List.of(VariationDocumentTypeCollection.builder()
+                            .value(VariationDocumentType.builder()
+                                .uploadedDocument(DUPLICATED_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_appConsentApprovedOrders_orderLetter()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .appConsentApprovedOrders(List.of(ConsentInContestedApprovedOrderCollection.builder()
+                            .approvedOrder(ConsentInContestedApprovedOrder.builder()
+                                .orderLetter(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_appConsentApprovedOrders_consentOrder()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .appConsentApprovedOrders(List.of(ConsentInContestedApprovedOrderCollection.builder()
+                            .approvedOrder(ConsentInContestedApprovedOrder.builder()
+                                .consentOrder(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_appConsentApprovedOrders_pensionDocuments()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .appConsentApprovedOrders(List.of(ConsentInContestedApprovedOrderCollection.builder()
+                            .approvedOrder(ConsentInContestedApprovedOrder.builder()
+                                .pensionDocuments(List.of(PensionTypeCollection.builder()
+                                    .typedCaseDocument(PensionType.builder()
+                                        .pensionDocument(DUPLICATED_CASE_DOCUMENT)
+                                        .build())
+                                    .build()))
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_appConsentApprovedOrders_additionalConsentDocuments()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .appConsentApprovedOrders(List.of(ConsentInContestedApprovedOrderCollection.builder()
+                            .approvedOrder(ConsentInContestedApprovedOrder.builder()
+                                .additionalConsentDocuments(List.of(DocumentCollection.builder()
+                                    .value(DUPLICATED_CASE_DOCUMENT)
+                                    .build()))
+                                .build())
+                            .build()))
+                        .build())
+                    .build())
+                .build(),
+            FinremCaseDetails.builder().build());
+
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarnings_duplicateInConsentOrderWrapper_appRefusedOrderCollection()
+        throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetails.builder()
+                .data(FinremCaseData.builder()
+                    .consentOrderWrapper(ConsentOrderWrapper.builder()
+                        .appRefusedOrderCollection(List.of(UnapprovedOrderCollection.builder()
+                            .value(UnapproveOrder.builder()
+                                .caseDocument(DUPLICATED_CASE_DOCUMENT)
+                                .build())
                             .build()))
                         .build())
                     .build())

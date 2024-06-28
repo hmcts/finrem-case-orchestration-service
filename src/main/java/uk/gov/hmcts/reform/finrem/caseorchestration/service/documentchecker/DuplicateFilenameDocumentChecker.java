@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentFileNameProvider;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
@@ -29,16 +30,16 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         return true;
     }
 
-    private boolean isDuplicateFilename(CaseDocument caseDocument, Supplier<List<CaseDocument>> caseDocumentSupplier) {
+    private boolean isDuplicateFilename(CaseDocument caseDocument, Supplier<List<DocumentFileNameProvider>> caseDocumentSupplier) {
         return ofNullable(caseDocumentSupplier.get()).orElse(List.of(CaseDocument.builder().documentFilename("").build()))
             .stream().anyMatch(d -> d.getDocumentFilename().equals(caseDocument.getDocumentFilename()));
     }
 
-    private static void processList(List<?> list, List<CaseDocument> allDocuments) {
+    private static void processList(List<?> list, List<DocumentFileNameProvider> allDocuments) {
         if (list != null) {
             for (Object item : list) {
-                if (item instanceof HasCaseDocument) {
-                    processHasCaseDocument((HasCaseDocument) item, allDocuments);
+                if (item instanceof HasCaseDocument hasCaseDocument) {
+                    processHasCaseDocument(hasCaseDocument, allDocuments);
                 } else {
                     log.warn("Ignored " + item.getClass().getName());
                 }
@@ -46,7 +47,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         }
     }
 
-    private static void processHasCaseDocument(HasCaseDocument hcd, List<CaseDocument> allDocuments) {
+    private static void processHasCaseDocument(HasCaseDocument hcd, List<DocumentFileNameProvider> allDocuments) {
         if (hcd != null) {
             try {
                 // Collect all fields from HasCaseDocument class
@@ -66,8 +67,8 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                             // Get the value of the field and process the list
                             processList((List<?>) field.get(hcd), allDocuments);
                         }
-                    } else if (CaseDocument.class.isAssignableFrom(field.getType())) {
-                        allDocuments.add((CaseDocument) field.get(hcd));
+                    } else if (DocumentFileNameProvider.class.isAssignableFrom(field.getType())) {
+                        allDocuments.add((DocumentFileNameProvider) field.get(hcd));
                     } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
                         processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
                     }
@@ -78,9 +79,9 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         }
     }
 
-    private List<CaseDocument> collectCaseDocumentsFromFinremCaseData(FinremCaseData caseData) {
+    private List<DocumentFileNameProvider> collectCaseDocumentsFromFinremCaseData(FinremCaseData caseData) {
         // List to collect all CaseDocument instances
-        List<CaseDocument> allDocuments = new ArrayList<>();
+        List<DocumentFileNameProvider> allDocuments = new ArrayList<>();
         try {
             // Collect all fields from FinremCaseData class
             Field[] fields = FinremCaseData.class.getDeclaredFields();
@@ -100,8 +101,8 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                         List<?> list = (List<?>) field.get(caseData);
                         processList(list, allDocuments);
                     }
-                } else if (CaseDocument.class.isAssignableFrom(field.getType())) {
-                    allDocuments.add((CaseDocument) field.get(caseData));
+                } else if (DocumentFileNameProvider.class.isAssignableFrom(field.getType())) {
+                    allDocuments.add((DocumentFileNameProvider) field.get(caseData));
                 } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
                     processHasCaseDocument((HasCaseDocument) field.get(caseData), allDocuments);
                 }
@@ -117,7 +118,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         throws DocumentContentCheckerException {
 
         FinremCaseData caseData = beforeCaseDetails.getData();
-        List<CaseDocument> allDocuments = collectCaseDocumentsFromFinremCaseData(caseData);
+        List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(caseData);
 
         log.info("Iterating all CaseDocuments with interface HasCaseDocument.");
 
