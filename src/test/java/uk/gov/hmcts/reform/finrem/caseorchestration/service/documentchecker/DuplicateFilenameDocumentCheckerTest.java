@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
@@ -129,23 +132,21 @@ class DuplicateFilenameDocumentCheckerTest {
         assertThat(underTest.canCheck(DUPLICATED_CASE_DOCUMENT)).isTrue();
     }
 
-    @Test
-    void testGetWarnings_NoDuplicate() throws DocumentContentCheckerException {
+    @ParameterizedTest
+    @EnumSource(value = CaseType.class, names = {"CONTESTED", "CONSENTED"})
+    void testGetWarnings_noDuplication(CaseType caseType) throws DocumentContentCheckerException {
         List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
-            FinremCaseDetails.builder()
-                .data(FinremCaseData.builder()
+            FinremCaseDetailsBuilderFactory.from(caseType, FinremCaseData.builder()
                     .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
                     .generalOrderWrapper(GeneralOrderWrapper.builder()
                         .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
-                        .build())
-                    .build())
-                .build(),
-            FinremCaseDetails.builder().build());
+                        .build())).build(),
+            FinremCaseDetailsBuilderFactory.from(caseType).build());
 
         assertThat(warnings).isEmpty();
     }
 
-    private static Stream<Arguments> testGetWarningsOnExistingCase() {
+    static Stream<Arguments> testGetWarningsOnExistingCase() {
         return Stream.of(
             Arguments.of(FinremCaseData.builder()
                 .generalOrderWrapper(GeneralOrderWrapper.builder()
@@ -894,6 +895,46 @@ class DuplicateFilenameDocumentCheckerTest {
                 .data(caseData)
                 .build(),
             FinremCaseDetails.builder().build());
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeConsented() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONSENTED).build(),
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONSENTED, FinremCaseData.builder()
+                .uploadDocuments(List.of(
+                    UploadDocumentCollection.builder().value(UploadDocument.builder()
+                            .documentComment("1")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build(),
+                    UploadDocumentCollection.builder().value(UploadDocument.builder()
+                            .documentComment("2")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()
+                ))).build());
+        assertDuplicateFilenameWarning(warnings);
+    }
+
+    @Test
+    void testGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContented() throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED).build(),
+            FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED, FinremCaseData.builder()
+                .uploadGeneralDocuments(List.of(
+                    UploadGeneralDocumentCollection.builder().value(UploadGeneralDocument.builder()
+                            .documentComment("1")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build(),
+                    UploadGeneralDocumentCollection.builder().value(UploadGeneralDocument.builder()
+                            .documentComment("2")
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build())
+                        .build()
+                ))).build());
         assertDuplicateFilenameWarning(warnings);
     }
 }

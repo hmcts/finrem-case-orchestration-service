@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentFileNamePr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -87,7 +89,6 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
     @Override
     public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
         throws DocumentContentCheckerException {
-
         FinremCaseData caseData = beforeCaseDetails.getData();
         List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(caseData);
 
@@ -98,6 +99,26 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
             .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));
 
         if (hasDuplicates) {
+            return List.of(WARNING);
+        }
+
+        // check if duplication occurs on uploading documents
+        FinremCaseData newCaseData = caseDetails.getData();
+        if (
+            (newCaseData.isConsentedApplication() &&
+                ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
+                    .map(d -> ofNullable(d.getValue()).orElse(UploadDocument.builder().build()).getDocumentLink())
+                    .filter(Objects::nonNull)
+                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)))
+            )
+            ||
+            (newCaseData.isContestedApplication() &&
+                ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
+                    .map(d -> ofNullable(d.getValue()).orElse(UploadGeneralDocument.builder().build()).getDocumentLink())
+                    .filter(Objects::nonNull)
+                    .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)))
+            )
+        ) {
             return List.of(WARNING);
         }
 
