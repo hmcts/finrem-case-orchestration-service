@@ -59,7 +59,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinremCaseData {
+public class FinremCaseData implements HasCaseDocument {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
