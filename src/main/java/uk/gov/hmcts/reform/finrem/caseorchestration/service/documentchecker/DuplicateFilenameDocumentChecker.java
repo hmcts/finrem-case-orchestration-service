@@ -1,21 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentsDiscovery;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.util.Optional.ofNullable;
@@ -36,64 +34,56 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
             .stream().anyMatch(d -> d.getDocumentFilename().equals(caseDocument.getDocumentFilename()));
     }
 
-    private boolean isDuplicatedFilenameInFinremCaseData(CaseDocument caseDocument, FinremCaseData caseData) {
-        return Arrays.stream(new BeanWrapperImpl(caseData.getClass()).getPropertyDescriptors())
-            .filter(d -> CaseDocument.class.isAssignableFrom(d.getPropertyType()))
-            .anyMatch(pd ->
-                isDuplicateFilename(caseDocument, () -> {
-                    try {
-                        return List.of((CaseDocument) pd.getReadMethod().invoke(caseData));
-                    } catch (Exception e) {
-                        log.error("Fail to invoke:" + pd.getReadMethod().getName());
-                        return null;
-                    }
-                })
-            ) || Arrays.stream(new BeanWrapperImpl(caseData.getClass()).getPropertyDescriptors())
-                .filter(d -> CaseDocumentsDiscovery.class.isAssignableFrom(d.getPropertyType()))
-                .anyMatch(pd ->
-                    isDuplicateFilename(caseDocument, () -> {
-                        try {
-                            return ((CaseDocumentsDiscovery) pd.getReadMethod().invoke(caseData)).discover();
-                        } catch (Exception e) {
-                            log.error("Fail to invoke:" + pd.getReadMethod().getName());
-                            return null;
-                        }
-                    })
-                );
-    }
-
     private static void processList(List<?> list, List<CaseDocument> allDocuments) {
-        String methodName = "discover";
         if (list != null) {
             for (Object item : list) {
-                try {
-                    // Invoke the 'discover' method on each item in the list
-                    Method discoverMethod = item.getClass().getMethod(methodName);
-                    @SuppressWarnings("unchecked")
-                    List<CaseDocument> documents = (List<CaseDocument>) discoverMethod.invoke(item);
-                    allDocuments.addAll(documents);
-                } catch (Exception e) {
-                    log.error("Fail to invoke " + methodName + "()", e);
+                if (item instanceof HasCaseDocument) {
+                    processHasCaseDocument((HasCaseDocument) item, allDocuments);
+                } else {
+                    log.warn("Ignored " + item.getClass().getName());
                 }
             }
         }
     }
 
-    @Override
-    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
-        throws DocumentContentCheckerException {
+    private static void processHasCaseDocument(HasCaseDocument hcd, List<CaseDocument> allDocuments) {
+        if (hcd != null) {
+            try {
+                // Collect all fields from HasCaseDocument class
+                Field[] fields = hcd.getClass().getDeclaredFields();
 
-        FinremCaseData caseData = beforeCaseDetails.getData();
-        if (isDuplicatedFilenameInFinremCaseData(caseDocument, caseData)) {
-            return List.of(WARNING);
+                for (Field field : fields) {
+                    field.setAccessible(true);
+
+                    // Check if the field is a List with a parameterized type
+                    if (List.class.isAssignableFrom(field.getType())) {
+                        ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+                        // Ensure the list has a single parameterized type argument
+                        if (actualTypeArguments.length == 1 && HasCaseDocument.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
+
+                            // Get the value of the field and process the list
+                            processList((List<?>) field.get(hcd), allDocuments);
+                        }
+                    } else if (CaseDocument.class.isAssignableFrom(field.getType())) {
+                        allDocuments.add((CaseDocument) field.get(hcd));
+                    } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
+                        processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to check for duplicate filenames and return warnings", e);
+            }
         }
+    }
 
+    private List<CaseDocument> collectCaseDocumentsFromFinremCaseData(FinremCaseData caseData) {
+        // List to collect all CaseDocument instances
+        List<CaseDocument> allDocuments = new ArrayList<>();
         try {
             // Collect all fields from FinremCaseData class
             Field[] fields = FinremCaseData.class.getDeclaredFields();
-
-            // List to collect all CaseDocument instances
-            List<CaseDocument> allDocuments = new ArrayList<>();
 
             for (Field field : fields) {
                 field.setAccessible(true);
@@ -104,26 +94,39 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                     Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                     // Ensure the list has a single parameterized type argument
-                    if (actualTypeArguments.length == 1 && CaseDocumentsDiscovery.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
+                    if (actualTypeArguments.length == 1 && HasCaseDocument.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
 
                         // Get the value of the field and process the list
                         List<?> list = (List<?>) field.get(caseData);
                         processList(list, allDocuments);
                     }
+                } else if (CaseDocument.class.isAssignableFrom(field.getType())) {
+                    allDocuments.add((CaseDocument) field.get(caseData));
+                } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
+                    processHasCaseDocument((HasCaseDocument) field.get(caseData), allDocuments);
                 }
-            }
-
-            log.info("Iterating all CaseDocuments with interface CaseDocumentsDiscovery.");
-
-            // Check for duplicate filenames in the collected documents
-            boolean hasDuplicates = allDocuments.stream()
-                .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));
-
-            if (hasDuplicates) {
-                return List.of(WARNING);
             }
         } catch (Exception e) {
             log.error("Failed to check for duplicate filenames and return warnings", e);
+        }
+        return allDocuments.stream().filter(Objects::nonNull).toList();
+    }
+
+    @Override
+    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
+        throws DocumentContentCheckerException {
+
+        FinremCaseData caseData = beforeCaseDetails.getData();
+        List<CaseDocument> allDocuments = collectCaseDocumentsFromFinremCaseData(caseData);
+
+        log.info("Iterating all CaseDocuments with interface HasCaseDocument.");
+
+        // Check for duplicate filenames in the collected documents
+        boolean hasDuplicates = allDocuments.stream()
+            .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));
+
+        if (hasDuplicates) {
+            return List.of(WARNING);
         }
 
         return Collections.emptyList();

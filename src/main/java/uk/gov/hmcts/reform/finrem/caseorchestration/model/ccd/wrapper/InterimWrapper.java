@@ -11,9 +11,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentsDiscovery;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailInterimCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
@@ -22,10 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -33,7 +28,7 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InterimWrapper implements CaseDocumentsDiscovery {
+public class InterimWrapper implements HasCaseDocument {
     private List<DirectionDetailInterimCollection> directionDetailsCollectionInterim;
     private String interimTimeEstimate;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -50,16 +45,4 @@ public class InterimWrapper implements CaseDocumentsDiscovery {
     @JsonProperty("iHCollectionItemIds")
     private List<InterimHearingCollectionItemData> interimHearingCollectionItemIds;
     private List<InterimHearingBulkPrintDocumentsData> interimHearingDocuments;
-
-    @Override
-    public List<CaseDocument> discover() {
-        return Stream.of(
-                Stream.of(interimUploadAdditionalDocument, interimHearingDirectionsDocument),
-                ofNullable(interimHearingDocuments).orElse(List.of()).stream()
-                    .map(d -> ofNullable(d.getValue()).orElse(InterimHearingBulkPrintDocument.builder().build()).getCaseDocument())
-            )
-            .flatMap(s -> s)
-            .filter(Objects::nonNull)
-            .toList();
-    }
 }

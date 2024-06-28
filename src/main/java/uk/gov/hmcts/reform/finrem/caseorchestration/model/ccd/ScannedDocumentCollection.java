@@ -6,24 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-import static java.util.Optional.ofNullable;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScannedDocumentCollection implements CaseDocumentsDiscovery {
+public class ScannedDocumentCollection implements HasCaseDocument {
     private String id;
     private ScannedDocument value;
-
-    @Override
-    public List<CaseDocument> discover() {
-        return ofNullable(value)
-            .map(ScannedDocument::getUrl)
-            .map(List::of)
-            .orElse(List.of());
-    }
 }

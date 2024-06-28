@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadOrder {
+public class UploadOrder implements HasCaseDocument {
     @JsonProperty("DocumentType")
     private UploadOrderDocumentType documentType;
     @JsonProperty("DocumentLink")

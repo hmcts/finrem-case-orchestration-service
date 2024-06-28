@@ -6,23 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-import static java.util.Optional.ofNullable;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadDocumentCollection implements CaseDocumentCollection<UploadDocument>, CaseDocumentsDiscovery {
+public class UploadDocumentCollection implements CaseDocumentCollection<UploadDocument>, HasCaseDocument {
     private UploadDocument value;
-
-    @Override
-    public List<CaseDocument> discover() {
-        return ofNullable(value)
-            .map(UploadDocument::getDocumentLink)
-            .map(List::of)
-            .orElse(List.of());
-    }
 }

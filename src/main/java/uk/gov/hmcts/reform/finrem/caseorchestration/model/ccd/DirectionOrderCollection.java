@@ -7,27 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-import static java.util.Optional.ofNullable;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection implements CaseDocumentsDiscovery {
+public class DirectionOrderCollection implements HasCaseDocument {
 
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
     private DirectionOrder value;
-
-    @Override
-    public List<CaseDocument> discover() {
-        return ofNullable(value)
-            .map(DirectionOrder::getUploadDraftDocument)
-            .map(List::of)
-            .orElse(List.of());
-    }
 }
