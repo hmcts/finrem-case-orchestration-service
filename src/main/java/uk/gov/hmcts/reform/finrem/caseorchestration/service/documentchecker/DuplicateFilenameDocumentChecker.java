@@ -47,6 +47,14 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         }
     }
 
+    /**
+     * Processes a {@link HasCaseDocument} instance to collect all documents that implement
+     * the {@link DocumentFileNameProvider} interface from its fields, including nested
+     * {@link HasCaseDocument} instances and lists of such instances.
+     *
+     * @param hcd the {@link HasCaseDocument} instance to process
+     * @param allDocuments the list to which collected {@link DocumentFileNameProvider} instances will be added
+     */
     private static void processHasCaseDocument(HasCaseDocument hcd, List<DocumentFileNameProvider> allDocuments) {
         try {
             // Collect all fields from HasCaseDocument class
@@ -68,6 +76,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                 } else if (DocumentFileNameProvider.class.isAssignableFrom(field.getType())) {
                     allDocuments.add((DocumentFileNameProvider) field.get(hcd));
                 } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
+                    // If the field is an instance of HasCaseDocument, recursively process the nested HasCaseDocument instance
                     processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
                 }
             }
