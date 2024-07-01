@@ -42,41 +42,37 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
             for (Object item : list) {
                 if (item instanceof HasCaseDocument hasCaseDocument) {
                     processHasCaseDocument(hasCaseDocument, allDocuments);
-                } else {
-                    log.warn("Ignored " + item.getClass().getName());
                 }
             }
         }
     }
 
     private static void processHasCaseDocument(HasCaseDocument hcd, List<DocumentFileNameProvider> allDocuments) {
-        if (hcd != null) {
-            try {
-                // Collect all fields from HasCaseDocument class
-                Field[] fields = hcd.getClass().getDeclaredFields();
+        try {
+            // Collect all fields from HasCaseDocument class
+            Field[] fields = hcd.getClass().getDeclaredFields();
 
-                for (Field field : fields) {
-                    field.setAccessible(true);
+            for (Field field : fields) {
+                field.setAccessible(true);
 
-                    // Check if the field is a List with a parameterized type
-                    if (List.class.isAssignableFrom(field.getType())) {
-                        ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
-                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                // Check if the field is a List with a parameterized type
+                if (List.class.isAssignableFrom(field.getType())) {
+                    ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-                        // Ensure the list has a single parameterized type argument
-                        if (actualTypeArguments.length == 1 && HasCaseDocument.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
-                            // Get the value of the field and process the list
-                            processList((List<?>) field.get(hcd), allDocuments);
-                        }
-                    } else if (DocumentFileNameProvider.class.isAssignableFrom(field.getType())) {
-                        allDocuments.add((DocumentFileNameProvider) field.get(hcd));
-                    } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
-                        processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
+                    // Ensure the list has a single parameterized type argument
+                    if (actualTypeArguments.length == 1 && HasCaseDocument.class.isAssignableFrom((Class<?>) actualTypeArguments[0])) {
+                        // Get the value of the field and process the list
+                        processList((List<?>) field.get(hcd), allDocuments);
                     }
+                } else if (DocumentFileNameProvider.class.isAssignableFrom(field.getType())) {
+                    allDocuments.add((DocumentFileNameProvider) field.get(hcd));
+                } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
+                    processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
                 }
-            } catch (Exception e) {
-                log.error("Failed to check for duplicate filenames and return warnings", e);
             }
+        } catch (Exception e) {
+            log.error("Failed to check for duplicate filenames and return warnings", e);
         }
     }
 
