@@ -117,8 +117,10 @@ public class ConsentOrderPrintService {
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
         getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
         DocumentHelper.PaperNotificationRecipient docRespondent;
-        docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
-        bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
+        if (!shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
+            docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+            bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
+        }
         FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
