@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldNam
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapperTest;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -407,11 +409,9 @@ public class FormAToCaseTransformerTest {
     @Test
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
-            .document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
-            .document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
-        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createScannedD81Doc("d81-1"));
+        scannedDocuments.add(createScannedD81Doc("d81-2"));
+        scannedDocuments.add(createFormADoc());
         scannedDocuments.add(createDoc(P1_DOCUMENT));
         scannedDocuments.add(createDoc(PPF1_DOCUMENT));
         scannedDocuments.add(createDoc(P2_DOCUMENT));
@@ -433,6 +433,12 @@ public class FormAToCaseTransformerTest {
 
         assertThat(transformedCaseData, hasKey("formA"));
         assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), FORM_A_DOCUMENT);
+        assertThat(transformedCaseData, hasKey("formAType"));
+        assertThat(transformedCaseData, hasKey("formASubtype"));
+        assertThat(transformedCaseData, hasKey("formAControlNumber"));
+        assertThat(transformedCaseData, hasKey("formAFileName"));
+        assertThat(transformedCaseData, hasKey("formAScannedDate"));
+        assertThat(transformedCaseData, hasKey("formADeliveryDate"));
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
         ComplexTypeCollection<CaseDocument> d81Documents =
@@ -446,6 +452,7 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-2"));
         assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
+        // TODO assert scannedD81WithInfos
 
         assertThat(transformedCaseData, hasKey("pensionCollection"));
         ComplexTypeCollection<TypedCaseDocument> pensionDocuments =
@@ -504,6 +511,27 @@ public class FormAToCaseTransformerTest {
         return InputScannedDoc.builder().subtype(formSubType)
             .document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
     }
+
+    private InputScannedDoc createFormADoc() {
+        return InputScannedDoc.builder().type("form").subtype(FORM_A_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + FORM_A_DOCUMENT, "http://binUrl/" + FORM_A_DOCUMENT + "/binary", FORM_A_DOCUMENT + ".pdf"))
+            .fileName("1111002.pdf")
+            .controlNumber("20901000454999999000")
+            .scannedDate(LocalDateTime.of(1989, Month.JUNE, 4, 0, 0))
+            .deliveryDate(LocalDateTime.of(1989, Month.JUNE, 4, 0, 0))
+            .build();
+    }
+
+    private InputScannedDoc createScannedD81Doc(String id) {
+        return InputScannedDoc.builder().type("other").subtype(D81_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + id, "http://binUrl/" + id + "/binary", id + ".pdf"))
+            .fileName(id + ".pdf")
+            .controlNumber("controlNumber" + id)
+            .scannedDate(LocalDateTime.of(1989, Month.JULY, 1, 0, 0))
+            .deliveryDate(LocalDateTime.of(1989, Month.JULY, 1, 0, 0))
+            .build();
+    }
+
 
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(

@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +59,8 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinremCaseData {
+@EqualsAndHashCode(callSuper = true)
+public class FinremCaseData extends FinremCaseDataParent {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
