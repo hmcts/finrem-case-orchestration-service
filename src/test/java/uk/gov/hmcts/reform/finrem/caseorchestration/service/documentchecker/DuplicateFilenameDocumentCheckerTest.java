@@ -935,7 +935,7 @@ class DuplicateFilenameDocumentCheckerTest {
     }
 
     @Test
-    void testGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContented() throws DocumentContentCheckerException {
+    void testGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContested() throws DocumentContentCheckerException {
         List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
             FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED).build(),
             FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED, FinremCaseData.builder()
@@ -955,7 +955,7 @@ class DuplicateFilenameDocumentCheckerTest {
     }
 
     @Test
-    void shouldNotetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContented() throws DocumentContentCheckerException {
+    void shouldNotGetWarningsOnUploadingDuplicatedFilesAtTheSameTimeContested() throws DocumentContentCheckerException {
         List<String> warnings = underTest.getWarnings(DUPLICATED_CASE_DOCUMENT, new byte[0],
             FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED).build(),
             FinremCaseDetailsBuilderFactory.from(CaseType.CONTESTED, FinremCaseData.builder()
