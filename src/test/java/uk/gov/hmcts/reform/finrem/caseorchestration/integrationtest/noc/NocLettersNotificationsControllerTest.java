@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotAppro
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentOrderingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
@@ -55,7 +56,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
     LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
-    IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class})
+    IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
+    InternationalPostalService.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     public static final String AUTH_TOKEN = "authToken";
@@ -88,6 +90,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private EmailService emailService;
     @MockBean
     private CourtDetailsMapper courtDetailsMapper;
+    @MockBean
+    private InternationalPostalService postalService;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
@@ -128,7 +132,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
         verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails, APPLICANT, AUTH_TOKEN);
-
+        verify(postalService).isApplicantResideOutsideOfUK(caseDetails.getData());
     }
 
     @Test

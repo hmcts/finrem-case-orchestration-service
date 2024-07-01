@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
     private final ConsentOrderService consentOrderService;
+    private final InternationalPostalService postalService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -30,8 +32,10 @@ public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
-        log.info("Invoking Solicitor Create mid event");
+        log.info("Invoking amend application mid event for caseId {}", callbackRequest.getCaseDetails().getId());
         List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
+        List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
+        errors.addAll(validate);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
