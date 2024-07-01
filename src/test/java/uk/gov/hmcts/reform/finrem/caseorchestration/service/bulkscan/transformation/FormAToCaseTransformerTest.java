@@ -166,7 +166,7 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void shouldEmptyChildGenderIsNotGiven() {
+    public void shouldTransformEmptyChildGenderIsNotGiven() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(asList(
             new OcrDataField(OcrFieldName.NAME_CHILD_1, "Bilbo Baggins"),
             new OcrDataField(OcrFieldName.GENDER_CHILD_1, ""),
