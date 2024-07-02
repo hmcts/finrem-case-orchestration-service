@@ -70,7 +70,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     private void checkApplicantPostCodeDetails(FinremCaseData caseData, List<String> errors) {
         String postCode = caseData.isApplicantRepresentedByASolicitor()
-            ? caseData.getApplicantPostcode()
+            ? caseData.getApplicantSolicitorPostcode()
             : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
 
         if (StringUtils.isEmpty(postCode)) {
@@ -80,7 +80,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     private void checkRespondentPostCodeDetails(FinremCaseData caseData, List<String> errors) {
         String postCode = caseData.isRespondentRepresentedByASolicitor()
-            ? caseData.getRespondentPostcode()
+            ? caseData.getRespondentSolicitorPostcode()
             : caseData.getContactDetailsWrapper().getRespondentAddress().getPostCode();
 
         if (StringUtils.isEmpty(postCode)) {

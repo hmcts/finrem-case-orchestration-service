@@ -725,14 +725,14 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public String getApplicantPostcode() {
+    public String getApplicantSolicitorPostcode() {
         return isConsentedApplication()
             ? getContactDetailsWrapper().getSolicitorAddress().getPostCode()
             : getContactDetailsWrapper().getApplicantSolicitorAddress().getPostCode();
     }
 
     @JsonIgnore
-    public String getRespondentPostcode() {
+    public String getRespondentSolicitorPostcode() {
         return getContactDetailsWrapper().getRespondentSolicitorAddress().getPostCode();
     }
 
