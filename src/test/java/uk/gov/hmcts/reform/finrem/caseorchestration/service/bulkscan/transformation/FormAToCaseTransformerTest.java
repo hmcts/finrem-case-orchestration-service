@@ -246,7 +246,7 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void ChildSupportAgencyCalculationMadeToNullWhenNotProvided() {
+    public void childSupportAgencyCalculationMadeToNullWhenNotProvided() {
         Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
                 null))));
