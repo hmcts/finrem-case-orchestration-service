@@ -69,7 +69,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
             ? caseData.getApplicantSolicitorPostcode()
             : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
 
-        if (StringUtils.isEmpty(postCode)) {
+        if (StringUtils.isBlank(postCode)) {
             errors.add("Postcode field is required for applicant address.");
         }
     }
@@ -79,7 +79,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
             ? caseData.getRespondentSolicitorPostcode()
             : caseData.getContactDetailsWrapper().getRespondentAddress().getPostCode();
 
-        if (StringUtils.isEmpty(postCode)) {
+        if (StringUtils.isBlank(postCode)) {
             errors.add("Postcode field is required for respondent address.");
         }
     }
