@@ -8,12 +8,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import java.util.ArrayList;
@@ -65,9 +67,19 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     private void checkApplicantPostCodeDetails(FinremCaseData caseData, List<String> errors) {
-        String postCode = caseData.isApplicantRepresentedByASolicitor()
-            ? caseData.getApplicantSolicitorPostcode()
-            : caseData.getContactDetailsWrapper().getApplicantAddress().getPostCode();
+        String postCode = null;
+
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            postCode = caseData.getApplicantSolicitorPostcode();
+        } else {
+            Address applicantAddress = caseData.getContactDetailsWrapper() != null
+                ? caseData.getContactDetailsWrapper().getApplicantAddress()
+                : null;
+
+            if (applicantAddress != null) {
+                postCode = applicantAddress.getPostCode();
+            }
+        }
 
         if (StringUtils.isBlank(postCode)) {
             errors.add("Postcode field is required for applicant address.");
