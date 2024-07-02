@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.DocumentCheckContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentFileNameProvider;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
@@ -92,10 +92,9 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
     }
 
     @Override
-    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
-        throws DocumentContentCheckerException {
-        FinremCaseData caseData = beforeCaseDetails.getData();
-        List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(caseData);
+    public List<String> getWarnings(DocumentCheckContext context)  throws DocumentContentCheckerException {
+        CaseDocument caseDocument = context.getCaseDocument();
+        List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(context.getBeforeCaseDetails().getData());
 
         log.info("Iterating all CaseDocuments with interface HasCaseDocument.");
 
@@ -108,7 +107,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         }
 
         // check if duplication occurs on uploading documents
-        FinremCaseData newCaseData = caseDetails.getData();
+        FinremCaseData newCaseData = context.getCaseDetails().getData();
         if (
             (newCaseData.isConsentedApplication()
                 && ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()

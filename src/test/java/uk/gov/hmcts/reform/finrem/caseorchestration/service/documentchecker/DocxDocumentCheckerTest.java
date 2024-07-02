@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.DocumentCheckContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.CaseNumberDocumentContentChecker;
@@ -82,7 +83,12 @@ class DocxDocumentCheckerTest {
         when(caseNumberDocumentContentChecker.getWarning(eq(caseDetails), any(String[].class)))
             .thenReturn(testCase == 1 ? null : "Warning2");
 
-        List<String> warnings = underTest.getWarnings(caseDocument, documentBytes, caseDetails, caseDetails);
+        List<String> warnings = underTest.getWarnings(DocumentCheckContext.builder()
+                .caseDocument(caseDocument)
+                .bytes(documentBytes)
+                .beforeCaseDetails(caseDetails)
+                .caseDetails(caseDetails)
+                .build());
 
         assertThat(warnings).hasSize(testCase == 1 ? 1 : 2).contains("Warning1");
 
@@ -103,7 +109,12 @@ class DocxDocumentCheckerTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         byte[] documentBytes = "Invalid content".getBytes();
 
-        assertThatThrownBy(() -> underTest.getWarnings(caseDocument, documentBytes, caseDetails, caseDetails))
+        assertThatThrownBy(() -> underTest.getWarnings(DocumentCheckContext.builder()
+            .caseDocument(caseDocument)
+            .bytes(documentBytes)
+            .beforeCaseDetails(caseDetails)
+            .caseDetails(caseDetails)
+            .build()))
             .isInstanceOf(DocumentContentCheckerException.class);
     }
 

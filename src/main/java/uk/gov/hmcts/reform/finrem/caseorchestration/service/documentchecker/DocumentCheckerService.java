@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.DocumentCheckContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -40,7 +41,11 @@ public class DocumentCheckerService {
         List<String> warnings = new ArrayList<>();
         documentCheckersForDocument.forEach(dc -> {
             try {
-                warnings.addAll(dc.getWarnings(caseDocument, bytes, beforeCaseDetails, caseDetails));
+                warnings.addAll(dc.getWarnings(DocumentCheckContext.builder()
+                    .caseDocument(caseDocument).bytes(bytes)
+                    .beforeCaseDetails(beforeCaseDetails)
+                    .caseDetails(caseDetails)
+                    .build()));
             } catch (DocumentContentCheckerException e) {
                 log.error(format("Unexpected error when getting warnings from %s", dc.getClass().getName()), e);
             }

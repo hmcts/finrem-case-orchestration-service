@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.DocumentCheckContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker.DocumentContentChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentreader.DocxDocumentReader;
 
@@ -28,12 +28,11 @@ public class DocxDocumentChecker implements DocumentChecker {
     }
 
     @Override
-    public List<String> getWarnings(CaseDocument caseDocument, byte[] bytes, FinremCaseDetails beforeCaseDetails, FinremCaseDetails caseDetails)
-        throws DocumentContentCheckerException {
-        String[] content = getContent(bytes);
+    public List<String> getWarnings(DocumentCheckContext context)  throws DocumentContentCheckerException {
+        String[] content = getContent(context.getBytes());
 
         return documentContentCheckers.stream()
-            .map(dcc -> dcc.getWarning(caseDetails, content))
+            .map(dcc -> dcc.getWarning(context.getCaseDetails(), content))
             .filter(Objects::nonNull)
             .toList();
     }
