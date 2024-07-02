@@ -53,10 +53,6 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         checkApplicantPostCodeDetails(caseData, errors);
         checkRespondentPostCodeDetails(caseData, errors);
 
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
-        }
-
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
