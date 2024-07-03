@@ -26,6 +26,7 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
+
     public UpdateContactDetailsContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                    InternationalPostalService postalService) {
         super(finremCaseDetailsMapper);
