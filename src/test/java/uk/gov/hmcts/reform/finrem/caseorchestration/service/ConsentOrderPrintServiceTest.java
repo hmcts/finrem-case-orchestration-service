@@ -198,11 +198,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetailsBefore = defaultContestedFinremCaseDetails();
 
         CaseDocument generalOrder = caseDocument(DOC_URL, "GeneralOrder.pdf", BINARY_URL);
-        BulkPrintDocument bulkPrintDocument = BulkPrintDocument
-            .builder()
-            .binaryFileUrl(BINARY_URL)
-            .fileName("NotApprovedCoverLetter.pdf")
-            .build();
 
         caseDetails.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(generalOrder);
         caseDetailsBefore.getData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(null);
@@ -215,8 +210,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(bulkPrintDocumentList());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
-        when(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, AUTH_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(bulkPrintDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore,
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
@@ -233,8 +226,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             .toList(), hasItem("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary"));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
             .toList(), hasItem("GeneralOrder.pdf"));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName)
-            .toList(), hasItem("NotApprovedCoverLetter.pdf"));
     }
 
     @Test
