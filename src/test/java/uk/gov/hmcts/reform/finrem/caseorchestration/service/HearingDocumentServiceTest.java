@@ -229,7 +229,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "0300 123 5577", "Family.canterbury.countycourt@justice.gov.uk");
+            "01227 819200", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -263,7 +263,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
-            "0113 306 2501", "leedsfamily@justice.gov.uk");
+            "01423 503921", "enquiries.harrogate.countycourt@Justice.gov.uk");
     }
 
     @Test
@@ -309,7 +309,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5430", "manchesterdivorce@justice.gov.uk");
+            "0161 240 5424", "manchesterdivorce@justice.gov.uk");
     }
 
     @Test
@@ -331,7 +331,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
-            "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
+            "0300 123 5577", "FRCLondon@justice.gov.uk");
     }
 
     @Test
