@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
