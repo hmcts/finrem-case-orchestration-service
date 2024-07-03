@@ -24,7 +24,8 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
 
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
-
+    private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
+    private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
     public UpdateContactDetailsContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                    InternationalPostalService postalService) {
         super(finremCaseDetailsMapper);
@@ -45,46 +46,47 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
         log.info("Invoking contested event {} mid event callback for case id {}", EventType.UPDATE_CONTACT_DETAILS,
             caseDetails.getId());
 
-        List<String> errors = new ArrayList<>();
-
         FinremCaseData caseData = caseDetails.getData();
-
+        List<String> errors = new ArrayList<>();
         errors.addAll(postalService.validate(caseData));
-
-        validateCaseData(caseData, errors);
-
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
-        }
-
+        errors.addAll(validateCaseData(caseData));
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
     }
 
-    private void validateCaseData(FinremCaseData caseData, List<String> errors) {
+    private List<String> validateCaseData(FinremCaseData caseData) {
 
-        if (caseData.isContestedApplication()) {
-            ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-            if (caseData.isApplicantRepresentedByASolicitor()) {
-                if (wrapper.getApplicantSolicitorAddress() != null
-                    && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode()))
-                    errors.add(APPLICANT_POSTCODE_ERROR);
-            } else {
-                if (wrapper.getApplicantAddress() != null
-                    && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode()))
-                    errors.add(APPLICANT_POSTCODE_ERROR);
-            }
-
-            if (caseData.isRespondentRepresentedByASolicitor()) {
-                if (wrapper.getRespondentSolicitorAddress() != null
-                    && ObjectUtils.isEmpty(wrapper.getRespondentSolicitorAddress().getPostCode()))
-                    errors.add(RESPONDENT_POSTCODE_ERROR);
-            } else {
-                if (wrapper.getApplicantAddress() != null
-                    && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getPostCode()))
-                    errors.add(RESPONDENT_POSTCODE_ERROR);
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            if (wrapper.getApplicantSolicitorAddress() != null
+                && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode()))  {
+                errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+                return errors;
             }
         }
+
+        if (wrapper.getApplicantAddress() != null
+            && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode())) {
+            errors.add(APPLICANT_POSTCODE_ERROR);
+            return errors;
+        }
+
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            if (wrapper.getRespondentSolicitorAddress() != null
+                && ObjectUtils.isEmpty(wrapper.getRespondentSolicitorAddress().getPostCode())) {
+                errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
+                return errors;
+            }
+        }
+
+        if (wrapper.getRespondentAddress() != null
+            && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getPostCode())) {
+            errors.add(RESPONDENT_POSTCODE_ERROR);
+            return errors;
+        }
+
+        return errors;
     }
 }
