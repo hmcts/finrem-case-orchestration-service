@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.contentchecker;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,7 +17,7 @@ class CaseNumberDocumentContentCheckerTest {
     private final CaseNumberDocumentContentChecker underTest = new CaseNumberDocumentContentChecker();
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567890", "whatever", ""})
+    @ValueSource(strings = {"Case number 1234567890", "Case No: 1234567890", "Reference number: 1234567890", "whatever", ""})
     @NullSource
     void givenCaseData_whenContentContainCaseNumber(String validContent) {
         Arrays.stream(StringDecorator.values()).forEach(validContentDecorator ->
@@ -26,14 +25,15 @@ class CaseNumberDocumentContentCheckerTest {
                 new String[]{validContentDecorator.decorate(validContent)})).isNull());
     }
 
-    @Test
-    void givenCaseData_whenContentDoesNotMatchCaseNumber() {
+    @ParameterizedTest
+    @ValueSource(strings = {"Case number 1234567891", "Case No: 1234567891", "Reference number: 1234567891"})
+    void givenCaseData_whenContentDoesNotMatchCaseNumber(String caseNumber) {
         assertThat(underTest.getWarning(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID)).build(),
-            new String[] {"Case number 1234567891"})).isEqualTo("Case numbers may not match");
+            new String[] {caseNumber})).isEqualTo("Case numbers may not match");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567890", "whatever", ""})
+    @ValueSource(strings = {"Case number 1234567890", "Case No: 1234567890", "Reference number: 1234567890", "whatever", ""})
     @NullSource
     void givenCaseDataWithoutId_whenContentDoesNotMatchCaseNumber(String content) {
         Arrays.stream(StringDecorator.values()).forEach(contentDecorator ->

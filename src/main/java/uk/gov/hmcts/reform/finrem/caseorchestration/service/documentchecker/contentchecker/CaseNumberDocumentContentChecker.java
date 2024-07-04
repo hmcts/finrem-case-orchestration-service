@@ -23,7 +23,9 @@ public class CaseNumberDocumentContentChecker implements DocumentContentChecker 
     }
 
     private boolean containsCaseNumber(String text) {
-        return defaultString(text).contains("Case number");
+        return defaultString(text).toLowerCase().contains("case number")
+            || defaultString(text).toLowerCase().contains("case no")
+            || defaultString(text).toLowerCase().contains("reference number");
     }
 
     private boolean contentCaseNumberNotEqualsCaseNumber(FinremCaseDetails caseDetails, String content) {
