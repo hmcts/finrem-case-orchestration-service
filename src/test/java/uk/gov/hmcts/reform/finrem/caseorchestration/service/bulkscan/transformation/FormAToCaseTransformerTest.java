@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.Month.DECEMBER;
+import static java.time.Month.FEBRUARY;
 import static java.time.Month.JULY;
 import static java.time.Month.JUNE;
 import static java.util.Arrays.asList;
@@ -423,7 +425,7 @@ public class FormAToCaseTransformerTest {
         scannedDocuments.add(createDoc(FORM_E_DOCUMENT));
         scannedDocuments.add(createDoc(COVER_LETTER_DOCUMENT));
         scannedDocuments.add(createDoc(OTHER_SUPPORT_DOCUMENTS));
-        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
+        scannedDocuments.add(createDraftConsentOrder());
         scannedDocuments.add(createDoc(DECREE_NISI_DOCUMENT));
         scannedDocuments.add(createDoc(DECREE_ABSOLUTE_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
@@ -528,8 +530,22 @@ public class FormAToCaseTransformerTest {
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
         assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), OTHER_SUPPORT_DOCUMENTS);
 
-        assertThat(transformedCaseData, hasKey("consentOrder"));
+        assertThat(transformedCaseData, hasKey("consentOrderType"));
+        assertThat(transformedCaseData, hasEntry("consentOrderType", "other"));
+        assertThat(transformedCaseData, hasKey("consentOrderSubtype"));
+        assertThat(transformedCaseData, hasEntry("consentOrderSubtype", DRAFT_CONSENT_ORDER_DOCUMENT));
+        assertThat(transformedCaseData, hasKey("consentOrderControlNumber"));
+        assertThat(transformedCaseData, hasEntry("consentOrderControlNumber", "20910000598969990077"));
+        assertThat(transformedCaseData, hasKey("consentOrderFileName"));
+        assertThat(transformedCaseData, hasEntry("consentOrderFileName", DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf"));
+        assertThat(transformedCaseData, hasKey("consentOrderScannedDate"));
+        assertThat(transformedCaseData, hasEntry("consentOrderScannedDate", LocalDateTime.of(2021, DECEMBER, 27, 10, 46)));
+        assertThat(transformedCaseData, hasKey("consentOrderDeliveryDate"));
+        assertThat(transformedCaseData, hasEntry("consentOrderDeliveryDate", LocalDateTime.of(2022, FEBRUARY, 4, 14, 20)));
+        assertThat(transformedCaseData, hasKey("consentOrderExceptionRecordReference"));
+        assertThat(transformedCaseData, hasEntry("consentOrderExceptionRecordReference", TEST_CASE_ID));
         assertThat(transformedCaseData, hasKey("latestConsentOrder"));
+        assertThat(transformedCaseData, hasKey("consentOrder"));
         CaseDocument draftConsentOrder = (CaseDocument) transformedCaseData.get("consentOrder");
         assertThat(draftConsentOrder, equalTo(transformedCaseData.get("latestConsentOrder")));
         assertDocumentsMatchExpectations(draftConsentOrder, DRAFT_CONSENT_ORDER_DOCUMENT);
@@ -550,6 +566,16 @@ public class FormAToCaseTransformerTest {
     private InputScannedDoc createDoc(String formSubType) {
         return InputScannedDoc.builder().subtype(formSubType)
             .document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
+    }
+
+    private InputScannedDoc createDraftConsentOrder() {
+        return InputScannedDoc.builder().type("other").subtype(DRAFT_CONSENT_ORDER_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + DRAFT_CONSENT_ORDER_DOCUMENT, "http://binUrl/" + DRAFT_CONSENT_ORDER_DOCUMENT + "/binary", DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf"))
+            .fileName(DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf")
+            .controlNumber("20910000598969990077")
+            .scannedDate(LocalDateTime.of(2021, DECEMBER, 27, 10, 46))
+            .deliveryDate(LocalDateTime.of(2022, FEBRUARY, 4, 14, 20))
+            .build();
     }
 
     private InputScannedDoc createFormADoc() {
