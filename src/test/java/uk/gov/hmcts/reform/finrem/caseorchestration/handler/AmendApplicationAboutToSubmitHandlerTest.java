@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -67,9 +68,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
     @Test
     public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(true));
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CONSENTED, EventType.AMEND_APP_DETAILS);
     }
 
     @Test
@@ -323,5 +322,4 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
                 .data(new FinremCaseData()).build())
             .build();
     }
-
 }
