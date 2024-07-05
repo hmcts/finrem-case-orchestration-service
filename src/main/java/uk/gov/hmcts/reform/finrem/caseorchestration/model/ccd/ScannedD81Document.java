@@ -19,13 +19,13 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ScannedD81Document {
     private CaseDocument documentLink;
-    private ScannedDocumentType scannedD81Type;
-    private String scannedD81Subtype;
-    private String scannedD81ControlNumber;
-    private String scannedD81FileName;
+    private ScannedDocumentType type;
+    private String subType;
+    private String controlNumber;
+    private String fileName;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime scannedD81ScannedDate;
+    private LocalDateTime scannedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime scannedD81DeliveryDate;
-    private String scannedD81ExceptionRecordReference;
+    private LocalDateTime deliveryDate;
+    private String exceptionRecordReference;
 }

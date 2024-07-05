@@ -9,17 +9,20 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedD81Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapperTest;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.Month.JULY;
+import static java.time.Month.JUNE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -434,11 +437,17 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, hasKey("formA"));
         assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), FORM_A_DOCUMENT);
         assertThat(transformedCaseData, hasKey("formAType"));
+        assertThat(transformedCaseData, hasEntry("formAType", "form"));
         assertThat(transformedCaseData, hasKey("formASubtype"));
+        assertThat(transformedCaseData, hasEntry("formASubtype", FORM_A_DOCUMENT));
         assertThat(transformedCaseData, hasKey("formAControlNumber"));
+        assertThat(transformedCaseData, hasEntry("formAControlNumber", "20901000454999999000"));
         assertThat(transformedCaseData, hasKey("formAFileName"));
+        assertThat(transformedCaseData, hasEntry("formAFileName", "1111002.pdf"));
         assertThat(transformedCaseData, hasKey("formAScannedDate"));
+        assertThat(transformedCaseData, hasEntry("formAScannedDate", LocalDateTime.of(2024, JUNE, 4, 0, 0)));
         assertThat(transformedCaseData, hasKey("formADeliveryDate"));
+        assertThat(transformedCaseData, hasEntry("formADeliveryDate", LocalDateTime.of(2024, JUNE, 4, 0, 0)));
         assertThat(transformedCaseData, hasKey("formAExceptionRecordReference"));
         assertThat(transformedCaseData, hasEntry("formAExceptionRecordReference", TEST_CASE_ID));
 
@@ -454,7 +463,36 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-2"));
         assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
+
         // TODO assert scannedD81WithInfos
+        assertThat(transformedCaseData, hasKey("scannedD81WithInfos"));
+        ComplexTypeCollection<ScannedD81Document> scannedD81WithInfos =
+            (ComplexTypeCollection<ScannedD81Document>) transformedCaseData.get("scannedD81WithInfos");
+        assertThat(scannedD81WithInfos, hasSize(2));
+        ScannedD81Document scannedD81Document1 = scannedD81WithInfos.getItem(0);
+        CaseDocument scannedD81CaseDocument1 = scannedD81Document1.getDocumentLink();
+        assertThat(scannedD81CaseDocument1.getDocumentUrl(), is("http://url/d81-1"));
+        assertThat(scannedD81CaseDocument1.getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
+        assertThat(scannedD81CaseDocument1.getDocumentFilename(), is("d81-1.pdf"));
+        assertThat(scannedD81Document1.getType(), is(ScannedDocumentType.OTHER));
+        assertThat(scannedD81Document1.getSubType(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document1.getControlNumber(), is("controlNumberd81-1"));
+        assertThat(scannedD81Document1.getFileName(), is("d81-1.pdf"));
+        assertThat(scannedD81Document1.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document1.getDeliveryDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document1.getExceptionRecordReference(), is(TEST_CASE_ID));
+        ScannedD81Document scannedD81Document2 = scannedD81WithInfos.getItem(1);
+        CaseDocument scannedD81CaseDocument2 = scannedD81Document2.getDocumentLink();
+        assertThat(scannedD81CaseDocument2.getDocumentUrl(), is("http://url/d81-2"));
+        assertThat(scannedD81CaseDocument2.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
+        assertThat(scannedD81CaseDocument2.getDocumentFilename(), is("d81-2.pdf"));
+        assertThat(scannedD81Document2.getType(), is(ScannedDocumentType.OTHER));
+        assertThat(scannedD81Document2.getSubType(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document2.getControlNumber(), is("controlNumberd81-2"));
+        assertThat(scannedD81Document2.getFileName(), is("d81-2.pdf"));
+        assertThat(scannedD81Document2.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document2.getDeliveryDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document2.getExceptionRecordReference(), is(TEST_CASE_ID));
 
         assertThat(transformedCaseData, hasKey("pensionCollection"));
         ComplexTypeCollection<TypedCaseDocument> pensionDocuments =
@@ -519,8 +557,8 @@ public class FormAToCaseTransformerTest {
             .document(new InputScannedDocUrl("http://url/" + FORM_A_DOCUMENT, "http://binUrl/" + FORM_A_DOCUMENT + "/binary", FORM_A_DOCUMENT + ".pdf"))
             .fileName("1111002.pdf")
             .controlNumber("20901000454999999000")
-            .scannedDate(LocalDateTime.of(1989, Month.JUNE, 4, 0, 0))
-            .deliveryDate(LocalDateTime.of(1989, Month.JUNE, 4, 0, 0))
+            .scannedDate(LocalDateTime.of(2024, JUNE, 4, 0, 0))
+            .deliveryDate(LocalDateTime.of(2024, JUNE, 4, 0, 0))
             .build();
     }
 
@@ -529,8 +567,8 @@ public class FormAToCaseTransformerTest {
             .document(new InputScannedDocUrl("http://url/" + id, "http://binUrl/" + id + "/binary", id + ".pdf"))
             .fileName(id + ".pdf")
             .controlNumber("controlNumber" + id)
-            .scannedDate(LocalDateTime.of(1989, Month.JULY, 1, 0, 0))
-            .deliveryDate(LocalDateTime.of(1989, Month.JULY, 1, 0, 0))
+            .scannedDate(LocalDateTime.of(2024, JULY, 1, 0, 0))
+            .deliveryDate(LocalDateTime.of(2024, JULY, 1, 0, 0))
             .build();
     }
 
