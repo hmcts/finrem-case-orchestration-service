@@ -71,9 +71,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         if (caseData.isApplicantRepresentedByASolicitor()) {
             postCode = caseData.getApplicantSolicitorPostcode();
         } else {
-            Address applicantAddress = caseData.getContactDetailsWrapper() != null
-                ? caseData.getContactDetailsWrapper().getApplicantAddress()
-                : null;
+            Address applicantAddress = caseData.getContactDetailsWrapper().getApplicantAddress();
 
             if (applicantAddress != null) {
                 postCode = applicantAddress.getPostCode();
@@ -91,9 +89,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         if (caseData.isRespondentRepresentedByASolicitor()) {
             postCode = caseData.getRespondentSolicitorPostcode();
         } else {
-            Address respondentAddress = caseData.getContactDetailsWrapper() != null
-                ? caseData.getContactDetailsWrapper().getRespondentAddress()
-                : null;
+            Address respondentAddress = caseData.getContactDetailsWrapper().getRespondentAddress();
 
             if (respondentAddress != null) {
                 postCode = respondentAddress.getPostCode();
