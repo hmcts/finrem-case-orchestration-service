@@ -108,8 +108,8 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
                 .value(UploadDocument.builder().build())
                 .build()
         ));
-        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "1warnings","1warnings")
-            : List.of());
+        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "1warnings", "1warnings",
+            "abc", "Aae") : List.of());
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, FinremCaseData.builder()
                 .uploadDocuments(List.of(
@@ -128,7 +128,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
                 .caseDetails(finremCaseDetails)
                 .caseDetailsBefore(finremCaseDetailsBefore).build(),
             AUTH_TOKEN);
-        assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings") : List.of());
+        assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings", "Aae", "abc") : List.of());
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
                 "Number of warnings encountered when uploading document for a case %s: %s", CASE_ID, 2));
