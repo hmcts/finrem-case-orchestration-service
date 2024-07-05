@@ -439,6 +439,8 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, hasKey("formAFileName"));
         assertThat(transformedCaseData, hasKey("formAScannedDate"));
         assertThat(transformedCaseData, hasKey("formADeliveryDate"));
+        assertThat(transformedCaseData, hasKey("formAExceptionRecordReference"));
+        assertThat(transformedCaseData, hasEntry("formAExceptionRecordReference", TEST_CASE_ID));
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
         ComplexTypeCollection<CaseDocument> d81Documents =

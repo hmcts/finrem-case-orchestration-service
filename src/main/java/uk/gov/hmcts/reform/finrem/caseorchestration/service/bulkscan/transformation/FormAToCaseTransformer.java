@@ -207,7 +207,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 additionalCaseData.put(CONSENT_ORDER_SCANNED_DATE, doc.getScannedDate());
                 additionalCaseData.put(CONSENT_ORDER_DELIVERY_DATE, doc.getDeliveryDate());
                 additionalCaseData.put(CONSENT_ORDER_EXCEPTIONAL_RECORD_REFERENCE, exceptionRecord.getId());
-                additionalCaseData.put(LATEST_CONSENT_ORDER, doc);
+                additionalCaseData.put(LATEST_CONSENT_ORDER, transformInputScannedDocIntoCaseDocument(doc));
             });
 
         inputScannedDocs.stream()

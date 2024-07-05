@@ -323,7 +323,7 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String FORMA = "formA";
-    public static final String FORMA_TYPE = "formArType";
+    public static final String FORMA_TYPE = "formAType";
     public static final String FORMA_SUBTYPE = "formASubtype";
     public static final String FORMA_CONTROL_NUMBER = "formAControlNumber";
     public static final String FORMA_FILE_NAME = "formAFileName";
