@@ -105,6 +105,8 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
 
+        checkApplicantPostcodeDetails(caseData, errors);
+
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(userAuthorisation, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
 
@@ -113,6 +115,25 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
             .data(caseData)
             .errors(errors)
             .build();
+    }
+
+    private void checkApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+        String postCode = null;
+
+        if (YES_VALUE.equals(caseData.get("applicantRepresented"))) {
+            Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get("applicantSolicitorAddress");
+            String solicitorPostCode = (String) applicantSolicitorAddress.get("PostCode");
+            if (StringUtils.isBlank(solicitorPostCode)) {
+                errors.add("Postcode field is required for applicant solicitor address.");
+            }
+        }
+        Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get("applicantAddress");
+        postCode = (String) applicantAddress.get("PostCode");
+
+
+        if (StringUtils.isBlank(postCode)) {
+            errors.add("Postcode field is required for applicant address.");
+        }
     }
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
