@@ -366,6 +366,7 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private OrderWrapper orderWrapper;
+    @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private BulkPrintCoversheetWrapper bulkPrintCoversheetWrapper;
     private YesOrNo additionalHearingDocumentsOption;
