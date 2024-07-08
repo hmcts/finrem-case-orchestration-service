@@ -48,11 +48,11 @@ public class ConsentOrderNotApprovedDocumentService {
 
         List<BulkPrintDocument> documents = new ArrayList<>();
 
-        documents.add(coverLetter(caseDetails, authorisationToken));
+        documents.add(notApprovedCoverLetter(caseDetails, authorisationToken, APPLICANT));
         addEitherNotApprovedOrderOrGeneralOrderIfApplicable(caseDetails, documents, authorisationToken);
 
         return documents.size() == 1
-            ? emptyList()  // if only cover letter then print nothing
+            ? emptyList() // if only cover letter then print nothing
             : documents;
     }
 
@@ -71,8 +71,10 @@ public class ConsentOrderNotApprovedDocumentService {
         }
     }
 
-    public BulkPrintDocument coverLetter(FinremCaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
+
+    public BulkPrintDocument notApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
         String notApprovedOrderNotificationFileName;
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
             notApprovedOrderNotificationFileName = documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName();
