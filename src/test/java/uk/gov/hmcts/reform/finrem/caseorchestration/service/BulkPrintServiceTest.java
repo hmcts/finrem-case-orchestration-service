@@ -157,7 +157,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetApp(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), is(caseDocument));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetRes(), is(caseDocument));
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), is(caseDocument));
     }
 
     @Test
@@ -240,7 +240,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(false));
     }
 
-
     @Test
     public void shouldSaveApplicantDocumentsToConfidentialCollectionWhenAddressIsConfidentialFinrem() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
@@ -255,8 +254,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
-        assertNull(caseDetails.getData().getBulkPrintCoverSheetApp());
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), is(caseDocument));
+        assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
     }
 
     @Test
@@ -273,8 +272,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
-        assertNull(caseDetails.getData().getBulkPrintCoverSheetRes());
+        assertThat(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), is(caseDocument));
+        assertNull(caseDetails.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
     }
 
     @Test
@@ -294,7 +293,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
         assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
     }
-
 
     @Test
     public void shouldPrintIntervenerDocuments() {
@@ -321,7 +319,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
     }
-
 
     @Test
     public void shouldPrintIntervenerDocumentsFinrem() {

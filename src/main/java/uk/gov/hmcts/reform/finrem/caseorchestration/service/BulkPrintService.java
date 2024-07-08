@@ -202,10 +202,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetApp(null);
-            caseDetails.getData().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetApp(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
 
         return documentHelper.mapToBulkPrintDocument(applicantCoverSheet);
@@ -264,10 +264,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetRes(null);
-            caseDetails.getData().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
 
         return documentHelper.mapToBulkPrintDocument(respondentCoverSheet);
