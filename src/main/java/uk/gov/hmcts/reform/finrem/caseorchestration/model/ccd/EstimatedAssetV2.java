@@ -13,6 +13,7 @@ public enum EstimatedAssetV2 {
     BETWEEN_SEVEN_POINT_FIVE_TO_FIFTEEN_MILLION_POUNDS("betweenSevenPointFiveAndFifteenMillionPounds"),
     BETWEEN_ONE_TO_SEVEN_POINT_FIVE_MILLION_POUNDS("betweenOneAndSevenPointFiveMillionPounds"),
     UNDER_ONE_MILLION_POUNDS("underOneMillionPounds"),
+    UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS("underTwoHundredAndFiftyThousandPounds"),
     UNABLE_TO_QUANTIFY("unableToQuantify");
     private final String id;
 
