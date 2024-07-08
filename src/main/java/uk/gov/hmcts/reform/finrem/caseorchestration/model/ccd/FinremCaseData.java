@@ -12,7 +12,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +20,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedR
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.FormAScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
@@ -60,8 +61,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class FinremCaseData extends FinremCaseDataParent {
+public class FinremCaseData {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
@@ -326,6 +326,11 @@ public class FinremCaseData extends FinremCaseDataParent {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFour intervenerFour;
+    @Getter(AccessLevel.NONE)
+    private FormAScannedDocWrapper formAScannedDocWrapper;
+    @Getter(AccessLevel.NONE)
+    private ConsentOrderScannedDocWrapper consentOrderScannedDocWrapper;
+    private List<ScannedD81WithInfo> scannedD81WithInfos;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
@@ -928,6 +933,24 @@ public class FinremCaseData extends FinremCaseDataParent {
             case INTV_3 -> getIntv3HearingNoticesCollection();
             case INTV_4 -> getIntv4HearingNoticesCollection();
         };
+    }
+
+    @JsonIgnore
+    public FormAScannedDocWrapper getFormAScannedDocWrapper() {
+        if (formAScannedDocWrapper == null) {
+            this.formAScannedDocWrapper = new FormAScannedDocWrapper();
+        }
+
+        return formAScannedDocWrapper;
+    }
+
+    @JsonIgnore
+    public ConsentOrderScannedDocWrapper getConsentOrderScannedDocWrapper() {
+        if (consentOrderScannedDocWrapper == null) {
+            this.consentOrderScannedDocWrapper = new ConsentOrderScannedDocWrapper();
+        }
+
+        return consentOrderScannedDocWrapper;
     }
 
     @JsonIgnore
