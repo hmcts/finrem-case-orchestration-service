@@ -80,6 +80,7 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest ccdRequest,
                                                                                    String userAuthorisation) {
+        List<String> errors = new ArrayList<>();
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
@@ -110,6 +111,7 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
         return GenericAboutToStartOrSubmitCallbackResponse
             .<Map<String, Object>>builder()
             .data(caseData)
+            .errors(errors)
             .build();
     }
 
