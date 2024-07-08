@@ -75,7 +75,7 @@ public class SendOrderIntervenerTwoDocumentHandler extends SendOrderPartyDocumen
         FinremCaseData caseData = caseDetails.getData();
         IntervenerTwo wrapper = caseData.getIntervenerTwo();
         if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
-            caseData.setBulkPrintCoverSheetIntv2(bulkPrintSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetIntv2(bulkPrintSheet);
         }
     }
 
