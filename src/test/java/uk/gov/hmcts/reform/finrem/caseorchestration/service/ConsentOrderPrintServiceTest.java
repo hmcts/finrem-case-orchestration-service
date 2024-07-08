@@ -95,7 +95,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(genericDocumentService.bulkPrint(any(), any(), anyBoolean(), any())).thenReturn(LETTER_ID);
     }
 
-
     @Test
     public void should_send_approve_order_when_no_general_order_available() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
@@ -114,7 +113,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = caseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -142,7 +141,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = caseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -172,7 +171,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = caseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -206,7 +205,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = caseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -253,7 +252,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             CONSENT_SEND_ORDER_FOR_APPROVED_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = caseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -283,7 +282,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = resultingCaseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -308,7 +307,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
 
         FinremCaseData caseData = resultingCaseDetails.getData();
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -333,7 +332,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
 
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
@@ -354,7 +353,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        assertEquals(caseData.getBulkPrintCoverSheetRes(), caseDocument);
+        assertEquals(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), caseDocument);
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
     }
@@ -443,7 +442,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        assertNotNull(caseData.getBulkPrintCoverSheetRes());
+        assertNotNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertEquals(caseData.getBulkPrintLetterIdApp(), LETTER_ID.toString());
 
@@ -470,7 +469,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             APPROVE_ORDER, AUTH_TOKEN);
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        assertEquals(caseData.getBulkPrintCoverSheetRes(), caseDocument);
+        assertEquals(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), caseDocument);
         assertEquals(caseData.getBulkPrintLetterIdRes(), LETTER_ID.toString());
         assertNull(caseData.getBulkPrintLetterIdApp());
 
@@ -533,10 +532,10 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        assertEquals(caseData.getBulkPrintCoverSheetResConfidential(), caseDocument);
-        assertNull(caseData.getBulkPrintCoverSheetRes());
-        assertEquals(caseData.getBulkPrintCoverSheetAppConfidential(), caseDocument);
-        assertNull(caseData.getBulkPrintCoverSheetApp());
+        assertEquals(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), caseDocument);
+        assertNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
+        assertEquals(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), caseDocument);
+        assertNull(caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
     }
 
     @Test
