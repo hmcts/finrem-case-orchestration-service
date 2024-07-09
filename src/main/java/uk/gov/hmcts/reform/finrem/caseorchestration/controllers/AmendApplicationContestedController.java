@@ -37,6 +37,7 @@ public class AmendApplicationContestedController extends BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<String> errors = new ArrayList<>();
+        checkApplicantSolicitorPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
@@ -50,6 +51,7 @@ public class AmendApplicationContestedController extends BaseController {
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = new ArrayList<>();
+        checkApplicantPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
@@ -63,6 +65,7 @@ public class AmendApplicationContestedController extends BaseController {
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = new ArrayList<>();
+        checkRespondentPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
