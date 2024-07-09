@@ -29,7 +29,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     @PostMapping(path = "/amend-application-app-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Add empty org policies for both parties")
+    @Operation(description = "Validate postcode on applicant solicitor page")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationAppSolicitor(
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
@@ -44,7 +44,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     @PostMapping(path = "/amend-application-app", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Add empty org policies for both parties")
+    @Operation(description = "Validate postcode on applicant details page")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationApp(
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
@@ -58,7 +58,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     @PostMapping(path = "/amend-application-res-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Add empty org policies for both parties")
+    @Operation(description = "Validate postcode on respondent solicitor page")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationRespondentSolicitor(
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
@@ -71,7 +71,6 @@ public class AmendApplicationContestedController extends BaseController {
     }
 
     private void checkApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-        String postCode = null;
 
         if (YES_VALUE.equals(caseData.get("applicantRepresented"))) {
             Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get("applicantSolicitorAddress");
