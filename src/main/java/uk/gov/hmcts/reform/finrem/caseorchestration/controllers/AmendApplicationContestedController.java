@@ -92,4 +92,24 @@ public class AmendApplicationContestedController extends BaseController {
         }
     }
 
+    private void checkRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+        String postCode = null;
+
+        if (YES_VALUE.equals(caseData.get("respondentRepresented"))) {
+            Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get("rSolicitorAddress");
+            postCode = (String) respondentSolicitorAddress.get("PostCode");
+
+            if (StringUtils.isBlank(postCode)) {
+                errors.add("Postcode field is required for respondent solicitor address.");
+            }
+        } else {
+            Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get("respondentAddress");
+            postCode = (String) respondentAddress.get("PostCode");
+
+            if (StringUtils.isBlank(postCode)) {
+                errors.add("Postcode field is required for respondent address.");
+            }
+        }
+    }
+
 }
