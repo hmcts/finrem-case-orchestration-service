@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
@@ -25,13 +27,20 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
+        return List.of(CallbackType.MID_EVENT, CallbackType.MID_EVENT_1, CallbackType.MID_EVENT_2, CallbackType.MID_EVENT_3).contains(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        throw new UnsupportedOperationException("MESSAGE");
+    }
+
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              CallbackType callbackType,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested event {} mid event callback for Case ID: {}",

@@ -12,4 +12,9 @@ public interface CallbackHandler<D> {
 
     GenericAboutToStartOrSubmitCallbackResponse<D> handle(CallbackRequest callbackRequest,
                                                           String userAuthorisation);
+
+    default GenericAboutToStartOrSubmitCallbackResponse<D> handle(CallbackRequest callbackRequest, CallbackType callbackType,
+                                                                  String userAuthorisation) {
+        return handle(callbackRequest, userAuthorisation);
+    }
 }

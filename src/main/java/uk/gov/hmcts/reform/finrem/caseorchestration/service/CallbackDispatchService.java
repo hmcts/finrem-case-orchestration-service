@@ -47,7 +47,7 @@ public class CallbackDispatchService {
             if (callbackHandler.canHandle(callbackType, caseType, eventType)) {
 
                 GenericAboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
-                    callbackHandler.handle(callbackRequest, userAuthorisation);
+                    callbackHandler.handle(callbackRequest, callbackType, userAuthorisation);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());
                 List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.emptyList());

@@ -27,6 +27,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 
 
@@ -101,6 +104,69 @@ public class CcdCallbackController {
         validateCaseData(callbackRequest);
 
         return performRequest(MID_EVENT, callbackRequest, authorisationToken);
+    }
+
+    @PostMapping(path = "/ccdMidEvent1")
+    @Operation(summary = "Handles MidEvent callback requests from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdMidEvent1(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+
+        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID: `{}`",
+            callbackRequest.getEventId(),
+            callbackRequest.getCaseDetails().getId());
+
+        validateCaseData(callbackRequest);
+
+        return performRequest(MID_EVENT_1, callbackRequest, authorisationToken);
+    }
+
+    @PostMapping(path = "/ccdMidEvent2")
+    @Operation(summary = "Handles MidEvent callback requests from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdMidEvent2(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+
+        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID: `{}`",
+            callbackRequest.getEventId(),
+            callbackRequest.getCaseDetails().getId());
+
+        validateCaseData(callbackRequest);
+
+        return performRequest(MID_EVENT_2, callbackRequest, authorisationToken);
+    }
+
+    @PostMapping(path = "/ccdMidEvent3")
+    @Operation(summary = "Handles MidEvent callback requests from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdMidEvent3(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+
+        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID: `{}`",
+            callbackRequest.getEventId(),
+            callbackRequest.getCaseDetails().getId());
+
+        validateCaseData(callbackRequest);
+
+        return performRequest(MID_EVENT_3, callbackRequest, authorisationToken);
     }
 
     @PostMapping(path = "/ccdSubmittedEvent")
