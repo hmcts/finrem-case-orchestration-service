@@ -33,16 +33,15 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                               String userAuthorisation) {
         throw new UnsupportedOperationException("MESSAGE");
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              CallbackType callbackType,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
+                                                                              CallbackType callbackType, String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();
         log.info("Invoking contested event {} mid event callback for Case ID: {}",
             EventType.AMEND_CONTESTED_APP_DETAILS, caseDetails.getId());
 

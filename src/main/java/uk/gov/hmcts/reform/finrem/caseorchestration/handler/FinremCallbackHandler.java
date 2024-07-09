@@ -30,6 +30,11 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
 
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
+                                                                              CallbackType callbackType, String userAuthorisation) {
+        return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
+    }
+
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
         FinremCaseDetails finremCaseDetailsBefore = null;
@@ -44,16 +49,18 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return callbackRequestWithFinremCaseDetails;
     }
 
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest, CallbackType callbackType, String userAuthorisation) {
+        FinremCallbackRequest callbackRequestWithFinremCaseDetails =
+            mapToFinremCallbackRequest(callbackRequest);
+        return this.handle(callbackRequestWithFinremCaseDetails, callbackType, userAuthorisation);
+    }
+
     public void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
-    }
-
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
-                                                                              CallbackType callbackType, String userAuthorisation) {
-        return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
     }
 }
