@@ -68,13 +68,12 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && (EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType) || EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.equals(eventType));
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest ccdRequest,
                                                                                    String userAuthorisation) {
-        List<String> errors = new ArrayList<>();
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
@@ -99,6 +98,7 @@ public class AmendApplicationContestedAboutToSubmitHandler implements CallbackHa
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
 
+        List<String> errors = new ArrayList<>();
         checkApplicantPostcodeDetails(caseData, errors);
         checkRespondentPostcodeDetails(caseData, errors);
 
