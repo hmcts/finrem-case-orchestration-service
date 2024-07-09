@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -63,6 +65,31 @@ public class AmendApplicationContestedController extends BaseController {
         List<String> errors = new ArrayList<>();
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
+    }
+
+    private void checkApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+        String postCode = null;
+
+        if (YES_VALUE.equals(caseData.get("applicantRepresented"))) {
+            Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get("applicantSolicitorAddress");
+            String solicitorPostCode = (String) applicantSolicitorAddress.get("PostCode");
+
+            if (StringUtils.isBlank(solicitorPostCode)) {
+                errors.add("Postcode field is required for applicant solicitor address.");
+            }
+        }
+
+    }
+
+    private void checkApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+        String postCode = null;
+
+        Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get("applicantAddress");
+        postCode = (String) applicantAddress.get("PostCode");
+
+        if (StringUtils.isBlank(postCode)) {
+            errors.add("Postcode field is required for applicant address.");
+        }
     }
 
 }
