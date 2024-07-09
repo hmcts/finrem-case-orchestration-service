@@ -37,7 +37,7 @@ public class AmendApplicationContestedController extends BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<String> errors = new ArrayList<>();
-        checkApplicantSolicitorPostcodeDetails(caseData, errors);
+        validateApplicantSolicitorPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
@@ -51,7 +51,7 @@ public class AmendApplicationContestedController extends BaseController {
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = new ArrayList<>();
-        checkApplicantPostcodeDetails(caseData, errors);
+        validateApplicantPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
@@ -65,12 +65,12 @@ public class AmendApplicationContestedController extends BaseController {
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = new ArrayList<>();
-        checkRespondentPostcodeDetails(caseData, errors);
+        validateRespondentPostcodeDetails(caseData, errors);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
-    private void checkApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+    private void validateApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
 
         if (YES_VALUE.equals(caseData.get("applicantRepresented"))) {
             Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get("applicantSolicitorAddress");
@@ -83,7 +83,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     }
 
-    private void checkApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+    private void validateApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
         String postCode = null;
 
         Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get("applicantAddress");
@@ -94,7 +94,7 @@ public class AmendApplicationContestedController extends BaseController {
         }
     }
 
-    private void checkRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
+    private void validateRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
         String postCode = null;
 
         if (YES_VALUE.equals(caseData.get("respondentRepresented"))) {
