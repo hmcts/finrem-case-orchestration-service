@@ -52,4 +52,17 @@ public class AmendApplicationContestedController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
+    @PostMapping(path = "/amend-application-res-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Add empty org policies for both parties")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationRespondentSolicitor(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
+    ) {
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        List<String> errors = new ArrayList<>();
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
+    }
+
 }
