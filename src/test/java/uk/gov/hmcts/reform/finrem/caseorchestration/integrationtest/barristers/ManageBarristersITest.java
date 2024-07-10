@@ -204,7 +204,7 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
-            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
+            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request, null);
 
         assertNotNull(response.getBody());
         List errors = response.getBody().getErrors();
@@ -226,7 +226,7 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
-            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
+            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request, null);
 
         assertNotNull(response.getBody());
         List errors = response.getBody().getErrors();
@@ -255,7 +255,7 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
         ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
-            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
+            ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request, null);
 
         assertNotNull(response.getBody());
         assertThat(response.getBody().getErrors().get(0), is("Barrister is already representing another party on this case"));

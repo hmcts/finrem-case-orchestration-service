@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
-import java.util.List;
-
 @Slf4j
 @Service
 public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
@@ -27,7 +25,7 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return List.of(CallbackType.MID_EVENT, CallbackType.MID_EVENT_1, CallbackType.MID_EVENT_2, CallbackType.MID_EVENT_3).contains(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType);
     }
@@ -35,15 +33,15 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                               String userAuthorisation) {
-        throw new UnsupportedOperationException("MESSAGE");
+        throw new UnsupportedOperationException("never reach this line");
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
-                                                                              CallbackType callbackType, String userAuthorisation) {
+                                                                              String userAuthorisation, CallbackContext context) {
         FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();
-        log.info("Invoking contested event {} mid event callback for Case ID: {}",
-            EventType.AMEND_CONTESTED_APP_DETAILS, caseDetails.getId());
+        log.info("Invoking contested event {} mid event callback (PageId:{}) for Case ID: {}",
+            EventType.AMEND_CONTESTED_APP_DETAILS, context.getPageId(), caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
