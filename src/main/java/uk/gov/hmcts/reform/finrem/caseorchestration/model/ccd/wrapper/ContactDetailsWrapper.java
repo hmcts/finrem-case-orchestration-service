@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -42,10 +41,8 @@ public class ContactDetailsWrapper {
     @JsonProperty("applicantAddressConfidential")
     private YesOrNo applicantAddressHiddenFromRespondent;
     @JsonProperty("respondentFMName")
-    @Setter
     private String respondentFmName;
     @JsonProperty("respondentLName")
-    @Setter
     private String respondentLname;
     @JsonProperty("respondentRepresented")
     private YesOrNo contestedRespondentRepresented;
@@ -78,9 +75,7 @@ public class ContactDetailsWrapper {
     private String solicitorDxNumber;
     private YesOrNo solicitorAgreeToReceiveEmails;
     @JsonProperty("appRespondentFMName")
-    @Setter
     private String appRespondentFmName;
-    @Setter
     private String appRespondentLName;
     @JsonProperty("appRespondentRep")
     private YesOrNo consentedRespondentRepresented;
