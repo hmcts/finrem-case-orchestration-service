@@ -304,6 +304,26 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         assertEquals(0, response.getErrors().size());
     }
 
+    @Test
+    public void givenEmptyPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
+        // Arrange
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        Address address = new Address();
+        address.setCounty("West Yorkshire");
+        address.setPostCode(" ");
+        finremCaseData.getContactDetailsWrapper().setApplicantSolicitorAddress(address);
+        finremCaseData.getContactDetailsWrapper().setRespondentSolicitorAddress(address);
+        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(2, response.getErrors().size());
+        assertTrue(response.getErrors().contains("Postcode field is required for applicant address."));
+        assertTrue(response.getErrors().contains("Postcode field is required for respondent address."));
+    }
+
     private CallbackRequest doValidCaseDataSetUp(final String path) {
         try {
             return getCallbackRequestFromResource(path);
