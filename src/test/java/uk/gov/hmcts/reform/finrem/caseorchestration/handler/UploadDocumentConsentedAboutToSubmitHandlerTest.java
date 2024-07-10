@@ -131,7 +131,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings", "Aae", "abc") : List.of());
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
-                "Number of warnings encountered when uploading document for a case %s: %s", CASE_ID, 2));
+                "Number of warnings encountered when uploading document for a case %s: %s", CASE_ID, 4));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }
