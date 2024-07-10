@@ -97,7 +97,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWra
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -898,7 +900,17 @@ class DuplicateFilenameDocumentCheckerTest {
             .caseDocument(DUPLICATED_CASE_DOCUMENT)
             .bytes(new byte[0])
             .beforeCaseDetails(FinremCaseDetails.builder().data(caseData).build())
-            .caseDetails(FinremCaseDetails.builder().build()).build());
+            .caseDetails(FinremCaseDetails.builder().data(
+                caseData.toBuilder().uploadDocuments(
+                    Stream.concat(
+                        Optional.ofNullable(caseData.getUploadDocuments()).orElse(new ArrayList<>()).stream(),
+                        Stream.of(UploadDocumentCollection.builder().value(UploadDocument.builder()
+                            .documentLink(DUPLICATED_CASE_DOCUMENT)
+                            .build()).build())
+                    ).toList()
+                ).build()
+            ).build())
+            .build());
         assertDuplicateFilenameWarning(warnings);
     }
 
