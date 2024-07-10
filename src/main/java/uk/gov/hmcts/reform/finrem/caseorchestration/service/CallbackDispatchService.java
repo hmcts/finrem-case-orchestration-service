@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -29,7 +30,7 @@ public class CallbackDispatchService {
     private final List<CallbackHandler> callbackHandlers;
 
     @SuppressWarnings("java:S3740")
-    public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
+    public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType, String pageId,
                                                                           CallbackRequest callbackRequest,
                                                                           String userAuthorisation) {
         requireNonNull(callbackRequest, "callback must not be null");
@@ -44,10 +45,11 @@ public class CallbackDispatchService {
         EventType eventType = getEventType(callbackRequest.getEventId());
         boolean handled = false;
         for (CallbackHandler callbackHandler : callbackHandlers) {
-            if (callbackHandler.canHandle(callbackType, caseType, eventType)) {
+            CallbackContext context = CallbackContext.builder().callbackType(callbackType).pageId(pageId).build();
+            if (callbackHandler.canHandle(caseType, eventType, context)) {
 
                 GenericAboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
-                    callbackHandler.handle(callbackRequest, callbackType, userAuthorisation);
+                    callbackHandler.handle(callbackRequest, userAuthorisation, context);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());
                 List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.emptyList());
