@@ -26,7 +26,7 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void shouldValidateApplicantSolicitorPostcodeDetails() throws Exception {
+    public void givenInvalidApplicantSolicitorPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
 
@@ -40,7 +40,7 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     }
 
     @Test
-    public void shouldValidateApplicantPostcodeDetails() throws Exception {
+    public void givenInvalidApplicantPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
 
@@ -54,7 +54,7 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     }
 
     @Test
-    public void shouldValidateRespondentSolicitorPostcodeDetails() throws Exception {
+    public void givenInvalidRespondentSolicitorPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
 
@@ -68,7 +68,7 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     }
 
     @Test
-    public void shouldValidateRespondentPostcodeDetails() throws Exception {
+    public void givenInvalidRespondentPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
 
@@ -82,5 +82,66 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.errors[0]", is("Postcode field is required for respondent address.")));
+    }
+
+    @Test
+    public void givenValidApplicantSolicitorPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+
+        ((ObjectNode) requestContent.get("case_details").get("case_data").get("applicantSolicitorAddress")).put("PostCode", "AB12 3CD");
+
+        mvc.perform(post(AMEND_APPLICATION_APP_SOL_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
+    }
+
+    @Test
+    public void givenValidApplicantPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+
+        ((ObjectNode) requestContent.get("case_details").get("case_data").get("applicantAddress")).put("PostCode", "AB12 3CD");
+
+        mvc.perform(post(AMEND_APPLICATION_APP_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
+    }
+
+    @Test
+    public void givenValidRespondentSolicitorPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+
+        ((ObjectNode) requestContent.get("case_details").get("case_data").get("rSolicitorAddress")).put("PostCode", "AB12 3CD");
+
+        mvc.perform(post(AMEND_APPLICATION_RES_SOL_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
+    }
+
+    @Test
+    public void givenValidRespondentPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+
+        ((ObjectNode) requestContent.get("case_details").get("case_data")).put("respondentRepresented", "No");
+        ((ObjectNode) requestContent.get("case_details").get("case_data").get("respondentAddress")).put("PostCode", "AB12 3CD");
+
+        mvc.perform(post(AMEND_APPLICATION_RES_SOL_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
     }
 }
