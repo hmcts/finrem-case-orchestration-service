@@ -466,7 +466,6 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
 
-        // TODO assert scannedD81WithInfos
         assertThat(transformedCaseData, hasKey("scannedD81WithInfos"));
         ComplexTypeCollection<ScannedD81Document> scannedD81WithInfos =
             (ComplexTypeCollection<ScannedD81Document>) transformedCaseData.get("scannedD81WithInfos");
