@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.io.File;
+import java.util.Objects;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -23,12 +24,12 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     private static final String AMEND_APPLICATION_RES_SOL_URL = "/case-orchestration/amend-application-validate-respondent-solicitor";
     public static final String AUTH_TOKEN = "tokien:)";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void givenInvalidApplicantSolicitorPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         mvc.perform(post(AMEND_APPLICATION_APP_SOL_URL)
                 .content(requestContent.toString())
@@ -41,8 +42,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenInvalidApplicantPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         mvc.perform(post(AMEND_APPLICATION_APP_URL)
                 .content(requestContent.toString())
@@ -55,8 +56,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenInvalidRespondentSolicitorPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         mvc.perform(post(AMEND_APPLICATION_RES_SOL_URL)
                 .content(requestContent.toString())
@@ -69,8 +70,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenInvalidRespondentPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         ((ObjectNode) requestContent.get("case_details").get("case_data")).put("respondentRepresented", "No");
 
@@ -86,8 +87,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenValidApplicantSolicitorPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         ((ObjectNode) requestContent.get("case_details").get("case_data").get("applicantSolicitorAddress")).put("PostCode", "AB12 3CD");
 
@@ -101,8 +102,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenValidApplicantPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         ((ObjectNode) requestContent.get("case_details").get("case_data").get("applicantAddress")).put("PostCode", "AB12 3CD");
 
@@ -116,8 +117,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenValidRespondentSolicitorPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         ((ObjectNode) requestContent.get("case_details").get("case_data").get("rSolicitorAddress")).put("PostCode", "AB12 3CD");
 
@@ -131,8 +132,8 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     @Test
     public void givenValidRespondentPostcode_whenAmendApplication_thenReturnSuccess() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
 
         ((ObjectNode) requestContent.get("case_details").get("case_data")).put("respondentRepresented", "No");
         ((ObjectNode) requestContent.get("case_details").get("case_data").get("respondentAddress")).put("PostCode", "AB12 3CD");
