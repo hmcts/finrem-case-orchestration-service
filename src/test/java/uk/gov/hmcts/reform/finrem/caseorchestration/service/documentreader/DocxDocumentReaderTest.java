@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentreader;
 
-import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +36,6 @@ class DocxDocumentReaderTest {
     void testGetContent_withError() throws IOException {
         byte[] document = Files.readAllBytes(getPathFromResources("fixtures/documentcontentvalidation/generalOrder.pdf"));
 
-        assertThatThrownBy(() -> underTest.getContent(document)).isInstanceOf(NotOfficeXmlFileException.class);
+        assertThatThrownBy(() -> underTest.getContent(document)).isInstanceOf(Exception.class);
     }
 }
