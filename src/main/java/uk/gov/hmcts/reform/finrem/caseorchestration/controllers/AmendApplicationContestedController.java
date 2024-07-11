@@ -107,10 +107,9 @@ public class AmendApplicationContestedController extends BaseController {
     }
 
     private void validateApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-        String applicantPostCode = null;
 
         Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get(APPLICANT_ADDRESS);
-        applicantPostCode = (String) applicantAddress.get(postCode);
+        String applicantPostCode = (String) applicantAddress.get(postCode);
 
         if (StringUtils.isBlank(applicantPostCode)) {
             errors.add("Postcode field is required for applicant address.");
@@ -118,18 +117,17 @@ public class AmendApplicationContestedController extends BaseController {
     }
 
     private void validateRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-        String respondentPostCode = null;
 
         if (YES_VALUE.equals(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))) {
             Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
-            respondentPostCode = (String) respondentSolicitorAddress.get(postCode);
+            String respondentPostCode = (String) respondentSolicitorAddress.get(postCode);
 
             if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent solicitor address.");
             }
         } else {
             Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get(RESPONDENT_ADDRESS);
-            respondentPostCode = (String) respondentAddress.get(postCode);
+            String respondentPostCode = (String) respondentAddress.get(postCode);
 
             if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent address.");
