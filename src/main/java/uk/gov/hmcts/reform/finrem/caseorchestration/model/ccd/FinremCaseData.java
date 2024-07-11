@@ -726,14 +726,19 @@ public class FinremCaseData {
 
     @JsonIgnore
     public String getApplicantSolicitorPostcode() {
-        return isConsentedApplication()
-            ? getContactDetailsWrapper().getSolicitorAddress().getPostCode()
-            : getContactDetailsWrapper().getApplicantSolicitorAddress().getPostCode();
+        if (isConsentedApplication()) {
+            Address solicitorAddress = getContactDetailsWrapper().getSolicitorAddress();
+            return solicitorAddress != null ? solicitorAddress.getPostCode() : null;
+        } else {
+            Address applicantAddress = getContactDetailsWrapper().getApplicantSolicitorAddress();
+            return applicantAddress != null ? applicantAddress.getPostCode() : null;
+        }
     }
 
     @JsonIgnore
     public String getRespondentSolicitorPostcode() {
-        return getContactDetailsWrapper().getRespondentSolicitorAddress().getPostCode();
+        Address respondentAddress = getContactDetailsWrapper().getRespondentSolicitorAddress();
+        return respondentAddress != null ? respondentAddress.getPostCode() : null;
     }
 
     @JsonIgnore
