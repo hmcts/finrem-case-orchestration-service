@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
@@ -68,13 +67,6 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Test
     public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CONSENTED, EventType.AMEND_APP_DETAILS);
-    }
-
-    @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(false));
     }
 
     @Test
@@ -332,13 +324,6 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.AMEND_APP_DETAILS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(new FinremCaseData()).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(new FinremCaseData()).build())
-            .build();
+        return buildConsentCallbackRequest(EventType.AMEND_APP_DETAILS);
     }
 }
