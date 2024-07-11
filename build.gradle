@@ -50,7 +50,7 @@ def versions = [
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2023.0.1"
-    restAssuredBomVersion = "5.4.0"
+    restAssuredBomVersion = "5.5.0"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -420,7 +420,7 @@ dependencies {
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
-    implementation("org.apache.poi:poi-ooxml:5.2.5") {
+    implementation("org.apache.poi:poi-ooxml:5.3.0") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
 
