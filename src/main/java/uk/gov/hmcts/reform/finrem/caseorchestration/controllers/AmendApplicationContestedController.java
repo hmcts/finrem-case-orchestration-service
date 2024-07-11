@@ -61,7 +61,7 @@ public class AmendApplicationContestedController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
-    @PostMapping(path = "/amend-application-app", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/amend-application-validate-applicant-address", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Validate postcode on applicant details page")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationApp(
