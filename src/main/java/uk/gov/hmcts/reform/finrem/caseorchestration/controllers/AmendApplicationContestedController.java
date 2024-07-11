@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +39,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class AmendApplicationContestedController extends BaseController {
 
     private static final String postCode = "PostCode";
+
+    @Autowired
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    private final InternationalPostalService postalService;
 
 
     @PostMapping(path = "/amend-application-app-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -58,9 +68,13 @@ public class AmendApplicationContestedController extends BaseController {
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken
     ) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<String> errors = new ArrayList<>();
         validateApplicantPostcodeDetails(caseData, errors);
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        errors.addAll(postalService.validate(finremCaseDetails.getData()));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
