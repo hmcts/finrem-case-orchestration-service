@@ -330,7 +330,7 @@ public class FinremCaseData {
     private FormAScannedDocWrapper formAScannedDocWrapper;
     @Getter(AccessLevel.NONE)
     private ConsentOrderScannedDocWrapper consentOrderScannedDocWrapper;
-    private List<ScannedD81WithInfo> scannedD81WithInfos;
+    private List<ScannedD81Collection> scannedD81WithInfos;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
