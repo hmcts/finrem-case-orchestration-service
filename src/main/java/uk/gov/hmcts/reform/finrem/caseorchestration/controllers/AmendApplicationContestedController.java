@@ -46,7 +46,7 @@ public class AmendApplicationContestedController extends BaseController {
     private final InternationalPostalService postalService;
 
 
-    @PostMapping(path = "/amend-application-app-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/amend-application-validate-applicant-solicitor-address", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Validate postcode on applicant solicitor page")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> amendApplicationAppSolicitor(
