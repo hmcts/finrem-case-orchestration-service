@@ -20,7 +20,7 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
 
     private static final String AMEND_APPLICATION_APP_SOL_URL = "/case-orchestration/amend-application-validate-applicant-solicitor-address";
     private static final String AMEND_APPLICATION_APP_URL = "/case-orchestration/amend-application-validate-applicant-address";
-    private static final String AMEND_APPLICATION_RES_SOL_URL = "/case-orchestration/amend-application-res-sol";
+    private static final String AMEND_APPLICATION_RES_SOL_URL = "/case-orchestration/amend-application-validate-respondent-solicitor";
     public static final String AUTH_TOKEN = "tokien:)";
 
     private ObjectMapper objectMapper = new ObjectMapper();
