@@ -20,12 +20,21 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @RequiredArgsConstructor
 public class AmendApplicationContestedController extends BaseController {
+
+    private static final String postCode = "PostCode";
+
 
     @PostMapping(path = "/amend-application-app-sol", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -72,11 +81,11 @@ public class AmendApplicationContestedController extends BaseController {
 
     private void validateApplicantSolicitorPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
 
-        if (YES_VALUE.equals(caseData.get("applicantRepresented"))) {
-            Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get("applicantSolicitorAddress");
-            String solicitorPostCode = (String) applicantSolicitorAddress.get("PostCode");
+        if (YES_VALUE.equals(caseData.get(APPLICANT_REPRESENTED))) {
+            Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get(CONTESTED_SOLICITOR_ADDRESS);
+            String applicantSolicitorPostCode = (String) applicantSolicitorAddress.get(postCode);
 
-            if (StringUtils.isBlank(solicitorPostCode)) {
+            if (StringUtils.isBlank(applicantSolicitorPostCode)) {
                 errors.add("Postcode field is required for applicant solicitor address.");
             }
         }
@@ -84,31 +93,31 @@ public class AmendApplicationContestedController extends BaseController {
     }
 
     private void validateApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-        String postCode = null;
+        String applicantPostCode = null;
 
-        Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get("applicantAddress");
-        postCode = (String) applicantAddress.get("PostCode");
+        Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get(APPLICANT_ADDRESS);
+        applicantPostCode = (String) applicantAddress.get(postCode);
 
-        if (StringUtils.isBlank(postCode)) {
+        if (StringUtils.isBlank(applicantPostCode)) {
             errors.add("Postcode field is required for applicant address.");
         }
     }
 
     private void validateRespondentPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
-        String postCode = null;
+        String respondentPostCode = null;
 
-        if (YES_VALUE.equals(caseData.get("respondentRepresented"))) {
-            Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get("rSolicitorAddress");
-            postCode = (String) respondentSolicitorAddress.get("PostCode");
+        if (YES_VALUE.equals(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))) {
+            Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
+            respondentPostCode = (String) respondentSolicitorAddress.get(postCode);
 
-            if (StringUtils.isBlank(postCode)) {
+            if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent solicitor address.");
             }
         } else {
-            Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get("respondentAddress");
-            postCode = (String) respondentAddress.get("PostCode");
+            Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get(RESPONDENT_ADDRESS);
+            respondentPostCode = (String) respondentAddress.get(postCode);
 
-            if (StringUtils.isBlank(postCode)) {
+            if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent address.");
             }
         }
