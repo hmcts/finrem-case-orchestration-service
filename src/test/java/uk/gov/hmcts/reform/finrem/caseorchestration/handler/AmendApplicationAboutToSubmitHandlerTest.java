@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
@@ -245,8 +244,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
-        assertTrue(response.getErrors().contains("Postcode field is required for applicant address."));
-        assertTrue(response.getErrors().contains("Postcode field is required for respondent address."));
+        assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
+        assertEquals("Postcode field is required for respondent address.", response.getErrors().get(1));
     }
 
     @Test
@@ -282,8 +281,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
-        assertTrue(response.getErrors().contains("Postcode field is required for applicant address."));
-        assertTrue(response.getErrors().contains("Postcode field is required for respondent address."));
+        assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
+        assertEquals("Postcode field is required for respondent address.", response.getErrors().get(1));
     }
 
     @Test
@@ -320,8 +319,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
-        assertTrue(response.getErrors().contains("Postcode field is required for applicant address."));
-        assertTrue(response.getErrors().contains("Postcode field is required for respondent address."));
+        assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
+        assertEquals("Postcode field is required for respondent address.", response.getErrors().get(1));
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {
