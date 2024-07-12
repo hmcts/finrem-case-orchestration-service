@@ -38,13 +38,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class AmendApplicationContestedController extends BaseController {
 
-    private static final String postCode = "PostCode";
+    private static final String POST_CODE = "PostCode";
 
     @Autowired
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final InternationalPostalService postalService;
-
 
     @PostMapping(path = "/amend-application-validate-applicant-solicitor-address", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,7 +96,7 @@ public class AmendApplicationContestedController extends BaseController {
 
         if (YES_VALUE.equals(caseData.get(APPLICANT_REPRESENTED))) {
             Map<String, Object> applicantSolicitorAddress = (Map<String, Object>) caseData.get(CONTESTED_SOLICITOR_ADDRESS);
-            String applicantSolicitorPostCode = (String) applicantSolicitorAddress.get(postCode);
+            String applicantSolicitorPostCode = (String) applicantSolicitorAddress.get(POST_CODE);
 
             if (StringUtils.isBlank(applicantSolicitorPostCode)) {
                 errors.add("Postcode field is required for applicant solicitor address.");
@@ -109,7 +108,7 @@ public class AmendApplicationContestedController extends BaseController {
     private void validateApplicantPostcodeDetails(Map<String, Object> caseData, List<String> errors) {
 
         Map<String, Object> applicantAddress = (Map<String, Object>) caseData.get(APPLICANT_ADDRESS);
-        String applicantPostCode = (String) applicantAddress.get(postCode);
+        String applicantPostCode = (String) applicantAddress.get(POST_CODE);
 
         if (StringUtils.isBlank(applicantPostCode)) {
             errors.add("Postcode field is required for applicant address.");
@@ -120,14 +119,14 @@ public class AmendApplicationContestedController extends BaseController {
 
         if (YES_VALUE.equals(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))) {
             Map<String, Object> respondentSolicitorAddress = (Map<String, Object>) caseData.get(RESP_SOLICITOR_ADDRESS);
-            String respondentPostCode = (String) respondentSolicitorAddress.get(postCode);
+            String respondentPostCode = (String) respondentSolicitorAddress.get(POST_CODE);
 
             if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent solicitor address.");
             }
         } else {
             Map<String, Object> respondentAddress = (Map<String, Object>) caseData.get(RESPONDENT_ADDRESS);
-            String respondentPostCode = (String) respondentAddress.get(postCode);
+            String respondentPostCode = (String) respondentAddress.get(POST_CODE);
 
             if (StringUtils.isBlank(respondentPostCode)) {
                 errors.add("Postcode field is required for respondent address.");
