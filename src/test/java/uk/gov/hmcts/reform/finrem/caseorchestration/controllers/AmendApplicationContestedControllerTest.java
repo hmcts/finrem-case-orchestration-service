@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(AmendApplicationContestedController.class)
 public class AmendApplicationContestedControllerTest extends BaseControllerTest {
@@ -30,9 +30,6 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     private static final String AMEND_APPLICATION_APP_SOL_URL = "/case-orchestration/amend-application-validate-applicant-solicitor-address";
     private static final String AMEND_APPLICATION_APP_URL = "/case-orchestration/amend-application-validate-applicant-address";
     private static final String AMEND_APPLICATION_RES_SOL_URL = "/case-orchestration/amend-application-validate-respondent-solicitor";
-    public static final String AUTH_TOKEN = "tokien:)";
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
     private InternationalPostalService postalService;
