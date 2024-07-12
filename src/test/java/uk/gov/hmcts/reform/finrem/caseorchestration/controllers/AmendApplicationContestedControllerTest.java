@@ -55,6 +55,22 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     }
 
     @Test
+    public void givenApplicantNotRepresented_whenAmendApplication_thenReturnEmptyErrors() throws Exception {
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
+
+        ((ObjectNode) requestContent.get("case_details").get("case_data")).put("applicantRepresented", "No");
+
+
+        mvc.perform(post(AMEND_APPLICATION_APP_SOL_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
+    }
+
+    @Test
     public void givenInvalidApplicantPostcode_whenAmendApplication_thenReturnValidationError() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-postcode-validation.json")).toURI()));
