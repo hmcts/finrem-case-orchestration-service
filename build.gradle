@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.11'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1310'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1314'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -417,7 +417,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
     developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
-    implementation("org.apache.poi:poi:5.2.3") {
+    implementation("org.apache.poi:poi:5.3.0") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
     implementation("org.apache.poi:poi-ooxml:5.2.5") {
