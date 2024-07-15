@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.11'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1310'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1314'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -49,7 +49,7 @@ def versions = [
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2023.0.1"
+    springCloudBomVersion = "2023.0.3"
     restAssuredBomVersion = "5.5.0"
 }
 
