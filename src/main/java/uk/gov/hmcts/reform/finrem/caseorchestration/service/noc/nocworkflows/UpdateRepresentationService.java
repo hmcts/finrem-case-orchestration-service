@@ -123,17 +123,20 @@ public class UpdateRepresentationService {
         return caseData;
     }
 
+    private boolean isApplicant(ChangeOrganisationRequest changeRequest) {
+        return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
+    }
+
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
                                                                 ChangedRepresentative addedSolicitor,
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+        boolean isApplicant = isApplicant(changeRequest);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
-        caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-            ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
+        caseData.put(isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
 
         Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(
             addedSolicitor, caseData, isConsented, isApplicant);
@@ -163,7 +166,7 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
-        final boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+        final boolean isApplicant = isApplicant(changeRequest);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
@@ -207,7 +210,7 @@ public class UpdateRepresentationService {
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
-            .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)
+            .party(isApplicant(changeRequest) ? APPLICANT : RESPONDENT)
             .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
@@ -216,7 +219,7 @@ public class UpdateRepresentationService {
     }
 
     private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
-        if (changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)) {
+        if (isApplicant(changeRequest)) {
             return caseDataService.buildFullApplicantName(caseDetails);
         } else if (changeRequest.getCaseRoleId().getValueCode().equals(RESP_SOLICITOR_POLICY)) {
             return caseDataService.buildFullRespondentName(caseDetails);

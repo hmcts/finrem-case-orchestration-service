@@ -116,10 +116,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
-    private UserDetails testIntvr1Solicitor;
-    private UserDetails testIntvr2Solicitor;
-    private UserDetails testIntvr3Solicitor;
-    private UserDetails testIntvr4Solicitor;
 
     private Organisation applicantOrg;
     private Organisation respondentOrg;
@@ -154,30 +150,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .forename("Test respondent")
             .surname("Solicitor")
             .email("padmaja.ramisetti@gmail.com")
-            .build();
-
-        testIntvr1Solicitor = UserDetails.builder()
-            .forename("Henry")
-            .surname("Solicitor")
-            .email("henrysolicitor1@gmail.com")
-            .build();
-
-        testIntvr2Solicitor = UserDetails.builder()
-            .forename("Paul")
-            .surname("Solicitor")
-            .email("paulsolicitor1@gmail.com")
-            .build();
-
-        testIntvr3Solicitor = UserDetails.builder()
-            .forename("Ashwin")
-            .surname("Solicitor")
-            .email("ashwinsolicitor1@gmail.com")
-            .build();
-
-        testIntvr4Solicitor = UserDetails.builder()
-            .forename("Maria")
-            .surname("Solicitor")
-            .email("mariasolicitor1@gmail.com")
             .build();
 
         applicantOrg = Organisation.builder()
