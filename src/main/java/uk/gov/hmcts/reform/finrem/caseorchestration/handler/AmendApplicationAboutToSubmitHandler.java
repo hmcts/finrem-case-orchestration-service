@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -45,8 +47,12 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+        List<String> errors = new ArrayList<>();
 
         FinremCaseData caseData = caseDetails.getData();
+
+        checkApplicantPostCodeDetails(caseData, errors);
+        checkRespondentPostCodeDetails(caseData, errors);
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
@@ -56,7 +62,49 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+    }
+
+    private void checkApplicantPostCodeDetails(FinremCaseData caseData, List<String> errors) {
+        String postCode = null;
+
+        if (caseData.isApplicantRepresentedByASolicitor()) {
+            postCode = caseData.getApplicantSolicitorPostcode();
+        } else {
+
+            Address applicantAddress = caseData.getContactDetailsWrapper().getApplicantAddress() != null
+                ? caseData.getContactDetailsWrapper().getApplicantAddress()
+                : null;
+
+            if (applicantAddress != null) {
+                postCode = applicantAddress.getPostCode();
+            }
+        }
+
+        if (StringUtils.isBlank(postCode)) {
+            errors.add("Postcode field is required for applicant address.");
+        }
+    }
+
+    private void checkRespondentPostCodeDetails(FinremCaseData caseData, List<String> errors) {
+        String postCode = null;
+
+        if (caseData.isRespondentRepresentedByASolicitor()) {
+            postCode = caseData.getRespondentSolicitorPostcode();
+        } else {
+
+            Address respondentAddress = caseData.getContactDetailsWrapper().getRespondentAddress() != null
+                ? caseData.getContactDetailsWrapper().getRespondentAddress()
+                : null;
+            
+            if (respondentAddress != null) {
+                postCode = respondentAddress.getPostCode();
+            }
+        }
+
+        if (StringUtils.isBlank(postCode)) {
+            errors.add("Postcode field is required for respondent address.");
+        }
     }
 
     private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
