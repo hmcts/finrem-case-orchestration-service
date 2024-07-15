@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -60,30 +62,32 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (caseData.isApplicantRepresentedByASolicitor()) {
-            if (wrapper.getApplicantSolicitorAddress() != null
-                && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode()))  {
-                errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-                return errors;
-            }
+        if (caseData.isApplicantRepresentedByASolicitor() &&
+            Optional.ofNullable(wrapper.getApplicantSolicitorAddress())
+                .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
+                .orElse(false)) {
+            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            return errors;
         }
 
-        if (wrapper.getApplicantAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode())) {
+        if (Optional.ofNullable(wrapper.getApplicantAddress())
+            .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
+            .orElse(false)) {
             errors.add(APPLICANT_POSTCODE_ERROR);
             return errors;
         }
 
-        if (caseData.isRespondentRepresentedByASolicitor()) {
-            if (wrapper.getRespondentSolicitorAddress() != null
-                && ObjectUtils.isEmpty(wrapper.getRespondentSolicitorAddress().getPostCode())) {
-                errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
-                return errors;
-            }
+        if (caseData.isRespondentRepresentedByASolicitor() &&
+            Optional.ofNullable(wrapper.getRespondentSolicitorAddress())
+                .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
+                .orElse(false)) {
+            errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
+            return errors;
         }
 
-        if (wrapper.getRespondentAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getPostCode())) {
+        if (Optional.ofNullable(wrapper.getRespondentAddress())
+            .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
+            .orElse(false)) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
             return errors;
         }
