@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -62,8 +61,8 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (caseData.isApplicantRepresentedByASolicitor() &&
-            Optional.ofNullable(wrapper.getApplicantSolicitorAddress())
+        if (caseData.isApplicantRepresentedByASolicitor()
+            && Optional.ofNullable(wrapper.getApplicantSolicitorAddress())
                 .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
                 .orElse(false)) {
             errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -77,8 +76,8 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
             return errors;
         }
 
-        if (caseData.isRespondentRepresentedByASolicitor() &&
-            Optional.ofNullable(wrapper.getRespondentSolicitorAddress())
+        if (caseData.isRespondentRepresentedByASolicitor()
+            && Optional.ofNullable(wrapper.getRespondentSolicitorAddress())
                 .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
                 .orElse(false)) {
             errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
