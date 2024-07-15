@@ -476,7 +476,7 @@ public class FormAToCaseTransformerTest {
         assertThat(scannedD81CaseDocument1.getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
         assertThat(scannedD81CaseDocument1.getDocumentFilename(), is("d81-1.pdf"));
         assertThat(scannedD81Document1.getType(), is(ScannedDocumentType.OTHER));
-        assertThat(scannedD81Document1.getSubType(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document1.getSubtype(), is(D81_DOCUMENT));
         assertThat(scannedD81Document1.getControlNumber(), is("controlNumberd81-1"));
         assertThat(scannedD81Document1.getFileName(), is("d81-1.pdf"));
         assertThat(scannedD81Document1.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
@@ -488,7 +488,7 @@ public class FormAToCaseTransformerTest {
         assertThat(scannedD81CaseDocument2.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(scannedD81CaseDocument2.getDocumentFilename(), is("d81-2.pdf"));
         assertThat(scannedD81Document2.getType(), is(ScannedDocumentType.OTHER));
-        assertThat(scannedD81Document2.getSubType(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document2.getSubtype(), is(D81_DOCUMENT));
         assertThat(scannedD81Document2.getControlNumber(), is("controlNumberd81-2"));
         assertThat(scannedD81Document2.getFileName(), is("d81-2.pdf"));
         assertThat(scannedD81Document2.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
