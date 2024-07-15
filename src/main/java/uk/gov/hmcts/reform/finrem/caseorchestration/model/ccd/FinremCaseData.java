@@ -326,8 +326,10 @@ public class FinremCaseData {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFour intervenerFour;
+    @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private FormAScannedDocWrapper formAScannedDocWrapper;
+    @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderScannedDocWrapper consentOrderScannedDocWrapper;
     private List<ScannedD81Collection> scannedD81WithInfos;
