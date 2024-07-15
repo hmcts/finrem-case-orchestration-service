@@ -165,7 +165,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
 
-        ComplexTypeCollection<ScannedD81Document> d81DocWrappers = inputScannedDocs.stream()
+        ComplexTypeCollection<ScannedD81Document> scannedD81Collection = inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
             .map(doc -> ScannedD81Document.builder()
                 .documentLink(transformInputScannedDocIntoCaseDocument(doc))
@@ -179,7 +179,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 .build()
             )
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
-        additionalCaseData.put("scannedD81WithInfos", d81DocWrappers);
+        additionalCaseData.put("scannedD81Collection", scannedD81Collection);
 
         additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, Map.of(
             P1_DOCUMENT, "Form P1",

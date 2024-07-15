@@ -332,7 +332,7 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderScannedDocWrapper consentOrderScannedDocWrapper;
-    private List<ScannedD81Collection> scannedD81WithInfos;
+    private List<ScannedD81Collection> scannedD81Collection;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;

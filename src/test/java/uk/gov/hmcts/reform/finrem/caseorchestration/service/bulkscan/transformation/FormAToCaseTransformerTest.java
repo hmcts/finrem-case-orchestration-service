@@ -466,11 +466,11 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
 
-        assertThat(transformedCaseData, hasKey("scannedD81WithInfos"));
-        ComplexTypeCollection<ScannedD81Document> scannedD81WithInfos =
-            (ComplexTypeCollection<ScannedD81Document>) transformedCaseData.get("scannedD81WithInfos");
-        assertThat(scannedD81WithInfos, hasSize(2));
-        ScannedD81Document scannedD81Document1 = scannedD81WithInfos.getItem(0);
+        assertThat(transformedCaseData, hasKey("scannedD81Collection"));
+        ComplexTypeCollection<ScannedD81Document> scannedD81Collection =
+            (ComplexTypeCollection<ScannedD81Document>) transformedCaseData.get("scannedD81Collection");
+        assertThat(scannedD81Collection, hasSize(2));
+        ScannedD81Document scannedD81Document1 = scannedD81Collection.getItem(0);
         CaseDocument scannedD81CaseDocument1 = scannedD81Document1.getDocumentLink();
         assertThat(scannedD81CaseDocument1.getDocumentUrl(), is("http://url/d81-1"));
         assertThat(scannedD81CaseDocument1.getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
@@ -482,7 +482,7 @@ public class FormAToCaseTransformerTest {
         assertThat(scannedD81Document1.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
         assertThat(scannedD81Document1.getDeliveryDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
         assertThat(scannedD81Document1.getExceptionRecordReference(), is(TEST_CASE_ID));
-        ScannedD81Document scannedD81Document2 = scannedD81WithInfos.getItem(1);
+        ScannedD81Document scannedD81Document2 = scannedD81Collection.getItem(1);
         CaseDocument scannedD81CaseDocument2 = scannedD81Document2.getDocumentLink();
         assertThat(scannedD81CaseDocument2.getDocumentUrl(), is("http://url/d81-2"));
         assertThat(scannedD81CaseDocument2.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
