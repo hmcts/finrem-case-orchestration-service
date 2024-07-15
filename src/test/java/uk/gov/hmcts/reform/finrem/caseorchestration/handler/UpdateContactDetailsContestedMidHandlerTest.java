@@ -73,7 +73,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
+    void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -110,7 +110,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_WhenNullApplicantPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenNullApplicantPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -128,7 +128,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -147,11 +147,10 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
         assertEquals(1, handle.getErrors().size());
         assertTrue(handle.getErrors().contains("Postcode field is required for respondent address."));
-
     }
 
     @Test
-    public void givenConsentedCase_WhenNullRespondentPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenNullRespondentPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -173,7 +172,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -191,11 +190,10 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
         assertEquals(1, handle.getErrors().size());
         assertTrue(handle.getErrors().contains("Postcode field is required for applicant solicitor address."));
-
     }
 
     @Test
-    public void givenConsentedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -215,11 +213,10 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
         assertEquals(1, handle.getErrors().size());
         assertTrue(handle.getErrors().contains("Postcode field is required for respondent solicitor address."));
-
     }
 
     @Test
-    public void givenConsentedCase_WhenNullApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenNullApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -237,11 +234,10 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
         assertEquals(1, handle.getErrors().size());
         assertTrue(handle.getErrors().contains("Postcode field is required for applicant solicitor address."));
-
     }
 
     @Test
-    public void givenConsentedCase_WhenNullRespondentSolicitorPostCode_thenHandlerWillShowMessage() {
+    void givenConsentedCase_WhenNullRespondentSolicitorPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -261,6 +257,5 @@ class UpdateContactDetailsContestedMidHandlerTest {
 
         assertEquals(1, handle.getErrors().size());
         assertTrue(handle.getErrors().contains("Postcode field is required for respondent solicitor address."));
-
     }
 }
