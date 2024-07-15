@@ -170,7 +170,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .map(doc -> ScannedD81Document.builder()
                 .documentLink(transformInputScannedDocIntoCaseDocument(doc))
                 .type(ScannedDocumentType.forValue(doc.getType()))
-                .subType(doc.getSubtype())
+                .subtype(doc.getSubtype())
                 .controlNumber(doc.getControlNumber())
                 .fileName(doc.getFileName())
                 .scannedDate(doc.getScannedDate())

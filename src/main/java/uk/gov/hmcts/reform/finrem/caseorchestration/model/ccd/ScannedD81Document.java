@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class ScannedD81Document {
     private CaseDocument documentLink;
     private ScannedDocumentType type;
-    private String subType;
+    private String subtype;
     private String controlNumber;
     private String fileName;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
