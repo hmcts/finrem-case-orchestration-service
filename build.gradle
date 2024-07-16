@@ -163,7 +163,7 @@ jacocoTestReport {
     reports {
         xml.required = true
         csv.required = false
-        xml.outputLocation = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml")
     }
 }
 
@@ -212,7 +212,7 @@ sonarqube {
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
-        property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+        property "sonar.dependencyCheck.htmlReportPath", layout.buildDirectory.file("reports/sonar-dependency-check-report.html")
         property "sonar.issue.ignore.multicriteria", "e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13"
         property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S1141"
         property "sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*.java"
