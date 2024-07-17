@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ScannedDocument {
+public class ScannedDocument implements HasCaseDocument {
     private ScannedDocumentType type;
     private String subtype;
     private CaseDocument url;
