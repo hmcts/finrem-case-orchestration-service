@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContestedGeneralOrderCollection {
+public class ContestedGeneralOrderCollection implements HasCaseDocument {
     private ContestedGeneralOrder value;
 }

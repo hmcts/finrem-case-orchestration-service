@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Deprecated
-public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
+public class ConfidentialUploadedDocumentData implements CaseDocumentTabData, HasCaseDocument {
     private String id;
     private UploadConfidentialDocument value;
 

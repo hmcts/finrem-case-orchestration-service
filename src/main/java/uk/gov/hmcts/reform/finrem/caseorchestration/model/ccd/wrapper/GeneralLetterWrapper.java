@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralLetterWrapper {
+public class GeneralLetterWrapper implements HasCaseDocument {
     private DynamicRadioList generalLetterAddressee;
     private GeneralLetterAddressToType generalLetterAddressTo;
     private String generalLetterRecipient;
