@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApprovedOrder implements HasCaseDocument {
+public class ApprovedOrder {
     @JsonProperty("orderLetter")
     private CaseDocument orderLetter;
     @JsonProperty("consentOrder")

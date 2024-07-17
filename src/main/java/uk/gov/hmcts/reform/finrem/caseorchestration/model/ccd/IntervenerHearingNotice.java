@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntervenerHearingNotice implements HasCaseDocument {
+public class IntervenerHearingNotice {
 
     @JsonProperty("hearingNotice")
     CaseDocument caseDocument;

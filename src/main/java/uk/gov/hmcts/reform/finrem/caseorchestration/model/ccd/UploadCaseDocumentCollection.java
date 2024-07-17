@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class UploadCaseDocumentCollection implements CaseDocumentTabData, HasCaseDocument {
+public class UploadCaseDocumentCollection implements CaseDocumentTabData {
 
     private String id;
 

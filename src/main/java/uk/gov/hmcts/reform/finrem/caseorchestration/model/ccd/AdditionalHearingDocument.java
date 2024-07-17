@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdditionalHearingDocument implements HasCaseDocument {
+public class AdditionalHearingDocument {
     @JsonProperty("additionalHearingDocument")
     private CaseDocument document;
 

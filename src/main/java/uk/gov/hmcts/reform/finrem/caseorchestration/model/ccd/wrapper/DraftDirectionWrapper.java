@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DraftDirectionWrapper implements HasCaseDocument {
+public class DraftDirectionWrapper {
     private List<DraftDirectionOrderCollection> draftDirectionOrderCollection;
     private DraftDirectionOrder latestDraftDirectionOrder;
     private List<DraftDirectionOrderCollection> judgesAmendedOrderCollection;

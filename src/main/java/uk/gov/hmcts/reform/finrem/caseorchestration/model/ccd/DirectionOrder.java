@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrder implements HasCaseDocument {
+public class DirectionOrder {
     @JsonProperty("uploadDraftDocument")
     CaseDocument uploadDraftDocument;
     @JsonProperty("orderDateTime")
