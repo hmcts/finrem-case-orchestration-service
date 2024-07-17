@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,8 +84,10 @@ class DocumentCheckerServiceTest extends BaseServiceTest {
         when(docxDocumentChecker.getWarnings(any()))
             .thenThrow(new DocumentContentCheckerException(new RuntimeException("test")));
 
-        underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().build(), AUTH_TOKEN);
-        assertThat(logs.getErrors()).isNotEmpty().contains("Unexpected error when getting warnings from " + DocxDocumentChecker.class.getName());
+        underTest.getWarnings(caseDocument, FinremCaseDetails.builder().build(), FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).build(),
+            AUTH_TOKEN);
+        assertThat(logs.getErrors()).isNotEmpty().contains(format("%s Unexpected error when getting warnings from %s", CASE_ID,
+            DocxDocumentChecker.class.getName()));
     }
 
     @Test

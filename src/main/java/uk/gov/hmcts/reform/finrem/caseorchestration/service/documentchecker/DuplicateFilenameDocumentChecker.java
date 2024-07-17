@@ -96,8 +96,6 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
         CaseDocument caseDocument = context.getCaseDocument();
         List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(context.getBeforeCaseDetails().getData());
 
-        log.info("Iterating all CaseDocuments with interface HasCaseDocument.");
-
         // Check for duplicate filenames in the collected documents
         boolean hasDuplicates = allDocuments.stream()
             .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));

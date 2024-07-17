@@ -47,7 +47,7 @@ public class DocumentCheckerService {
                     .caseDetails(caseDetails)
                     .build()));
             } catch (DocumentContentCheckerException e) {
-                log.error(format("Unexpected error when getting warnings from %s", dc.getClass().getName()), e);
+                log.error(format("%s Unexpected error when getting warnings from %s", caseDetails.getId(), dc.getClass().getName()), e);
             }
         });
 
