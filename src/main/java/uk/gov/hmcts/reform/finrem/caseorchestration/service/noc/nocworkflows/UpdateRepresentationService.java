@@ -237,7 +237,9 @@ public class UpdateRepresentationService {
             return caseDataService.buildFullIntervener3Name(caseDetails);
         } else if (INTVR_SOLICITOR_4_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullIntervener4Name(caseDetails);
-        } else throw new UnsupportedOperationException(format("%s - Unrecognised caseRoleId: %s",
-            caseDetails.getId(), changeRequest.getCaseRoleId().getValueCode()));
+        } else {
+            throw new UnsupportedOperationException(format("%s - Unrecognised caseRoleId: %s",
+                caseDetails.getId(), changeRequest.getCaseRoleId().getValueCode()));
+        }
     }
 }
