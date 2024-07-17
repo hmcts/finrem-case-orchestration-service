@@ -86,7 +86,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.VariationDocumentTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -822,47 +821,31 @@ class DuplicateFilenameDocumentCheckerTest {
                 .approvedConsentOrderLetter(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetApp(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetApp(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetRes(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetRes(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetIntv1(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetIntv1(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetIntv2(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetIntv2(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetIntv3(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetIntv3(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetIntv4(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetIntv4(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .formA(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetAppConfidential(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetAppConfidential(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .bulkPrintCoversheetWrapper(BulkPrintCoversheetWrapper.builder()
-                    .bulkPrintCoverSheetResConfidential(DUPLICATED_CASE_DOCUMENT)
-                    .build())
+                .bulkPrintCoverSheetResConfidential(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .divorceUploadPetition(DUPLICATED_CASE_DOCUMENT)

@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -15,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BulkPrintCoversheetWrapper implements HasCaseDocument {
+public class BulkPrintCoversheetWrapper {
     private CaseDocument bulkPrintCoverSheetApp;
     private CaseDocument bulkPrintCoverSheetRes;
     private CaseDocument bulkPrintCoverSheetIntv1;
