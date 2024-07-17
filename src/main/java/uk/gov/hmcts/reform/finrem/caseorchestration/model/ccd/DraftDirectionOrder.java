@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class DraftDirectionOrder implements HasCaseDocument {
+public class DraftDirectionOrder {
 
     @JsonProperty("purposeOfDocument")
     String purposeOfDocument;

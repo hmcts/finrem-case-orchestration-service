@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PensionTypeCollection implements HasCaseDocument {
+public class PensionTypeCollection {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")

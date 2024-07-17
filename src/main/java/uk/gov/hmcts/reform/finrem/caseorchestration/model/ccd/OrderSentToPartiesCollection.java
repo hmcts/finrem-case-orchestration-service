@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderSentToPartiesCollection implements HasCaseDocument {
+public class OrderSentToPartiesCollection {
 
     @JsonProperty("id")
     private String id;

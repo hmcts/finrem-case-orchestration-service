@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("java:S1700")
-public class AmendedConsentOrder implements HasCaseDocument {
+public class AmendedConsentOrder {
     @JsonProperty("amendedConsentOrder")
     private CaseDocument amendedConsentOrder;
     @JsonProperty("amendedConsentOrderDate")

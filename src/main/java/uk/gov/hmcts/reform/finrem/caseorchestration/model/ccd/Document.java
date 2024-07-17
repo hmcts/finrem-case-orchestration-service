@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Document implements DocumentFileNameProvider {
+public class Document {
 
     @JsonProperty("document_url")
     private String url;
@@ -20,9 +20,4 @@ public class Document implements DocumentFileNameProvider {
     private String binaryUrl;
     @JsonProperty("document_filename")
     private String filename;
-
-    @Override
-    public String getDocumentFilename() {
-        return filename;
-    }
 }

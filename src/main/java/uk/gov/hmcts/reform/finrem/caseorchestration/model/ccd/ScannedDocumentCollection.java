@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScannedDocumentCollection implements HasCaseDocument {
+public class ScannedDocumentCollection {
     private String id;
     private ScannedDocument value;
 }

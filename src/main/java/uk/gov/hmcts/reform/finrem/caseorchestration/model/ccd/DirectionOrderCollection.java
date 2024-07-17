@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectionOrderCollection implements HasCaseDocument {
+public class DirectionOrderCollection {
 
     @JsonProperty("id")
     private String id;
