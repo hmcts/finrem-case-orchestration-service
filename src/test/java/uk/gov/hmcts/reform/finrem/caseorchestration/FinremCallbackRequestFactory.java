@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
@@ -19,19 +20,33 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData) {
+        return from(id, null, caseData);
+    }
+
+    public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData) {
+        return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData));
+    }
+
+    public static FinremCallbackRequest from(Long id, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
+        return from(id, null, caseDataBuilder);
+    }
+
+    public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
+        return from(FinremCaseDetails.builder()
+            .id(id)
+            .caseType(caseType)
+            .data(caseDataBuilder.build()));
+    }
+
+    public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
         return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(id)
-                .data(caseData)
-                .build())
+            .caseDetails(caseDetailsBuilder.build())
             .build();
     }
 
     public static FinremCallbackRequest create() {
         return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .data(FinremCaseData.builder().build())
-                .build())
+            .caseDetails(FinremCaseDetailsBuilderFactory.from().build())
             .build();
     }
 }

@@ -55,10 +55,10 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinremCaseData {
+public class FinremCaseData implements HasCaseDocument {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;

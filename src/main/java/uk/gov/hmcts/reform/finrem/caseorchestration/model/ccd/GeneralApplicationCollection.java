@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralApplicationCollection {
+public class GeneralApplicationCollection implements HasCaseDocument {
     private GeneralApplication value;
 }

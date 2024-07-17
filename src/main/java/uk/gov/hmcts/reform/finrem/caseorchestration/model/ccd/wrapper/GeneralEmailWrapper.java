@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralEmailWrapper {
+public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;

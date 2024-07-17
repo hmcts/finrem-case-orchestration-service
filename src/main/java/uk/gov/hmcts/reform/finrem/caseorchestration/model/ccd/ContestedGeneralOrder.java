@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ContestedGeneralOrder {
+public class ContestedGeneralOrder implements HasCaseDocument {
     private String generalOrderText;
     private CaseDocument additionalDocument;
     @JsonProperty("selectJudge")

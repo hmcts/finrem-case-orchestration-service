@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConsentInContestedApprovedOrderCollection {
+public class ConsentInContestedApprovedOrderCollection implements HasCaseDocument {
     @JsonProperty("id")
     private String id;
 
