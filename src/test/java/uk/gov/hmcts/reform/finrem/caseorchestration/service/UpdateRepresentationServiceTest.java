@@ -350,13 +350,52 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         );
         setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-withoutCaseRoleId.json")) {
+            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
                 .getCaseDetails();
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            changeOrganisationRequestField.put("CaseRoleId", null);
         }
 
-        assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+
+        String expectedMessage = "12345678 - unexpected empty caseRoleId";
+        String actualMessage = ex.getMessage();
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowUnsupportedOperationException()
+        throws Exception {
+        String fixture = "consentedAppSolicitorAdding";
+        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build()
+        );
+        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        try (InputStream resourceAsStream = getClass()
+            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+                .getCaseDetails();
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            Map<String, Object> caseRoleId = (Map<String, Object>) changeOrganisationRequestField.get("CaseRoleId");
+            caseRoleId.put("value", Map.of("code", "[INTVRSOLICITOR5]", "label", "[INTVRSOLICITOR5]"));
+        }
+
+        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+
+        String expectedMessage = "12345678 - Unrecognised caseRoleId: [INTVRSOLICITOR5]";
+        String actualMessage = ex.getMessage();
+        assertEquals(expectedMessage, actualMessage);
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -125,7 +126,10 @@ public class UpdateRepresentationService {
         return caseData;
     }
 
-    private boolean isApplicant(ChangeOrganisationRequest changeRequest) {
+    private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
+        if (StringUtils.isEmpty(changeRequest.getCaseRoleId().getValueCode())) {
+            throw new UnsupportedOperationException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
+        }
         return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
     }
 
@@ -134,7 +138,7 @@ public class UpdateRepresentationService {
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = isApplicant(changeRequest);
+        boolean isApplicant = isApplicant(caseDetails, changeRequest);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
@@ -168,7 +172,7 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
-        final boolean isApplicant = isApplicant(changeRequest);
+        final boolean isApplicant = isApplicant(caseDetails, changeRequest);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
@@ -212,7 +216,7 @@ public class UpdateRepresentationService {
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
-            .party(isApplicant(changeRequest) ? APPLICANT : RESPONDENT)
+            .party(isApplicant(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
             .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
@@ -221,7 +225,7 @@ public class UpdateRepresentationService {
     }
 
     private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
-        if (isApplicant(changeRequest)) {
+        if (isApplicant(caseDetails, changeRequest)) {
             return caseDataService.buildFullApplicantName(caseDetails);
         } else if (RESP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullRespondentName(caseDetails);
@@ -233,7 +237,7 @@ public class UpdateRepresentationService {
             return caseDataService.buildFullIntervener3Name(caseDetails);
         } else if (INTVR_SOLICITOR_4_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullIntervener4Name(caseDetails);
-        } else throw new UnsupportedOperationException(format("%s: Unrecognised caseRoleId: %s",
+        } else throw new UnsupportedOperationException(format("%s - Unrecognised caseRoleId: %s",
             caseDetails.getId(), changeRequest.getCaseRoleId().getValueCode()));
     }
 }
