@@ -2,13 +2,13 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'jacoco'
-    id 'org.sonarqube' version '5.0.0.4638'
+    id 'org.sonarqube' version '5.1.0.4882'
     id 'org.springframework.boot' version '3.3.1'
     id 'com.github.ben-manes.versions' version '0.51.0'
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.11'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1314'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1319'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -49,7 +49,7 @@ def versions = [
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2023.0.3"
+    springCloudBomVersion = "2023.0.1"
     restAssuredBomVersion = "5.5.0"
 }
 
@@ -211,7 +211,7 @@ sonarqube {
         property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.outputLocation.get()}"
         property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
         property "sonar.issue.ignore.multicriteria", "e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13"
         property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S1141"
@@ -361,6 +361,9 @@ bootWithCCD {
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
     environment("spring.profiles.active", "local")
+
+    // ccd-data-store-api
+    environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", "FinancialRemedyContested")
 }
 
 dependencyManagement {
