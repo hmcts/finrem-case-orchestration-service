@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocumentCollection implements HasCaseDocument {
+public class DocumentCollection {
     private CaseDocument value;
 }

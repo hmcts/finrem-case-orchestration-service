@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadDocument implements HasDocumentLink {
+public class UploadDocument {
     @JsonProperty("DocumentType")
     private UploadDocumentType documentType;
     @JsonProperty("DocumentEmailContent")

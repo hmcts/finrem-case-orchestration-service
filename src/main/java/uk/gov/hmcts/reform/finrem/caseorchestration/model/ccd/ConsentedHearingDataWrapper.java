@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsentedHearingDataWrapper implements HasCaseDocument {
+public class ConsentedHearingDataWrapper {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")

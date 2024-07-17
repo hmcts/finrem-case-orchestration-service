@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApproveOrder implements HasCaseDocument {
+public class ApproveOrder {
 
     @JsonProperty("approveOrder")
     CaseDocument caseDocument;

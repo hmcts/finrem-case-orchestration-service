@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadConsentOrderCollection implements HasCaseDocument {
+public class UploadConsentOrderCollection {
     private UploadConsentOrder value;
 }
