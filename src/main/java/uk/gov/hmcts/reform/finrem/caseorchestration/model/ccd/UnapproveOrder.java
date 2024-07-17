@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnapproveOrder {
+public class UnapproveOrder implements HasCaseDocument {
 
     @JsonProperty("unapproveOrder")
     CaseDocument caseDocument;

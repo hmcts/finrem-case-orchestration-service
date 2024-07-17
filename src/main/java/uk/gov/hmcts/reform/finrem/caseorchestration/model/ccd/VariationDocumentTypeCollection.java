@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VariationDocumentTypeCollection {
+public class VariationDocumentTypeCollection implements HasCaseDocument {
     private UUID id;
     private VariationDocumentType value;
 }

@@ -55,10 +55,10 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinremCaseData {
+public class FinremCaseData implements HasCaseDocument {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
@@ -722,6 +722,23 @@ public class FinremCaseData {
     @JsonIgnore
     public boolean isAppAddressConfidential() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
+    }
+
+    @JsonIgnore
+    public String getApplicantSolicitorPostcode() {
+        if (isConsentedApplication()) {
+            Address solicitorAddress = getContactDetailsWrapper().getSolicitorAddress();
+            return solicitorAddress != null ? solicitorAddress.getPostCode() : null;
+        } else {
+            Address applicantAddress = getContactDetailsWrapper().getApplicantSolicitorAddress();
+            return applicantAddress != null ? applicantAddress.getPostCode() : null;
+        }
+    }
+
+    @JsonIgnore
+    public String getRespondentSolicitorPostcode() {
+        Address respondentAddress = getContactDetailsWrapper().getRespondentSolicitorAddress();
+        return respondentAddress != null ? respondentAddress.getPostCode() : null;
     }
 
     @JsonIgnore
