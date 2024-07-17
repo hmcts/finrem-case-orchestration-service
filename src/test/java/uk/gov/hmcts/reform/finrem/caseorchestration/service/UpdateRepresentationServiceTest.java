@@ -41,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -331,6 +332,31 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(COUNTY, solicitorAddress.getCounty());
         assertEquals(COUNTRY, solicitorAddress.getCountry());
         assertEquals(POSTCODE, solicitorAddress.getPostCode());
+    }
+
+    @Test
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowUnsupportedOperationException() throws Exception {
+        String fixture = "consentedAppSolicitorAdding";
+        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build()
+        );
+        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        try (InputStream resourceAsStream = getClass()
+            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-withoutCaseRoleId.json")) {
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+                .getCaseDetails();
+        }
+
+        assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
     }
 
     @Test
