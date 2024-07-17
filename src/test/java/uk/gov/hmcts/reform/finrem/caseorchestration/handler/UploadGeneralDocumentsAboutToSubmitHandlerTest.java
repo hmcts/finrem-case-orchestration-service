@@ -80,7 +80,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     public void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDate() {
 
         CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension",
-            "/binaryUrl", "");
+            "/binaryUrl", "", null);
 
         UploadGeneralDocumentCollection oldDoc = createGeneralUploadDocumentItem(
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT,
