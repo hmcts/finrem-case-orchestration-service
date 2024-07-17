@@ -361,6 +361,9 @@ bootWithCCD {
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
     environment("spring.profiles.active", "local")
+
+    // ccd-data-store-api
+    environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", "FinancialRemedyContested")
 }
 
 dependencyManagement {
