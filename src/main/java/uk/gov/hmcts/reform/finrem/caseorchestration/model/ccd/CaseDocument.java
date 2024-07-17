@@ -41,4 +41,8 @@ public class CaseDocument implements DocumentFileNameProvider {
         this.categoryId = caseDocuments.getCategoryId();
         this.uploadTimestamp = caseDocuments.getUploadTimestamp();
     }
+
+    public String getDocumentUrl() {
+        return this.documentUrl == null ? "" : this.documentUrl;
+    }
 }
