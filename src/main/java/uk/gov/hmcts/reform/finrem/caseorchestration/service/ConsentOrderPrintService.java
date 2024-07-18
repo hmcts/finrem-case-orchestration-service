@@ -79,10 +79,10 @@ public class ConsentOrderPrintService {
 
         if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
             log.info("Case ID: {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
-            caseData.setBulkPrintCoverSheetRes(null);
-            caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseData.setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
             caseData.setBulkPrintLetterIdRes(respondentLetterId.toString());
         }
 
