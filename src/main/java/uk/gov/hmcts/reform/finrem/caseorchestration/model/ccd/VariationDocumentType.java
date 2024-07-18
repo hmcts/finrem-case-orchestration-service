@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VariationDocumentType implements HasCaseDocument {
+public class VariationDocumentType {
     private VariationTypeOfDocument typeOfDocument;
     private Document uploadedDocument;
 

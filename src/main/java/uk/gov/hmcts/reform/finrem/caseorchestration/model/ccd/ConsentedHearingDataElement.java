@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConsentedHearingDataElement implements HasCaseDocument {
+public class ConsentedHearingDataElement {
     @JsonProperty("hearingType")
     public String hearingType;
     @JsonProperty("hearingTimeEstimate")

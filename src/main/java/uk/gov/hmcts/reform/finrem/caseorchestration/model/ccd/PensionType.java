@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PensionType implements HasCaseDocument {
+public class PensionType {
 
     private PensionDocumentType typeOfDocument;
 

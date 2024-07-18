@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Deprecated
-public class UploadConfidentialDocument implements HasCaseDocument {
+public class UploadConfidentialDocument {
     @JsonProperty("DocumentType")
     private CaseDocumentType documentType;
     @JsonProperty("DocumentLink")

@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdditionalHearingDocumentCollection implements HasCaseDocument {
+public class AdditionalHearingDocumentCollection {
     private AdditionalHearingDocument value;
 }

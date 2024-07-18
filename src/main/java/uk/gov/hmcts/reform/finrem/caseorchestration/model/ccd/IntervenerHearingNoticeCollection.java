@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntervenerHearingNoticeCollection implements HasCaseDocument {
+public class IntervenerHearingNoticeCollection {
 
     @JsonProperty("id")
     private String id;
