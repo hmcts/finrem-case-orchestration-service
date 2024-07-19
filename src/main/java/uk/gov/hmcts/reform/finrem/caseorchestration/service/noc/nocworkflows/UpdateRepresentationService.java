@@ -101,7 +101,7 @@ public class UpdateRepresentationService {
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseDetails.getId().toString(), NOC_EVENT)
-            .orElseThrow(() -> new IllegalStateException(format("Could not find %s event in audit", NOC_EVENT)));
+            .orElseThrow(() -> new IllegalStateException(format("%s - Could not find %s event in audit", caseDetails.getId(), NOC_EVENT)));
 
         return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
     }
