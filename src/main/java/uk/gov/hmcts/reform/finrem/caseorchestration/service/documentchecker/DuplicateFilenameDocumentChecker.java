@@ -56,6 +56,9 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
      * @param allDocuments the list to which collected {@link DocumentFileNameProvider} instances will be added
      */
     private static void processHasCaseDocument(HasCaseDocument hcd, List<DocumentFileNameProvider> allDocuments) {
+        if (hcd == null) {
+            return;
+        }
         try {
             // Collect all fields from HasCaseDocument class
             Field[] fields = hcd.getClass().getDeclaredFields();
@@ -77,7 +80,7 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
                     allDocuments.add((DocumentFileNameProvider) field.get(hcd));
                 } else if (HasCaseDocument.class.isAssignableFrom(field.getType())) {
                     // If the field is an instance of HasCaseDocument, recursively process the nested HasCaseDocument instance
-                    processHasCaseDocument((HasCaseDocument)  field.get(hcd), allDocuments);
+                    processHasCaseDocument((HasCaseDocument) field.get(hcd), allDocuments);
                 }
             }
         } catch (Exception e) {
@@ -94,34 +97,35 @@ public class DuplicateFilenameDocumentChecker implements DocumentChecker {
     @Override
     public List<String> getWarnings(DocumentCheckContext context)  throws DocumentContentCheckerException {
         CaseDocument caseDocument = context.getCaseDocument();
-        List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(context.getBeforeCaseDetails().getData());
+        if (caseDocument != null) {
+            List<DocumentFileNameProvider> allDocuments = collectCaseDocumentsFromFinremCaseData(context.getBeforeCaseDetails().getData());
 
-        // Check for duplicate filenames in the collected documents
-        boolean hasDuplicates = allDocuments.stream()
-            .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));
+            // Check for duplicate filenames in the collected documents
+            boolean hasDuplicates = allDocuments.stream()
+                .anyMatch(d -> isDuplicateFilename(caseDocument, () -> List.of(d)));
 
-        if (hasDuplicates) {
-            return List.of(WARNING);
-        }
+            if (hasDuplicates) {
+                return List.of(WARNING);
+            }
 
-        // check if duplication occurs on uploading documents
-        FinremCaseData newCaseData = context.getCaseDetails().getData();
-        if (
-            (newCaseData.isConsentedApplication()
-                && ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
+            // check if duplication occurs on uploading documents
+            FinremCaseData newCaseData = context.getCaseDetails().getData();
+            if (
+                (newCaseData.isConsentedApplication()
+                    && ofNullable(newCaseData.getUploadDocuments()).orElse(List.of()).stream()
                     .map(d -> ofNullable(d.getValue()).orElse(UploadDocument.builder().build()).getDocumentLink())
                     .filter(Objects::nonNull)
                     .filter(d -> isDuplicateFilename(caseDocument, () -> List.of(d))).count() > 1)
-                ||
-                (newCaseData.isContestedApplication()
-                    && ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
+                    ||
+                    (newCaseData.isContestedApplication()
+                        && ofNullable(newCaseData.getUploadGeneralDocuments()).orElse(List.of()).stream()
                         .map(d -> ofNullable(d.getValue()).orElse(UploadGeneralDocument.builder().build()).getDocumentLink())
                         .filter(Objects::nonNull)
-                    .filter(d -> isDuplicateFilename(caseDocument, () -> List.of(d))).count() > 1)
-        ) {
-            return List.of(WARNING);
+                        .filter(d -> isDuplicateFilename(caseDocument, () -> List.of(d))).count() > 1)
+            ) {
+                return List.of(WARNING);
+            }
         }
-
         return Collections.emptyList();
     }
 }

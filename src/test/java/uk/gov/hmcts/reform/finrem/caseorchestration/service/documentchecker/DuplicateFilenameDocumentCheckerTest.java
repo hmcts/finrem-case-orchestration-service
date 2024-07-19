@@ -104,6 +104,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerServiceTest.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -148,6 +149,30 @@ class DuplicateFilenameDocumentCheckerTest {
                         .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
                         .build())).build())
                 .caseDetails(FinremCaseDetailsBuilderFactory.from(caseType).build())
+            .build());
+
+        assertThat(warnings).isEmpty();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CaseType.class, names = {"CONTESTED", "CONSENTED"})
+    void givenCaseDocumentIsNull(CaseType caseType) throws DocumentContentCheckerException {
+        List<String> warnings = underTest.getWarnings(DocumentCheckContext.builder()
+            .caseDocument(null)
+            .bytes(new byte[0])
+            .beforeCaseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID, caseType, FinremCaseData.builder()
+                .uploadGeneralDocuments(List.of(UploadGeneralDocumentCollection.builder()
+                    .value(UploadGeneralDocument.builder().build())
+                    .build()))
+                .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
+                .generalOrderWrapper(GeneralOrderWrapper.builder()
+                    .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
+                    .build())).build())
+            .caseDetails(FinremCaseDetailsBuilderFactory.from(CASE_ID, caseType,
+                    FinremCaseData.builder().uploadDocuments(List.of(UploadDocumentCollection.builder().value(UploadDocument.builder()
+                        .documentLink(DUPLICATED_CASE_DOCUMENT)
+                        .build()).build()))
+                ).build())
             .build());
 
         assertThat(warnings).isEmpty();
