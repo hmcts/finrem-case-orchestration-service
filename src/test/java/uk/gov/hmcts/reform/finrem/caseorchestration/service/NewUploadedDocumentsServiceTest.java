@@ -95,6 +95,24 @@ class NewUploadedDocumentsServiceTest {
                         .build())
                     .build())
             ),
+            // 1.1.2 with null document link in the new doc
+            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
+                        UploadGeneralDocumentCollection.builder()
+                            .value(UploadGeneralDocument.builder()
+                                .documentLink(null)
+                                .build())
+                            .build()
+                    )).toList());
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+                List.of()
+            ),
             // 1.2 with new doc
             Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
                     finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);

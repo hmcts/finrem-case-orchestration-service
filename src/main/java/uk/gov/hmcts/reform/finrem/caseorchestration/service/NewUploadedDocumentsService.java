@@ -20,6 +20,16 @@ public class NewUploadedDocumentsService {
         return ofNullable(caseDocument).orElse(CaseDocument.builder().build());
     }
 
+    /**
+     * Retrieves a list of newly uploaded documents by comparing the current case data with the previous case data.
+     * The existence of caseDocumentLink is the key factor of the comparison.
+     *
+     * @param <T> the type parameter extending {@code CaseDocumentCollection}
+     * @param caseData the current {@code FinremCaseData}
+     * @param caseDataBefore the previous {@code FinremCaseData}
+     * @param accessor a function that extracts the list of documents from the {@code FinremCaseData}
+     * @return a list of newly uploaded documents, or an empty list if no new documents are found
+     */
     public <T extends CaseDocumentCollection<?>> List<T> getNewUploadDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore,
                                                                                Function<FinremCaseData, List<T>> accessor) {
         List<T> uploadedDocuments = accessor.apply(caseData);
@@ -33,10 +43,10 @@ public class NewUploadedDocumentsService {
 
         List<T> ret = new ArrayList<>();
         uploadedDocuments.stream()
-            .filter(d -> d.getValue() != null)
+            .filter(d -> d.getValue() != null && d.getValue().getDocumentLink() != null)
             .forEach(d -> {
                 boolean exists = previousDocuments.stream()
-                    .filter(pd -> pd.getValue() != null)
+                    .filter(pd -> pd.getValue() != null && pd.getValue().getDocumentLink() != null)
                     .anyMatch(pd -> nullSafeCaseDocument(pd.getValue().getDocumentLink()).getDocumentUrl().equals(
                         nullSafeCaseDocument(d.getValue().getDocumentLink()).getDocumentUrl()));
                 if (!exists) {
