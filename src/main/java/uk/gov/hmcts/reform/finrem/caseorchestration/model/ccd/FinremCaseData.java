@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
@@ -152,12 +153,6 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
-    private CaseDocument bulkPrintCoverSheetApp;
-    private CaseDocument bulkPrintCoverSheetRes;
-    private CaseDocument bulkPrintCoverSheetIntv1;
-    private CaseDocument bulkPrintCoverSheetIntv2;
-    private CaseDocument bulkPrintCoverSheetIntv3;
-    private CaseDocument bulkPrintCoverSheetIntv4;
     private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
@@ -180,8 +175,6 @@ public class FinremCaseData {
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
-    private CaseDocument bulkPrintCoverSheetAppConfidential;
-    private CaseDocument bulkPrintCoverSheetResConfidential;
     @JsonProperty("RespSolNotificationsEmailConsent")
     private YesOrNo respSolNotificationsEmailConsent;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -373,6 +366,9 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private OrderWrapper orderWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private BulkPrintCoversheetWrapper bulkPrintCoversheetWrapper;
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
 
@@ -725,6 +721,23 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public String getApplicantSolicitorPostcode() {
+        if (isConsentedApplication()) {
+            Address solicitorAddress = getContactDetailsWrapper().getSolicitorAddress();
+            return solicitorAddress != null ? solicitorAddress.getPostCode() : null;
+        } else {
+            Address applicantAddress = getContactDetailsWrapper().getApplicantSolicitorAddress();
+            return applicantAddress != null ? applicantAddress.getPostCode() : null;
+        }
+    }
+
+    @JsonIgnore
+    public String getRespondentSolicitorPostcode() {
+        Address respondentAddress = getContactDetailsWrapper().getRespondentSolicitorAddress();
+        return respondentAddress != null ? respondentAddress.getPostCode() : null;
+    }
+
+    @JsonIgnore
     public boolean isRespAddressConfidential() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
     }
@@ -940,5 +953,13 @@ public class FinremCaseData {
 
         return cfvMigrationWrapper;
     }
-}
 
+    @JsonIgnore
+    public BulkPrintCoversheetWrapper getBulkPrintCoversheetWrapper() {
+        if (bulkPrintCoversheetWrapper == null) {
+            this.bulkPrintCoversheetWrapper = new BulkPrintCoversheetWrapper();
+        }
+
+        return bulkPrintCoversheetWrapper;
+    }
+}
