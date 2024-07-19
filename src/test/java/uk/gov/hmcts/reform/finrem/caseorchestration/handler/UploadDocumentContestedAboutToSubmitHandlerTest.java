@@ -68,13 +68,47 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_DOCUMENT_CONTESTED);
     }
 
+    @Test
+    void givenValidCaseDataWithoutDocumentUploaded_thenNoWarningShouldBeReturned() {
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder().documentEmailContent("<documentEmailContent>").build()) // no documentLink
+                .build()
+        ));
+        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(List.of("whatever")); // never reach
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
+            FinremCallbackRequest.builder()
+                .caseDetails(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED).build())
+                .caseDetailsBefore(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED).build()).build(),
+            AUTH_TOKEN);
+        assertThat(response.getWarnings()).isEmpty();
+    }
+
+    @Test
+    void givenValidCaseDataWithDocumentUpload_whenUnexpectedExceptionThrownInWarningChecking_thenNotBlockTheSubmission() {
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
+            UploadGeneralDocumentCollection.builder()
+                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
+                .build()
+        ));
+        when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenThrow(new RuntimeException("unexpected exception"));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
+            FinremCallbackRequest.builder()
+                .caseDetails(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED).build())
+                .caseDetailsBefore(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED).build()).build(),
+            AUTH_TOKEN);
+        assertThat(response.getWarnings()).isEmpty();
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningIsDetected_thenPopulateWarning(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
         when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().build())
+                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
                 .build()
         ));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(expectedWarnings);
@@ -99,7 +133,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEqualTo(expectedWarnings);
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
-                "Number of warnings encountered when uploading general document for a case %s: %s", CASE_ID, 1));
+                "%s - Number of warnings encountered when uploading general document: %s", CASE_ID, 1));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }
@@ -110,7 +144,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
         when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
             UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().build())
+                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
                 .build()
         ));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "2warnings", "1warnings")
@@ -136,7 +170,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings") : List.of());
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
-                "Number of warnings encountered when uploading general document for a case %s: %s", CASE_ID, 2));
+                "%s - Number of warnings encountered when uploading general document: %s", CASE_ID, 2));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }

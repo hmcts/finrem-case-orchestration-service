@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -18,10 +18,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.Docu
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.Optional.ofNullable;
@@ -59,17 +60,29 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        final Long caseId = finremCaseDetails.getId();
 
-        final Set<String> warnings = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
-            FinremCaseData::getUploadGeneralDocuments).stream()
-                .map(d -> documentCheckerService.getWarnings(d.getValue().getDocumentLink(), beforeFinremCaseDetails, finremCaseDetails,
-                    userAuthorisation))
-                .flatMap(List::stream)
-                .filter(ObjectUtils::isNotEmpty)
-                .collect(Collectors.toSet());
-        if (!warnings.isEmpty()) {
-            log.info("Number of warnings encountered when uploading general document for a case {}: {}",
-                    finremCaseDetails.getId(), warnings.size());
+        List<UploadGeneralDocumentCollection> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore,
+            FinremCaseData::getUploadGeneralDocuments);
+
+        Set<String> allWarnings = new HashSet<>();
+        for (UploadGeneralDocumentCollection doc : newDocuments) {
+            if (doc.getValue() != null && doc.getValue().getDocumentLink() != null) {
+                try {
+                    List<String> warnings = documentCheckerService.getWarnings(doc.getValue().getDocumentLink(), beforeFinremCaseDetails,
+                        finremCaseDetails, userAuthorisation);
+                    if (!ObjectUtils.isEmpty(warnings)) {
+                        allWarnings.addAll(warnings);
+                    }
+                } catch (Exception t) {
+                    log.error(format("%s - Exception was caught when checking the warnings", caseId), t);
+                }
+            }
+        }
+
+        if (!allWarnings.isEmpty()) {
+            log.info(format("%s - Number of warnings encountered when uploading general document: %s",
+                caseId, allWarnings.size()));
         }
 
         // Do sorting
@@ -83,7 +96,7 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(warnings.stream().sorted().toList())
+            .warnings(allWarnings.stream().sorted().toList())
             .data(caseData).build();
     }
 
