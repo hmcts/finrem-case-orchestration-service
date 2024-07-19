@@ -29,15 +29,15 @@ public class CaseNumberDocumentContentChecker implements DocumentContentChecker 
     }
 
     private boolean contentCaseNumberNotEqualsCaseNumber(FinremCaseDetails caseDetails, String content) {
-        long caseNumberFromContent = getCaseNumberFromContent(content);
+        String caseNumberFromContent = getCaseNumberFromContent(content);
         if (caseDetails.getId() == null) {
             return false;
         }
-        return caseNumberFromContent != caseDetails.getId();
+        return !String.valueOf(caseDetails.getId()).equals(caseNumberFromContent);
     }
 
-    private long getCaseNumberFromContent(String text) {
-        return Long.parseLong(CharMatcher.inRange('0', '9').retainFrom(text));
+    private String getCaseNumberFromContent(String text) {
+        return defaultString(CharMatcher.inRange('0', '9').retainFrom(text));
     }
 
 }

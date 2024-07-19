@@ -26,14 +26,16 @@ class CaseNumberDocumentContentCheckerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567891", "Case No: 1234567891", "Reference number: 1234567891"})
+    @ValueSource(strings = {"Case number 1234567891", "Case No: 1234567891", "Reference number: 1234567891",
+        "Case number 1701101433943871302024"})
     void givenCaseData_whenContentDoesNotMatchCaseNumber(String caseNumber) {
         assertThat(underTest.getWarning(FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID)).build(),
             new String[] {caseNumber})).isEqualTo("Case numbers may not match");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Case number 1234567890", "Case No: 1234567890", "Reference number: 1234567890", "whatever", ""})
+    @ValueSource(strings = {"Case number 1234567890", "Case No: 1234567890", "Reference number: 1234567890", "whatever", "",
+        "Case number 1701101433943871302024"})
     @NullSource
     void givenCaseDataWithoutId_whenContentDoesNotMatchCaseNumber(String content) {
         Arrays.stream(StringDecorator.values()).forEach(contentDecorator ->
