@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorNocDocumentServiceTest extends NocDocumentServiceBaseTestSetup {
@@ -27,9 +27,9 @@ public class SolicitorNocDocumentServiceTest extends NocDocumentServiceBaseTestS
 
     @Test
     public void shouldGenerateLitigantSolicitorAddedDocuments() {
-        when(documentConfiguration.getNocLetterNotificationSolicitorTemplate()).thenReturn(DOC_TEMPLATE);
-        when(documentConfiguration.getNocLetterNotificationSolicitorFileName()).thenReturn(DOC_FILENAME);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+        lenient().when(documentConfiguration.getNocLetterNotificationSolicitorTemplate()).thenReturn(DOC_TEMPLATE);
+        lenient().when(documentConfiguration.getNocLetterNotificationSolicitorFileName()).thenReturn(DOC_FILENAME);
+        lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(
             eq(AUTH_TOKEN),
             notiicationLettersDetailsMapCaptor.capture(),
             eq(DOC_TEMPLATE),
