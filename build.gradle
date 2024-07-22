@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.11'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1319'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1323'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -361,6 +361,9 @@ bootWithCCD {
     // ccd-definition-store-api
     environment("WELSH_TRANSLATION_ENABLED", "false")
     environment("spring.profiles.active", "local")
+
+    // ccd-data-store-api
+    environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", "FinancialRemedyContested")
 }
 
 dependencyManagement {
