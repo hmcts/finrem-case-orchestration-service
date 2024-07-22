@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderRefusalHolder implements HasCaseDocument {
+public class OrderRefusalHolder {
     private String orderRefusalAfterText;
     private List<OrderRefusalOption> orderRefusal;
     private String orderRefusalOther;

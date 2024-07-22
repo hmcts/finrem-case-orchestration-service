@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -17,10 +14,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralEmailWrapper {
-    private String generalEmailRecipient;
-    private String generalEmailCreatedBy;
-    private String generalEmailBody;
-    private CaseDocument generalEmailUploadedDocument;
-    private List<GeneralEmailCollection> generalEmailCollection;
+public class BulkPrintCoversheetWrapper {
+    private CaseDocument bulkPrintCoverSheetApp;
+    private CaseDocument bulkPrintCoverSheetRes;
+    private CaseDocument bulkPrintCoverSheetIntv1;
+    private CaseDocument bulkPrintCoverSheetIntv2;
+    private CaseDocument bulkPrintCoverSheetIntv3;
+    private CaseDocument bulkPrintCoverSheetIntv4;
+    private CaseDocument bulkPrintCoverSheetAppConfidential;
+    private CaseDocument bulkPrintCoverSheetResConfidential;
 }

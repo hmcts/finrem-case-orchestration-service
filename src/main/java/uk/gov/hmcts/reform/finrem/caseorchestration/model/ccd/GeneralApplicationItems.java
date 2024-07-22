@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralApplicationItems implements HasCaseDocument {
+public class GeneralApplicationItems {
     @JsonProperty("generalApplicationDocument")
     private CaseDocument generalApplicationDocument;
     @JsonProperty("generalApplicationCreatedBy")

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterimHearingCollection implements HasCaseDocument {
+public class InterimHearingCollection {
     @JsonProperty("id")
     private UUID id;
     @JsonProperty("value")

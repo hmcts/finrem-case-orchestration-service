@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ManageScannedDocument implements HasCaseDocument {
+public class ManageScannedDocument {
     private YesOrNo selectForUpdate;
 
     @JsonUnwrapped

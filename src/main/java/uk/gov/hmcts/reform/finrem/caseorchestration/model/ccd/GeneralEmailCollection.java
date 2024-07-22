@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralEmailCollection implements HasCaseDocument {
+public class GeneralEmailCollection {
     private GeneralEmailHolder value;
 }

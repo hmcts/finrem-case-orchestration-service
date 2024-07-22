@@ -339,8 +339,8 @@ class FinremCaseDetailMapperTest {
     }
 
     private void assertCoverSheets(FinremCaseData caseData) {
-        assertEquals(getTestDocument(), caseData.getBulkPrintCoverSheetApp());
-        assertEquals(getTestDocument(), caseData.getBulkPrintCoverSheetRes());
+        assertEquals(getTestDocument(), caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp());
+        assertEquals(getTestDocument(), caseData.getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes());
         assertEquals("1234", caseData.getBulkPrintLetterIdApp());
         assertEquals("1234", caseData.getBulkPrintLetterIdRes());
         assertEquals(getTestDocument(), caseData.getApprovedConsentOrderLetter());

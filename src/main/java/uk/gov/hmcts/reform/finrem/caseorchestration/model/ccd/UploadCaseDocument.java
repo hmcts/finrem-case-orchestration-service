@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadCaseDocument implements HasCaseDocument {
+public class UploadCaseDocument {
     private CaseDocument caseDocuments;
     private CaseDocumentType caseDocumentType;
     private CaseDocumentParty caseDocumentParty;

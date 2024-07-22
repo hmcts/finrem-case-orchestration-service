@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralLetter implements HasCaseDocument {
+public class GeneralLetter {
     @JsonProperty("generatedLetter")
     private CaseDocument generatedLetter;
     @JsonProperty("generalLetterUploadedDocument")

@@ -75,7 +75,7 @@ public class SendOrderIntervenerThreeDocumentHandler extends SendOrderPartyDocum
         FinremCaseData caseData = caseDetails.getData();
         IntervenerThree wrapper = caseData.getIntervenerThree();
         if (!notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(wrapper, caseDetails)) {
-            caseData.setBulkPrintCoverSheetIntv3(bulkPrintSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetIntv3(bulkPrintSheet);
         }
     }
 
