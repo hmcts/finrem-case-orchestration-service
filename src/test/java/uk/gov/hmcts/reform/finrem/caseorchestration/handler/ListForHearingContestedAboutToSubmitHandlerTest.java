@@ -168,10 +168,10 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(response.getData().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), nullValue());
-        assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), nullValue());
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
@@ -214,10 +214,10 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(objectMapper.convertValue(any(), eq(CaseDocument.class))).thenReturn(document);
         when(additionalHearingDocumentService.convertToPdf(any(CaseDocument.class), anyString(), anyString())).thenReturn(document);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(response.getData().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), nullValue());
-        assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), nullValue());
 
         verify(hearingDocumentService, times(1)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(0)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
@@ -261,10 +261,10 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(response.getData().getBulkPrintCoverSheetResConfidential(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetAppConfidential(), equalTo(caseDocument()));
-        assertThat(response.getData().getBulkPrintCoverSheetRes(), nullValue());
-        assertThat(response.getData().getBulkPrintCoverSheetApp(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetResConfidential(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetAppConfidential(), equalTo(caseDocument()));
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetRes(), nullValue());
+        assertThat(response.getData().getBulkPrintCoversheetWrapper().getBulkPrintCoverSheetApp(), nullValue());
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
