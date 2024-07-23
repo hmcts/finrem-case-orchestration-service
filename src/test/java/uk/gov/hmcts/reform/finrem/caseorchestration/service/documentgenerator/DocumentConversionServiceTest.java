@@ -75,6 +75,16 @@ public class DocumentConversionServiceTest {
     }
 
     @Test
+    public void doNotFlattenPdfDocumentWithNoFromLayer() throws IOException {
+
+        String editedPdfFixture = "/fixtures/D81_consent_order.pdf";
+        byte[] pdfBytes = loadResource(editedPdfFixture);
+        byte[] result = documentConversionService.flattenPdfDocument(pdfBytes);
+
+        assertThat(pdfBytes, is(result));
+    }
+
+    @Test
     public void flattenNonPdfDocumentHandleException() throws IOException {
 
         String toBeFlattenedFile = "/fixtures/MockD11Word.docx";

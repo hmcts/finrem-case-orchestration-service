@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,12 +66,14 @@ public class DocumentConversionService {
 
         try {
             PDDocument doc = PDDocument.load(document);
-            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
-            acroForm.flatten();
-            doc.save(bos);
-            doc.close();
-            return bos.toByteArray();
+            if (acroForm.isPresent()) {
+                acroForm.get().flatten();
+                doc.save(bos);
+                doc.close();
+                return bos.toByteArray();
+            }
         } catch (IOException e) {
             log.error("Unable to flatten document", e);
         }
