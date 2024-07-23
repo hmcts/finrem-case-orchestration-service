@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderWrapper {
+public class OrderWrapper implements HasCaseDocument {
     private List<ApprovedOrderConsolidateCollection> appOrderCollections;
     private List<ApprovedOrderConsolidateCollection> respOrderCollections;
     private List<ApprovedOrderConsolidateCollection> intv1OrderCollections;

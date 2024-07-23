@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GeneralApplication {
+public class GeneralApplication implements HasCaseDocument {
     @JsonProperty("generalApplicationDocument")
     private CaseDocument generalApplicationDocument;
 }
