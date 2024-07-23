@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralOrderWrapper {
+public class GeneralOrderWrapper implements HasCaseDocument {
     private GeneralOrderAddressTo generalOrderAddressTo;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

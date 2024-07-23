@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CaseDocument {
+public class CaseDocument implements DocumentFileNameProvider {
 
     @JsonProperty("document_url")
     private String documentUrl;
@@ -40,5 +40,9 @@ public class CaseDocument {
         this.documentBinaryUrl = caseDocuments.getDocumentBinaryUrl();
         this.categoryId = caseDocuments.getCategoryId();
         this.uploadTimestamp = caseDocuments.getUploadTimestamp();
+    }
+
+    public String getDocumentUrl() {
+        return this.documentUrl == null ? "" : this.documentUrl;
     }
 }
