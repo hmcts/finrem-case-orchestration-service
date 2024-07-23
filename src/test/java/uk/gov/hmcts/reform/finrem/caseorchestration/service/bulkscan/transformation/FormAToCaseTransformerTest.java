@@ -158,11 +158,32 @@ public class FormAToCaseTransformerTest {
             hasEntry("authorisation2b", "I'm the CEO")
         ));
 
-        assertChildrenInfo(transformedCaseData);
+        assertGivenChildrenInfo(transformedCaseData);
 
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
         assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("lumpSumOrder", "pensionSharingOrder")));
         assertThat(transformedCaseData.get("natureOfApplication6"), is(singletonList("In addition to child support")));
+    }
+
+    @Test
+    public void shouldTransformEmptyChildGenderIsNotGiven() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(asList(
+            new OcrDataField(OcrFieldName.NAME_CHILD_1, "Bilbo Baggins"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_1, ""),
+            new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_1, "12/03/2000"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_1, "son"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_1, "SON"),
+            new OcrDataField(OcrFieldName.COUNTRY_CHILD_1, "New Zeeland"),
+            new OcrDataField(OcrFieldName.NAME_CHILD_2, "Frodo Baggins"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_2, null),
+            new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_2, "12/03/1895"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_2, "daughter"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_2, "Daughter"),
+            new OcrDataField(OcrFieldName.COUNTRY_CHILD_2, "The Shire")));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertNotGivenChildrenInfo(transformedCaseData);
     }
 
     @Test
@@ -225,6 +246,14 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
+    public void childSupportAgencyCalculationMadeToNullWhenNotProvided() {
+        Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+            singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
+                null))));
+        assertThat(optionOneTransformedData, hasEntry("ChildSupportAgencyCalculationMade", null));
+    }
+
+    @Test
     public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
         Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             singletonList(new OcrDataField("OrderForChildren",
@@ -267,7 +296,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
-            hasEntry("natureOfApplication5b", ""),
+            not(hasEntry("natureOfApplication5b", "")),
             not(hasKey("orderForChildrenQuestion1"))
         ));
     }
@@ -520,11 +549,18 @@ public class FormAToCaseTransformerTest {
         return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
     }
 
-    private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
+    private void assertGivenChildrenInfo(Map<String, Object> transformedCaseData) {
         ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
 
         assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "Male", "son", "SON", "New Zeeland"));
         assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "Female", "daughter", "Daughter", "Canada"));
+    }
+
+    private void assertNotGivenChildrenInfo(Map<String, Object> transformedCaseData) {
+        ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
+
+        assertChild(children.getItem(0), asList("Bilbo Baggins", "2000-03-12", "notGiven", "son", "SON", "New Zeeland"));
+        assertChild(children.getItem(1), asList("Frodo Baggins", "1895-03-12", "notGiven", "daughter", "Daughter", "The Shire"));
     }
 
     private void assertChild(ChildInfo child, List<String> values) {
