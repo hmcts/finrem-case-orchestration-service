@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Gender.NOT_GIVEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.COUNTRY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.DOB;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.GENDER;
@@ -46,10 +47,12 @@ public class ChildrenInfoMapper {
             dob = transformFormDateIntoCcdDate("childInfo" + index + ".dateOfBirth", childsDob);
         }
 
+        String gender = getValueOrEmptyString(index, ocrDataFields, GENDER);
+
         return ChildInfo.builder()
             .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
             .dateOfBirth(dob)
-            .gender(getValueFromOcrDataFields(GENDER + index, ocrDataFields).orElse("notGiven"))
+            .gender(StringUtils.isNotBlank(gender) ? gender : NOT_GIVEN.getValue())
             .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))
             .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_RESPONDENT))
             .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, COUNTRY))
