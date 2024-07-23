@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Gender;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_EMAIL_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidator.validatePostcode;
@@ -149,15 +149,17 @@ public class FormAValidator extends BulkScanFormValidator {
         ));
         ALLOWED_VALUES_PER_FIELD.put(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, asList(
             "Yes",
-            "No",
-            EMPTY
+            "No"
         ));
         ALLOWED_VALUES_PER_FIELD.put(AUTHORISATION_SIGNED_BY, asList(
             "Applicant",
             "Litigation Friend",
             "Applicant's solicitor"
         ));
-        final List<String> genderEnum = asList("Male", "Female", EMPTY);
+        final List<String> genderEnum = asList(
+            Gender.MALE.getValue(),
+            Gender.FEMALE.getValue()
+        );
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_1, genderEnum);
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
