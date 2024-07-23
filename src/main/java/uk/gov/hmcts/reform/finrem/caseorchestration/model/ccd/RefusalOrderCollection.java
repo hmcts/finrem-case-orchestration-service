@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RefusalOrderCollection {
+public class RefusalOrderCollection implements HasCaseDocument {
     private RefusalOrder value;
 }

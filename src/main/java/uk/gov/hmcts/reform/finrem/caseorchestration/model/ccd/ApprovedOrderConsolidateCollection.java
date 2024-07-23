@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApprovedOrderConsolidateCollection {
+public class ApprovedOrderConsolidateCollection implements HasCaseDocument {
 
     private ApproveOrdersHolder value;
 

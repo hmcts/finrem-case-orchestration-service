@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftDirectionOrderCollection {
+public class DraftDirectionOrderCollection implements HasCaseDocument {
     private DraftDirectionOrder value;
 }
