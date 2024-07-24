@@ -31,13 +31,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class UpdateRepresentationWorkflowService {
 
-    @Autowired
     private final NoticeOfChangeService noticeOfChangeService;
-
-    @Autowired
     private final AssignCaseAccessService assignCaseAccessService;
-
-    @Autowired
     private final SystemUserService systemUserService;
 
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
