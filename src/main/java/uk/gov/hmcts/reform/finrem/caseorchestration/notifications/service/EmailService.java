@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,10 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EmailService {
 
-    @Autowired
-    private EmailClient emailClient;
+    private final EmailClient emailClient;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
