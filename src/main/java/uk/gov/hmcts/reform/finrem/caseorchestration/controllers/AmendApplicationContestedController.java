@@ -40,8 +40,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     private static final String POST_CODE = "PostCode";
 
-    @Autowired
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final InternationalPostalService postalService;
 

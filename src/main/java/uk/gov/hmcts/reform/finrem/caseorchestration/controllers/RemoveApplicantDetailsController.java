@@ -61,10 +61,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public class RemoveApplicantDetailsController extends BaseController {
 
-    @Autowired
     private final UpdateRepresentationWorkflowService nocWorkflowService;
-
-    @Autowired
     private final OnlineFormDocumentService service;
 
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
