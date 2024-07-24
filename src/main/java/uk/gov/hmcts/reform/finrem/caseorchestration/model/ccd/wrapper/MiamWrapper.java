@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGroundsV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendanceV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -37,8 +39,12 @@ public class MiamWrapper {
     private List<MiamUrgencyReason> miamUrgencyReasonChecklist;
     @JsonProperty("MIAMPreviousAttendanceChecklist")
     private MiamPreviousAttendance miamPreviousAttendanceChecklist;
+    @JsonProperty("MIAMPreviousAttendanceChecklistV2")
+    private MiamPreviousAttendanceV2 miamPreviousAttendanceChecklistV2;
     @JsonProperty("MIAMOtherGroundsChecklist")
     private MiamOtherGrounds miamOtherGroundsChecklist;
+    @JsonProperty("MIAMOtherGroundsChecklistV2")
+    private MiamOtherGroundsV2 miamOtherGroundsChecklistV2;
     @JsonProperty("evidenceUnavailableDomesticAbuseMIAM")
     private String evidenceUnavailableDomesticAbuseMiam;
     @JsonProperty("evidenceUnavailableUrgencyMIAM")
