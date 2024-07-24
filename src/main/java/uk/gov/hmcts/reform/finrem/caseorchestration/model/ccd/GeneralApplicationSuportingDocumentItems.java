@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GeneralApplicationSuportingDocumentItems {
+public class GeneralApplicationSuportingDocumentItems implements HasCaseDocument {
     @JsonProperty("supportDocument")
     private CaseDocument supportDocument;
 }

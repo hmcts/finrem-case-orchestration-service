@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterimHearingBulkPrintDocumentsData {
+public class InterimHearingBulkPrintDocumentsData implements HasCaseDocument {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")

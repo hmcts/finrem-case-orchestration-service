@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamCheckService;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.isA;

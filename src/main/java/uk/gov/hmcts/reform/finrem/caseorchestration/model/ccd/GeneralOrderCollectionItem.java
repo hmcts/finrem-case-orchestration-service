@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class GeneralOrderCollectionItem extends CollectionElement<GeneralOrder> {
+public class GeneralOrderCollectionItem extends CollectionElement<GeneralOrder> implements HasCaseDocument {
 
     @JsonProperty("value")
     private GeneralOrder generalOrder;

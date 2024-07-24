@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApproveOrdersHolder {
+public class ApproveOrdersHolder implements HasCaseDocument {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderReceivedAt;
     private List<ApprovedOrderCollection> approveOrders;

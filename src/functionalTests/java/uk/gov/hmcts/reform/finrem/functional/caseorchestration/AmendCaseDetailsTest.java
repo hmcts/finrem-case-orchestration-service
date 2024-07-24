@@ -22,8 +22,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTIONS_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST_V2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
@@ -419,8 +421,8 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             MIAM_EXEMPTIONS_CHECKLIST,
             MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
             MIAM_URGENCY_CHECKLIST,
-            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-            MIAM_OTHER_GROUNDS_CHECKLIST,
+            MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2,
+            MIAM_OTHER_GROUNDS_CHECKLIST_V2,
             MIAM_DOMESTIC_ABUSE_TEXTBOX,
             MIAM_URGENCY_TEXTBOX,
             MIAM_PREVIOUS_ATTENDANCE_TEXTBOX,
