@@ -266,7 +266,9 @@ public class CCDConfigConstant {
     public static final String MIAM_DOMESTIC_VIOLENCE_CHECKLIST = "MIAMDomesticViolenceChecklist";
     public static final String MIAM_URGENCY_CHECKLIST = "MIAMUrgencyReasonChecklist";
     public static final String MIAM_PREVIOUS_ATTENDANCE_CHECKLIST = "MIAMPreviousAttendanceChecklist";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2 = "MIAMPreviousAttendanceChecklistV2";
     public static final String MIAM_OTHER_GROUNDS_CHECKLIST = "MIAMOtherGroundsChecklist";
+    public static final String MIAM_OTHER_GROUNDS_CHECKLIST_V2 = "MIAMOtherGroundsChecklistV2";
     public static final String MIAM_DOMESTIC_ABUSE_TEXTBOX = "evidenceUnavailableDomesticAbuseMIAM";
     public static final String MIAM_PREVIOUS_ATTENDANCE_TEXTBOX = "evidenceUnavailablePreviousAttendanceMIAM";
     public static final String MIAM_OTHER_GROUNDS_TEXTBOX = "evidenceUnavailableOtherGroundsMIAM";
