@@ -23,6 +23,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("java:S6857")
 public class EmailService {
 
     private final EmailClient emailClient;
