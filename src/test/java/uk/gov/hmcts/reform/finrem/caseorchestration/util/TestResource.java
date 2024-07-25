@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,5 +39,9 @@ public class TestResource {
             .fileName(FILE_NAME)
             .binaryUrl(BINARY_URL)
             .build();
+    }
+
+    public static Path getPathFromResources(String fileName) {
+        return Paths.get("src/test/resources/" + fileName);
     }
 }

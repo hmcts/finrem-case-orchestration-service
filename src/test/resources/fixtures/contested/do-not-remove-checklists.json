@@ -125,6 +125,7 @@
         }
       ],
       "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
+      "MIAMOtherGroundsChecklistV2": "FR_ms_MIAMOtherGroundsChecklistV2_Value_5",
       "applicantSolicitorAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -175,6 +176,7 @@
         "FR_ms_MIAMDomesticViolenceChecklist_Value_2"
       ],
       "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
+      "MIAMPreviousAttendanceChecklistV2": "FR_ms_MIAMPreviousAttendanceChecklistV2_Value_1",
       "additionalPropertyOrderDecision": "No",
       "applicantSolicitorConsentForEmails": "Yes"
     }

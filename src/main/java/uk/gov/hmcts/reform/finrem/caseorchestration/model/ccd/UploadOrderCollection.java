@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadOrderCollection {
+public class UploadOrderCollection implements HasCaseDocument {
     private UploadOrder value;
     private String id;
 }

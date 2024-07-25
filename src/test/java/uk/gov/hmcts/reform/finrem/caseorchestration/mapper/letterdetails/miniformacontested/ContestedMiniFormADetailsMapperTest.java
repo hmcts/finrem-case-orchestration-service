@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustment
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedMiniFormADetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -28,6 +29,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGroundsV2.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendanceV2.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1;
 
 public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
@@ -76,7 +81,29 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
         assertNotNull(actual);
     }
 
+    @Test
+    public void testMiamV2Exemptions() {
+        String miamPreviousAtttendance = FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1.getText();
+        String miamOtherGrounds = FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_5.getText();
+        DocumentTemplateDetails expected = getExpectedContestedMiniFormADetails(miamPreviousAtttendance,
+            miamOtherGrounds);
+
+        MiamWrapper miamWrapper = caseDetails.getData().getMiamWrapper();
+        miamWrapper.setMiamPreviousAttendanceChecklistV2(FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1);
+        miamWrapper.setMiamOtherGroundsChecklistV2(FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_5);
+        DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(caseDetails,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals(expected, actual);
+    }
+
     private ContestedMiniFormADetails getExpectedContestedMiniFormADetails() {
+        return getExpectedContestedMiniFormADetails(FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_1.getText(),
+            FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1.getText());
+    }
+
+    private ContestedMiniFormADetails getExpectedContestedMiniFormADetails(String miamPreviousAttendance,
+                                                                           String miamOtherGrounds) {
         return ContestedMiniFormADetails.builder()
             .caseNumber("1596638099618923")
             .applicantFmName("Applicant")
@@ -127,8 +154,8 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .miamExemptionsChecklist(getMiamExemptionsChecklist())
             .miamDomesticViolenceChecklist(getMiamDomesticViolenceChecklist())
             .miamUrgencyReasonChecklist(getMiamUrgencyReasonChecklist())
-            .miamPreviousAttendanceChecklist(MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_1.getText())
-            .miamOtherGroundsChecklist(MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1.getText())
+            .miamPreviousAttendanceChecklist(miamPreviousAttendance)
+            .miamOtherGroundsChecklist(miamOtherGrounds)
             .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetail())
             .build();
     }
