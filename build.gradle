@@ -25,7 +25,7 @@ def versions = [
         lombok               : '1.18.34',
         mockito              : '3.12.4',
         pact                 : '4.6.11',
-        pdfbox               : '2.0.31',
+        pdfbox               : '2.0.32',
         reformLogging        : '6.1.5',
         serenity             : '4.1.20',
         serviceTokenGenerator: '5.1.3',
