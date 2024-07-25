@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedD81Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
@@ -54,6 +56,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_CONTROL_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_DELIVERY_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_EXCEPTIONAL_RECORD_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_SCANNED_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_SUBTYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_CONTROL_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_DELIVERY_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_EXCEPTIONAL_RECORD_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_SCANNED_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_SUBTYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORMA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -92,7 +109,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         // Section 1 - further details of application
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.ADDRESS_OF_PROPERTIES, "natureOfApplication3a");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.MORTGAGE_DETAILS, "natureOfApplication3b");
-        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN, NATURE_OF_APP_5B);
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "ChildSupportAgencyCalculationMade");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "ChildSupportAgencyCalculationReason");
 
@@ -131,14 +147,38 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals(FORM_A_DOCUMENT))
             .findFirst()
-            .map(this::transformInputScannedDocIntoCaseDocument)
-            .ifPresent(doc -> additionalCaseData.put("formA", doc));
+            .ifPresent(doc -> {
+                additionalCaseData.put(FORMA, transformInputScannedDocIntoCaseDocument(doc));
+                additionalCaseData.put(FORMA_TYPE, doc.getType());
+                additionalCaseData.put(FORMA_SUBTYPE, doc.getSubtype());
+                additionalCaseData.put(FORMA_CONTROL_NUMBER, doc.getControlNumber());
+                additionalCaseData.put(FORMA_FILE_NAME, doc.getFileName());
+                additionalCaseData.put(FORMA_SCANNED_DATE, doc.getScannedDate());
+                additionalCaseData.put(FORMA_DELIVERY_DATE, doc.getDeliveryDate());
+                additionalCaseData.put(FORMA_EXCEPTIONAL_RECORD_REFERENCE, exceptionRecord.getId());
+            });
 
         ComplexTypeCollection<CaseDocument> d81DocumentCollection = inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
             .map(this::transformInputScannedDocIntoCaseDocument)
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
+
+        ComplexTypeCollection<ScannedD81Document> scannedD81Collection = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
+            .map(doc -> ScannedD81Document.builder()
+                .documentLink(transformInputScannedDocIntoCaseDocument(doc))
+                .type(ScannedDocumentType.forValue(doc.getType()))
+                .subtype(doc.getSubtype())
+                .controlNumber(doc.getControlNumber())
+                .fileName(doc.getFileName())
+                .scannedDate(doc.getScannedDate())
+                .deliveryDate(doc.getDeliveryDate())
+                .exceptionRecordReference(exceptionRecord.getId())
+                .build()
+            )
+            .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
+        additionalCaseData.put("scannedD81Collection", scannedD81Collection);
 
         additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, Map.of(
             P1_DOCUMENT, "Form P1",
@@ -157,10 +197,16 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals(DRAFT_CONSENT_ORDER_DOCUMENT))
             .findFirst()
-            .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> {
-                additionalCaseData.put(CONSENT_ORDER, doc);
-                additionalCaseData.put(LATEST_CONSENT_ORDER, doc);
+                additionalCaseData.put(CONSENT_ORDER, transformInputScannedDocIntoCaseDocument(doc));
+                additionalCaseData.put(CONSENT_ORDER_TYPE, doc.getType());
+                additionalCaseData.put(CONSENT_ORDER_SUBTYPE, doc.getSubtype());
+                additionalCaseData.put(CONSENT_ORDER_CONTROL_NUMBER, doc.getControlNumber());
+                additionalCaseData.put(CONSENT_ORDER_FILE_NAME, doc.getFileName());
+                additionalCaseData.put(CONSENT_ORDER_SCANNED_DATE, doc.getScannedDate());
+                additionalCaseData.put(CONSENT_ORDER_DELIVERY_DATE, doc.getDeliveryDate());
+                additionalCaseData.put(CONSENT_ORDER_EXCEPTIONAL_RECORD_REFERENCE, exceptionRecord.getId());
+                additionalCaseData.put(LATEST_CONSENT_ORDER, transformInputScannedDocIntoCaseDocument(doc));
             });
 
         inputScannedDocs.stream()

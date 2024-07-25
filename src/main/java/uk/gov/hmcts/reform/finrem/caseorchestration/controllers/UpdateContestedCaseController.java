@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +70,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final CaseFlagsService caseFlagsService;
+    private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -142,6 +144,7 @@ public class UpdateContestedCaseController extends BaseController {
         } else {
             removeMiamCertificationDetails(caseData);
         }
+        removeLegacyExemptions(caseData);
     }
 
     private void removeMiamCertificationDetailsForApplicantAttendedMiam(Map<String, Object> caseData) {
@@ -175,6 +178,10 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put(MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, null);
         caseData.put(MIAM_OTHER_GROUNDS_TEXTBOX, null);
         caseData.put(MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX, null);
+    }
+
+    private void removeLegacyExemptions(Map<String, Object> caseData) {
+        miamLegacyExemptionsService.removeLegacyExemptions(caseData);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {

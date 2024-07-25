@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
+@Import(MiamLegacyExemptionsService.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
@@ -52,6 +56,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockBean
     private CaseFlagsService caseFlagsService;
+    @Autowired
+    private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @Before
     public void setUp() {
@@ -348,7 +354,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotRemoveMiamCheckListForContested() throws Exception {
+    public void shouldOnlyRemoveLegacyMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/do-not-remove-checklists.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -360,8 +366,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
+            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklistV2").exists())
+            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklistV2").exists())
+            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
+            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
     }
 
     @Test

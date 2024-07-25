@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OtherDocument {
+public class OtherDocument implements HasCaseDocument {
     private OtherDocumentType typeOfDocument;
     private CaseDocument uploadedDocument;
 }

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -140,7 +141,7 @@ public class FinremCaseDataTest {
     }
 
     private List<Field> getAllFields(Class<?> clazz) {
-        List<Field> fields = Arrays.asList(clazz.getDeclaredFields());
+        List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         Class<?> superclass = clazz.getSuperclass();
         if (superclass != null) {
             fields.addAll(getAllFields(superclass));
