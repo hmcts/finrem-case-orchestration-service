@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralOrder {
+public class GeneralOrder implements HasCaseDocument {
     @JsonProperty("generalOrder_addressTo")
     private String generalOrderAddressTo;
     @JsonProperty("generalOrder_order")
