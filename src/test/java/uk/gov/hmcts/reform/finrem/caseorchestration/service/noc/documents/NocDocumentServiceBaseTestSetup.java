@@ -38,7 +38,7 @@ public class NocDocumentServiceBaseTestSetup {
     protected ObjectMapper objectMapper = new ObjectMapper();
 
     protected static final String AUTH_TOKEN = "authToken";
-    protected static final String DOC_TEMPLATE = "docTemplate";
+    protected static final String DOC_TEMPLATE = "NO_THIS_DOCUMENT.docx";
     protected static final String DOC_FILENAME = "docFilename";
     protected static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     protected static final String APPLICANT_NAME = "applicantName";

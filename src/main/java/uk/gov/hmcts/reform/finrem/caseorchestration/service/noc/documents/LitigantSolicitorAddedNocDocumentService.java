@@ -20,7 +20,7 @@ public class LitigantSolicitorAddedNocDocumentService extends NocDocumentService
 
     @Override
     NocDocumentTemplate getNocDocumentTemplate() {
-        return new NocDocumentTemplate(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate(),
+        return new NocDocumentTemplate("NO_THIS_DOCUMENT.docx",
             documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName());
     }
 }
