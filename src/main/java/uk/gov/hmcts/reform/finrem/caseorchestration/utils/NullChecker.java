@@ -18,7 +18,7 @@ public class NullChecker {
             return false;
         }
         if (target instanceof CharSequence charSequence) {
-           return !StringUtils.isEmpty(charSequence);
+            return !StringUtils.isEmpty(charSequence);
         }
         return Arrays.stream(target.getClass().getDeclaredFields())
             .peek(f -> f.setAccessible(true))
