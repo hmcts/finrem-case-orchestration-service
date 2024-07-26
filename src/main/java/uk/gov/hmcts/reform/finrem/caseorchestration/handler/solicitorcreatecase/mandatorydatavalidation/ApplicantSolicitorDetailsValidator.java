@@ -23,7 +23,6 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
         }
         if (!NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorPhone())) {
             ret.add("Applicant solicitor's phone is required.");
-
         }
         if (!NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorFirm())) {
             ret.add("Applicant solicitor's name of your firm is required.");

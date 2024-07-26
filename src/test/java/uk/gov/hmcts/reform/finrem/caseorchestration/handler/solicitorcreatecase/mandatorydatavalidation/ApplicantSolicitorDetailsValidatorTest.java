@@ -60,7 +60,8 @@ class ApplicantSolicitorDetailsValidatorTest  {
             Arguments.of("solicitorEmail", "Applicant solicitor's email is required."),
             Arguments.of("solicitorPhone", "Applicant solicitor's phone is required."),
             Arguments.of("solicitorFirm", "Applicant solicitor's name of your firm is required."),
-            Arguments.of("solicitorName", "Applicant solicitor's name is required.")
+            Arguments.of("solicitorName", "Applicant solicitor's name is required."),
+            Arguments.of("solicitorAddress", "Applicant solicitor's address is required.")
         );
     }
 
@@ -75,6 +76,10 @@ class ApplicantSolicitorDetailsValidatorTest  {
                 "solicitorFirm", "SOLICITOR FIRM",
                 "solicitorAddress", Map.of("PostCode", "GU2 7NY")));
             if (t == NullOrEmptyTest.EMPTY_STRING) {
+                if ("solicitorAddress".equals(fieldName)) {
+                    // skip solicitorAddress if it's not a string
+                    return;
+                }
                 map.put(fieldName, "");
             } else {
                 map.remove((fieldName));
@@ -97,6 +102,10 @@ class ApplicantSolicitorDetailsValidatorTest  {
                 "solicitorPhone", "9999999999",
                 "solicitorName", "SOLICITOR NAME",
                 "solicitorFirm", "SOLICITOR FIRM"));
+            if ("solicitorAddress".equals(fieldName)) {
+                // skip parameter: solicitorAddress
+                return;
+            }
             if (t == NullOrEmptyTest.EMPTY_STRING) {
                 map.put(fieldName, "");
             } else {
