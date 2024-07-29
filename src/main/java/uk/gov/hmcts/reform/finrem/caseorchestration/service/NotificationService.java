@@ -1697,7 +1697,9 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
+        log.info("{} - sendNoticeOfChangeEmail ", caseDetails.getId());
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
+        log.info("{} - template: {}", caseDetails.getId(), template.name());
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
@@ -1705,7 +1707,9 @@ public class NotificationService {
 
 
     public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
+        log.info("{} - sendNoticeOfChangeEmail(FinremCaseDetails) ", caseDetails.getId());
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
+        log.info("{} - template: {}", caseDetails.getId(), template.name());
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
@@ -1775,13 +1779,18 @@ public class NotificationService {
         EmailTemplateNames template) {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            if (checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())) {
+            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseDetails.getId());
+            boolean isApplicantSolicitorDigital = checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+            log.info("{} - isApplicantSolicitorDigital = {}}", caseDetails.getId(), isApplicantSolicitorDigital);
+            if (isApplicantSolicitorDigital) {
                 sendNotificationEmail(notificationRequest, template);
             }
             return;
         }
 
-        if (checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())) {
+        boolean isRespondentSolicitorDigital = checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+        log.info("{} - isRespondentSolicitorDigital = {}}", caseDetails.getId(), isRespondentSolicitorDigital);
+        if (isRespondentSolicitorDigital) {
             sendNotificationEmail(notificationRequest, template);
         }
     }
