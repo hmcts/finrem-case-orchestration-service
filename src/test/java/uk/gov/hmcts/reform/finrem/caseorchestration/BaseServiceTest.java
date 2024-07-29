@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
@@ -409,11 +410,7 @@ public abstract class BaseServiceTest extends BaseTest {
     }
 
     protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        CaseDocument document = new CaseDocument();
-        document.setDocumentUrl(url);
-        document.setDocumentBinaryUrl(binaryUrl);
-        document.setDocumentFilename(filename);
-        return document;
+        return caseDocument(url, filename, binaryUrl);
     }
 
     protected CallbackRequest buildHearingCallbackRequest(String payloadJson) {

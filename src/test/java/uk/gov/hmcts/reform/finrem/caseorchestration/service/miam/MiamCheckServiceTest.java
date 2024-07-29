@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.miam;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,26 +26,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_ABUSE_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST_V2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_23;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_10;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_11;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_16;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_4;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_6;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_7;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_8;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_3;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGroundsV2.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_16;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_6;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendanceV2.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_6;
 
 class MiamCheckServiceTest {
@@ -56,8 +48,6 @@ class MiamCheckServiceTest {
         + "for further information on what to do next and how to arrange a MIAM.";
     private static final String MIAM_EVIDENCE_UNAVAILABLE_ERROR = "Please explain in the textbox why you are unable to "
         + "provide the required evidence with your application.";
-    private static final String MIAM_LEGACY_OPTION_ERROR = "You have selected an outdated MIAM exemption option which "
-        + "needs to be unchecked before you can continue.";
 
     @Mock
     private CaseDetails caseDetails;
@@ -72,7 +62,7 @@ class MiamCheckServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForMiamFieldTest")
-    void whenSelectedMiamEvidenceUnavailableAndTextboxEmptyOrLegacyOptionThenShouldReturnError(Map<String, Object> data, String expectedError) {
+    void whenSelectedMiamEvidenceUnavailableAndTextboxEmptyThenShouldReturnError(Map<String, Object> data, String expectedError) {
         List<String> errors = getMiamErrorsFromCaseData(data);
         assertThat(errors, contains(expectedError));
     }
@@ -88,40 +78,12 @@ class MiamCheckServiceTest {
                 FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_6.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
             Arguments.of(ImmutableMap.of(MIAM_DOMESTIC_VIOLENCE_CHECKLIST,
                 FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_23.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_16.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-                FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_6.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
+            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST_V2,
+                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_16.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
+            Arguments.of(ImmutableMap.of(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2,
+                FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_6.getValue()), MIAM_EVIDENCE_UNAVAILABLE_ERROR),
             Arguments.of(ImmutableMap.of(APPLICANT_ATTENDED_MIAM,
-                NO_VALUE, CLAIMING_EXEMPTION_MIAM, NO_VALUE), MIAM_EXEMPT_ERROR),
-
-            // Previous exemptions Do Not Use options
-            Arguments.of(ImmutableMap.of(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-                FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_2.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-                FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_3.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST,
-                FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_5.getValue()), MIAM_LEGACY_OPTION_ERROR),
-
-            // Other exemption Do Not Use options
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_2.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_3.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_4.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_6.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_7.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_8.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_10.getValue()), MIAM_LEGACY_OPTION_ERROR),
-            Arguments.of(ImmutableMap.of(MIAM_OTHER_GROUNDS_CHECKLIST,
-                FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_11.getValue()), MIAM_LEGACY_OPTION_ERROR)
+                NO_VALUE, CLAIMING_EXEMPTION_MIAM, NO_VALUE), MIAM_EXEMPT_ERROR)
         );
     }
 
