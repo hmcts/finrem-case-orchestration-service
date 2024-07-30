@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentConversionExce
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentConversionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -58,6 +60,42 @@ public class DocumentConversionServiceTest {
     }
 
     @Test
+    public void flattenPdfDocument() throws IOException {
+
+        // Note: Already flat PDFs are unchanged by flattening (see flattenFlattenedD11.pdf)
+        String editedPdfFixture = "/fixtures/D11Edited.pdf";
+        byte[] editedPdfBytes = loadResource(editedPdfFixture);
+
+        String flatPdfFixture = "/fixtures/D11Edited-flattened.pdf";
+        byte[] expectedFlatPdfBytes = loadResource(flatPdfFixture);
+
+        byte[] result = documentConversionService.flattenPdfDocument(editedPdfBytes);
+
+        assertThat(expectedFlatPdfBytes, is(result));
+    }
+
+    @Test
+    public void doNotFlattenPdfDocumentWithNoFromLayer() throws IOException {
+
+        String editedPdfFixture = "/fixtures/D81_consent_order.pdf";
+        byte[] pdfBytes = loadResource(editedPdfFixture);
+        byte[] result = documentConversionService.flattenPdfDocument(pdfBytes);
+
+        assertThat(pdfBytes, is(result));
+    }
+
+    @Test
+    public void flattenNonPdfDocumentHandleException() throws IOException {
+
+        String toBeFlattenedFile = "/fixtures/MockD11Word.docx";
+        byte[] toBeFlattenedbytes = loadResource(toBeFlattenedFile);
+
+        byte[] result = documentConversionService.flattenPdfDocument(toBeFlattenedbytes);
+
+        assertThat(toBeFlattenedbytes, is(result));
+    }
+
+    @Test
     public void convertWordToPdf() {
         mockServer.expect(requestTo(PDF_SERVICE_URI))
             .andExpect(method(HttpMethod.POST))
@@ -90,5 +128,13 @@ public class DocumentConversionServiceTest {
     public void getConvertedFilename() {
         assertThat(documentConversionService.getConvertedFilename("nodot"), is("nodot.pdf"));
         assertThat(documentConversionService.getConvertedFilename("word.docx"), is("word.pdf"));
+    }
+
+    private byte[] loadResource(String testPdf) throws IOException {
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testPdf)) {
+            assert resourceAsStream != null;
+            return resourceAsStream.readAllBytes();
+        }
     }
 }
