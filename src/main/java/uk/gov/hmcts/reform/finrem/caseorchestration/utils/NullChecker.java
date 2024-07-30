@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
-import org.apache.tika.utils.StringUtils;
+
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -18,7 +19,7 @@ public class NullChecker {
             return false;
         }
         if (target instanceof CharSequence charSequence) {
-            return !StringUtils.isEmpty(charSequence);
+            return StringUtils.hasText(charSequence);
         }
         return Arrays.stream(target.getClass().getDeclaredFields())
             .peek(f -> f.setAccessible(true))
