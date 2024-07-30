@@ -1762,6 +1762,7 @@ public class NotificationService {
         EmailTemplateNames template) {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
+            log.info("{} - notificationEmail = {}", caseDetails.getId(), notificationRequest.getNotificationEmail());
             log.info("{} - isApplicantNoticeOfChangeRequest = true", caseDetails.getId());
             boolean isApplicantSolicitorDigital = checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
             log.info("{} - isApplicantSolicitorDigital = {}}", caseDetails.getId(), isApplicantSolicitorDigital);
