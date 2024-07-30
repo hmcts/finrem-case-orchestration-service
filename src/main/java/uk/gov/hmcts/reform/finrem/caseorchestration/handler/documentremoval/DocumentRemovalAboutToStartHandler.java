@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -38,38 +39,37 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         ObjectMapper objectMapper = new ObjectMapper();
-        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
         try {
-            String json = ow.writeValueAsString(caseData);
-            JsonNode rootNode = objectMapper.readTree(json);
-            traverse(rootNode);
+            JsonNode root = objectMapper.valueToTree(caseData);
+            List<JsonNode> documentsCollection = new ArrayList<>();
+            traverse(root, documentsCollection);
+            log.info("Retrieved docs");
         } catch (Exception e) {
             log.error("Exception occurred while converting case data to JSON", e);
         }
 
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    public void traverse(JsonNode root) {
-
+    public void traverse(JsonNode root, List<JsonNode> documentsCollection) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
-
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
-                traverse(fieldValue);
+                if (fieldValue.has("document_url")){
+                    documentsCollection.add(fieldValue);
+                }
+                else {
+                    traverse(fieldValue, documentsCollection);
+                }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                traverse(arrayElement);
+                traverse(arrayElement, documentsCollection);
             }
-        } else {
-            // JsonNode root represents a single value field - do something with it.
-//   if root.get("documentUrl")
         }
     }
 
