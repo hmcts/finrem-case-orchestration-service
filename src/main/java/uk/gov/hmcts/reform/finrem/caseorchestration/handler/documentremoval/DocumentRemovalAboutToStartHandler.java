@@ -48,6 +48,12 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
             log.error("Exception occurred while converting case data to JSON", e);
         }
 
+        // create collection obj
+
+        // map the documentsCollection to a number of complex types
+
+        // add the collection
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
