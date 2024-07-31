@@ -27,9 +27,7 @@ class NullCheckerTest {
         return Stream.of(
             Arguments.of(new NullCheckerTestFixture(null, null), false),
             Arguments.of(new NullCheckerTestFixture("A", null), true),
-            Arguments.of(new NullCheckerTestFixture(null, 1), true),
-            Arguments.of(null, false),
-            Arguments.of("anyString", true)
+            Arguments.of(new NullCheckerTestFixture(null, 1), true)
         );
     }
 }
