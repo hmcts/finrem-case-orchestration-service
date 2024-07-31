@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class MiniFormAController extends BaseController {
 
@@ -43,12 +44,10 @@ public class MiniFormAController extends BaseController {
     public static final String REFER_TO_JUDGE_DATE = "referToJudgeDate";
     public static final String REFER_TO_JUDGE_TEXT = "referToJudgeText";
     public static final String REFER_TO_JUDGE_TEXT_DEFAULT = "consent for approval";
-    @Autowired
-    private OnlineFormDocumentService service;
-    @Autowired
-    private DefaultsConfiguration defaultsConfiguration;
-    @Autowired
-    private CaseDataService caseDataService;
+
+    private final OnlineFormDocumentService service;
+    private final DefaultsConfiguration defaultsConfiguration;
+    private final CaseDataService caseDataService;
 
     @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Consented Mini Form A generation. Serves as a callback from CCD")

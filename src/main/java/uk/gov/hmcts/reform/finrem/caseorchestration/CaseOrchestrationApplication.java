@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,12 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.task.ScheduledTaskRu
     basePackageClasses = {CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
 @EnableCaching
 @EnableScheduling
+@RequiredArgsConstructor
 public class CaseOrchestrationApplication  implements CommandLineRunner {
 
     public static final String TASK_NAME = "TASK_NAME";
 
-    @Autowired
-    private ScheduledTaskRunner taskRunner;
+    private final ScheduledTaskRunner taskRunner;
 
     public static void main(String[] args) {
         final var application = new SpringApplication(CaseOrchestrationApplication.class);
