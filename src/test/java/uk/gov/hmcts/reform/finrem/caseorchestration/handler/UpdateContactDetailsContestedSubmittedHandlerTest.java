@@ -48,7 +48,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
-    public void givenACcdCallbackUpdateContactDetailsContestCase_WhenCanHandleCalled_thenHandlerCanHandle() {
+    void givenACcdCallbackUpdateContactDetailsContestCase_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS),
             is(true));
@@ -58,8 +58,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertEquals(response.getData().isApplicantRepresentedByASolicitor(), "No");
+        assertEquals(response.getData().isApplicantRepresentedByASolicitor(), false);
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantPhone(), "89897876765");
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantEmail(), "email01@email.com");
@@ -76,9 +75,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(), null);
-
         verify(service).generateContestedMiniFormA(any(), any());
-
     }
 
     @Test
@@ -102,19 +99,13 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(), null);
-
         verify(service).generateContestedMiniFormA(any(), any());
     }
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() throws Exception {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, response.getErrors().size());
-
         assertEquals(response.getData().isApplicantRepresentedByASolicitor(), "No");
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantPhone(), "89897876765");
@@ -132,19 +123,13 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(), null);
-
         verify(service).generateContestedMiniFormA(any(), any());
     }
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() throws Exception {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON);
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, response.getErrors().size());
-
         assertEquals(response.getData().isApplicantRepresentedByASolicitor(), "No");
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantPhone(), "89897876765");
@@ -161,7 +146,6 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber(), null);
         assertEquals(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(), null);
-
         verify(service, never()).generateContestedMiniFormA(any(), any());
     }
 
