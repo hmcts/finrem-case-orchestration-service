@@ -63,6 +63,7 @@ public class RemoveApplicantDetailsController extends BaseController {
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final OnlineFormDocumentService service;
 
+    @Deprecated
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Removes applicant details or applicants solicitor details")
@@ -92,6 +93,10 @@ public class RemoveApplicantDetailsController extends BaseController {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
         }
+
+        // TODO: Includes if beforeCase and CaseDetails after isRepresented is difference, not equal then caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)
+
+
 
         if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
