@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,14 +50,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class UpdateConsentedCaseController extends BaseController {
 
-    @Autowired
-    private UpdateRepresentationWorkflowService nocWorkflowService;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
+    private final UpdateRepresentationWorkflowService nocWorkflowService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/update-contact-details", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")

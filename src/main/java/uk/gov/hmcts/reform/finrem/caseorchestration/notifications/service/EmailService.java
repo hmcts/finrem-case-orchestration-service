@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -21,10 +21,11 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
+@SuppressWarnings("java:S6857")
 public class EmailService {
 
-    @Autowired
-    private EmailClient emailClient;
+    private final EmailClient emailClient;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
