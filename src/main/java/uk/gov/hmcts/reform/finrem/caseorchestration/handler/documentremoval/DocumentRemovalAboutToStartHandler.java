@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
@@ -39,14 +40,32 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         ObjectMapper objectMapper = new ObjectMapper();
+        List<JsonNode> documentsCollection = new ArrayList<>();
         try {
             JsonNode root = objectMapper.valueToTree(caseData);
-            List<JsonNode> documentsCollection = new ArrayList<>();
             traverse(root, documentsCollection);
             log.info("Retrieved docs");
         } catch (Exception e) {
             log.error("Exception occurred while converting case data to JSON", e);
         }
+
+        List<DocumentToRemoveCollection> documents = List.of(
+            DocumentToRemoveCollection.builder()
+                .value(DocumentToRemove.builder()
+                    .documentToRemoveUrl("Doc URL 1")
+                    .documentToRemoveName("Doc name 1")
+                    .documentToRemoveId("ID 1")
+                    .build())
+                .build(),
+            DocumentToRemoveCollection.builder()
+                .value(DocumentToRemove.builder()
+                    .documentToRemoveUrl("Doc URL 2")
+                    .documentToRemoveName("Doc name 2")
+                    .documentToRemoveId("ID 2")
+                    .build()).build());
+
+        caseData.setDocumentToRemoveCollection(documents);
+
 
         // create collection obj
 

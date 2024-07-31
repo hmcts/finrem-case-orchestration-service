@@ -195,7 +195,7 @@ public class FinremCaseData implements HasCaseDocument {
     private YesOrNo additionalPropertyOrderDecision;
     @JsonProperty("propertyAdjutmentOrderDetail")
     private List<PropertyAdjustmentOrderCollection> propertyAdjustmentOrderDetail;
-    private List<DocumentToRemoveCollection> documentsToRemoveCollection;
+    private List<DocumentToRemoveCollection> documentToRemoveCollection;
     private YesOrNo paymentForChildrenDecision;
     private YesOrNo benefitForChildrenDecision;
     private List<BenefitPayment> benefitPaymentChecklist;

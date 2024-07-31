@@ -1,22 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.UpdateGeneralApplicationStatusAboutToStartHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentcatergory.AssignDocumentCategoriesAboutToSubmitHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.io.InputStream;
 
@@ -35,13 +29,6 @@ class DocumentRemovalAboutToStartHandlerTest {
     @BeforeEach
     public void setup() {
         objectMapper = new ObjectMapper();
-// remove if not useful
-//        helper = new GeneralApplicationHelper(objectMapper, service);
-//        handler = new UpdateGeneralApplicationStatusAboutToStartHandler(
-//                finremCaseDetailsMapper, helper, generalApplicationService);
-//        generalApplicationService = new GeneralApplicationService(
-//                documentHelper, objectMapper, idamService, service, assignCaseAccessService, helper, bulkPrintDocumentService,
-//                generalApplicationsCategoriser);
     }
 
     @Test
