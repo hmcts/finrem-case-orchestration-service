@@ -1,21 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder.UploadApprovedOrderContestedAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -39,23 +35,17 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON = "/fixtures/contested/amend-applicant-solicitor-details-app-untouched.json";
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON = "/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json";
 
+    @InjectMocks
     private UpdateContactDetailsContestedSubmittedHandler handler;
 
+    @Mock
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @Mock
-    protected OnlineFormDocumentService service;
+    private OnlineFormDocumentService service;
 
     @Mock
-    private FeatureToggleService featureToggleService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @BeforeEach
-    void setUp() {
-        handler = new UpdateContactDetailsContestedSubmittedHandler(new FinremCaseDetailsMapper(new ObjectMapper()), updateRepresentationWorkflowService, service);
-    }
-
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test
     public void givenACcdCallbackUpdateContactDetailsContestCase_WhenCanHandleCalled_thenHandlerCanHandle() {
@@ -65,8 +55,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    public void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
-
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -93,8 +82,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    public void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() throws Exception {
-
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() throws Exception {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(response.getData().isApplicantRepresentedByASolicitor(), "No");
@@ -119,7 +107,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    public void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() throws Exception {
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() throws Exception {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -149,7 +137,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    public void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() throws Exception {
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() throws Exception {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -176,7 +164,6 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
 
         verify(service, never()).generateContestedMiniFormA(any(), any());
     }
-
 
     private FinremCallbackRequest buildCaseDetailsWithPath(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
