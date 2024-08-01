@@ -68,15 +68,13 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
             CaseDetails originalCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(originalfinremCaseDetails);
 
-            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+            AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 userAuthorisation,
-                originalCaseDetails));
-
-
-            return ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse>
+                originalCaseDetails);
+            return aboutToStartOrSubmitCallbackResponse;
         }
 
-        persistOrgPolicies(caseData, callbackRequest.getCaseDetailsBefore());
+        persistOrgPolicies(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseDetails.getData()).build();
