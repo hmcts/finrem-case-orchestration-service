@@ -9,10 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -20,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -30,21 +27,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithGeneralOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
     public static final String AUTH_TOKEN = "tokien:)";
 
-    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON = "/fixtures/contested/amend-applicant-solicitor-details.json";
-    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON = "/fixtures/contested/amend-applicant-solicitor-details-res-untouched.json";
-    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON = "/fixtures/contested/amend-applicant-solicitor-details-app-untouched.json";
-    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON = "/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json";
+    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON =
+        "/fixtures/contested/amend-applicant-solicitor-details.json";
+    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON =
+        "/fixtures/contested/amend-applicant-solicitor-details-res-untouched.json";
+    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON =
+        "/fixtures/contested/amend-applicant-solicitor-details-app-untouched.json";
+    private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON =
+        "/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json";
 
     @InjectMocks
     private UpdateContactDetailsContestedSubmittedHandler handler;
@@ -79,8 +78,10 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
-        FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals("89897876765", response.getData().getContactDetailsWrapper().getApplicantPhone());
@@ -105,8 +106,10 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() {
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
-        FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals("89897876765", response.getData().getContactDetailsWrapper().getApplicantPhone());
@@ -131,8 +134,10 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() {
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
-        FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals("89897876765", response.getData().getContactDetailsWrapper().getApplicantPhone());
@@ -155,8 +160,10 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() {
-        FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
         assertEquals("89897876765", response.getData().getContactDetailsWrapper().getApplicantPhone());

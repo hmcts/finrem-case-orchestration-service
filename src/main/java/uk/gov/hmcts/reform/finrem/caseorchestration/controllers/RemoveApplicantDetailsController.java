@@ -94,10 +94,6 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.put(MINI_FORM_A, document);
         }
 
-        // TODO: Includes if beforeCase and CaseDetails after isRepresented is difference, not equal then caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)
-
-
-
         if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();

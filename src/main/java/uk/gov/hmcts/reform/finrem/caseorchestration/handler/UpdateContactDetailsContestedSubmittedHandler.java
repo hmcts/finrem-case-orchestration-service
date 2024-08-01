@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @Slf4j
 @Service
@@ -55,14 +53,14 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
         removeApplicantSolicitorDetails(caseData);
         removeRespondentDetails(caseData);
 
-        if(caseData.isAppAddressConfidential() || caseData.isRespAddressConfidential()) {
+        if (caseData.isAppAddressConfidential() || caseData.isRespAddressConfidential()) {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
             CaseDocument document = service.generateContestedMiniFormA(userAuthorisation, caseDetails);
             caseData.setMiniFormA(document);
         }
 
-        if(Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
-        && caseData.getContactDetailsWrapper().equals(YES_VALUE)) {
+        if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
+            && caseData.getContactDetailsWrapper().equals(YES_VALUE)) {
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
@@ -93,7 +91,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
     private void removeApplicantSolicitorDetails(FinremCaseData caseData) {
 
-        if(!caseData.isApplicantRepresentedByASolicitor()) {
+        if (!caseData.isApplicantRepresentedByASolicitor()) {
             caseData.getContactDetailsWrapper().setApplicantSolicitorName(null);
             caseData.getContactDetailsWrapper().setApplicantSolicitorFirm(null);
             caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(null);
@@ -107,7 +105,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
     private void removeRespondentDetails(FinremCaseData caseData) {
 
-        if(caseData.isRespondentRepresentedByASolicitor()) {
+        if (caseData.isRespondentRepresentedByASolicitor()) {
             caseData.getContactDetailsWrapper().setRespondentAddress(null);
             caseData.getContactDetailsWrapper().setRespondentPhone(null);
             caseData.getContactDetailsWrapper().setRespondentEmail(null);
