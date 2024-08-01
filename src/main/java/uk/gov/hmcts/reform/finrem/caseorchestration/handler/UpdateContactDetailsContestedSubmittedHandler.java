@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @Slf4j
 @Service
@@ -54,7 +56,8 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
         removeRespondentDetails(caseData);
 
         if(caseData.isAppAddressConfidential() || caseData.isRespAddressConfidential()) {
-            CaseDocument document = service.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
+            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
+            CaseDocument document = service.generateContestedMiniFormA(userAuthorisation, caseDetails);
             caseData.setMiniFormA(document);
         }
 
@@ -63,7 +66,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
-        persistOrgPolicies(caseData);
+        persistOrgPolicies(caseData, callbackRequest.getCaseDetailsBefore().getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseDetails.getData()).build();
@@ -98,9 +101,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(null);
             caseData.getContactDetailsWrapper().setApplicantSolicitorDxNumber(null);
             caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(null);
-            // removes Applicant Organisation Policy of Solicitor
             caseData.setApplicantOrganisationPolicy(null);
-            persistOrgPolicies(caseData);
         }
     }
 
@@ -120,13 +121,12 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
             caseData.setRespSolNotificationsEmailConsent(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
-            // removes Respondent Organisation Policy of Solicitor
             caseData.setRespondentOrganisationPolicy(null);
-            persistOrgPolicies(caseData);
         }
     }
 
-    private void persistOrgPolicies(FinremCaseData caseData) {
-        nocWorkflowService.persistDefaultOrganisationPolicy(caseData);
+    private void persistOrgPolicies(FinremCaseData caseData, FinremCaseData originalDetails) {
+        caseData.setApplicantOrganisationPolicy(originalDetails.getApplicantOrganisationPolicy());
+        caseData.setRespondentOrganisationPolicy(originalDetails.getRespondentOrganisationPolicy());
     }
 }

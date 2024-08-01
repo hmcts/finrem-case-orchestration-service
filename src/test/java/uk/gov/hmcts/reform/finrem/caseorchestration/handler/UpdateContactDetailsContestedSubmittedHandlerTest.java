@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -24,8 +25,10 @@ import java.util.LinkedHashMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -74,11 +77,9 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
-        when(service.generateDraftContestedMiniFormA(anyString(),
-            any(FinremCaseDetails.class))).thenReturn(caseDocument());
+        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
-
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
         assertNotNull(response.getData().getContactDetailsWrapper().getApplicantAddress());
@@ -102,6 +103,8 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() {
+        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
@@ -112,7 +115,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals("Guy", response.getData().getContactDetailsWrapper().getApplicantLname());
         assertEquals(true, response.getData().isAppAddressConfidential());
         assertEquals(false, response.getData().isRespAddressConfidential());
-        assertEquals(LinkedHashMap.class, response.getData().getMiniFormA());
+        assertEquals(caseDocument(), response.getData().getMiniFormA());
         assertNull(response.getData().getAppSolicitorName());
         assertNull(response.getData().getAppSolicitorFirm());
         assertNull(response.getData().getContactDetailsWrapper().getSolicitorReference());
@@ -125,7 +128,9 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() throws Exception {
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() {
+        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
@@ -134,9 +139,9 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals("email01@email.com", response.getData().getContactDetailsWrapper().getApplicantEmail());
         assertEquals("Poor", response.getData().getContactDetailsWrapper().getApplicantFmName());
         assertEquals("Guy", response.getData().getContactDetailsWrapper().getApplicantLname());
-        assertNull(response.getData().isAppAddressConfidential());
-        assertEquals(false, response.getData().isRespAddressConfidential());
-        assertEquals(LinkedHashMap.class, response.getData().getMiniFormA());
+        assertFalse(response.getData().isAppAddressConfidential());
+        assertTrue(response.getData().isRespAddressConfidential());
+        assertEquals(caseDocument(), response.getData().getMiniFormA());
         assertNull(response.getData().getAppSolicitorName());
         assertNull(response.getData().getAppSolicitorFirm());
         assertNull(response.getData().getContactDetailsWrapper().getSolicitorReference());
@@ -149,7 +154,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     }
 
     @Test
-    void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() throws Exception {
+    void shouldSuccessfullyRemoveApplicantSolicitorDetails_bothConfidentialAddressNotAmended() {
         FinremCallbackRequest finremCallbackRequest = buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_BOTH_UNTOUCHED_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(false, response.getData().isApplicantRepresentedByASolicitor());
@@ -158,9 +163,8 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals("email01@email.com", response.getData().getContactDetailsWrapper().getApplicantEmail());
         assertEquals("Poor", response.getData().getContactDetailsWrapper().getApplicantFmName());
         assertEquals("Guy", response.getData().getContactDetailsWrapper().getApplicantLname());
-        assertNull(response.getData().isAppAddressConfidential());
-        assertEquals(false, response.getData().isRespAddressConfidential());
-        assertEquals(LinkedHashMap.class, response.getData().getMiniFormA());
+        assertFalse(response.getData().isAppAddressConfidential());
+        assertFalse(response.getData().isRespAddressConfidential());
         assertNull(response.getData().getAppSolicitorName());
         assertNull(response.getData().getAppSolicitorFirm());
         assertNull(response.getData().getContactDetailsWrapper().getSolicitorReference());
@@ -169,17 +173,20 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
-        verify(service).generateContestedMiniFormA(any(), any());
+        verify(service, never()).generateContestedMiniFormA(any(), any());
     }
 
     private FinremCallbackRequest buildCaseDetailsWithPath(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             FinremCaseDetails caseDetails =
                 objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
+            FinremCaseDetails caseDetailsBefore = caseDetails;
+            caseDetailsBefore.getData().setMiniFormA(caseDocument());
 
             return FinremCallbackRequest
                 .builder()
                 .eventType(EventType.UPDATE_CONTACT_DETAILS)
+                .caseDetailsBefore(caseDetailsBefore)
                 .caseDetails(caseDetails)
                 .build();
         } catch (Exception e) {
