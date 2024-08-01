@@ -104,6 +104,7 @@ public class UpdateContestedCaseController extends BaseController {
         updateContestedFastTrackProcedureDetail(caseData);
         updateContestedComplexityDetails(caseData);
         isApplicantsHomeCourt(caseData);
+        isAllocatedToBeHeardAtHighCourtJudgeLevel(caseData);
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
 
@@ -133,6 +134,12 @@ public class UpdateContestedCaseController extends BaseController {
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), NO_VALUE)) {
             caseData.put("reasonForLocalCourt", null);
+        }
+    }
+
+    private void isAllocatedToBeHeardAtHighCourtJudgeLevel(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("allocatedToBeHeardAtHighCourtJudgeLevel"), NO_VALUE)) {
+            caseData.put("allocatedToBeHeardAtHighCourtJudgeLevelText", null);
         }
     }
 
