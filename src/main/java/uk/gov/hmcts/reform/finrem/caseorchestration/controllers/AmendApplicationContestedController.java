@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,8 +39,7 @@ public class AmendApplicationContestedController extends BaseController {
 
     private static final String POST_CODE = "PostCode";
 
-    @Autowired
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final InternationalPostalService postalService;
 
