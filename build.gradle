@@ -40,7 +40,7 @@ def versions = [
         tika                 : '2.9.2',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.4',
-        elasticSearch        : '7.17.22',
+        elasticSearch        : '7.17.23',
         jacksonDatabind      : '2.17.2',
         retry                : '1.3.4',
         snakeyaml            : '2.2',
