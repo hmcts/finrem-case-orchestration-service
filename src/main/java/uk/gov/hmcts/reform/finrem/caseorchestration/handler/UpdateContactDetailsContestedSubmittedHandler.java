@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -28,7 +27,6 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
     private final OnlineFormDocumentService service;
 
-
     public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          UpdateRepresentationWorkflowService nocWorkflowService,
                                                          OnlineFormDocumentService service) {
@@ -36,7 +34,6 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
         this.nocWorkflowService = nocWorkflowService;
         this.service = service;
     }
-
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -48,7 +45,6 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), finremCaseDetails.getId());
 
@@ -64,20 +60,31 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
         if(Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
         && caseData.getContactDetailsWrapper().equals(YES_VALUE)) {
-            FinremCaseDetails originalfinremCaseDetails = callbackRequest.getCaseDetailsBefore();
-            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-            CaseDetails originalCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(originalfinremCaseDetails);
-
-            AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                userAuthorisation,
-                originalCaseDetails);
-            return aboutToStartOrSubmitCallbackResponse;
+            return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
         persistOrgPolicies(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseDetails.getData()).build();
+    }
+
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleNoticeOfChangeWorklow(
+        FinremCallbackRequest request, String userAuthorisation) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(request.getCaseDetails());
+        CaseDetails originalCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(request.getCaseDetailsBefore());
+        AboutToStartOrSubmitCallbackResponse nocResponse = nocWorkflowService.handleNoticeOfChangeWorkflow(
+            caseDetails, userAuthorisation, originalCaseDetails);
+
+        CaseType caseType = request.getCaseDetails().getCaseType();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(finremCaseDetailsMapper.mapToFinremCaseData(nocResponse.getData(), caseType.getCcdType()))
+            .dataClassification(nocResponse.getDataClassification())
+            .securityClassification(nocResponse.getSecurityClassification())
+            .errors(nocResponse.getErrors())
+            .warnings(nocResponse.getWarnings())
+            .state(nocResponse.getState())
+            .build();
     }
 
 
