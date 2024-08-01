@@ -15,7 +15,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentToRemove {
+    @JsonProperty("documentToRemoveUrl")
     private String documentToRemoveUrl;
+    @JsonProperty("documentToRemoveName")
     private String documentToRemoveName;
+    @JsonProperty("documentToRemoveId")
     private String documentToRemoveId;
 }
