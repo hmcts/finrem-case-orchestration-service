@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 
 import java.io.InputStream;
 
@@ -195,8 +194,8 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         when(updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(
             finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails()),
             AUTH_TOKEN,
-            finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetailsBefore()))).
-            thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+            finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetailsBefore())))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(finremCallbackRequest, AUTH_TOKEN);
