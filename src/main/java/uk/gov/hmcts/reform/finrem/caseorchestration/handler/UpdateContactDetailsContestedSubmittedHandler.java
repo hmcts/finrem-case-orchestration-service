@@ -37,7 +37,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.UPDATE_CONTACT_DETAILS.equals(eventType);
     }
@@ -61,6 +61,13 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
         if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
             && caseData.getContactDetailsWrapper().equals(YES_VALUE)) {
+            return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
+        }
+
+        if (callbackRequest.getCaseDetailsBefore().getData().isApplicantRepresentedByASolicitor()
+            != callbackRequest.getCaseDetails().getData().isApplicantRepresentedByASolicitor()
+            || callbackRequest.getCaseDetailsBefore().getData().isRespondentRepresentedByASolicitor()
+            != callbackRequest.getCaseDetails().getData().isRespondentRepresentedByASolicitor()) {
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
