@@ -18,9 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.Map;
 
@@ -37,8 +35,6 @@ public class UpdateRepresentationController extends BaseController {
 
     private final UpdateRepresentationService updateRepresentationService;
     private final AssignCaseAccessService assignCaseAccessService;
-    private final FeatureToggleService featureToggleService;
-    private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 
     @PostMapping(path = "/apply-noc-decision", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
