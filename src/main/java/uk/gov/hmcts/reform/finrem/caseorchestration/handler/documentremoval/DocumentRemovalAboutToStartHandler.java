@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,31 +49,36 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         try {
             JsonNode root = objectMapper.valueToTree(caseData);
             traverse(root, documentNodes);
+
+            // WIP - look at getting the Mapper working
+            // It doesn't, the JSON nodes and DocumentToRemove names don't match
+            //            for (JsonNode documentNode : documentNodes) {
+            //                DocumentToRemove doc = objectMapper.treeToValue(documentNode, DocumentToRemove.class);
+            //                documentsCollection.add(
+            //                        DocumentToRemoveCollection.builder()
+            //                           .value(doc).build());
+            //            }
+
+            for (JsonNode documentNode : documentNodes) {
+
+                String[] documentUrlAsArray = documentNode.get("document_url").asText().split("/");
+
+                documentsCollection.add(
+                        DocumentToRemoveCollection.builder()
+                                .value(DocumentToRemove.builder()
+                                        .documentToRemoveUrl(documentNode.get("document_url").asText())
+                                        .documentToRemoveName(documentNode.get("document_filename").asText())
+                                        .documentToRemoveId(documentUrlAsArray[documentUrlAsArray.length-1])
+                                        .build())
+                                .build());
+            }
+
+
         } catch (Exception e) {
             log.error("Exception occurred while converting case data to JSON", e);
         }
 
-       for (JsonNode documentNode : documentNodes) {
-
-       }
-
-
-        List<DocumentToRemoveCollection> documents = List.of(
-            DocumentToRemoveCollection.builder()
-                .value(DocumentToRemove.builder()
-                    .documentToRemoveUrl("Doc URL 1")
-                    .documentToRemoveName("Doc name 1")
-                    .documentToRemoveId("ID 1")
-                    .build())
-                .build(),
-            DocumentToRemoveCollection.builder()
-                .value(DocumentToRemove.builder()
-                    .documentToRemoveUrl("Doc URL 2")
-                    .documentToRemoveName("Doc name 2")
-                    .documentToRemoveId("ID 2")
-                    .build()).build());
-
-        caseData.setDocumentToRemoveCollection(documents);
+        caseData.setDocumentToRemoveCollection(documentsCollection);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
