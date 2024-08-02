@@ -60,7 +60,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
         }
 
         if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
-            && caseData.getContactDetailsWrapper().equals(YES_VALUE)) {
+            && caseData.getContactDetailsWrapper().toString().equals(YES_VALUE)) {
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 

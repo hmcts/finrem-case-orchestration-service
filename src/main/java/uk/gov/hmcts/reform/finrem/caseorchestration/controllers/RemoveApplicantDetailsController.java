@@ -63,7 +63,6 @@ public class RemoveApplicantDetailsController extends BaseController {
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final OnlineFormDocumentService service;
 
-    @Deprecated
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Removes applicant details or applicants solicitor details")
@@ -95,7 +94,7 @@ public class RemoveApplicantDetailsController extends BaseController {
         }
 
         if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).toString().equals(YES_VALUE)) {
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 authorisationToken,
