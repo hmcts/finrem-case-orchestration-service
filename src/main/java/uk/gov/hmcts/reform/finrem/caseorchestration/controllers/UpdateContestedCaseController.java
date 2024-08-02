@@ -33,6 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -138,8 +140,8 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void isAllocatedToBeHeardAtHighCourtJudgeLevel(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("allocatedToBeHeardAtHighCourtJudgeLevel"), NO_VALUE)) {
-            caseData.put("allocatedToBeHeardAtHighCourtJudgeLevelText", null);
+        if (equalsTo((String) caseData.get(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL), NO_VALUE)) {
+            caseData.put(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT, null);
         }
     }
 
