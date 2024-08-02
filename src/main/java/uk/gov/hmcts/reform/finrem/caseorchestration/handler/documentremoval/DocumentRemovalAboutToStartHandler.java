@@ -56,11 +56,12 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
         JsonNode root = objectMapper.valueToTree(caseData);
         traverse(root, documentNodes);
-        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(DocumentToRemove::getDocumentUploadTimestamp)).toList();
 
-        List<User> sortedList = users.stream()
-            .sorted(Comparator.comparingInt(User::getAge))
-            .collect(Collectors.toList());
+        //Todo: test that this actually sorts by date, upload new files with newer date
+        //Todo: Add ternary, so that files without a date can still be sorted, use something like this for an old date:
+        // thing.has(DOCUMENT_TIME_STAMP) ? documentNode.get(DOCUMENT_TIME_STAMP).asLong() : Long.MIN_VALUE)
+
+        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(node -> node.get("upload_timestamp").asLong())).toList();
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -73,7 +74,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                         .documentToRemoveUrl(docUrl)
                         .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
                         .documentToRemoveId(docId)
-                        .documentUploadTimestamp(documentNode.has(DOCUMENT_TIME_STAMP) ? documentNode.get(DOCUMENT_TIME_STAMP).asLong() : Long.MIN_VALUE)
+//
                         .build())
                     .build());
         }
