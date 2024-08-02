@@ -60,16 +60,6 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-
-    @Before
-    public void setup() {
-        handler = new UpdateContactDetailsContestedSubmittedHandler(
-            finremCaseDetailsMapper,
-            updateRepresentationWorkflowService,
-            service);
-    }
-
-
     @Test
     void givenACcdCallbackUpdateContactDetailsContestCase_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
