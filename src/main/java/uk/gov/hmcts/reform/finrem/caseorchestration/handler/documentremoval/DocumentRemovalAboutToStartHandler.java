@@ -25,8 +25,11 @@ import java.util.List;
 @Service
 public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
+    private final ObjectMapper objectMapper;
+
     public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -39,15 +42,20 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<JsonNode> documentsCollection = new ArrayList<>();
+        List<JsonNode> documentNodes = new ArrayList<>();
+        List<DocumentToRemoveCollection> documentsCollection = new ArrayList<>();
+
         try {
             JsonNode root = objectMapper.valueToTree(caseData);
-            traverse(root, documentsCollection);
-            log.info("Retrieved docs");
+            traverse(root, documentNodes);
         } catch (Exception e) {
             log.error("Exception occurred while converting case data to JSON", e);
         }
+
+       for (JsonNode documentNode : documentNodes) {
+
+       }
+
 
         List<DocumentToRemoveCollection> documents = List.of(
             DocumentToRemoveCollection.builder()
@@ -66,34 +74,27 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
         caseData.setDocumentToRemoveCollection(documents);
 
-
-        // create collection obj
-
-        // map the documentsCollection to a number of complex types
-
-        // add the collection
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    public void traverse(JsonNode root, List<JsonNode> documentsCollection) {
+    public void traverse(JsonNode root, List<JsonNode> documentNodes) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
                 if (fieldValue.has("document_url")){
-                    documentsCollection.add(fieldValue);
+                    documentNodes.add(fieldValue);
                 }
                 else {
-                    traverse(fieldValue, documentsCollection);
+                    traverse(fieldValue, documentNodes);
                 }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                traverse(arrayElement, documentsCollection);
+                traverse(arrayElement, documentNodes);
             }
         }
     }
