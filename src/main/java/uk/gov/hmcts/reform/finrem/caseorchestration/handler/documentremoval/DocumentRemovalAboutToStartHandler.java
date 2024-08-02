@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,32 +43,31 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         final String DOCUMENT_URL = "document_url";
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
+        final String DOCUMENT_FILENAME = "document_filename";
+
         List<JsonNode> documentNodes = new ArrayList<>();
         List<DocumentToRemoveCollection> documentsCollection = new ArrayList<>();
 
-        try {
-            JsonNode root = objectMapper.valueToTree(caseData);
-            traverse(root, documentNodes);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
 
-            for (JsonNode documentNode : documentNodes) {
+        JsonNode root = objectMapper.valueToTree(caseData);
+        traverse(root, documentNodes);
+        documentNodes = documentNodes.stream().distinct().toList();
 
-                // Splits the document into array elements, so we can use the last as the document id
-                String[] documentUrlAsArray = documentNode.get(DOCUMENT_URL).asText().split("/");
+        for (JsonNode documentNode : documentNodes) {
+            String docUrl = documentNode.get(DOCUMENT_URL).asText();
+            String[] documentUrlAsArray = docUrl.split("/");
+            String docId = documentUrlAsArray[documentUrlAsArray.length-1];
 
-                documentsCollection.add(
-                        DocumentToRemoveCollection.builder()
-                                .value(DocumentToRemove.builder()
-                                        .documentToRemoveUrl(documentNode.get(DOCUMENT_URL).asText())
-                                        .documentToRemoveName(documentNode.get("document_filename").asText())
-                                        .documentToRemoveId(documentUrlAsArray[documentUrlAsArray.length-1])
-                                        .build())
-                                .build());
-            }
-
-        } catch (Exception e) {
-            log.error("Exception occurred while converting case data to JSON", e);
+            documentsCollection.add(
+                DocumentToRemoveCollection.builder()
+                    .value(DocumentToRemove.builder()
+                        .documentToRemoveUrl(docUrl)
+                        .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
+                        .documentToRemoveId(docId)
+                        .build())
+                    .build());
         }
 
         caseData.setDocumentToRemoveCollection(documentsCollection);
