@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +28,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
+
+    static final String DOCUMENT_URL = "document_url";
+    static final String DOCUMENT_FILENAME = "document_filename";
+    static final String DOCUMENT_TIME_STAMP = "document_timestamp";
 
     private final ObjectMapper objectMapper;
 
@@ -42,9 +48,6 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        final String DOCUMENT_URL = "document_url";
-        final String DOCUMENT_FILENAME = "document_filename";
-
         List<JsonNode> documentNodes = new ArrayList<>();
         List<DocumentToRemoveCollection> documentsCollection = new ArrayList<>();
 
@@ -53,7 +56,11 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
         JsonNode root = objectMapper.valueToTree(caseData);
         traverse(root, documentNodes);
-        documentNodes = documentNodes.stream().distinct().toList();
+        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(DocumentToRemove::getDocumentUploadTimestamp)).toList();
+
+        List<User> sortedList = users.stream()
+            .sorted(Comparator.comparingInt(User::getAge))
+            .collect(Collectors.toList());
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -66,6 +73,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                         .documentToRemoveUrl(docUrl)
                         .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
                         .documentToRemoveId(docId)
+                        .documentUploadTimestamp(documentNode.has(DOCUMENT_TIME_STAMP) ? documentNode.get(DOCUMENT_TIME_STAMP).asLong() : Long.MIN_VALUE)
                         .build())
                     .build());
         }
@@ -81,7 +89,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has("document_url")){
+                if (fieldValue.has(DOCUMENT_URL)){
                     documentNodes.add(fieldValue);
                 }
                 else {
