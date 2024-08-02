@@ -41,6 +41,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        final String DOCUMENT_URL = "document_url";
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         List<JsonNode> documentNodes = new ArrayList<>();
@@ -50,29 +51,20 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
             JsonNode root = objectMapper.valueToTree(caseData);
             traverse(root, documentNodes);
 
-            // WIP - look at getting the Mapper working
-            // It doesn't, the JSON nodes and DocumentToRemove names don't match
-            //            for (JsonNode documentNode : documentNodes) {
-            //                DocumentToRemove doc = objectMapper.treeToValue(documentNode, DocumentToRemove.class);
-            //                documentsCollection.add(
-            //                        DocumentToRemoveCollection.builder()
-            //                           .value(doc).build());
-            //            }
-
             for (JsonNode documentNode : documentNodes) {
 
-                String[] documentUrlAsArray = documentNode.get("document_url").asText().split("/");
+                // Splits the document into array elements, so we can use the last as the document id
+                String[] documentUrlAsArray = documentNode.get(DOCUMENT_URL).asText().split("/");
 
                 documentsCollection.add(
                         DocumentToRemoveCollection.builder()
                                 .value(DocumentToRemove.builder()
-                                        .documentToRemoveUrl(documentNode.get("document_url").asText())
+                                        .documentToRemoveUrl(documentNode.get(DOCUMENT_URL).asText())
                                         .documentToRemoveName(documentNode.get("document_filename").asText())
                                         .documentToRemoveId(documentUrlAsArray[documentUrlAsArray.length-1])
                                         .build())
                                 .build());
             }
-
 
         } catch (Exception e) {
             log.error("Exception occurred while converting case data to JSON", e);
