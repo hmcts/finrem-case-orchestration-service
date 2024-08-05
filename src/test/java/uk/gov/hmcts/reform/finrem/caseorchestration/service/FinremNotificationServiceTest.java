@@ -1026,8 +1026,8 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
     public void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
+        notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
         FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
@@ -1046,7 +1046,6 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
@@ -1064,7 +1063,6 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
