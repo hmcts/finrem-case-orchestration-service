@@ -788,15 +788,13 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
         NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setNotificationEmail("test@test.com");
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        //  verify(notificationServiceConfiguration).getContestedNoticeOfChange();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOTICE_OF_CHANGE);
     }
 
@@ -804,14 +802,27 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
+        notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOTICE_OF_CHANGE);
+    }
+
+    @Test
+    public void givenConsentedCaseWhenSendNoticeOfChangeEmail_whenMissingEmailAddress_thenNotSendingNoticeOfChangeContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
+        verify(emailService, times(0)).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOTICE_OF_CHANGE);
     }
 
     @Test
