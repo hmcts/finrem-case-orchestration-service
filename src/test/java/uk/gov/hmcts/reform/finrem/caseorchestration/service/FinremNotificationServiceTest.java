@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -1043,6 +1044,7 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
     public void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
+        notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
@@ -1055,6 +1057,24 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOTICE_OF_CHANGE));
+    }
+
+    @Test
+    public void givenConsentedCaseWhenSendNoticeOfChangeEmailWithoutNotificationEmail_thenNotSendNoticeOfChangeContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendNoticeOfChangeEmail(newCallbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
+        verify(emailService, times(0)).sendConfirmationEmail(any(), eq(FR_CONSENTED_NOTICE_OF_CHANGE));
     }
 
     @Test
