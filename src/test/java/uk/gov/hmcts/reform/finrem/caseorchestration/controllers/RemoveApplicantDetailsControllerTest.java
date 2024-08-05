@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 
-@Deprecated
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 

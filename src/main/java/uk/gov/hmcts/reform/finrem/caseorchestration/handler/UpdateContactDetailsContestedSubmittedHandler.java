@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -25,14 +26,14 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
     private final UpdateRepresentationWorkflowService nocWorkflowService;
 
-    private final OnlineFormDocumentService service;
+    private final OnlineFormDocumentService onlineFormDocumentService;
 
     public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                          UpdateRepresentationWorkflowService nocWorkflowService,
                                                          OnlineFormDocumentService service) {
         super(finremCaseDetailsMapper);
         this.nocWorkflowService = nocWorkflowService;
-        this.service = service;
+        this.onlineFormDocumentService = service;
     }
 
     @Override
@@ -55,19 +56,23 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
         if (caseData.isAppAddressConfidential() || caseData.isRespAddressConfidential()) {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails());
-            CaseDocument document = service.generateContestedMiniFormA(userAuthorisation, caseDetails);
+            CaseDocument document = onlineFormDocumentService.generateContestedMiniFormA(userAuthorisation, caseDetails);
             caseData.setMiniFormA(document);
         }
 
         if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
-            && caseData.getContactDetailsWrapper().toString().equals(YES_VALUE)) {
+            && caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange().toString().equals(YES_VALUE)) {
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
-        if (callbackRequest.getCaseDetailsBefore().getData().isApplicantRepresentedByASolicitor()
-            != callbackRequest.getCaseDetails().getData().isApplicantRepresentedByASolicitor()
-            || callbackRequest.getCaseDetailsBefore().getData().isRespondentRepresentedByASolicitor()
-            != callbackRequest.getCaseDetails().getData().isRespondentRepresentedByASolicitor()) {
+
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        boolean isApplicantRepresentedChanged = caseDataBefore.isApplicantRepresentedByASolicitor()
+            != caseData.isApplicantRepresentedByASolicitor();
+        boolean isRespondentRepresentedChanged = caseDataBefore.isRespondentRepresentedByASolicitor()
+            != caseData.isRespondentRepresentedByASolicitor();
+
+        if (isApplicantRepresentedChanged || isRespondentRepresentedChanged) {
             return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
         }
 
@@ -95,35 +100,36 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             .build();
     }
 
-
     private void removeApplicantSolicitorDetails(FinremCaseData caseData) {
 
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         if (!caseData.isApplicantRepresentedByASolicitor()) {
-            caseData.getContactDetailsWrapper().setApplicantSolicitorName(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorFirm(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorPhone(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorDxNumber(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(null);
+            contactDetailsWrapper.setApplicantSolicitorName(null);
+            contactDetailsWrapper.setApplicantSolicitorFirm(null);
+            contactDetailsWrapper.setApplicantSolicitorAddress(null);
+            contactDetailsWrapper.setApplicantSolicitorPhone(null);
+            contactDetailsWrapper.setApplicantSolicitorEmail(null);
+            contactDetailsWrapper.setApplicantSolicitorDxNumber(null);
+            contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
             caseData.setApplicantOrganisationPolicy(null);
         }
     }
 
     private void removeRespondentDetails(FinremCaseData caseData) {
 
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         if (caseData.isRespondentRepresentedByASolicitor()) {
-            caseData.getContactDetailsWrapper().setRespondentAddress(null);
-            caseData.getContactDetailsWrapper().setRespondentPhone(null);
-            caseData.getContactDetailsWrapper().setRespondentEmail(null);
-            caseData.getContactDetailsWrapper().setRespondentResideOutsideUK(null);
+            contactDetailsWrapper.setRespondentAddress(null);
+            contactDetailsWrapper.setRespondentPhone(null);
+            contactDetailsWrapper.setRespondentEmail(null);
+            contactDetailsWrapper.setRespondentResideOutsideUK(null);
         } else {
-            caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorPhone(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
+            contactDetailsWrapper.setRespondentSolicitorName(null);
+            contactDetailsWrapper.setRespondentSolicitorFirm(null);
+            contactDetailsWrapper.setRespondentSolicitorAddress(null);
+            contactDetailsWrapper.setRespondentSolicitorPhone(null);
+            contactDetailsWrapper.setRespondentSolicitorEmail(null);
+            contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
             caseData.setRespSolNotificationsEmailConsent(null);
             caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
             caseData.setRespondentOrganisationPolicy(null);

@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 
 @ExtendWith(MockitoExtension.class)
 public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
-    public static final String AUTH_TOKEN = "tokien:)";
+    private static final String AUTH_TOKEN = "token:)";
 
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON =
         "/fixtures/contested/amend-applicant-solicitor-details.json";
@@ -54,7 +54,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     @Mock
-    private OnlineFormDocumentService service;
+    private OnlineFormDocumentService onlineFormDocumentService;
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -68,7 +68,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails() {
-        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+        when(onlineFormDocumentService.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         FinremCallbackRequest finremCallbackRequest =
             buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON);
@@ -91,12 +91,12 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
-        verify(service).generateContestedMiniFormA(any(), any());
+        verify(onlineFormDocumentService).generateContestedMiniFormA(any(), any());
     }
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() {
-        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+        when(onlineFormDocumentService.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         FinremCallbackRequest finremCallbackRequest =
             buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_RES_UNTOUCHED_JSON);
@@ -119,12 +119,12 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
-        verify(service).generateContestedMiniFormA(any(), any());
+        verify(onlineFormDocumentService).generateContestedMiniFormA(any(), any());
     }
 
     @Test
     void shouldSuccessfullyRemoveApplicantSolicitorDetails_applicantConfidentialAddressNotAmended() {
-        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+        when(onlineFormDocumentService.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         FinremCallbackRequest finremCallbackRequest =
             buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_APP_UNTOUCHED_JSON);
@@ -147,7 +147,7 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
-        verify(service).generateContestedMiniFormA(any(), any());
+        verify(onlineFormDocumentService).generateContestedMiniFormA(any(), any());
     }
 
     @Test
@@ -172,11 +172,11 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorEmail());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorDxNumber());
         assertNull(response.getData().getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
-        verify(service, never()).generateContestedMiniFormA(any(), any());
+        verify(onlineFormDocumentService, never()).generateContestedMiniFormA(any(), any());
     }
 
     @Test
-    void shouldhandleNoticeOfChangeWorklow_WhenApplicantRepresentedChanged() {
+    void shouldHandleNoticeOfChangeWorkflow_WhenApplicantRepresentedChanged() {
 
         FinremCallbackRequest finremCallbackRequest =
             buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON);
