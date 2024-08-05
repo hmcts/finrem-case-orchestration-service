@@ -571,8 +571,6 @@ public class NotificationService {
             notificationRequestForIntervenerSolicitor.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequestForIntervenerSolicitor,
             FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
-
-
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -630,7 +628,6 @@ public class NotificationService {
     public void sendSolicitorToDraftOrderEmailApplicant(CaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
-
 
     public void sendSolicitorToDraftOrderEmailApplicant(FinremCaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
@@ -738,7 +735,6 @@ public class NotificationService {
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
     }
-
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -1139,7 +1135,6 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
     }
 
-
     public void sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
         if (featureToggleService.isSendToFRCEnabled()) {
@@ -1261,7 +1256,6 @@ public class NotificationService {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             hearingData));
     }
-
 
     /**
      * No Return.
@@ -1892,7 +1886,6 @@ public class NotificationService {
         }
         return DEFAULT_EMAIL;
     }
-
 
     private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
         if (featureToggleService.isSendToFRCEnabled()) {
