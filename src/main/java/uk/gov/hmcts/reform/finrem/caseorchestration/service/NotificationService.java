@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
@@ -1697,22 +1698,18 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
-        log.info("{} - sendNoticeOfChangeEmail ", caseDetails.getId());
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
-        log.info("{} - template: {}", caseDetails.getId(), template.name());
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmail(notificationRequest, template);
     }
 
 
     public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
-        log.info("{} - sendNoticeOfChangeEmail(FinremCaseDetails) ", caseDetails.getId());
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
-        log.info("{} - template: {}", caseDetails.getId(), template.name());
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmail(notificationRequest, template);
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
@@ -1720,14 +1717,14 @@ public class NotificationService {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
     public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
     public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
@@ -1746,9 +1743,17 @@ public class NotificationService {
         return caseDataService.isContestedApplication(caseDetails);
     }
 
+    private void sendNocEmail(
+        NotificationRequest notificationRequest,
+        EmailTemplateNames template) {
+        if (StringUtils.hasText(notificationRequest.getNotificationEmail())) {
+            sendNotificationEmail(notificationRequest, template);
+        }
+    }
+
     /**
      * Return String Object for given Case with the given indentation used.
-     * <p>Please use @{@link #sendEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
+     * <p>Please use @{@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
      *
      * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
@@ -1756,13 +1761,12 @@ public class NotificationService {
      * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
      */
     @Deprecated(since = "15-june-2023")
-    private void sendEmailIfSolicitorIsDigital(
+    private void sendNocEmailIfSolicitorIsDigital(
         CaseDetails caseDetails,
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            log.info("{} - notificationEmail = {}", caseDetails.getId(), notificationRequest.getNotificationEmail());
             log.info("{} - isApplicantNoticeOfChangeRequest = true", caseDetails.getId());
             boolean isApplicantSolicitorDigital = checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
             log.info("{} - isApplicantSolicitorDigital = {}}", caseDetails.getId(), isApplicantSolicitorDigital);
@@ -1779,7 +1783,7 @@ public class NotificationService {
         }
     }
 
-    private void sendEmailIfSolicitorIsDigital(
+    private void sendNocEmailIfSolicitorIsDigital(
         FinremCaseDetails caseDetails,
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
