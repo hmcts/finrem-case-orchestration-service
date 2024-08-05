@@ -61,7 +61,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         //Todo: Add ternary, so that files without a date can still be sorted, use something like this for an old date:
         // thing.has(DOCUMENT_TIME_STAMP) ? documentNode.get(DOCUMENT_TIME_STAMP).asLong() : Long.MIN_VALUE)
 
-        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(node -> node.get("upload_timestamp").asLong())).toList();
+        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(node -> node.has("upload_timestamp") ? node.get("upload_timestamp").asLong() : Long.MIN_VALUE)).toList();
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -74,7 +74,6 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                         .documentToRemoveUrl(docUrl)
                         .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
                         .documentToRemoveId(docId)
-//
                         .build())
                     .build());
         }
