@@ -1186,4 +1186,12 @@ public class FinremNotificationServiceTest extends BaseServiceTest {
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_UPDATE_FRC_COURT));
     }
 
+    @Test
+    public void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
+    }
 }
