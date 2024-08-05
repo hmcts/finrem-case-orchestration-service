@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -16,9 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -30,9 +29,12 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     static final String DOCUMENT_TIME_STAMP = "document_timestamp";
 
     private final ObjectMapper objectMapper;
+    private final DocumentRemovalService documentRemovalService;
 
-    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper) {
+
+    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper, DocumentRemovalService documentRemovalService) {
         super(mapper);
+        this.documentRemovalService = documentRemovalService;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -51,7 +53,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
 
         JsonNode root = objectMapper.valueToTree(caseData);
-        retrieveDocumentNode(root, documentNodes);
+        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
 
         // TODO: Sort by document upload_timestamp if provided with document node.
         documentNodes = documentNodes.stream().distinct().toList();
@@ -74,28 +76,6 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         caseData.setDocumentToRemoveCollection(documentsCollection);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
-    }
-
-    private void retrieveDocumentNode(JsonNode root, List<JsonNode> documentNodes) {
-        if (root.isObject()) {
-            Iterator<String> fieldNames = root.fieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has(DOCUMENT_URL)){
-                    documentNodes.add(fieldValue);
-                }
-                else {
-                    retrieveDocumentNode(fieldValue, documentNodes);
-                }
-            }
-        } else if (root.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) root;
-            for (int i = 0; i < arrayNode.size(); i++) {
-                JsonNode arrayElement = arrayNode.get(i);
-                retrieveDocumentNode(arrayElement, documentNodes);
-            }
-        }
     }
 
 }
