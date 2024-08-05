@@ -322,6 +322,15 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
+    }
+
+    @Test
     public void sendConsentOrderAvailableNotificationCtscEmail() {
         notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest.getCaseDetails());
 
