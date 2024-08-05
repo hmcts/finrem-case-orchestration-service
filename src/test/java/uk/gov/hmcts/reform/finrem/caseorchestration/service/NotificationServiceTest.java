@@ -796,7 +796,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setNotificationEmail("test@test.com");
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
@@ -809,7 +809,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
@@ -823,7 +823,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCaseWhenSendNoticeOfChangeEmail_whenMissingEmailAddress_thenNotSendingNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
@@ -836,11 +836,10 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
-
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
@@ -850,7 +849,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -865,7 +864,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -881,7 +880,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
