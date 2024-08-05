@@ -1673,15 +1673,6 @@ public class NotificationService {
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
-    public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
-    }
-
-    public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
-    }
-
     /**
      * Do not expect any return.
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
