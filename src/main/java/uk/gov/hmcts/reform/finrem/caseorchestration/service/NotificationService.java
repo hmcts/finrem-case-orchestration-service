@@ -1668,7 +1668,6 @@ public class NotificationService {
             .build();
     }
 
-
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -1703,7 +1702,6 @@ public class NotificationService {
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendNocEmail(notificationRequest, template);
     }
-
 
     public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
@@ -1825,7 +1823,6 @@ public class NotificationService {
             ? FR_CONSENTED_NOTICE_OF_CHANGE
             : FR_CONTESTED_NOTICE_OF_CHANGE;
     }
-
 
     /**
      * Return String Object for given Case with the given indentation used.
