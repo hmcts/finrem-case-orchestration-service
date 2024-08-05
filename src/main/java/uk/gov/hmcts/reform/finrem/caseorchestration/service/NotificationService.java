@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -1741,7 +1743,7 @@ public class NotificationService {
      * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
      * @param template            instance of EmailTemplateNames
-     * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
+     * @deprecated Use {@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}
      */
     @Deprecated(since = "15-june-2023")
     private void sendNocEmailIfSolicitorIsDigital(
@@ -1749,21 +1751,14 @@ public class NotificationService {
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
-        if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseDetails.getId());
-            boolean isApplicantSolicitorDigital = checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
-            log.info("{} - isApplicantSolicitorDigital = {}}", caseDetails.getId(), isApplicantSolicitorDigital);
-            if (isApplicantSolicitorDigital) {
-                sendNotificationEmail(notificationRequest, template);
-            }
-            return;
-        }
-
-        boolean isRespondentSolicitorDigital = checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
-        log.info("{} - isRespondentSolicitorDigital = {}}", caseDetails.getId(), isRespondentSolicitorDigital);
-        if (isRespondentSolicitorDigital) {
-            sendNotificationEmail(notificationRequest, template);
-        }
+        sendNocEmailIfSolicitorIsDigitalInternal(
+            caseDetails.getId().toString(),
+            notificationRequest,
+            template,
+            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
+            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
+            () -> (String) caseDetails.getData().get(getSolicitorNameKey(caseDetails))
+        );
     }
 
     private void sendNocEmailIfSolicitorIsDigital(
@@ -1771,18 +1766,36 @@ public class NotificationService {
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
-        if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseDetails.getId());
-            boolean isApplicantSolicitorDigital = checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
-            log.info("{} - isApplicantSolicitorDigital = {}}", caseDetails.getId(), isApplicantSolicitorDigital);
+        sendNocEmailIfSolicitorIsDigitalInternal(
+            caseDetails.getId().toString(),
+            notificationRequest,
+            template,
+            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
+            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
+            () -> caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
+                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()
+        );
+    }
+
+    private void sendNocEmailIfSolicitorIsDigitalInternal(
+        String caseId,
+        NotificationRequest notificationRequest,
+        EmailTemplateNames template,
+        BooleanSupplier isApplicantSolicitorDigitalSupplier,
+        BooleanSupplier isRespondentSolicitorDigitalSupplier,
+        Supplier<String> nameSupplier) {
+
+        if (isApplicantNoticeOfChangeRequest(notificationRequest, nameSupplier)) {
+            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseId);
+            boolean isApplicantSolicitorDigital = isApplicantSolicitorDigitalSupplier.getAsBoolean();
+            log.info("{} - isApplicantSolicitorDigital = {}}", caseId, isApplicantSolicitorDigital);
             if (isApplicantSolicitorDigital) {
                 sendNotificationEmail(notificationRequest, template);
             }
             return;
         }
-
-        boolean isRespondentSolicitorDigital = checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
-        log.info("{} - isRespondentSolicitorDigital = {}}", caseDetails.getId(), isRespondentSolicitorDigital);
+        boolean isRespondentSolicitorDigital = isRespondentSolicitorDigitalSupplier.getAsBoolean();
+        log.info("{} - isRespondentSolicitorDigital = {}}", caseId, isRespondentSolicitorDigital);
         if (isRespondentSolicitorDigital) {
             sendNotificationEmail(notificationRequest, template);
         }
@@ -1831,25 +1844,10 @@ public class NotificationService {
 
     }
 
-    /**
-     * Return boolean true or false for given Case.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @return boolean primitive
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     CaseDetails caseDetails) {
+                                                     Supplier<String> nameSupplier) {
         return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().get(getSolicitorNameKey(caseDetails))));
-    }
-
-    private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     FinremCaseDetails caseDetails) {
-        return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
-                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()));
+            nullToEmpty(nameSupplier.get()));
     }
 
     private String getSolicitorNameKey(CaseDetails caseDetails) {
