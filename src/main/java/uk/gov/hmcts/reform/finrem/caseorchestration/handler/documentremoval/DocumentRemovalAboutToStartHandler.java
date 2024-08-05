@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -19,11 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -55,13 +51,10 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
 
         JsonNode root = objectMapper.valueToTree(caseData);
-        traverse(root, documentNodes);
+        retrieveDocumentNode(root, documentNodes);
 
-        //Todo: test that this actually sorts by date, upload new files with newer date
-        //Todo: Add ternary, so that files without a date can still be sorted, use something like this for an old date:
-        // thing.has(DOCUMENT_TIME_STAMP) ? documentNode.get(DOCUMENT_TIME_STAMP).asLong() : Long.MIN_VALUE)
-
-        documentNodes = documentNodes.stream().distinct().sorted(Comparator.comparingLong(node -> node.has("upload_timestamp") ? node.get("upload_timestamp").asLong() : Long.MIN_VALUE)).toList();
+        // TODO: Sort by document upload_timestamp if provided with document node.
+        documentNodes = documentNodes.stream().distinct().toList();
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -83,7 +76,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    public void traverse(JsonNode root, List<JsonNode> documentNodes) {
+    private void retrieveDocumentNode(JsonNode root, List<JsonNode> documentNodes) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
             while (fieldNames.hasNext()) {
@@ -93,14 +86,14 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                     documentNodes.add(fieldValue);
                 }
                 else {
-                    traverse(fieldValue, documentNodes);
+                    retrieveDocumentNode(fieldValue, documentNodes);
                 }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                traverse(arrayElement, documentNodes);
+                retrieveDocumentNode(arrayElement, documentNodes);
             }
         }
     }
