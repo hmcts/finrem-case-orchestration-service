@@ -60,6 +60,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
@@ -878,6 +879,40 @@ public class NotificationServiceTest extends BaseServiceTest {
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
+    }
+
+    @Test
+    public void givenConsentedCaseAndRequestedByDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
+    }
+
+    @Test
+    public void givenConsentedCaseAndRequestedByNonDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(emailService, times(0)).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
     }
 
     @Test
