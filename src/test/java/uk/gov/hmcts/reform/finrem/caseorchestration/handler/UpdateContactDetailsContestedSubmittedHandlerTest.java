@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
+class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
     private static final String AUTH_TOKEN = "token:)";
 
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON =
@@ -80,8 +80,8 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals("email01@email.com", response.getData().getContactDetailsWrapper().getApplicantEmail());
         assertEquals("Poor", response.getData().getContactDetailsWrapper().getApplicantFmName());
         assertEquals("Guy", response.getData().getContactDetailsWrapper().getApplicantLname());
-        assertEquals(true, response.getData().isAppAddressConfidential());
-        assertEquals(false, response.getData().isRespAddressConfidential());
+        assertTrue(response.getData().isAppAddressConfidential());
+        assertFalse(response.getData().isRespAddressConfidential());
         assertEquals(caseDocument(), response.getData().getMiniFormA());
         assertNull(response.getData().getAppSolicitorName());
         assertNull(response.getData().getAppSolicitorFirm());
@@ -108,8 +108,8 @@ public class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandl
         assertEquals("email01@email.com", response.getData().getContactDetailsWrapper().getApplicantEmail());
         assertEquals("Poor", response.getData().getContactDetailsWrapper().getApplicantFmName());
         assertEquals("Guy", response.getData().getContactDetailsWrapper().getApplicantLname());
-        assertEquals(true, response.getData().isAppAddressConfidential());
-        assertEquals(false, response.getData().isRespAddressConfidential());
+        assertTrue(response.getData().isAppAddressConfidential());
+        assertFalse(response.getData().isRespAddressConfidential());
         assertEquals(caseDocument(), response.getData().getMiniFormA());
         assertNull(response.getData().getAppSolicitorName());
         assertNull(response.getData().getAppSolicitorFirm());

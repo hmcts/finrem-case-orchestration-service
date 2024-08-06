@@ -25,10 +25,10 @@
         "PostCode": "TW3 1SS",
         "Country": "United Kingdom"
       },
-      "dateOfMarriage": null,
+      "dateOfMarriage": "2000-01-01",
       "mortgageDetail": "test",
       "netValueOfHome": "dfdf",
-      "dateOfSepration": null,
+      "dateOfSepration": "2000-01-01",
       "propertyAddress": "test",
       "respondentEmail": null,
       "respondentLName": "test",

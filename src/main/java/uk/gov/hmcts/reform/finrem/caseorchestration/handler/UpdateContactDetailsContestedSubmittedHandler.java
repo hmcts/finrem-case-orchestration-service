@@ -62,9 +62,8 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
 
         if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
             && caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange().toString().equals(YES_VALUE)) {
-            return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
+            return handleNoticeOfChangeWorkflow(callbackRequest, userAuthorisation);
         }
-
 
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         boolean isApplicantRepresentedChanged = caseDataBefore.isApplicantRepresentedByASolicitor()
@@ -73,7 +72,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             != caseData.isRespondentRepresentedByASolicitor();
 
         if (isApplicantRepresentedChanged || isRespondentRepresentedChanged) {
-            return handleNoticeOfChangeWorklow(callbackRequest, userAuthorisation);
+            return handleNoticeOfChangeWorkflow(callbackRequest, userAuthorisation);
         }
 
         persistOrgPolicies(caseData, callbackRequest.getCaseDetailsBefore().getData());
@@ -82,7 +81,7 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             .data(finremCaseDetails.getData()).build();
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleNoticeOfChangeWorklow(
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleNoticeOfChangeWorkflow(
         FinremCallbackRequest request, String userAuthorisation) {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(request.getCaseDetails());
         CaseDetails originalCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(request.getCaseDetailsBefore());
@@ -101,9 +100,8 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
     }
 
     private void removeApplicantSolicitorDetails(FinremCaseData caseData) {
-
-        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         if (!caseData.isApplicantRepresentedByASolicitor()) {
+            ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
             contactDetailsWrapper.setApplicantSolicitorName(null);
             contactDetailsWrapper.setApplicantSolicitorFirm(null);
             contactDetailsWrapper.setApplicantSolicitorAddress(null);
