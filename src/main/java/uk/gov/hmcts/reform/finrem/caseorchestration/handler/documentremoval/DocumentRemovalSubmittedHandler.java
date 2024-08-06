@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
+import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_URL;
 
@@ -34,6 +37,7 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
@@ -53,6 +57,7 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
         List<DocumentToRemoveCollection> documentsUserWantsToKeepCollection = caseData.getDocumentToRemoveCollection();
 
         JsonNode root = objectMapper.valueToTree(caseData);
+
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
 
         documentNodes = documentNodes.stream().distinct().toList();
@@ -74,30 +79,34 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
         }
 
         ArrayList<DocumentToRemoveCollection> documentsUserWantsDeletedCollection = new ArrayList<>(allExistingDocumentsCollection);
+        // documentsUserWantsDeletedCollection is the difference between allExistingDocumentsCollection and documentsUserWantsToKeepCollection
         documentsUserWantsDeletedCollection.removeAll(documentsUserWantsToKeepCollection);
 
         //Upload a new 'document deleted file'
-        String deletedDocId = "a guid";
-        //Todo
+        // todo
 
         // Update root so that the document details are redacted for each document that needs to be deleted.
+        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(objectMapper,"url", "filename", "binary");
         documentsUserWantsDeletedCollection.forEach( documentToDelete ->
-                documentRemovalService.updateNodeForDocumentToDelete(root, documentToDelete.getValue(), deletedDocId));
+                documentRemovalService.updateNodeForDocumentToDelete(root, newNode, documentToDelete.getValue()));
 
-        // Build case data with contents of documentsUserWantsDeletedCollection removed. File id replaced.
+        documentRemovalService.removeDocumentToRemoveCollection(root);
 
-
-
-        // Remove DocumentToRemoveCollection
-        //Todo
+        // rebuild case data with file data redacted where file need to be removed.
+        FinremCaseData amendedCaseData;
+        try {
+            amendedCaseData = objectMapper.treeToValue(root, FinremCaseData.class);
+        } catch (Exception e) {
+            log.error(format("Error building amendedCaseData for case id %s after deleting document", caseDetails.getId()), e);
+            throw new DocumentDeleteException(e.getMessage(), e);
+        }
 
         // then make a call to the help class to delete the doc from doc store - if no such call already exists.
         //Todo
 
-        // Put in better logging
+        // Put in better logging, and try catch exception handling and custom exception for it all.
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(amendedCaseData).build();
     }
 
 }
-
