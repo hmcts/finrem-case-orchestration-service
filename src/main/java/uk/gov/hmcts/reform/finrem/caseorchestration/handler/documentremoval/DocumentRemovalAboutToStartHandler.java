@@ -26,16 +26,17 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
     static final String DOCUMENT_URL = "document_url";
     static final String DOCUMENT_FILENAME = "document_filename";
-    static final String DOCUMENT_TIME_STAMP = "document_timestamp";
 
     private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
 
 
-    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper, DocumentRemovalService documentRemovalService) {
+    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                              DocumentRemovalService documentRemovalService,
+                                              ObjectMapper objectMapper) {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -61,7 +62,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
             String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length-1];
+            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
 
             documentsCollection.add(
                 DocumentToRemoveCollection.builder()

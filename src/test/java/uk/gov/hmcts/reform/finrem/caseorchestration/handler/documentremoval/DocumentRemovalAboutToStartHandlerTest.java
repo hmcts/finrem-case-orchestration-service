@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.poi.ss.formula.functions.T;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,32 +17,40 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalAboutToStartHandlerTest {
 
+    @Mock
     private ObjectMapper objectMapper;
-
-    private static final String DOCS_TO_REMOVE_JSON = "/fixtures/documentRemoval/documents-to-remove.json";
-    private static final String NO_DOCS_TO_REMOVE_JSON = "/fixtures/documentRemoval/no-documents-to-remove.json";
-
-    @InjectMocks
-    private DocumentRemovalAboutToStartHandler handler;
 
     @Mock
     private DocumentRemovalService documentRemovalService;
 
+    @InjectMocks
+    private DocumentRemovalAboutToStartHandler handler;
+
+    private FinremCallbackRequest callbackRequest;
+    private FinremCaseData caseData;
+
     @BeforeEach
     public void setup() {
-        objectMapper = new ObjectMapper();
+        caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(caseData).build();
+        callbackRequest = FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
 
     @Test
@@ -57,28 +64,80 @@ class DocumentRemovalAboutToStartHandlerTest {
     }
 
     @Test
-    void shouldGenerateDocumentListFromCaseData() {
-        FinremCallbackRequest callbackRequestFromFile = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(DOCS_TO_REMOVE_JSON)).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequestFromFile, "authToken");
-        assertEquals(6, response.getData().getDocumentToRemoveCollection().size());
+    void testHandleWithEmptyDocumentNodes() throws Exception {
+        JsonNode rootNode = mock(JsonNode.class);
+        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
+        doNothing().when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertTrue(response.getData().getDocumentToRemoveCollection().isEmpty());
     }
 
     @Test
-    void shouldGenerateEmptyDocumentListFromCaseDataWithoutDocs() {
-        FinremCallbackRequest callbackRequestFromFile = FinremCallbackRequest.builder().caseDetails(buildCaseDetailsWithPath(NO_DOCS_TO_REMOVE_JSON)).build();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequestFromFile, "authToken");
-        assertEquals(0, response.getData().getDocumentToRemoveCollection().size());
+    void testHandleWithValidDocumentNodes() throws Exception {
+        JsonNode rootNode = mock(JsonNode.class);
+        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
+
+
+        JsonNode documentNode = mock(JsonNode.class);
+        when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
+        when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
+
+        List<JsonNode> documentNodes = new ArrayList<>();
+        documentNodes.add(documentNode);
+
+        doAnswer(invocation -> {
+            List<JsonNode> nodes = invocation.getArgument(1);
+            nodes.addAll(documentNodes);
+            return null;
+        }).when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().getDocumentToRemoveCollection());
+        assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveName());
+        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveId());
     }
 
-    // Copied from UpdateGereralApplicationStatusAboutToStartHandler.java - consider whether utility
-    // Converts a JSON file to a FinremCallbackRequest to test a handler.
-    private FinremCaseDetails buildCaseDetailsWithPath(String path) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            FinremCaseDetails caseDetails =
-                    objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
-            return FinremCallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    void testHandleWithDuplicateDocumentNodes() throws Exception {
+        JsonNode rootNode = mock(JsonNode.class);
+        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
+
+
+        JsonNode documentNode = mock(JsonNode.class);
+        when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
+        when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
+
+        List<JsonNode> documentNodes = new ArrayList<>();
+        documentNodes.add(documentNode);
+        documentNodes.add(documentNode); // Duplicate
+
+        doAnswer(invocation -> {
+            List<JsonNode> nodes = invocation.getArgument(1);
+            nodes.addAll(documentNodes);
+            return null;
+        }).when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().getDocumentToRemoveCollection());
+        assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveName());
+        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveId());
     }
 }

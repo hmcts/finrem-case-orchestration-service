@@ -49,7 +49,7 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testDocumentWithUploadTimestamp() throws Exception {
-        String json = "{\"formC\":{\"document_url\":\"https://example.com\",  \"upload_timestamp\": \"2024-07-21T12:24:58.964127000\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example.com/binary\"}}";
+        String json = "{\"formC\":{\"document_url\":\"https://example.com\",\"upload_timestamp\": \"2024-07-21T12:24:58.964127000\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example.com/binary\"}}";
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);

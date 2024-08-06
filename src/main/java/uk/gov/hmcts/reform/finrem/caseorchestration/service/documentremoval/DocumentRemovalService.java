@@ -20,10 +20,9 @@ public class DocumentRemovalService {
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has("document_url")){
+                if (fieldValue.has("document_url")) {
                     documentNodes.add(fieldValue);
-                }
-                else {
+                } else {
                     retrieveDocumentNodes(fieldValue, documentNodes);
                 }
             }
