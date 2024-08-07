@@ -90,7 +90,7 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         // todo
 
         // Update root so that the document details are redacted for each document that needs to be deleted.
-        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(objectMapper,"url", "filename", "binary");
+        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(objectMapper,"http://a_store/documents/1a489d01-d77b-4f06-abd9-a1d69928a303", "Document removed - 27th June 2024", "http://a_store/documents/1a489d01-d77b-4f06-abd9-a1d69928a303/binary");
         documentsUserWantsDeletedCollection.forEach( documentToDelete ->
                 documentRemovalService.updateNodeForDocumentToDelete(root, newNode, documentToDelete.getValue()));
 
@@ -112,6 +112,10 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         // Put in better logging, and try catch exception handling and custom exception for it all.
 
         // Refactor to use the Mapper bean already in COS?
+
+        // Check upload timestamps again. This handler changes the format slightly
+        // "upload_timestamp": "2024-07-30T06:37:33.424157" becomes "upload_timestamp": "2024-07-30T06:37:33.424157000"
+        // for all timestamps
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(amendedCaseData).build();
     }
