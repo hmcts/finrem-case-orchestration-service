@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,17 +30,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class UpdateRepresentationController extends BaseController {
 
-    @Autowired
-    private UpdateRepresentationService updateRepresentationService;
-
-    @Autowired
-    private AssignCaseAccessService assignCaseAccessService;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
+    private final UpdateRepresentationService updateRepresentationService;
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/apply-noc-decision", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
