@@ -77,7 +77,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                     .build());
         }
 
-        log.info("Retrieved {} case documents to remove from", documentNodes.size());
+        log.info("Retrieved {} case documents to remove from Case ID {}", documentNodes.size(), caseDetails.getId());
 
         caseData.setDocumentToRemoveCollection(documentsCollection);
 
