@@ -28,12 +28,12 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
+public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
 
-    public DocumentRemovalSubmittedHandler(FinremCaseDetailsMapper mapper,  DocumentRemovalService documentRemovalService) {
+    public DocumentRemovalAboutToSubmitHandler(FinremCaseDetailsMapper mapper, DocumentRemovalService documentRemovalService) {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
         this.objectMapper = new ObjectMapper();
@@ -42,7 +42,7 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
                 && (EventType.REMOVE_CASE_DOCUMENT.equals(eventType));
     }
 
@@ -58,10 +58,13 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
 
         JsonNode root = objectMapper.valueToTree(caseData);
 
+        // Gets the case data as a node tree
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
 
+        // Removes duplicates from the node tree
         documentNodes = documentNodes.stream().distinct().toList();
 
+        // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-submit
         List<DocumentToRemoveCollection> allExistingDocumentsCollection = new ArrayList<>();
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -78,11 +81,12 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
                             .build());
         }
 
+        // Uses and compares collections to see what file(s) the user wants removed
         ArrayList<DocumentToRemoveCollection> documentsUserWantsDeletedCollection = new ArrayList<>(allExistingDocumentsCollection);
         // documentsUserWantsDeletedCollection is the difference between allExistingDocumentsCollection and documentsUserWantsToKeepCollection
         documentsUserWantsDeletedCollection.removeAll(documentsUserWantsToKeepCollection);
 
-        //Upload a new 'document deleted file'
+        //Upload a new 'document deleted file' Hardcoded at the moment.
         // todo
 
         // Update root so that the document details are redacted for each document that needs to be deleted.
@@ -90,9 +94,10 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
         documentsUserWantsDeletedCollection.forEach( documentToDelete ->
                 documentRemovalService.updateNodeForDocumentToDelete(root, newNode, documentToDelete.getValue()));
 
+        // Clears out the document collection from the root node, so that it isn't part of the final CCD data.
         documentRemovalService.removeDocumentToRemoveCollection(root);
 
-        // rebuild case data with file data redacted where file need to be removed.
+        // rebuild case data with file data redacted.  Does this from the root node with the required updates.
         FinremCaseData amendedCaseData;
         try {
             amendedCaseData = objectMapper.treeToValue(root, FinremCaseData.class);
@@ -105,6 +110,8 @@ public class DocumentRemovalSubmittedHandler extends FinremCallbackHandler {
         //Todo
 
         // Put in better logging, and try catch exception handling and custom exception for it all.
+
+        // Refactor to use the Mapper bean already in COS?
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(amendedCaseData).build();
     }
