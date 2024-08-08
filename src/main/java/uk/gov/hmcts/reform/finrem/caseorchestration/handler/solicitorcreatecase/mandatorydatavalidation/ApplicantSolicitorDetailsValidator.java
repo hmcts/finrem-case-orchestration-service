@@ -20,25 +20,27 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
 
         List<String> ret = new ArrayList<>();
 
-        if (YesOrNo.NO.equals(contactDetailsWrapper.getApplicantRepresented())) {
-            log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
-            return ret;
-        }
-        if (contactDetailsWrapper.getSolicitorAddress() == null
-            || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
-            ret.add("Applicant solicitor's address is required.");
-        }
-        if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorEmail())) {
-            ret.add("Applicant solicitor's email is required.");
-        }
-        if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorPhone())) {
-            ret.add("Applicant solicitor's phone is required.");
-        }
-        if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorFirm())) {
-            ret.add("Applicant solicitor's name of your firm is required.");
-        }
-        if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorName())) {
-            ret.add("Applicant solicitor's name is required.");
+        if (caseData.isConsentedApplication()) {
+            if (YesOrNo.NO.equals(contactDetailsWrapper.getApplicantRepresented())) {
+                log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
+                return ret;
+            }
+            if (contactDetailsWrapper.getSolicitorAddress() == null
+                || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
+                ret.add("Applicant solicitor's address is required.");
+            }
+            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorEmail())) {
+                ret.add("Applicant solicitor's email is required.");
+            }
+            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorPhone())) {
+                ret.add("Applicant solicitor's phone is required.");
+            }
+            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorFirm())) {
+                ret.add("Applicant solicitor's name of your firm is required.");
+            }
+            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorName())) {
+                ret.add("Applicant solicitor's name is required.");
+            }
         }
         return ret;
     }

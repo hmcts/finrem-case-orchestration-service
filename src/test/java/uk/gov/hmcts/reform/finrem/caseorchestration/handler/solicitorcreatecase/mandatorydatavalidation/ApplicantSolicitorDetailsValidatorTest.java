@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -35,14 +37,41 @@ class ApplicantSolicitorDetailsValidatorTest  {
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
     }
 
-    @Test
-    void shouldReturnEmptyError() {
-        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(Map.of(
+    @ParameterizedTest
+    @ValueSource(strings = {"No"})
+    @NullSource
+    void shouldReturnEmptyError(String applicantRepresented) {
+        Map<String, Object> map = new HashMap<>(Map.of(
             "solicitorEmail", "this_is@email.com",
             "solicitorPhone", "9999999999",
             "solicitorName", "SOLICITOR NAME",
             "solicitorFirm", "SOLICITOR FIRM",
-            "solicitorAddress", Map.of("PostCode", "GU2 7NY"))).build();
+            "solicitorAddress", Map.of("PostCode", "GU2 7NY")));
+        map.put("applicantRepresented", applicantRepresented);
+
+        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
+
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
+        ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
+        List<String> validationErrors = validator.validate(caseData);
+        assertThat(validationErrors).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyErrorIfContestedCase() {
+        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType())
+            .data(Map.of()).build();
+
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
+        ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
+        List<String> validationErrors = validator.validate(caseData);
+        assertThat(validationErrors).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyErrorIfApplicantRepresentedIsNo() {
+        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType())
+            .data(Map.of("applicantRepresented", "No")).build();
 
         FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
         ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
