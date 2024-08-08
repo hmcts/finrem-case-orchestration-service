@@ -103,9 +103,9 @@ class DocumentRemovalAboutToStartHandlerTest {
         assertNotNull(response.getData());
         assertNotNull(response.getData().getDocumentToRemoveCollection());
         assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveName());
-        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveId());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentId());
     }
 
     @Test
@@ -136,8 +136,8 @@ class DocumentRemovalAboutToStartHandlerTest {
         assertNotNull(response.getData());
         assertNotNull(response.getData().getDocumentToRemoveCollection());
         assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveName());
-        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentToRemoveId());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentId());
     }
 }
