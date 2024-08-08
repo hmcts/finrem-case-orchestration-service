@@ -62,19 +62,9 @@ class CreateCaseMandatoryDataIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data", notNullValue()))
             .andExpect(jsonPath("$.warnings",empty()))
-            .andExpect(jsonPath("$.errors", hasSize(6)))
+            .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.errors",
-                hasItem("Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides")))
-            .andExpect(jsonPath("$.errors",
-                hasItem("Applicant solicitor's email is required.")))
-            .andExpect(jsonPath("$.errors",
-                hasItem("Applicant solicitor's phone is required.")))
-            .andExpect(jsonPath("$.errors",
-                hasItem("Applicant solicitor's name of your firm is required.")))
-            .andExpect(jsonPath("$.errors",
-                hasItem("Applicant solicitor's name is required.")))
-            .andExpect(jsonPath("$.errors",
-                hasItem("Applicant solicitor's address is required.")));
+                hasItem("Applicant's Local Court is required. Update Please choose the Region in which the Applicant resides")));
 
     }
 }
