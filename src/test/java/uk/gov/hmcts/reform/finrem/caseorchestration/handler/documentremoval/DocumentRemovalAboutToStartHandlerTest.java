@@ -73,7 +73,7 @@ class DocumentRemovalAboutToStartHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertTrue(response.getData().getDocumentToRemoveCollection().isEmpty());
+        assertTrue(response.getData().getDocumentToKeepCollection().isEmpty());
     }
 
     @Test
@@ -101,11 +101,11 @@ class DocumentRemovalAboutToStartHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertNotNull(response.getData().getDocumentToRemoveCollection());
-        assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentFilename());
-        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentId());
+        assertNotNull(response.getData().getDocumentToKeepCollection());
+        assertEquals(1, response.getData().getDocumentToKeepCollection().size());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentId());
     }
 
     @Test
@@ -134,10 +134,10 @@ class DocumentRemovalAboutToStartHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertNotNull(response.getData().getDocumentToRemoveCollection());
-        assertEquals(1, response.getData().getDocumentToRemoveCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentFilename());
-        assertEquals("123", response.getData().getDocumentToRemoveCollection().get(0).getValue().getDocumentId());
+        assertNotNull(response.getData().getDocumentToKeepCollection());
+        assertEquals(1, response.getData().getDocumentToKeepCollection().size());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentId());
     }
 }

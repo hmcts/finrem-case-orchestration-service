@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DocumentToRemove extends CaseDocument {
+public class DocumentToKeep extends CaseDocument {
     @JsonProperty("document_id")
     private String documentId;
 }

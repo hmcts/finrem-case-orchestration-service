@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
@@ -48,7 +48,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         List<JsonNode> documentNodes = new ArrayList<>();
-        List<DocumentToRemoveCollection> documentsCollection = new ArrayList<>();
+        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -68,8 +68,8 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
             String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
 
             documentsCollection.add(
-                DocumentToRemoveCollection.builder()
-                    .value(DocumentToRemove.builder()
+                DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
                         .documentUrl(docUrl)
                         .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
                         .documentId(docId)
@@ -79,7 +79,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
         log.info("Retrieved {} case documents to remove from Case ID {}", documentNodes.size(), caseDetails.getId());
 
-        caseData.setDocumentToRemoveCollection(documentsCollection);
+        caseData.setDocumentToKeepCollection(documentsCollection);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
