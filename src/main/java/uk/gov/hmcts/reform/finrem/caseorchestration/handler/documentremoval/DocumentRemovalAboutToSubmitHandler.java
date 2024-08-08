@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
@@ -17,12 +18,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_URL;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,12 +36,17 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
+    private final GenericDocumentService genericDocumentService;
 
-    public DocumentRemovalAboutToSubmitHandler(FinremCaseDetailsMapper mapper, DocumentRemovalService documentRemovalService) {
+    @Autowired
+    public DocumentRemovalAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
+                                               DocumentRemovalService documentRemovalService,
+                                               GenericDocumentService genericDocumentService) {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
+        this.genericDocumentService = genericDocumentService;
     }
 
     @Override
@@ -49,73 +58,57 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
-        List<JsonNode> documentNodes = new ArrayList<>();
-
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DocumentToRemoveCollection> documentsUserWantsToKeepCollection = caseData.getDocumentToRemoveCollection();
-
+        List<JsonNode> documentNodes = new ArrayList<>();
+        List<DocumentToRemoveCollection> documentsUserWantsToKeepList = caseData.getDocumentToRemoveCollection();
         JsonNode root = objectMapper.valueToTree(caseData);
 
         // Gets the case data as a node tree
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
 
-        // Removes duplicates from the node tree
+        // Removes duplicates from the node tree - bundle this with the above function when refactored.
         documentNodes = documentNodes.stream().distinct().toList();
 
-        // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-submit
-        List<DocumentToRemoveCollection> allExistingDocumentsCollection = new ArrayList<>();
-        for (JsonNode documentNode : documentNodes) {
-            String docUrl = documentNode.get(DOCUMENT_URL).asText();
-            String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length-1];
-
-            allExistingDocumentsCollection.add(
-                    DocumentToRemoveCollection.builder()
-                            .value(DocumentToRemove.builder()
-                                    .documentToRemoveUrl(docUrl)
-                                    .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
-                                    .documentToRemoveId(docId)
-                                    .build())
-                            .build());
-        }
+        // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-start
+        List<DocumentToRemoveCollection> allExistingDocumentsList = documentRemovalService.buildCaseDocumentList(documentNodes);
 
         // Uses and compares collections to see what file(s) the user wants removed
-        ArrayList<DocumentToRemoveCollection> documentsUserWantsDeletedCollection = new ArrayList<>(allExistingDocumentsCollection);
-        // documentsUserWantsDeletedCollection is the difference between allExistingDocumentsCollection and documentsUserWantsToKeepCollection
-        documentsUserWantsDeletedCollection.removeAll(documentsUserWantsToKeepCollection);
+        ArrayList<DocumentToRemoveCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
+        // documentsUserWantsDeletedCollection is the difference between a list of allExistingDocumentsCollection and documentsUserWantsToKeepList
+        documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
 
-        //Upload a new 'document deleted file' Hardcoded at the moment.
-        // todo
+        // ACs require uploading a new document deleted file.  UploadDocumentContestedAboutToSubmitHandler indicates
+        // that EXUI handles the actual doc upload.  The handler validates that urls, sorts and categorises.
+        // DFR doesn't do this yet, but we could do via template/docmosis (GenerateDocumentService.java)*.
+        // For now this changes to a valid anonymous stores and GUID so that the document can be accessed.
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(
+                objectMapper,
+                "http://redacted_store/documents/00000000-0000-0000-0000-000000000000",
+                String.format("Document removed - %s", LocalDateTime.now().format(dtf)),
+                "http://redacted_store/documents/00000000-0000-0000-0000-000000000000/binary"
+        );
 
-        // Update root so that the document details are redacted for each document that needs to be deleted.
-        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(objectMapper,"http://a_store/documents/1a489d01-d77b-4f06-abd9-a1d69928a303", "Document removed - 27th June 2024", "http://a_store/documents/1a489d01-d77b-4f06-abd9-a1d69928a303/binary");
-        documentsUserWantsDeletedCollection.forEach( documentToDelete ->
-                documentRemovalService.updateNodeForDocumentToDelete(root, newNode, documentToDelete.getValue()));
+        //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
+        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+                documentRemovalService.deleteDocument(
+                        documentToDeleteCollection.getValue(), userAuthorisation));
 
-        // Clears out the document collection from the root node, so that it isn't part of the final CCD data.
+        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+                documentRemovalService.updateNodeForDocumentToDelete(
+                        root, newNode, documentToDeleteCollection.getValue()));
+
+
         documentRemovalService.removeDocumentToRemoveCollection(root);
 
-        // rebuild case data with file data redacted.  Does this from the root node with the required updates.
-        FinremCaseData amendedCaseData;
-        try {
-            amendedCaseData = objectMapper.treeToValue(root, FinremCaseData.class);
-        } catch (Exception e) {
-            log.error(format("Error building amendedCaseData for case id %s after deleting document", caseDetails.getId()), e);
-            throw new DocumentDeleteException(e.getMessage(), e);
-        }
-
-        // then make a call to the help class to delete the doc from doc store - if no such call already exists.
-        //Todo
+        FinremCaseData amendedCaseData =
+                documentRemovalService.buildAmendedCaseDataFromRootNode(root, caseDetails.getId(), objectMapper);
 
         // Put in better logging, and try catch exception handling and custom exception for it all.
 
         // Refactor to use the Mapper bean already in COS?
-
-        // Check upload timestamps again. This handler changes the format slightly
-        // "upload_timestamp": "2024-07-30T06:37:33.424157" becomes "upload_timestamp": "2024-07-30T06:37:33.424157000"
-        // for all timestamps
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(amendedCaseData).build();
     }
