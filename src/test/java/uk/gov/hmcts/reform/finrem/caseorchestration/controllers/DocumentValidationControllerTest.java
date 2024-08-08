@@ -2,12 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -30,9 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(DocumentValidationController.class)
 public class DocumentValidationControllerTest extends BaseControllerTest {
 
@@ -40,7 +36,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
     private static final String AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor-contested.json";
-
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,9 +47,9 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     private ConsentedApplicationHelper helper;
 
     @Test
-    public void whenCaseIsContestedshouldReturnSuccessWhenFileUploadCheckButNotToSetLabelField() throws Exception {
+    public void whenCaseIsContestedShouldReturnSuccessWhenFileUploadCheckButNotToSetLabelField() throws Exception {
         doRequestSetUp(AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = builder()
+        DocumentValidationResponse response = DocumentValidationResponse.builder()
             .mimeType("application/pdf").build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
@@ -71,9 +66,9 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenCaseIsConsentedshouldReturnSuccessWhenFileUploadCheck() throws Exception {
+    public void whenCaseIsConsentedShouldReturnSuccessWhenFileUploadCheck() throws Exception {
         doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = builder()
+        DocumentValidationResponse response = DocumentValidationResponse.builder()
             .mimeType("application/pdf").build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
@@ -92,7 +87,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnSuccessWhenFileUploadCheckForInvalidField() throws Exception {
         doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
-        DocumentValidationResponse response = builder()
+        DocumentValidationResponse response = DocumentValidationResponse.builder()
             .mimeType("application/pdf")
             .build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))

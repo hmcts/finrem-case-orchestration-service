@@ -7,10 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -20,10 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
-
-import static java.lang.String.format;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_URL;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,7 +30,6 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
-    private final GenericDocumentService genericDocumentService;
 
     @Autowired
     public DocumentRemovalAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
@@ -46,7 +39,6 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         this.documentRemovalService = documentRemovalService;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
-        this.genericDocumentService = genericDocumentService;
     }
 
     @Override
@@ -62,7 +54,7 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
 
         List<JsonNode> documentNodes = new ArrayList<>();
-        List<DocumentToRemoveCollection> documentsUserWantsToKeepList = caseData.getDocumentToRemoveCollection();
+        List<DocumentToKeepCollection> documentsUserWantsToKeepList = caseData.getDocumentToKeepCollection();
         JsonNode root = objectMapper.valueToTree(caseData);
 
         // Gets the case data as a node tree
@@ -72,10 +64,10 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         documentNodes = documentNodes.stream().distinct().toList();
 
         // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-start
-        List<DocumentToRemoveCollection> allExistingDocumentsList = documentRemovalService.buildCaseDocumentList(documentNodes);
+        List<DocumentToKeepCollection> allExistingDocumentsList = documentRemovalService.buildCaseDocumentList(documentNodes);
 
         // Uses and compares collections to see what file(s) the user wants removed
-        ArrayList<DocumentToRemoveCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
+        ArrayList<DocumentToKeepCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
         // documentsUserWantsDeletedCollection is the difference between a list of allExistingDocumentsCollection and documentsUserWantsToKeepList
         documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
 

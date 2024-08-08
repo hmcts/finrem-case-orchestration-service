@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -28,14 +28,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremov
 @Service
 public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
+    static final String DOCUMENT_URL = "document_url";
+    static final String DOCUMENT_FILENAME = "document_filename";
+
     private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
 
 
-    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper, DocumentRemovalService documentRemovalService) {
+    public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                              DocumentRemovalService documentRemovalService,
+                                              ObjectMapper objectMapper) {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -47,10 +52,13 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         List<JsonNode> documentNodes = new ArrayList<>();
-        List<DocumentToRemoveCollection> documentsCollection = new ArrayList<>();
+        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+
+        log.info("Invoking event document removal about to start callback for Case ID: {}",
+            caseDetails.getId());
 
         JsonNode root = objectMapper.valueToTree(caseData);
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
@@ -61,19 +69,21 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
             String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length-1];
+            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
 
             documentsCollection.add(
-                DocumentToRemoveCollection.builder()
-                    .value(DocumentToRemove.builder()
-                        .documentToRemoveUrl(docUrl)
-                        .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
-                        .documentToRemoveId(docId)
+                DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
+                        .documentUrl(docUrl)
+                        .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
+                        .documentId(docId)
                         .build())
                     .build());
         }
 
-        caseData.setDocumentToRemoveCollection(documentsCollection);
+        log.info("Retrieved {} case documents to remove from Case ID {}", documentNodes.size(), caseDetails.getId());
+
+        caseData.setDocumentToKeepCollection(documentsCollection);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

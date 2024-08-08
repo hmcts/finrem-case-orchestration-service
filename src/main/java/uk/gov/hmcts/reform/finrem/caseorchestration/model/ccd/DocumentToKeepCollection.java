@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocumentToRemoveCollection {
-    private DocumentToRemove value;
+public class DocumentToKeepCollection {
+    private DocumentToKeep value;
 }

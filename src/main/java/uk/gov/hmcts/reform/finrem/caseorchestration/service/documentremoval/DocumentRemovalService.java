@@ -4,22 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemove;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToRemoveCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 
@@ -48,8 +44,7 @@ public class DocumentRemovalService {
                 JsonNode fieldValue = root.get(fieldName);
                 if (fieldValue.has(DOCUMENT_URL)){
                     documentNodes.add(fieldValue);
-                }
-                else {
+                } else {
                     retrieveDocumentNodes(fieldValue, documentNodes);
                 }
             }
@@ -64,17 +59,17 @@ public class DocumentRemovalService {
 
     // Todo - test for generated node and exception
     // Todo Jdoc
-    public void updateNodeForDocumentToDelete(JsonNode root, JsonNode newNode, DocumentToRemove documentToRemove) {
+    public void updateNodeForDocumentToDelete(JsonNode root, JsonNode newNode, DocumentToKeep documentToKeep) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
                 if (fieldValue.has(DOCUMENT_URL)){
-                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToRemove.getDocumentToRemoveUrl())) {
+                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeep.getDocumentUrl())) {
                         log.info(String.format("Updating field %1$s from %2$s to %3$s",
                                 fieldName,
-                                documentToRemove.getDocumentToRemoveUrl(),
+                                documentToKeep.getDocumentUrl(),
                                 newNode.get(DOCUMENT_URL).asText()
                                 )
                         );
@@ -82,14 +77,14 @@ public class DocumentRemovalService {
                     }
                 }
                 else {
-                    updateNodeForDocumentToDelete(fieldValue, newNode, documentToRemove);
+                    updateNodeForDocumentToDelete(fieldValue, newNode, documentToKeep);
                 }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                updateNodeForDocumentToDelete(arrayElement, newNode, documentToRemove);
+                updateNodeForDocumentToDelete(arrayElement, newNode, documentToKeep);
             }
         }
     }
@@ -121,23 +116,24 @@ public class DocumentRemovalService {
     }
 
     // todo jdoc - based on deleteOldMiniFormA
-    public void deleteDocument(DocumentToRemove documentToRemove, String authorisationToken) {
+    // Once working, consider making async again.  See deleteOldMiniFormA
+    public void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
 
         try {
-            genericDocumentService.deleteDocument(documentToRemove.getDocumentToRemoveUrl(), authorisationToken);
+            genericDocumentService.deleteDocument(documentToRemove.getDocumentUrl(), authorisationToken);
         } catch (Exception e) {
             log.error(format(
                     "Failed to delete document url %s",
-                    documentToRemove.getDocumentToRemoveUrl()), e);
+                    documentToRemove.getDocumentUrl()), e);
 
             throw new DocumentDeleteException(e.getMessage(), e);
         }
     }
 
     // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-start
-    public List<DocumentToRemoveCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
+    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
 
-        List<DocumentToRemoveCollection> allExistingDocumentsList = new ArrayList<>();
+        List<DocumentToKeepCollection> allExistingDocumentsList = new ArrayList<>();
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -145,11 +141,11 @@ public class DocumentRemovalService {
             String docId = documentUrlAsArray[documentUrlAsArray.length-1];
 
             allExistingDocumentsList.add(
-                    DocumentToRemoveCollection.builder()
-                            .value(DocumentToRemove.builder()
-                                    .documentToRemoveUrl(docUrl)
-                                    .documentToRemoveName(documentNode.get(DOCUMENT_FILENAME).asText())
-                                    .documentToRemoveId(docId)
+                    DocumentToKeepCollection.builder()
+                            .value(DocumentToKeep.builder()
+                                    .documentUrl(docUrl)
+                                    .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
+                                    .documentId(docId)
                                     .build())
                             .build());
         }
