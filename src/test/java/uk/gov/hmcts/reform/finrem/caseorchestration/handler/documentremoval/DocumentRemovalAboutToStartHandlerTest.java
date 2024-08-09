@@ -81,11 +81,12 @@ class DocumentRemovalAboutToStartHandlerTest {
         JsonNode rootNode = mock(JsonNode.class);
         when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
 
-
         JsonNode documentNode = mock(JsonNode.class);
         when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
         when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_binary_url")).thenReturn(mock(JsonNode.class));
         when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
+        when(documentNode.get("document_binary_url").asText()).thenReturn("http://example.com/doc/123/binary");
         when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
 
         List<JsonNode> documentNodes = new ArrayList<>();
@@ -103,8 +104,9 @@ class DocumentRemovalAboutToStartHandlerTest {
         assertNotNull(response.getData());
         assertNotNull(response.getData().getDocumentToKeepCollection());
         assertEquals(1, response.getData().getDocumentToKeepCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("http://example.com/doc/123/binary", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentFilename());
         assertEquals("123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentId());
     }
 
@@ -113,11 +115,12 @@ class DocumentRemovalAboutToStartHandlerTest {
         JsonNode rootNode = mock(JsonNode.class);
         when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
 
-
         JsonNode documentNode = mock(JsonNode.class);
         when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
         when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
+        when(documentNode.get("document_binary_url")).thenReturn(mock(JsonNode.class));
         when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
+        when(documentNode.get("document_binary_url").asText()).thenReturn("http://example.com/doc/123/binary");
         when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
 
         List<JsonNode> documentNodes = new ArrayList<>();
@@ -136,8 +139,9 @@ class DocumentRemovalAboutToStartHandlerTest {
         assertNotNull(response.getData());
         assertNotNull(response.getData().getDocumentToKeepCollection());
         assertEquals(1, response.getData().getDocumentToKeepCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentFilename());
+        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("http://example.com/doc/123/binary", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentFilename());
         assertEquals("123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentId());
     }
 }
