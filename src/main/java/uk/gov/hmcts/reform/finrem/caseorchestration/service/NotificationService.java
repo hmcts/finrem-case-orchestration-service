@@ -1743,7 +1743,7 @@ public class NotificationService {
      * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
      * @param template            instance of EmailTemplateNames
-     * @deprecated Use {@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}
+     * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
      */
     @Deprecated(since = "15-june-2023")
     private void sendNocEmailIfSolicitorIsDigital(
