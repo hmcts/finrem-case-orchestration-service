@@ -12,20 +12,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-
 @Slf4j
 @Service
 public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbackHandler {
 
     private final UpdateRepresentationWorkflowService nocWorkflowService;
-
     private final OnlineFormDocumentService onlineFormDocumentService;
 
     public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -47,7 +46,8 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), finremCaseDetails.getId());
+        log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(),
+            finremCaseDetails.getId());
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
@@ -60,25 +60,51 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             caseData.setMiniFormA(document);
         }
 
-        if (Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange()).isPresent()
-            && caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange().toString().equals(YES_VALUE)) {
-            return handleNoticeOfChangeWorkflow(callbackRequest, userAuthorisation);
-        }
-
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        boolean isApplicantRepresentedChanged = caseDataBefore.isApplicantRepresentedByASolicitor()
-            != caseData.isApplicantRepresentedByASolicitor();
-        boolean isRespondentRepresentedChanged = caseDataBefore.isRespondentRepresentedByASolicitor()
-            != caseData.isRespondentRepresentedByASolicitor();
-
-        if (isApplicantRepresentedChanged || isRespondentRepresentedChanged) {
+        if (isRepresentativeChange(caseDataBefore, caseData)) {
+            updateNocParty(caseDataBefore, caseData);
             return handleNoticeOfChangeWorkflow(callbackRequest, userAuthorisation);
+        } else {
+            persistOrgPolicies(caseData, caseDataBefore);
+
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(finremCaseDetails.getData()).build();
         }
+    }
 
-        persistOrgPolicies(caseData, callbackRequest.getCaseDetailsBefore().getData());
+    private boolean isRepresentativeChange(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return isUpdateIncludesRepresentativeChange(caseData.getContactDetailsWrapper())
+            || isApplicantRepresentedChange(caseDataBefore, caseData)
+            || isRespondentRepresentedChange(caseDataBefore, caseData);
+    }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseDetails.getData()).build();
+    private boolean isUpdateIncludesRepresentativeChange(ContactDetailsWrapper contactDetailsWrapper) {
+        return Optional.ofNullable(contactDetailsWrapper.getUpdateIncludesRepresentativeChange())
+            .orElse(YesOrNo.NO)
+            .isYes();
+    }
+
+    private boolean isApplicantRepresentedChange(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return caseDataBefore.isApplicantRepresentedByASolicitor() != caseData.isApplicantRepresentedByASolicitor();
+    }
+
+    private boolean isRespondentRepresentedChange(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return caseDataBefore.isRespondentRepresentedByASolicitor() != caseData.isRespondentRepresentedByASolicitor();
+    }
+
+    private void updateNocParty(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        if (isUpdateIncludesRepresentativeChange(contactDetailsWrapper)) {
+            return;
+        }
+        if (isApplicantRepresentedChange(caseDataBefore, caseData)) {
+            contactDetailsWrapper.setUpdateIncludesRepresentativeChange(YesOrNo.YES);
+            contactDetailsWrapper.setNocParty(NoticeOfChangeParty.APPLICANT);
+        }
+        if (isRespondentRepresentedChange(caseDataBefore, caseData)) {
+            contactDetailsWrapper.setUpdateIncludesRepresentativeChange(YesOrNo.YES);
+            contactDetailsWrapper.setNocParty(NoticeOfChangeParty.RESPONDENT);
+        }
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleNoticeOfChangeWorkflow(
@@ -114,7 +140,6 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
     }
 
     private void removeRespondentDetails(FinremCaseData caseData) {
-
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
         if (caseData.isRespondentRepresentedByASolicitor()) {
             contactDetailsWrapper.setRespondentAddress(null);
@@ -129,7 +154,6 @@ public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbac
             contactDetailsWrapper.setRespondentSolicitorEmail(null);
             contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
             caseData.setRespSolNotificationsEmailConsent(null);
-            caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
             caseData.setRespondentOrganisationPolicy(null);
         }
     }

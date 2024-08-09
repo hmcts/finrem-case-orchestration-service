@@ -1,36 +1,42 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.InputStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
@@ -46,6 +52,8 @@ class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestS
         "/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json";
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON =
         "/fixtures/contested/amend-applicant-solicitor-details-representation-changed.json";
+    private static final String FIXTURES_CONTESTED_AMEND_RESPONDENT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON =
+        "/fixtures/contested/amend-respondent-solicitor-details-representation-changed.json";
 
     @InjectMocks
     private UpdateContactDetailsContestedSubmittedHandler handler;
@@ -56,14 +64,13 @@ class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestS
     @Mock
     private OnlineFormDocumentService onlineFormDocumentService;
 
-    @Mock
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Spy
+    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
+        new ObjectMapper().registerModule(new JavaTimeModule()));
 
     @Test
     void givenACcdCallbackUpdateContactDetailsContestCase_WhenCanHandleCalled_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS),
-            is(true));
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CONTESTED, EventType.UPDATE_CONTACT_DETAILS);
     }
 
     @Test
@@ -176,25 +183,65 @@ class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestS
     }
 
     @Test
-    void shouldHandleNoticeOfChangeWorkflow_WhenApplicantRepresentedChanged() {
-
+    void shouldHandleNoticeOfChangeWorkflow_WhenIsUpdateIncludesRepresentativeChange() {
         FinremCallbackRequest finremCallbackRequest =
             buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON);
+        finremCallbackRequest.getCaseDetails().getData().getContactDetailsWrapper()
+            .setUpdateIncludesRepresentativeChange(YesOrNo.YES);
+        AboutToStartOrSubmitCallbackResponse nocResponse = AboutToStartOrSubmitCallbackResponse.builder()
+            .data(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails()).getData())
+            .build();
         when(updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(
-            finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails()),
-            AUTH_TOKEN,
-            finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetailsBefore())))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+            any(CaseDetails.class), anyString(), any(CaseDetails.class))).thenReturn(nocResponse);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
         assertNotNull(response);
+        verify(updateRepresentationWorkflowService, times(1)).handleNoticeOfChangeWorkflow(
+            any(CaseDetails.class), anyString(), any(CaseDetails.class));
+    }
+
+    @Test
+    void shouldHandleNoticeOfChangeWorkflow_WhenApplicantRepresentedChanged() {
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON);
+        AboutToStartOrSubmitCallbackResponse nocResponse = AboutToStartOrSubmitCallbackResponse.builder()
+            .data(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails()).getData())
+            .build();
+        when(updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(
+            any(CaseDetails.class), anyString(), any(CaseDetails.class))).thenReturn(nocResponse);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertNotNull(response);
+        verify(updateRepresentationWorkflowService, times(1)).handleNoticeOfChangeWorkflow(
+            any(CaseDetails.class), anyString(), any(CaseDetails.class));
+    }
+
+    @Test
+    void shouldHandleNoticeOfChangeWorkflow_WhenRespondentRepresentedChanged() {
+        FinremCallbackRequest finremCallbackRequest =
+            buildCaseDetailsWithPath(FIXTURES_CONTESTED_AMEND_RESPONDENT_SOLICITOR_DETAILS_REPRESENTATION_CHANGED_JSON);
+        AboutToStartOrSubmitCallbackResponse nocResponse = AboutToStartOrSubmitCallbackResponse.builder()
+            .data(finremCaseDetailsMapper.mapToCaseDetails(finremCallbackRequest.getCaseDetails()).getData())
+            .build();
+        when(updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(
+            any(CaseDetails.class), anyString(), any(CaseDetails.class))).thenReturn(nocResponse);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertNotNull(response);
+        verify(updateRepresentationWorkflowService, times(1)).handleNoticeOfChangeWorkflow(
+            any(CaseDetails.class), anyString(), any(CaseDetails.class));
     }
 
     private FinremCallbackRequest buildCaseDetailsWithPath(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            FinremCallbackRequest finremCallbackRequest
-                = objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
+            FinremCallbackRequest finremCallbackRequest =
+                objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
 
             FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
             caseDetails.getData().setMiniFormA(caseDocument());
@@ -209,5 +256,4 @@ class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestS
             throw new RuntimeException(e);
         }
     }
-
 }
