@@ -14,6 +14,13 @@ import java.util.List;
 @Component
 @Slf4j
 class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
+
+    private void validateField(String fieldValue, String fieldName, List<String> errors) {
+        if (!StringUtils.hasText(fieldValue)) {
+            errors.add(String.format("Applicant solicitor's %s is required.", fieldName));
+        }
+    }
+
     @Override
     public List<String> validate(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
@@ -29,18 +36,10 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
                 || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
                 ret.add("Applicant solicitor's address is required.");
             }
-            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorEmail())) {
-                ret.add("Applicant solicitor's email is required.");
-            }
-            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorPhone())) {
-                ret.add("Applicant solicitor's phone is required.");
-            }
-            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorFirm())) {
-                ret.add("Applicant solicitor's name of your firm is required.");
-            }
-            if (!StringUtils.hasText(contactDetailsWrapper.getSolicitorName())) {
-                ret.add("Applicant solicitor's name is required.");
-            }
+            validateField(contactDetailsWrapper.getSolicitorEmail(), "email", ret);
+            validateField(contactDetailsWrapper.getSolicitorPhone(), "phone", ret);
+            validateField(contactDetailsWrapper.getSolicitorFirm(), "name of your firm", ret);
+            validateField(contactDetailsWrapper.getSolicitorName(), "name", ret);
         }
         return ret;
     }
