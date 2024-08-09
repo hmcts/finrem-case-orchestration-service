@@ -89,7 +89,7 @@ public class DocumentRemovalService {
     // todo - some jdoc to explain why we're doing this
     // Clears out the document collection from the root node, so that it isn't part of the final CCD data.
     public void removeDocumentToRemoveCollection(JsonNode root) {
-        ((ObjectNode) root).remove("documentToRemoveCollection");
+        ((ObjectNode) root).remove("documentToKeepCollection");
     }
 
     // todo jdoc - based on deleteOldMiniFormA
