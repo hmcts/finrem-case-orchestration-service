@@ -53,12 +53,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
@@ -83,6 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
@@ -318,6 +321,15 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
+    }
+
+    @Test
+    public void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+            dataKeysWrapper);
+
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_ORDER_AVAILABLE);
     }
 
@@ -787,25 +799,23 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setNotificationEmail("test@test.com");
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        //  verify(notificationServiceConfiguration).getContestedNoticeOfChange();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOTICE_OF_CHANGE);
     }
 
     @Test
     public void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
+        notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
@@ -815,12 +825,24 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenConsentedCaseWhenSendNoticeOfChangeEmail_whenMissingEmailAddress_thenNotSendingNoticeOfChangeContestedEmail() {
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
+        verify(emailService, times(0)).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOTICE_OF_CHANGE);
+    }
+
+    @Test
     public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
-
 
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
@@ -830,7 +852,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -845,7 +867,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
@@ -860,8 +882,42 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenConsentedCaseAndRequestedByDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
+    }
+
+    @Test
+    public void givenConsentedCaseAndRequestedByNonDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(emailService, times(0)).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
+    }
+
+    @Test
     public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
@@ -1525,6 +1581,14 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .build())
             .caseType(caseType)
             .build();
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
+        CallbackRequest request = getConsentedCallbackRequest();
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(request.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(request.getCaseDetails());
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE));
     }
 
 }
