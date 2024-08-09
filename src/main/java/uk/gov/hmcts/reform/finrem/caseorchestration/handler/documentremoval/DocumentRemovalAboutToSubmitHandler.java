@@ -71,26 +71,14 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         // documentsUserWantsDeletedCollection is the difference between a list of allExistingDocumentsCollection and documentsUserWantsToKeepList
         documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
 
-        // ACs require uploading a new document deleted file.  UploadDocumentContestedAboutToSubmitHandler indicates
-        // that EXUI handles the actual doc upload.  The handler validates that urls, sorts and categorises.
-        // DFR doesn't do this yet, but we could do via template/docmosis (GenerateDocumentService.java)*.
-        // For now this changes to a valid anonymous stores and GUID so that the document can be accessed.
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-        JsonNode newNode = documentRemovalService.buildNewNodeForDeletedFile(
-                objectMapper,
-                "http://redacted_store/documents/00000000-0000-0000-0000-000000000000",
-                String.format("Document removed - %s", LocalDateTime.now().format(dtf)),
-                "http://redacted_store/documents/00000000-0000-0000-0000-000000000000/binary"
-        );
-
         //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
-        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
-                documentRemovalService.deleteDocument(
-                        documentToDeleteCollection.getValue(), userAuthorisation));
+//        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+//                documentRemovalService.deleteDocument(
+//                        documentToDeleteCollection.getValue(), userAuthorisation));
 
         documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
                 documentRemovalService.updateNodeForDocumentToDelete(
-                        root, newNode, documentToDeleteCollection.getValue()));
+                        root, documentToDeleteCollection.getValue()));
 
 
         documentRemovalService.removeDocumentToRemoveCollection(root);

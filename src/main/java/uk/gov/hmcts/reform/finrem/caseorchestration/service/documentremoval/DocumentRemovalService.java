@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -59,53 +60,29 @@ public class DocumentRemovalService {
 
     // Todo - test for generated node and exception
     // Todo Jdoc
-    public void updateNodeForDocumentToDelete(JsonNode root, JsonNode newNode, DocumentToKeep documentToKeep) {
+
+    public void updateNodeForDocumentToDelete(JsonNode root, DocumentToKeep documentToDelete) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
                 if (fieldValue.has(DOCUMENT_URL)){
-                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeep.getDocumentUrl())) {
-                        log.info(String.format("Updating field %1$s from %2$s to %3$s",
-                                fieldName,
-                                documentToKeep.getDocumentUrl(),
-                                newNode.get(DOCUMENT_URL).asText()
-                                )
-                        );
-                        ((ObjectNode) root).set(fieldName, newNode);
+                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
+                        log.info(format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                        ((ObjectNode) root).remove(fieldName);
                     }
                 }
                 else {
-                    updateNodeForDocumentToDelete(fieldValue, newNode, documentToKeep);
+                    updateNodeForDocumentToDelete(fieldValue, documentToDelete);
                 }
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                updateNodeForDocumentToDelete(arrayElement, newNode, documentToKeep);
+                updateNodeForDocumentToDelete(arrayElement, documentToDelete);
             }
-        }
-    }
-
-    // Todo - test for generated node and exception
-    // Todo Jdoc
-    public JsonNode buildNewNodeForDeletedFile(ObjectMapper objectMapper, String documentUrl,
-                                               String documentFilename, String documentBinaryUrl) throws DocumentDeleteException {
-        String newString = String.format("{" +
-                "\"%1$s\": \"%2$s\"," +
-                "\"%3$s\": \"%4$s\"," +
-                "\"%5$s\": \"%6$s\"}",
-                DOCUMENT_URL, documentUrl,
-                DOCUMENT_FILENAME, documentFilename,
-                DOCUMENT_BINARY_URL, documentBinaryUrl);
-
-        try {
-            return objectMapper.readTree(newString);
-        } catch (Exception e) {
-            log.error(format("Error building new node when deleting document url: %s", documentUrl), e);
-            throw new DocumentDeleteException(e.getMessage(), e);
         }
     }
 
@@ -120,11 +97,11 @@ public class DocumentRemovalService {
     public void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
 
         try {
-            genericDocumentService.deleteDocument(documentToRemove.getDocumentUrl(), authorisationToken);
+            genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
         } catch (Exception e) {
             log.error(format(
                     "Failed to delete document url %s",
-                    documentToRemove.getDocumentUrl()), e);
+                    documentToRemove.getCaseDocument().getDocumentUrl()), e);
 
             throw new DocumentDeleteException(e.getMessage(), e);
         }
@@ -143,9 +120,12 @@ public class DocumentRemovalService {
             allExistingDocumentsList.add(
                     DocumentToKeepCollection.builder()
                             .value(DocumentToKeep.builder()
-                                    .documentUrl(docUrl)
-                                    .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
                                     .documentId(docId)
+                                    .caseDocument(CaseDocument.builder()
+                                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
+                                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
+                                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
+                                            .build())
                                     .build())
                             .build());
         }
