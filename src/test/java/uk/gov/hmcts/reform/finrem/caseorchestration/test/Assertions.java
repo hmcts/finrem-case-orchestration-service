@@ -25,7 +25,7 @@ public class Assertions {
                     boolean expectedOutcome = Arrays.stream(combination).anyMatch(c ->
                         callbackType == c.get()[0]
                             && caseType == c.get()[1]
-                            && eventType == c.get()[2] // This condition will always be true}
+                            && eventType == c.get()[2] // This condition will always be true
                     );
                     assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
                 }

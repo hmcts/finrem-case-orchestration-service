@@ -22,12 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -65,21 +60,14 @@ class DocumentRemovalAboutToStartHandlerTest {
 
     @Test
     void testHandleWithEmptyDocumentNodes() throws Exception {
-        JsonNode rootNode = mock(JsonNode.class);
-        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
-        doNothing().when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
-
+        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(new ArrayList<>());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 
-        assertNotNull(response);
-        assertNotNull(response.getData());
         assertTrue(response.getData().getDocumentToKeepCollection().isEmpty());
     }
 
     @Test
     void testHandleWithValidDocumentNodes() throws Exception {
-        JsonNode rootNode = mock(JsonNode.class);
-        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
 
         JsonNode documentNode = mock(JsonNode.class);
         when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
@@ -92,17 +80,10 @@ class DocumentRemovalAboutToStartHandlerTest {
         List<JsonNode> documentNodes = new ArrayList<>();
         documentNodes.add(documentNode);
 
-        doAnswer(invocation -> {
-            List<JsonNode> nodes = invocation.getArgument(1);
-            nodes.addAll(documentNodes);
-            return null;
-        }).when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
+        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentNodes);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 
-        assertNotNull(response);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().getDocumentToKeepCollection());
         assertEquals(1, response.getData().getDocumentToKeepCollection().size());
         assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("http://example.com/doc/123/binary", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
@@ -112,8 +93,6 @@ class DocumentRemovalAboutToStartHandlerTest {
 
     @Test
     void testHandleWithDuplicateDocumentNodes() throws Exception {
-        JsonNode rootNode = mock(JsonNode.class);
-        when(objectMapper.valueToTree(caseData)).thenReturn(rootNode);
 
         JsonNode documentNode = mock(JsonNode.class);
         when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
@@ -127,17 +106,10 @@ class DocumentRemovalAboutToStartHandlerTest {
         documentNodes.add(documentNode);
         documentNodes.add(documentNode); // Duplicate
 
-        doAnswer(invocation -> {
-            List<JsonNode> nodes = invocation.getArgument(1);
-            nodes.addAll(documentNodes);
-            return null;
-        }).when(documentRemovalService).retrieveDocumentNodes(eq(rootNode), any(List.class));
+        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentNodes);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 
-        assertNotNull(response);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().getDocumentToKeepCollection());
         assertEquals(1, response.getData().getDocumentToKeepCollection().size());
         assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentUrl());
         assertEquals("http://example.com/doc/123/binary", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentBinaryUrl());

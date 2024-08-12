@@ -24,7 +24,7 @@ class DocumentRemovalServiceTest {
     public void setUp() {
         objectMapper = new ObjectMapper();
         documentNodes = new ArrayList<>();
-        documentRemovalService = new DocumentRemovalService();
+        documentRemovalService = new DocumentRemovalService(objectMapper);
     }
 
     @Test
@@ -49,7 +49,13 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testDocumentWithUploadTimestamp() throws Exception {
-        String json = "{\"formC\":{\"document_url\":\"https://example.com\",\"upload_timestamp\": \"2024-07-21T12:24:58.964127000\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example.com/binary\"}}";
+        String json = "{\"formC\":{"
+                    + "\"document_url\":\"https://example.com\","
+                    + "\"upload_timestamp\": \"2024-07-21T12:24:58.964127000\","
+                    + "\"document_filename\":\"Form-C.pdf\","
+                    + "\"document_binary_url\":\"https://example.com/binary\""
+                + "}"
+            + "}";
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
@@ -63,7 +69,12 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testSingleObjectWithDocumentUrl() throws Exception {
-        String json = "{\"formC\":{\"document_url\":\"https://example.com\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example.com/binary\"}}";
+        String json = "{\"formC\":{"
+                    + "\"document_url\":\"https://example.com\","
+                    + "\"document_filename\":\"Form-C.pdf\","
+                    + "\"document_binary_url\":\"https://example.com/binary\""
+                + "}"
+            + "}";
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
@@ -76,7 +87,15 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testNestedObjectWithDocumentUrl() throws Exception {
-        String json = "{\"nested\":{\"formC\":{\"document_url\":\"https://example.com\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example.com/binary\"}}}";
+        String json = "{\"nested\":"
+                    + "{\"formC\":"
+                        + "{"
+                            + "\"document_url\":\"https://example.com\","
+                            + "\"document_filename\":\"Form-C.pdf\","
+                            + "\"document_binary_url\":\"https://example.com/binary\""
+                        + "}"
+                    + "}"
+            + "}";
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
@@ -89,7 +108,25 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testArrayWithDocumentUrls() throws Exception {
-        String json = "{\"array\":[{\"formA\":{\"document_url\":\"https://example1.com\",\"document_filename\":\"Form-A.pdf\",\"document_binary_url\":\"https://example1.com/binary\"}}, {\"formB\":{\"document_url\":\"https://example2.com\",\"document_filename\":\"Form-B.pdf\",\"document_binary_url\":\"https://example2.com/binary\"}}]}";
+        String json = "{\"array\":"
+                    + "["
+                        + "{\"formA\":"
+                            + "{"
+                                + "\"document_url\":\"https://example1.com\","
+                                + "\"document_filename\":\"Form-A.pdf\","
+                                + "\"document_binary_url\":\"https://example1.com/binary\""
+                            + "}"
+                        + "},"
+                        + "{\"formB\":"
+                            + "{"
+                                + "\"document_url\":\"https://example2.com\","
+                                + "\"document_filename\":\"Form-B.pdf\","
+                                + "\"document_binary_url\":\"https://example2.com/binary\""
+                            + "}"
+                        + "}"
+                    + "]"
+            + "}";
+
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
@@ -107,7 +144,47 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testComplexNestedArrayStructure() throws Exception {
-        String json = "{\"array\":[{\"nestedArray1\":[{\"formA\":{\"document_url\":\"https://example1.com\",\"document_filename\":\"Form-A.pdf\",\"document_binary_url\":\"https://example1.com/binary\"}},{\"formB\":{\"document_url\":\"https://example2.com\",\"document_filename\":\"Form-B.pdf\",\"document_binary_url\":\"https://example2.com/binary\"}}]},{\"nestedArray2\":[{\"formC\":{\"document_url\":\"https://example3.com\",\"document_filename\":\"Form-C.pdf\",\"document_binary_url\":\"https://example3.com/binary\"}},{\"formD\":{\"document_url\":\"https://example4.com\",\"document_filename\":\"Form-D.pdf\",\"document_binary_url\":\"https://example4.com/binary\"}}]}]}";
+        String json = "{\"array\":"
+                    + "["
+                        + "{\"nestedArray1\": "
+                            + "["
+                                + "{\"formA\":"
+                                    + "{"
+                                        + "\"document_url\":\"https://example1.com\","
+                                        + "\"document_filename\":\"Form-A.pdf\","
+                                        + "\"document_binary_url\":\"https://example1.com/binary\""
+                                    + "}"
+                                + "},"
+                                + "{\"formB\":"
+                                    + "{"
+                                        + "\"document_url\":\"https://example2.com\","
+                                        + "\"document_filename\":\"Form-B.pdf\","
+                                        + "\"document_binary_url\":\"https://example2.com/binary\""
+                                    + "}"
+                                + "}"
+                            + "]"
+                        + "},"
+                    + "{\"nestedArray2\":"
+                        + "["
+                            + "{\"formC\":"
+                                + "{"
+                                    + "\"document_url\":\"https://example3.com\","
+                                    + "\"document_filename\":\"Form-C.pdf\","
+                                    + "\"document_binary_url\":\"https://example3.com/binary\""
+                                + "}"
+                            + "},"
+                            + "{\"formD\":"
+                                + "{"
+                                    + "\"document_url\":\"https://example4.com\","
+                                    + "\"document_filename\":\"Form-D.pdf\","
+                                    + "\"document_binary_url\":\"https://example4.com/binary\""
+                                + "}"
+                            + "}"
+                        + "]"
+                    + "}"
+                + "]"
+            + "}";
+
         JsonNode root = objectMapper.readTree(json);
 
         documentRemovalService.retrieveDocumentNodes(root, documentNodes);
