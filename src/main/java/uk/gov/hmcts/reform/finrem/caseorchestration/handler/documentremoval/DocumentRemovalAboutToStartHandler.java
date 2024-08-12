@@ -21,9 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.Docu
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService.DOCUMENT_URL;
-
 @Slf4j
 @Service
 public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {

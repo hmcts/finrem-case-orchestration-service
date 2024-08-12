@@ -32,9 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class DocumentRemovalAboutToStartHandlerTest {
 
     @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
     private DocumentRemovalService documentRemovalService;
 
     @InjectMocks
