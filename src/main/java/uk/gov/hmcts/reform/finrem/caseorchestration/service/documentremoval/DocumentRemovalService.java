@@ -62,9 +62,33 @@ public class DocumentRemovalService {
         }
     }
 
+    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
+
+        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
+
+        for (JsonNode documentNode : documentNodes) {
+            String docUrl = documentNode.get(DOCUMENT_URL).asText();
+            String[] documentUrlAsArray = docUrl.split("/");
+            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
+
+            documentsCollection.add(
+                DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
+                        .documentId(docId)
+                        .caseDocument(CaseDocument.builder()
+                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
+                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
+                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
+                            .build())
+                        .build())
+                    .build());
+        }
+        return documentsCollection;
+    }
+
+
     // Todo - test for generated node and exception
     // Todo Jdoc
-
     public void updateNodeForDocumentToDelete(JsonNode root, DocumentToKeep documentToDelete) {
         if (root.isObject()) {
             Iterator<String> fieldNames = root.fieldNames();
@@ -109,31 +133,6 @@ public class DocumentRemovalService {
 
             throw new DocumentDeleteException(e.getMessage(), e);
         }
-    }
-
-    // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-start
-    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
-
-        List<DocumentToKeepCollection> allExistingDocumentsList = new ArrayList<>();
-
-        for (JsonNode documentNode : documentNodes) {
-            String docUrl = documentNode.get(DOCUMENT_URL).asText();
-            String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length-1];
-
-            allExistingDocumentsList.add(
-                    DocumentToKeepCollection.builder()
-                            .value(DocumentToKeep.builder()
-                                    .documentId(docId)
-                                    .caseDocument(CaseDocument.builder()
-                                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
-                                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
-                                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
-                                            .build())
-                                    .build())
-                            .build());
-        }
-        return allExistingDocumentsList;
     }
 
     // rebuild case data with file data redacted.  Does this from the root node with the required updates.

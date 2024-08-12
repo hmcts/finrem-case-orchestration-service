@@ -25,12 +25,7 @@ import java.util.List;
 @Service
 public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
-    static final String DOCUMENT_URL = "document_url";
-    static final String DOCUMENT_FILENAME = "document_filename";
-    static final String DOCUMENT_BINARY_URL = "document_binary_url";
-
     private final DocumentRemovalService documentRemovalService;
-
 
     public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper,
                                               DocumentRemovalService documentRemovalService) {
@@ -48,7 +43,6 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
@@ -60,25 +54,10 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         List<JsonNode> documentNodes = documentRemovalService.getDocumentNodes(caseData)
             .stream().distinct().toList();
 
-        for (JsonNode documentNode : documentNodes) {
-            String docUrl = documentNode.get(DOCUMENT_URL).asText();
-            String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
+        List<DocumentToKeepCollection> documentsCollection =
+            documentRemovalService.buildCaseDocumentList(documentNodes);
 
-            documentsCollection.add(
-                DocumentToKeepCollection.builder()
-                    .value(DocumentToKeep.builder()
-                        .documentId(docId)
-                        .caseDocument(CaseDocument.builder()
-                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
-                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
-                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
-                            .build())
-                        .build())
-                    .build());
-        }
-
-        log.info("Retrieved {} case documents to remove from Case ID {}", documentNodes.size(), caseDetails.getId());
+        log.info("Retrieved {} case documents to remove from Case ID {}", documentsCollection.size(), caseDetails.getId());
 
         caseData.setDocumentToKeepCollection(documentsCollection);
 
