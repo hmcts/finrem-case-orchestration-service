@@ -44,8 +44,8 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && (CaseType.CONTESTED.equals(caseType) ||
-                CaseType.CONSENTED.equals(caseType))
+            && (CaseType.CONTESTED.equals(caseType)
+                || CaseType.CONSENTED.equals(caseType))
             && (EventType.REMOVE_CASE_DOCUMENT.equals(eventType));
     }
 
