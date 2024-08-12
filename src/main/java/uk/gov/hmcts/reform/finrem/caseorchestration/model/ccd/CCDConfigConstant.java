@@ -71,6 +71,10 @@ public class CCDConfigConstant {
     public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
     public static final String CONTESTED_SOLICITOR_PHONE = "applicantSolicitorPhone";
 
+    public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL = "allocatedToBeHeardAtHighCourtJudgeLevel";
+    public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT = "allocatedToBeHeardAtHighCourtJudgeLevelText";
+
+
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";

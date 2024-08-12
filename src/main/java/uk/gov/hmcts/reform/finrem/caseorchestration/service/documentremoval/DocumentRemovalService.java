@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,19 +22,23 @@ import static java.lang.String.format;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DocumentRemovalService {
 
-    // Todo - Lots of JDOC to explain this
-
-    public static final String DOCUMENT_URL = "document_url";
+    static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
 
+    private final ObjectMapper objectMapper;
+
     private final GenericDocumentService genericDocumentService;
 
-    @Autowired
-    public DocumentRemovalService(GenericDocumentService genericDocumentService) {
-        this.genericDocumentService = genericDocumentService;
+    public List<JsonNode> getDocumentNodes(FinremCaseData caseData) {
+        JsonNode root = objectMapper.valueToTree(caseData);
+        List<JsonNode> documentNodes = new ArrayList<>();
+
+        retrieveDocumentNodes(root, documentNodes);
+        return documentNodes;
     }
 
     public void retrieveDocumentNodes(JsonNode root, List<JsonNode> documentNodes) {
@@ -43,7 +47,7 @@ public class DocumentRemovalService {
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has(DOCUMENT_URL)){
+                if (fieldValue.has(DOCUMENT_URL)) {
                     documentNodes.add(fieldValue);
                 } else {
                     retrieveDocumentNodes(fieldValue, documentNodes);

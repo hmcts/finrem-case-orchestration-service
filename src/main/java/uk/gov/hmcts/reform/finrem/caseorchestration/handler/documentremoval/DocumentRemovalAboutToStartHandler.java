@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -31,28 +30,27 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
 
     static final String DOCUMENT_URL = "document_url";
     static final String DOCUMENT_FILENAME = "document_filename";
+    static final String DOCUMENT_BINARY_URL = "document_binary_url";
 
-    private final ObjectMapper objectMapper;
     private final DocumentRemovalService documentRemovalService;
 
 
     public DocumentRemovalAboutToStartHandler(FinremCaseDetailsMapper mapper,
-                                              DocumentRemovalService documentRemovalService,
-                                              ObjectMapper objectMapper) {
+                                              DocumentRemovalService documentRemovalService) {
         super(mapper);
         this.documentRemovalService = documentRemovalService;
-        this.objectMapper = objectMapper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
+            && (CaseType.CONTESTED.equals(caseType)
+                || CaseType.CONSENTED.equals(caseType))
             && (EventType.REMOVE_CASE_DOCUMENT.equals(eventType));
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
-        List<JsonNode> documentNodes = new ArrayList<>();
         List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -61,11 +59,9 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         log.info("Invoking event document removal about to start callback for Case ID: {}",
             caseDetails.getId());
 
-        JsonNode root = objectMapper.valueToTree(caseData);
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
         // TODO: Sort by document upload_timestamp if provided with document node.
-        documentNodes = documentNodes.stream().distinct().toList();
+        List<JsonNode> documentNodes = documentRemovalService.getDocumentNodes(caseData)
+            .stream().distinct().toList();
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -79,7 +75,7 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
                         .caseDocument(CaseDocument.builder()
                             .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
                             .documentUrl(documentNode.get(DOCUMENT_URL).asText())
-                            .documentBinaryUrl(documentNode.get("document_binary_url").asText())
+                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
                             .build())
                         .build())
                     .build());
