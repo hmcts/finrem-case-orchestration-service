@@ -109,7 +109,7 @@ class SolicitorCreateConsentedAboutToSubmitHandlerTest {
             .thenReturn(List.of());
 
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy((FinremCaseData) any());
+        verify(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

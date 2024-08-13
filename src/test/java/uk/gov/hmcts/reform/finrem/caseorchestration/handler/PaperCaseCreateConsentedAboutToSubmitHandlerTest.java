@@ -39,7 +39,6 @@ class PaperCaseCreateConsentedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
             SOLICITOR_CREATE, FinremCaseDetailsBuilderFactory.from(123L, CONSENTED));
         underTest.handle(callbackRequest, AUTH_TOKEN);
-        verify(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy((FinremCaseData) any());
+        verify(updateRepresentationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
-
 }
