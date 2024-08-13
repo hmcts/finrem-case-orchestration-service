@@ -86,33 +86,39 @@ public class DocumentRemovalService {
         return documentsCollection;
     }
 
-
-    // Todo - test for generated node and exception
-    // Todo Jdoc
-    public void updateNodeForDocumentToDelete(JsonNode root, DocumentToKeep documentToDelete) {
+    public void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
         if (root.isObject()) {
+            // Use a list to store field names to be removed
+            List<String> fieldsToRemove = new ArrayList<>();
             Iterator<String> fieldNames = root.fieldNames();
+
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has(DOCUMENT_URL)){
+
+                if (fieldValue.has(DOCUMENT_URL)) {
                     if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
-                        log.info(format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
-                        ((ObjectNode) root).remove(fieldName);
+                        log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                        fieldsToRemove.add(fieldName);
                     }
+                } else {
+                    removeDocumentFromJson(fieldValue, documentToDelete);
                 }
-                else {
-                    updateNodeForDocumentToDelete(fieldValue, documentToDelete);
-                }
+            }
+
+            // Remove the fields after iteration
+            for (String fieldName : fieldsToRemove) {
+                ((ObjectNode) root).remove(fieldName);
             }
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                updateNodeForDocumentToDelete(arrayElement, documentToDelete);
+                removeDocumentFromJson(arrayElement, documentToDelete);
             }
         }
     }
+
 
     // todo - some jdoc to explain why we're doing this
     // Clears out the document collection from the root node, so that it isn't part of the final CCD data.

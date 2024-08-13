@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +75,7 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
 //                        documentToDeleteCollection.getValue(), userAuthorisation));
 
         documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
-                documentRemovalService.updateNodeForDocumentToDelete(
+                documentRemovalService.removeDocumentFromJson(
                         root, documentToDeleteCollection.getValue()));
 
 
