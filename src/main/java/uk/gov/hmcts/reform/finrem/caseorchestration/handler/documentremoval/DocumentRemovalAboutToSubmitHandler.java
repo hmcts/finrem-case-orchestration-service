@@ -51,15 +51,10 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        List<JsonNode> documentNodes = new ArrayList<>();
         List<DocumentToKeepCollection> documentsUserWantsToKeepList = caseData.getDocumentToKeepCollection();
         JsonNode root = objectMapper.valueToTree(caseData);
 
-        // Gets the case data as a node tree
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
-        // Removes duplicates from the node tree - bundle this with the above function when refactored.
-        documentNodes = documentNodes.stream().distinct().toList();
+        List<JsonNode> documentNodes = documentRemovalService.getDocumentNodes(caseData).stream().distinct().toList();
 
         // Uses the node tree to rebuild the same documents collection, that we use to display to the user after about-to-start
         List<DocumentToKeepCollection> allExistingDocumentsList = documentRemovalService.buildCaseDocumentList(documentNodes);

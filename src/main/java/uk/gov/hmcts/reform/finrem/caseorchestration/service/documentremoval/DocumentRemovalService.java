@@ -62,30 +62,6 @@ public class DocumentRemovalService {
         }
     }
 
-    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
-
-        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
-
-        for (JsonNode documentNode : documentNodes) {
-            String docUrl = documentNode.get(DOCUMENT_URL).asText();
-            String[] documentUrlAsArray = docUrl.split("/");
-            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
-
-            documentsCollection.add(
-                DocumentToKeepCollection.builder()
-                    .value(DocumentToKeep.builder()
-                        .documentId(docId)
-                        .caseDocument(CaseDocument.builder()
-                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
-                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
-                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
-                            .build())
-                        .build())
-                    .build());
-        }
-        return documentsCollection;
-    }
-
     public void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
         if (root.isObject()) {
             // Use a list to store field names to be removed
@@ -117,6 +93,30 @@ public class DocumentRemovalService {
                 removeDocumentFromJson(arrayElement, documentToDelete);
             }
         }
+    }
+
+    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
+
+        List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
+
+        for (JsonNode documentNode : documentNodes) {
+            String docUrl = documentNode.get(DOCUMENT_URL).asText();
+            String[] documentUrlAsArray = docUrl.split("/");
+            String docId = documentUrlAsArray[documentUrlAsArray.length - 1];
+
+            documentsCollection.add(
+                DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
+                        .documentId(docId)
+                        .caseDocument(CaseDocument.builder()
+                            .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
+                            .documentUrl(documentNode.get(DOCUMENT_URL).asText())
+                            .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
+                            .build())
+                        .build())
+                    .build());
+        }
+        return documentsCollection;
     }
 
 
