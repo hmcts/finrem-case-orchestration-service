@@ -40,11 +40,11 @@ public class FinremCaseDataTest {
             testEnabled = false;
         }
         if (!localMode) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            consentedFileNameWithPath = retrieveFileName("ccd-config-aat-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             if (consentedFileNameWithPath == null) {
                 consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             }
-            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            contestedFileNameWithPath = retrieveFileName("ccd-config-aat-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             if (contestedFileNameWithPath == null) {
                 contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
