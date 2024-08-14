@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
-    public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
-    public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
+    public static final String CCD_CONFIG_AAT_CONTESTED_XLSX = "ccd-config-aat-contested.xlsx";
+    public static final String CCD_CONFIG_AAT_CONSENTED_XLSX = "ccd-config-aat-consented.xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
 
@@ -70,30 +70,30 @@ public class FinremCaseDataTest {
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_AAT_CONTESTED_XLSX, contestedFileNameWithPath),
+            getFile(CCD_CONFIG_AAT_CONSENTED_XLSX, consentedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_AAT_CONSENTED_XLSX, consentedFileNameWithPath),
+            getFile(CCD_CONFIG_AAT_CONTESTED_XLSX, contestedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath);
+        File configFile = getFile(CCD_CONFIG_AAT_CONSENTED_XLSX, consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
+        File configFile = getFile(CCD_CONFIG_AAT_CONTESTED_XLSX, contestedFileNameWithPath);
         validateState(configFile);
     }
 
