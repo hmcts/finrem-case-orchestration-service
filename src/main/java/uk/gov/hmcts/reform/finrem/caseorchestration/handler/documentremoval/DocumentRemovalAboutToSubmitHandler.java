@@ -31,6 +31,8 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+            && (CaseType.CONTESTED.equals(caseType)
+                || CaseType.CONSENTED.equals(caseType))
                 && (EventType.REMOVE_CASE_DOCUMENT.equals(eventType));
     }
 

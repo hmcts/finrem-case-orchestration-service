@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
