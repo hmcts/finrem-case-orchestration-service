@@ -65,9 +65,9 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
 
         //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
-//        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
-//                documentRemovalService.deleteDocument(
-//                        documentToDeleteCollection.getValue(), userAuthorisation));
+        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+                documentRemovalService.deleteDocument(
+                        documentToDeleteCollection.getValue(), userAuthorisation));
 
         documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
                 documentRemovalService.removeDocumentFromJson(
