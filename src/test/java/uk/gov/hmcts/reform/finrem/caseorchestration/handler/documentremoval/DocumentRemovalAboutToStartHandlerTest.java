@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
@@ -67,17 +69,25 @@ class DocumentRemovalAboutToStartHandlerTest {
     void testHandleWithValidDocumentNodes() throws Exception {
 
         JsonNode documentNode = mock(JsonNode.class);
-        when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_binary_url")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
-        when(documentNode.get("document_binary_url").asText()).thenReturn("http://example.com/doc/123/binary");
-        when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
-
         List<JsonNode> documentNodes = new ArrayList<>();
         documentNodes.add(documentNode);
 
+        DocumentToKeepCollection documentToKeepCollection = DocumentToKeepCollection.builder().value(
+            DocumentToKeep.builder()
+                .documentId("123")
+                .caseDocument(CaseDocument.builder()
+                    .documentUrl("http://example.com/doc/123")
+                    .documentFilename("example.pdf")
+                    .documentBinaryUrl("http://example.com/doc/123/binary")
+                    .build())
+                .build())
+            .build();
+
+        List<DocumentToKeepCollection> documentsToKeepList = new ArrayList<>();
+        documentsToKeepList.add(documentToKeepCollection);
+
         when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentNodes);
+        when(documentRemovalService.buildCaseDocumentList(documentNodes)).thenReturn(documentsToKeepList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 
@@ -91,19 +101,30 @@ class DocumentRemovalAboutToStartHandlerTest {
     @Test
     void testHandleWithDuplicateDocumentNodes() throws Exception {
 
-        JsonNode documentNode = mock(JsonNode.class);
-        when(documentNode.get("document_url")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_filename")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_binary_url")).thenReturn(mock(JsonNode.class));
-        when(documentNode.get("document_url").asText()).thenReturn("http://example.com/doc/123");
-        when(documentNode.get("document_binary_url").asText()).thenReturn("http://example.com/doc/123/binary");
-        when(documentNode.get("document_filename").asText()).thenReturn("example.pdf");
+        JsonNode documentNode = mock(JsonNode.class);;
 
-        List<JsonNode> documentNodes = new ArrayList<>();
-        documentNodes.add(documentNode);
-        documentNodes.add(documentNode); // Duplicate
+        List<JsonNode> documentDuplicateNodes = new ArrayList<>();
+        documentDuplicateNodes.add(documentNode);
+        documentDuplicateNodes.add(documentNode); // Duplicate
 
-        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentNodes);
+        List<JsonNode> documentDistinctNodes = documentDuplicateNodes.stream().distinct().toList();
+
+        DocumentToKeepCollection documentToKeepCollection = DocumentToKeepCollection.builder().value(
+                DocumentToKeep.builder()
+                    .documentId("123")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("http://example.com/doc/123")
+                        .documentFilename("example.pdf")
+                        .documentBinaryUrl("http://example.com/doc/123/binary")
+                        .build())
+                    .build())
+            .build();
+
+        List<DocumentToKeepCollection> documentsToKeepList = new ArrayList<>();
+        documentsToKeepList.add(documentToKeepCollection);
+
+        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentDuplicateNodes);
+        when(documentRemovalService.buildCaseDocumentList(documentDistinctNodes)).thenReturn(documentsToKeepList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 

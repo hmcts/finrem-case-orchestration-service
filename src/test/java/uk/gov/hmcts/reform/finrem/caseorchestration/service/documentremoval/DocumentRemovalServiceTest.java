@@ -100,12 +100,12 @@ class DocumentRemovalServiceTest {
     @Test
     void testNestedObjectWithDocumentUrl() throws Exception {
         String json = """
-            {"nested":"
-                {"formC":"
+            {"nested":
+                {"formC":
                     {
-                        "document_url":"https://example.com","
-                        "document_filename":"Form-C.pdf","
-                        "document_binary_url":"https://example.com/binary""
+                        "document_url":"https://example.com",
+                        "document_filename":"Form-C.pdf",
+                        "document_binary_url":"https://example.com/binary"
                     }
                 }
              }
@@ -127,15 +127,15 @@ class DocumentRemovalServiceTest {
                 [
                     {"formA":
                         {
-                            "document_url":"https://example1.com","
-                            "document_filename":"Form-A.pdf","
+                            "document_url":"https://example1.com",
+                            "document_filename":"Form-A.pdf",
                             "document_binary_url":"https://example1.com/binary"
                         }
                     },
                     {"formB":
                         {
-                            "document_url":"https://example2.com","
-                            "document_filename":"Form-B.pdf","
+                            "document_url":"https://example2.com",
+                            "document_filename":"Form-B.pdf",
                             "document_binary_url":"https://example2.com/binary"
                         }
                     }
