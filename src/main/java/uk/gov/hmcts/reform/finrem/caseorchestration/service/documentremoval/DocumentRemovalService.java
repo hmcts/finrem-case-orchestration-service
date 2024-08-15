@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -45,7 +46,7 @@ public class DocumentRemovalService {
 
         retrieveDocumentNodes(root, documentNodes);
 
-        //TODO: Sort by timestamp where possible
+        //TODO: Sort by timestamp where provided
         documentNodes = documentNodes.stream().distinct().toList();
 
         return buildCaseDocumentList(documentNodes);
@@ -56,10 +57,11 @@ public class DocumentRemovalService {
         List<DocumentToKeepCollection> allExistingDocumentsList = getCaseDocumentsList(caseData);
 
         ArrayList<DocumentToKeepCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
-        List<DocumentToKeepCollection> documentsUserWantsToKeepList = caseData.getDocumentToKeepCollection();
-        documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
+        Optional<List<DocumentToKeepCollection>> documentsUserWantsToKeepList = Optional.ofNullable(caseData.getDocumentToKeepCollection());
+        documentsUserWantsToKeepList.ifPresent(documentsUserWantsDeletedList::removeAll);
 
-        //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
+        //CDAM Needs to be enabled for this to work, only the user who created a document can delete it.
+        // in our case, all documents are created by ExUI and therefor have no username, so auth fails on delete with 403.
         documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
             deleteDocument(
                 documentToDeleteCollection.getValue(), userAuthorisation));

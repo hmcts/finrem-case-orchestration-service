@@ -56,7 +56,7 @@ class DocumentRemovalAboutToStartHandlerTest {
     }
 
     @Test
-    void testHandleWithEmptyDocumentNodes() throws Exception {
+    void testHandleWithEmptyDocumentsToKeep() throws Exception {
 
         when(documentRemovalService.getCaseDocumentsList(caseData)).thenReturn(new ArrayList<>());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
@@ -65,7 +65,7 @@ class DocumentRemovalAboutToStartHandlerTest {
     }
 
     @Test
-    void testHandleWithValidDocumentNodes() throws Exception {
+    void testHandleWithValidDocumentsToKeep() throws Exception {
 
         DocumentToKeepCollection documentToKeepCollection = DocumentToKeepCollection.builder().value(
             DocumentToKeep.builder()
