@@ -7,15 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval.DocumentRemovalService;
 
@@ -65,11 +65,11 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
         documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
 
         //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
-        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+        documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
                 documentRemovalService.deleteDocument(
                         documentToDeleteCollection.getValue(), userAuthorisation));
 
-        documentsUserWantsDeletedList.forEach( documentToDeleteCollection ->
+        documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
                 documentRemovalService.removeDocumentFromJson(
                         root, documentToDeleteCollection.getValue()));
 
