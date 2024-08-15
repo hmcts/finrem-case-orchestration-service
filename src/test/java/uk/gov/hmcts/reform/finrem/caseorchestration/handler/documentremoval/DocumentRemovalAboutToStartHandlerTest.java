@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -59,7 +57,8 @@ class DocumentRemovalAboutToStartHandlerTest {
 
     @Test
     void testHandleWithEmptyDocumentNodes() throws Exception {
-        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(new ArrayList<>());
+
+        when(documentRemovalService.getCaseDocumentsList(caseData)).thenReturn(new ArrayList<>());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 
         assertTrue(response.getData().getDocumentToKeepCollection().isEmpty());
@@ -67,10 +66,6 @@ class DocumentRemovalAboutToStartHandlerTest {
 
     @Test
     void testHandleWithValidDocumentNodes() throws Exception {
-
-        JsonNode documentNode = mock(JsonNode.class);
-        List<JsonNode> documentNodes = new ArrayList<>();
-        documentNodes.add(documentNode);
 
         DocumentToKeepCollection documentToKeepCollection = DocumentToKeepCollection.builder().value(
             DocumentToKeep.builder()
@@ -86,45 +81,9 @@ class DocumentRemovalAboutToStartHandlerTest {
         List<DocumentToKeepCollection> documentsToKeepList = new ArrayList<>();
         documentsToKeepList.add(documentToKeepCollection);
 
-        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentNodes);
-        when(documentRemovalService.buildCaseDocumentList(documentNodes)).thenReturn(documentsToKeepList);
+        FinremCaseData caseData = new FinremCaseData();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
-
-        assertEquals(1, response.getData().getDocumentToKeepCollection().size());
-        assertEquals("http://example.com/doc/123", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentUrl());
-        assertEquals("http://example.com/doc/123/binary", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
-        assertEquals("example.pdf", response.getData().getDocumentToKeepCollection().get(0).getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("123", response.getData().getDocumentToKeepCollection().get(0).getValue().getDocumentId());
-    }
-
-    @Test
-    void testHandleWithDuplicateDocumentNodes() throws Exception {
-
-        JsonNode documentNode = mock(JsonNode.class);;
-
-        List<JsonNode> documentDuplicateNodes = new ArrayList<>();
-        documentDuplicateNodes.add(documentNode);
-        documentDuplicateNodes.add(documentNode); // Duplicate
-
-        List<JsonNode> documentDistinctNodes = documentDuplicateNodes.stream().distinct().toList();
-
-        DocumentToKeepCollection documentToKeepCollection = DocumentToKeepCollection.builder().value(
-                DocumentToKeep.builder()
-                    .documentId("123")
-                    .caseDocument(CaseDocument.builder()
-                        .documentUrl("http://example.com/doc/123")
-                        .documentFilename("example.pdf")
-                        .documentBinaryUrl("http://example.com/doc/123/binary")
-                        .build())
-                    .build())
-            .build();
-
-        List<DocumentToKeepCollection> documentsToKeepList = new ArrayList<>();
-        documentsToKeepList.add(documentToKeepCollection);
-
-        when(documentRemovalService.getDocumentNodes(caseData)).thenReturn(documentDuplicateNodes);
-        when(documentRemovalService.buildCaseDocumentList(documentDistinctNodes)).thenReturn(documentsToKeepList);
+        when(documentRemovalService.getCaseDocumentsList(caseData)).thenReturn(documentsToKeepList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 

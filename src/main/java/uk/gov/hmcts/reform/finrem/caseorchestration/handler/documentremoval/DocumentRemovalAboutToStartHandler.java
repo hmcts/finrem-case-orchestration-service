@@ -46,17 +46,12 @@ public class DocumentRemovalAboutToStartHandler extends FinremCallbackHandler {
         log.info("Invoking event document removal about to start callback for Case ID: {}",
             caseDetails.getId());
 
-        // TODO: Sort by document upload_timestamp if provided with document node.
-        List<JsonNode> documentNodes = documentRemovalService.getDocumentNodes(caseData)
-            .stream().distinct().toList();
-
         List<DocumentToKeepCollection> documentsCollection =
-            documentRemovalService.buildCaseDocumentList(documentNodes);
+            documentRemovalService.getCaseDocumentsList(caseData);
 
         log.info("Retrieved {} case documents to remove from Case ID {}", documentsCollection.size(), caseDetails.getId());
 
         caseData.setDocumentToKeepCollection(documentsCollection);
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 

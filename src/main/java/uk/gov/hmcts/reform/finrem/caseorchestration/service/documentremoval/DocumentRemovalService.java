@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentDeleteException;
@@ -22,80 +22,58 @@ import static java.lang.String.format;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class DocumentRemovalService {
 
     static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
 
+
     private final ObjectMapper objectMapper;
 
     private final GenericDocumentService genericDocumentService;
 
-    public List<JsonNode> getDocumentNodes(FinremCaseData caseData) {
+    public DocumentRemovalService(ObjectMapper objectMapper, GenericDocumentService genericDocumentService) {
+        this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.genericDocumentService = genericDocumentService;
+    }
+
+    public List<DocumentToKeepCollection> getCaseDocumentsList(FinremCaseData caseData) {
         JsonNode root = objectMapper.valueToTree(caseData);
         List<JsonNode> documentNodes = new ArrayList<>();
 
         retrieveDocumentNodes(root, documentNodes);
-        return documentNodes;
+
+        //TODO: Sort by timestamp where possible
+        documentNodes = documentNodes.stream().distinct().toList();
+
+        return buildCaseDocumentList(documentNodes);
     }
 
-    public void retrieveDocumentNodes(JsonNode root, List<JsonNode> documentNodes) {
-        if (root.isObject()) {
-            Iterator<String> fieldNames = root.fieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                JsonNode fieldValue = root.get(fieldName);
-                if (fieldValue.has(DOCUMENT_URL)) {
-                    documentNodes.add(fieldValue);
-                } else {
-                    retrieveDocumentNodes(fieldValue, documentNodes);
-                }
-            }
-        } else if (root.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) root;
-            for (int i = 0; i < arrayNode.size(); i++) {
-                JsonNode arrayElement = arrayNode.get(i);
-                retrieveDocumentNodes(arrayElement, documentNodes);
-            }
-        }
+    public FinremCaseData removeDocuments(FinremCaseData caseData, Long caseId,  String userAuthorisation) {
+        JsonNode caseDataJson = objectMapper.valueToTree(caseData);
+        List<DocumentToKeepCollection> allExistingDocumentsList = getCaseDocumentsList(caseData);
+
+        ArrayList<DocumentToKeepCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
+        List<DocumentToKeepCollection> documentsUserWantsToKeepList = caseData.getDocumentToKeepCollection();
+        documentsUserWantsDeletedList.removeAll(documentsUserWantsToKeepList);
+
+        //PROVE whether CRUD needed to delete things - see if this extends to files.  As this goes through CCD AM
+        documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
+            deleteDocument(
+                documentToDeleteCollection.getValue(), userAuthorisation));
+
+        documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
+            removeDocumentFromJson(
+                caseDataJson, documentToDeleteCollection.getValue()));
+
+        ((ObjectNode) caseDataJson).remove("documentToKeepCollection");
+
+        return buildAmendedCaseDataFromRootNode(caseDataJson, caseId);
     }
 
-    public void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
-        if (root.isObject()) {
-            // Use a list to store field names to be removed
-            List<String> fieldsToRemove = new ArrayList<>();
-            Iterator<String> fieldNames = root.fieldNames();
-
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                JsonNode fieldValue = root.get(fieldName);
-
-                if (fieldValue.has(DOCUMENT_URL)) {
-                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
-                        log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
-                        fieldsToRemove.add(fieldName);
-                    }
-                } else {
-                    removeDocumentFromJson(fieldValue, documentToDelete);
-                }
-            }
-
-            // Remove the fields after iteration
-            for (String fieldName : fieldsToRemove) {
-                ((ObjectNode) root).remove(fieldName);
-            }
-        } else if (root.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) root;
-            for (int i = 0; i < arrayNode.size(); i++) {
-                JsonNode arrayElement = arrayNode.get(i);
-                removeDocumentFromJson(arrayElement, documentToDelete);
-            }
-        }
-    }
-
-    public List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
+    private List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
 
         List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
 
@@ -119,17 +97,63 @@ public class DocumentRemovalService {
         return documentsCollection;
     }
 
-
-    // todo - some jdoc to explain why we're doing this
-    // Clears out the document collection from the root node, so that it isn't part of the final CCD data.
-    public void removeDocumentToRemoveCollection(JsonNode root) {
-        ((ObjectNode) root).remove("documentToKeepCollection");
+    private void retrieveDocumentNodes(JsonNode root, List<JsonNode> documentNodes) {
+        if (root.isObject()) {
+            Iterator<String> fieldNames = root.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                JsonNode fieldValue = root.get(fieldName);
+                if (fieldValue.has(DOCUMENT_URL)) {
+                    documentNodes.add(fieldValue);
+                } else {
+                    retrieveDocumentNodes(fieldValue, documentNodes);
+                }
+            }
+        } else if (root.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) root;
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode arrayElement = arrayNode.get(i);
+                retrieveDocumentNodes(arrayElement, documentNodes);
+            }
+        }
     }
 
-    // todo jdoc - based on deleteOldMiniFormA
-    // Once working, consider making async again.  See deleteOldMiniFormA
-    public void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
+    private void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
+        if (root.isObject()) {
+            // Use a list to store field names to be removed
+            List<String> fieldsToRemove = new ArrayList<>();
+            Iterator<String> fieldNames = root.fieldNames();
 
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                JsonNode fieldValue = root.get(fieldName);
+
+                if (fieldValue.has(DOCUMENT_URL)) {
+                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
+                        log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                        fieldsToRemove.add(fieldName);
+                    }
+                } else {
+                    removeDocumentFromJson(fieldValue, documentToDelete);
+                }
+            }
+
+            // Remove the fields after iteration
+            for (String fieldName : fieldsToRemove) {
+                ((ObjectNode) root).remove(fieldName);
+            }
+
+        } else if (root.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) root;
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode arrayElement = arrayNode.get(i);
+                removeDocumentFromJson(arrayElement, documentToDelete);
+            }
+        }
+    }
+
+    // Once working, consider making async again.  See deleteOldMiniFormA
+    private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
         try {
             genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
         } catch (Exception e) {
@@ -141,8 +165,7 @@ public class DocumentRemovalService {
         }
     }
 
-    // rebuild case data with file data redacted.  Does this from the root node with the required updates.
-    public FinremCaseData buildAmendedCaseDataFromRootNode(JsonNode root, Long caseId, ObjectMapper objectMapper) {
+    private FinremCaseData buildAmendedCaseDataFromRootNode(JsonNode root, Long caseId) {
         FinremCaseData amendedCaseData;
         try {
             amendedCaseData = objectMapper.treeToValue(root, FinremCaseData.class);
