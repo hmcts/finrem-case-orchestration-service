@@ -29,6 +29,16 @@ public class CcdDataStoreService {
         removeRole(finremCaseDetails, authorisationToken, CREATOR_USER_ROLE);
     }
 
+    public void removeUserRole(CaseDetails caseDetails, String authorisationToken, String userId, String role) {
+        RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper
+            .mapToRemoveUserRolesRequest(caseDetails, userId, role);
+
+        restService.restApiDeleteCall(
+            authorisationToken,
+            ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl(),
+            removeUserRolesRequest);
+    }
+
     private void removeRole(CaseDetails caseDetails, String authorisationToken, String role) {
         String userId = idamService.getIdamUserId(authorisationToken);
         RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(caseDetails, userId, role);

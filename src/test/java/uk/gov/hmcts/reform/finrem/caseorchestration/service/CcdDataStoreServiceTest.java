@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseUsers;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.RemoveUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,7 +46,7 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
         removeUserRolesRequest = RemoveUserRolesRequest
             .builder()
             .case_users(
-                Arrays.asList(
+                List.of(
                     CaseUsers
                         .builder()
                         .caseId(TEST_CASE_ID)
@@ -82,6 +82,17 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
         ccdDataStoreService.removeCreatorRole(caseDetails, AUTH_TOKEN);
 
         verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
+        verify(removeUserRolesRequestMapper, times(1)).mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, CREATOR_USER_ROLE);
+        verify(ccdDataStoreServiceConfiguration, times(1)).getRemoveCaseRolesUrl();
+        verify(restService, times(1)).restApiDeleteCall(AUTH_TOKEN, TEST_URL, removeUserRolesRequest);
+    }
+
+    @Test
+    public void removeUserRole() {
+        CaseDetails caseDetails = buildCaseDetails();
+
+        ccdDataStoreService.removeUserRole(caseDetails, AUTH_TOKEN, TEST_USER_ID, CREATOR_USER_ROLE);
+
         verify(removeUserRolesRequestMapper, times(1)).mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, CREATOR_USER_ROLE);
         verify(ccdDataStoreServiceConfiguration, times(1)).getRemoveCaseRolesUrl();
         verify(restService, times(1)).restApiDeleteCall(AUTH_TOKEN, TEST_URL, removeUserRolesRequest);
