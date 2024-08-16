@@ -10,10 +10,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -189,5 +192,113 @@ class DocumentRemovalServiceTest {
         assertEquals("789", result.get(2).getValue().getDocumentId());
 
     }
+
+    //TODO: Currently when mapping back allocatedRegionWrapper is not mapped
+    // back when passed in as null (note shouldn't be an issue as maps back to case data when no null )
+    @Test
+    void testRemoveDocuments_NoDocuments() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Some Name")
+                .build())
+            .build();
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantLname(),result.getContactDetailsWrapper().getApplicantLname());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void testRemoveDocuments_KeepAllDocuments() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Form-D.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                    .build()))
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("123")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example1.com/123")
+                        .documentFilename("Form-C.pdf")
+                        .documentBinaryUrl("https://example1.com/binary")
+                        .build())
+                    .build())
+                .build(),
+                DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Form-D.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(2, result.getUploadDocuments().size());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+
+    //TODO: Docs within Collections within value object (i.e uploadDocuments will need the value object deleting too)
+    @Test
+    void testRemoveDocuments_RemoveDoc() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example2.com/456")
+                            .documentFilename("Form-D.pdf")
+                            .documentBinaryUrl("https://example2.com/binary")
+                            .build())
+                        .build())
+                    .build()))
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
+                        .documentId("123")
+                        .caseDocument(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(2, result.getUploadDocuments().size());
+        assertEquals("Form-C.pdf", result.getUploadDocuments().get(0).getValue().getDocumentLink().getDocumentFilename());
+        assertNull(result.getUploadDocuments().get(1).getValue().getDocumentFileName());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
 
 }
