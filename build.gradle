@@ -382,6 +382,10 @@ dependencyManagement {
             entry 'legion-of-the-bouncy-castle-java-crytography-api'
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
+        //CVE-2024-25710
+        dependencySet(group: 'org.apache.commons', version: '1.27.0') {
+            entry 'commons-compress'
+        }
     }
 }
 
