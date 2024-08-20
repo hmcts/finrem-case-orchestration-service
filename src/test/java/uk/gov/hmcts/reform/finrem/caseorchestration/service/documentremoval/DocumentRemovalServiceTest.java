@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -34,9 +36,12 @@ class DocumentRemovalServiceTest {
     @Mock
     private GenericDocumentService genericDocumentService;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     @BeforeEach
     public void setUp() {
-        documentRemovalService = new DocumentRemovalService(new ObjectMapper(), genericDocumentService);
+        documentRemovalService = new DocumentRemovalService(new ObjectMapper(), genericDocumentService, featureToggleService);
     }
 
     @Test

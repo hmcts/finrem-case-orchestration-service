@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.ArrayList;
@@ -34,8 +35,13 @@ public class DocumentRemovalService {
 
     private final GenericDocumentService genericDocumentService;
 
-    public DocumentRemovalService(ObjectMapper objectMapper, GenericDocumentService genericDocumentService) {
+    private final FeatureToggleService featureToggleService;
+
+    public DocumentRemovalService(ObjectMapper objectMapper,
+                                  GenericDocumentService genericDocumentService,
+                                  FeatureToggleService featureToggleService) {
         this.objectMapper = objectMapper;
+        this.featureToggleService = featureToggleService;
         this.objectMapper.registerModule(new JavaTimeModule());
         this.genericDocumentService = genericDocumentService;
     }
@@ -130,11 +136,11 @@ public class DocumentRemovalService {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
 
-                if (fieldValue.has(DOCUMENT_URL)) {
-                    if (fieldValue.get(DOCUMENT_URL).asText().equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
-                        log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
-                        fieldsToRemove.add(fieldName);
-                    }
+                if (fieldValue.has(DOCUMENT_URL) &&
+                    fieldValue.get(DOCUMENT_URL).asText()
+                        .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
+                    log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                    fieldsToRemove.add(fieldName);
                 } else {
                     removeDocumentFromJson(fieldValue, documentToDelete);
                 }
@@ -157,7 +163,9 @@ public class DocumentRemovalService {
     // Once working, consider making async again.  See deleteOldMiniFormA
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
         try {
-            genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
+            if (featureToggleService.isSecureDocEnabled()) {
+                genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
+            }
         } catch (Exception e) {
             log.error(format(
                     "Failed to delete document url %s",
