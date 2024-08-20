@@ -22,14 +22,14 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class UpdateContactDetailsContestedSubmittedHandler extends FinremCallbackHandler {
+public class UpdateContactDetailsContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final OnlineFormDocumentService onlineFormDocumentService;
 
-    public UpdateContactDetailsContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         UpdateRepresentationWorkflowService nocWorkflowService,
-                                                         OnlineFormDocumentService service) {
+    public UpdateContactDetailsContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                             UpdateRepresentationWorkflowService nocWorkflowService,
+                                                             OnlineFormDocumentService service) {
         super(finremCaseDetailsMapper);
         this.nocWorkflowService = nocWorkflowService;
         this.onlineFormDocumentService = service;

@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestSetup {
+class UpdateContactDetailsContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private static final String AUTH_TOKEN = "token:)";
 
     private static final String FIXTURES_CONTESTED_AMEND_APPLICANT_SOLICITOR_DETAILS_JSON =
@@ -56,7 +56,7 @@ class UpdateContactDetailsContestedSubmittedHandlerTest extends BaseHandlerTestS
         "/fixtures/contested/amend-respondent-solicitor-details-representation-changed.json";
 
     @InjectMocks
-    private UpdateContactDetailsContestedSubmittedHandler handler;
+    private UpdateContactDetailsContestedAboutToSubmitHandler handler;
 
     @Mock
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
