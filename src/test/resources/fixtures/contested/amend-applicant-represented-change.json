@@ -1,0 +1,192 @@
+{
+  "event_id" : "FR_issueApplication",
+  "case_details" : {
+    "id" : "123",
+    "jurisdiction" : "DIVORCE",
+    "state" : "caseAdded",
+    "case_type_id" : "FinancialRemedyContested",
+    "currentUserCaseRole" : "[APPSOLICITOR]",
+    "case_data" : {
+      "typeOfApplication" : "In connection to matrimonial and civil partnership proceedings",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "nocParty" : "applicant",
+      "ApplicantOrganisationParty" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : null,
+          "OrganisationName" : null
+        },
+        "LastNoCRequestedBy" : null,
+        "PreviousOrganisations" : [
+          {
+            "id" : "8f070b12-9c3c-4c70-8d5b-376e3273dcb4",
+            "value" : {
+              "ToTimestamp" : "2024-08-19T16:25:01.026913",
+              "FromTimestamp" : "2024-08-19T15:20:42.101895",
+              "OrganisationName" : "FinRem-2-Org",
+              "OrganisationAddress" : {
+                "County" : "London",
+                "Country" : null,
+                "PostCode" : "EC3A 2AD",
+                "PostTown" : "London",
+                "AddressLine1" : "3rd Floor, 65-68 Leadenhall St",
+                "AddressLine2" : null,
+                "AddressLine3" : null
+              }
+            }
+          }
+        ],
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "helpWithFeesQuestion" : "Yes",
+      "applicantFMName" : "Poor",
+      "applicantLName" : "Guy",
+      "applicantPhone" : "89897876765",
+      "applicantEmail" : "email01@email.com",
+      "applicantRepresented" : "No",
+      "applicantAddressConfidential" : "Yes",
+      "applicantAddress" : {
+        "AddressLine1" : "67 Pears Road",
+        "AddressLine2" : "",
+        "AddressLine3" : "",
+        "PostTown" : "Hounslow",
+        "County" : "",
+        "PostCode" : "TW3 1SS",
+        "Country" : "United Kingdom"
+      },
+      "dateOfMarriage" : "1111-01-01",
+      "mortgageDetail" : "test",
+      "netValueOfHome" : "dfdf",
+      "dateOfSepration" : "1111-01-01",
+      "propertyAddress" : "test",
+      "respondentEmail" : null,
+      "respondentLName" : "test",
+      "respondentPhone" : null,
+      "respondentAddressConfidential" : "No",
+      "respondentFMName" : "test",
+      "divorceCaseNumber" : "DD12D12345",
+      "fastTrackDecision" : "Yes",
+      "respondentAddress" : {
+        "County" : "",
+        "Country" : "",
+        "PostCode" : "",
+        "PostTown" : "SRIKALAHASTI",
+        "AddressLine1" : "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2" : "Srikalahasti, Chittor District",
+        "AddressLine3" : ""
+      },
+      "promptForAnyDocument" : "No",
+      "applicantAttendedMIAM" : "No",
+      "claimingExemptionMIAM" : "Yes",
+      "divorceDecreeNisiDate" : "1111-01-01",
+      "isApplicantsHomeCourt" : "No",
+      "nameOfCourtDivorceCentre" : "test",
+      "otherReasonForComplexity" : "Yes",
+      "detailPotentialAllegation" : "sfsffsd",
+      "benefitForChildrenDecision" : "No",
+      "paymentForChildrenDecision" : "Yes",
+      "addToComplexityListOfCourts" : "trueDontKnow",
+      "otherReasonForComplexityText" : "sdff",
+      "additionalPropertyOrderDecision" : "No",
+      "respondentRepresented" : "No"
+    }
+  },
+  "case_details_before" : {
+    "id" : "123",
+    "jurisdiction" : "DIVORCE",
+    "state" : "caseAdded",
+    "case_type_id" : "FinancialRemedyContested",
+    "case_data" : {
+      "updateIncludesRepresentativeChange" : "No",
+      "applicantOrganisationParty" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "respondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : null,
+          "OrganisationName" : null
+        },
+        "LastNoCRequestedBy" : null,
+        "PreviousOrganisations" : [
+          {
+            "id" : "8f070b12-9c3c-4c70-8d5b-376e3273dcb4",
+            "value" : {
+              "ToTimestamp" : "2024-08-19T16:25:01.026913",
+              "FromTimestamp" : "2024-08-19T15:20:42.101895",
+              "OrganisationName" : "FinRem-2-Org",
+              "OrganisationAddress" : {
+                "County" : "London",
+                "Country" : null,
+                "PostCode" : "EC3A 2AD",
+                "PostTown" : "London",
+                "AddressLine1" : "3rd Floor, 65-68 Leadenhall St",
+                "AddressLine2" : null,
+                "AddressLine3" : null
+              }
+            }
+          }
+        ],
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "helpWithFeesQuestion" : "Yes",
+      "applicantFMName" : "Poor",
+      "applicantLName" : "Guy",
+      "applicantPhone" : "89897876765",
+      "applicantEmail" : "email01@email.com",
+      "applicantRepresented" : "No",
+      "applicantAddress" : {
+        "AddressLine1" : "67 Pears Road",
+        "AddressLine2" : "",
+        "AddressLine3" : "",
+        "PostTown" : "Hounslow",
+        "County" : "",
+        "PostCode" : "TW3 1SS",
+        "Country" : "United Kingdom"
+      },
+      "dateOfMarriage" : "1111-01-01",
+      "mortgageDetail" : "test",
+      "netValueOfHome" : "dfdf",
+      "dateOfSepration" : "1111-01-01",
+      "propertyAddress" : "test",
+      "respondentEmail" : null,
+      "respondentLName" : "test",
+      "respondentPhone" : null,
+      "respondentFMName" : "test",
+      "divorceCaseNumber" : "DD12D12345",
+      "fastTrackDecision" : "Yes",
+      "respondentAddress" : {
+        "County" : "",
+        "Country" : "",
+        "PostCode" : "",
+        "PostTown" : "SRIKALAHASTI",
+        "AddressLine1" : "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2" : "Srikalahasti, Chittor District",
+        "AddressLine3" : ""
+      },
+      "promptForAnyDocument" : "No",
+      "applicantAttendedMIAM" : "No",
+      "claimingExemptionMIAM" : "Yes",
+      "divorceDecreeNisiDate" : "1111-01-01",
+      "isApplicantsHomeCourt" : "No",
+      "nameOfCourtDivorceCentre" : "test",
+      "otherReasonForComplexity" : "Yes",
+      "detailPotentialAllegation" : "sfsffsd",
+      "benefitForChildrenDecision" : "No",
+      "paymentForChildrenDecision" : "Yes",
+      "addToComplexityListOfCourts" : "trueDontKnow",
+      "otherReasonForComplexityText" : "sdff",
+      "additionalPropertyOrderDecision" : "No",
+      "respondentRepresented" : "No"
+    }
+  }
+}

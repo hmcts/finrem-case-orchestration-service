@@ -32,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -39,6 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
@@ -82,8 +85,11 @@ public class RemoveApplicantDetailsController extends BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        removeApplicantSolicitorDetails(caseData);
-        removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+        boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
+        if (includesRepresentationChange) {
+            handleApplicantRepresentationChange(caseData);
+            handleRespondentRepresentationChange(caseDetails);
+        }
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
@@ -93,8 +99,7 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.put(MINI_FORM_A, document);
         }
 
-        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+        if (includesRepresentationChange) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 authorisationToken,
@@ -102,6 +107,26 @@ public class RemoveApplicantDetailsController extends BaseController {
         }
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
+        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseData.get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE);
+    }
+
+    private void handleApplicantRepresentationChange(Map<String, Object> caseData) {
+        String nocParty = (String) caseData.get(NOC_PARTY);
+        if (APPLICANT.equalsIgnoreCase(nocParty)) {
+            removeApplicantSolicitorDetails(caseData);
+        }
+    }
+
+    private void handleRespondentRepresentationChange(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        String nocParty = (String)caseData.get(NOC_PARTY);
+        if (RESPONDENT.equalsIgnoreCase(nocParty)) {
+            removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+        }
     }
 
     private void removeApplicantSolicitorDetails(Map<String, Object> caseData) {
