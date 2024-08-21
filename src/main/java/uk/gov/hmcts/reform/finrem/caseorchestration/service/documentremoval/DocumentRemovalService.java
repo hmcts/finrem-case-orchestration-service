@@ -53,9 +53,6 @@ public class DocumentRemovalService {
 
         retrieveDocumentNodes(root, documentNodes);
 
-        //TODO: Sort by timestamp where provided
-        documentNodes = documentNodes.stream().distinct().toList();
-
         return buildCaseDocumentList(documentNodes);
     }
 
@@ -103,7 +100,7 @@ public class DocumentRemovalService {
                         .build())
                     .build());
         }
-        return documentsCollection;
+        return documentsCollection.stream().distinct().toList();
     }
 
     private void retrieveDocumentNodes(JsonNode root, List<JsonNode> documentNodes) {
