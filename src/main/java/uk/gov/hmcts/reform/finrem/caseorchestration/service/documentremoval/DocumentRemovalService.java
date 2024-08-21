@@ -15,10 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -29,6 +32,7 @@ public class DocumentRemovalService {
     static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    private static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
 
 
     private final ObjectMapper objectMapper;
@@ -52,7 +56,6 @@ public class DocumentRemovalService {
 
         retrieveDocumentNodes(root, documentNodes);
 
-        //TODO: Sort by timestamp where provided
         documentNodes = documentNodes.stream().distinct().toList();
 
         return buildCaseDocumentList(documentNodes);
@@ -98,10 +101,19 @@ public class DocumentRemovalService {
                             .documentFilename(documentNode.get(DOCUMENT_FILENAME).asText())
                             .documentUrl(documentNode.get(DOCUMENT_URL).asText())
                             .documentBinaryUrl(documentNode.get(DOCUMENT_BINARY_URL).asText())
+                            .uploadTimestamp(getUploadTimestampFromDocumentNode(documentNode))
                             .build())
                         .build())
                     .build());
         }
+
+        documentsCollection.sort(Comparator.comparing(
+                DocumentToKeepCollection::getValue,
+                    Comparator.comparing(DocumentToKeep::getCaseDocument,
+                            Comparator.comparing(CaseDocument::getUploadTimestamp,
+                                Comparator.nullsLast(
+                                    Comparator.reverseOrder())))));
+
         return documentsCollection;
     }
 
@@ -184,5 +196,24 @@ public class DocumentRemovalService {
             throw new DocumentDeleteException(e.getMessage(), e);
         }
         return amendedCaseData;
+    }
+
+    /**
+     * We expect the upload timestamp to be null or valid. However, if anything unexpected is provided,
+     * catch and return null - this is only for sorting on the page.
+     *
+     * @param documentNode a JsonNode containing the upload timestamp
+     * @return documentNodeUploadTimestamp a localDateTime version of the upload timestamp
+     */
+    private LocalDateTime getUploadTimestampFromDocumentNode(JsonNode documentNode) {
+        LocalDateTime documentNodeUploadTimestamp;
+        try {
+            documentNodeUploadTimestamp =
+                    Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
+                            LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
+        } catch (Exception e) {
+            documentNodeUploadTimestamp = null;
+        }
+        return documentNodeUploadTimestamp;
     }
 }
