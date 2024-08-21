@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,8 @@ class DocumentRemovalServiceTest {
 
     private DocumentRemovalService documentRemovalService;
 
+    private ObjectMapper objectMapperForTest;
+
     @Mock
     private GenericDocumentService genericDocumentService;
 
@@ -40,7 +45,8 @@ class DocumentRemovalServiceTest {
 
     @BeforeEach
     public void setUp() {
-        documentRemovalService = new DocumentRemovalService(new ObjectMapper(), genericDocumentService, featureToggleService);
+        objectMapperForTest = new ObjectMapper();
+        documentRemovalService = new DocumentRemovalService(objectMapperForTest, genericDocumentService, featureToggleService);
     }
 
     @Test
@@ -301,5 +307,51 @@ class DocumentRemovalServiceTest {
         assertNull(result.getDocumentToKeepCollection());
     }
 
+    @Test
+    void testBuildCaseDocumentList() {
+        // Todo, spotted that this test is missing.  Added this failing placeholder
+        // Needs a test with a given JSON Node containing the docs
+        // Then test everything is built as expected
+        // split the sorting out if that makes more sense.
+        // Assert that getUploadTimestampFromDocumentNode called.
+        assertEquals(true,false);
+    }
 
+    @Test
+    void test_getUploadTimestampFromDocumentNode_returnsDate() throws IOException {
+        String testData = "{" +
+                "\"document_url\": \"a url\"," +
+                "\"document_filename\": \"a filename\"," +
+                "\"document_binary_url\": \"a binary url\"," +
+                "\"upload_timestamp\": \"2024-08-20T07:20:43.416964\"" +
+                "}";
+        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
+        assertEquals("2024-08-20T07:20:43.416964", testTimestamp.toString());
+    }
+
+    @Test
+    void test_getUploadTimestampFromDocumentNode_handlesNullfromSource() throws IOException {
+        String testData = "{" +
+                "\"document_url\": \"a url\"," +
+                "\"document_filename\": \"a filename\"," +
+                "\"document_binary_url\": \"a binary url\"" +
+                "}";
+        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
+        assertNull(testTimestamp);
+    }
+
+    @Test
+    void test_getUploadTimestampFromDocumentNode_givesNullWithInvalidDate() throws IOException {
+        String testData = "{" +
+                "\"document_url\": \"a url\"," +
+                "\"document_filename\": \"a filename\"," +
+                "\"document_binary_url\": \"a binary url\"," +
+                "\"upload_timestamp\": \"an invalid date\"" +
+                "}";
+        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
+        assertNull(testTimestamp);
+    }
 }

@@ -81,6 +81,25 @@ public class DocumentRemovalService {
         return buildAmendedCaseDataFromRootNode(caseDataJson, caseId);
     }
 
+    /**
+     * We expect the upload timestamp to be null or valid. However, if anything unexpected is provided,
+     * catch and return null - this is only for sorting on the page.
+     *
+     * @param documentNode a JsonNode containing the upload timestamp
+     * @return documentNodeUploadTimestamp a localDateTime version of the upload timestamp
+     */
+    public LocalDateTime getUploadTimestampFromDocumentNode(JsonNode documentNode) {
+        LocalDateTime documentNodeUploadTimestamp;
+        try {
+            documentNodeUploadTimestamp =
+                    Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
+                            LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
+        } catch (Exception e) {
+            documentNodeUploadTimestamp = null;
+        }
+        return documentNodeUploadTimestamp;
+    }
+
     private List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
 
         List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
@@ -207,24 +226,5 @@ public class DocumentRemovalService {
             throw new DocumentDeleteException(e.getMessage(), e);
         }
         return amendedCaseData;
-    }
-
-    /**
-     * We expect the upload timestamp to be null or valid. However, if anything unexpected is provided,
-     * catch and return null - this is only for sorting on the page.
-     *
-     * @param documentNode a JsonNode containing the upload timestamp
-     * @return documentNodeUploadTimestamp a localDateTime version of the upload timestamp
-     */
-    private LocalDateTime getUploadTimestampFromDocumentNode(JsonNode documentNode) {
-        LocalDateTime documentNodeUploadTimestamp;
-        try {
-            documentNodeUploadTimestamp =
-                    Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
-                            LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
-        } catch (Exception e) {
-            documentNodeUploadTimestamp = null;
-        }
-        return documentNodeUploadTimestamp;
     }
 }
