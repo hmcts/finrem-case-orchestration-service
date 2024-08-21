@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -40,6 +41,13 @@ public class FinremCallbackRequestFactory {
 
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
         return FinremCallbackRequest.builder()
+            .caseDetails(caseDetailsBuilder.build())
+            .build();
+    }
+
+    public static FinremCallbackRequest from(EventType eventType, FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
+        return FinremCallbackRequest.builder()
+            .eventType(eventType)
             .caseDetails(caseDetailsBuilder.build())
             .build();
     }
