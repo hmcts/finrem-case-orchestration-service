@@ -45,7 +45,6 @@ public class DocumentRemovalService {
                                   FeatureToggleService featureToggleService) {
         this.objectMapper = objectMapper;
         this.featureToggleService = featureToggleService;
-        this.objectMapper.registerModule(new JavaTimeModule());
         this.genericDocumentService = genericDocumentService;
     }
 
