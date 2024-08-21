@@ -16,12 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -52,18 +52,21 @@ public class DocumentRemovalService {
         JsonNode root = objectMapper.valueToTree(caseData);
         List<JsonNode> documentNodes = new ArrayList<>();
 
+        log.info("Retrieving document JSON nodes");
         retrieveDocumentNodes(root, documentNodes);
 
         return buildCaseDocumentList(documentNodes);
     }
 
     public FinremCaseData removeDocuments(FinremCaseData caseData, Long caseId,  String userAuthorisation) {
-        JsonNode caseDataJson = objectMapper.valueToTree(caseData);
+
         List<DocumentToKeepCollection> allExistingDocumentsList = getCaseDocumentsList(caseData);
 
         ArrayList<DocumentToKeepCollection> documentsUserWantsDeletedList = new ArrayList<>(allExistingDocumentsList);
         Optional<List<DocumentToKeepCollection>> documentsUserWantsToKeepList = Optional.ofNullable(caseData.getDocumentToKeepCollection());
         documentsUserWantsToKeepList.ifPresent(documentsUserWantsDeletedList::removeAll);
+
+        log.info(format("Beginning removal of %s document from Case ID %s", documentsUserWantsDeletedList.size(), caseId));
 
         //CDAM Needs to be enabled for this to work, only the user who created a document can delete it.
         // in our case, all documents are created by ExUI and therefor have no username, so auth fails on delete with 403.
@@ -71,9 +74,13 @@ public class DocumentRemovalService {
             deleteDocument(
                 documentToDeleteCollection.getValue(), userAuthorisation));
 
+        JsonNode caseDataJson = objectMapper.valueToTree(caseData);
+
         documentsUserWantsDeletedList.forEach(documentToDeleteCollection ->
             removeDocumentFromJson(
                 caseDataJson, documentToDeleteCollection.getValue()));
+
+        log.info("Document removal complete, removing DocumentToKeep collection from CaseData JSON");
 
         ((ObjectNode) caseDataJson).remove("documentToKeepCollection");
 
@@ -102,6 +109,8 @@ public class DocumentRemovalService {
     private List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
 
         List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
+
+        log.info("Converting JSON nodes to DocumentToKeepCollection");
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();
@@ -163,8 +172,8 @@ public class DocumentRemovalService {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
 
-                if (fieldValue.has(DOCUMENT_URL) &&
-                    fieldValue.get(DOCUMENT_URL).asText()
+                if (fieldValue.has(DOCUMENT_URL)
+                    && fieldValue.get(DOCUMENT_URL).asText()
                         .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
                     log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
                     fieldsToRemove.add(fieldName);
@@ -184,8 +193,8 @@ public class DocumentRemovalService {
                         String fieldName = fieldNames.next();
                         JsonNode fieldValue = valueObject.get(fieldName);
 
-                        if (fieldValue.has(DOCUMENT_URL) &&
-                            fieldValue.get(DOCUMENT_URL).asText()
+                        if (fieldValue.has(DOCUMENT_URL)
+                            && fieldValue.get(DOCUMENT_URL).asText()
                                 .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
                             log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
                             ((ArrayNode) root).remove(i);
@@ -204,6 +213,9 @@ public class DocumentRemovalService {
     // Once working, consider making async again.  See deleteOldMiniFormA
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
         try {
+            log.info(String.format("Deleting doc from DocStore with url %s",
+                documentToRemove.getCaseDocument().getDocumentUrl()));
+
             if (featureToggleService.isSecureDocEnabled()) {
                 genericDocumentService.deleteDocument(documentToRemove.getCaseDocument().getDocumentUrl(), authorisationToken);
             }
@@ -219,6 +231,7 @@ public class DocumentRemovalService {
     private FinremCaseData buildAmendedCaseDataFromRootNode(JsonNode root, Long caseId) {
         FinremCaseData amendedCaseData;
         try {
+            log.info(format("Building amendedCaseData for case id %s after deleting document", caseId));
             amendedCaseData = objectMapper.treeToValue(root, FinremCaseData.class);
         } catch (Exception e) {
             log.error(format("Error building amendedCaseData for case id %s after deleting document", caseId), e);
