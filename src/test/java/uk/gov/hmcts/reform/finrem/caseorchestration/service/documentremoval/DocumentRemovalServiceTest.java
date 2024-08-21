@@ -260,7 +260,7 @@ class DocumentRemovalServiceTest {
         assertEquals(2, result.getUploadDocuments().size());
         assertNull(result.getDocumentToKeepCollection());
     }
-    
+
     @Test
     void testRemoveDocuments_RemoveDoc() {
         FinremCaseData caseData = FinremCaseData.builder()
