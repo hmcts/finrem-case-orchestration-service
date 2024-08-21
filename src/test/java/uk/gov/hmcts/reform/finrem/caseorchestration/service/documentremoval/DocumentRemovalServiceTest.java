@@ -25,7 +25,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -261,9 +260,7 @@ class DocumentRemovalServiceTest {
         assertEquals(2, result.getUploadDocuments().size());
         assertNull(result.getDocumentToKeepCollection());
     }
-
-
-    //TODO: Docs within Collections within value object (i.e uploadDocuments will need the value object deleting too)
+    
     @Test
     void testRemoveDocuments_RemoveDoc() {
         FinremCaseData caseData = FinremCaseData.builder()
@@ -299,9 +296,8 @@ class DocumentRemovalServiceTest {
 
         FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
-        assertEquals(2, result.getUploadDocuments().size());
+        assertEquals(1, result.getUploadDocuments().size());
         assertEquals("Form-C.pdf", result.getUploadDocuments().get(0).getValue().getDocumentLink().getDocumentFilename());
-        assertNull(result.getUploadDocuments().get(1).getValue().getDocumentFileName());
         assertNull(result.getDocumentToKeepCollection());
     }
 
