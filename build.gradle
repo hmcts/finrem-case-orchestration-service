@@ -382,6 +382,10 @@ dependencyManagement {
             entry 'legion-of-the-bouncy-castle-java-crytography-api'
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
+        //CVE-2024-25710
+        dependencySet(group: 'org.apache.commons', version: '1.27.0') {
+            entry 'commons-compress'
+        }
     }
 }
 
@@ -449,7 +453,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.3:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.4:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
