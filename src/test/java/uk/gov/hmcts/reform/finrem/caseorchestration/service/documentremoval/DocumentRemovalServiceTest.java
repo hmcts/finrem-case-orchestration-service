@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ class DocumentRemovalServiceTest {
 
     private DocumentRemovalService documentRemovalService;
 
-    private ObjectMapper objectMapperForTest;
+    private ObjectMapper objectMapper;
 
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -45,8 +46,9 @@ class DocumentRemovalServiceTest {
 
     @BeforeEach
     public void setUp() {
-        objectMapperForTest = new ObjectMapper();
-        documentRemovalService = new DocumentRemovalService(objectMapperForTest, genericDocumentService, featureToggleService);
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        documentRemovalService = new DocumentRemovalService(objectMapper, genericDocumentService, featureToggleService);
     }
 
     @Test
@@ -325,7 +327,7 @@ class DocumentRemovalServiceTest {
                 "\"document_binary_url\": \"a binary url\"," +
                 "\"upload_timestamp\": \"2024-08-20T07:20:43.416964\"" +
                 "}";
-        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        JsonNode documentNode = objectMapper.readTree(testData);
         LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
         assertEquals("2024-08-20T07:20:43.416964", testTimestamp.toString());
     }
@@ -337,7 +339,7 @@ class DocumentRemovalServiceTest {
                 "\"document_filename\": \"a filename\"," +
                 "\"document_binary_url\": \"a binary url\"" +
                 "}";
-        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        JsonNode documentNode = objectMapper.readTree(testData);
         LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
         assertNull(testTimestamp);
     }
@@ -350,7 +352,7 @@ class DocumentRemovalServiceTest {
                 "\"document_binary_url\": \"a binary url\"," +
                 "\"upload_timestamp\": \"an invalid date\"" +
                 "}";
-        JsonNode documentNode = objectMapperForTest.readTree(testData);
+        JsonNode documentNode = objectMapper.readTree(testData);
         LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
         assertNull(testTimestamp);
     }
