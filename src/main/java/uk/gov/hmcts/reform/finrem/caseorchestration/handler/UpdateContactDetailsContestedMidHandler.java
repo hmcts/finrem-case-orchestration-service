@@ -57,7 +57,6 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
     }
 
     private List<String> validateCaseData(FinremCaseData caseData) {
-
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
@@ -84,7 +83,7 @@ public class UpdateContactDetailsContestedMidHandler extends FinremCallbackHandl
             return errors;
         }
 
-        if (Optional.ofNullable(wrapper.getRespondentAddress())
+        if (!caseData.isRespondentRepresentedByASolicitor() && Optional.ofNullable(wrapper.getRespondentAddress())
             .map(address -> ObjectUtils.isEmpty(address.getPostCode()))
             .orElse(false)) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
