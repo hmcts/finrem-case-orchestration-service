@@ -29,6 +29,7 @@ public class DocumentRemovalService {
     static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    private static final String VALUE_KEY = "value";
 
 
     private final ObjectMapper objectMapper;
@@ -127,9 +128,9 @@ public class DocumentRemovalService {
     }
 
     private void removeDocumentFromJson(JsonNode root, DocumentToKeep documentToDelete) {
+        List<String> fieldsToRemove = new ArrayList<>();
+
         if (root.isObject()) {
-            // Use a list to store field names to be removed
-            List<String> fieldsToRemove = new ArrayList<>();
             Iterator<String> fieldNames = root.fieldNames();
 
             while (fieldNames.hasNext()) {
@@ -145,18 +146,32 @@ public class DocumentRemovalService {
                     removeDocumentFromJson(fieldValue, documentToDelete);
                 }
             }
-
-            // Remove the fields after iteration
-            for (String fieldName : fieldsToRemove) {
-                ((ObjectNode) root).remove(fieldName);
-            }
-
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
+                if (arrayElement.has(VALUE_KEY)) {
+                    JsonNode valueObject = arrayElement.get(VALUE_KEY);
+                    Iterator<String> fieldNames = valueObject.fieldNames();
+
+                    while (fieldNames.hasNext()) {
+                        String fieldName = fieldNames.next();
+                        JsonNode fieldValue = valueObject.get(fieldName);
+
+                        if (fieldValue.has(DOCUMENT_URL) &&
+                            fieldValue.get(DOCUMENT_URL).asText()
+                                .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
+                            log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                            ((ArrayNode) root).remove(i);
+                        }
+                    }
+                }
                 removeDocumentFromJson(arrayElement, documentToDelete);
             }
+        }
+
+        for (String fieldName : fieldsToRemove) {
+            ((ObjectNode) root).remove(fieldName);
         }
     }
 
