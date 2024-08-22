@@ -51,9 +51,9 @@ public class DocumentRemovalService {
         JsonNode root = objectMapper.valueToTree(caseData);
         List<JsonNode> documentNodes = new ArrayList<>();
 
-        log.info("Retrieving document JSON nodes");
+        log.info(format("Retrieving document JSON nodes for case id %s", caseData.getCcdCaseId()));
         retrieveDocumentNodes(root, documentNodes);
-
+        log.info(format("Building case document list for case id %s", caseData.getCcdCaseId()));
         return buildCaseDocumentList(documentNodes);
     }
 
@@ -79,7 +79,8 @@ public class DocumentRemovalService {
             removeDocumentFromJson(
                 caseDataJson, documentToDeleteCollection.getValue()));
 
-        log.info("Document removal complete, removing DocumentToKeep collection from CaseData JSON");
+        log.info(format("Document removal complete, removing DocumentToKeep collection " +
+                "from CaseData JSON for case ID: %s", caseId));
 
         ((ObjectNode) caseDataJson).remove("documentToKeepCollection");
 
@@ -100,6 +101,9 @@ public class DocumentRemovalService {
                     Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
                             LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
         } catch (Exception e) {
+            log.info(format(
+                    "Error getting upload timestamp for document url: %s.",
+                    documentNode.get(DOCUMENT_URL).asText()));
             documentNodeUploadTimestamp = null;
         }
         return documentNodeUploadTimestamp;
@@ -108,8 +112,6 @@ public class DocumentRemovalService {
     private List<DocumentToKeepCollection> buildCaseDocumentList(List<JsonNode> documentNodes) {
 
         List<DocumentToKeepCollection> documentsCollection = new ArrayList<>();
-
-        log.info("Converting JSON nodes to DocumentToKeepCollection");
 
         for (JsonNode documentNode : documentNodes) {
             String docUrl = documentNode.get(DOCUMENT_URL).asText();

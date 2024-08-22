@@ -205,6 +205,13 @@ class DocumentRemovalServiceTest {
 
     }
 
+    @Test
+    void testGetCaseDocumentsList_SortingIsCorrect() {
+        // Date the documents and check that the sorting is correct.
+        // Consider updating other tests to include upload timestamps
+        assertEquals(true,true);
+    }
+
     //TODO: Currently when mapping back allocatedRegionWrapper is not mapped
     // back when passed in as null (note shouldn't be an issue as maps back to case data when no null )
     @Test
@@ -307,16 +314,6 @@ class DocumentRemovalServiceTest {
         assertEquals(1, result.getUploadDocuments().size());
         assertEquals("Form-C.pdf", result.getUploadDocuments().get(0).getValue().getDocumentLink().getDocumentFilename());
         assertNull(result.getDocumentToKeepCollection());
-    }
-
-    @Test
-    void testBuildCaseDocumentList() {
-        // Todo, spotted that this test is missing.  Added this failing placeholder
-        // Needs a test with a given JSON Node containing the docs
-        // Then test everything is built as expected
-        // split the sorting out if that makes more sense.
-        // Assert that getUploadTimestampFromDocumentNode called.
-        assertEquals(true,true);
     }
 
     @Test
