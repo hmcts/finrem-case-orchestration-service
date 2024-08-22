@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -17,14 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
-import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 class RespondentChangeOrgPolicyAboutToSubmitHandlerTest {
     public static final String AUTH_TOKEN = "tokien:)";
@@ -91,19 +87,5 @@ class RespondentChangeOrgPolicyAboutToSubmitHandlerTest {
                 .data(finremCaseData).build())
             .build();
     }
-
-    private static void assertCanHandle(CallbackHandler handler, Arguments... combination) {
-        for (CallbackType callbackType : CallbackType.values()) {
-            for (CaseType caseType : CaseType.values()) {
-                for (EventType eventType : EventType.values()) {
-                    boolean expectedOutcome = Arrays.stream(combination).anyMatch(c ->
-                        callbackType == c.get()[0]
-                            && caseType == c.get()[1]
-                            && eventType == c.get()[2] // This condition will always be true
-                    );
-                    assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
-                }
-            }
-        }
-    }
 }
+
