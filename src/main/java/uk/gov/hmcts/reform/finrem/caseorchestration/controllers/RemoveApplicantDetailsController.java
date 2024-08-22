@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -100,18 +99,16 @@ public class RemoveApplicantDetailsController extends BaseController {
         }
 
         if (includesRepresentationChange) {
-            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
-            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                authorisationToken,
-                originalCaseDetails));
+            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, authorisationToken,
+                callback.getCaseDetailsBefore()));
+        } else {
+            persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
-        persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
-        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseData.get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE);
+        return YES_VALUE.equals(caseData.get(INCLUDES_REPRESENTATION_CHANGE));
     }
 
     private void handleApplicantRepresentationChange(Map<String, Object> caseData) {
