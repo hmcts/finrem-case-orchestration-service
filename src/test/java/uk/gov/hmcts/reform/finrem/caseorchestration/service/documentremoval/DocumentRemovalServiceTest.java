@@ -1,8 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,8 +52,14 @@ class DocumentRemovalServiceTest {
 
     @BeforeEach
     public void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper = JsonMapper
+                .builder()
+                .addModule(new JavaTimeModule())
+                .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+
         documentRemovalService = new DocumentRemovalService(objectMapper, genericDocumentService, featureToggleService);
     }
 
@@ -205,15 +217,84 @@ class DocumentRemovalServiceTest {
 
     }
 
+    /**
+     * Sorts files by upload timestamp in reverse ascending order, nulls last.
+     * The data for this test includes the various file structures.
+     */
     @Test
     void testGetCaseDocumentsList_SortingIsCorrect() {
-        // Date the documents and check that the sorting is correct.
-        // Consider updating other tests to include upload timestamps
-        assertEquals(true,true);
+
+        String firstDate = "2024-01-01T00:00:00.000000";
+        String secondDate = "2024-01-02T00:00:00.000000";
+        String thirdDate = "2024-01-03T00:00:00.000000";
+        String fourthDate = "2024-01-04T00:00:00.000000";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+                // ApprovedOrderCollection as example of complex nested data.  Has third-oldest upload date
+                .ccdCaseId(TestConstants.CASE_ID)
+                .orderWrapper(OrderWrapper.builder()
+                    .appOrderCollection(List.of(
+                        ApprovedOrderCollection.builder()
+                            .value(ApproveOrder.builder()
+                                .caseDocument(CaseDocument.builder()
+                                    .documentUrl("https://example3.com/789")
+                                    .documentFilename("ThirdDoc.pdf")
+                                    .documentBinaryUrl("https://example3.com/binary")
+                                    .uploadTimestamp(LocalDateTime.parse(thirdDate, formatter))
+                                    .build())
+                                .build())
+                            .build()))
+                        .build())
+                // uploaded documents collection as example of data at in an array.  Has first, fourth and a null upload date.
+                .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                                .value(UploadDocument.builder()
+                                        .documentLink(CaseDocument.builder()
+                                                .documentUrl("https://example1.com/123")
+                                                .documentFilename("FirstDoc.pdf")
+                                                .documentBinaryUrl("https://example1.com/binary")
+                                                .uploadTimestamp(LocalDateTime.parse(firstDate, formatter))
+                                                .build()).build()).build(),
+                        UploadDocumentCollection.builder().value(UploadDocument.builder()
+                                .documentLink(CaseDocument.builder()
+                                        .documentUrl("https://example4.com/101112")
+                                        .documentFilename("FourthDoc.pdf")
+                                        .documentBinaryUrl("https://example4.com/binary")
+                                        .uploadTimestamp(LocalDateTime.parse(fourthDate, formatter))
+                                        .build()).build()).build(),
+                        UploadDocumentCollection.builder().value(UploadDocument.builder()
+                                .documentLink(CaseDocument.builder()
+                                        .documentUrl("https://example5.com/131415")
+                                        .documentFilename("NullDoc.pdf")
+                                        .documentBinaryUrl("https://example5.com/binary")
+                                        .build()).build()).build()))
+                // miniFormA as example of data at a root level.  Has second-oldest upload date
+                .miniFormA(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("secondDoc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .uploadTimestamp(LocalDateTime.parse(secondDate, formatter))
+                        .build())
+                .build());
+
+        assertEquals(5, result.size());
+
+        assertEquals("https://example4.com/101112", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("FourthDoc.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example3.com/789", result.get(1).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("ThirdDoc.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example2.com/456", result.get(2).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("secondDoc.pdf", result.get(2).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example1.com/123", result.get(3).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("FirstDoc.pdf", result.get(3).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example5.com/131415", result.get(4).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("NullDoc.pdf", result.get(4).getValue().getCaseDocument().getDocumentFilename());
     }
 
-    //TODO: Currently when mapping back allocatedRegionWrapper is not mapped
-    // back when passed in as null (note shouldn't be an issue as maps back to case data when no null )
     @Test
     void testRemoveDocuments_NoDocuments() {
         FinremCaseData caseData = FinremCaseData.builder()
