@@ -173,9 +173,8 @@ public class DocumentRemovalService {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
 
-                if (fieldValue.has(DOCUMENT_URL)
-                    && fieldValue.get(DOCUMENT_URL).asText()
-                        .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
+                if (shouldRemoveDocument(fieldValue,
+                    documentToDelete.getCaseDocument().getDocumentUrl())) {
                     log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
                     fieldsToRemove.add(fieldName);
                 } else {
@@ -183,27 +182,7 @@ public class DocumentRemovalService {
                 }
             }
         } else if (root.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) root;
-            for (int i = 0; i < arrayNode.size(); i++) {
-                JsonNode arrayElement = arrayNode.get(i);
-                if (arrayElement.has(VALUE_KEY)) {
-                    JsonNode valueObject = arrayElement.get(VALUE_KEY);
-                    Iterator<String> fieldNames = valueObject.fieldNames();
-
-                    while (fieldNames.hasNext()) {
-                        String fieldName = fieldNames.next();
-                        JsonNode fieldValue = valueObject.get(fieldName);
-
-                        if (fieldValue.has(DOCUMENT_URL)
-                            && fieldValue.get(DOCUMENT_URL).asText()
-                                .equals(documentToDelete.getCaseDocument().getDocumentUrl())) {
-                            log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
-                            ((ArrayNode) root).remove(i);
-                        }
-                    }
-                }
-                removeDocumentFromJson(arrayElement, documentToDelete);
-            }
+            processArrayNode(root, documentToDelete);
         }
 
         for (String fieldName : fieldsToRemove) {
@@ -211,7 +190,35 @@ public class DocumentRemovalService {
         }
     }
 
-    // Once working, consider making async again.  See deleteOldMiniFormA
+    private void processArrayNode(JsonNode root, DocumentToKeep documentToDelete){
+        ArrayNode arrayNode = (ArrayNode) root;
+        for (int i = 0; i < arrayNode.size(); i++) {
+            JsonNode arrayElement = arrayNode.get(i);
+            if (arrayElement.has(VALUE_KEY)) {
+                JsonNode valueObject = arrayElement.get(VALUE_KEY);
+                Iterator<String> fieldNames = valueObject.fieldNames();
+
+                while (fieldNames.hasNext()) {
+                    String fieldName = fieldNames.next();
+                    JsonNode fieldValue = valueObject.get(fieldName);
+
+                    if (shouldRemoveDocument(fieldValue,
+                        documentToDelete.getCaseDocument().getDocumentUrl())) {
+                        log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
+                        ((ArrayNode) root).remove(i);
+                    }
+                }
+            }
+            removeDocumentFromJson(arrayElement, documentToDelete);
+        }
+    }
+
+    private boolean shouldRemoveDocument(JsonNode fieldValue, String documentToKeepUrl) {
+        return fieldValue.has(DOCUMENT_URL)
+                && fieldValue.get(DOCUMENT_URL).asText().equals(documentToKeepUrl);
+    }
+
+    // Consider making async again.  See deleteOldMiniFormA
     private void deleteDocument(DocumentToKeep documentToRemove, String authorisationToken) {
         try {
             log.info(String.format("Deleting doc from DocStore with url %s",
