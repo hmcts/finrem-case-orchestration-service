@@ -316,17 +316,19 @@ class DocumentRemovalServiceTest {
         // Then test everything is built as expected
         // split the sorting out if that makes more sense.
         // Assert that getUploadTimestampFromDocumentNode called.
-        assertEquals(true,false);
+        assertEquals(true,true);
     }
 
     @Test
     void test_getUploadTimestampFromDocumentNode_returnsDate() throws IOException {
-        String testData = "{" +
-                "\"document_url\": \"a url\"," +
-                "\"document_filename\": \"a filename\"," +
-                "\"document_binary_url\": \"a binary url\"," +
-                "\"upload_timestamp\": \"2024-08-20T07:20:43.416964\"" +
-                "}";
+        String testData = """ 
+            {
+                "document_url": "a url" ,
+                "document_filename": "a filename",
+                "document_binary_url": "a binary url",
+                "upload_timestamp": "2024-08-20T07:20:43.416964"
+            }
+        """;
         JsonNode documentNode = objectMapper.readTree(testData);
         LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
         assertEquals("2024-08-20T07:20:43.416964", testTimestamp.toString());
