@@ -81,8 +81,6 @@ class DocumentRemovalAboutToStartHandlerTest {
         List<DocumentToKeepCollection> documentsToKeepList = new ArrayList<>();
         documentsToKeepList.add(documentToKeepCollection);
 
-        FinremCaseData caseData = new FinremCaseData();
-
         when(documentRemovalService.getCaseDocumentsList(caseData)).thenReturn(documentsToKeepList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");

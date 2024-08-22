@@ -49,7 +49,7 @@ class DocumentRemovalAboutToSubmitHandlerTest {
     }
 
     @Test
-    void testHandle() throws Exception {
+    void testHandle() {
         when(documentRemovalService.removeDocuments(caseData, 1L, "auth")).thenReturn(caseData);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, "auth");
 

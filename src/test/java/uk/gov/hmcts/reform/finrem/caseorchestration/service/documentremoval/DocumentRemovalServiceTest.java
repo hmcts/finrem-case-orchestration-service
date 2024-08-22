@@ -52,7 +52,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testGetCaseDocumentsList_EmptyObject() throws Exception {
+    void testGetCaseDocumentsList_EmptyObject() {
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .build());
@@ -60,7 +60,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testGetCaseDocumentsList_testEmptyArray() throws Exception {
+    void testGetCaseDocumentsList_testEmptyArray() {
 
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
@@ -70,7 +70,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testGetCaseDocumentsList_RootDocument() throws Exception {
+    void testGetCaseDocumentsList_RootDocument() {
 
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
@@ -90,7 +90,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testGetCaseDocumentsList_withDuplicateDocument() throws Exception {
+    void testGetCaseDocumentsList_withDuplicateDocument() {
 
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
@@ -116,7 +116,7 @@ class DocumentRemovalServiceTest {
 
 
     @Test
-    void testGetCaseDocumentsList_NestedObjectWithinArrayWithDocumentUrl() throws Exception {
+    void testGetCaseDocumentsList_NestedObjectWithinArrayWithDocumentUrl() {
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .uploadDocuments(List.of(UploadDocumentCollection.builder()
@@ -148,7 +148,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testGetCaseDocumentsList_ComplexNestedArrayStructure() throws Exception {
+    void testGetCaseDocumentsList_ComplexNestedArrayStructure() {
 
         List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
