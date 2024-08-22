@@ -79,8 +79,8 @@ public class DocumentRemovalService {
             removeDocumentFromJson(
                 caseDataJson, documentToDeleteCollection.getValue()));
 
-        log.info(format("Document removal complete, removing DocumentToKeep collection " +
-                "from CaseData JSON for case ID: %s", caseId));
+        log.info(format("Document removal complete, removing DocumentToKeep collection "
+            + "from CaseData JSON for case ID: %s", caseId));
 
         ((ObjectNode) caseDataJson).remove("documentToKeepCollection");
 
@@ -190,7 +190,7 @@ public class DocumentRemovalService {
         }
     }
 
-    private void processArrayNode(JsonNode root, DocumentToKeep documentToDelete){
+    private void processArrayNode(JsonNode root, DocumentToKeep documentToDelete) {
         ArrayNode arrayNode = (ArrayNode) root;
         for (int i = 0; i < arrayNode.size(); i++) {
             JsonNode arrayElement = arrayNode.get(i);
