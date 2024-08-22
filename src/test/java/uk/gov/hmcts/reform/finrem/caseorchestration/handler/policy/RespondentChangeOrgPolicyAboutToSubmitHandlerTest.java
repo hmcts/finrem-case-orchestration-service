@@ -33,15 +33,15 @@ class RespondentChangeOrgPolicyAboutToSubmitHandlerTest {
     }
 
     @Test
-    void canHandle() {
+    void canHandleContested() {
         assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
             EventType.CLEAR_RESPONDENT_POLICY));
     }
 
     @Test
-    void canNotHandleWrongCaseType() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED,
-                EventType.CLEAR_RESPONDENT_POLICY));
+    void canHandleConsented() {
+        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED,
+            EventType.CLEAR_RESPONDENT_POLICY));
     }
 
     @Test

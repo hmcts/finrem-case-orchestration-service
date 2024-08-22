@@ -27,7 +27,7 @@ public class RespondentChangeOrgPolicyAboutToSubmitHandler extends FinremCallbac
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+            && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
             && EventType.CLEAR_RESPONDENT_POLICY.equals(eventType);
     }
 
