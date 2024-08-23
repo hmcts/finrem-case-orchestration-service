@@ -15,11 +15,11 @@ apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '33.2.1-jre',
+        guava                : '33.3.0-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.5-SPRING2',
         commonsIo            : '2.16.1',
-        commonsLang3         : '3.15.0',
+        commonsLang3         : '3.16.0',
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.34',
@@ -382,6 +382,10 @@ dependencyManagement {
             entry 'legion-of-the-bouncy-castle-java-crytography-api'
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
+        //CVE-2024-25710
+        dependencySet(group: 'org.apache.commons', version: '1.27.0') {
+            entry 'commons-compress'
+        }
     }
 }
 
@@ -449,7 +453,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.3:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.4:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
