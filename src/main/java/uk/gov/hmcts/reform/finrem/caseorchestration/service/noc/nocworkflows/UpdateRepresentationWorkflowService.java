@@ -103,14 +103,14 @@ public class UpdateRepresentationWorkflowService {
     public void persistDefaultOrganisationPolicy(FinremCaseData caseData) {
         String ccdCaseId = caseData.getCcdCaseId();
         OrganisationPolicy appPolicy = caseData.getApplicantOrganisationPolicy();
-        log.info("Applicant existing org policy {} for Case ID: {}", appPolicy, ccdCaseId);
         if (appPolicy == null) {
+            log.info("Adding default applicant organisation policy for Case ID: {}", ccdCaseId);
             OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.APP_SOLICITOR);
             caseData.setApplicantOrganisationPolicy(organisationPolicy);
         }
         OrganisationPolicy respPolicy = caseData.getRespondentOrganisationPolicy();
-        log.info("Respondent existing org policy {} for Case ID: {}", respPolicy, ccdCaseId);
         if (respPolicy == null) {
+            log.info("Adding default respondent organisation policy for Cae ID: {}", ccdCaseId);
             OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.RESP_SOLICITOR);
             caseData.setRespondentOrganisationPolicy(organisationPolicy);
         }
