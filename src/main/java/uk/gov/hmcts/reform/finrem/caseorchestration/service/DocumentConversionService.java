@@ -71,9 +71,9 @@ public class DocumentConversionService {
             if (acroForm.isPresent()) {
                 acroForm.get().flatten();
                 doc.save(bos);
-                doc.close();
                 return bos.toByteArray();
             }
+            doc.close();
         } catch (IOException e) {
             log.error("Unable to flatten document", e);
         }
