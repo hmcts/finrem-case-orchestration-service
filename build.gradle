@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '5.1.0.4882'
-    id 'org.springframework.boot' version '3.3.2'
+    id 'org.springframework.boot' version '3.3.3'
     id 'com.github.ben-manes.versions' version '0.51.0'
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.13'
@@ -383,7 +383,7 @@ dependencyManagement {
             entry 'the_bouncy_castle_crypto_package_for_java'
         }
         //CVE-2024-25710
-        dependencySet(group: 'org.apache.commons', version: '1.27.0') {
+        dependencySet(group: 'org.apache.commons', version: '1.27.1') {
             entry 'commons-compress'
         }
     }
