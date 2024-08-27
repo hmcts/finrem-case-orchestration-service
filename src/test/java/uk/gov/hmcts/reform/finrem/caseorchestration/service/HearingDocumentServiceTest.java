@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -90,7 +88,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
@@ -232,7 +229,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "0300 123 5577", "Family.canterbury.countycourt@justice.gov.uk");
+            "01227 819200", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -266,7 +263,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
-            "0113 306 2501", "leedsfamily@justice.gov.uk");
+            "01423 503921", "enquiries.harrogate.countycourt@Justice.gov.uk");
     }
 
     @Test
@@ -312,7 +309,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5430", "manchesterdivorce@justice.gov.uk");
+            "0161 240 5424", "manchesterdivorce@justice.gov.uk");
     }
 
     @Test
@@ -334,7 +331,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
-            "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
+            "0300 123 5577", "FRCLondon@justice.gov.uk");
     }
 
     @Test
@@ -409,40 +406,6 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFieldsNotSet();
     }
-
-    @Test
-    public void verifySendListForHearingCorrespondence() {
-        CaseDetails caseDetails = caseDetails(NO_VALUE);
-        caseDetails.getData().put(PARTIES_ON_CASE, buildDynamicSelectableParties(fullPartyList()));
-        buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode()));
-
-        hearingDocumentService.sendListForHearingCorrespondence(caseDetails, caseDetails(NO_VALUE), AUTH_TOKEN);
-
-
-        verify(bulkPrintService).printApplicantDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
-        verify(bulkPrintService).printRespondentDocuments(any(FinremCaseDetails.class), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
-
-        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(1));
-        bulkPrintDocumentsCaptor.getValue().forEach(obj -> assertThat(obj.getBinaryFileUrl(), is(BINARY_URL)));
-
-
-    }
-
-    @Test
-    public void verifySendListForHearingCorrespondenceReturnsErrorsWhenCoreLitigantsNotSelected() {
-        CaseDetails caseDetails = caseDetails(NO_VALUE);
-        caseDetails.getData()
-            .put(PARTIES_ON_CASE, buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode())));
-        buildDynamicSelectableParties(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode()));
-
-        List<String> errors = hearingDocumentService.sendListForHearingCorrespondence(caseDetails, caseDetails(NO_VALUE), AUTH_TOKEN);
-        assertThat(errors.size(), is(1));
-        assertThat(errors.get(0), is("This listing notice must be sent to the applicant and respondent as default."
-            + " If this listing needs to be sent to only one of these parties please use the general order event."));
-        verifyNoMoreInteractions(bulkPrintService);
-
-    }
-
 
     private List<String> fullPartyList() {
         return of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode(),

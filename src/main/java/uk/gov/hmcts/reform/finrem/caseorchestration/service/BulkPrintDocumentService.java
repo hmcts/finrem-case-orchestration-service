@@ -26,10 +26,11 @@ public class BulkPrintDocumentService {
         log.info("Downloading document for bulk print for Case ID: {}", caseId);
 
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream()
-            .map(bulkPrintDocument -> service.download(bulkPrintDocument.getBinaryFileUrl(), auth))
+            .map(bulkPrintDocument -> documentConversionService.flattenPdfDocument(service.download(bulkPrintDocument.getBinaryFileUrl(), auth)))
             .toList();
         log.info("Download document count for bulk print {} for Case ID: {} ", documents.size(),
             caseId);
+
         return documents;
     }
 

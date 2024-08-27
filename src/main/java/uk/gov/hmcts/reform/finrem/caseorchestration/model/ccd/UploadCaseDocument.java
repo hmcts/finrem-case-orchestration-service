@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadCaseDocument {
+public class UploadCaseDocument implements HasCaseDocument {
     private CaseDocument caseDocuments;
     private CaseDocumentType caseDocumentType;
     private CaseDocumentParty caseDocumentParty;
@@ -33,6 +33,22 @@ public class UploadCaseDocument {
     private LocalDateTime scannedDate;
 
     private String exceptionRecordReference;
+
+    private YesOrNo selectForUpdate;
+
+    public static UploadCaseDocument from(ScannedDocumentCollection scannedDocumentCollection) {
+        ScannedDocument scannedDocument = scannedDocumentCollection.getValue();
+        return UploadCaseDocument.builder()
+            .fileName(scannedDocument.getFileName())
+            .scannedDate(scannedDocument.getScannedDate())
+            .caseDocuments(CaseDocument.builder()
+                .documentUrl(scannedDocument.getUrl().getDocumentUrl())
+                .documentBinaryUrl(scannedDocument.getUrl().getDocumentBinaryUrl())
+                .documentFilename(scannedDocument.getUrl().getDocumentFilename())
+                .build())
+            .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
+            .build();
+    }
 
     public UploadCaseDocument(UploadCaseDocument uploadCaseDocument) {
         this.setCaseDocuments(new CaseDocument(uploadCaseDocument.getCaseDocuments()));

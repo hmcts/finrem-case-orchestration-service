@@ -9,15 +9,22 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedD81Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ScannedDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapperTest;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.Month.DECEMBER;
+import static java.time.Month.FEBRUARY;
+import static java.time.Month.JULY;
+import static java.time.Month.JUNE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -158,11 +165,32 @@ public class FormAToCaseTransformerTest {
             hasEntry("authorisation2b", "I'm the CEO")
         ));
 
-        assertChildrenInfo(transformedCaseData);
+        assertGivenChildrenInfo(transformedCaseData);
 
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
         assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("lumpSumOrder", "pensionSharingOrder")));
         assertThat(transformedCaseData.get("natureOfApplication6"), is(singletonList("In addition to child support")));
+    }
+
+    @Test
+    public void shouldTransformEmptyChildGenderIsNotGiven() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(asList(
+            new OcrDataField(OcrFieldName.NAME_CHILD_1, "Bilbo Baggins"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_1, ""),
+            new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_1, "12/03/2000"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_1, "son"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_1, "SON"),
+            new OcrDataField(OcrFieldName.COUNTRY_CHILD_1, "New Zeeland"),
+            new OcrDataField(OcrFieldName.NAME_CHILD_2, "Frodo Baggins"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_2, null),
+            new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_2, "12/03/1895"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_2, "daughter"),
+            new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_2, "Daughter"),
+            new OcrDataField(OcrFieldName.COUNTRY_CHILD_2, "The Shire")));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertNotGivenChildrenInfo(transformedCaseData);
     }
 
     @Test
@@ -225,6 +253,14 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
+    public void childSupportAgencyCalculationMadeToNullWhenNotProvided() {
+        Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+            singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
+                null))));
+        assertThat(optionOneTransformedData, hasEntry("ChildSupportAgencyCalculationMade", null));
+    }
+
+    @Test
     public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
         Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             singletonList(new OcrDataField("OrderForChildren",
@@ -267,7 +303,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
-            hasEntry("natureOfApplication5b", ""),
+            not(hasEntry("natureOfApplication5b", "")),
             not(hasKey("orderForChildrenQuestion1"))
         ));
     }
@@ -407,11 +443,9 @@ public class FormAToCaseTransformerTest {
     @Test
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
-            .document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
-            .document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
-        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createScannedD81Doc("d81-1"));
+        scannedDocuments.add(createScannedD81Doc("d81-2"));
+        scannedDocuments.add(createFormADoc());
         scannedDocuments.add(createDoc(P1_DOCUMENT));
         scannedDocuments.add(createDoc(PPF1_DOCUMENT));
         scannedDocuments.add(createDoc(P2_DOCUMENT));
@@ -420,7 +454,7 @@ public class FormAToCaseTransformerTest {
         scannedDocuments.add(createDoc(FORM_E_DOCUMENT));
         scannedDocuments.add(createDoc(COVER_LETTER_DOCUMENT));
         scannedDocuments.add(createDoc(OTHER_SUPPORT_DOCUMENTS));
-        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
+        scannedDocuments.add(createDraftConsentOrder());
         scannedDocuments.add(createDoc(DECREE_NISI_DOCUMENT));
         scannedDocuments.add(createDoc(DECREE_ABSOLUTE_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
@@ -433,6 +467,20 @@ public class FormAToCaseTransformerTest {
 
         assertThat(transformedCaseData, hasKey("formA"));
         assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), FORM_A_DOCUMENT);
+        assertThat(transformedCaseData, hasKey("formAType"));
+        assertThat(transformedCaseData, hasEntry("formAType", "form"));
+        assertThat(transformedCaseData, hasKey("formASubtype"));
+        assertThat(transformedCaseData, hasEntry("formASubtype", FORM_A_DOCUMENT));
+        assertThat(transformedCaseData, hasKey("formAControlNumber"));
+        assertThat(transformedCaseData, hasEntry("formAControlNumber", "20901000454999999000"));
+        assertThat(transformedCaseData, hasKey("formAFileName"));
+        assertThat(transformedCaseData, hasEntry("formAFileName", "1111002.pdf"));
+        assertThat(transformedCaseData, hasKey("formAScannedDate"));
+        assertThat(transformedCaseData, hasEntry("formAScannedDate", LocalDateTime.of(2024, JUNE, 4, 0, 0)));
+        assertThat(transformedCaseData, hasKey("formADeliveryDate"));
+        assertThat(transformedCaseData, hasEntry("formADeliveryDate", LocalDateTime.of(2024, JUNE, 4, 0, 0)));
+        assertThat(transformedCaseData, hasKey("formAExceptionRecordReference"));
+        assertThat(transformedCaseData, hasEntry("formAExceptionRecordReference", TEST_CASE_ID));
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
         ComplexTypeCollection<CaseDocument> d81Documents =
@@ -446,6 +494,35 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-2"));
         assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
+
+        assertThat(transformedCaseData, hasKey("scannedD81Collection"));
+        ComplexTypeCollection<ScannedD81Document> scannedD81Collection =
+            (ComplexTypeCollection<ScannedD81Document>) transformedCaseData.get("scannedD81Collection");
+        assertThat(scannedD81Collection, hasSize(2));
+        ScannedD81Document scannedD81Document1 = scannedD81Collection.getItem(0);
+        CaseDocument scannedD81CaseDocument1 = scannedD81Document1.getDocumentLink();
+        assertThat(scannedD81CaseDocument1.getDocumentUrl(), is("http://url/d81-1"));
+        assertThat(scannedD81CaseDocument1.getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
+        assertThat(scannedD81CaseDocument1.getDocumentFilename(), is("d81-1.pdf"));
+        assertThat(scannedD81Document1.getType(), is(ScannedDocumentType.OTHER));
+        assertThat(scannedD81Document1.getSubtype(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document1.getControlNumber(), is("controlNumberd81-1"));
+        assertThat(scannedD81Document1.getFileName(), is("d81-1.pdf"));
+        assertThat(scannedD81Document1.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document1.getDeliveryDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document1.getExceptionRecordReference(), is(TEST_CASE_ID));
+        ScannedD81Document scannedD81Document2 = scannedD81Collection.getItem(1);
+        CaseDocument scannedD81CaseDocument2 = scannedD81Document2.getDocumentLink();
+        assertThat(scannedD81CaseDocument2.getDocumentUrl(), is("http://url/d81-2"));
+        assertThat(scannedD81CaseDocument2.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
+        assertThat(scannedD81CaseDocument2.getDocumentFilename(), is("d81-2.pdf"));
+        assertThat(scannedD81Document2.getType(), is(ScannedDocumentType.OTHER));
+        assertThat(scannedD81Document2.getSubtype(), is(D81_DOCUMENT));
+        assertThat(scannedD81Document2.getControlNumber(), is("controlNumberd81-2"));
+        assertThat(scannedD81Document2.getFileName(), is("d81-2.pdf"));
+        assertThat(scannedD81Document2.getScannedDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document2.getDeliveryDate(), is(LocalDateTime.of(2024, JULY,  1, 0, 0)));
+        assertThat(scannedD81Document2.getExceptionRecordReference(), is(TEST_CASE_ID));
 
         assertThat(transformedCaseData, hasKey("pensionCollection"));
         ComplexTypeCollection<TypedCaseDocument> pensionDocuments =
@@ -481,8 +558,22 @@ public class FormAToCaseTransformerTest {
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
         assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), OTHER_SUPPORT_DOCUMENTS);
 
-        assertThat(transformedCaseData, hasKey("consentOrder"));
+        assertThat(transformedCaseData, hasKey("consentOrderType"));
+        assertThat(transformedCaseData, hasEntry("consentOrderType", "other"));
+        assertThat(transformedCaseData, hasKey("consentOrderSubtype"));
+        assertThat(transformedCaseData, hasEntry("consentOrderSubtype", DRAFT_CONSENT_ORDER_DOCUMENT));
+        assertThat(transformedCaseData, hasKey("consentOrderControlNumber"));
+        assertThat(transformedCaseData, hasEntry("consentOrderControlNumber", "20910000598969990077"));
+        assertThat(transformedCaseData, hasKey("consentOrderFileName"));
+        assertThat(transformedCaseData, hasEntry("consentOrderFileName", DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf"));
+        assertThat(transformedCaseData, hasKey("consentOrderScannedDate"));
+        assertThat(transformedCaseData, hasEntry("consentOrderScannedDate", LocalDateTime.of(2021, DECEMBER, 27, 10, 46)));
+        assertThat(transformedCaseData, hasKey("consentOrderDeliveryDate"));
+        assertThat(transformedCaseData, hasEntry("consentOrderDeliveryDate", LocalDateTime.of(2022, FEBRUARY, 4, 14, 20)));
+        assertThat(transformedCaseData, hasKey("consentOrderExceptionRecordReference"));
+        assertThat(transformedCaseData, hasEntry("consentOrderExceptionRecordReference", TEST_CASE_ID));
         assertThat(transformedCaseData, hasKey("latestConsentOrder"));
+        assertThat(transformedCaseData, hasKey("consentOrder"));
         CaseDocument draftConsentOrder = (CaseDocument) transformedCaseData.get("consentOrder");
         assertThat(draftConsentOrder, equalTo(transformedCaseData.get("latestConsentOrder")));
         assertDocumentsMatchExpectations(draftConsentOrder, DRAFT_CONSENT_ORDER_DOCUMENT);
@@ -505,6 +596,37 @@ public class FormAToCaseTransformerTest {
             .document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
     }
 
+    private InputScannedDoc createDraftConsentOrder() {
+        return InputScannedDoc.builder().type("other").subtype(DRAFT_CONSENT_ORDER_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + DRAFT_CONSENT_ORDER_DOCUMENT, "http://binUrl/" + DRAFT_CONSENT_ORDER_DOCUMENT + "/binary", DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf"))
+            .fileName(DRAFT_CONSENT_ORDER_DOCUMENT + ".pdf")
+            .controlNumber("20910000598969990077")
+            .scannedDate(LocalDateTime.of(2021, DECEMBER, 27, 10, 46))
+            .deliveryDate(LocalDateTime.of(2022, FEBRUARY, 4, 14, 20))
+            .build();
+    }
+
+    private InputScannedDoc createFormADoc() {
+        return InputScannedDoc.builder().type("form").subtype(FORM_A_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + FORM_A_DOCUMENT, "http://binUrl/" + FORM_A_DOCUMENT + "/binary", FORM_A_DOCUMENT + ".pdf"))
+            .fileName("1111002.pdf")
+            .controlNumber("20901000454999999000")
+            .scannedDate(LocalDateTime.of(2024, JUNE, 4, 0, 0))
+            .deliveryDate(LocalDateTime.of(2024, JUNE, 4, 0, 0))
+            .build();
+    }
+
+    private InputScannedDoc createScannedD81Doc(String id) {
+        return InputScannedDoc.builder().type("other").subtype(D81_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/" + id, "http://binUrl/" + id + "/binary", id + ".pdf"))
+            .fileName(id + ".pdf")
+            .controlNumber("controlNumber" + id)
+            .scannedDate(LocalDateTime.of(2024, JULY, 1, 0, 0))
+            .deliveryDate(LocalDateTime.of(2024, JULY, 1, 0, 0))
+            .build();
+    }
+
+
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(
             createExceptionRecord(asList(new OcrDataField(ocrFieldName, ocrFieldValue))));
@@ -520,11 +642,18 @@ public class FormAToCaseTransformerTest {
         return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
     }
 
-    private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
+    private void assertGivenChildrenInfo(Map<String, Object> transformedCaseData) {
         ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
 
         assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "Male", "son", "SON", "New Zeeland"));
         assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "Female", "daughter", "Daughter", "Canada"));
+    }
+
+    private void assertNotGivenChildrenInfo(Map<String, Object> transformedCaseData) {
+        ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
+
+        assertChild(children.getItem(0), asList("Bilbo Baggins", "2000-03-12", "notGiven", "son", "SON", "New Zeeland"));
+        assertChild(children.getItem(1), asList("Frodo Baggins", "1895-03-12", "notGiven", "daughter", "Daughter", "The Shire"));
     }
 
     private void assertChild(ChildInfo child, List<String> values) {

@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 
 import java.util.Map;
@@ -30,17 +29,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class UpdateRepresentationController extends BaseController {
 
-    @Autowired
-    private UpdateRepresentationService updateRepresentationService;
-
-    @Autowired
-    private AssignCaseAccessService assignCaseAccessService;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
+    private final UpdateRepresentationService updateRepresentationService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     @PostMapping(path = "/apply-noc-decision", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
@@ -54,15 +48,14 @@ public class UpdateRepresentationController extends BaseController {
         @RequestBody CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        log.info("Received request to apply Notice of Change Decision and update representation for Case ID: {}",
-            caseDetails.getId());
+        Long caseId = caseDetails.getId();
+        log.info("{} - Received request to apply Notice of Change Decision and update representation", caseId);
 
         validateCaseData(ccdRequest);
         caseDetails.getData().remove(IS_NOC_REJECTED);
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-        log.info("The creator role has been revoked on case {}", caseDetails.getId());
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
-        log.info("Solicitor representation has been updated on case {}", caseDetails.getId());
+        log.info("{} - Solicitor representation has been updated.", caseId);
         caseDetails.getData().putAll(caseData);
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));

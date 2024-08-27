@@ -33,6 +33,7 @@ public class ConsentOrderPrintService {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final InternationalPostalService postalService;
 
     public void sendConsentOrderToBulkPrint(FinremCaseDetails finremCaseDetails,
                                             FinremCaseDetails finremCaseDetailsBefore,
@@ -78,10 +79,10 @@ public class ConsentOrderPrintService {
 
         if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
             log.info("Case ID: {}, has been marked as confidential. Adding coversheet to confidential field", finremCaseDetails.getId());
-            caseData.setBulkPrintCoverSheetRes(null);
-            caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseData.setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseData.getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
             caseData.setBulkPrintLetterIdRes(respondentLetterId.toString());
         }
 
@@ -114,12 +115,19 @@ public class ConsentOrderPrintService {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(coverSheet));
-        getOrderDocuments(caseDetails,caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+        getOrderDocuments(caseDetails, caseDetailsBefore, eventType, authorisationToken, bulkPrintDocuments);
+        DocumentHelper.PaperNotificationRecipient docRespondent;
+        if (!shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)) {
+            docRespondent = DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+            bulkPrintDocuments.add(consentOrderNotApprovedDocumentService.notApprovedCoverLetter(caseDetails, authorisationToken, docRespondent));
+        }
+        FinremCaseData caseData = caseDetails.getData();
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
             RESPONDENT,
             bulkPrintDocuments,
+            postalService.isRespondentResideOutsideOfUK(caseData),
             authorisationToken);
     }
 
@@ -147,12 +155,13 @@ public class ConsentOrderPrintService {
             } else if (!isNull(generalOrder) && !orderDocuments.isEmpty()
                 && documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
                 bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
+            } else if (!isNull(generalOrder) && orderDocuments.isEmpty()) {
+                bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalOrder));
             } else {
                 bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
             }
         }
     }
-
 
 
     public boolean shouldPrintOrderApprovedDocuments(FinremCaseDetails caseDetails, String authorisationToken) {

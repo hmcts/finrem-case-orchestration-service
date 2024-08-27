@@ -22,15 +22,9 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
     }
 
     @Override
-    protected DocumentCategory getPensionPlanDocumentCategory() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_PENSION_PLAN;
-    }
-
-    @Override
     protected DocumentCategory getCertificatesOfServiceDocumentCategory() {
         return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_CERTIFICATES_OF_SERVICE;
     }
-
 
     @Override
     protected DocumentCategory getHearingDocumentsCategoryES1() {
@@ -40,11 +34,6 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getHearingDocumentsCategoryES2() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_ES2;
-    }
-
-    @Override
-    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
-        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4_MORTGAGE_CAPACITIES_OR_HOUSING_PARTICULARS;
     }
 
     @Override
@@ -65,6 +54,11 @@ public class IntervenerFourOtherDocumentsHandler extends OtherDocumentsHandler {
     @Override
     protected DocumentCategory getHearingDocumentsCategoryFM5() {
         return DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_FM5;
+    }
+
+    @Override
+    protected DocumentCategory getPartyDocumentsCategoryMortgageCapacities() {
+        return DocumentCategory.INTERVENER_DOCUMENTS_INTERVENER_4;
     }
 
     @Override

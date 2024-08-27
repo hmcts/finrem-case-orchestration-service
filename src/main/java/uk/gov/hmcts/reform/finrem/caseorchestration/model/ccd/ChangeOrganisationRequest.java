@@ -42,4 +42,12 @@ public class ChangeOrganisationRequest {
     @JsonProperty("ApprovalStatus")
     private ChangeOrganisationApprovalStatus approvalStatus;
 
+    public DynamicList getCaseRoleId() {
+        if (caseRoleId == null) {
+            return DynamicList.builder().build();
+        } else {
+            return caseRoleId;
+        }
+    }
+
 }

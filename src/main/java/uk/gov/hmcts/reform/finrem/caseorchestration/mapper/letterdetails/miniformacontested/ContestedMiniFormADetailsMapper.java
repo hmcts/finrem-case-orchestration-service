@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
@@ -158,6 +156,11 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         MiamWrapper miamDetails) {
         return builder
             .claimingExemptionMiam(getYesOrNo(miamDetails.getClaimingExemptionMiam()))
+            .evidenceUnavailableDomesticAbuseMiam(miamDetails.getEvidenceUnavailableDomesticAbuseMiam())
+            .evidenceUnavailableUrgencyMiam(miamDetails.getEvidenceUnavailableUrgencyMiam())
+            .evidenceUnavailablePreviousAttendanceMiam(miamDetails.getEvidenceUnavailablePreviousAttendanceMiam())
+            .evidenceUnavailableOtherGroundsMiam(miamDetails.getEvidenceUnavailableOtherGroundsMiam())
+            .additionalInfoOtherGroundsMiam(miamDetails.getAdditionalInfoOtherGroundsMiam())
             .familyMediatorMiam(getYesOrNo(miamDetails.getFamilyMediatorMiam()))
             .applicantAttendedMiam(getYesOrNo(miamDetails.getApplicantAttendedMiam()))
             .mediatorRegistrationNumber(Objects.toString(caseData.getMediatorRegistrationNumber(), null))
@@ -171,17 +174,24 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     }
 
     private String getMiamOtherGroundsChecklist(MiamWrapper miamDetails) {
-        return Optional.ofNullable(miamDetails.getMiamOtherGroundsChecklist())
-            .map(MiamOtherGrounds::getText)
-            .orElse(null);
+        if (miamDetails.getMiamOtherGroundsChecklistV2() != null) {
+            return miamDetails.getMiamOtherGroundsChecklistV2().getText();
+        } else if (miamDetails.getMiamOtherGroundsChecklist() != null) {
+            return miamDetails.getMiamOtherGroundsChecklist().getText();
+        } else {
+            return null;
+        }
     }
 
     private String getMiamPreviousAttendanceChecklist(MiamWrapper miamDetails) {
-        return Optional.ofNullable(miamDetails.getMiamPreviousAttendanceChecklist())
-            .map(MiamPreviousAttendance::getText)
-            .orElse(null);
+        if (miamDetails.getMiamPreviousAttendanceChecklistV2() != null) {
+            return miamDetails.getMiamPreviousAttendanceChecklistV2().getText();
+        } else if (miamDetails.getMiamPreviousAttendanceChecklist() != null) {
+            return miamDetails.getMiamPreviousAttendanceChecklist().getText();
+        } else {
+            return null;
+        }
     }
-
 
     private List<String> getNatureOfApplicationChecklist(FinremCaseData caseData) {
         List<NatureApplication> natureApplicationList = caseData.getNatureApplicationWrapper()

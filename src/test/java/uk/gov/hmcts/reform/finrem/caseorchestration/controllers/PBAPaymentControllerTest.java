@@ -17,8 +17,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.emptyOrNullString;
@@ -67,6 +70,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private CcdDataStoreService ccdDataStoreService;
     @MockBean
     private PrdOrganisationService prdOrganisationService;
+    @MockBean
+    private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -300,6 +305,22 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
+
+    @Test
+    public void givenDraftCaseWithInvalidMiamExemptions_whenAssignAppSolUrlRequest_thenReturnsErrors() throws Exception {
+        doPBASetUp(true);
+        List<String> errors = List.of("Error 1", "Error 2");
+        when(miamLegacyExemptionsService.isLegacyExemptionsInvalid(any(Map.class))).thenReturn(true);
+        when(miamLegacyExemptionsService.getInvalidLegacyExemptions(any(Map.class))).thenReturn(errors);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(3)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }

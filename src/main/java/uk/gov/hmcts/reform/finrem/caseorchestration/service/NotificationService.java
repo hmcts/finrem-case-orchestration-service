@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -30,7 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -80,7 +83,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_SOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
@@ -147,7 +155,8 @@ public class NotificationService {
     }
 
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
-        sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+        sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper
+            .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails)));
     }
 
     /**
@@ -164,7 +173,8 @@ public class NotificationService {
 
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
-            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails);
+            finremNotificationRequestMapper
+                .getNotificationRequestForRespondentSolicitor(finremCaseDetails, !isRespondentSolicitorDigital(finremCaseDetails));
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
     }
 
@@ -431,15 +441,15 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        sendContestOrderApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
+        log.info("Sending notification email to Applicant for 'Contest Order Approved'. Case ID : {}", caseDetails.getId());
+        emailService.sendConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_APPLICANT);
     }
 
     /**
@@ -451,20 +461,24 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        sendContestOrderApprovedEmail(
+            notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
+        log.info("Sending notification email to Respondent for 'Contest Order Approved'. Case ID : {}",
+            caseDetails.getId());
+        sendContestOrderApprovedEmail(
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails),
+            FR_CONTEST_ORDER_APPROVED_RESPONDENT);
     }
 
     /**
      * No Return.
-     * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
+     * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper, IntervenerType)}</p>
      *
      * @param caseDetails         instance of CaseDetails
      * @param caseDataKeysWrapper instance of SolicitorCaseDataKeysWrapper
@@ -472,23 +486,31 @@ public class NotificationService {
      */
     @Deprecated(since = "15-june-2023")
     public void sendContestOrderApprovedEmailIntervener(CaseDetails caseDetails,
-                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper)));
+                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
+                                                        IntervenerType intervener) {
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
+        NotificationRequest request = notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        sendContestOrderApprovedEmail(request, template);
     }
 
     public void sendContestOrderApprovedEmailIntervener(FinremCaseDetails caseDetails,
-                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
-        CompletableFuture.runAsync(() ->
-            sendContestOrderApprovedEmail(
-                finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, caseDataKeysWrapper)));
+                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper,
+                                                        IntervenerType intervener) {
+        log.info("Sending notification email to {} for 'Contest Order Approved'. Case ID : {}",
+            intervener, caseDetails.getId());
+        NotificationRequest request = finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(
+            caseDetails, caseDataKeysWrapper);
+        EmailTemplateNames template = getIntervenerSendOrderContestedTemplate(intervener);
+        sendContestOrderApprovedEmail(request, template);
     }
 
-    public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest) {
+    public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         log.info("Received request for notification email for 'Contest Order Approved'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTEST_ORDER_APPROVED);
+        emailService.sendConfirmationEmail(notificationRequest, template);
     }
 
     /**
@@ -551,8 +573,6 @@ public class NotificationService {
             notificationRequestForIntervenerSolicitor.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequestForIntervenerSolicitor,
             FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
-
-
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -610,7 +630,6 @@ public class NotificationService {
     public void sendSolicitorToDraftOrderEmailApplicant(CaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
-
 
     public void sendSolicitorToDraftOrderEmailApplicant(FinremCaseDetails caseDetails) {
         sendSolicitorToDraftOrderEmail(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
@@ -718,7 +737,6 @@ public class NotificationService {
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
     }
-
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -1119,7 +1137,6 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_APPLICATION_OUTCOME);
     }
 
-
     public void sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails caseDetails) throws IOException {
         String recipientEmail = DEFAULT_EMAIL;
         if (featureToggleService.isSendToFRCEnabled()) {
@@ -1241,7 +1258,6 @@ public class NotificationService {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             hearingData));
     }
-
 
     /**
      * No Return.
@@ -1584,6 +1600,10 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    public boolean isApplicantSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isApplicantSolicitorPopulated();
+    }
+
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
@@ -1594,6 +1614,10 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
+    public boolean isApplicantSolicitorDigital(FinremCaseDetails caseDetails) {
+        return checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    }
+
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -1602,6 +1626,14 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorDigital(FinremCaseDetails caseDetails) {
+        return checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isRespondentSolicitorPopulated();
     }
 
     public boolean isIntervenerSolicitorEmailPopulated(IntervenerWrapper intervenerWrapper) {
@@ -1632,7 +1664,6 @@ public class NotificationService {
             .build();
     }
 
-
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
@@ -1642,15 +1673,6 @@ public class NotificationService {
         return caseDataService.isContestedPaperApplication(caseDetails)
             && (!isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
-    }
-
-    public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
-    }
-
-    public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
     }
 
     /**
@@ -1665,15 +1687,14 @@ public class NotificationService {
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmail(notificationRequest, template);
     }
-
 
     public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmail(notificationRequest, template);
     }
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
@@ -1681,14 +1702,14 @@ public class NotificationService {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
     public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
         EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
-        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
+        sendNocEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
     public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
@@ -1707,9 +1728,17 @@ public class NotificationService {
         return caseDataService.isContestedApplication(caseDetails);
     }
 
+    private void sendNocEmail(
+        NotificationRequest notificationRequest,
+        EmailTemplateNames template) {
+        if (StringUtils.hasText(notificationRequest.getNotificationEmail())) {
+            sendNotificationEmail(notificationRequest, template);
+        }
+    }
+
     /**
      * Return String Object for given Case with the given indentation used.
-     * <p>Please use @{@link #sendEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
+     * <p>Please use @{@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
      *
      * @param caseDetails         instance of CaseDetails
      * @param notificationRequest instance of NotificationRequest
@@ -1717,36 +1746,57 @@ public class NotificationService {
      * @deprecated Use {@link CaseDetails caseDetails, NotificationRequest notificationRequest, EmailTemplateNames template}
      */
     @Deprecated(since = "15-june-2023")
-    private void sendEmailIfSolicitorIsDigital(
+    private void sendNocEmailIfSolicitorIsDigital(
         CaseDetails caseDetails,
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
-        if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            if (checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())) {
-                sendNotificationEmail(notificationRequest, template);
-            }
-            return;
-        }
-
-        if (checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())) {
-            sendNotificationEmail(notificationRequest, template);
-        }
+        sendNocEmailIfSolicitorIsDigitalInternal(
+            caseDetails.getId().toString(),
+            notificationRequest,
+            template,
+            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
+            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
+            () -> (String) caseDetails.getData().get(getSolicitorNameKey(caseDetails))
+        );
     }
 
-    private void sendEmailIfSolicitorIsDigital(
+    private void sendNocEmailIfSolicitorIsDigital(
         FinremCaseDetails caseDetails,
         NotificationRequest notificationRequest,
         EmailTemplateNames template) {
 
-        if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            if (checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())) {
+        sendNocEmailIfSolicitorIsDigitalInternal(
+            caseDetails.getId().toString(),
+            notificationRequest,
+            template,
+            () -> checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString()),
+            () -> checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString()),
+            () -> caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
+                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()
+        );
+    }
+
+    private void sendNocEmailIfSolicitorIsDigitalInternal(
+        String caseId,
+        NotificationRequest notificationRequest,
+        EmailTemplateNames template,
+        BooleanSupplier isApplicantSolicitorDigitalSupplier,
+        BooleanSupplier isRespondentSolicitorDigitalSupplier,
+        Supplier<String> nameSupplier) {
+
+        if (isApplicantNoticeOfChangeRequest(notificationRequest, nameSupplier)) {
+            log.info("{} - isApplicantNoticeOfChangeRequest = true", caseId);
+            boolean isApplicantSolicitorDigital = isApplicantSolicitorDigitalSupplier.getAsBoolean();
+            log.info("{} - isApplicantSolicitorDigital = {}}", caseId, isApplicantSolicitorDigital);
+            if (isApplicantSolicitorDigital) {
                 sendNotificationEmail(notificationRequest, template);
             }
             return;
         }
-
-        if (checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())) {
+        boolean isRespondentSolicitorDigital = isRespondentSolicitorDigitalSupplier.getAsBoolean();
+        log.info("{} - isRespondentSolicitorDigital = {}}", caseId, isRespondentSolicitorDigital);
+        if (isRespondentSolicitorDigital) {
             sendNotificationEmail(notificationRequest, template);
         }
     }
@@ -1772,7 +1822,6 @@ public class NotificationService {
             : FR_CONTESTED_NOTICE_OF_CHANGE;
     }
 
-
     /**
      * Return String Object for given Case with the given indentation used.
      *
@@ -1795,25 +1844,10 @@ public class NotificationService {
 
     }
 
-    /**
-     * Return boolean true or false for given Case.
-     *
-     * @param caseDetails instance of CaseDetails
-     * @return boolean primitive
-     * @deprecated Use {@link FinremCaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     CaseDetails caseDetails) {
+                                                     Supplier<String> nameSupplier) {
         return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().get(getSolicitorNameKey(caseDetails))));
-    }
-
-    private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     FinremCaseDetails caseDetails) {
-        return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().isConsentedApplication() ? caseDetails.getData().getContactDetailsWrapper().getSolicitorName()
-                : caseDetails.getData().getContactDetailsWrapper().getApplicantSolicitorName()));
+            nullToEmpty(nameSupplier.get()));
     }
 
     private String getSolicitorNameKey(CaseDetails caseDetails) {
@@ -1842,7 +1876,6 @@ public class NotificationService {
         return DEFAULT_EMAIL;
     }
 
-
     private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -1851,5 +1884,25 @@ public class NotificationService {
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
         return DEFAULT_EMAIL;
+    }
+
+    private EmailTemplateNames getIntervenerSendOrderContestedTemplate(IntervenerType intervener) {
+        switch (intervener) {
+            case INTERVENER_ONE -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+            }
+            case INTERVENER_TWO -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER2;
+            }
+            case INTERVENER_THREE -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER3;
+            }
+            case INTERVENER_FOUR -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER4;
+            }
+            default -> {
+                return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
+            }
+        }
     }
 }

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_RESIDE_OUTSIDE_UK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -60,10 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public class RemoveApplicantDetailsController extends BaseController {
 
-    @Autowired
     private final UpdateRepresentationWorkflowService nocWorkflowService;
-
-    @Autowired
     private final OnlineFormDocumentService service;
 
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
@@ -130,6 +127,7 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.remove(RESPONDENT_ADDRESS);
             caseData.remove(RESPONDENT_PHONE);
             caseData.remove(RESPONDENT_EMAIL);
+            caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, NO_VALUE);
         } else {
             caseData.remove(RESP_SOLICITOR_NAME);
             caseData.remove(RESP_SOLICITOR_FIRM);

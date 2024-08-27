@@ -14,11 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -38,14 +41,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -74,6 +76,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private static final String INTV2_SOLICITOR_LABEL = "Intervener 2 Solicitor";
     private static final String INTV3_SOLICITOR_LABEL = "Intervener 3 Solicitor";
     private static final String INTV4_SOLICITOR_LABEL = "Intervener 4 Solicitor";
+    private static final String GENERAL_LETTER_PATH = "/fixtures/general-letter.json";
+    private static final String GENERAL_LETTER_CONTESTED_PATH = "/fixtures/contested/general-letter-contested.json";
+    private static final String GENERAL_LETTER_MISSING_ADDRESS_PATH = "/fixtures/general-letter-missing-address.json";
+    private static final String GENERAL_LETTER_EMPTY_COLLECTION_PATH = "/fixtures/general-letter-empty-collection.json";
 
     @Autowired
     private GeneralLetterService generalLetterService;
@@ -88,6 +94,14 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     private CaseDataService caseDataService;
     @MockBean
     private FeatureToggleService featureToggleService;
+    @MockBean
+    private BulkPrintDocumentService bulkPrintDocumentService;
+    @MockBean
+    private InternationalPostalService postalService;
+
+    CaseDocument uploadedDocument;
+    FinremCaseDetails generalLetterCaseDetails;
+    FinremCaseDetails generalLetterContestedCaseDetails;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -95,29 +109,185 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        uploadedDocument = caseDocument(
+            "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+            "example_document.pdf",
+            "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary");
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(uploadedDocument);
+        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
     }
 
-    private FinremCaseDetails getCaseDetailsWithGeneralLetterData(String path) {
-        return TestSetUpUtils.finremCaseDetailsFromResource(path, mapper);
+    @Test
+    public void shouldGenerateGeneralLetterForApplicant() {
+        testGenerateGeneralLetterForLitigant(APPLICANT, "50 Applicant Street\n");
     }
 
     @Test
-    public void generateGeneralLetterForApplicantforGivenConsentedCase() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
+    public void shouldGenerateGeneralLetterForRespondent() {
+        testGenerateGeneralLetterForLitigant(RESPONDENT, "50 Respondent Street\n");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForApplicantSolicitor() {
+        testGenerateGeneralLetterForLitigant(APPLICANT_SOLICITOR, "50 Applicant Solicitor Street\n");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForRespondentSolicitor() {
+        testGenerateGeneralLetterForLitigant(RESPONDENT_SOLICITOR, "50 Respondent Solicitor Street\n");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener1() {
+        testGenerateGeneralLetterForIntervener(INTERVENER1, INTV1_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener1Solicitor() {
+        testGenerateGeneralLetterForIntervener(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener2() {
+        testGenerateGeneralLetterForIntervener(INTERVENER2, INTV2_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener2Solicitor() {
+        testGenerateGeneralLetterForIntervener(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener3() {
+        testGenerateGeneralLetterForIntervener(INTERVENER3, INTV3_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener3Solicitor() {
+        testGenerateGeneralLetterForIntervener(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener4() {
+        testGenerateGeneralLetterForIntervener(INTERVENER4, INTV4_LABEL, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4");
+    }
+
+    @Test
+    public void shouldGenerateGeneralLetterForIntervener4Solicitor() {
+        testGenerateGeneralLetterForIntervener(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL,
+            DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
+    }
+
+    @Test
+    public void givenNoPreviousGeneralLettersGenerated_shouldGenerateGeneralLetter() {
+        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_EMPTY_COLLECTION_PATH);
+        DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocuments(
+            List.of(DocumentCollection.builder().value(caseDocument()).build()));
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+
+        assertThat(generalLetterData, hasSize(1));
+        verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null, caseDocument());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument(), AUTH_TOKEN, String.valueOf(caseDetails.getId()));
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567891L));
+    }
+
+    @Test
+    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
+        FinremCaseDetails generalLetterCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
+        assertNull(generalLetterCaseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
+        FinremCaseData caseData = generalLetterCaseDetails.getData();
+        DynamicRadioList addresseeList = getDynamicRadioList(OTHER_RECIPIENT, OTHER_RECIPIENT, false);
+        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        generalLetterService.previewGeneralLetter(AUTH_TOKEN, generalLetterCaseDetails);
+        assertNotNull(generalLetterCaseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
+    }
+
+    @Test
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
+        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_MISSING_ADDRESS_PATH);
+        DynamicRadioList addresseeList = getDynamicRadioList(RESPONDENT, RESPONDENT, true);
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, hasItem("Address is missing for recipient type " + RESPONDENT));
+    }
+
+    @Test
+    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
+        FinremCaseDetails generalLetterCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
+        generalLetterCaseDetails.getData().getGeneralLetterWrapper().setGeneralLetterRecipientAddress(getAddress());
+        generalLetterCaseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(generalLetterCaseDetails);
+        assertThat(errors, is(empty()));
+    }
+
+    @Test
+    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
+        FinremCaseDetails generalLetterCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
+        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build();
+        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
+        generalLetterCaseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        generalLetterCaseDetails.getData().setCcdCaseType(CaseType.CONTESTED);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, generalLetterCaseDetails);
+        GeneralLetterWrapper wrapper = generalLetterCaseDetails.getData().getGeneralLetterWrapper();
+        List<GeneralLetterCollection> generalLetterData = wrapper.getGeneralLetterCollection();
+        assertNull(generalLetterCaseDetails.getData().getCourtDetails());
+        verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
+            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), caseDocument());
+        wrapper.getGeneralLetterUploadedDocuments().forEach(doc -> verifyDocumentFields(doc.getValue(),
+            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId(), uploadedDocument));
+        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    public void validateEncryptionOnUploadedDocuments() {
+        List<DocumentCollection> caseDocuments = new ArrayList<>();
+        DocumentCollection doc1 = DocumentCollection.builder().value(caseDocument()).build();
+        caseDocuments.add(doc1);
+        DocumentCollection doc2 = DocumentCollection.builder().value(null).build();
+        caseDocuments.add(doc2);
+        DocumentCollection doc3 = null;
+        caseDocuments.add(doc3);
+        String caseId = "1346347334";
+        String auth = AUTH_TOKEN;
+        List<String> errors = new ArrayList<>();
+        generalLetterService.validateEncryptionOnUploadedDocuments(caseDocuments, caseId, auth, errors);
+        verify(bulkPrintDocumentService, times(1)).validateEncryptionOnUploadedDocument(
+            doc1.getValue(), caseId, new ArrayList<>(), auth);
+    }
+
+    @Test
+    public void generateGeneralLetterForApplicantForGivenConsentedCaseAndApplicantResideInternational() {
+        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
         FinremCaseData caseData = caseDetails.getData();
+        caseData.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
         DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT, APPLICANT, false);
         caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
         when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
+        when(postalService.isRecipientResideOutsideOfUK((FinremCaseData) any(), anyString())).thenReturn(true);
 
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
 
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null);
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), null);
+        CaseDocument expectedGeneratedLetter = caseDocument();
+        verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null, expectedGeneratedLetter);
+        verifyDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), null, expectedGeneratedLetter);
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
@@ -130,288 +300,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Third Address Line\n"
             + "Greater London\n"
             + "London\n"
-            + "SE12 9SE"));
+            + "SE12 9SE\n"
+            + "United Kingdom"));
         verifyLitigantNames(data);
         assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
         verify(caseDataService).buildFullApplicantName((CaseDetails) any());
         verify(caseDataService).buildFullRespondentName((CaseDetails) any());
-    }
-
-    @Test
-    public void generateGeneralLetterForResponsentforGivenConsentedCase() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
-        FinremCaseData caseData = caseDetails.getData();
-        DynamicRadioList addresseeList = getDynamicRadioList(RESPONDENT, RESPONDENT, false);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null);
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), null);
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Respondent Street\n"
-            + "Second Address Line\n"
-            + "Third Address Line\n"
-            + "Greater London\n"
-            + "London\n"
-            + "SE12 9SE"));
-        verifyLitigantNames(data);
-        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
-        verify(caseDataService).buildFullApplicantName((CaseDetails) any());
-        verify(caseDataService).buildFullRespondentName((CaseDetails) any());
-    }
-
-    @Test
-    public void generateGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
-        FinremCaseData caseData = caseDetails.getData();
-        DynamicRadioList addresseeList = getDynamicRadioList(RESPONDENT_SOLICITOR, RESP_SOLICITOR_LABEL, false);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
-
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null);
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), null);
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Respondent Solicitor Street\n"
-            + "Second Address Line\n"
-            + "Third Address Line\n"
-            + "Greater London\n"
-            + "London\n"
-            + "SE12 9SE"));
-        verifyLitigantNames(data);
-        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
-    }
-
-    @Test
-    public void generateContestedGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-
-        when(caseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("Poor Guy");
-        when(caseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Moj Resp");
-
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(),
-            DocumentCategory.COURT_CORRESPONDENCE_APPLICANT.getDocumentCategoryId());
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
-            + "Second Address Line\n"
-            + "Third Address Line\n"
-            + "Greater London\n"
-            + "London\n"
-            + "SW1V 4FG"));
-        verifyLitigantNames(data);
-    }
-
-    @Test
-    public void generateContestedIntervenerOneGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerOneWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1, INTV1_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1");
-    }
-
-    @Test
-    public void generateContestedIntervenerOneSolicitorGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerOneWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER1_SOLICITOR, INTV1_SOLICITOR_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_1, "intvr1sol");
-    }
-
-    @Test
-    public void generateContestedIntervenerTwoSolicitorGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerTwoWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2_SOLICITOR, INTV2_SOLICITOR_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2sol");
-    }
-
-    @Test
-    public void generateContestedIntervenerTwoGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerTwoWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER2, INTV2_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_2, "intvr2");
-    }
-
-    @Test
-    public void generateContestedIntervenerThreeSolicitorGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerThreeWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3_SOLICITOR, INTV3_SOLICITOR_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3sol");
-    }
-
-    @Test
-    public void generateContestedIntervenerThreeGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerThreeWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER3, INTV3_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_3, "intvr3");
-    }
-
-    @Test
-    public void generateContestedIntervenerFourSolicitorGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerFourWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4_SOLICITOR, INTV4_SOLICITOR_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4sol");
-    }
-
-    @Test
-    public void generateContestedIntervenerFourGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/contested/general-letter-contested.json");
-        FinremCaseData caseData = caseDetails.getData();
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        addIntervenerFourWrapper(caseData);
-        DynamicRadioList addresseeList = getDynamicRadioList(INTERVENER4, INTV4_LABEL, true);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verifyIntervenerData(caseDetails, DocumentCategory.COURT_CORRESPONDENCE_INTERVENER_4, "intvr4");
-    }
-
-    private void verifyIntervenerData(FinremCaseDetails caseDetails, DocumentCategory category, String intervenerName) {
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertThat(generalLetterData, hasSize(2));
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), category.getDocumentCategoryId());
-        verifyCaseDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(), category.getDocumentCategoryId());
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        verifyAddress(data);
-        verifyIntervenerName(data, intervenerName);
-    }
-
-    @Test
-    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter-empty-collection.json");
-        DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocument(caseDocument());
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-
-        assertThat(generalLetterData, hasSize(1));
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(), null);
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(caseDocument(), AUTH_TOKEN, String.valueOf(caseDetails.getId()));
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567891L));
-    }
-
-    @Test
-    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
-        assertNull(caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
-        FinremCaseData caseData = caseDetails.getData();
-        DynamicRadioList addresseeList = getDynamicRadioList(OTHER_RECIPIENT, OTHER_RECIPIENT, false);
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
-        assertNotNull(caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
-    }
-
-    @Test
-    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter-missing-address.json");
-        DynamicRadioList addresseeList = getDynamicRadioList(RESPONDENT, RESPONDENT, true);
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
-        assertThat(errors, hasItem("Address is missing for recipient type " + RESPONDENT));
-    }
-
-    @Test
-    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
-        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build();
-        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterRecipientAddress(getAddress());
-        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
-        assertThat(errors, is(empty()));
-    }
-
-    @Test
-    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
-        FinremCaseDetails caseDetails = getCaseDetailsWithGeneralLetterData("/fixtures/general-letter.json");
-        FinremCaseData caseData = caseDetails.getData();
-        DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(OTHER_RECIPIENT).label(OTHER_RECIPIENT).build();
-        DynamicRadioList addresseeList = DynamicRadioList.builder().listItems(getDynamicRadioListItems(false)).value(chosenOption).build();
-        caseData.getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
-        assertNull(caseDetails.getData().getCourtDetails());
-        verifyCaseDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
-            DocumentCategory.COURT_CORRESPONDENCE_OTHER.getDocumentCategoryId());
-        verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any(), any(), any());
     }
 
     private List<DynamicRadioListElement> getDynamicRadioListItems(boolean addIntervenerListElements) {
@@ -454,6 +348,17 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(((Addressee) data.get(ADDRESSEE)).getName(), is(recipient));
     }
 
+    private void verifyIntervenerData(FinremCaseDetails caseDetails, DocumentCategory category, String intervenerName) {
+        List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertThat(generalLetterData, hasSize(2));
+        verifyDocumentFieldCategorisation(generalLetterData, category.getDocumentCategoryId());
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        verifyAddress(data);
+        verifyIntervenerName(data, intervenerName);
+    }
+
     private void addIntervenerOneWrapper(FinremCaseData caseData) {
         IntervenerOne intervenerWrapper = IntervenerOne.builder().intervenerSolName("intvr1sol")
             .intervenerName("intvr1").intervenerAddress(getAddress()).build();
@@ -478,10 +383,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         caseData.setIntervenerFour(intervenerWrapper);
     }
 
-    private static void verifyCaseDocumentFields(CaseDocument result, String category) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+    private static void verifyDocumentFields(CaseDocument result, String category, CaseDocument expectedResult) {
+        assertThat(result.getDocumentFilename(), is(expectedResult.getDocumentFilename()));
+        assertThat(result.getDocumentUrl(), is(expectedResult.getDocumentUrl()));
+        assertThat(result.getDocumentBinaryUrl(), is(expectedResult.getDocumentBinaryUrl()));
         assertThat(result.getCategoryId(), is(category));
     }
 
@@ -494,5 +399,81 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioListElement chosenOption = DynamicRadioListElement.builder().code(code).label(label).build();
         return DynamicRadioList.builder().listItems(
             getDynamicRadioListItems(addIntervenerListElements)).value(chosenOption).build();
+    }
+
+    private void checkLitigantGeneralLetterData(Map<String, Object> data, String addressFirstLine) {
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is(addressFirstLine
+            + "Second Address Line\n"
+            + "Third Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE"));
+        verifyLitigantNames(data);
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
+    }
+
+    private void verifyCaseServiceCalls() {
+        verify(caseDataService).buildFullApplicantName((CaseDetails) any());
+        verify(caseDataService).buildFullRespondentName((CaseDetails) any());
+    }
+
+    private static void verifyDocumentFieldCategorisation(List<GeneralLetterCollection> generalLetterData,
+                                                          String categoryId) {
+        verifyDocumentFields(generalLetterData.get(0).getValue().getGeneratedLetter(),
+            categoryId, caseDocument());
+        verifyDocumentFields(generalLetterData.get(1).getValue().getGeneratedLetter(),
+            categoryId, caseDocument());
+    }
+
+    private FinremCaseDetails getCaseDetailsWithGeneralLetterData(String path) {
+        return TestSetUpUtils.finremCaseDetailsFromResource(path, mapper);
+    }
+
+    private void addIntervenerWrapper(String intervenerCode) {
+        FinremCaseData data = generalLetterContestedCaseDetails.getData();
+        switch (intervenerCode) {
+            case INTERVENER1, INTERVENER1_SOLICITOR:
+                addIntervenerOneWrapper(data);
+                break;
+            case INTERVENER2, INTERVENER2_SOLICITOR:
+                addIntervenerTwoWrapper(data);
+                break;
+            case INTERVENER3, INTERVENER3_SOLICITOR:
+                addIntervenerThreeWrapper(data);
+                break;
+            case INTERVENER4, INTERVENER4_SOLICITOR:
+                addIntervenerFourWrapper(data);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid intervener code");
+        }
+    }
+
+    private void testGenerateGeneralLetterForLitigant(String role, String addressFirstLine) {
+        generalLetterCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_PATH);
+        DynamicRadioList addresseeList = getDynamicRadioList(role, role, false);
+        generalLetterCaseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, generalLetterCaseDetails);
+        List<GeneralLetterCollection> generalLetterData = generalLetterCaseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
+        assertThat(generalLetterData, hasSize(2));
+        verifyDocumentFieldCategorisation(generalLetterData, null);
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        checkLitigantGeneralLetterData(data, addressFirstLine);
+        verifyCaseServiceCalls();
+    }
+
+    private void testGenerateGeneralLetterForIntervener(String intervenerCode, String intervenerLabel,
+                                                        DocumentCategory category, String intervenerName) {
+        generalLetterContestedCaseDetails = getCaseDetailsWithGeneralLetterData(GENERAL_LETTER_CONTESTED_PATH);
+        generalLetterContestedCaseDetails.getData().setCcdCaseType(CaseType.CONTESTED);
+        addIntervenerWrapper(intervenerCode);
+        DynamicRadioList addresseeList = getDynamicRadioList(intervenerCode, intervenerLabel, true);
+        generalLetterContestedCaseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, generalLetterContestedCaseDetails);
+        verifyIntervenerData(generalLetterContestedCaseDetails, category, intervenerName);
     }
 }

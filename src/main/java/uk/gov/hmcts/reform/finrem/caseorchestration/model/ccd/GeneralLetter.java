@@ -8,15 +8,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GeneralLetter {
+public class GeneralLetter implements HasCaseDocument {
     @JsonProperty("generatedLetter")
     private CaseDocument generatedLetter;
     @JsonProperty("generalLetterUploadedDocument")
     private CaseDocument generalLetterUploadedDocument;
+    @JsonProperty("generalLetterUploadedDocuments")
+    private List<DocumentCollection> generalLetterUploadedDocuments;
 }

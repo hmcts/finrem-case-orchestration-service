@@ -46,8 +46,7 @@ public class RemovedSolicitorService {
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
                                                                 ChangeOrganisationRequest changeRequest) {
         log.info("Remove solicitor for Case ID: {}", caseDetails.getId());
-        final boolean isApplicant = changeRequest.getCaseRoleId() != null
-            && changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+        final boolean isApplicant = APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
 
         if (!caseDataService.isLitigantRepresented(caseDetails, isApplicant)) {
             return null;

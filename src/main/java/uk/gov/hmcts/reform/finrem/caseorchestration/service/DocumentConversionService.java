@@ -4,6 +4,9 @@ import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -21,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +59,25 @@ public class DocumentConversionService {
 
     public String getConvertedFilename(String filename) {
         return FilenameUtils.getBaseName(filename) + ".pdf";
+    }
+
+    public byte[] flattenPdfDocument(byte[] document) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            PDDocument doc = PDDocument.load(document);
+            Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
+
+            if (acroForm.isPresent()) {
+                acroForm.get().flatten();
+                doc.save(bos);
+                doc.close();
+                return bos.toByteArray();
+            }
+        } catch (IOException e) {
+            log.error("Unable to flatten document", e);
+        }
+        return document;
     }
 
     private byte[] convert(Document sourceDocument, String auth) {

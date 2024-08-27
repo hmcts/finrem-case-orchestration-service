@@ -170,6 +170,12 @@ public class AssignCaseAccessService {
         log.info("About to start revoking creator role for Case ID: {}", caseDetails.getId());
         List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
             .getCaseAssignmentUserRoles();
+
+        if (allRoles.isEmpty()) {
+            log.info("No user roles found for Case ID: {}", caseDetails.getId());
+            return null;
+        }
+
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
 
         if (creatorRoles.isEmpty()) {
@@ -178,7 +184,8 @@ public class AssignCaseAccessService {
         }
 
         if (creatorRoles.size() > 1) {
-            throw new IllegalStateException("Multiple creator roles found for case");
+            throw new IllegalStateException(
+                    String.format("Multiple creator roles found for case ID: %s", caseDetails.getId()));
         }
 
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
@@ -188,6 +195,7 @@ public class AssignCaseAccessService {
             return null;
         }
 
+        log.info("Attempting to revoke CREATOR role for case {}", caseDetails.getId());
         return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
     }
 

@@ -41,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -116,10 +117,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
-    private UserDetails testIntvr1Solicitor;
-    private UserDetails testIntvr2Solicitor;
-    private UserDetails testIntvr3Solicitor;
-    private UserDetails testIntvr4Solicitor;
 
     private Organisation applicantOrg;
     private Organisation respondentOrg;
@@ -154,30 +151,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .forename("Test respondent")
             .surname("Solicitor")
             .email("padmaja.ramisetti@gmail.com")
-            .build();
-
-        testIntvr1Solicitor = UserDetails.builder()
-            .forename("Henry")
-            .surname("Solicitor")
-            .email("henrysolicitor1@gmail.com")
-            .build();
-
-        testIntvr2Solicitor = UserDetails.builder()
-            .forename("Paul")
-            .surname("Solicitor")
-            .email("paulsolicitor1@gmail.com")
-            .build();
-
-        testIntvr3Solicitor = UserDetails.builder()
-            .forename("Ashwin")
-            .surname("Solicitor")
-            .email("ashwinsolicitor1@gmail.com")
-            .build();
-
-        testIntvr4Solicitor = UserDetails.builder()
-            .forename("Maria")
-            .surname("Solicitor")
-            .email("mariasolicitor1@gmail.com")
             .build();
 
         applicantOrg = Organisation.builder()
@@ -359,6 +332,70 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(COUNTY, solicitorAddress.getCounty());
         assertEquals(COUNTRY, solicitorAddress.getCountry());
         assertEquals(POSTCODE, solicitorAddress.getPostCode());
+    }
+
+    @Test
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowUnsupportedOperationException() throws Exception {
+        String fixture = "consentedAppSolicitorAdding";
+        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build()
+        );
+        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        try (InputStream resourceAsStream = getClass()
+            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+                .getCaseDetails();
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            changeOrganisationRequestField.put("CaseRoleId", null);
+        }
+
+        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+
+        String expectedMessage = "12345678 - unexpected empty caseRoleId";
+        String actualMessage = ex.getMessage();
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowUnsupportedOperationException()
+        throws Exception {
+        String fixture = "consentedAppSolicitorAdding";
+        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build()
+        );
+        setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
+        try (InputStream resourceAsStream = getClass()
+            .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
+            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+                .getCaseDetails();
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            Map<String, Object> caseRoleId = (Map<String, Object>) changeOrganisationRequestField.get("CaseRoleId");
+            caseRoleId.put("value", Map.of("code", "[INTVRSOLICITOR5]", "label", "[INTVRSOLICITOR5]"));
+        }
+
+        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+            .updateRepresentationAsSolicitor(initialDetails, "bebe"));
+
+        String expectedMessage = "12345678 - Unrecognised caseRoleId: [INTVRSOLICITOR5]";
+        String actualMessage = ex.getMessage();
+        assertEquals(expectedMessage, actualMessage);
     }
 
     @Test

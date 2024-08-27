@@ -71,6 +71,10 @@ public class CCDConfigConstant {
     public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
     public static final String CONTESTED_SOLICITOR_PHONE = "applicantSolicitorPhone";
 
+    public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL = "allocatedToBeHeardAtHighCourtJudgeLevel";
+    public static final String ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT = "allocatedToBeHeardAtHighCourtJudgeLevelText";
+
+
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
@@ -263,6 +267,18 @@ public class CCDConfigConstant {
     //contest courts
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String MIAM_DOMESTIC_VIOLENCE_CHECKLIST = "MIAMDomesticViolenceChecklist";
+    public static final String MIAM_URGENCY_CHECKLIST = "MIAMUrgencyReasonChecklist";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_CHECKLIST = "MIAMPreviousAttendanceChecklist";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2 = "MIAMPreviousAttendanceChecklistV2";
+    public static final String MIAM_OTHER_GROUNDS_CHECKLIST = "MIAMOtherGroundsChecklist";
+    public static final String MIAM_OTHER_GROUNDS_CHECKLIST_V2 = "MIAMOtherGroundsChecklistV2";
+    public static final String MIAM_DOMESTIC_ABUSE_TEXTBOX = "evidenceUnavailableDomesticAbuseMIAM";
+    public static final String MIAM_PREVIOUS_ATTENDANCE_TEXTBOX = "evidenceUnavailablePreviousAttendanceMIAM";
+    public static final String MIAM_OTHER_GROUNDS_TEXTBOX = "evidenceUnavailableOtherGroundsMIAM";
+    public static final String MIAM_URGENCY_TEXTBOX = "evidenceUnavailableUrgencyMIAM";
+    public static final String MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX = "additionalInfoOtherGroundsMIAM";
+    public static final String MIAM_EXEMPTIONS_CHECKLIST = "MIAMExemptionsChecklist";
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
@@ -312,6 +328,14 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A = "miniFormA";
     public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
+    public static final String FORMA = "formA";
+    public static final String FORMA_TYPE = "formAType";
+    public static final String FORMA_SUBTYPE = "formASubtype";
+    public static final String FORMA_CONTROL_NUMBER = "formAControlNumber";
+    public static final String FORMA_FILE_NAME = "formAFileName";
+    public static final String FORMA_SCANNED_DATE = "formAScannedDate";
+    public static final String FORMA_DELIVERY_DATE = "formADeliveryDate";
+    public static final String FORMA_EXCEPTIONAL_RECORD_REFERENCE = "formAExceptionRecordReference";
     public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
@@ -341,6 +365,13 @@ public class CCDConfigConstant {
     public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
+    public static final String CONSENT_ORDER_TYPE = "consentOrderType";
+    public static final String CONSENT_ORDER_SUBTYPE = "consentOrderSubtype";
+    public static final String CONSENT_ORDER_CONTROL_NUMBER = "consentOrderControlNumber";
+    public static final String CONSENT_ORDER_FILE_NAME = "consentOrderFileName";
+    public static final String CONSENT_ORDER_SCANNED_DATE = "consentOrderScannedDate";
+    public static final String CONSENT_ORDER_DELIVERY_DATE = "consentOrderDeliveryDate";
+    public static final String CONSENT_ORDER_EXCEPTIONAL_RECORD_REFERENCE = "consentOrderExceptionRecordReference";
     public static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
     public static final String CONSENT_ORDER_FRC_ADDRESS = "consentOrderFRCAddress";
     public static final String CONSENT_ORDER_FRC_EMAIL = "consentOrderFRCEmail";
@@ -688,4 +719,7 @@ public class CCDConfigConstant {
     public static final String HEARING_BEDFORDSHIRE_COURT_LIST = "hearing_bedfordshireCourtList";
     public static final String HEARING_THAMESVALLEY_COURT_LIST = "hearing_thamesvalleyCourtList";
 
+    //international postal flag
+    public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";
+    public static final String RESPONDENT_RESIDE_OUTSIDE_UK = "respondentResideOutsideUK";
 }

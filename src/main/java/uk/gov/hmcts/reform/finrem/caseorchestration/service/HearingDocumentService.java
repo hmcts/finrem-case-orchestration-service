@@ -14,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Selec
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -146,30 +144,4 @@ public class HearingDocumentService {
     public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
         return caseDetails.getData().getFormC() != null;
     }
-
-    public List<String> sendListForHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
-
-        List<String> errors = new ArrayList<>();
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-
-        selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(finremCaseDetails.getData());
-        errors.addAll(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(finremCaseDetails.getData(),
-            HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
-        if (!errors.isEmpty()) {
-            return errors;
-        }
-        FinremCaseDetails finremCaseDetailsBefore = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetailsBefore);
-        if (finremCaseDetailsBefore != null && finremCaseDetailsBefore.getData().getFormC() != null) {
-            log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
-            additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, finremCaseDetails);
-            log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
-        } else {
-            log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
-            this.sendInitialHearingCorrespondence(finremCaseDetails, authorisationToken);
-            log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", finremCaseDetails.getId());
-        }
-        return errors;
-    }
-
-
 }

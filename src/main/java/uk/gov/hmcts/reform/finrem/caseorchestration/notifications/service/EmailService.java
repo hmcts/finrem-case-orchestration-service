@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -21,10 +21,11 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
+@SuppressWarnings("java:S6857")
 public class EmailService {
 
-    @Autowired
-    private EmailClient emailClient;
+    private final EmailClient emailClient;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
@@ -37,6 +38,7 @@ public class EmailService {
 
     private static final String CONTESTED = "contested";
     private static final String CONSENTED = "consented";
+    private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
     private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
     private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
     private static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
@@ -82,6 +84,10 @@ public class EmailService {
 
             templateVars.put("courtName", courtDetails.get("name"));
             templateVars.put("courtEmail", courtDetails.get("email"));
+        }
+
+        if (FR_ASSIGNED_TO_JUDGE.equals(templateName)) {
+            templateVars.put("isNotDigital", notificationRequest.getIsNotDigital());
         }
 
         //general emails and transfer to local court emails are the only templates that require the generalEmailBody

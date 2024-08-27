@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -12,7 +13,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralOrderCollectionItem extends CollectionElement<GeneralOrder> {
+@EqualsAndHashCode(callSuper = true)
+public class GeneralOrderCollectionItem extends CollectionElement<GeneralOrder> implements HasCaseDocument {
 
     @JsonProperty("value")
     private GeneralOrder generalOrder;

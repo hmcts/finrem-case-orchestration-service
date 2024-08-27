@@ -37,6 +37,8 @@ public class BulkPrintService {
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
     private final CaseDataService caseDataService;
+    private final InternationalPostalService postalService;
+
 
     /**
      * Please upgrade your code.
@@ -48,26 +50,39 @@ public class BulkPrintService {
      */
     @Deprecated(since = "15-Feb-2023")
     @SuppressWarnings("java:S1133")
-    public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails, final String recipient, String auth) {
+    public UUID sendDocumentForPrint(final CaseDocument document,
+                                     CaseDetails caseDetails,
+                                     final String recipient,
+                                     String auth) {
+
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename())
                 .build());
-
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient, bulkPrintDocument, auth);
+        return bulkPrintDocuments(caseDetails.getId(),
+            FINANCIAL_REMEDY_GENERAL_LETTER,
+            recipient,
+            bulkPrintDocument,
+            postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
+            auth);
     }
 
-    public UUID sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails, final String recipient, String auth) {
+    public UUID sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails,
+                                     final String recipient, String auth) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename()).build());
 
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient, bulkPrintDocument, auth);
+        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, recipient,
+            bulkPrintDocument,
+            postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
+            auth);
     }
 
-    public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents, String auth) {
+    public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents,
+                                                   boolean isInternational, String auth) {
         log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
-        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, auth);
+        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
     /**
@@ -82,14 +97,26 @@ public class BulkPrintService {
     public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
                                         List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
-            generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments, APPLICANT, authorisationToken);
+            generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments, APPLICANT,
+            postalService.isApplicantResideOutsideOfUK(caseDetails.getData()),
+            authorisationToken);
 
     }
 
+    /**
+     * Prints the applicant's documents with a coversheet.
+     *
+     * @param caseDetails          The case details.
+     * @param authorisationToken   The authorisation token.
+     * @param caseDocuments        The list of case documents to print.
+     * @return The UUID of the printed documents.
+     */
     public UUID printApplicantDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                         List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails,
-            generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments, APPLICANT, authorisationToken);
+            generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments, APPLICANT,
+            postalService.isApplicantResideOutsideOfUK(caseDetails.getData()),
+            authorisationToken);
     }
 
     /**
@@ -103,29 +130,34 @@ public class BulkPrintService {
     @SuppressWarnings("java:S1133")
     public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
+
         return printDocumentsWithCoversheet(caseDetails,
             generateRespondentCoverSheet(caseDetails, authorisationToken),
             caseDocuments,
             RESPONDENT,
+            postalService.isRespondentResideOutsideOfUK(caseDetails.getData()),
             authorisationToken);
     }
 
     public UUID printRespondentDocuments(FinremCaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
+
         return printDocumentsWithCoversheet(caseDetails,
-            generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments, RESPONDENT, authorisationToken);
+            generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments,
+            RESPONDENT, postalService.isRespondentResideOutsideOfUK(caseDetails.getData()), authorisationToken);
     }
 
-    private UUID bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents, String auth) {
+    private UUID bulkPrintDocuments(Long caseId, String letterType, String recipient, List<BulkPrintDocument> documents,
+                                    boolean isInternational, String auth) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(String.valueOf(caseId))
                 .letterType(letterType)
                 .bulkPrintDocuments(documents)
-                .build(), recipient, auth);
+                .build(), recipient, isInternational, auth);
 
-        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}",
-            caseId, letterId, documents.size(), letterType, documents, recipient);
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}, isInternationa {}",
+            caseId, letterId, documents.size(), letterType, documents, recipient, isInternational);
 
         return letterId;
     }
@@ -143,23 +175,25 @@ public class BulkPrintService {
                                               BulkPrintDocument coverSheet,
                                               List<BulkPrintDocument> caseDocuments,
                                               String recipient,
+                                              boolean isInternational,
                                               String auth) {
         log.info("Adding all required document for bulkprint for Case ID: {}", caseDetails.getId());
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
-        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, auth);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
     }
 
     private UUID printDocumentsWithCoversheet(FinremCaseDetails caseDetails,
                                               BulkPrintDocument coverSheet,
                                               List<BulkPrintDocument> caseDocuments,
                                               String recipient,
+                                              boolean isInternational,
                                               String auth) {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
-        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, auth);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
     }
 
     private BulkPrintDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -168,10 +202,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Applicant has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetApp(null);
-            caseDetails.getData().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetApp(applicantCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetApp(applicantCoverSheet);
         }
 
         return documentHelper.mapToBulkPrintDocument(applicantCoverSheet);
@@ -230,10 +264,10 @@ public class BulkPrintService {
 
         if (YesOrNo.isYes(caseDetails.getData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Respondent has been marked as confidential, adding coversheet to confidential field for caseId {}", caseDetails.getId());
-            caseDetails.getData().setBulkPrintCoverSheetRes(null);
-            caseDetails.getData().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(null);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
-            caseDetails.getData().setBulkPrintCoverSheetRes(respondentCoverSheet);
+            caseDetails.getData().getBulkPrintCoversheetWrapper().setBulkPrintCoverSheetRes(respondentCoverSheet);
         }
 
         return documentHelper.mapToBulkPrintDocument(respondentCoverSheet);
@@ -294,18 +328,19 @@ public class BulkPrintService {
         return printDocumentsWithCoversheet(caseDetails,
             generateIntervenerCoverSheet(caseDetails, authorisationToken,
                 intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
-            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+            intervenerWrapper.getIntervenerType().getTypeValue(),
+            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper),
+            authorisationToken);
     }
 
     public UUID printIntervenerDocuments(IntervenerWrapper intervenerWrapper,
                                          FinremCaseDetails caseDetails,
                                          String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
-
         return printDocumentsWithCoversheet(caseDetails,
             generateIntervenerCoverSheet(caseDetails, authorisationToken, intervenerWrapper.getPaperNotificationRecipient()), caseDocuments,
-            intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+            intervenerWrapper.getIntervenerType().getTypeValue(),
+            postalService.isIntervenerResideOutsideOfUK(intervenerWrapper), authorisationToken);
     }
-
 }
 

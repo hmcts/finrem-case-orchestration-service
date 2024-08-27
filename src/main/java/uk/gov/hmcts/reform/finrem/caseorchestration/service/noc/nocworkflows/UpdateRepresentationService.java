@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Map;
 
+import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -40,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_1_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_2_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_3_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_4_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
@@ -98,7 +101,7 @@ public class UpdateRepresentationService {
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseDetails.getId().toString(), NOC_EVENT)
-            .orElseThrow(() -> new IllegalStateException(String.format("Could not find %s event in audit", NOC_EVENT)));
+            .orElseThrow(() -> new IllegalStateException(format("%s - Could not find %s event in audit", caseDetails.getId(), NOC_EVENT)));
 
         return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
     }
@@ -123,17 +126,23 @@ public class UpdateRepresentationService {
         return caseData;
     }
 
+    private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
+        if (StringUtils.isEmpty(changeRequest.getCaseRoleId().getValueCode())) {
+            throw new UnsupportedOperationException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
+        }
+        return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
+    }
+
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
                                                                 ChangedRepresentative addedSolicitor,
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+        boolean isApplicant = isApplicant(caseDetails, changeRequest);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
-        caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-            ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
+        caseData.put(isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
 
         Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(
             addedSolicitor, caseData, isConsented, isApplicant);
@@ -163,7 +172,7 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
-        final boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
+        final boolean isApplicant = isApplicant(caseDetails, changeRequest);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
         String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
@@ -207,7 +216,7 @@ public class UpdateRepresentationService {
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
-            .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)
+            .party(isApplicant(caseDetails, changeRequest) ? APPLICANT : RESPONDENT)
             .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
@@ -216,17 +225,21 @@ public class UpdateRepresentationService {
     }
 
     private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
-        if (changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)) {
+        if (isApplicant(caseDetails, changeRequest)) {
             return caseDataService.buildFullApplicantName(caseDetails);
-        } else if (changeRequest.getCaseRoleId().getValueCode().equals(RESP_SOLICITOR_POLICY)) {
+        } else if (RESP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullRespondentName(caseDetails);
-        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_1_POLICY)) {
+        } else if (INTVR_SOLICITOR_1_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullIntervener1Name(caseDetails);
-        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_2_POLICY)) {
+        } else if (INTVR_SOLICITOR_2_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullIntervener2Name(caseDetails);
-        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_3_POLICY)) {
+        } else if (INTVR_SOLICITOR_3_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
             return caseDataService.buildFullIntervener3Name(caseDetails);
+        } else if (INTVR_SOLICITOR_4_POLICY.equals(changeRequest.getCaseRoleId().getValueCode())) {
+            return caseDataService.buildFullIntervener4Name(caseDetails);
+        } else {
+            throw new UnsupportedOperationException(format("%s - Unrecognised caseRoleId: %s",
+                caseDetails.getId(), changeRequest.getCaseRoleId().getValueCode()));
         }
-        return caseDataService.buildFullIntervener4Name(caseDetails);
     }
 }

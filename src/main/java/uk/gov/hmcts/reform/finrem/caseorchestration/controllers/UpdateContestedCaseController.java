@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +33,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_ABUSE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_DOMESTIC_VIOLENCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTIONS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_OTHER_GROUNDS_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_PREVIOUS_ATTENDANCE_TEXTBOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_CHECKLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_URGENCY_TEXTBOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
@@ -59,6 +72,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final CaseFlagsService caseFlagsService;
+    private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -92,6 +106,7 @@ public class UpdateContestedCaseController extends BaseController {
         updateContestedFastTrackProcedureDetail(caseData);
         updateContestedComplexityDetails(caseData);
         isApplicantsHomeCourt(caseData);
+        isAllocatedToBeHeardAtHighCourtJudgeLevel(caseData);
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
 
@@ -113,26 +128,9 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedComplexityDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("addToComplexityListOfCourts"), "falseNo")) {
-            removeContestedComplexityDetails(caseData);
-        } else {
-            updateComplexityDetails(caseData);
-        }
-    }
-
-    private void updateComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
             caseData.put("otherReasonForComplexityText", null);
         }
-    }
-
-    private void removeContestedComplexityDetails(Map<String, Object> caseData) {
-        caseData.put("estimatedAssetsChecklist", null);
-        caseData.put("netValueOfHome", null);
-        caseData.put("potentialAllegationChecklist", null);
-        caseData.put("otherReasonForComplexity", null);
-        caseData.put("otherReasonForComplexityText", null);
-        caseData.put("detailPotentialAllegation", null);
     }
 
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {
@@ -141,23 +139,21 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
+    private void isAllocatedToBeHeardAtHighCourtJudgeLevel(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL), NO_VALUE)) {
+            caseData.put(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT, null);
+        }
+    }
+
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
+        caseData.put(FAMILY_MEDIATOR_MIAM, null);
         if (equalsTo((String) caseData.get(APPLICANT_ATTENDED_MIAM), YES_VALUE)) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
             removeMiamCertificationDetails(caseData);
-            updateWhenClaimingExemptionMiam(caseData);
         }
-    }
-
-    private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
-            caseData.put(FAMILY_MEDIATOR_MIAM, null);
-            removeMiamExceptionDetails(caseData);
-        } else {
-            updateClaimingExemptionMiamDetails(caseData);
-        }
+        removeLegacyExemptions(caseData);
     }
 
     private void removeMiamCertificationDetailsForApplicantAttendedMiam(Map<String, Object> caseData) {
@@ -171,6 +167,7 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("soleTraderName", null);
         caseData.put("familyMediatorServiceName", null);
         caseData.put("mediatorRegistrationNumber", null);
+        caseData.put("uploadMediatorDocument", null);
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
@@ -179,43 +176,21 @@ public class UpdateContestedCaseController extends BaseController {
         removeMiamExceptionDetails(caseData);
     }
 
-    private void updateClaimingExemptionMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(FAMILY_MEDIATOR_MIAM), YES_VALUE)) {
-            removeMiamExceptionDetails(caseData);
-        } else {
-            removeMiamCertificationDetails(caseData);
-            updateMiamExceptionDetails(caseData);
-        }
-    }
-
-    private void updateMiamExceptionDetails(Map<String, Object> caseData) {
-        ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "other", "MIAMOtherGroundsChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "domesticViolence", "MIAMDomesticViolenceChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "urgency", "MIAMUrgencyReasonChecklist");
-
-        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
-            "previousMIAMattendance", "MIAMPreviousAttendanceChecklist");
-    }
-
-    private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
-                                           String other, String miamOtherGroundsChecklist) {
-        if (hasNotSelected(miamExemptionsChecklist, other)) {
-            caseData.put(miamOtherGroundsChecklist, null);
-        }
-    }
-
     private void removeMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put("MIAMExemptionsChecklist", null);
-        caseData.put("MIAMDomesticViolenceChecklist", null);
-        caseData.put("MIAMUrgencyReasonChecklist", null);
-        caseData.put("MIAMPreviousAttendanceChecklist", null);
-        caseData.put("MIAMOtherGroundsChecklist", null);
+        caseData.put(MIAM_EXEMPTIONS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, null);
+        caseData.put(MIAM_URGENCY_CHECKLIST, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_CHECKLIST, null);
+        caseData.put(MIAM_OTHER_GROUNDS_CHECKLIST, null);
+        caseData.put(MIAM_DOMESTIC_ABUSE_TEXTBOX, null);
+        caseData.put(MIAM_URGENCY_TEXTBOX, null);
+        caseData.put(MIAM_PREVIOUS_ATTENDANCE_TEXTBOX, null);
+        caseData.put(MIAM_OTHER_GROUNDS_TEXTBOX, null);
+        caseData.put(MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX, null);
+    }
+
+    private void removeLegacyExemptions(Map<String, Object> caseData) {
+        miamLegacyExemptionsService.removeLegacyExemptions(caseData);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {

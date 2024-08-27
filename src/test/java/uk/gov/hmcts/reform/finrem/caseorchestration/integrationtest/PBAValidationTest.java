@@ -28,7 +28,7 @@ import java.io.InputStream;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
@@ -49,9 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @AutoConfigureMockMvc
 public class PBAValidationTest extends BaseTest {
 
-    private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate";
-    private static final String PBA_VALID_RESPONSE = "{\"pbaNumberValid\": true }";
-    private static final String PBA_INVALID_RESPONSE = "{\"pbaNumberValid\": false }";
+    private static final String PBA_VALIDATE_URL = "/case-orchestration/ccdMidEvent";
 
     @Autowired
     private MockMvc webClient;
@@ -96,8 +94,8 @@ public class PBAValidationTest extends BaseTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.errors", is(empty())))
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test
@@ -112,7 +110,7 @@ public class PBAValidationTest extends BaseTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors", hasSize(1)))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test
@@ -123,8 +121,8 @@ public class PBAValidationTest extends BaseTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.errors", is(empty())))
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test

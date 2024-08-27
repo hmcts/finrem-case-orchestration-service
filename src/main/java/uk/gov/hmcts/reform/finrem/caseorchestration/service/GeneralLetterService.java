@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
@@ -65,11 +66,13 @@ public class GeneralLetterService {
 
     private final GenericDocumentService genericDocumentService;
     private final BulkPrintService bulkPrintService;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CaseDataService caseDataService;
     private final CreateGeneralLetterDocumentCategoriser createGeneralLetterDocumentCategoriser;
+    private final InternationalPostalService postalService;
 
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -87,19 +90,33 @@ public class GeneralLetterService {
         GeneralLetterWrapper wrapper = caseData.getGeneralLetterWrapper();
         log.info("Generating General letter for Case ID: {}", caseId);
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
-        CaseDocument generalLetterUploadedDocument = wrapper.getGeneralLetterUploadedDocument();
-        if (generalLetterUploadedDocument != null) {
-            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument,
-                authorisationToken, caseId.toString());
-            wrapper.setGeneralLetterUploadedDocument(pdfDocument);
-        }
-        addGeneralLetterToCaseData(caseDetails, document,
-            wrapper.getGeneralLetterUploadedDocument());
+        List<DocumentCollection> pdfGeneralLetterUploadedDocuments = getUploadedDocumentsAsPdfs(authorisationToken, wrapper, caseId);
+
+        addGeneralLetterToCaseData(caseDetails, document, pdfGeneralLetterUploadedDocuments);
         printLatestGeneralLetter(caseDetails, authorisationToken);
         removeFrcCourtFields(caseData);
         if (caseData.isContestedApplication()) {
             createGeneralLetterDocumentCategoriser.categorise(caseData);
         }
+    }
+
+    private List<DocumentCollection> getUploadedDocumentsAsPdfs(String authorisationToken, GeneralLetterWrapper wrapper, Long caseId) {
+        Optional<List<DocumentCollection>> generalLetterUploadedDocuments = Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments());
+
+        List<DocumentCollection> pdfGeneralLetterUploadedDocuments = new ArrayList<>();
+
+        generalLetterUploadedDocuments.ifPresent(uploadedDocuments -> {
+            if (!uploadedDocuments.isEmpty()) {
+                uploadedDocuments.forEach(generalLetterUploadedDocumentCollection -> {
+                    CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                        generalLetterUploadedDocumentCollection.getValue(),
+                        authorisationToken, caseId.toString());
+                    pdfGeneralLetterUploadedDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                });
+                wrapper.setGeneralLetterUploadedDocuments(pdfGeneralLetterUploadedDocuments);
+            }
+        });
+        return pdfGeneralLetterUploadedDocuments;
     }
 
     private CaseDocument generateGeneralLetterDocument(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -109,6 +126,16 @@ public class GeneralLetterService {
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             getGeneralLetterTemplate(caseDetails.getData()), documentConfiguration.getGeneralLetterFileName());
+    }
+
+    public void validateEncryptionOnUploadedDocuments(List<DocumentCollection> caseDocuments, String caseId,
+                                                      String auth, List<String> errors) {
+        caseDocuments.forEach(doc -> {
+            if (doc != null && doc.getValue() != null) {
+                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(
+                    doc.getValue(), caseId, errors, auth);
+            }
+        });
     }
 
     private String getGeneralLetterTemplate(FinremCaseData caseData) {
@@ -133,13 +160,13 @@ public class GeneralLetterService {
     }
 
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document,
-                                            CaseDocument generalLetterUploadedDocument) {
+                                            List<DocumentCollection> generalLetterUploadedDocuments) {
         List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
             .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
         generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
                 .generatedLetter(document)
-                .generalLetterUploadedDocument(generalLetterUploadedDocument)
+                .generalLetterUploadedDocuments(generalLetterUploadedDocuments)
                 .build())
             .build());
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterCollection(generalLetterCollection);
@@ -160,8 +187,10 @@ public class GeneralLetterService {
     private void populateNameAddressAndReference(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        String addressee = finremCaseDetails.getData().getGeneralLetterWrapper().getGeneralLetterAddressee().getValue().getCode();
+        boolean recipientResideOutsideOfUK = postalService.isRecipientResideOutsideOfUK(finremCaseDetails.getData(), addressee);
         Addressee generalLetterAddressee = Addressee.builder().name(getRecipientName(finremCaseDetails))
-                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(finremCaseDetails))).build();
+                .formattedAddress(formatAddressForLetterPrinting(getRecipientAddress(finremCaseDetails), recipientResideOutsideOfUK)).build();
         String reference = getRecipientSolicitorReference(finremCaseDetails);
         data.put(ADDRESSEE, generalLetterAddressee);
         data.put("reference", reference);
@@ -228,28 +257,37 @@ public class GeneralLetterService {
         List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
         GeneralLetterCollection latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
         bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
-        CaseDocument generalLetterUploadedDocument = generalLetterWrapper.getGeneralLetterUploadedDocument();
-        if (generalLetterUploadedDocument != null) {
-            bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(generalLetterUploadedDocument));
-        }
+        Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocument())
+            .ifPresent(uploadedDocument -> bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(uploadedDocument)));
+
+        Optional.ofNullable(generalLetterWrapper.getGeneralLetterUploadedDocuments())
+            .ifPresent(uploadedDocuments -> uploadedDocuments.forEach(
+                generalLetterUploadedDocumentCollection -> bulkPrintDocuments.add(documentHelper.mapToBulkPrintDocument(
+                    generalLetterUploadedDocumentCollection.getValue())
+                )
+            ));
+        String recipient = generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode();
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(),
-            generalLetterWrapper.getGeneralLetterAddressee().getValue().getCode(),
-            bulkPrintDocuments, authorisationToken);
+            recipient,
+            bulkPrintDocuments,
+            postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), recipient),
+            authorisationToken);
     }
 
-    public static String formatAddressForLetterPrinting(Address address) {
-        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
+    private String formatAddressForLetterPrinting(Address address, boolean isInternational) {
+        return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class), isInternational);
     }
 
-    private static String formatAddressForLetterPrinting(Map<String, Object> address) {
+    private String formatAddressForLetterPrinting(Map<String, Object> address, boolean isInternational) {
         if (address != null) {
-            return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
-                    .map(address::get)
-                    .filter(Objects::nonNull)
-                    .map(Object::toString)
-                    .filter(StringUtils::isNotEmpty)
-                    .filter(s -> !s.equals("null"))
-                    .collect(Collectors.joining("\n"));
+            Stream<String> addressLines = Stream.of("AddressLine1", "AddressLine2", "AddressLine3",
+                "County", "PostTown", "PostCode", isInternational ? "Country" : "");
+            return addressLines.map(address::get)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .filter(StringUtils::isNotEmpty)
+                .filter(s -> !s.equals("null"))
+                .collect(Collectors.joining("\n"));
         }
         return "";
     }

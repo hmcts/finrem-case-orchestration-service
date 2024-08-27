@@ -29,7 +29,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotdigital_thenPartyListDefaultSelectedAppAndResp() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotDigital_thenPartyListDefaultSelectedAppAndResp() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -69,7 +69,7 @@ class PartyServiceTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAredigitalAndAllSelected_thenPartyList() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreDigitalAndAllSelected_thenPartyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -106,6 +106,29 @@ class PartyServiceTest {
 
         Assertions.assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+    }
+
+    @Test
+    void givenACcdCallbackContestedCase_whenAllPartiesUnrepresentSelected_thengetUnrepresentedParties() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setCcdCaseType(CONTESTED);
+        data.getContactDetailsWrapper().setApplicantFmName("Tony");
+        data.getContactDetailsWrapper().setApplicantLname("B");
+
+        data.getContactDetailsWrapper().setRespondentFmName("Tony");
+        data.getContactDetailsWrapper().setRespondentLname("C");
+
+        DynamicMultiSelectList partiesOnCase = partyService.getAllActivePartyList(caseDetails);
+
+        Assertions.assertEquals(2, partiesOnCase.getListItems().size(), "available parties");
+        Assertions.assertEquals(2, partiesOnCase.getValue().size(), "selected parties");
+
+        Assertions.assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(0).getCode(),
+            "selected unrepresented applicant");
+        Assertions.assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), partiesOnCase.getListItems().get(1).getCode(),
+            "selected unrepresented respondent");
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {

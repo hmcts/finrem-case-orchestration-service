@@ -46,7 +46,8 @@ public class FinremContestedSendOrderCorresponder extends FinremMultiLetterOrEma
         log.info("Sending email notification to Intervener type {} Solicitor for 'Order Approved' for Case ID: {}",
             intervenerWrapper.getIntervenerType(), caseDetails.getId());
         notificationService.sendContestOrderApprovedEmailIntervener(caseDetails,
-            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
+            notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper),
+            intervenerWrapper.getIntervenerType());
     }
 
     @Override

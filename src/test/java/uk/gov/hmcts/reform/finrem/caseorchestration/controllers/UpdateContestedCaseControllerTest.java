@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
+@Import(MiamLegacyExemptionsService.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
@@ -52,6 +56,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockBean
     private CaseFlagsService caseFlagsService;
+    @Autowired
+    private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @Before
     public void setUp() {
@@ -64,7 +70,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldDeleteNDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
+    public void shouldDeleteNoDecreeAbsoluteWhenDecreeNisiSelectedBySolicitor() throws Exception {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(caseDocument());
 
@@ -284,7 +290,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveComplexityDetailsForContested() throws Exception {
+    public void shouldUpdateComplexityDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-complexity-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -293,12 +299,13 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.estimatedAssetsChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.netValueOfHome").doesNotExist())
-            .andExpect(jsonPath("$.data.potentialAllegationChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.otherReasonForComplexity").doesNotExist())
-            .andExpect(jsonPath("$.data.otherReasonForComplexityText").doesNotExist())
-            .andExpect(jsonPath("$.data.detailPotentialAllegation").doesNotExist());
+            .andExpect(jsonPath("$.data.estimatedAssetsChecklist").exists())
+            .andExpect(jsonPath("$.data.netValueOfHome").exists())
+            .andExpect(jsonPath("$.data.potentialAllegationChecklist").exists())
+            .andExpect(jsonPath("$.data.otherReasonForComplexity").exists())
+            .andExpect(jsonPath("$.data.otherReasonForComplexityText").exists())
+            .andExpect(jsonPath("$.data.detailPotentialAllegation").exists())
+            .andExpect(jsonPath("$.data.estimatedAssetsChecklistV2").exists());
     }
 
     @Test
@@ -347,114 +354,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(
-                "/fixtures/contested/update-miam-exceptions-when-applicant-not-claiming-exemption.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print()).andExpect(jsonPath("$.data.applicantAttendedMIAM").exists())
-            .andExpect(jsonPath("$.data.claimingExemptionMIAM").exists())
-            .andExpect(jsonPath("$.data.familyMediatorMIAM").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-    }
-
-    @Test
-    public void shouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(
-                "/fixtures/contested/update-miam-exceptions-when-applicant-attended-family-mediator.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-    }
-
-    @Test
-    public void shouldRemoveDomesticViolenceCheckListForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/remove-domestic-violence-checklist.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
-    }
-
-    @Test
-    public void shouldRemoveUrgencyCheckListForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/remove-urgency-checklist.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
-    }
-
-    @Test
-    public void shouldRemovePreviousMiamAttendanceCheckListForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/remove-previousMiamAttendance-checklist.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
-
-    }
-
-    @Test
-    public void shouldRemoveOtherGroundsMiamCheckListForContested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/remove-other-checklist.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-    }
-
-    @Test
-    public void shouldNotRemoveMiamCheckListForContested() throws Exception {
+    public void shouldOnlyRemoveLegacyMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/do-not-remove-checklists.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -466,8 +366,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMExemptionsChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMDomesticViolenceChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
-            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
+            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklistV2").exists())
+            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklistV2").exists())
+            .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
+            .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
     }
 
     @Test
@@ -533,6 +435,19 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.promptForAnyDocument").exists())
             .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
+    }
+
+    @Test
+    public void shouldRemoveAllocatedToBeHeardAtHighCourtJudgeLevelText() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamCheckService;
 
 import java.util.List;
 
@@ -28,11 +28,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class MiamCheckController extends BaseController {
 
-    @Autowired
-    private MiamCheckService service;
+    private final MiamCheckService service;
 
     @PostMapping(path = "/miam-attend-exempt-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Application cannot be made unless the applicant has either attended, or is exempt.")
@@ -53,7 +53,7 @@ public class MiamCheckController extends BaseController {
     }
 
     private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callback) {
-        List<String> errors = service.miamExemptAttendCheck(callback.getCaseDetails());
+        List<String> errors = service.validateMiamFields(callback.getCaseDetails());
         return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
     }
 }

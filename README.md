@@ -1,5 +1,7 @@
 # Financial Remedy Case Orchestration Service
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=finrem-case-orchestration&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=finrem-case-orchestration) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=finrem-case-orchestration&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=finrem-case-orchestration) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=finrem-case-orchestration&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=finrem-case-orchestration) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=finrem-case-orchestration&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=finrem-case-orchestration) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=finrem-case-orchestration&metric=coverage)](https://sonarcloud.io/summary/new_code?id=finrem-case-orchestration)
+
 ## Overview
 `finrem-case-orchestration` is a [Spring Boot](https://spring.io/projects/spring-boot) application and is responsible for handling all CCD callbacks
 for Financial Remedy cases. It provides the business logic to enable Financial Remedy cases to be progressed through
@@ -53,6 +55,9 @@ The integration between the plugin and `finrem-case-orchestration` can be found 
 cftlib can be configured to run either
 - using AAT services. See [cftlib AAT](docs/cftlib-aat.md)
 - in a pure local environment without any AAT dependencies. See [cftlib Local](docs/cftlib-local.md)
+
+#### Logs
+Application logs for the services running locally can be found in `build/cftlib/logs`.
 
 ## API documentation
 API documentation is provided with Swagger. This is available locally at: `http://localhost:9000/swagger-ui.html`

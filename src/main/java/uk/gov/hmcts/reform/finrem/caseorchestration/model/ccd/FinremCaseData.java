@@ -17,11 +17,15 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.FormAScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
@@ -54,10 +58,10 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinremCaseData {
+public class FinremCaseData implements HasCaseDocument {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
@@ -151,12 +155,6 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
     private CaseDocument approvedConsentOrderLetter;
-    private CaseDocument bulkPrintCoverSheetApp;
-    private CaseDocument bulkPrintCoverSheetRes;
-    private CaseDocument bulkPrintCoverSheetIntv1;
-    private CaseDocument bulkPrintCoverSheetIntv2;
-    private CaseDocument bulkPrintCoverSheetIntv3;
-    private CaseDocument bulkPrintCoverSheetIntv4;
     private String bulkPrintLetterIdRes;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
@@ -179,8 +177,6 @@ public class FinremCaseData {
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
-    private CaseDocument bulkPrintCoverSheetAppConfidential;
-    private CaseDocument bulkPrintCoverSheetResConfidential;
     @JsonProperty("RespSolNotificationsEmailConsent")
     private YesOrNo respSolNotificationsEmailConsent;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -199,6 +195,7 @@ public class FinremCaseData {
     private YesOrNo additionalPropertyOrderDecision;
     @JsonProperty("propertyAdjutmentOrderDetail")
     private List<PropertyAdjustmentOrderCollection> propertyAdjustmentOrderDetail;
+    private List<DocumentToKeepCollection> documentToKeepCollection;
     private YesOrNo paymentForChildrenDecision;
     private YesOrNo benefitForChildrenDecision;
     private List<BenefitPayment> benefitPaymentChecklist;
@@ -206,6 +203,7 @@ public class FinremCaseData {
     private List<FastTrackReason> fastTrackDecisionReason;
     private Complexity addToComplexityListOfCourts;
     private List<EstimatedAsset> estimatedAssetsChecklist;
+    private EstimatedAssetV2 estimatedAssetsChecklistV2;
     private String netValueOfHome;
     private List<PotentialAllegation> potentialAllegationChecklist;
     private String detailPotentialAllegation;
@@ -215,9 +213,13 @@ public class FinremCaseData {
     private String specificArrangementsRequired;
     private YesOrNo isApplicantsHomeCourt;
     private String reasonForLocalCourt;
+    private YesOrNo allocatedToBeHeardAtHighCourtJudgeLevel;
+    private String allocatedToBeHeardAtHighCourtJudgeLevelText;
     private String mediatorRegistrationNumber;
     private String familyMediatorServiceName;
     private String soleTraderName;
+    private CaseDocument uploadMediatorDocument;
+    private CaseDocument uploadMediatorDocumentPaperCase;
     private String mediatorRegistrationNumber1;
     private String familyMediatorServiceName1;
     private String soleTraderName1;
@@ -329,6 +331,13 @@ public class FinremCaseData {
     private IntervenerFour intervenerFour;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
+    private FormAScannedDocWrapper formAScannedDocWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ConsentOrderScannedDocWrapper consentOrderScannedDocWrapper;
+    private List<ScannedD81Collection> scannedD81Collection;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -369,6 +378,9 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private OrderWrapper orderWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private BulkPrintCoversheetWrapper bulkPrintCoversheetWrapper;
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
 
@@ -376,7 +388,7 @@ public class FinremCaseData {
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
-    private List<UploadCaseDocumentCollection> manageScannedDocumentCollection;
+    private List<ManageScannedDocumentCollection> manageScannedDocumentCollection;
     @JsonProperty("appBarristerCollection")
     private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
@@ -397,7 +409,9 @@ public class FinremCaseData {
 
     private YesOrNo isNocRejected;
 
-    private YesOrNo isCfvCategoriesAppliedFlag;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CfvMigrationWrapper cfvMigrationWrapper;
 
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
@@ -719,6 +733,23 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public String getApplicantSolicitorPostcode() {
+        if (isConsentedApplication()) {
+            Address solicitorAddress = getContactDetailsWrapper().getSolicitorAddress();
+            return solicitorAddress != null ? solicitorAddress.getPostCode() : null;
+        } else {
+            Address applicantAddress = getContactDetailsWrapper().getApplicantSolicitorAddress();
+            return applicantAddress != null ? applicantAddress.getPostCode() : null;
+        }
+    }
+
+    @JsonIgnore
+    public String getRespondentSolicitorPostcode() {
+        Address respondentAddress = getContactDetailsWrapper().getRespondentSolicitorAddress();
+        return respondentAddress != null ? respondentAddress.getPostCode() : null;
+    }
+
+    @JsonIgnore
     public boolean isRespAddressConfidential() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
     }
@@ -865,9 +896,10 @@ public class FinremCaseData {
     @JsonIgnore
     private String getSouthEastCourt(RegionSouthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()), RegionSouthEastFrc.KENT,
-                getCourtListIdOrDefault(courtList.getKentSurreyCourt()), RegionSouthEastFrc.THAMES_VALLEY,
-                getCourtListIdOrDefault(courtList.getThamesValleyCourt())).get(frc).getSelectedCourtId();
+            return Map.of(RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                    RegionSouthEastFrc.KENT_FRC, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                    RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt()))
+                .get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -925,5 +957,39 @@ public class FinremCaseData {
         };
     }
 
-}
+    @JsonIgnore
+    public FormAScannedDocWrapper getFormAScannedDocWrapper() {
+        if (formAScannedDocWrapper == null) {
+            this.formAScannedDocWrapper = new FormAScannedDocWrapper();
+        }
 
+        return formAScannedDocWrapper;
+    }
+
+    @JsonIgnore
+    public ConsentOrderScannedDocWrapper getConsentOrderScannedDocWrapper() {
+        if (consentOrderScannedDocWrapper == null) {
+            this.consentOrderScannedDocWrapper = new ConsentOrderScannedDocWrapper();
+        }
+
+        return consentOrderScannedDocWrapper;
+    }
+
+    @JsonIgnore
+    public CfvMigrationWrapper getCfvMigrationWrapper() {
+        if (cfvMigrationWrapper == null) {
+            this.cfvMigrationWrapper = new CfvMigrationWrapper();
+        }
+
+        return cfvMigrationWrapper;
+    }
+
+    @JsonIgnore
+    public BulkPrintCoversheetWrapper getBulkPrintCoversheetWrapper() {
+        if (bulkPrintCoversheetWrapper == null) {
+            this.bulkPrintCoversheetWrapper = new BulkPrintCoversheetWrapper();
+        }
+
+        return bulkPrintCoversheetWrapper;
+    }
+}

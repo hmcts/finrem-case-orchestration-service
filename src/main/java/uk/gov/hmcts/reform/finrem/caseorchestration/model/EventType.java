@@ -15,7 +15,8 @@ public enum EventType {
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     UPLOAD_CONFIDENTIAL_DOCUMENT("FR_uploadConfidentialDocument"),
-    UPLOAD_GENERAL_DOCUMENT("FR_uploadGeneralDocument"),
+    UPLOAD_DOCUMENT_CONSENTED("FR_uploadDocument"),
+    UPLOAD_DOCUMENT_CONTESTED("FR_uploadGeneralDocument"),
     INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
@@ -74,22 +75,17 @@ public enum EventType {
     DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
     CONSENT_ORDER("FR_consentOrder"),
     ASSIGN_DOCUMENT_CATEGORIES("FR_assignDocumentCategories"),
-
     GIVE_ALLOCATION_DIRECTIONS("FR_giveAllocationDirections"),
-
     UPDATE_FRC_INFORMATION("FR_updateFRCInformation"),
-
     UPDATE_COURT_INFO("FR_updateCourtInfo"),
-
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
-
     MANAGE_SCANNED_DOCS("FR_manageScannedDocs"),
-
+    UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
     CONSENT_SEND_ORDER_FOR_APPROVED_ORDER("FR_sendOrderForApproved"),
-
     HIDE_CASE("FR_hideCase"),
-
     UNHIDE_CASE("FR_unhideCase"),
+    APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
+    REMOVE_CASE_DOCUMENT("FR_removeCaseDocument"),
 
     @JsonEnumDefaultValue
     NONE("");
