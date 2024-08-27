@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.tika.Tika;
@@ -63,9 +64,10 @@ public class DocumentConversionService {
 
     public byte[] flattenPdfDocument(byte[] document) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PDDocument doc = null;
 
         try {
-            PDDocument doc = PDDocument.load(document);
+           doc = PDDocument.load(document);
             Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
             if (acroForm.isPresent()) {
@@ -73,9 +75,10 @@ public class DocumentConversionService {
                 doc.save(bos);
                 return bos.toByteArray();
             }
-            doc.close();
         } catch (IOException e) {
             log.error("Unable to flatten document", e);
+        } finally {
+            IOUtils.closeQuietly(doc);
         }
         return document;
     }
