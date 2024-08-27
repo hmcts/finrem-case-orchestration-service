@@ -68,11 +68,12 @@ public class DocumentConversionService {
 
         try {
            doc = PDDocument.load(document);
-            Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
+           Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
             if (acroForm.isPresent()) {
                 acroForm.get().flatten();
                 doc.save(bos);
+                doc.close();
                 return bos.toByteArray();
             }
         } catch (IOException e) {
