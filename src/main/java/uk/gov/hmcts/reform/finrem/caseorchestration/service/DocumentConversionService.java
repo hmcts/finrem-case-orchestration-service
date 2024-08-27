@@ -67,8 +67,8 @@ public class DocumentConversionService {
         PDDocument doc = null;
 
         try {
-           doc = PDDocument.load(document);
-           Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
+            doc = PDDocument.load(document);
+            Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
             if (acroForm.isPresent()) {
                 acroForm.get().flatten();
