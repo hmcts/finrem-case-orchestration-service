@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -397,47 +395,4 @@ class DocumentRemovalServiceTest {
         assertNull(result.getDocumentToKeepCollection());
     }
 
-    @Test
-    void test_getUploadTimestampFromDocumentNode_returnsDate() throws IOException {
-        String testData = """ 
-                {
-                    "document_url": "a url" ,
-                    "document_filename": "a filename",
-                    "document_binary_url": "a binary url",
-                    "upload_timestamp": "2024-08-20T07:20:43.416964"
-                }
-            """;
-        JsonNode documentNode = objectMapper.readTree(testData);
-        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
-        assertEquals("2024-08-20T07:20:43.416964", testTimestamp.toString());
-    }
-
-    @Test
-    void test_getUploadTimestampFromDocumentNode_handlesNullfromSource() throws IOException {
-        String testData = """ 
-                {
-                    "document_url": "a url",
-                    "document_filename": "a filename",
-                    "document_binary_url": "a binary url"
-                }
-            """;
-        JsonNode documentNode = objectMapper.readTree(testData);
-        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
-        assertNull(testTimestamp);
-    }
-
-    @Test
-    void test_getUploadTimestampFromDocumentNode_givesNullWithInvalidDate() throws IOException {
-        String testData = """
-                {
-                    "document_url": "a url",
-                    "document_filename": "a filename",
-                    "document_binary_url": "a binary url",
-                    "upload_timestamp": "an invalid date"
-                }
-            """;
-        JsonNode documentNode = objectMapper.readTree(testData);
-        LocalDateTime testTimestamp = documentRemovalService.getUploadTimestampFromDocumentNode(documentNode);
-        assertNull(testTimestamp);
-    }
 }

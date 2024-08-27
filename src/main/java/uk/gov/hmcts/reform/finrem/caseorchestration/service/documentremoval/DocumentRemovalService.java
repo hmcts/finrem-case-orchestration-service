@@ -94,14 +94,14 @@ public class DocumentRemovalService {
      * @param documentNode a JsonNode containing the upload timestamp
      * @return documentNodeUploadTimestamp a localDateTime version of the upload timestamp
      */
-    public LocalDateTime getUploadTimestampFromDocumentNode(JsonNode documentNode) {
+    private LocalDateTime getUploadTimestampFromDocumentNode(JsonNode documentNode) {
         LocalDateTime documentNodeUploadTimestamp;
         try {
             documentNodeUploadTimestamp =
                     Objects.isNull(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP)) ? null :
                             LocalDateTime.parse(documentNode.get(DOCUMENT_UPLOAD_TIMESTAMP).asText());
         } catch (Exception e) {
-            log.info(format(
+            log.error(format(
                     "Error getting upload timestamp for document url: %s.",
                     documentNode.get(DOCUMENT_URL).asText()));
             documentNodeUploadTimestamp = null;

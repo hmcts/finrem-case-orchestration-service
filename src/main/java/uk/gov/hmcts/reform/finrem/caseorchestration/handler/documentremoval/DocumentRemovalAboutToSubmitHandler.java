@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.documentremoval;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -21,7 +20,6 @@ public class DocumentRemovalAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final DocumentRemovalService documentRemovalService;
 
-    @Autowired
     public DocumentRemovalAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                DocumentRemovalService documentRemovalService) {
         super(mapper);
