@@ -110,7 +110,7 @@ public class UpdateRepresentationWorkflowService {
         }
         OrganisationPolicy respPolicy = caseData.getRespondentOrganisationPolicy();
         if (respPolicy == null) {
-            log.info("Adding default respondent organisation policy for Cae ID: {}", ccdCaseId);
+            log.info("Adding default respondent organisation policy for Case ID: {}", ccdCaseId);
             OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.RESP_SOLICITOR);
             caseData.setRespondentOrganisationPolicy(organisationPolicy);
         }
