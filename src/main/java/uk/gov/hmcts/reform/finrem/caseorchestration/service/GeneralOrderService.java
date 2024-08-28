@@ -312,7 +312,7 @@ public class GeneralOrderService {
     public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
         FinremCaseData caseData = caseDetails.getData();
         List<CaseDocument> orders = new ArrayList<>();
-        List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
+        List<DirectionOrderCollection> hearingOrders = caseData.getFinalOrderCollection();
         if (selectedDocs != null && hearingOrders != null) {
             List<DynamicMultiSelectListElement> docs = selectedDocs.getValue();
             docs.forEach(doc -> hearingOrders.forEach(obj -> addToList(doc, obj, orders, caseDetails.getId())));
