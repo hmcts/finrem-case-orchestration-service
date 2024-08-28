@@ -419,6 +419,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
                 .build());
 
         data.setUploadHearingOrder(hearingOrderDocuments);
+        data.setFinalOrderCollection(hearingOrderDocuments);
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
