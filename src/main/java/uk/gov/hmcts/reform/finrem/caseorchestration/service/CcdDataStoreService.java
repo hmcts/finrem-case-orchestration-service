@@ -21,31 +21,27 @@ public class CcdDataStoreService {
     private final IdamService idamService;
     private final RestService restService;
 
+    public void removeUserCaseRole(String caseId, String authorisationToken, String userId, String role) {
+        RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper
+            .mapToRemoveUserRolesRequest(caseId, userId, role);
+
+        restService.restApiDeleteCall(
+            authorisationToken,
+            ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl(),
+            removeUserRolesRequest);
+    }
+
     public void removeCreatorRole(CaseDetails caseDetails, String authorisationToken) {
-        removeRole(caseDetails, authorisationToken, CREATOR_USER_ROLE);
+        removeCreatorRole(caseDetails.getId(), authorisationToken);
     }
 
     public void removeCreatorRole(FinremCaseDetails finremCaseDetails, String authorisationToken) {
-        removeRole(finremCaseDetails, authorisationToken, CREATOR_USER_ROLE);
+        removeCreatorRole(finremCaseDetails.getId(), authorisationToken);
     }
 
-    private void removeRole(CaseDetails caseDetails, String authorisationToken, String role) {
+    private void removeCreatorRole(Long caseId, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
-        RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(caseDetails, userId, role);
 
-        restService.restApiDeleteCall(
-            authorisationToken,
-            ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl(),
-            removeUserRolesRequest);
-    }
-
-    private void removeRole(FinremCaseDetails finremCaseDetails, String authorisationToken, String role) {
-        String userId = idamService.getIdamUserId(authorisationToken);
-        RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(finremCaseDetails, userId, role);
-
-        restService.restApiDeleteCall(
-            authorisationToken,
-            ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl(),
-            removeUserRolesRequest);
+        removeUserCaseRole(String.valueOf(caseId), authorisationToken, userId, CREATOR_USER_ROLE);
     }
 }
