@@ -2,10 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -15,31 +16,34 @@ import java.util.LinkedHashMap;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
-    public static final String AUTH_TOKEN = "tokien:)";
-    @MockBean
-    protected UpdateRepresentationWorkflowService handleNocWorkflowService;
+    private static final String AUTH_TOKEN = "tokien:)";
 
     @MockBean
-    protected OnlineFormDocumentService service;
+    private UpdateRepresentationWorkflowService handleNocWorkflowService;
 
     @MockBean
-    protected FeatureToggleService featureToggleService;
+    private OnlineFormDocumentService service;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails() throws Exception {
@@ -71,7 +75,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
         verify(service).generateContestedMiniFormA(any(), any());
     }
-
 
     @Test
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails_respondentConfidentialAddressNotAmended() throws Exception {
@@ -164,4 +167,24 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         verify(service, never()).generateContestedMiniFormA(any(), any());
     }
 
+    @Test
+    public void shouldNotRemoveRespondentOrganisationPolicy() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-applicant-represented-change.json").toURI()));
+        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+
+        mvc.perform(post(REMOVE_DETAILS_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<CaseDetails> caseDetailsArgument = ArgumentCaptor.forClass(CaseDetails.class);
+        verify(handleNocWorkflowService, times(1)).handleNoticeOfChangeWorkflow(caseDetailsArgument.capture(),
+            anyString(), any(CaseDetails.class));
+        CaseDetails caseDetails = caseDetailsArgument.getValue();
+        assertTrue(caseDetails.getData().containsKey(RESPONDENT_ORGANISATION_POLICY));
+
+        verify(service).generateContestedMiniFormA(any(), any());
+    }
 }
