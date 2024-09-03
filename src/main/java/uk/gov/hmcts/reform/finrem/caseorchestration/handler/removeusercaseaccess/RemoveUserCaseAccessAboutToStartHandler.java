@@ -58,7 +58,7 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
         List<CaseAssignedUserRole> caseAssignedUserRoles = getCaseAssignedUserRoles(authToken, caseId);
         List<DynamicListElement> dynamicListElements = caseAssignedUserRoles.stream()
             .map(c -> getUserCaseAccess(authToken, c))
-            .map(this::map)
+            .map(this::mapToDynamicListElement)
             .toList();
         DynamicList caseUserAccessList = DynamicList.builder()
             .listItems(dynamicListElements)
@@ -85,7 +85,7 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
         return UserCaseAccess.of(caseAssignedUserRole, userDetails);
     }
 
-    private DynamicListElement map(UserCaseAccess userCaseAccess) {
+    private DynamicListElement mapToDynamicListElement(UserCaseAccess userCaseAccess) {
         return DynamicListElement.builder()
             .code(String.format("%s%s%s", userCaseAccess.getUserId(), CODE_VALUES_SEPARATOR,
                 userCaseAccess.getCaseRole()))
