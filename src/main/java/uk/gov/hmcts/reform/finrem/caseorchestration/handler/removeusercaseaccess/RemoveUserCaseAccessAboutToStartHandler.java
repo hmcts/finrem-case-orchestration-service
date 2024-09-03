@@ -55,20 +55,23 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
         String caseId = String.valueOf(finremCallbackRequest.getCaseDetails().getId());
         log.info("Remove User Case Access about to start callback for Case ID: {}", caseId);
 
-        List<CaseAssignedUserRole> caseAssignedUserRoles = getCaseAssignedUserRoles(authToken, caseId);
-        List<DynamicListElement> dynamicListElements = caseAssignedUserRoles.stream()
-            .map(c -> getUserCaseAccess(authToken, c))
-            .map(this::mapToDynamicListElement)
-            .toList();
-        DynamicList caseUserAccessList = DynamicList.builder()
-            .listItems(dynamicListElements)
-            .build();
-
+        DynamicList caseUserAccessList = getUserCaseAccessList(authToken, caseId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         caseData.setUserCaseAccessList(caseUserAccessList);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData)
+            .build();
+    }
+
+    private DynamicList getUserCaseAccessList(String authToken, String caseId) {
+        List<CaseAssignedUserRole> caseAssignedUserRoles = getCaseAssignedUserRoles(authToken, caseId);
+        List<DynamicListElement> dynamicListElements = caseAssignedUserRoles.stream()
+            .map(c -> getUserCaseAccess(authToken, c))
+            .map(this::mapToDynamicListElement)
+            .toList();
+        return DynamicList.builder()
+            .listItems(dynamicListElements)
             .build();
     }
 
