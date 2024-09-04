@@ -163,7 +163,7 @@ public class AdditionalHearingDocumentService {
         if (!directionDetailsCollection.isEmpty()) {
             directionDetailsCollection.sort(Comparator.comparing(
                 DirectionDetailCollection::getValue, Comparator.comparing(
-                    DirectionDetail::getDateOfHearing,  Comparator.nullsLast(
+                    DirectionDetail::getDateOfHearing, Comparator.nullsLast(
                         Comparator.reverseOrder()
                     )
                 )
