@@ -86,6 +86,7 @@ public enum EventType {
     UNHIDE_CASE("FR_unhideCase"),
     APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
     REMOVE_CASE_DOCUMENT("FR_removeCaseDocument"),
+    REMOVE_USER_CASE_ACCESS("FR_removeUserCaseAccess"),
 
     @JsonEnumDefaultValue
     NONE("");
