@@ -49,14 +49,15 @@ public class DocumentConversionServiceTest {
 
     private MockRestServiceServer mockServer;
 
-    private Document documentToConvert = new Document();
+    private Document documentToConvert;
 
     @Before
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
+        documentToConvert = new Document();
         documentToConvert.setFileName("file.docx");
-        documentToConvert.setUrl("docurl.com");
-        documentToConvert.setBinaryUrl("binaryurl.com");
+        documentToConvert.setUrl("docUrl.com");
+        documentToConvert.setBinaryUrl("binaryUrl.com");
     }
 
     @Test
