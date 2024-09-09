@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -103,17 +104,23 @@ public class UpdateRepresentationWorkflowService {
     public void persistDefaultOrganisationPolicy(FinremCaseData caseData) {
         String ccdCaseId = caseData.getCcdCaseId();
         OrganisationPolicy appPolicy = caseData.getApplicantOrganisationPolicy();
-        log.info("Applicant existing org policy {} for Case ID: {}", appPolicy, ccdCaseId);
-        if (appPolicy == null) {
+        if (isInvalidOrganisationPolicy(appPolicy)) {
+            log.info("Adding default applicant organisation policy for Case ID: {}", ccdCaseId);
             OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.APP_SOLICITOR);
             caseData.setApplicantOrganisationPolicy(organisationPolicy);
         }
         OrganisationPolicy respPolicy = caseData.getRespondentOrganisationPolicy();
-        log.info("Respondent existing org policy {} for Case ID: {}", respPolicy, ccdCaseId);
-        if (respPolicy == null) {
+        if (isInvalidOrganisationPolicy(respPolicy)) {
+            log.info("Adding default respondent organisation policy for Case ID: {}", ccdCaseId);
             OrganisationPolicy organisationPolicy = getOrganisationPolicy(CaseRole.RESP_SOLICITOR);
             caseData.setRespondentOrganisationPolicy(organisationPolicy);
         }
+    }
+
+    private boolean isInvalidOrganisationPolicy(OrganisationPolicy organisationPolicy) {
+        return organisationPolicy == null
+            || organisationPolicy.getOrganisation() == null
+            || StringUtils.isBlank(organisationPolicy.getOrgPolicyCaseAssignedRole());
     }
 
     private void persistDefaultApplicantOrganisationPolicy(CaseDetails caseDetails) {

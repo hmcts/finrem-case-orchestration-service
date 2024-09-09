@@ -437,7 +437,7 @@ public class FinremCaseData implements HasCaseDocument {
     private CaseFlagsWrapper caseFlagsWrapper;
 
     private String previousState;
-
+    private DynamicList userCaseAccessList;
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {

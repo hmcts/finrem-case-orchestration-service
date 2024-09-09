@@ -1,214 +1,398 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentremoval;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalServiceTest {
 
-    private ObjectMapper objectMapper;
-    private List<JsonNode> documentNodes;
-
     private DocumentRemovalService documentRemovalService;
+
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private GenericDocumentService genericDocumentService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @BeforeEach
     public void setUp() {
-        objectMapper = new ObjectMapper();
-        documentNodes = new ArrayList<>();
-        documentRemovalService = new DocumentRemovalService(objectMapper);
+        objectMapper = JsonMapper
+                .builder()
+                .addModule(new JavaTimeModule())
+                .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+
+        documentRemovalService = new DocumentRemovalService(objectMapper, genericDocumentService, featureToggleService);
     }
 
     @Test
-    void testEmptyObject() throws Exception {
-        String json = "{}";
-        JsonNode root = objectMapper.readTree(json);
-
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
-        assertEquals(0, documentNodes.size());
+    void testGetCaseDocumentsList_EmptyObject() {
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .build());
+        assertEquals(0, result.size());
     }
 
     @Test
-    void testEmptyArray() throws Exception {
-        String json = "[]";
-        JsonNode root = objectMapper.readTree(json);
+    void testGetCaseDocumentsList_testEmptyArray() {
 
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
-        assertEquals(0, documentNodes.size());
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(new ArrayList<>())
+            .build());
+        assertEquals(0, result.size());
     }
 
     @Test
-    void testDocumentWithUploadTimestamp() throws Exception {
-        String json = """
-                 {
-                   "formC": {
-                     "document_url": "https://example.com",
-                     "upload_timestamp": "2024-07-21T12:24:58.964127000",
-                     "document_filename": "Form-C.pdf",
-                     "document_binary_url": "https://example.com/binary"
-                   }
-                 }
-                """;
+    void testGetCaseDocumentsList_RootDocument() {
 
-        JsonNode root = objectMapper.readTree(json);
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .miniFormA(CaseDocument.builder()
+                .documentUrl("https://example.com/123")
+                .documentFilename("Form-C.pdf")
+                .documentBinaryUrl("https://example.com/binary")
+                .build())
+            .build());
 
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
 
-        assertEquals(1, documentNodes.size());
-        assertEquals("https://example.com", documentNodes.get(0).get("document_url").asText());
-        assertEquals("2024-07-21T12:24:58.964127000", documentNodes.get(0).get("upload_timestamp").asText());
-        assertEquals("Form-C.pdf", documentNodes.get(0).get("document_filename").asText());
-        assertEquals("https://example.com/binary", documentNodes.get(0).get("document_binary_url").asText());
+        assertEquals(1, result.size());
+        assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.get(0).getValue().getDocumentId());
     }
 
     @Test
-    void testSingleObjectWithDocumentUrl() throws Exception {
-        String json = "{\"formC\":{"
-                    + "\"document_url\":\"https://example.com\","
-                    + "\"document_filename\":\"Form-C.pdf\","
-                    + "\"document_binary_url\":\"https://example.com/binary\""
-                + "}"
-            + "}";
-        JsonNode root = objectMapper.readTree(json);
+    void testGetCaseDocumentsList_withDuplicateDocument() {
 
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .miniFormA(CaseDocument.builder()
+                .documentUrl("https://example.com/123")
+                .documentFilename("Form-C.pdf")
+                .documentBinaryUrl("https://example.com/binary")
+                .build())
+            .divorceUploadEvidence1(CaseDocument.builder()
+                .documentUrl("https://example.com/123")
+                .documentFilename("Form-C.pdf")
+                .documentBinaryUrl("https://example.com/binary")
+                .build())
+            .build());
 
-        assertEquals(1, documentNodes.size());
-        assertEquals("https://example.com", documentNodes.get(0).get("document_url").asText());
-        assertEquals("Form-C.pdf", documentNodes.get(0).get("document_filename").asText());
-        assertEquals("https://example.com/binary", documentNodes.get(0).get("document_binary_url").asText());
+
+        assertEquals(1, result.size());
+        assertEquals("https://example.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.get(0).getValue().getDocumentId());
+    }
+
+
+    @Test
+    void testGetCaseDocumentsList_NestedObjectWithinArrayWithDocumentUrl() {
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                .value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example1.com/123")
+                        .documentFilename("Form-C.pdf")
+                        .documentBinaryUrl("https://example1.com/binary")
+                        .build()).build()).build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Form-D.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build()).build()).build()))
+            .build());
+
+        assertEquals(2, result.size());
+
+        assertEquals("https://example1.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example1.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.get(0).getValue().getDocumentId());
+
+        assertEquals("https://example2.com/456", result.get(1).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-D.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example2.com/binary", result.get(1).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("456", result.get(1).getValue().getDocumentId());
     }
 
     @Test
-    void testNestedObjectWithDocumentUrl() throws Exception {
-        String json = "{\"nested\":"
-                    + "{\"formC\":"
-                        + "{"
-                            + "\"document_url\":\"https://example.com\","
-                            + "\"document_filename\":\"Form-C.pdf\","
-                            + "\"document_binary_url\":\"https://example.com/binary\""
-                        + "}"
-                    + "}"
-            + "}";
-        JsonNode root = objectMapper.readTree(json);
+    void testGetCaseDocumentsList_ComplexNestedArrayStructure() {
 
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .orderWrapper(OrderWrapper.builder()
+                .appOrderCollection(List.of(
+                    ApprovedOrderCollection.builder()
+                        .value(ApproveOrder.builder()
+                            .caseDocument(CaseDocument.builder()
+                                .documentUrl("https://example1.com/123")
+                                .documentFilename("Form-A.pdf")
+                                .documentBinaryUrl("https://example1.com/binary")
+                                .build())
+                            .build())
+                        .build(),
+                    ApprovedOrderCollection.builder()
+                        .value(ApproveOrder.builder()
+                            .caseDocument(CaseDocument.builder()
+                                .documentUrl("https://example2.com/456")
+                                .documentFilename("Form-B.pdf")
+                                .documentBinaryUrl("https://example2.com/binary")
+                                .build())
+                            .build())
+                        .build(),
+                    ApprovedOrderCollection.builder()
+                        .value(ApproveOrder.builder()
+                            .caseDocument(CaseDocument.builder()
+                                .documentUrl("https://example3.com/789")
+                                .documentFilename("Form-C.pdf")
+                                .documentBinaryUrl("https://example3.com/binary")
+                                .build())
+                            .build())
+                        .build()))
+                .build())
+            .build());
 
-        assertEquals(1, documentNodes.size());
-        assertEquals("https://example.com", documentNodes.get(0).get("document_url").asText());
-        assertEquals("Form-C.pdf", documentNodes.get(0).get("document_filename").asText());
-        assertEquals("https://example.com/binary", documentNodes.get(0).get("document_binary_url").asText());
+
+
+        assertEquals(3, result.size());
+
+        assertEquals("https://example1.com/123", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-A.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example1.com/binary", result.get(0).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("123", result.get(0).getValue().getDocumentId());
+
+        assertEquals("https://example2.com/456", result.get(1).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-B.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example2.com/binary", result.get(1).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("456", result.get(1).getValue().getDocumentId());
+
+        assertEquals("https://example3.com/789", result.get(2).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("Form-C.pdf", result.get(2).getValue().getCaseDocument().getDocumentFilename());
+        assertEquals("https://example3.com/binary", result.get(2).getValue().getCaseDocument().getDocumentBinaryUrl());
+        assertEquals("789", result.get(2).getValue().getDocumentId());
+
+    }
+
+    /**
+     * Sorts files by upload timestamp in reverse ascending order, nulls last.
+     * The data for this test includes the various file structures.
+     */
+    @Test
+    void testGetCaseDocumentsList_SortingIsCorrect() {
+
+        String firstDate = "2024-01-01T00:00:00.000000";
+        String secondDate = "2024-01-02T00:00:00.000000";
+        String thirdDate = "2024-01-03T00:00:00.000000";
+        String fourthDate = "2024-01-04T00:00:00.000000";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+
+        List<DocumentToKeepCollection> result = documentRemovalService.getCaseDocumentsList(FinremCaseData.builder()
+                // ApprovedOrderCollection as example of complex nested data.  Has third-oldest upload date
+                .ccdCaseId(TestConstants.CASE_ID)
+                .orderWrapper(OrderWrapper.builder()
+                    .appOrderCollection(List.of(
+                        ApprovedOrderCollection.builder()
+                            .value(ApproveOrder.builder()
+                                .caseDocument(CaseDocument.builder()
+                                    .documentUrl("https://example3.com/789")
+                                    .documentFilename("ThirdDoc.pdf")
+                                    .documentBinaryUrl("https://example3.com/binary")
+                                    .uploadTimestamp(LocalDateTime.parse(thirdDate, formatter))
+                                    .build())
+                                .build())
+                            .build()))
+                        .build())
+                // uploaded documents collection as example of data at in an array.  Has first, fourth and a null upload date.
+                .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                                .value(UploadDocument.builder()
+                                        .documentLink(CaseDocument.builder()
+                                                .documentUrl("https://example1.com/123")
+                                                .documentFilename("FirstDoc.pdf")
+                                                .documentBinaryUrl("https://example1.com/binary")
+                                                .uploadTimestamp(LocalDateTime.parse(firstDate, formatter))
+                                                .build()).build()).build(),
+                        UploadDocumentCollection.builder().value(UploadDocument.builder()
+                                .documentLink(CaseDocument.builder()
+                                        .documentUrl("https://example4.com/101112")
+                                        .documentFilename("FourthDoc.pdf")
+                                        .documentBinaryUrl("https://example4.com/binary")
+                                        .uploadTimestamp(LocalDateTime.parse(fourthDate, formatter))
+                                        .build()).build()).build(),
+                        UploadDocumentCollection.builder().value(UploadDocument.builder()
+                                .documentLink(CaseDocument.builder()
+                                        .documentUrl("https://example5.com/131415")
+                                        .documentFilename("NullDoc.pdf")
+                                        .documentBinaryUrl("https://example5.com/binary")
+                                        .build()).build()).build()))
+                // miniFormA as example of data at a root level.  Has second-oldest upload date
+                .miniFormA(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("secondDoc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .uploadTimestamp(LocalDateTime.parse(secondDate, formatter))
+                        .build())
+                .build());
+
+        assertEquals(5, result.size());
+
+        assertEquals("https://example4.com/101112", result.get(0).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("FourthDoc.pdf", result.get(0).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example3.com/789", result.get(1).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("ThirdDoc.pdf", result.get(1).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example2.com/456", result.get(2).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("secondDoc.pdf", result.get(2).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example1.com/123", result.get(3).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("FirstDoc.pdf", result.get(3).getValue().getCaseDocument().getDocumentFilename());
+
+        assertEquals("https://example5.com/131415", result.get(4).getValue().getCaseDocument().getDocumentUrl());
+        assertEquals("NullDoc.pdf", result.get(4).getValue().getCaseDocument().getDocumentFilename());
     }
 
     @Test
-    void testArrayWithDocumentUrls() throws Exception {
-        String json = "{\"array\":"
-                    + "["
-                        + "{\"formA\":"
-                            + "{"
-                                + "\"document_url\":\"https://example1.com\","
-                                + "\"document_filename\":\"Form-A.pdf\","
-                                + "\"document_binary_url\":\"https://example1.com/binary\""
-                            + "}"
-                        + "},"
-                        + "{\"formB\":"
-                            + "{"
-                                + "\"document_url\":\"https://example2.com\","
-                                + "\"document_filename\":\"Form-B.pdf\","
-                                + "\"document_binary_url\":\"https://example2.com/binary\""
-                            + "}"
-                        + "}"
-                    + "]"
-            + "}";
+    void testRemoveDocuments_NoDocuments() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantLname("Some Name")
+                .build())
+            .build();
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
-        JsonNode root = objectMapper.readTree(json);
-
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
-        assertEquals(2, documentNodes.size());
-
-        assertEquals("https://example1.com", documentNodes.get(0).get("document_url").asText());
-        assertEquals("Form-A.pdf", documentNodes.get(0).get("document_filename").asText());
-        assertEquals("https://example1.com/binary", documentNodes.get(0).get("document_binary_url").asText());
-
-        assertEquals("https://example2.com", documentNodes.get(1).get("document_url").asText());
-        assertEquals("Form-B.pdf", documentNodes.get(1).get("document_filename").asText());
-        assertEquals("https://example2.com/binary", documentNodes.get(1).get("document_binary_url").asText());
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantLname(),result.getContactDetailsWrapper().getApplicantLname());
+        assertNull(result.getDocumentToKeepCollection());
     }
 
     @Test
-    void testComplexNestedArrayStructure() throws Exception {
-        String json = "{\"array\":"
-                    + "["
-                        + "{\"nestedArray1\": "
-                            + "["
-                                + "{\"formA\":"
-                                    + "{"
-                                        + "\"document_url\":\"https://example1.com\","
-                                        + "\"document_filename\":\"Form-A.pdf\","
-                                        + "\"document_binary_url\":\"https://example1.com/binary\""
-                                    + "}"
-                                + "},"
-                                + "{\"formB\":"
-                                    + "{"
-                                        + "\"document_url\":\"https://example2.com\","
-                                        + "\"document_filename\":\"Form-B.pdf\","
-                                        + "\"document_binary_url\":\"https://example2.com/binary\""
-                                    + "}"
-                                + "}"
-                            + "]"
-                        + "},"
-                    + "{\"nestedArray2\":"
-                        + "["
-                            + "{\"formC\":"
-                                + "{"
-                                    + "\"document_url\":\"https://example3.com\","
-                                    + "\"document_filename\":\"Form-C.pdf\","
-                                    + "\"document_binary_url\":\"https://example3.com/binary\""
-                                + "}"
-                            + "},"
-                            + "{\"formD\":"
-                                + "{"
-                                    + "\"document_url\":\"https://example4.com\","
-                                    + "\"document_filename\":\"Form-D.pdf\","
-                                    + "\"document_binary_url\":\"https://example4.com/binary\""
-                                + "}"
-                            + "}"
-                        + "]"
-                    + "}"
-                + "]"
-            + "}";
+    void testRemoveDocuments_KeepAllDocuments() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                    .documentLink(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Form-D.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                    .build()))
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("123")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example1.com/123")
+                        .documentFilename("Form-C.pdf")
+                        .documentBinaryUrl("https://example1.com/binary")
+                        .build())
+                    .build())
+                .build(),
+                DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Form-D.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
 
-        JsonNode root = objectMapper.readTree(json);
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
 
-        documentRemovalService.retrieveDocumentNodes(root, documentNodes);
-
-        assertEquals(4, documentNodes.size());
-
-        assertEquals("https://example1.com", documentNodes.get(0).get("document_url").asText());
-        assertEquals("Form-A.pdf", documentNodes.get(0).get("document_filename").asText());
-        assertEquals("https://example1.com/binary", documentNodes.get(0).get("document_binary_url").asText());
-
-        assertEquals("https://example2.com", documentNodes.get(1).get("document_url").asText());
-        assertEquals("Form-B.pdf", documentNodes.get(1).get("document_filename").asText());
-        assertEquals("https://example2.com/binary", documentNodes.get(1).get("document_binary_url").asText());
-
-        assertEquals("https://example3.com", documentNodes.get(2).get("document_url").asText());
-        assertEquals("Form-C.pdf", documentNodes.get(2).get("document_filename").asText());
-        assertEquals("https://example3.com/binary", documentNodes.get(2).get("document_binary_url").asText());
-
-        assertEquals("https://example4.com", documentNodes.get(3).get("document_url").asText());
-        assertEquals("Form-D.pdf", documentNodes.get(3).get("document_filename").asText());
-        assertEquals("https://example4.com/binary", documentNodes.get(3).get("document_binary_url").asText());
+        assertEquals(2, result.getUploadDocuments().size());
+        assertNull(result.getDocumentToKeepCollection());
     }
+
+    @Test
+    void testRemoveDocuments_RemoveDoc() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .uploadDocuments(List.of(UploadDocumentCollection.builder()
+                    .value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build(),
+                UploadDocumentCollection.builder().value(UploadDocument.builder()
+                        .documentLink(CaseDocument.builder()
+                            .documentUrl("https://example2.com/456")
+                            .documentFilename("Form-D.pdf")
+                            .documentBinaryUrl("https://example2.com/binary")
+                            .build())
+                        .build())
+                    .build()))
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                    .value(DocumentToKeep.builder()
+                        .documentId("123")
+                        .caseDocument(CaseDocument.builder()
+                            .documentUrl("https://example1.com/123")
+                            .documentFilename("Form-C.pdf")
+                            .documentBinaryUrl("https://example1.com/binary")
+                            .build())
+                        .build())
+                    .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(1, result.getUploadDocuments().size());
+        assertEquals("Form-C.pdf", result.getUploadDocuments().get(0).getValue().getDocumentLink().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
 }

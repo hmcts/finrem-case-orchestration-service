@@ -57,8 +57,6 @@ public class UpdateRepresentationWorkflowServiceTest {
     @InjectMocks
     UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
-    private ObjectMapper mapper = new ObjectMapper();
-
     private CaseDetails caseDetails;
 
     private CaseDetails defaultChangeDetails;
@@ -240,6 +238,40 @@ public class UpdateRepresentationWorkflowServiceTest {
         assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
             data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         assertEquals("XX9191910", data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+    }
+
+    @Test
+    public void givenContestedCase_whenApplicantOrgPolicyEmpty_thenAddDefaultRole() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDataDetails();
+        FinremCaseData data = finremCaseDetails.getData();
+        data.setApplicantOrganisationPolicy(new OrganisationPolicy());
+        data.setRespondentOrganisationPolicy(getOrganisationPolicy(CaseRole.RESP_SOLICITOR));
+
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(data);
+
+        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
+            data.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertNull(data.getApplicantOrganisationPolicy().getOrgPolicyReference());
+        assertEquals("XX9191910", data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void givenContestedCase_whenRespondentOrgPolicyEmpty_thenAddDefaultRole() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDataDetails();
+        FinremCaseData data = finremCaseDetails.getData();
+        data.setApplicantOrganisationPolicy(getOrganisationPolicy(CaseRole.APP_SOLICITOR));
+        data.setRespondentOrganisationPolicy(new OrganisationPolicy());
+
+        updateRepresentationWorkflowService.persistDefaultOrganisationPolicy(data);
+
+        assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(),
+            data.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertEquals("XX9191910", data.getApplicantOrganisationPolicy().getOrgPolicyReference());
+        assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(),
+            data.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+        assertNull(data.getRespondentOrganisationPolicy().getOrgPolicyReference());
     }
 
     private OrganisationPolicy getOrganisationPolicy(CaseRole role) {
