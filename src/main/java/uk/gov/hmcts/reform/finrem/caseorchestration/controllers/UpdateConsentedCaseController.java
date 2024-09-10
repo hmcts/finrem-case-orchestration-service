@@ -64,7 +64,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class UpdateConsentedCaseController extends BaseController {
+public class UpdateConsentedCaseController extends UpdateContactDetailsController {
 
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final FeatureToggleService featureToggleService;
@@ -86,9 +86,11 @@ public class UpdateConsentedCaseController extends BaseController {
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
-        updateRespondentSolicitorAddress(caseData);
+        boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
 
-        updateApplicantOrSolicitorContactDetails(caseData);
+        if (includesRepresentationChange) {
+            handleApplicantRepresentationChange(caseData);
+            handleRespondentRepresentationChange(caseDetails);
 
         if (YES_VALUE.equals(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE))) {
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
