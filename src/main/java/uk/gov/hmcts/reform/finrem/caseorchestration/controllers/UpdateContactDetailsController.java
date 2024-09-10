@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
-public class UpdateContactDetailsController extends BaseController {
+public abstract class UpdateContactDetailsController extends BaseController {
 
     void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
         caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
