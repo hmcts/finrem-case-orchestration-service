@@ -90,6 +90,42 @@ public class UpdateConsentedCaseController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    private void removeApplicantSolicitorDetails(Map<String, Object> caseData) {
+        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
+        if (applicantRepresented.equals(NO_VALUE)) {
+            caseData.remove("applicantSolicitorName");
+            caseData.remove("applicantSolicitorFirm");
+            caseData.remove("applicantSolicitorAddress");
+            caseData.remove("applicantSolicitorPhone");
+            caseData.remove("applicantSolicitorEmail");
+            caseData.remove("applicantSolicitorDXnumber");
+            caseData.remove("applicantSolicitorConsentForEmails");
+            caseData.remove(APPLICANT_ORGANISATION_POLICY);
+        }
+    }
+
+    private void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
+        boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
+        String respondentRepresented = isContested
+            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
+            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
+        if (respondentRepresented.equals(YES_VALUE)) {
+            caseData.remove(RESPONDENT_ADDRESS);
+            caseData.remove(RESPONDENT_PHONE);
+            caseData.remove(RESPONDENT_EMAIL);
+            caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, NO_VALUE);
+        } else {
+            caseData.remove(RESP_SOLICITOR_NAME);
+            caseData.remove(RESP_SOLICITOR_FIRM);
+            caseData.remove(RESP_SOLICITOR_ADDRESS);
+            caseData.remove(RESP_SOLICITOR_PHONE);
+            caseData.remove(RESP_SOLICITOR_EMAIL);
+            caseData.remove(RESP_SOLICITOR_DX_NUMBER);
+            caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
+            caseData.remove(RESPONDENT_ORGANISATION_POLICY);
+        }
+    }
+
     private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
         if (NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))) {
             removeRespondentSolicitorAddress(caseData);
