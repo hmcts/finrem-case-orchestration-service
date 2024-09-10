@@ -41,14 +41,14 @@ public class UpdateContactDetailsController extends BaseController {
     }
 
 
-    void handleApplicantRepresentationChange(Map<String, Object> caseData) {
+    void handleApplicantRepresentationChange(Map<String, Object> caseData, boolean isContested) {
         String nocParty = (String) caseData.get(NOC_PARTY);
         if (APPLICANT.equalsIgnoreCase(nocParty)) {
-            removeApplicantSolicitorDetails(caseData);
+            removeApplicantSolicitorDetails(caseData, isContested);
         }
     }
 
-    void handleRespondentRepresentationChange(CaseDetails caseDetails) {
+    void handleRespondentRepresentationChange(CaseDetails caseDetails, boolean isContested) {
         Map<String, Object> caseData = caseDetails.getData();
         String nocParty = (String) caseData.get(NOC_PARTY);
         if (RESPONDENT.equalsIgnoreCase(nocParty)) {
@@ -56,7 +56,7 @@ public class UpdateContactDetailsController extends BaseController {
         }
     }
 
-    void removeApplicantSolicitorDetails(Map<String, Object> caseData) {
+    void removeApplicantSolicitorDetails(Map<String, Object> caseData, boolean isContested) {
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(NO_VALUE)) {
             caseData.remove("applicantSolicitorName");
