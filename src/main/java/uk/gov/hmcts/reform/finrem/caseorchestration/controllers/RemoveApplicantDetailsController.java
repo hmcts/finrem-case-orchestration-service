@@ -63,8 +63,8 @@ public class RemoveApplicantDetailsController extends UpdateContactDetailsContro
 
         boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
         if (includesRepresentationChange) {
-            handleApplicantRepresentationChange(caseData, true);
-            handleRespondentRepresentationChange(caseDetails, true);
+            handleApplicantRepresentationChange(caseDetails);
+            handleRespondentRepresentationChange(caseDetails);
         }
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);

@@ -55,18 +55,23 @@ public class UpdateContactDetailsController extends BaseController {
     }
 
 
-    void handleApplicantRepresentationChange(Map<String, Object> caseData, boolean isContested) {
+    void handleApplicantRepresentationChange(CaseDetails caseDetails) {
+        String caseTypeId = caseDetails.getCaseTypeId();
+        Map<String, Object> caseData = caseDetails.getData();
+
         String nocParty = (String) caseData.get(NOC_PARTY);
         if (APPLICANT.equalsIgnoreCase(nocParty)) {
-            removeApplicantSolicitorDetails(caseData, isContested);
+            removeApplicantSolicitorDetails(caseData, caseTypeId);
         }
     }
 
-    void handleRespondentRepresentationChange(CaseDetails caseDetails, boolean isContested) {
+    void handleRespondentRepresentationChange(CaseDetails caseDetails) {
+        String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
+
         String nocParty = (String) caseData.get(NOC_PARTY);
         if (RESPONDENT.equalsIgnoreCase(nocParty)) {
-            removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+            removeRespondentDetails(caseData, caseTypeId);
         }
     }
 

@@ -54,8 +54,8 @@ public class UpdateConsentedCaseController extends UpdateContactDetailsControlle
         boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
 
         if (includesRepresentationChange) {
-            handleApplicantRepresentationChange(caseData, false);
-            handleRespondentRepresentationChange(caseDetails, false);
+            handleApplicantRepresentationChange(caseDetails);
+            handleRespondentRepresentationChange(caseDetails);
 
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
