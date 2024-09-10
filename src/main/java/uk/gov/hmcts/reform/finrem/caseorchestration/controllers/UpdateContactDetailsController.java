@@ -75,7 +75,8 @@ public class UpdateContactDetailsController extends BaseController {
         }
     }
 
-    void removeApplicantSolicitorDetails(Map<String, Object> caseData, boolean isContested) {
+    void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
+        boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(NO_VALUE)) {
             caseData.remove(isContested ? CONTESTED_SOLICITOR_NAME : CONSENTED_SOLICITOR_NAME);
@@ -94,8 +95,8 @@ public class UpdateContactDetailsController extends BaseController {
     void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String respondentRepresented = isContested
-            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
-            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
+            ? nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))
+            : nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED));
         if (respondentRepresented.equals(YES_VALUE)) {
             caseData.remove(RESPONDENT_ADDRESS);
             caseData.remove(RESPONDENT_PHONE);
