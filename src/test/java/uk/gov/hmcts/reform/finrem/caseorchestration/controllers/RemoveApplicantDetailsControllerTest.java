@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -176,6 +177,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-represented-change.json").toURI()));
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+        when(updateContactDetailsService.isIncludesRepresentationChange(anyMap())).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
