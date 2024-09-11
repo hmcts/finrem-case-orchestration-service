@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
@@ -33,6 +34,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
+
+    @MockBean
+    private UpdateContactDetailsService updateContactDetailsService;
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
     private static final String AUTH_TOKEN = "tokien:)";
@@ -177,7 +181,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         ArgumentCaptor<CaseDetails> caseDetailsArgument = ArgumentCaptor.forClass(CaseDetails.class);
         verify(handleNocWorkflowService, times(1)).handleNoticeOfChangeWorkflow(caseDetailsArgument.capture(),
