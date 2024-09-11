@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Map;
@@ -37,8 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class RemoveApplicantDetailsController extends UpdateContactDetailsController {
+public class RemoveApplicantDetailsController extends BaseController {
 
+    private final UpdateContactDetailsService updateContactDetailsService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final OnlineFormDocumentService service;
 
@@ -61,10 +63,10 @@ public class RemoveApplicantDetailsController extends UpdateContactDetailsContro
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
+        boolean includesRepresentationChange = updateContactDetailsService.isIncludesRepresentationChange(caseData);
         if (includesRepresentationChange) {
-            handleApplicantRepresentationChange(caseDetails);
-            handleRespondentRepresentationChange(caseDetails);
+            updateContactDetailsService.handleApplicantRepresentationChange(caseDetails);
+            updateContactDetailsService.handleRespondentRepresentationChange(caseDetails);
         }
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
@@ -79,7 +81,7 @@ public class RemoveApplicantDetailsController extends UpdateContactDetailsContro
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, authorisationToken,
                 callback.getCaseDetailsBefore()));
         } else {
-            persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
+            updateContactDetailsService.persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
     }

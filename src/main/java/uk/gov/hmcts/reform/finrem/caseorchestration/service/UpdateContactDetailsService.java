@@ -1,5 +1,8 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
@@ -43,19 +46,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
-public abstract class UpdateContactDetailsController extends BaseController {
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UpdateContactDetailsService {
 
-    void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
+    public void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
         caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
         caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 
-    boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
+    public boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
         return YES_VALUE.equals(caseData.get(INCLUDES_REPRESENTATION_CHANGE));
     }
 
-
-    void handleApplicantRepresentationChange(CaseDetails caseDetails) {
+    public void handleApplicantRepresentationChange(CaseDetails caseDetails) {
         String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -65,7 +70,7 @@ public abstract class UpdateContactDetailsController extends BaseController {
         }
     }
 
-    void handleRespondentRepresentationChange(CaseDetails caseDetails) {
+    public void handleRespondentRepresentationChange(CaseDetails caseDetails) {
         String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -75,7 +80,7 @@ public abstract class UpdateContactDetailsController extends BaseController {
         }
     }
 
-    void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
+    static void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(NO_VALUE)) {
@@ -92,7 +97,7 @@ public abstract class UpdateContactDetailsController extends BaseController {
         }
     }
 
-    void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
+    static void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String respondentRepresented = isContested
             ? nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))

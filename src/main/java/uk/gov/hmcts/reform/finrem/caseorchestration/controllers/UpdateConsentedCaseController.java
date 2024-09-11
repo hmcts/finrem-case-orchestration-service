@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Map;
@@ -29,8 +30,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class UpdateConsentedCaseController extends UpdateContactDetailsController {
+public class UpdateConsentedCaseController extends BaseController {
 
+    private final UpdateContactDetailsService updateContactDetailsService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final FeatureToggleService featureToggleService;
 
@@ -51,11 +53,11 @@ public class UpdateConsentedCaseController extends UpdateContactDetailsControlle
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean includesRepresentationChange = isIncludesRepresentationChange(caseData);
+        boolean includesRepresentationChange = updateContactDetailsService.isIncludesRepresentationChange(caseData);
 
         if (includesRepresentationChange) {
-            handleApplicantRepresentationChange(caseDetails);
-            handleRespondentRepresentationChange(caseDetails);
+            updateContactDetailsService.handleApplicantRepresentationChange(caseDetails);
+            updateContactDetailsService.handleRespondentRepresentationChange(caseDetails);
 
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
@@ -63,7 +65,7 @@ public class UpdateConsentedCaseController extends UpdateContactDetailsControlle
                 originalCaseDetails));
         }
 
-        persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
+        updateContactDetailsService.persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
