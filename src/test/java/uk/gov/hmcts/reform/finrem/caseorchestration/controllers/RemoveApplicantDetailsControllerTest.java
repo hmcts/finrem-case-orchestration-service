@@ -36,11 +36,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
-    @MockBean
-    private UpdateContactDetailsService updateContactDetailsService;
-
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
     private static final String AUTH_TOKEN = "tokien:)";
+
+    @MockBean
+    private UpdateContactDetailsService updateContactDetailsService;
 
     @MockBean
     private UpdateRepresentationWorkflowService handleNocWorkflowService;
