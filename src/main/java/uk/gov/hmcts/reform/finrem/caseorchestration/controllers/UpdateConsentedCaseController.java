@@ -63,10 +63,11 @@ public class UpdateConsentedCaseController extends BaseController {
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 authToken,
                 originalCaseDetails));
+        } else {
+            updateContactDetailsService.persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+
         }
 
-        updateContactDetailsService.persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
