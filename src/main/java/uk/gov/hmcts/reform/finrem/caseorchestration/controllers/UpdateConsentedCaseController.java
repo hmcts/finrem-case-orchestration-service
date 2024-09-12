@@ -85,6 +85,8 @@ public class UpdateConsentedCaseController extends BaseController {
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 authToken,
                 originalCaseDetails));
+        } else {
+            persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
         }
 
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
