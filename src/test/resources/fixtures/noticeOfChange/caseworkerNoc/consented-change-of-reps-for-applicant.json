@@ -1,0 +1,150 @@
+{
+  "token": "token_test",
+  "event_id": "FR_issueApplication",
+  "case_details": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "solicitorName": "Sir Solicitor",
+      "applicantRepresented": "No",
+      "solicitorEmail": "sirsolicitor1@gmail.com",
+      "nocParty": "applicant",
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "IG2 6SA",
+        "PostTown": "Ilford",
+        "AddressLine1": "102 Ashurst Drive",
+        "AddressLine2": "GantsHill",
+        "AddressLine3": ""
+      },
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "rSolicitorDXnumber": "123",
+      "RespSolNotificationsEmailConsent":"No",
+      "dateOfSeparation": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "appRespondentLName": "Smith",
+      "appRespondentRep": "Yes",
+      "respondentPhone": "7411201631",
+      "appRespondentFMName": "Jane",
+      "RepresentationUpdateHistory":
+      [
+          {
+            "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+            "value": {
+              "party": "applicant",
+              "name": "John Smith",
+              "date": "2020-06-01T15:00:00.000",
+              "by": "Claire Mumford",
+              "via": "Notice of Change",
+              "added": {
+                "name": "Sir Solicitor",
+                "email": "sirsolicitor1@gmail.com",
+                "organisation": {
+                  "OrganisationID": "A31PTVA",
+                  "OrganisationName": "FRApplicantSolicitorFirm"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+  "case_details_before": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "solicitorName": "Sir Solicitor",
+      "applicantRepresented": "No",
+      "solicitorEmail": "sirsolicitor1@gmail.com",
+      "nocParty": "applicant",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "rSolicitorAddress": {
+        "County": "Please select",
+        "Country": "Essex",
+        "PostCode": "IG1 1NL",
+        "PostTown": "ILFORD",
+        "AddressLine1": "FLAT 188 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE",
+        "AddressLine3": ""
+      },      "dateOfSeparation": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "appRespondentLName": "Smith",
+      "appRespondentRep": "Yes",
+      "respondentPhone": "7411201631",
+      "appRespondentFMName": "Jane",
+      "RepresentationUpdateHistory":
+      [
+        {
+          "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+          "value": {
+            "party": "applicant",
+            "name": "John Smith",
+            "date": "2020-06-01T15:00:00.000",
+            "by": "Claire Mumford",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirm"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+  }
+}
