@@ -72,8 +72,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
         verify(updateContactDetailsService).handleApplicantRepresentationChange(any());
         verify(updateContactDetailsService).handleRespondentRepresentationChange(any());
-
-
     }
 
     @Test
@@ -87,8 +85,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(updateContactDetailsService).persistOrgPolicies(any(), any());
-
-
     }
 
     @Test
@@ -110,7 +106,3 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource(FEE_LOOKUP_JSON).toURI()));
     }
 }
-
-
-
-

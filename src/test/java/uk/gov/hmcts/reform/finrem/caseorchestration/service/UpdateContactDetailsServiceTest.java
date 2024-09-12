@@ -175,6 +175,4 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         assertFalse(caseData.containsKey(RESPONDENT_EMAIL));
         assertEquals(NO_VALUE, caseData.get(RESPONDENT_RESIDE_OUTSIDE_UK)); // This should be added
     }
-
-
 }

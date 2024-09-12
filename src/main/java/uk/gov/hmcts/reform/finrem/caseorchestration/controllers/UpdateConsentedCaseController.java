@@ -67,6 +67,5 @@ public class UpdateConsentedCaseController extends BaseController {
             updateContactDetailsService.persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
-
     }
 }
