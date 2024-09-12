@@ -90,35 +90,60 @@ public class UpdateConsentedCaseController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
-        if (NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))) {
-            removeRespondentSolicitorAddress(caseData);
-        } else {
-            removeRespondentAddress(caseData);
+
+    private boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
+        return YES_VALUE.equals(caseData.get(INCLUDES_REPRESENTATION_CHANGE));
+    }
+
+    private void handleApplicantRepresentationChange(Map<String, Object> caseData) {
+        String nocParty = (String) caseData.get(NOC_PARTY);
+        if (APPLICANT.equalsIgnoreCase(nocParty)) {
+            removeApplicantSolicitorDetails(caseData);
         }
     }
 
-    private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        Optional<Object> applicantRepresented = ofNullable(caseData.get(APPLICANT_REPRESENTED));
-        if (equalsTo(Objects.toString(applicantRepresented.orElse("No")), "No")) {
-            removeApplicantSolicitorAddress(caseData, false);
-        } else {
-            removeApplicantAddress(caseData);
+    private void handleRespondentRepresentationChange(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        String nocParty = (String) caseData.get(NOC_PARTY);
+        if (RESPONDENT.equalsIgnoreCase(nocParty)) {
+            removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
         }
     }
 
-    private void removeApplicantAddress(Map<String, Object> caseData) {
-        caseData.put(APPLICANT_ADDRESS, null);
-        caseData.put(APPLICANT_PHONE, null);
-        caseData.put(APPLICANT_EMAIL, null);
-        caseData.put(APPLICANT_RESIDE_OUTSIDE_UK, YesOrNo.NO);
+    private void removeApplicantSolicitorDetails(Map<String, Object> caseData) {
+        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
+        if (applicantRepresented.equals(NO_VALUE)) {
+            caseData.remove("applicantSolicitorName");
+            caseData.remove("applicantSolicitorFirm");
+            caseData.remove("applicantSolicitorAddress");
+            caseData.remove("applicantSolicitorPhone");
+            caseData.remove("applicantSolicitorEmail");
+            caseData.remove("applicantSolicitorDXnumber");
+            caseData.remove("applicantSolicitorConsentForEmails");
+            caseData.remove(APPLICANT_ORGANISATION_POLICY);
+        }
     }
 
-    private void removeRespondentAddress(Map<String, Object> caseData) {
-        caseData.put(RESPONDENT_ADDRESS, null);
-        caseData.put(RESPONDENT_PHONE, null);
-        caseData.put(RESPONDENT_EMAIL, null);
-        caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, YesOrNo.NO);
+    private void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
+        boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
+        String respondentRepresented = isContested
+            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
+            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
+        if (respondentRepresented.equals(YES_VALUE)) {
+            caseData.remove(RESPONDENT_ADDRESS);
+            caseData.remove(RESPONDENT_PHONE);
+            caseData.remove(RESPONDENT_EMAIL);
+            caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, NO_VALUE);
+        } else {
+            caseData.remove(RESP_SOLICITOR_NAME);
+            caseData.remove(RESP_SOLICITOR_FIRM);
+            caseData.remove(RESP_SOLICITOR_ADDRESS);
+            caseData.remove(RESP_SOLICITOR_PHONE);
+            caseData.remove(RESP_SOLICITOR_EMAIL);
+            caseData.remove(RESP_SOLICITOR_DX_NUMBER);
+            caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
+            caseData.remove(RESPONDENT_ORGANISATION_POLICY);
+        }
     }
 
     private boolean equalsTo(String fieldData, String value) {
