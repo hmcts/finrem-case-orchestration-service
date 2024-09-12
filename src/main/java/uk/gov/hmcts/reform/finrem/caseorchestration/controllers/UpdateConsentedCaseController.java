@@ -89,7 +89,6 @@ public class UpdateConsentedCaseController extends BaseController {
             persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
         }
 
-        persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -148,10 +147,6 @@ public class UpdateConsentedCaseController extends BaseController {
             caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
             caseData.remove(RESPONDENT_ORGANISATION_POLICY);
         }
-    }
-
-    private boolean equalsTo(String fieldData, String value) {
-        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
     }
 
     private void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
