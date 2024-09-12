@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
@@ -36,6 +37,9 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     private JsonNode requestContent;
 
     @MockBean
+    private UpdateContactDetailsService updateContactDetailsService;
+
+    @MockBean
     private UpdateRepresentationWorkflowService mockNocWorkflowService;
 
     @MockBean
@@ -56,9 +60,9 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
@@ -72,9 +76,9 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
