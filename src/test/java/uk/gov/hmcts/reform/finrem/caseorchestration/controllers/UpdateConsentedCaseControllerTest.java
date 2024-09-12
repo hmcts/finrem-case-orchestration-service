@@ -18,11 +18,12 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -56,6 +57,26 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldSuccessfullyRemoveApplicantSolicitorDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps.json").toURI()));
+        when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(updateContactDetailsService.isIncludesRepresentationChange(anyMap())).thenReturn(true);
+
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(updateContactDetailsService).handleApplicantRepresentationChange(any());
+        verify(updateContactDetailsService).handleRespondentRepresentationChange(any());
+
+
+    }
+
+    @Test
     public void givenValidData_whenUpdateCaseDetails_thenShouldPreserveOrgPolicies() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
@@ -63,10 +84,11 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
-            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").exists());
+            .andExpect(status().isOk());
+
+        verify(updateContactDetailsService).persistOrgPolicies(any(), any());
+
+
     }
 
     @Test
