@@ -87,10 +87,10 @@ public class UpdateConsentedCaseController extends BaseController {
                 originalCaseDetails));
         } else {
             persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
 
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
 
