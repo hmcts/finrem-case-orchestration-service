@@ -620,7 +620,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
     }
 
-
     @Test
     public void sortDirectionDetailsCollection() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -647,15 +646,33 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .build();
         orderCollections.add(secondOrder);
 
+        DirectionDetailCollection thirdOrder
+            = DirectionDetailCollection.builder().value(DirectionDetail.builder().dateOfHearing(null).build())
+            .build();
+        orderCollections.add(thirdOrder);
+
+        LocalDate fourthDate = LocalDate.of(2021, 1, 2);
+        DirectionDetailCollection fourthOrder
+            = DirectionDetailCollection.builder().value(DirectionDetail.builder().dateOfHearing(fourthDate).build())
+            .build();
+        orderCollections.add(fourthOrder);
+
+        DirectionDetailCollection fifthOrder
+            = DirectionDetailCollection.builder().value(DirectionDetail.builder().dateOfHearing(null).build())
+            .build();
+        orderCollections.add(fifthOrder);
+
         data.setDirectionDetailsCollection(orderCollections);
 
         additionalHearingDocumentService.sortDirectionDetailsCollection(data);
 
         List<DirectionDetailCollection> directionDetailsCollection = data.getDirectionDetailsCollection();
-        DirectionDetail value0 = directionDetailsCollection.get(0).getValue();
-        assertEquals(secondDate, value0.getDateOfHearing());
-        DirectionDetail value1 = directionDetailsCollection.get(1).getValue();
-        assertEquals(firstDate, value1.getDateOfHearing());
+        assertEquals(5, directionDetailsCollection.size());
+        assertEquals(secondDate, directionDetailsCollection.get(0).getValue().getDateOfHearing());
+        assertEquals(fourthDate, directionDetailsCollection.get(1).getValue().getDateOfHearing());
+        assertEquals(firstDate, directionDetailsCollection.get(2).getValue().getDateOfHearing());
+        assertNull(directionDetailsCollection.get(3).getValue().getDateOfHearing());
+        assertNull(directionDetailsCollection.get(4).getValue().getDateOfHearing());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
