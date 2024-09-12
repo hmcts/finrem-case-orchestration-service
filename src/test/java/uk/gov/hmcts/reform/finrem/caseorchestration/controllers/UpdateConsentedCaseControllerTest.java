@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,9 +57,9 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
@@ -72,10 +73,51 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldSuccessfullyRemoveApplicantSolicitorDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps-for-applicant.json").toURI()));
+        when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+    }
+
+    @Test
+    public void shouldSuccessfullyRemoveRespondentDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps-for-respondent.json").toURI()));
+        when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldSuccessfullyRemoveRespondentSolicitorDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps-no-respondent-change.json").toURI()));
+        when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
