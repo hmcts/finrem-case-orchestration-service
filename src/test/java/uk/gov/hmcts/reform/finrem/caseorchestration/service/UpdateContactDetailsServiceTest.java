@@ -50,11 +50,11 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldPersistOrgPolicies() {
-        Map<String, Object> caseData = new HashMap<>();
         Map<String, Object> originalData = new HashMap<>();
         originalData.put(APPLICANT_ORGANISATION_POLICY, "ApplicantPolicyData");
         originalData.put(RESPONDENT_ORGANISATION_POLICY, "RespondentPolicyData");
 
+        Map<String, Object> caseData = new HashMap<>();
         CaseDetails originalDetails = mock(CaseDetails.class);
         when(originalDetails.getData()).thenReturn(originalData);
 
