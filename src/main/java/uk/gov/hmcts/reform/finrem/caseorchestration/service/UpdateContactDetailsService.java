@@ -80,7 +80,7 @@ public class UpdateContactDetailsService {
         }
     }
 
-    static void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
+    void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(NO_VALUE)) {
@@ -97,7 +97,7 @@ public class UpdateContactDetailsService {
         }
     }
 
-    static void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
+    void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String respondentRepresented = isContested
             ? nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))

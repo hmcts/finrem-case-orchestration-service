@@ -45,6 +45,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class UpdateContactDetailsServiceTest extends BaseServiceTest {
 
+    private final UpdateContactDetailsService service = new UpdateContactDetailsService();
+
+
     @Autowired
     UpdateContactDetailsService updateContactDetailsService;
 
@@ -118,7 +121,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
 
         String caseTypeId = CaseType.CONTESTED.getCcdType();
 
-        UpdateContactDetailsService.removeApplicantSolicitorDetails(caseData, caseTypeId);
+        service.removeApplicantSolicitorDetails(caseData, caseTypeId);
 
         assertFalse(caseData.containsKey(CONTESTED_SOLICITOR_NAME));
         assertFalse(caseData.containsKey(CONTESTED_SOLICITOR_FIRM));
@@ -145,7 +148,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         caseData.put(APPLICANT_ORGANISATION_POLICY, "Applicant Policy");
 
         String caseTypeId = CaseType.CONSENTED.getCcdType();
-        UpdateContactDetailsService.removeApplicantSolicitorDetails(caseData, caseTypeId);
+        service.removeApplicantSolicitorDetails(caseData, caseTypeId);
 
         assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_NAME));
         assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_FIRM));
@@ -168,7 +171,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
 
         String caseTypeId = CaseType.CONTESTED.getCcdType();
 
-        UpdateContactDetailsService.removeRespondentDetails(caseData, caseTypeId);
+        service.removeRespondentDetails(caseData, caseTypeId);
 
         assertFalse(caseData.containsKey(RESPONDENT_ADDRESS));
         assertFalse(caseData.containsKey(RESPONDENT_PHONE));
