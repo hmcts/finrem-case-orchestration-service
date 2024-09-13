@@ -153,7 +153,7 @@ public class UpdateContactDetailsServiceTest {
 
     @ParameterizedTest
     @MethodSource("applicantParameters")
-    void shouldRemoveApplicantSolicitorDetails(String caseTypeId, Map<String, Object> caseData, String[] PropertiesToRemove) {
+    void shouldRemoveApplicantSolicitorDetails(String caseTypeId, Map<String, Object> caseData, String[] propertiesToRemove) {
 
         CaseDetails caseDetails = mock(CaseDetails.class);
         when(caseDetails.getData()).thenReturn(caseData);
@@ -161,7 +161,7 @@ public class UpdateContactDetailsServiceTest {
 
         service.handleApplicantRepresentationChange(caseDetails);
 
-        for (String property : PropertiesToRemove) {
+        for (String property : propertiesToRemove) {
             assertFalse(caseData.containsKey(property), "property should be removed: " + property);
         }
     }
