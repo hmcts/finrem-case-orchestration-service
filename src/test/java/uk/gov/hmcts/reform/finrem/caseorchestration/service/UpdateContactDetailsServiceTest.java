@@ -1,17 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -43,12 +42,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
-public class UpdateContactDetailsServiceTest extends BaseServiceTest {
+public class UpdateContactDetailsServiceTest {
 
     private final UpdateContactDetailsService service = new UpdateContactDetailsService();
 
-
-    @Autowired
+    @MockBean
     UpdateContactDetailsService updateContactDetailsService;
 
     @Test
@@ -61,7 +59,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         CaseDetails originalDetails = mock(CaseDetails.class);
         when(originalDetails.getData()).thenReturn(originalData);
 
-        updateContactDetailsService.persistOrgPolicies(caseData, originalDetails);
+        service.persistOrgPolicies(caseData, originalDetails);
 
         assertEquals("ApplicantPolicyData", caseData.get(APPLICANT_ORGANISATION_POLICY));
         assertEquals("RespondentPolicyData", caseData.get(RESPONDENT_ORGANISATION_POLICY));
@@ -72,7 +70,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATION_CHANGE, YES_VALUE);
 
-        boolean result = updateContactDetailsService.isIncludesRepresentationChange(caseData);
+        boolean result = service.isIncludesRepresentationChange(caseData);
 
         assertTrue(result);
     }
@@ -86,8 +84,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONSENTED.getCcdType());
         when(caseDetails.getData()).thenReturn(caseData);
 
-        updateContactDetailsService.handleApplicantRepresentationChange(caseDetails);
-
+        service.handleApplicantRepresentationChange(caseDetails);
 
         assertFalse(caseData.containsKey(APPLICANT_REPRESENTED));
     }
@@ -101,7 +98,7 @@ public class UpdateContactDetailsServiceTest extends BaseServiceTest {
         when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONSENTED.getCcdType());
         when(caseDetails.getData()).thenReturn(caseData);
 
-        updateContactDetailsService.handleRespondentRepresentationChange(caseDetails);
+        service.handleRespondentRepresentationChange(caseDetails);
 
         assertFalse(caseData.containsKey(RESPONDENT_ADDRESS));
     }
