@@ -63,7 +63,6 @@ checkstyle {
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
-
 compileJava.dependsOn processResources
 build.dependsOn jacocoTestReport
 
