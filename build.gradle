@@ -57,6 +57,12 @@ group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
+checkstyle {
+    maxWarnings = 0
+    toolVersion = '10.18.1'
+    getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
+}
+
 compileJava.dependsOn processResources
 build.dependsOn jacocoTestReport
 
