@@ -11,6 +11,7 @@ public enum GeneralApplicationStatus {
     OTHER("Other");
 
     private final String status;
+
     GeneralApplicationStatus(String status) {
         this.status = status;
     }
