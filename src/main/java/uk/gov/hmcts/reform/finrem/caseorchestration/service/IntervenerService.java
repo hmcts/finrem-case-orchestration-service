@@ -50,20 +50,20 @@ public class IntervenerService {
     public IntervenerChangeDetails updateIntervenerDetails(IntervenerWrapper intervenerWrapper,
                                                            List<String> errors,
                                                            FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        Long caseId = callbackRequest.getCaseDetails().getId();
         validateIntervenerCountryOfResident(intervenerWrapper, errors);
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerChangeDetails.setIntervenerType(intervenerWrapper.getIntervenerType());
 
         if (intervenerWrapper != null) {
+            Long caseId = callbackRequest.getCaseDetails().getId();
             if (intervenerWrapper.getIntervenerDateAdded() == null) {
                 log.info("{} date intervener added to Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 intervenerWrapper.setIntervenerDateAdded(LocalDate.now());
             }
 
             final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
+            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
                 log.info("Add {} case role for Case ID: {}", caseRole, caseId);
                 String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
