@@ -37,7 +37,7 @@ public class UploadApprovedOrderContestedAboutToSubmitHandler extends FinremCall
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("invoking about to sumit event {} for Case ID:{}", EventType.UPLOAD_APPROVED_ORDER,
+        log.info("invoking about to submit event {} for Case ID:{}", EventType.UPLOAD_APPROVED_ORDER,
             callbackRequest.getCaseDetails().getId());
 
         List<String> errors = new ArrayList<>();
