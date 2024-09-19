@@ -9,12 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -69,9 +67,6 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
     private void previewGeneralLetter(String userAuthorisation,
                                       FinremCaseDetails caseDetails) {
         generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-        GeneralLetterWrapper wrapper = caseDetails.getData().getGeneralLetterWrapper();
-        Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
-            .filter(list -> !list.isEmpty());
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> buildCallbackResponse(FinremCaseDetails caseDetails,
