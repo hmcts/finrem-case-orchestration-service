@@ -43,7 +43,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         List<String> errors = getErrorsForCreatingPreviewOrFinalLetter(caseDetails);
 
         if (errors.isEmpty()) {
-            previewGeneralLetterAndValidateEncryption(userAuthorisation, caseDetails, errors);
+            previewGeneralLetter(userAuthorisation, caseDetails);
         }
 
         return buildCallbackResponse(caseDetails, errors);
@@ -66,15 +66,12 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         return new ArrayList<>(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails));
     }
 
-    private void previewGeneralLetterAndValidateEncryption(String userAuthorisation,
-                                                           FinremCaseDetails caseDetails,
-                                                           List<String> errors) {
+    private void previewGeneralLetter(String userAuthorisation,
+                                      FinremCaseDetails caseDetails) {
         generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
         GeneralLetterWrapper wrapper = caseDetails.getData().getGeneralLetterWrapper();
         Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
-            .filter(list -> !list.isEmpty())
-            .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
+            .filter(list -> !list.isEmpty());
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> buildCallbackResponse(FinremCaseDetails caseDetails,
