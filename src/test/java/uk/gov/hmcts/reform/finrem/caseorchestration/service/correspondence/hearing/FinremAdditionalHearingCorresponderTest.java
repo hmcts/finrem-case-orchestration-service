@@ -14,21 +14,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
-    private ObjectMapper objectMapper;
-
     @Before
     public void setUpTest() {
-        objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
             new FinremAdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
         caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-
     }
 
     @Test
@@ -38,26 +36,26 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
     }
 
     @Test
-    public void shouldGetDocumentsToPrintIfgetAdditionalHearingDocumentDateIsNull() {
+    public void shouldGetDocumentsToPrintIfGetAdditionalHearingDocumentDateIsNull() {
         List<AdditionalHearingDocumentCollection> additionalHearingDocumentCollections = new ArrayList<>();
         AdditionalHearingDocumentCollection document1 = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
-                .document(CaseDocument.builder().build())
+                .document(CaseDocument.builder().documentFilename("1").build())
                 .additionalHearingDocumentDate(null).build())
             .build();
         AdditionalHearingDocumentCollection document2 = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
-                .document(CaseDocument.builder().build())
+                .document(CaseDocument.builder().documentFilename("2").build())
                 .additionalHearingDocumentDate(null).build())
             .build();
         AdditionalHearingDocumentCollection document3 = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
-                .document(CaseDocument.builder().build())
+                .document(CaseDocument.builder().documentFilename("latest").build())
                 .additionalHearingDocumentDate(LocalDateTime.now()).build())
             .build();
         AdditionalHearingDocumentCollection document4 = AdditionalHearingDocumentCollection.builder()
             .value(AdditionalHearingDocument.builder()
-                .document(CaseDocument.builder().build())
+                .document(CaseDocument.builder().documentFilename("4").build())
                 .additionalHearingDocumentDate(LocalDateTime.now().minusDays(10)).build())
             .build();
         additionalHearingDocumentCollections.add(document1);
@@ -67,6 +65,7 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
         caseDetails.getData().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
+        assertThat(documentsToPrint).contains(CaseDocument.builder().documentFilename("latest").build());
     }
 
 }
