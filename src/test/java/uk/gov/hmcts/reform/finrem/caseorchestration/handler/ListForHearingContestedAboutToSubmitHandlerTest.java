@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ContestedListForHearingCorrespondenceService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,14 +45,15 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENTS_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @Mock
     private ObjectMapper objectMapper;
     @Mock
@@ -73,8 +73,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Mock
     private NotificationService notificationService;
 
-    @Mock
-    private ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService;
     @InjectMocks
     private ListForHearingContestedAboutToSubmitHandler aboutToSubmitHandler;
     @InjectMocks
@@ -86,27 +84,8 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private static final String FAST_TRACK_WARNING = "Date of the hearing must be between 12 and 14 weeks.";
 
     @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEvent_thenHandlerCanNotHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
-            equalTo(false));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEvent_thenHandlerCanHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToStartEvent_thenHandlerCanNotHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(false));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenASubmittedEvent_thenHandlerCanNotHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
-                equalTo(false));
+    void testHandlerCanHandle() {
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING);
     }
 
     @Test
@@ -133,7 +112,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest("/fixtures/pba-validate.json");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors().get(0), equalTo(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
-
     }
 
     @Test
@@ -179,8 +157,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(contestedListForHearingCorrespondenceService).sendHearingCorrespondence(any(), anyString());
-
     }
 
     @Test
@@ -225,7 +201,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(coverSheetService).generateApplicantCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verify(coverSheetService).generateRespondentCoverSheet(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
-        verify(contestedListForHearingCorrespondenceService).sendHearingCorrespondence(any(), anyString());
     }
 
     @Test
@@ -272,7 +247,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verify(coverSheetService).generateApplicantCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
         verify(coverSheetService).generateRespondentCoverSheet(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
-
     }
 
     private DynamicMultiSelectList getParties() {
@@ -292,7 +266,6 @@ class ListForHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTestSet
             .listItems(list)
             .build();
     }
-
 
     private List<String> partyList() {
         return of(CaseRole.APP_SOLICITOR.getCcdCode(),
