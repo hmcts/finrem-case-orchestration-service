@@ -64,7 +64,7 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         String caseId = finremCaseDetails.getId().toString();
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
 
         List<String> errors = validateHearingService.validateHearingErrors(finremCaseDetails);
