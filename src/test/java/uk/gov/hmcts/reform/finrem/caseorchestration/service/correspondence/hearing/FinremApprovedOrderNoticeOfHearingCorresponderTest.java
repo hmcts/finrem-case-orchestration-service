@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 
@@ -13,13 +13,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
+@ExtendWith(MockitoExtension.class)
+class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     private static final String LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL = "http://dm-store/1frea-ldo-doc/binary";
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
@@ -31,7 +31,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHe
     }
 
     @Test
-    public void shouldGetDocumentsToPrint() {
+    void shouldGetDocumentsToPrint() {
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
     }
