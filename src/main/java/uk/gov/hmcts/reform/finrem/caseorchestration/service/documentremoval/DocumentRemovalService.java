@@ -202,8 +202,10 @@ public class DocumentRemovalService {
                     String fieldName = fieldNames.next();
                     JsonNode fieldValue = valueObject.get(fieldName);
 
-                    if (shouldRemoveDocument(fieldValue,
-                        documentToDelete.getCaseDocument().getDocumentUrl())) {
+                    if (fieldValue.asText().equals(
+                        documentToDelete.getCaseDocument().getDocumentUrl())
+                        || shouldRemoveDocument(fieldValue,
+                            documentToDelete.getCaseDocument().getDocumentUrl())) {
                         log.info(String.format("Deleting doc with url %s", documentToDelete.getCaseDocument().getDocumentUrl()));
                         ((ArrayNode) root).remove(i);
                     }
