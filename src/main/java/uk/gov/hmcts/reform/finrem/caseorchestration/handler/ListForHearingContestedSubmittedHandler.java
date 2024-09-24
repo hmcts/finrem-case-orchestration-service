@@ -37,7 +37,7 @@ public class ListForHearingContestedSubmittedHandler extends FinremCallbackHandl
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         String caseId = finremCaseDetails.getId().toString();
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
+        log.info("Invoking contested {} submitted callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
         contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, userAuthorisation);
 
