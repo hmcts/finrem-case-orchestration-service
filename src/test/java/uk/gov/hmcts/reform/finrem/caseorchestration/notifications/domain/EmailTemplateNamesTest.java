@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -15,6 +15,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
@@ -33,11 +34,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
-public class EmailTemplateNamesTest {
+class EmailTemplateNamesTest {
 
     @Test
-    public void givenJvmIsWorkingAccordingToSpecification_whenEnumNameInvoked_thenItReturnsSameStringAsEnumName() {
-        ImmutableMap.<Enum, String>builder()
+    void givenJvmIsWorkingAccordingToSpecification_whenEnumNameInvoked_thenItReturnsSameStringAsEnumName() {
+        ImmutableMap.<EmailTemplateNames, String>builder()
             // consented
             .put(FR_HWF_SUCCESSFUL, "FR_HWF_SUCCESSFUL")
             .put(FR_ASSIGNED_TO_JUDGE, "FR_ASSIGNED_TO_JUDGE")
@@ -47,6 +48,7 @@ public class EmailTemplateNamesTest {
             .put(FR_CONSENT_GENERAL_EMAIL, "FR_CONSENT_GENERAL_EMAIL")
             .put(FR_TRANSFER_TO_LOCAL_COURT, "FR_TRANSFER_TO_LOCAL_COURT")
             // contested
+            .put(FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN, "FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN")
             .put(FR_CONTESTED_DRAFT_ORDER, "FR_CONTESTED_DRAFT_ORDER")
             .put(FR_CONTESTED_HWF_SUCCESSFUL, "FR_CONTESTED_HWF_SUCCESSFUL")
             .put(FR_CONTESTED_APPLICATION_ISSUED, "FR_CONTESTED_APPLICATION_ISSUED")
@@ -68,7 +70,6 @@ public class EmailTemplateNamesTest {
             .put(FR_CONTESTED_INTERIM_HEARING, "FR_CONTESTED_INTERIM_HEARING")
             .put(FR_CONSENTED_LIST_FOR_HEARING, "FR_CONSENTED_LIST_FOR_HEARING")
             .build()
-            .entrySet()
-            .forEach(enumAndName -> assertThat(enumAndName.getKey().name(), is(enumAndName.getValue())));
+            .forEach((key, value) -> assertThat(key.name(), is(value)));
     }
 }
