@@ -233,8 +233,8 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationCollectionData> getGeneralApplicationCollectionData(FinremCaseDetails caseDetails, String loggedInUserCaseRole,
-         List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
-         FinremCaseData caseData, FinremCaseData caseDataBefore) {
+                                                                                       List<GeneralApplicationCollectionData> interimGeneralApplicationListForRoleType,
+                                                                                       FinremCaseData caseData, FinremCaseData caseDataBefore) {
         switch (loggedInUserCaseRole) {
             case INTERVENER1 -> {
                 interimGeneralApplicationListForRoleType = getInterimGeneralApplicationList(
@@ -461,10 +461,6 @@ public class GeneralApplicationService {
                 service.validateEncryptionOnUploadedDocument(ga.getValue().getGeneralApplicationDraftOrder(),
                     caseId, errors, userAuthorisation);
                 List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = ga.getValue().getGaSupportDocuments();
-                if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
-                    gaSupportDocuments.forEach(doc -> service.validateEncryptionOnUploadedDocument(doc.getValue().getSupportDocument(),
-                        caseId, errors, userAuthorisation));
-                }
             });
         }
 
