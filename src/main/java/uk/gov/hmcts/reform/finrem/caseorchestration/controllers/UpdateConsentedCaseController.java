@@ -18,35 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeApplicantSolicitorAddress;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_RESIDE_OUTSIDE_UK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_RESIDE_OUTSIDE_UK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -54,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public class UpdateConsentedCaseController extends BaseController {
 
+    private final UpdateContactDetailsService updateContactDetailsService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final FeatureToggleService featureToggleService;
 
@@ -74,59 +53,19 @@ public class UpdateConsentedCaseController extends BaseController {
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
-        updateRespondentSolicitorAddress(caseData);
+        boolean includesRepresentationChange = updateContactDetailsService.isIncludesRepresentationChange(caseData);
 
-        updateApplicantOrSolicitorContactDetails(caseData);
+        if (includesRepresentationChange) {
+            updateContactDetailsService.handleApplicantRepresentationChange(caseDetails);
+            updateContactDetailsService.handleRespondentRepresentationChange(caseDetails);
 
-        if (YES_VALUE.equals(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE))) {
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
                 authToken,
                 originalCaseDetails));
-        }
-
-        persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
-        if (NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))) {
-            removeRespondentSolicitorAddress(caseData);
         } else {
-            removeRespondentAddress(caseData);
+            updateContactDetailsService.persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
-    }
-
-    private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        Optional<Object> applicantRepresented = ofNullable(caseData.get(APPLICANT_REPRESENTED));
-        if (equalsTo(Objects.toString(applicantRepresented.orElse("No")), "No")) {
-            removeApplicantSolicitorAddress(caseData, false);
-        } else {
-            removeApplicantAddress(caseData);
-        }
-    }
-
-    private void removeApplicantAddress(Map<String, Object> caseData) {
-        caseData.put(APPLICANT_ADDRESS, null);
-        caseData.put(APPLICANT_PHONE, null);
-        caseData.put(APPLICANT_EMAIL, null);
-        caseData.put(APPLICANT_RESIDE_OUTSIDE_UK, YesOrNo.NO);
-    }
-
-    private void removeRespondentAddress(Map<String, Object> caseData) {
-        caseData.put(RESPONDENT_ADDRESS, null);
-        caseData.put(RESPONDENT_PHONE, null);
-        caseData.put(RESPONDENT_EMAIL, null);
-        caseData.put(RESPONDENT_RESIDE_OUTSIDE_UK, YesOrNo.NO);
-    }
-
-    private boolean equalsTo(String fieldData, String value) {
-        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
-    }
-
-    private void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
-        caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
-        caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 }

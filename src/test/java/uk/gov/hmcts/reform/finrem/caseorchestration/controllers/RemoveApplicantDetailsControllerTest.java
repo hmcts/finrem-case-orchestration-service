@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
@@ -18,6 +19,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -36,6 +38,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
     private static final String AUTH_TOKEN = "tokien:)";
+
+    @MockBean
+    private UpdateContactDetailsService updateContactDetailsService;
 
     @MockBean
     private UpdateRepresentationWorkflowService handleNocWorkflowService;
@@ -172,12 +177,13 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-represented-change.json").toURI()));
         when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
+        when(updateContactDetailsService.isIncludesRepresentationChange(anyMap())).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         ArgumentCaptor<CaseDetails> caseDetailsArgument = ArgumentCaptor.forClass(CaseDetails.class);
         verify(handleNocWorkflowService, times(1)).handleNoticeOfChangeWorkflow(caseDetailsArgument.capture(),
