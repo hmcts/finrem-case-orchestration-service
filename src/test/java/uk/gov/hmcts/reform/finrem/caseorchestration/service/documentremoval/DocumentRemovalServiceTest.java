@@ -14,8 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -32,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
@@ -307,6 +311,40 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
+    void testRemoveDocuments_TopLevelDoc() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .d11(CaseDocument.builder()
+                .documentUrl("https://example1.com/123")
+                .documentFilename("Approved Order Doc.pdf")
+                .documentBinaryUrl("https://example1.com/binary")
+                .build())
+            .divorceUploadEvidence1(CaseDocument.builder()
+                .documentUrl("https://example2.com/456")
+                .documentFilename("Additional Hearing Doc.pdf")
+                .documentBinaryUrl("https://example2.com/binary")
+                .build())
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertNull(result.getD11());
+        assertNotNull(result.getDivorceUploadEvidence1());
+        assertEquals("Additional Hearing Doc.pdf", result.getDivorceUploadEvidence1().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
     void testRemoveDocuments_KeepAllDocuments() {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
@@ -356,7 +394,7 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testRemoveDocuments_RemoveDoc() {
+    void testRemoveDocuments_RemoveDocFromArray() {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
             .uploadDocuments(List.of(UploadDocumentCollection.builder()
@@ -395,4 +433,91 @@ class DocumentRemovalServiceTest {
         assertNull(result.getDocumentToKeepCollection());
     }
 
+    @Test
+    void testRemoveDocuments_NestedObjectInArray() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .hearingNoticeDocumentPack(List.of(DocumentCollection.builder()
+                    .value(CaseDocument.builder()
+                        .documentUrl("https://example1.com/123")
+                        .documentFilename("Approved Order1.pdf")
+                        .documentBinaryUrl("https://example1.com/binary")
+                        .build())
+                .build(),
+                DocumentCollection.builder()
+                    .value(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                .build()
+            ))
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(1, result.getHearingNoticeDocumentPack().size());
+        assertEquals("Additional Hearing Doc.pdf", result.getHearingNoticeDocumentPack().get(0).getValue().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
+
+    @Test
+    void testRemoveDocuments_NestedObjectInNestedArray() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(TestConstants.CASE_ID)
+            .orderWrapper(OrderWrapper.builder()
+                .appOrderCollections(List.of(ApprovedOrderConsolidateCollection.builder()
+                        .value(ApproveOrdersHolder.builder()
+                            .approveOrders(List.of(
+                                ApprovedOrderCollection.builder()
+                                    .value(ApproveOrder.builder()
+                                        .caseDocument(CaseDocument.builder()
+                                            .documentUrl("https://example1.com/123")
+                                            .documentFilename("Approved Order Doc.pdf")
+                                            .documentBinaryUrl("https://example1.com/binary")
+                                            .build())
+                                        .build())
+                                    .build(),
+                                ApprovedOrderCollection.builder()
+                                    .value(ApproveOrder.builder()
+                                        .caseDocument(CaseDocument.builder()
+                                            .documentUrl("https://example2.com/456")
+                                            .documentFilename("Additional Hearing Doc.pdf")
+                                            .documentBinaryUrl("https://example2.com/binary")
+                                            .build())
+                                        .build())
+                                    .build()))
+                            .build())
+                    .build()))
+                .build())
+            .documentToKeepCollection(List.of(DocumentToKeepCollection.builder()
+                .value(DocumentToKeep.builder()
+                    .documentId("456")
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl("https://example2.com/456")
+                        .documentFilename("Additional Hearing Doc.pdf")
+                        .documentBinaryUrl("https://example2.com/binary")
+                        .build())
+                    .build())
+                .build()))
+            .build();
+
+        FinremCaseData result = documentRemovalService.removeDocuments(caseData, 1L, "Auth");
+
+        assertEquals(1, result.getOrderWrapper().getAppOrderCollections().get(0).getValue().getApproveOrders().size());
+        assertEquals("Additional Hearing Doc.pdf", result.getOrderWrapper().getAppOrderCollections()
+            .get(0).getValue().getApproveOrders().get(0)
+            .getValue().getCaseDocument().getDocumentFilename());
+        assertNull(result.getDocumentToKeepCollection());
+    }
 }
