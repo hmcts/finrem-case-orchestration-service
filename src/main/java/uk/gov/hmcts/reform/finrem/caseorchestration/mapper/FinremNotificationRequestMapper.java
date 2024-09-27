@@ -36,7 +36,7 @@ public class FinremNotificationRequestMapper {
     protected static final String EMPTY_STRING = "";
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
-    public NotificationRequest getNotificationRequestForAdmin(FinremCaseDetails caseDetails) {
+    public NotificationRequest getNotificationRequestForCaseworker(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails);
     }
 

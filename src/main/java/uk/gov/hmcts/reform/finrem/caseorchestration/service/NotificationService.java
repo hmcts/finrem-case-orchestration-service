@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
@@ -1911,14 +1910,14 @@ public class NotificationService {
         }
     }
 
-    public void sendContestedOutstandingOrdersNeedReviewEmail(FinremCaseDetails caseDetails) throws IOException {
+    public void sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(FinremCaseDetails caseDetails) {
         String recipientEmail = getRecipientEmail(caseDetails);
 
-        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForAdmin(caseDetails);
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForCaseworker(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
 
-        log.info("{} - Received request for notification email for Contested Outstanding Orders Need Review.",
+        log.info("{} - Received request for notification email for Contested Outstanding Orders Need Review (caseworker).",
             notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN);
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER);
     }
 }

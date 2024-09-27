@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
@@ -120,6 +121,8 @@ class FinremNotificationServiceTest {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
+        lenient().when(notificationRequestMapper.getNotificationRequestForCaseworker(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class), anyBoolean()))
@@ -655,6 +658,14 @@ class FinremNotificationServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
+    }
+
+    @Test
+    void sendContestedOutstandingOrdersNeedReviewEmailToCaseworker() {
+        notificationService.sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(contestedFinremCaseDetails);
+
+        verify(notificationRequestMapper).getNotificationRequestForCaseworker(contestedFinremCaseDetails);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER));
     }
 
     private FinremCaseData getFinremCaseData() {
