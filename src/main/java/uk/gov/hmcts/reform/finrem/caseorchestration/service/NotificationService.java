@@ -1860,6 +1860,14 @@ public class NotificationService {
         return DEFAULT_EMAIL;
     }
 
+    private String getRecipientEmail(FinremCaseDetails caseDetails) {
+        if (featureToggleService.isSendToFRCEnabled()) {
+            String selectedAllocatedCourt = caseDetails.getData().getSelectedAllocatedCourt();
+            return getRecipientEmailFromSelectedCourt(selectedAllocatedCourt);
+        }
+        return DEFAULT_EMAIL;
+    }
+
     private String getRecipientEmailFromSelectedCourt(String selectedAllocatedCourt) {
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -1879,14 +1887,6 @@ public class NotificationService {
             }
         } catch (JsonProcessingException ex) {
             log.error("Fail to read `court-details.json`", ex);
-        }
-        return DEFAULT_EMAIL;
-    }
-
-    private String getRecipientEmail(FinremCaseDetails caseDetails) {
-        if (featureToggleService.isSendToFRCEnabled()) {
-            String selectedAllocatedCourt = caseDetails.getData().getSelectedAllocatedCourt();
-            return getRecipientEmailFromSelectedCourt(selectedAllocatedCourt);
         }
         return DEFAULT_EMAIL;
     }
