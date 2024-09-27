@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
@@ -1904,5 +1905,21 @@ public class NotificationService {
                 return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
             }
         }
+    }
+
+    public void sendContestedOutstandingOrdersNeedReviewEmail(FinremCaseDetails caseDetails) throws IOException {
+        String recipientEmail = DEFAULT_EMAIL;
+        if (featureToggleService.isSendToFRCEnabled()) {
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedAllocatedCourt());
+            recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        }
+
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForAdmin(caseDetails);
+        notificationRequest.setNotificationEmail(recipientEmail);
+
+        log.info("{} - Received request for notification email for Contested Outstanding Orders Need Review.",
+            notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_OS_ORDERS_NEED_REVIEW_ADMIN);
     }
 }
