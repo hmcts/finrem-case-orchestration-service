@@ -122,10 +122,12 @@ class FinremNotificationServiceTest {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
-        lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
+        lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class), anyBoolean()))
             .thenReturn(notificationRequest);
-        lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class))).thenReturn(notificationRequest);
+        lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class), anyBoolean()))
             .thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
