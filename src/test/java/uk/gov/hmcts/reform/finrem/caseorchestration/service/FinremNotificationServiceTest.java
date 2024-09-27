@@ -92,8 +92,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 
 @ExtendWith(MockitoExtension.class)
 class FinremNotificationServiceTest {
-    
-    private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
 
     @InjectMocks
     private NotificationService notificationService;
@@ -483,7 +481,7 @@ class FinremNotificationServiceTest {
     @Test
     void shouldEmailRespondentSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
@@ -518,7 +516,7 @@ class FinremNotificationServiceTest {
     @Test
     void shouldEmailContestedAppSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         lenient().when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
