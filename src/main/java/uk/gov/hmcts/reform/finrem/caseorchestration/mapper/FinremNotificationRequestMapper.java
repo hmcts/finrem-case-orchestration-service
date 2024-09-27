@@ -149,7 +149,8 @@ public class FinremNotificationRequestMapper {
         }
         notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
         notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
-        notificationRequest.setHearingDate(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT).format(caseData.getHearingDate()));
+        notificationRequest.setHearingDate(caseData.getHearingDate() == null ? null : DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT)
+            .format(caseData.getHearingDate()));
         // TODO judgeName
         // TODO date
 
