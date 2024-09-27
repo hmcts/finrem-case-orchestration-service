@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
@@ -1881,8 +1882,19 @@ public class NotificationService {
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseDetails.getData().getSelectedAllocatedCourt());
-
-            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+            // potentially NPE if not found
+            if (courtDetails != null) {
+                String courtEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+                if (!isEmpty(courtEmail)) {
+                    return courtEmail;
+                } else {
+                    log.error("Get an empty email after looking up court details of {} from 'court-details.json'. Use DEFAULT_EMAIL instead",
+                        caseDetails.getData().getSelectedAllocatedCourt());
+                }
+            } else {
+                log.error("Unable to lookup court details of {} from 'court-details.json'. Use DEFAULT_EMAIL instead", 
+                    caseDetails.getData().getSelectedAllocatedCourt());
+            }
         }
         return DEFAULT_EMAIL;
     }
