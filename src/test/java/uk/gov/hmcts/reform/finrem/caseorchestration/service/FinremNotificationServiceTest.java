@@ -8,8 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -111,14 +111,12 @@ class FinremNotificationServiceTest {
     @Mock
     private NotificationServiceConfiguration notificationServiceConfiguration;
 
-    private FinremCallbackRequest callbackRequest;
-    private FinremCallbackRequest newCallbackRequest;
+    private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
+    private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
     private SolicitorCaseDataKeysWrapper dataKeysWrapper;
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-        callbackRequest = getConsentedNewCallbackRequest();
-        newCallbackRequest = getConsentedNewCallbackRequest();
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
@@ -139,242 +137,235 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendHwfSuccessfulNotificationEmail() {
-        notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest.getCaseDetails());
+        notificationService.sendConsentedHWFSuccessfulConfirmationEmail(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_HWF_SUCCESSFUL));
     }
 
     @Test
     void sendAssignToJudgeNotificationEmailToApplicantSolicitor() {
-        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails(), true);
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails, true);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_ASSIGNED_TO_JUDGE));
     }
 
     @Test
     void sendAssignToJudgeNotificationEmailToRespondentSolicitor() {
-        notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails(), true);
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails, true);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_ASSIGNED_TO_JUDGE));
     }
 
     @Test
     void sendConsentOrderMadeConfirmationEmailToApplicantSolicitor() {
-        notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_MADE));
     }
 
     @Test
     void sendConsentOrderMadeConfirmationEmailToRespondentSolicitor() {
-        notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_MADE));
     }
 
     @Test
     void sendPrepareForHearingNotificationEmailToApplicantSolicitor() {
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendPrepareForHearingEmailApplicant(contestedFinremCaseDetails);
 
-        notificationService.sendPrepareForHearingEmailApplicant(newCallbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING));
     }
 
     @Test
     void sendPrepareForHearingNotificationEmailToRespondentSolicitor() {
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendPrepareForHearingEmailRespondent(contestedFinremCaseDetails);
 
-        notificationService.sendPrepareForHearingEmailRespondent(newCallbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING));
     }
 
     @Test
     void sendConsentOrderNotApprovedNotificationEmailToApplicantSolicitor() {
-        notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
-        notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendConsentOrderAvailableNotificationEmail() {
-        notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
     }
 
     @Test
     void sendConsentOrderAvailableNotificationCtscEmail() {
-        notificationService.sendConsentOrderAvailableCtscEmail(newCallbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderAvailableCtscEmail(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE_CTSC));
     }
 
     @Test
     void sendContestedApplicationIssuedEmail() {
-        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_APPLICATION_ISSUED));
     }
 
     @Test
     void sendContestOrderApprovedEmailApplicantSolicitor() {
-        notificationService.sendContestOrderApprovedEmailApplicant(newCallbackRequest.getCaseDetails());
+        notificationService.sendContestOrderApprovedEmailApplicant(consentedFinremCaseDetails);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+            .getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_APPLICANT));
     }
 
     @Test
     void sendContestOrderApprovedEmailRespondentSolicitor() {
-        notificationService.sendContestOrderApprovedEmailRespondent(newCallbackRequest.getCaseDetails());
+        notificationService.sendContestOrderApprovedEmailRespondent(consentedFinremCaseDetails);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+            .getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_RESPONDENT));
     }
 
     @Test
     void sendFinremContestOrderApprovedEmailIntervener1Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
+        notificationService.sendContestOrderApprovedEmailIntervener(consentedFinremCaseDetails,
             dataKeysWrapper, IntervenerType.INTERVENER_ONE);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
+            .getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER1));
     }
 
     @Test
     void sendFinremContestOrderApprovedEmailIntervener2Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
+        notificationService.sendContestOrderApprovedEmailIntervener(consentedFinremCaseDetails,
             dataKeysWrapper, IntervenerType.INTERVENER_TWO);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
+            .getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER2));
     }
 
     @Test
     void sendFinremContestOrderApprovedEmailIntervener3Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
+        notificationService.sendContestOrderApprovedEmailIntervener(consentedFinremCaseDetails,
             dataKeysWrapper, IntervenerType.INTERVENER_THREE);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
+            .getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER3));
     }
 
     @Test
     void sendFinremContestOrderApprovedEmailIntervener4Solicitor() {
-        notificationService.sendContestOrderApprovedEmailIntervener(newCallbackRequest.getCaseDetails(),
+        notificationService.sendContestOrderApprovedEmailIntervener(consentedFinremCaseDetails,
             dataKeysWrapper, IntervenerType.INTERVENER_FOUR);
 
         verify(notificationRequestMapper)
-            .getNotificationRequestForIntervenerSolicitor(newCallbackRequest.getCaseDetails(), dataKeysWrapper);
+            .getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_APPROVED_INTERVENER4));
     }
 
     @Test
     void sendSolicitorToDraftOrderEmailRespondent() {
-        notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
+        notificationService.sendSolicitorToDraftOrderEmailRespondent(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_DRAFT_ORDER));
     }
 
     @Test
     void sendSolicitorToDraftOrderEmailApplicant() {
-        notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest.getCaseDetails());
+        notificationService.sendSolicitorToDraftOrderEmailApplicant(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_DRAFT_ORDER));
     }
 
     @Test
     void sendContestedHwfSuccessfulNotificationEmail() {
-        callbackRequest = getContestedNewCallbackRequest();
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(newCallbackRequest.getCaseDetails());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_HWF_SUCCESSFUL));
     }
 
     @Test
     void sendGeneralEmailConsented() {
-        notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails(), anyString());
+        notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
     }
 
     @Test
     void sendGeneralEmailContested() {
-        notificationService.sendContestedGeneralEmail(callbackRequest.getCaseDetails(), anyString());
+        notificationService.sendContestedGeneralEmail(contestedFinremCaseDetails, anyString());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_EMAIL));
     }
 
     @Test
     void sendContestOrderNotApprovedNotificationEmailApplicant() {
-        notificationService.sendContestOrderNotApprovedEmailApplicant(newCallbackRequest.getCaseDetails());
+        notificationService.sendContestOrderNotApprovedEmailApplicant(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendContestOrderNotApprovedNotificationEmailRespondent() {
-        notificationService.sendContestOrderNotApprovedEmailRespondent(newCallbackRequest.getCaseDetails());
+        notificationService.sendContestOrderNotApprovedEmailRespondent(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTEST_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendContestedConsentOrderApprovedNotificationEmailToApplicantSolicitor() {
-        notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_CONSENT_ORDER_APPROVED));
     }
 
     @Test
     void sendContestedConsentOrderApprovedNotificationEmailToRespondentSolicitor() {
-        notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_CONSENT_ORDER_APPROVED));
     }
 
     @Test
     void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(contestedFinremCaseDetails);
 
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE));
     }
 
@@ -382,11 +373,9 @@ class FinremNotificationServiceTest {
     void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(contestedFinremCaseDetails);
 
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_OUTCOME));
     }
 
@@ -394,89 +383,87 @@ class FinremNotificationServiceTest {
     void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse() {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
 
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(contestedFinremCaseDetails);
 
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_OUTCOME));
     }
 
     @Test
     void sendContestedConsentGeneralOrderNotificationEmailApplicantSolicitor() {
-        notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_ORDER_CONSENT));
     }
 
     @Test
     void sendContestedConsentGeneralOrderNotificationEmailRespondentSolicitor() {
-        notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_ORDER_CONSENT));
     }
 
     @Test
     void sendContestedGeneralOrderNotificationEmailApplicant() {
-        notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest.getCaseDetails());
+        notificationService.sendContestedGeneralOrderEmailApplicant(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_ORDER));
     }
 
     @Test
     void sendContestedGeneralOrderNotificationEmailRespondent() {
-        notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest.getCaseDetails());
+        notificationService.sendContestedGeneralOrderEmailRespondent(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_ORDER));
     }
 
     @Test
     void sendConsentedGeneralOrderNotificationEmailApplicant() {
-        notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_GENERAL_ORDER));
     }
 
     @Test
     void sendConsentedGeneralOrderNotificationEmailRespondent() {
-        notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_GENERAL_ORDER));
     }
 
     @Test
     void sendContestedConsentOrderNotApprovedNotificationEmail() {
-        notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendContestedConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
-        notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(contestedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED));
     }
 
     @Test
     void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor() {
-        notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED_SENT));
     }
 
     @Test
     void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor() {
-        notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED_SENT));
     }
 
@@ -538,29 +525,25 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendTransferToCourtEmailConsented() {
-        notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
+        notificationService.sendTransferToLocalCourtEmail(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_TRANSFER_TO_LOCAL_COURT));
     }
 
     @Test
     void sendInterimNotificationEmailToApplicantSolicitor() {
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendInterimNotificationEmailToApplicantSolicitor(contestedFinremCaseDetails);
 
-        notificationService.sendInterimNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_INTERIM_HEARING));
     }
 
     @Test
     void sendInterimNotificationEmailToRespondentSolicitor() {
-        callbackRequest = getContestedNewCallbackRequest();
+        notificationService.sendInterimNotificationEmailToRespondentSolicitor(contestedFinremCaseDetails);
 
-        notificationService.sendInterimNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_INTERIM_HEARING));
     }
 
@@ -570,7 +553,7 @@ class FinremNotificationServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
 
         notificationService.sendNoticeOfChangeEmail(caseDetails);
 
@@ -584,7 +567,7 @@ class FinremNotificationServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         notificationRequest.setNotificationEmail("test@test.com");
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        FinremCaseDetails caseDetails = getConsentedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails();
 
         notificationService.sendNoticeOfChangeEmail(caseDetails);
 
@@ -598,7 +581,7 @@ class FinremNotificationServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
 
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
@@ -612,7 +595,7 @@ class FinremNotificationServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
-        FinremCaseDetails caseDetails = getConsentedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails();
 
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
@@ -626,7 +609,7 @@ class FinremNotificationServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(false);
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
 
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
@@ -636,19 +619,15 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendUpdateFrcInformationEmailToAppSolicitor() {
-        newCallbackRequest = getContestedNewCallbackRequest();
-
-        notificationService.sendUpdateFrcInformationEmailToAppSolicitor(newCallbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendUpdateFrcInformationEmailToAppSolicitor(contestedFinremCaseDetails);
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_UPDATE_FRC_SOL));
     }
 
     @Test
     void sendUpdateFrcInformationEmailToRespSolicitor() {
-        newCallbackRequest = getContestedNewCallbackRequest();
-
-        notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(newCallbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(contestedFinremCaseDetails);
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_UPDATE_FRC_SOL));
     }
 
@@ -656,42 +635,26 @@ class FinremNotificationServiceTest {
     void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
-        newCallbackRequest = getContestedNewCallbackRequest();
-
-        notificationService.sendUpdateFrcInformationEmailToCourt(newCallbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(newCallbackRequest.getCaseDetails());
+        notificationService.sendUpdateFrcInformationEmailToCourt(contestedFinremCaseDetails);
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_UPDATE_FRC_COURT));
     }
 
     @Test
     void sendConsentOrderAvailableEmailToIntervenerSolicitor() {
-        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),
+        notificationService.sendConsentOrderAvailableEmailToIntervenerSolicitor(consentedFinremCaseDetails,
             dataKeysWrapper);
 
-        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(callbackRequest.getCaseDetails(), dataKeysWrapper);
+        verify(notificationRequestMapper).getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_AVAILABLE));
     }
 
     @Test
     void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
-        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest.getCaseDetails());
+        notificationService.sendPrepareForHearingOrderSentEmailRespondent(consentedFinremCaseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
-    }
-
-    protected FinremCallbackRequest getContestedNewCallbackRequest() {
-        FinremCaseData caseData = getFinremCaseData();
-        caseData.getContactDetailsWrapper().setRespondentFmName("David");
-        caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .caseType(CaseType.CONTESTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
     }
 
     private FinremCaseData getFinremCaseData() {
@@ -714,7 +677,15 @@ class FinremNotificationServiceTest {
         return caseData;
     }
 
-    protected FinremCallbackRequest getConsentedNewCallbackRequest() {
+    private FinremCaseDetails getContestedFinremCaseDetails() {
+        FinremCaseData caseData = getFinremCaseData();
+        caseData.getContactDetailsWrapper().setRespondentFmName("David");
+        caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
+    }
+
+    private FinremCaseDetails getConsentedFinremCaseDetails() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
         caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
@@ -734,12 +705,6 @@ class FinremNotificationServiceTest {
         caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
         caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
-        return FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .caseType(CaseType.CONSENTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
+        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONSENTED, caseData).build();
     }
 }
