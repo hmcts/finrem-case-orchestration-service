@@ -1,0 +1,47 @@
+{
+  "token" : "token_test",
+  "event_id" : "FR_issueApplication",
+  "case_details" : {
+    "id" : "123",
+    "jurisdiction" : "DIVORCE",
+    "state" : "applicationIssued",
+    "case_type_id" : "FinancialRemedyContested",
+    "case_data" : {
+      "applicantFMName" : "John",
+      "applicantLName" : "Smith",
+      "applicantRepresented" : "Yes",
+      "applicantSolicitorName" : "Sir Solicitor",
+      "applicantSolicitorEmail" : "sirsolicitor1@gmail.com",
+      "nocParty" : "respondent",
+      "natureOfRepresentationChange" : "replacing",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "A31PTVA",
+          "OrganisationName" : "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference" : "FRApplicant",
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "A31PTVU",
+          "OrganisationName" : "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference" : "FRRespondent",
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "respondentRepresented" : "No",
+      "respondentAddress" : "123 Respondent St",
+      "respondentPhone" : "07123456789",
+      "respondentEmail" : "respondent@example.com",
+      "rSolicitorName" : "Respondent Solicitor",
+      "rSolicitorFirm" : "Respondent Solicitor Firm",
+      "rSolicitorAddress" : "456 Solicitor Ave",
+      "rSolicitorPhone" : "07890123456",
+      "rSolicitorEmail" : "solicitor@example.com",
+      "rSolicitorDXNumber" : "DX123456",
+      "rSolicitorConsentForEmails" : "Yes"
+    }
+  }
+}
