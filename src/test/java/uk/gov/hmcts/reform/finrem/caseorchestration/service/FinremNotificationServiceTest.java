@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -61,6 +62,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
@@ -134,6 +136,8 @@ class FinremNotificationServiceTest {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
+        lenient().when(finremNotificationRequestMapper
+            .buildNotificationRequest(any(FinremCaseDetails.class), any())).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(FinremCaseDetails.class), any()))
             .thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForCaseworker(any(FinremCaseDetails.class)))
@@ -151,6 +155,23 @@ class FinremNotificationServiceTest {
         lenient().when(notificationServiceConfiguration.getCtscEmail()).thenReturn(TEST_CTSC_EMAIL);
         lenient().when(objectMapper.readValue(getCourtDetailsString(), HashMap.class))
             .thenReturn(new HashMap(Map.of("email", "FRCLondon@justice.gov.uk")));
+    }
+
+    @Test
+    void sendBarristerAddedEmail() {
+        Barrister barrister = Barrister.builder().build();
+        notificationService.sendBarristerAddedEmail(contestedFinremCaseDetails, barrister);
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(contestedFinremCaseDetails, barrister);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_BARRISTER_ACCESS_ADDED));
+    }
+
+    @Test
+    void sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor() {
+        notificationService.sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForIntervenerSolicitor(consentedFinremCaseDetails, dataKeysWrapper);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED_SENT));
     }
 
     @Test
