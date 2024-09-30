@@ -1415,7 +1415,7 @@ public class NotificationService {
      * @deprecated Use {@link CaseDetails caseDetails}
      */
     @Deprecated(since = "15-june-2023")
-    public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
+    public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) {
         String recipientEmail = getRecipientEmail(caseDetails);
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -1424,7 +1424,7 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_UPDATE_FRC_COURT);
     }
 
-    public void sendUpdateFrcInformationEmailToCourt(FinremCaseDetails caseDetails) throws JsonProcessingException {
+    public void sendUpdateFrcInformationEmailToCourt(FinremCaseDetails caseDetails) {
         String recipientEmail = getRecipientEmail(caseDetails);
 
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
