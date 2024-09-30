@@ -700,7 +700,6 @@ public class NotificationService {
             notificationRequest);
         final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
         emailService.sendConfirmationEmail(notificationRequest, templateName);
-
     }
 
     private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
