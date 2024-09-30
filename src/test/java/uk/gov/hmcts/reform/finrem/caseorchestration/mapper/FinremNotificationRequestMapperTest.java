@@ -35,7 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
-
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestCon
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.getConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.getContestedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.getDefaultConsentedFinremCaseData;
