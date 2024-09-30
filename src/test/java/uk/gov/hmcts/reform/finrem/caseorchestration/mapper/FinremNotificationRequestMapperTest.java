@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -33,6 +34,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -304,6 +306,25 @@ class FinremNotificationRequestMapperTest {
         assertEquals("intervener name", notificationRequest.getIntervenerFullName());
         assertEquals("test org", notificationRequest.getIntervenerSolicitorFirm());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
+    }
+
+    @Test
+    void shouldCreateNotificationRequestForBarristerNotification() {
+        Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
+            contestedFinremCaseDetails, Barrister.builder()
+                .name("barrister name")
+                .email("barrister@email.com")
+                .organisation(org)
+                .build());
+
+        assertEquals("barrister name", notificationRequest.getName());
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals("1", notificationRequest.getBarristerReferenceNumber());
+        assertEquals("barrister@email.com", notificationRequest.getNotificationEmail());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals(CTSC_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
     }
 
     @SneakyThrows
