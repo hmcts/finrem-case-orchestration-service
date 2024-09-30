@@ -145,6 +145,14 @@ class FinremNotificationServiceTest {
     }
 
     @Test
+    void sendPrepareForHearingOrderSentEmailApplicant() {
+        notificationService.sendPrepareForHearingOrderSentEmailApplicant(contestedFinremCaseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(contestedFinremCaseDetails);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
+    }
+
+    @Test
     void sendConsentHearingNotificationEmailToApplicantSolicitor() {
         notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(consentedFinremCaseDetails, Map.of());
 
