@@ -18,6 +18,7 @@ public class TestConstants {
     public static final String TEST_RESP_SOLICITOR_NAME = "Test Resp Sol";
     public static final String TEST_RESP_SOLICITOR_EMAIL = "testRespSolicitor@email.com";
 
+    public static final String TEST_CTSC_EMAIL = "testCtsc@email.com";
     public static final String TEST_JUDGE_EMAIL = "testJudge@email.com";
 
     public static final String TEST_KEY = "testKey";

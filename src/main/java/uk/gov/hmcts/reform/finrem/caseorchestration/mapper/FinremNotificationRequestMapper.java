@@ -34,6 +34,10 @@ public class FinremNotificationRequestMapper {
     private final ConsentedApplicationHelper consentedApplicationHelper;
     protected static final String EMPTY_STRING = "";
 
+    public NotificationRequest getNotificationRequestForCaseworker(FinremCaseDetails caseDetails) {
+        return buildNotificationRequest(caseDetails);
+    }
+
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
     }
@@ -106,15 +110,23 @@ public class FinremNotificationRequestMapper {
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
 
+    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails) {
+        return buildNotificationRequest(caseDetails, (SolicitorCaseDataKeysWrapper) null);
+    }
+
     private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         FinremCaseData caseData = caseDetails.getData();
         notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
+        if (caseDataKeysWrapper != null) {
+            notificationRequest.setSolicitorReferenceNumber(Objects.toString(caseDataKeysWrapper.getSolicitorReferenceKey(), EMPTY_STRING));
+        }
         notificationRequest.setDivorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber(), EMPTY_STRING));
-        notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
-        notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
+        if (caseDataKeysWrapper != null) {
+            notificationRequest.setName(caseDataKeysWrapper.getSolicitorNameKey());
+            notificationRequest.setNotificationEmail(caseDataKeysWrapper.getSolicitorEmailKey());
+        }
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
