@@ -73,6 +73,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         DynamicRadioListElement listElement = DynamicRadioListElement.builder().build();
         switch (loggedInUserCaseRole) {
             case APPLICANT, RESPONDENT -> {
+                log.info("Mapping applicant/respondent GAs");
                 generalApplications = wrapper.getAppRespGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getAppRespGeneralApplications();
                 listElement.setCode(loggedInUserCaseRole);
@@ -86,6 +87,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER1 -> {
+                log.info("Mapping Intervener1 GAs");
                 generalApplications = wrapper.getIntervener1GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener1GeneralApplications();
                 listElement.setCode(INTERVENER1);
@@ -99,6 +101,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER2 -> {
+                log.info("Mapping Intervener2 GAs");
                 generalApplications = wrapper.getIntervener2GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener2GeneralApplications();
                 listElement.setCode(INTERVENER2);
@@ -112,6 +115,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER3 -> {
+                log.info("Mapping Intervener3 GAs");
                 generalApplications = wrapper.getIntervener3GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener3GeneralApplications();
                 listElement.setCode(INTERVENER3);
@@ -125,6 +129,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER4 -> {
+                log.info("Mapping Intervener4 GAs");
                 generalApplications = wrapper.getIntervener4GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener4GeneralApplications();
                 listElement.setCode(INTERVENER4);
@@ -144,6 +149,11 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         }
         List<String> errors = new ArrayList<>();
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore, userAuthorisation);
+
+        log.info("GA MidHandler existing generalApplicationsBefore list size: {} generalApplications list size: {} for case ID: {}",
+            generalApplicationsBefore.size(),
+            generalApplications != null && !generalApplications.isEmpty() ? generalApplications.size() : 0,
+            caseId);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

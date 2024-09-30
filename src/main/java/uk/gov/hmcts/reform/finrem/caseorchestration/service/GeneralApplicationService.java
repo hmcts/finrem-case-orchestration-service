@@ -91,6 +91,10 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> generalApplicationList =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
 
+        log.info("GeneralApplicationService updateGeneralApplications generalApplicationsBefore list size: {} "
+                + "generalApplications list size: {} for case ID: {}",
+            generalApplicationListBefore.size(), generalApplicationList.size(), caseDetails.getId());
+
         String initialCollectionId = Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationTracking(), null);
 
@@ -159,6 +163,9 @@ public class GeneralApplicationService {
             helper.convertToGeneralApplicationsCollection(applicationCollectionDataList));
 
         generalApplicationsCategoriser.categorise(caseData);
+
+        log.info("GeneralApplicationService updateGeneralApplications applicationCollectionDataList list size: {} for case ID: {}",
+            applicationCollectionDataList.size(), caseDetails.getId());
 
         return caseData;
     }
@@ -559,7 +566,7 @@ public class GeneralApplicationService {
             }
             if (ga.getGeneralApplicationItems().getGeneralApplicationSender() != null) {
                 log.info("General application sender is {} on Case id {} with status {}",
-                    ga.getGeneralApplicationItems().getGeneralApplicationSender(),
+                    ga.getGeneralApplicationItems().getGeneralApplicationSender().getValue(),
                     caseId,
                     ga.getGeneralApplicationItems().getGeneralApplicationStatus());
             }
