@@ -456,6 +456,8 @@ dependencies {
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
+    cftlibImplementation group: 'org.springframework', name: 'spring-aspects'
+
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
