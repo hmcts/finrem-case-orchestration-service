@@ -706,7 +706,7 @@ class FinremNotificationServiceTest {
     }
 
     @Test
-    void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
+    void sendUpdateFrcInformationEmailToCourt() {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
         notificationService.sendUpdateFrcInformationEmailToCourt(contestedFinremCaseDetails);
