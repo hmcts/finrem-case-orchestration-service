@@ -8,10 +8,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -22,11 +25,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerT
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,10 +40,12 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CTSC_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
@@ -115,6 +122,8 @@ class FinremNotificationServiceTest {
     private ObjectMapper objectMapper;
     @Mock
     private NotificationServiceConfiguration notificationServiceConfiguration;
+    @Mock
+    private EvidenceManagementDownloadService evidenceManagementDownloadService;
 
     private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
     private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
@@ -352,6 +361,18 @@ class FinremNotificationServiceTest {
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
+    }
+
+    @Test
+    void shouldThrowExceptionIfDownloadGeneralEmailUploadedDocumentsFailWhenSendGeneralEmailConsented() {
+        lenient().when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
+            .thenReturn(ResponseEntity.badRequest().build());
+
+        assertThatThrownBy(() -> notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, AUTH_TOKEN))
+            .isInstanceOf(HttpClientErrorException.class);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
+        verify(emailService, never()).sendConfirmationEmail(any(), eq(FR_CONSENT_GENERAL_EMAIL));
     }
 
     @Test
@@ -728,6 +749,7 @@ class FinremNotificationServiceTest {
 
     private FinremCaseDetails getConsentedFinremCaseDetails() {
         FinremCaseData caseData = new FinremCaseData();
+        caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("documentBinaryUrl").build());
         caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
         caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
         caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
