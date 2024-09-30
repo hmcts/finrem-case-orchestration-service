@@ -1,85 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-
-public abstract class TestConstants extends uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants {
-    public static final String TEST_CASE_FAMILY_MAN_ID = "test.family.man.id";
-    public static final String BEARER_AUTH_TOKEN = "Bearer test.auth.token";
-    public static final String CONTESTED = "contested";
-    public static final String CONSENTED = "consented";
-    public static final String APPLICANT_NAME = "Applicant Name";
-    public static final String RESPONDENT_NAME = "Respondent Name";
-    public static final String BARRISTER_REFERENCE_NUMBER = "1234567890";
-    public static final String INTERVENER_SOLICITOR_REFERENCE_NUMBER = "1234567890";
-
-    public static FinremCaseDetails getContestedFinremCaseDetails() {
-        return getContestedFinremCaseDetails(getDefaultContestedFinremCaseData());
-    }
-
-    public static FinremCaseDetails getContestedFinremCaseDetails(FinremCaseData caseData) {
-        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
-    }
-
-    public static FinremCaseData getDefaultContestedFinremCaseData() {
-
-        FinremCaseData caseData = new FinremCaseData();
-        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
-        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
-        caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
-        caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
-            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
-        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
-        caseData.getContactDetailsWrapper().setRespondentFmName("David");
-        caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-        return caseData;
-    }
-
-    public static FinremCaseData getDefaultConsentedFinremCaseData() {
-        FinremCaseData caseData = new FinremCaseData();
-        caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
-        caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
-        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
-        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
-        caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
-        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
-        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
-        caseData.setCcdCaseType(CaseType.CONSENTED);
-        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
-        caseData.getRegionWrapper().getAllocatedRegionWrapper().getDefaultCourtListWrapper()
-            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
-        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
-        return caseData;
-    }
-
-    public static FinremCaseDetails getConsentedFinremCaseDetails() {
-        return getConsentedFinremCaseDetails(getDefaultConsentedFinremCaseData());
-    }
-
-    public static FinremCaseDetails getConsentedFinremCaseDetails(FinremCaseData caseData) {
-        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONSENTED, caseData).build();
-    }
+public interface TestConstants extends uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants {
+    String TEST_CASE_FAMILY_MAN_ID = "test.family.man.id";
+    String BEARER_AUTH_TOKEN = "Bearer test.auth.token";
+    String CONTESTED = "contested";
+    String CONSENTED = "consented";
+    String APPLICANT_NAME = "Applicant Name";
+    String RESPONDENT_NAME = "Respondent Name";
+    String BARRISTER_REFERENCE_NUMBER = "1234567890";
+    String INTERVENER_SOLICITOR_REFERENCE_NUMBER = "1234567890";
 }
