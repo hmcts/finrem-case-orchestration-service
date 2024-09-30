@@ -809,6 +809,10 @@ class FinremNotificationServiceTest {
         return getContestedFinremCaseDetails(getDefaultContestedFinremCaseData());
     }
 
+    private FinremCaseDetails getContestedFinremCaseDetails(FinremCaseData caseData) {
+        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
+    }
+
     private FinremCaseData getDefaultContestedFinremCaseData() {
         FinremCaseData caseData = getFinremCaseData();
         caseData.getContactDetailsWrapper().setRespondentFmName("David");
@@ -846,9 +850,5 @@ class FinremNotificationServiceTest {
 
     private FinremCaseDetails getConsentedFinremCaseDetails(FinremCaseData caseData) {
         return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONSENTED, caseData).build();
-    }
-
-    private FinremCaseDetails getContestedFinremCaseDetails(FinremCaseData caseData) {
-        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
     }
 }
