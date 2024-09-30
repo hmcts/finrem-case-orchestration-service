@@ -8,16 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 
-public abstract class TestConstants {
+public abstract class TestConstants extends uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants {
     public static final String TEST_CASE_FAMILY_MAN_ID = "test.family.man.id";
     public static final String TEST_SOLICITOR_REFERENCE = "test.solicitor.reference";
-    public static final String TEST_DIVORCE_CASE_NUMBER = "D123";
     public static final String TEST_SOLICITOR_NAME = "Solicitor name";
     public static final String TEST_SOLICITOR_EMAIL = "testSolicitor@email.com";
     public static final String BEARER_AUTH_TOKEN = "Bearer test.auth.token";
