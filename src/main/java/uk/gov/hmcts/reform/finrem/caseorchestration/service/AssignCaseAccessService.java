@@ -301,7 +301,7 @@ public class AssignCaseAccessService {
     }
 
     public String getActiveUser(String caseId, String userAuthorisation) {
-        String logMessage = "Logged in user role {} Case ID: {}";
+        String logMessage = "Logged in user role {} on Case ID: {}";
         String activeUserCaseRole = getActiveUserCaseRole(caseId, userAuthorisation);
         if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
             log.info(logMessage, APPLICANT, caseId);

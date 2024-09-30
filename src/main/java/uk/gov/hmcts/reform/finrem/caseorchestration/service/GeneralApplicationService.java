@@ -99,7 +99,6 @@ public class GeneralApplicationService {
             .getGeneralApplicationTracking(), null);
 
         String loggedInUserCaseRole = accessService.getActiveUser(String.valueOf(caseDetails.getId()), userAuthorisation);
-        log.info("Logged in user case role {}", loggedInUserCaseRole);
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)

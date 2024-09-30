@@ -59,7 +59,6 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(
             caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
