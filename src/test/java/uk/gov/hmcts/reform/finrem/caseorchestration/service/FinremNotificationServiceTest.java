@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -465,6 +466,19 @@ class FinremNotificationServiceTest {
     }
 
     @Test
+    void sendContestedGeneralApplicationReferToJudgeNotificationEmail_populateGeneralEmailBodyIfGeneralApplicationReferDetailExists() {
+        FinremCaseData caseData = getDefaultContestedFinremCaseData();
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferDetail("TestGeneralApplicationReferDetail");
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails(caseData);
+
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(caseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetails);
+        verify(emailService).sendConfirmationEmail(argThat(email -> "TestGeneralApplicationReferDetail".equals(email.getGeneralEmailBody())),
+            eq(FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE));
+    }
+
+    @Test
     void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
 
@@ -773,11 +787,15 @@ class FinremNotificationServiceTest {
     }
 
     private FinremCaseDetails getContestedFinremCaseDetails() {
+        return getContestedFinremCaseDetails(getDefaultContestedFinremCaseData());
+    }
+
+    private FinremCaseData getDefaultContestedFinremCaseData() {
         FinremCaseData caseData = getFinremCaseData();
         caseData.getContactDetailsWrapper().setRespondentFmName("David");
         caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
         caseData.setCcdCaseType(CaseType.CONTESTED);
-        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
+        return caseData;
     }
 
     private FinremCaseData getDefaultConsentedFinremCaseData() {
@@ -809,5 +827,9 @@ class FinremNotificationServiceTest {
 
     private FinremCaseDetails getConsentedFinremCaseDetails(FinremCaseData caseData) {
         return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONSENTED, caseData).build();
+    }
+
+    private FinremCaseDetails getContestedFinremCaseDetails(FinremCaseData caseData) {
+        return FinremCaseDetailsBuilderFactory.from(12345L, CaseType.CONTESTED, caseData).build();
     }
 }
