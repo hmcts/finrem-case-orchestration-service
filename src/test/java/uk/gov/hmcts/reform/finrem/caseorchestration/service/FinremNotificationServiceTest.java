@@ -137,8 +137,6 @@ class FinremNotificationServiceTest {
             .buildNotificationRequest(any(FinremCaseDetails.class), any())).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(FinremCaseDetails.class), any()))
             .thenReturn(notificationRequest);
-        lenient().when(finremNotificationRequestMapper.getNotificationRequestForCaseworker(any(FinremCaseDetails.class)))
-            .thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class), anyBoolean()))
