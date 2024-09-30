@@ -100,6 +100,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
@@ -137,6 +138,8 @@ class FinremNotificationServiceTest {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
+        lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class),
+            any())).thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper
             .buildNotificationRequest(any(FinremCaseDetails.class), any())).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(FinremCaseDetails.class), any()))
@@ -156,6 +159,22 @@ class FinremNotificationServiceTest {
         lenient().when(notificationServiceConfiguration.getCtscEmail()).thenReturn(TEST_CTSC_EMAIL);
         lenient().when(objectMapper.readValue(getCourtDetailsString(), HashMap.class))
             .thenReturn(new HashMap(Map.of("email", "FRCLondon@justice.gov.uk")));
+    }
+
+    @Test
+    void sendGeneralApplicationRejectionEmailToResSolicitor() {
+        notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(consentedFinremCaseDetails);
+        verify(finremNotificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
+
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_REJECT_GENERAL_APPLICATION));
+    }
+
+    @Test
+    void sendConsentHearingNotificationEmailToRespondentSolicitor() {
+        notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(consentedFinremCaseDetails, Map.of());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails, Map.of());
+
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENTED_LIST_FOR_HEARING));
     }
 
     @Test
