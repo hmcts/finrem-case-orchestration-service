@@ -150,7 +150,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore, userAuthorisation);
 
         log.info("GA MidHandler existing generalApplicationsBefore list size: {} generalApplications list size: {} for case ID: {}",
-            generalApplicationsBefore.size(),
+            generalApplicationsBefore != null && !generalApplicationsBefore.isEmpty()  ? generalApplicationsBefore.size() : 0,
             generalApplications != null && !generalApplications.isEmpty() ? generalApplications.size() : 0,
             caseId);
 

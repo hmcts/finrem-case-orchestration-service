@@ -93,7 +93,9 @@ public class GeneralApplicationService {
 
         log.info("GeneralApplicationService updateGeneralApplications generalApplicationsBefore list size: {} "
                 + "generalApplications list size: {} for case ID: {}",
-            generalApplicationListBefore.size(), generalApplicationList.size(), caseDetails.getId());
+            generalApplicationListBefore != null && !generalApplicationListBefore.isEmpty()  ? generalApplicationListBefore.size() : 0,
+            generalApplicationList.size(),
+            caseDetails.getId());
 
         String initialCollectionId = Objects.toString(caseData.getGeneralApplicationWrapper()
             .getGeneralApplicationTracking(), null);
