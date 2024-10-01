@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
@@ -31,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -843,5 +848,44 @@ class FinremNotificationServiceTest implements TestConstants {
         verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
             eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
         verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_SOLICITOR_REMOVED_EMAIL));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, " + YES_VALUE + ", , true", // Contested, Solicitor agrees, Consented field null
+        "false, , " + YES_VALUE + ", true", // Consented, Solicitor agrees, Contested field null
+        "true, NO, , false", // Contested, Solicitor does not agree
+        "false, , NO, false", // Consented, Solicitor does not agree
+        "true, , , false", // Contested, No agreement provided
+        "false, , , false" // Consented, No agreement provided
+    })
+    void testIsApplicantSolicitorAgreeToReceiveEmails(
+        boolean isContestedApplication,
+        String contestedValue,
+        String consentedValue,
+        boolean expectedResult) {
+
+        // Prepare case data
+        Map<String, Object> caseData = new HashMap<>();
+        if (contestedValue != null) {
+            caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, contestedValue);
+        }
+        if (consentedValue != null) {
+            caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, consentedValue);
+        }
+
+        // Build the case details
+        CaseDetails caseDetails = CaseDetails.builder()
+            .data(caseData)
+            .build();
+
+        // Mock case type
+        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(isContestedApplication);
+
+        // Perform test
+        boolean result = notificationService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+
+        // Assert the result
+        assertEquals(expectedResult, result);
     }
 }
