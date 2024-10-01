@@ -5,8 +5,8 @@ import lombok.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode
 public class DraftOrderReview implements HasCaseDocument {
 //fields here
