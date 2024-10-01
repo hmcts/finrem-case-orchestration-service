@@ -6,7 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,14 +32,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
@@ -110,6 +115,9 @@ class FinremNotificationServiceTest implements TestConstants {
 
     @InjectMocks
     private NotificationService notificationService;
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(NotificationService.class);
 
     @Mock
     private FeatureToggleService featureToggleService;
@@ -637,25 +645,48 @@ class FinremNotificationServiceTest implements TestConstants {
         assertEquals(expectedResult, result);
     }
 
-    @Test
-    void shouldEmailContestedAppSolicitor() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+    @ParameterizedTest
+    @MethodSource("provideTestCases")
+    void testIsContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData,
+                                                                    boolean isPaperApplication, boolean isRepresented, boolean isEmailNotEmpty,
+                                                                    boolean expectedResult) {
 
-        lenient().when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
-        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        lenient().when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+        // Mocking caseDataService methods
+        lenient().when(caseDataService.isPaperApplication(caseData)).thenReturn(isPaperApplication);
+        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(caseData)).thenReturn(isRepresented);
+        lenient().when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(isEmailNotEmpty);
 
-        assertTrue(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
+        // Perform the test
+        boolean result = notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData);
+
+        // Assert the result
+        assertEquals(expectedResult, result);
     }
 
-    @Test
-    void shouldNotEmailContestedAppSolicitor() {
-        lenient().when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(true);
-        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+    // MethodSource for parameterized test cases
+    static Stream<Arguments> provideTestCases() {
+        Map<String, Object> caseDataWithAgreement = new HashMap<>();
+        caseDataWithAgreement.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
-        assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(new HashMap<>()));
+        Map<String, Object> caseDataWithoutAgreement = new HashMap<>();
+        caseDataWithoutAgreement.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, "No");
+
+        return Stream.of(
+            // Scenario 1: All conditions are true, expect true
+            Arguments.of(caseDataWithAgreement, false, true, true, true),
+
+            // Scenario 2: Paper application, expect false
+            Arguments.of(caseDataWithAgreement, true, true, true, false),
+
+            // Scenario 3: Not represented by a solicitor, expect false
+            Arguments.of(caseDataWithAgreement, false, false, true, false),
+
+            // Scenario 4: Email is empty, expect false
+            Arguments.of(caseDataWithAgreement, false, true, false, false),
+
+            // Scenario 5: Agreement to receive emails is "No", expect false
+            Arguments.of(caseDataWithoutAgreement, false, true, true, false)
+        );
     }
 
     @Test
@@ -937,5 +968,120 @@ class FinremNotificationServiceTest implements TestConstants {
 
         // Assert the result
         assertEquals(isContested, result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCourtDetailsTestCases")
+    void testGetRecipientEmailFromSelectedCourt(Map<String, Object> courtDetailsMap, String selectedAllocatedCourt, String expectedEmail,
+                                                boolean throwsException, String expectedLogMessage) throws Exception {
+        if (throwsException) {
+            lenient().when(objectMapper.readValue(anyString(), eq(HashMap.class))).thenThrow(new JsonProcessingException("error") {});
+        } else {
+            lenient().when(objectMapper.readValue(anyString(), eq(HashMap.class))).thenReturn((HashMap) courtDetailsMap);
+        }
+
+        // Call the method
+        String result = notificationService.getRecipientEmailFromSelectedCourt(selectedAllocatedCourt);
+
+        // Verify the result
+        assertEquals(expectedEmail, result);
+
+        // Verify log messages if expected
+        if (expectedLogMessage != null) {
+            assertThat(logs.getErrors()).containsExactly(expectedLogMessage);
+        } else {
+            assertThat(logs.getErrors()).isEmpty();
+        }
+    }
+
+    // MethodSource for the parameterized test
+    static Stream<Arguments> provideCourtDetailsTestCases() {
+        Map<String, Object> validCourtDetailsMap = new HashMap<>();
+        Map<String, Object> courtWithValidEmail = new HashMap<>();
+        courtWithValidEmail.put(COURT_DETAILS_EMAIL_KEY, "court@example.com");
+        validCourtDetailsMap.put("someCourt", courtWithValidEmail);
+
+        Map<String, Object> courtWithEmptyEmail = new HashMap<>();
+        courtWithEmptyEmail.put(COURT_DETAILS_EMAIL_KEY, "");
+        Map<String, Object> emptyEmailCourtDetailsMap = new HashMap<>();
+        emptyEmailCourtDetailsMap.put("someCourt", courtWithEmptyEmail);
+
+        Map<String, Object> missingCourtDetailsMap = new HashMap<>(); // No court details for this test
+
+        return Stream.of(
+            // Scenario: valid court email is found, no error log expected
+            Arguments.of(validCourtDetailsMap, "someCourt", "court@example.com", false, null),
+
+            // Scenario: court details not found, log the error
+            Arguments.of(missingCourtDetailsMap, "nonExistentCourt", "fr_applicant_solicitor1@mailinator.com",
+                false, "Unable to lookup court details of nonExistentCourt from 'court-details.json'. Use DEFAULT_EMAIL instead"),
+
+            // Scenario: court email is empty, log the error
+            Arguments.of(emptyEmailCourtDetailsMap, "someCourt", "fr_applicant_solicitor1@mailinator.com",
+                false, "Get an empty email after looking up court details of someCourt from 'court-details.json'. Use DEFAULT_EMAIL instead"),
+
+            // Scenario: JsonProcessingException thrown, log the error
+            Arguments.of(null, "someCourt", "fr_applicant_solicitor1@mailinator.com",
+                true, "Fail to read `court-details.json`")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideTestCases_testShouldEmailRespondentSolicitor")
+    void testShouldEmailRespondentSolicitor(Map<String, Object> caseData, boolean isRepresented, boolean isEmailNotEmpty, boolean expectedResult) {
+
+        // Mocking caseDataService methods
+        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(isRepresented);
+        lenient().when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(isEmailNotEmpty);
+
+        // Perform the test
+        boolean result = notificationService.shouldEmailRespondentSolicitor(caseData);
+
+        // Assert the result
+        assertEquals(expectedResult, result);
+    }
+
+    // MethodSource for parameterized test cases
+    static Stream<Arguments> provideTestCases_testShouldEmailRespondentSolicitor() {
+        Map<String, Object> caseDataWithEmail = new HashMap<>();
+        caseDataWithEmail.put(RESP_SOLICITOR_EMAIL, "respSolicitor@example.com");
+
+        Map<String, Object> caseDataWithoutEmail = new HashMap<>(); // No email scenario
+
+        return Stream.of(
+            // Scenario 1: Respondent is represented by a solicitor and email is present, expect true
+            Arguments.of(caseDataWithEmail, true, true, true),
+
+            // Scenario 2: Respondent is represented by a solicitor but email is empty, expect false
+            Arguments.of(caseDataWithEmail, true, false, false),
+
+            // Scenario 3: Respondent is not represented by a solicitor, expect false
+            Arguments.of(caseDataWithEmail, false, true, false),
+
+            // Scenario 4: Respondent is not represented and email is empty, expect false
+            Arguments.of(caseDataWithoutEmail, false, false, false)
+        );
+    }
+
+    @Mock
+    private FinremCaseDetails mockCaseDetails;
+    @Mock
+    private FinremCaseData mockCaseData;
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true",   // Scenario 1: Solicitor data is populated, expect true
+        "false, false"  // Scenario 2: Solicitor data is not populated, expect false
+    })
+    void testIsApplicantSolicitorEmailPopulated(boolean isSolicitorPopulated, boolean expectedResult) {
+        // Mock the behavior of caseData
+        when(mockCaseDetails.getData()).thenReturn(mockCaseData);
+        when(mockCaseData.isApplicantSolicitorPopulated()).thenReturn(isSolicitorPopulated);
+
+        // Perform the test
+        boolean result = notificationService.isApplicantSolicitorEmailPopulated(mockCaseDetails);
+
+        // Assert the result
+        assertEquals(expectedResult, result);
     }
 }

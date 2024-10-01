@@ -1865,7 +1865,7 @@ public class NotificationService {
         return DEFAULT_EMAIL;
     }
 
-    private String getRecipientEmailFromSelectedCourt(String selectedAllocatedCourt) {
+    public String getRecipientEmailFromSelectedCourt(String selectedAllocatedCourt) {
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(selectedAllocatedCourt);
