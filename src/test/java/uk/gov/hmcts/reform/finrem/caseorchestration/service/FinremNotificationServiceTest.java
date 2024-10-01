@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -600,39 +600,41 @@ class FinremNotificationServiceTest implements TestConstants {
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONSENT_ORDER_NOT_APPROVED_SENT));
     }
 
-    @Test
-    void shouldEmailRespondentSolicitor() {
+    @ParameterizedTest
+    @CsvSource({
+        "false, true, true, , true",  // Paper app = false, represented by solicitor = true, has email, no email consent set
+        "false, true, true, NO, false",  // Paper app = false, represented by solicitor = true, has email, email consent NO
+        "true, true, true, , false",  // Paper app = true (invalid)
+        "false, false, true, , false",  // Not represented by solicitor
+        "false, true, false, , false",  // No solicitor email provided
+        "false, true, true, YES, true"  // Explicit consent given
+    })
+    void testIsRespondentSolicitorEmailCommunicationEnabled(
+        boolean isPaperApplication,
+        boolean isRespondentRepresentedBySolicitor,
+        boolean hasSolicitorEmail,
+        String emailConsentValue,
+        boolean expectedResult) {
+
+        // Prepare case data
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        if (hasSolicitorEmail) {
+            caseData.put(RESP_SOLICITOR_EMAIL, "solicitor@example.com");
+        }
+        if (emailConsentValue != null) {
+            caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, emailConsentValue);
+        }
 
-        when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+        // Mock the service methods
+        lenient().when(caseDataService.isPaperApplication(caseData)).thenReturn(isPaperApplication);
+        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(isRespondentRepresentedBySolicitor);
+        lenient().when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(hasSolicitorEmail);
 
-        assertTrue(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
-    }
+        // Perform the test
+        boolean result = notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData);
 
-    @Test
-    void shouldNotEmailRespondentSolicitor() {
-        lenient().when(caseDataService.isPaperApplication(any(Map.class))).thenReturn(true);
-        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-
-        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(new HashMap<>()));
-    }
-
-    @Test
-    void shouldEmailRespondentSolicitorWhenNullEmailConsent() {
-        lenient().when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
-        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        lenient().when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
-
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, null);
-
-        boolean isRespondentCommunicationEnabled = notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData);
-
-        assertTrue(isRespondentCommunicationEnabled);
+        // Assert the result
+        assertEquals(expectedResult, result);
     }
 
     @Test
@@ -887,5 +889,53 @@ class FinremNotificationServiceTest implements TestConstants {
 
         // Assert the result
         assertEquals(expectedResult, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsApplicantSolicitorResponsibleToDraftOrder(boolean isResponsible) {
+        // Prepare mock data
+        Map<String, Object> caseData = new HashMap<>();
+
+        // Mock the service method
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
+
+        // Perform the test
+        boolean result = notificationService.isApplicantSolicitorResponsibleToDraftOrder(caseData);
+
+        // Assert the result
+        assertEquals(isResponsible, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsRespondentSolicitorResponsibleToDraftOrder(boolean isResponsible) {
+        // Prepare mock data
+        Map<String, Object> caseData = new HashMap<>();
+
+        // Mock the service method
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).thenReturn(isResponsible);
+
+        // Perform the test
+        boolean result = notificationService.isRespondentSolicitorResponsibleToDraftOrder(caseData);
+
+        // Assert the result
+        assertEquals(isResponsible, result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsContestedApplication(boolean isContested) {
+        // Prepare mock FinremCaseDetails
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().build();
+
+        // Mock the service method
+        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(isContested);
+
+        // Perform the test
+        boolean result = notificationService.isContestedApplication(caseDetails);
+
+        // Assert the result
+        assertEquals(isContested, result);
     }
 }
