@@ -1026,7 +1026,7 @@ class FinremNotificationServiceTest {
 
             // Scenario: JsonProcessingException thrown, log the error
             Arguments.of(null, "someCourt", "fr_applicant_solicitor1@mailinator.com",
-                true, "Fail to read `court-details.json`")
+                true, "Fail to read 'court-details.json'")
         );
     }
 

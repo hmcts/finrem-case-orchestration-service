@@ -1883,7 +1883,7 @@ public class NotificationService {
                     selectedAllocatedCourt);
             }
         } catch (JsonProcessingException ex) {
-            log.error("Fail to read `court-details.json`", ex);
+            log.error("Fail to read 'court-details.json'", ex);
         }
         return DEFAULT_EMAIL;
     }
