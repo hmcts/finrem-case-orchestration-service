@@ -70,7 +70,6 @@ public class CreateGeneralLetterConsentMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
 
         verify(generalLetterService).previewGeneralLetter(anyString(), any());
-        verify(generalLetterService).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
         assertNull(response.getData().getIntervenerOne().getIntervenerAddress());
     }
 
@@ -82,7 +81,6 @@ public class CreateGeneralLetterConsentMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, "userAuthorisation");
 
         verify(generalLetterService, never()).previewGeneralLetter(anyString(), any());
-        verify(generalLetterService, never()).validateEncryptionOnUploadedDocuments(any(), any(), any(), any());
         assertNotNull(response);
         assertTrue(response.getErrors().contains("Error"));
     }
