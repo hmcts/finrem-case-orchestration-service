@@ -14,5 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DraftOrderReviewCollection {
+    private DraftOrderReview value;
 
 }
