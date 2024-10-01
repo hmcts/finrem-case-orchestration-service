@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestDat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultContestedFinremCaseData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_ASSIGNED_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
@@ -89,6 +92,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_ADDED_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -129,10 +136,12 @@ class FinremNotificationServiceTest implements TestConstants {
         NotificationRequest notificationRequest = new NotificationRequest();
         lenient().when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(FinremCaseDetails.class),
             any())).thenReturn(notificationRequest);
-        lenient().when(finremNotificationRequestMapper
-            .buildNotificationRequest(any(FinremCaseDetails.class), any())).thenReturn(notificationRequest);
         lenient().when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(FinremCaseDetails.class), any()))
             .thenReturn(notificationRequest);
+        lenient().when(notificationServiceConfiguration.getCtscEmail()).thenReturn(TEST_CTSC_EMAIL);
+
+        lenient().when(finremNotificationRequestMapper
+            .buildNotificationRequest(any(FinremCaseDetails.class), any())).thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
             .thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class), anyBoolean()))
@@ -143,7 +152,11 @@ class FinremNotificationServiceTest implements TestConstants {
             .thenReturn(notificationRequest);
         lenient().when(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(any(FinremCaseDetails.class),
             any(SolicitorCaseDataKeysWrapper.class))).thenReturn(notificationRequest);
-        lenient().when(notificationServiceConfiguration.getCtscEmail()).thenReturn(TEST_CTSC_EMAIL);
+        lenient().when(finremNotificationRequestMapper.buildNotificationRequest(any(FinremCaseDetails.class),
+            any(Barrister.class))).thenReturn(notificationRequest);
+        lenient().when(finremNotificationRequestMapper.buildNotificationRequest(any(FinremCaseDetails.class), any(IntervenerOne.class),
+            anyString(), anyString(), anyString())).thenReturn(notificationRequest);
+
         lenient().when(objectMapper.readValue(getCourtDetailsString(), HashMap.class))
             .thenReturn(new HashMap(Map.of("email", "FRCLondon@justice.gov.uk")));
     }
@@ -770,5 +783,65 @@ class FinremNotificationServiceTest implements TestConstants {
 
         verify(finremNotificationRequestMapper).getNotificationRequestForRespondentSolicitor(consentedFinremCaseDetails);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT));
+    }
+
+    @Test
+    void sendGeneralApplicationRejectionEmailToAppSolicitor() {
+        notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(consentedFinremCaseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_REJECT_GENERAL_APPLICATION));
+    }
+
+    @Test
+    void sendBarristerRemovedEmail() {
+        notificationService.sendBarristerRemovedEmail(consentedFinremCaseDetails, Barrister.builder().build());
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), any());
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_BARRISTER_ACCESS_REMOVED));
+    }
+
+    @Test
+    void sendIntervenerAddedEmail() {
+        IntervenerDetails i1 = IntervenerOne.builder().build();
+        notificationService.sendIntervenerAddedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
+            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_ADDED_EMAIL));
+    }
+
+    @Test
+    void sendIntervenerSolicitorAddedEmail() {
+        IntervenerDetails i1 = IntervenerOne.builder().build();
+        notificationService.sendIntervenerSolicitorAddedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
+            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_SOLICITOR_ADDED_EMAIL));
+    }
+
+    @Test
+    void sendIntervenerRemovedEmail() {
+        IntervenerDetails i1 = IntervenerOne.builder().build();
+        notificationService.sendIntervenerRemovedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
+            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_REMOVED_EMAIL));
+    }
+
+    @Test
+    void sendIntervenerSolicitorRemovedEmail() {
+        IntervenerDetails i1 = IntervenerOne.builder().build();
+        notificationService.sendIntervenerSolicitorRemovedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
+
+        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
+            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_SOLICITOR_REMOVED_EMAIL));
     }
 }
