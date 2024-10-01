@@ -55,4 +55,10 @@ public class NotificationRequest {
     private byte[] documentContents;
     @JsonProperty("isNotDigital")
     private Boolean isNotDigital;
+    @JsonProperty("hearingDate")
+    private String hearingDate;
+    @JsonProperty("judgeName")
+    private String judgeName;
+    @JsonProperty("earliestDraftOrderDate")
+    private String earliestDraftOrderDate;
 }
