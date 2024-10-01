@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
-public abstract class TestConstants {
+public class TestConstants {
+
+    protected TestConstants() {
+        // restrict instantiation
+    }
+
     public static final String TEST_CASE_ID = "test.case.id";
     public static final String TEST_USER_ID = "test.user.id";
     public static final String TEST_ORG_ID = "test.org.id";

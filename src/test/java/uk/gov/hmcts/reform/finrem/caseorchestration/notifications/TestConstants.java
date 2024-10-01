@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications;
 
-public abstract class TestConstants extends uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants {
+public class TestConstants extends uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants {
+    private TestConstants() {
+        super();
+    }
+
     public static final String TEST_CASE_FAMILY_MAN_ID = "test.family.man.id";
     public static final String BEARER_AUTH_TOKEN = "Bearer test.auth.token";
     public static final String CONTESTED = "contested";
