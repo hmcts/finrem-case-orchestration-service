@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DraftOrdersWrapper {
+public class DraftOrdersWrapper implements HasCaseDocument {
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
     private List<DraftOrderReviewCollection> draftOrderReviewCollection;

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DraftOrderReviewCollection {
+public class DraftOrderReviewCollection implements HasCaseDocument {
     private DraftOrderReview value;
 
 }

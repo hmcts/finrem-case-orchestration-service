@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SuggestedDraftOrderCollection {
+public class SuggestedDraftOrderCollection implements HasCaseDocument {
     private SuggestedDraftOrder value;
 
 }
