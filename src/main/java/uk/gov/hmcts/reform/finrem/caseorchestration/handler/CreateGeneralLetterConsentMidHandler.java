@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,11 +51,6 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
         List<String> errors = new ArrayList<>(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails));
         if (errors.isEmpty()) {
             generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-            Optional.ofNullable(caseData.getGeneralLetterWrapper().getGeneralLetterUploadedDocuments())
-                .filter(list -> !list.isEmpty())
-                .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                    list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
-
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
         } else {
             log.error("Errors occurred while handling callback request: {} on case id {}", errors, caseDetails.getId());
