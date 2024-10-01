@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -93,7 +94,7 @@ public class GeneralApplicationService {
 
         log.info("GeneralApplicationService updateGeneralApplications generalApplicationsBefore list size: {} "
                 + "generalApplications list size: {} for case ID: {}",
-            generalApplicationListBefore != null && !generalApplicationListBefore.isEmpty()  ? generalApplicationListBefore.size() : 0,
+            ObjectUtils.isEmpty(generalApplicationListBefore) ? 0 : generalApplicationListBefore.size(),
             generalApplicationList.size(),
             caseDetails.getId());
 

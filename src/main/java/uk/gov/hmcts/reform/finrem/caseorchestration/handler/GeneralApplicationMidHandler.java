@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -150,8 +151,8 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         service.checkIfApplicationCompleted(caseDetails, errors, generalApplications, generalApplicationsBefore, userAuthorisation);
 
         log.info("GA MidHandler existing generalApplicationsBefore list size: {} generalApplications list size: {} for case ID: {}",
-            generalApplicationsBefore != null && !generalApplicationsBefore.isEmpty()  ? generalApplicationsBefore.size() : 0,
-            generalApplications != null && !generalApplications.isEmpty() ? generalApplications.size() : 0,
+            ObjectUtils.isEmpty(generalApplicationsBefore) ? 0 : generalApplicationsBefore.size(),
+            ObjectUtils.isEmpty(generalApplications) ? 0 : generalApplications.size(),
             caseId);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
