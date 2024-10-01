@@ -814,8 +814,8 @@ class FinremNotificationServiceTest implements TestConstants {
         notificationService.sendIntervenerAddedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
             TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
 
-        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
-            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(finremNotificationRequestMapper).buildNotificationRequest(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_ADDED_EMAIL));
     }
 
@@ -825,8 +825,8 @@ class FinremNotificationServiceTest implements TestConstants {
         notificationService.sendIntervenerSolicitorAddedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
             TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
 
-        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
-            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(finremNotificationRequestMapper).buildNotificationRequest(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_SOLICITOR_ADDED_EMAIL));
     }
 
@@ -836,8 +836,8 @@ class FinremNotificationServiceTest implements TestConstants {
         notificationService.sendIntervenerRemovedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
             TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
 
-        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
-            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(finremNotificationRequestMapper).buildNotificationRequest(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_REMOVED_EMAIL));
     }
 
@@ -847,8 +847,8 @@ class FinremNotificationServiceTest implements TestConstants {
         notificationService.sendIntervenerSolicitorRemovedEmail(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
             TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
 
-        verify(finremNotificationRequestMapper).buildNotificationRequest(eq(consentedFinremCaseDetails), eq(i1), eq(TEST_SOLICITOR_NAME),
-            eq(TEST_RESP_SOLICITOR_EMAIL), eq(TEST_SOLICITOR_REFERENCE));
+        verify(finremNotificationRequestMapper).buildNotificationRequest(consentedFinremCaseDetails, i1, TEST_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
         verify(emailService).sendConfirmationEmail(any(), eq(FR_INTERVENER_SOLICITOR_REMOVED_EMAIL));
     }
 
