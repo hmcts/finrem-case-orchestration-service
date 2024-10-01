@@ -146,7 +146,7 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void shouldReturnEmptyStringForSolicitorReferenceWhenNotProvided() {
-        FinremCaseDetails caseDetails = contestedFinremCaseDetails;
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().getContactDetailsWrapper().setSolicitorReference(null);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
@@ -163,7 +163,7 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
-        FinremCaseDetails caseDetails = contestedFinremCaseDetails;
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
@@ -181,7 +181,7 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
-        FinremCaseDetails caseDetails = contestedFinremCaseDetails;
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
