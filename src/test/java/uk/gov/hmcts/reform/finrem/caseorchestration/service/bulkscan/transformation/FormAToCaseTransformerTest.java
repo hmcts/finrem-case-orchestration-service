@@ -269,6 +269,14 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
+    public void childSupportAgencyCalculationMadeToNullWhenEmptySpaceString() {
+        Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+            singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
+                "   "))));
+        assertThat(optionOneTransformedData, hasEntry("ChildSupportAgencyCalculationMade", null));
+    }
+
+    @Test
     public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
         Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             singletonList(new OcrDataField("OrderForChildren",
