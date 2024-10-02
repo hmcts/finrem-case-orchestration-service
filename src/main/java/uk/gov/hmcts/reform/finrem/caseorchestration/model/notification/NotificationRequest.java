@@ -59,6 +59,6 @@ public class NotificationRequest {
     private String hearingDate;
     @JsonProperty("judgeName")
     private String judgeName;
-    @JsonProperty("orderDueDate")
-    private String orderDueDate;
+    @JsonProperty("earliestToBeReviewedOrderDate")
+    private String earliestToBeReviewedOrderDate;
 }

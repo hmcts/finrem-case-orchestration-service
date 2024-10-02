@@ -33,7 +33,7 @@ public class DraftOrderReview implements HasCaseDocument {
         return "FAKE JUDGE NAME";
     }
 
-    public LocalDate getEarliestToBeReviewedDraftOrderDate() {
+    public LocalDate getEarliestToBeReviewedOrderDate() {
         return agreedDraftOrderCollection.stream()
             .map(AgreedDraftOrderCollection::getValue) // Get AgreedDraftOrder from the collection
             .flatMap(agreedDraftOrder -> Stream.concat(
