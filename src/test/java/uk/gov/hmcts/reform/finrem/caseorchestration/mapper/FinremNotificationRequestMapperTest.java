@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftOrderReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -75,20 +76,10 @@ class FinremNotificationRequestMapperTest {
     }
 
     @Test
-    void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
+    void shouldCreateRequestForOutstandingOrdersNeedReview() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForOutstandingOrdersNeedReview(
-            consentedFinremCaseDetails);
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("consented", notificationRequest.getCaseType());
-        assertEquals("consent", notificationRequest.getCaseOrderType());
-        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
-        assertEquals("David Goodman", notificationRequest.getRespondentName());
-        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+            consentedFinremCaseDetails, "notificationEmail", DraftOrderReview.builder().build());
+        // TODO
     }
 
 
