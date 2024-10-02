@@ -40,7 +40,7 @@ public class FinremNotificationRequestMapper {
                                                                                     DraftOrderReview draftOrderReview) {
         NotificationRequest ret = getNotificationRequestForCaseworker(caseDetails, notificationEmail);
         ret.setHearingDate(String.valueOf(draftOrderReview.getHearingDate()));
-        ret.setEarliestDraftOrderDate(String.valueOf(draftOrderReview.getEarliestDraftOrderDate()));
+        ret.setOrderDueDate(String.valueOf(draftOrderReview.getEarliestToBeReviewedDraftOrderDate()));
         ret.setJudgeName(draftOrderReview.getJudgeName());
         return ret;
     }

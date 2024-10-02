@@ -76,6 +76,24 @@ class FinremNotificationRequestMapperTest {
 
     @Test
     void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForOutstandingOrdersNeedReview(
+            consentedFinremCaseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+
+    @Test
+    void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             consentedFinremCaseDetails);
 
