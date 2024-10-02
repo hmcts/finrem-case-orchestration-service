@@ -1,10 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -25,8 +32,9 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -35,19 +43,41 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultConsentedFinremCaseData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultContestedFinremCaseData;
 
-public class FinremNotificationRequestMapperTest extends BaseServiceTest {
+
+@ExtendWith(MockitoExtension.class)
+class FinremNotificationRequestMapperTest {
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
     protected static final String EMPTY_STRING = "";
 
-    @Autowired
+    @InjectMocks
     FinremNotificationRequestMapper notificationRequestMapper;
+    @InjectMocks
+    ObjectMapper mapper;
+    @Mock
+    ConsentedApplicationHelper consentedApplicationHelper;
+
+    private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
+    private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
+
+    @BeforeEach
+    public void setup() {
+        // Initialize mock objects
+        MockitoAnnotations.openMocks(this);
+
+        // Register the JavaTimeModule for Java 8 Date/Time support
+        mapper.registerModule(new JavaTimeModule());
+    }
 
     @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
+    void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
-            getConsentedNewCallbackRequest().getCaseDetails());
+            consentedFinremCaseDetails);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -62,9 +92,9 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyIsNotDigital() {
+    void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyIsNotDigital() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
-            getConsentedNewCallbackRequest().getCaseDetails(), true);
+            consentedFinremCaseDetails, true);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -80,9 +110,9 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourney() {
+    void shouldCreateNotificationRequestForRespSolicitorForConsentedJourney() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
-            getConsentedNewCallbackRequest().getCaseDetails());
+            consentedFinremCaseDetails);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -97,9 +127,9 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestFoRespSolicitorForConsentedJourneyIsNotDigital() {
+    void shouldCreateNotificationRequestFoRespSolicitorForConsentedJourneyIsNotDigital() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
-            getConsentedNewCallbackRequest().getCaseDetails(), true);
+            consentedFinremCaseDetails, true);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -114,11 +144,9 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
-
-
     @Test
-    public void shouldReturnEmptyStringForSolicitorReferenceWhenNotProvided() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+    void shouldReturnEmptyStringForSolicitorReferenceWhenNotProvided() {
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().getContactDetailsWrapper().setSolicitorReference(null);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
@@ -134,14 +162,14 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+    void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals("RG-123456789", notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
         assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
@@ -152,8 +180,8 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+    void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
         caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
@@ -173,13 +201,10 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("First Directions Appointment (FDA)", notificationRequest.getHearingType());
     }
 
-
     @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
-
+    void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
-            caseDetails);
+            contestedFinremCaseDetails);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -193,13 +218,12 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
-        callbackRequest.getCaseDetails().getData()
-            .setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+    void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultContestedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails(caseData);
 
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
-            callbackRequest.getCaseDetails());
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
 
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
@@ -207,13 +231,13 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
-        callbackRequest.getCaseDetails().getData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
-            "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+    void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultContestedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getContestedFinremCaseDetails(caseData);
 
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
-            callbackRequest.getCaseDetails());
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
 
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
@@ -221,13 +245,13 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        FinremCallbackRequest callbackRequest = getConsentedNewCallbackRequest();
-        callbackRequest.getCaseDetails().getData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
-            "Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+    void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
-            callbackRequest.getCaseDetails());
+            caseDetails);
 
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
@@ -237,13 +261,13 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        FinremCallbackRequest callbackRequest = getConsentedNewCallbackRequest();
-        callbackRequest.getCaseDetails().getData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
-            "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+    void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
+        FinremCaseData caseData = getDefaultConsentedFinremCaseData();
+        caseData.setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME,
+            TEST_RESP_SOLICITOR_EMAIL));
+        FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(caseData);
 
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
-            callbackRequest.getCaseDetails());
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(caseDetails);
 
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
@@ -253,7 +277,7 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearing() {
+    void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearing() {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(TEST_JSON, mapper);
         FinremCaseData caseData = caseDetails.getData();
 
@@ -261,23 +285,18 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
             caseData.getInterimWrapper().getInterimHearingsScreenField()).orElse(Collections.emptyList());
 
         assertThat(interimHearingList.isEmpty(), is(false));
-
     }
 
     @Test
-    public void shouldCreateNotificationRequestForIntervenerNotification() {
+    void shouldCreateNotificationRequestForIntervenerNotification() {
         Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
         OrganisationPolicy intervenerOrg = OrganisationPolicy.builder().organisation(org).build();
         IntervenerOne intervenerDetails = IntervenerOne.builder()
             .intervenerName("intervener name")
             .intervenerOrganisation(intervenerOrg)
             .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE).build();
-        String recipient = TEST_SOLICITOR_NAME;
-        String email = TEST_SOLICITOR_EMAIL;
-        String referenceNumber = TEST_SOLICITOR_REFERENCE;
-        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
         NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
-            caseDetails, intervenerDetails, recipient, email, referenceNumber);
+            contestedFinremCaseDetails, intervenerDetails, TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
@@ -289,6 +308,24 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
     }
 
+    @Test
+    void shouldCreateNotificationRequestForBarristerNotification() {
+        Organisation org = Organisation.builder().organisationName("test org").organisationID("1").build();
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
+            contestedFinremCaseDetails, Barrister.builder()
+                .name("barrister name")
+                .email("barrister@email.com")
+                .organisation(org)
+                .build());
+
+        assertEquals("barrister name", notificationRequest.getName());
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals("1", notificationRequest.getBarristerReferenceNumber());
+        assertEquals("barrister@email.com", notificationRequest.getNotificationEmail());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals(CTSC_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+    }
 
     @SneakyThrows
     private List<RepresentationUpdateHistoryCollection> getChangeOfRepresentationListJson(String party,

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -33,11 +33,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
 
-public class EmailTemplateNamesTest {
+class EmailTemplateNamesTest {
 
     @Test
-    public void givenJvmIsWorkingAccordingToSpecification_whenEnumNameInvoked_thenItReturnsSameStringAsEnumName() {
-        ImmutableMap.<Enum, String>builder()
+    void givenJvmIsWorkingAccordingToSpecification_whenEnumNameInvoked_thenItReturnsSameStringAsEnumName() {
+        ImmutableMap.<EmailTemplateNames, String>builder()
             // consented
             .put(FR_HWF_SUCCESSFUL, "FR_HWF_SUCCESSFUL")
             .put(FR_ASSIGNED_TO_JUDGE, "FR_ASSIGNED_TO_JUDGE")
@@ -68,7 +68,6 @@ public class EmailTemplateNamesTest {
             .put(FR_CONTESTED_INTERIM_HEARING, "FR_CONTESTED_INTERIM_HEARING")
             .put(FR_CONSENTED_LIST_FOR_HEARING, "FR_CONSENTED_LIST_FOR_HEARING")
             .build()
-            .entrySet()
-            .forEach(enumAndName -> assertThat(enumAndName.getKey().name(), is(enumAndName.getValue())));
+            .forEach((key, value) -> assertThat(key.name(), is(value)));
     }
 }

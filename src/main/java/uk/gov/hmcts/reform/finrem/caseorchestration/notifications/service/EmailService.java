@@ -56,7 +56,6 @@ public class EmailService {
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
 
-
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),

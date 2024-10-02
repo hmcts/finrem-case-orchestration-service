@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 public class TestConstants {
+
+    protected TestConstants() {
+        // restrict instantiation
+    }
+
     public static final String TEST_CASE_ID = "test.case.id";
     public static final String TEST_USER_ID = "test.user.id";
     public static final String TEST_ORG_ID = "test.org.id";
@@ -18,6 +23,7 @@ public class TestConstants {
     public static final String TEST_RESP_SOLICITOR_NAME = "Test Resp Sol";
     public static final String TEST_RESP_SOLICITOR_EMAIL = "testRespSolicitor@email.com";
 
+    public static final String TEST_CTSC_EMAIL = "testCtsc@email.com";
     public static final String TEST_JUDGE_EMAIL = "testJudge@email.com";
 
     public static final String TEST_KEY = "testKey";
