@@ -52,6 +52,8 @@ public class ApplicantChangeOrgPolicyAboutToSubmitHandler extends FinremCallback
             .build();
         caseData.setApplicantOrganisationPolicy(organisationPolicy);
 
+        caseData.setChangeOrganisationRequestField(null);
+
         log.info("cleared applicant org policy {} for Case ID: {}", organisationPolicy, caseId);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
