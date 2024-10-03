@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -91,7 +90,6 @@ public class RemovedSolicitorServiceTest {
     }
 
     @Test
-    @Ignore
     public void givenRemovedNotRepresented_whenGetRemovedSolicitorAsSolicitorButCaseRoleIdIsNull_thenReturnCorrectRemovedSolicitorAsNull() {
         ChangeOrganisationRequest changeRequest = getApplicantChangeRequest(null);
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, getApplicantOrgPolicyWithOrganisation());
