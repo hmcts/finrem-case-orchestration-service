@@ -51,7 +51,6 @@ public class ApplicantChangeOrgPolicyAboutToSubmitHandler extends FinremCallback
             .orgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getCcdCode())
             .build();
         caseData.setApplicantOrganisationPolicy(organisationPolicy);
-
         caseData.setChangeOrganisationRequestField(null);
 
         log.info("cleared applicant org policy {} for Case ID: {}", organisationPolicy, caseId);

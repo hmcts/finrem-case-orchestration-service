@@ -51,6 +51,7 @@ public class RespondentChangeOrgPolicyAboutToSubmitHandler extends FinremCallbac
             .orgPolicyCaseAssignedRole(CaseRole.RESP_SOLICITOR.getCcdCode())
             .build();
         caseData.setRespondentOrganisationPolicy(organisationPolicy);
+        caseData.setChangeOrganisationRequestField(null);
 
         log.info("cleared respondent org policy {} for Case ID: {}", organisationPolicy, caseId);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
