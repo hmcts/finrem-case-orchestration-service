@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftOrderReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -72,6 +76,28 @@ class FinremNotificationRequestMapperTest {
 
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
+    }
+
+    @Test
+    void shouldCreateRequestForOutstandingOrdersNeedReview() {
+        DraftOrderReview mockedDraftOrderReview = mock(DraftOrderReview.class);
+        when(mockedDraftOrderReview.getEarliestToBeReviewedOrderDate()).thenReturn(LocalDate.of(2024, 1, 1));
+        when(mockedDraftOrderReview.getJudgeName()).thenReturn("JUDGE NAME");
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForOutstandingOrdersNeedReview(
+            consentedFinremCaseDetails, "notificationEmail", mockedDraftOrderReview);
+        assertEquals("notificationEmail", notificationRequest.getNotificationEmail());
+        assertEquals("JUDGE NAME", notificationRequest.getJudgeName());
+        assertEquals("2024-01-01", notificationRequest.getEarliestToBeReviewedOrderDate());
+    }
+
+    @Test
+    void shouldCreateRequestForCaseworker() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForCaseworker(
+            consentedFinremCaseDetails, "notificationEmail");
+        assertEquals("notificationEmail", notificationRequest.getNotificationEmail());
+        assertEquals("", notificationRequest.getName());
+        assertEquals("", notificationRequest.getSolicitorReferenceNumber());
     }
 
     @Test

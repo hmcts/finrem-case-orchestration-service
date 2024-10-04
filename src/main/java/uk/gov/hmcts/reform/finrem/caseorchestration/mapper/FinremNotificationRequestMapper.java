@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationH
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftOrderReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -33,6 +34,24 @@ public class FinremNotificationRequestMapper {
     private static final String CONTESTED = "contested";
     private final ConsentedApplicationHelper consentedApplicationHelper;
     protected static final String EMPTY_STRING = "";
+
+    public NotificationRequest getNotificationRequestForOutstandingOrdersNeedReview(FinremCaseDetails caseDetails,
+                                                                                    String notificationEmail,
+                                                                                    DraftOrderReview draftOrderReview) {
+        NotificationRequest ret = getNotificationRequestForCaseworker(caseDetails, notificationEmail);
+        ret.setHearingDate(String.valueOf(draftOrderReview.getHearingDate()));
+        ret.setEarliestToBeReviewedOrderDate(String.valueOf(draftOrderReview.getEarliestToBeReviewedOrderDate()));
+        ret.setJudgeName(draftOrderReview.getJudgeName());
+        return ret;
+    }
+
+    public NotificationRequest getNotificationRequestForCaseworker(FinremCaseDetails caseDetails, String notificationEmail) {
+        return buildNotificationRequest(caseDetails, SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(notificationEmail)
+            .solicitorNameKey("")
+            .solicitorReferenceKey("")
+            .build());
+    }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getData()));
@@ -135,7 +154,6 @@ public class FinremNotificationRequestMapper {
         }
         notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
         notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
-
         return notificationRequest;
     }
 
