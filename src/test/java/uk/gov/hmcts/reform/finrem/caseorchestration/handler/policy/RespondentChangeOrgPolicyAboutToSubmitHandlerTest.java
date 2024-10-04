@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -63,6 +64,7 @@ class RespondentChangeOrgPolicyAboutToSubmitHandlerTest {
         assertNull(data.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID());
         assertNull(data.getRespondentOrganisationPolicy().getOrganisation().getOrganisationName());
         assertNull(data.getRespondentOrganisationPolicy().getOrgPolicyReference());
+        assertNull(data.getChangeOrganisationRequestField());
         assertEquals(CaseRole.RESP_SOLICITOR.getCcdCode(), data.getRespondentOrganisationPolicy()
             .getOrgPolicyCaseAssignedRole());
     }
@@ -75,8 +77,19 @@ class RespondentChangeOrgPolicyAboutToSubmitHandlerTest {
             .orgPolicyCaseAssignedRole(CaseRole.RESP_SOLICITOR.getCcdCode())
             .build();
 
+        ChangeOrganisationRequest defaultRequest = ChangeOrganisationRequest.builder()
+            .requestTimestamp(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .approvalRejectionTimestamp(null)
+            .approvalStatus(null)
+            .caseRoleId(null)
+            .reason(null)
+            .build();
+
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         finremCaseData.setApplicantOrganisationPolicy(organisationPolicy);
+        finremCaseData.setChangeOrganisationRequestField(defaultRequest);
 
         return FinremCallbackRequest
             .builder()

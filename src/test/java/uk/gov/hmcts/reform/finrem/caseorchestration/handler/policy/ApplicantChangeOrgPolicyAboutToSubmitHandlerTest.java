@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -69,6 +71,7 @@ class ApplicantChangeOrgPolicyAboutToSubmitHandlerTest {
         assertNull(data.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID());
         assertNull(data.getApplicantOrganisationPolicy().getOrganisation().getOrganisationName());
         assertNull(data.getApplicantOrganisationPolicy().getOrgPolicyReference());
+        assertNull(data.getChangeOrganisationRequestField());
         assertEquals(CaseRole.APP_SOLICITOR.getCcdCode(), data.getApplicantOrganisationPolicy()
             .getOrgPolicyCaseAssignedRole());
     }
@@ -81,8 +84,19 @@ class ApplicantChangeOrgPolicyAboutToSubmitHandlerTest {
             .orgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getCcdCode())
             .build();
 
+        ChangeOrganisationRequest defaultRequest = ChangeOrganisationRequest.builder()
+            .requestTimestamp(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .approvalRejectionTimestamp(null)
+            .approvalStatus(null)
+            .caseRoleId(null)
+            .reason(null)
+            .build();
+
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         finremCaseData.setApplicantOrganisationPolicy(organisationPolicy);
+        finremCaseData.setChangeOrganisationRequestField(defaultRequest);
 
         return FinremCallbackRequest
             .builder()
