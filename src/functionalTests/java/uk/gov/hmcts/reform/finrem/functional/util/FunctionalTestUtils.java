@@ -99,7 +99,7 @@ public class FunctionalTestUtils {
     public String parsePdfToString(InputStream inputStream) {
         String parsedText = null;
 
-        try (PDDocument pdDoc = Loader.loadPDF((RandomAccessRead) inputStream)) {
+        try (PDDocument pdDoc = Loader.loadPDF(inputStream.readAllBytes())) {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             parsedText = pdfStripper.getText(pdDoc);
         } catch (IOException e) {
