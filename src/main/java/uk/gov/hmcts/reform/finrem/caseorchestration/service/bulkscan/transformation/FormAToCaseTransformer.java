@@ -307,6 +307,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
 
+        modifiedCaseData.replaceAll((key, value) -> (value instanceof String
+            && value.toString().trim().isEmpty()) ? null : value);
+
         return modifiedCaseData;
     }
 
