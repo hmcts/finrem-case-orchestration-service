@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
-public class SuggestedDraftOrderCollection implements HasCaseDocument {
+public class SuggestedPensionSharingAnnexCollection implements HasCaseDocument {
 
-    private DraftOrder value;
+    private PensionSharingAnnex value;
 
 }

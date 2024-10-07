@@ -4,15 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
-@EqualsAndHashCode
-public class SuggestedDraftOrderCollection implements HasCaseDocument {
-
-    private DraftOrder value;
-
+@NoArgsConstructor
+public class AdditionalDocumentsCollection implements HasCaseDocument {
+    private Document value;
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +12,9 @@ import lombok.EqualsAndHashCode;
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
-public class SuggestedDraftOrderCollection implements HasCaseDocument {
+public class PensionSharingAnnex implements HasCaseDocument {
 
-    private DraftOrder value;
+    @JsonProperty("suggestedPensionSharingAnnexes")
+    CaseDocument suggestedPensionSharingAnnexes;
 
 }
