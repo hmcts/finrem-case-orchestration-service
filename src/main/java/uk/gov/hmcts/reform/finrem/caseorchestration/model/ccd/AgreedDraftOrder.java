@@ -6,11 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
 public class AgreedDraftOrder implements HasCaseDocument {
-//fields here
+
+    private List<DraftOrderCollection> draftOrderCollection;
+
+    private List<PensionSharingAnnexCollection> pensionSharingAnnexCollection;
+
 }
