@@ -176,7 +176,6 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build());
     }
 
-    // PT todo - this should initialise case role ID properly
     private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {
         ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
             .builder()
