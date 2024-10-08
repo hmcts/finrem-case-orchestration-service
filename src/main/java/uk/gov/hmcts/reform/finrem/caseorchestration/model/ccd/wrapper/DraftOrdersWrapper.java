@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AgreedDraftOrderCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftOrderReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadSuggestedDraftOrder;
 
 import java.util.List;
@@ -27,7 +28,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private String typeOfDraftOrder;
     @JsonProperty("uploadSuggestedDraftOrder")
     private UploadSuggestedDraftOrder uploadSuggestedDraftOrder;
-    //private UploadAgreedDraftOrder uploadAgreedDraftOrder;
+    @JsonProperty("uploadAgreedDraftOrder")
+    private UploadAgreedDraftOrder uploadAgreedDraftOrder;
 
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     private List<SuggestedDraftOrder> suggestedDraftOrder;
