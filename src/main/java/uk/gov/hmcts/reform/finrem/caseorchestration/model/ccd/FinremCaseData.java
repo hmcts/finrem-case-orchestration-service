@@ -297,7 +297,6 @@ public class FinremCaseData implements HasCaseDocument {
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
     private DynamicMultiSelectList partiesOnCase;
-    private DynamicMultiSelectList confirmUploadedDocuments;
     private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
@@ -645,16 +644,12 @@ public class FinremCaseData implements HasCaseDocument {
 
     @JsonIgnore
     public String getApplicantLastName() {
-        return (
-            nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim()
-        );
+        return nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim();
     }
 
     @JsonIgnore
     public String getRespondentLastName() {
-        return (
-            nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim()
-        );
+        return nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim();
     }
 
     @JsonIgnore

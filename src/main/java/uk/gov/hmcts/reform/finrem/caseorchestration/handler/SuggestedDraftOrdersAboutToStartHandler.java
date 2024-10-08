@@ -48,7 +48,7 @@ public class SuggestedDraftOrdersAboutToStartHandler extends FinremCallbackHandl
         DynamicMultiSelectList list = DynamicMultiSelectList.builder()
             .listItems(List.of(element))
             .build();
-        finremCaseData.setConfirmUploadedDocuments(list);
+        finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setConfirmUploadedDocuments(list);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
