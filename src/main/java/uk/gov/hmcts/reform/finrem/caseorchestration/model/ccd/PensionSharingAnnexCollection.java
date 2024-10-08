@@ -1,19 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
-@EqualsAndHashCode
-public class DraftOrderReview implements HasCaseDocument {
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PensionSharingAnnexCollection implements HasCaseDocument {
+    private PensionSharingAnnex value;
 
-    private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
 }

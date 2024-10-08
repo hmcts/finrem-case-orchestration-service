@@ -1,20 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
-public class PensionSharingAnnex implements HasCaseDocument {
+public class PensionSharingAnnex implements HasCaseDocument, OrderToBeReviewed {
 
-    @JsonProperty("suggestedPensionSharingAnnexes")
-    CaseDocument suggestedPensionSharingAnnexes;
+    private OrderStatus status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate submittedDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate reviewedDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate notificationSentDate;
 }

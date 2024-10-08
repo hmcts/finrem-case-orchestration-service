@@ -1,25 +1,30 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
-public class DraftOrder implements HasCaseDocument {
+public class DraftOrder implements HasCaseDocument, OrderToBeReviewed {
 
-    @JsonProperty("suggestedDraftOrderDocument")
-    CaseDocument suggestedDraftOrderDocument;
+    private OrderStatus status;
 
-    @JsonProperty("additionalDocuments")
-    private List<AdditionalDocumentsCollection> additionalDocuments;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate submittedDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate reviewedDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate notificationSentDate;
 
 }

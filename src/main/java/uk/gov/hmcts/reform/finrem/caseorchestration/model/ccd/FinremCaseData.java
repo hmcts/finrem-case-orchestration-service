@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BarristerCollectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.BulkPrintCoversheetWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CfvMigrationWrapper;
@@ -394,18 +395,9 @@ public class FinremCaseData implements HasCaseDocument {
     private List<ScannedDocumentCollection> applicantScanDocuments;
     private List<ScannedDocumentCollection> respondentScanDocuments;
     private List<ManageScannedDocumentCollection> manageScannedDocumentCollection;
-    @JsonProperty("appBarristerCollection")
-    private List<BarristerCollectionItem> applicantBarristers;
-    @JsonProperty("respBarristerCollection")
-    private List<BarristerCollectionItem> respondentBarristers;
-    @JsonProperty("intvr1BarristerCollection")
-    private List<BarristerCollectionItem> intvr1Barristers;
-    @JsonProperty("intvr2BarristerCollection")
-    private List<BarristerCollectionItem> intvr2Barristers;
-    @JsonProperty("intvr3BarristerCollection")
-    private List<BarristerCollectionItem> intvr3Barristers;
-    @JsonProperty("intvr4BarristerCollection")
-    private List<BarristerCollectionItem> intvr4Barristers;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private BarristerCollectionWrapper barristerCollectionWrapper;
     private BarristerParty barristerParty;
     private YesOrNo benefitForChildrenDecisionSchedule;
     private List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule;
@@ -1013,10 +1005,20 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
+    public BarristerCollectionWrapper getBarristerCollectionWrapper() {
+        if (barristerCollectionWrapper == null) {
+            this.barristerCollectionWrapper = new BarristerCollectionWrapper();
+        }
+
+        return barristerCollectionWrapper;
+    }
+
+    @JsonIgnore
     public DraftOrdersWrapper getDraftOrdersWrapper() {
         if (draftOrdersWrapper == null) {
             this.draftOrdersWrapper = new DraftOrdersWrapper();
         }
         return draftOrdersWrapper;
     }
+
 }
