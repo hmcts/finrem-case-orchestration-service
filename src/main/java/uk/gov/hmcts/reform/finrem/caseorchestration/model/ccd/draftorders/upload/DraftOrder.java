@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderToBeReviewed;
 
 import java.time.LocalDate;
 
@@ -14,7 +17,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
-public class PensionSharingAnnex implements HasCaseDocument, OrderToBeReviewed {
+public class DraftOrder implements HasCaseDocument, OrderToBeReviewed {
 
     private OrderStatus status;
 
@@ -26,4 +29,5 @@ public class PensionSharingAnnex implements HasCaseDocument, OrderToBeReviewed {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate notificationSentDate;
+
 }

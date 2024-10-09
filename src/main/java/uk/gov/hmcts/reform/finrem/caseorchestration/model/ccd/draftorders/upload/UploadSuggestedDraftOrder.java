@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -18,4 +20,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 public class UploadSuggestedDraftOrder {
     @JsonProperty("confirmUploadedDocuments")
     private DynamicMultiSelectList confirmUploadedDocuments;
+
+    @JsonProperty("uploadParty")
+    private String uploadParty;
+
+    @JsonProperty("uploadOrdersOrPSAs")
+    private List<String> uploadOrdersOrPSAs;
+
+    @JsonProperty("suggestedDraftOrderCollection")
+    private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
+
+    @JsonProperty("suggestedPSACollection")
+    private List<SuggestedPensionSharingAnnexCollection> suggestedPSACollection;
 }
