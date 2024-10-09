@@ -8,9 +8,7 @@ import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
-import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,36 +96,14 @@ public class FunctionalTestUtils {
     }
 
     public String parsePdfToString(InputStream inputStream) {
-        PDFParser parser;
-        PDDocument pdDoc = null;
-        COSDocument cosDoc = null;
-        PDFTextStripper pdfStripper;
-        String parsedText;
+        String parsedText = null;
 
-        try {
-            parser = new PDFParser(new RandomAccessBufferedFileInputStream(inputStream));
-            parser.parse();
-            cosDoc = parser.getDocument();
-            pdfStripper = new PDFTextStripper();
-            pdDoc = new PDDocument(cosDoc);
+        try (PDDocument pdDoc = Loader.loadPDF(inputStream.readAllBytes())) {
+            PDFTextStripper pdfStripper = new PDFTextStripper();
             parsedText = pdfStripper.getText(pdDoc);
-        } catch (Throwable t) {
-            t.printStackTrace();
-
-            try {
-                if (cosDoc != null) {
-                    cosDoc.close();
-                }
-
-                if (pdDoc != null) {
-                    pdDoc.close();
-                }
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-            throw new Error(t);
+        } catch (IOException e) {
+            log.error("Failed to parse the documents, exception: {}", e.getMessage());
         }
-
         return parsedText;
     }
 

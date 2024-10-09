@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,7 @@ public class BulkPrintDocumentService {
             }
 
             if (pdfBytes != null) {
-                try (PDDocument doc = PDDocument.load(pdfBytes)) {
+                try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
                     if (doc.isEncrypted()) {
                         errors.add("Uploaded document '" + documentFilename + "' contains some kind of encryption. "
                             + "Please remove encryption before uploading or upload another document.");
