@@ -1,9 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -13,12 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Su
 
 @Slf4j
 @Service
-public class SuggestedDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
+public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final SuggestedDraftOrdersCategoriser suggestedDraftOrdersCategoriser;
 
 
-    public SuggestedDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, SuggestedDraftOrdersCategoriser suggestedDraftOrdersCategoriser) {
+    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, SuggestedDraftOrdersCategoriser suggestedDraftOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.suggestedDraftOrdersCategoriser = suggestedDraftOrdersCategoriser;
 
