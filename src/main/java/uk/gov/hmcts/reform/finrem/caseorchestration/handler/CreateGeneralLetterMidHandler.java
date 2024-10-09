@@ -9,12 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -43,7 +41,7 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         List<String> errors = getErrorsForCreatingPreviewOrFinalLetter(caseDetails);
 
         if (errors.isEmpty()) {
-            previewGeneralLetterAndValidateEncryption(userAuthorisation, caseDetails, errors);
+            previewGeneralLetter(userAuthorisation, caseDetails);
         }
 
         return buildCallbackResponse(caseDetails, errors);
@@ -66,15 +64,9 @@ public class CreateGeneralLetterMidHandler extends FinremCallbackHandler {
         return new ArrayList<>(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails));
     }
 
-    private void previewGeneralLetterAndValidateEncryption(String userAuthorisation,
-                                                           FinremCaseDetails caseDetails,
-                                                           List<String> errors) {
+    private void previewGeneralLetter(String userAuthorisation,
+                                      FinremCaseDetails caseDetails) {
         generalLetterService.previewGeneralLetter(userAuthorisation, caseDetails);
-        GeneralLetterWrapper wrapper = caseDetails.getData().getGeneralLetterWrapper();
-        Optional.ofNullable(wrapper.getGeneralLetterUploadedDocuments())
-            .filter(list -> !list.isEmpty())
-            .ifPresent(list -> generalLetterService.validateEncryptionOnUploadedDocuments(
-                list, userAuthorisation, String.valueOf(caseDetails.getId()), errors));
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> buildCallbackResponse(FinremCaseDetails caseDetails,

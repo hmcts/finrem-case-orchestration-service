@@ -68,6 +68,9 @@ public class DocumentConversionService {
 
         try {
             doc = PDDocument.load(document);
+            if (doc.isEncrypted()) {
+                doc.setAllSecurityToBeRemoved(true);
+            }
             Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
             if (acroForm.isPresent()) {
