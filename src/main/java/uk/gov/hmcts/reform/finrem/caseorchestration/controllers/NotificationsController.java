@@ -257,7 +257,7 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Send a notice of change to the Solicitor email and a letter to the organization.")
+    @Operation(summary = "Initiated by caseworker, sends a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
