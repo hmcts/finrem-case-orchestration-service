@@ -36,7 +36,8 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
 
     public RemoveUserCaseAccessAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                    AuthTokenGenerator authTokenGenerator,
-                                                   DataStoreClient dataStoreClient, IdamAuthApi idamAuthApi, SystemUserService systemUserService) {
+                                                   DataStoreClient dataStoreClient, IdamAuthApi idamAuthApi,
+                                                   SystemUserService systemUserService) {
         super(finremCaseDetailsMapper);
         this.authTokenGenerator = authTokenGenerator;
         this.dataStoreClient = dataStoreClient;
