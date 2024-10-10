@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
@@ -31,6 +33,11 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     @JsonProperty("draftOrdersReviewCollection")
     private List<DraftOrdersReviewCollection> draftOrdersReviewCollection;
+
+    @JsonProperty("agreedDraftOrderCollection")
+    private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
+    @JsonProperty("suggestedDraftOrderCollection")
+    private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
 
     @JsonIgnore
     public UploadSuggestedDraftOrder getUploadSuggestedDraftOrder() {
