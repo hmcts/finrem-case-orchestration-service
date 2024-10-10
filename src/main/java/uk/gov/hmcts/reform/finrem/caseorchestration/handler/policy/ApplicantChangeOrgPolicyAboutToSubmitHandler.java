@@ -27,7 +27,7 @@ public class ApplicantChangeOrgPolicyAboutToSubmitHandler extends FinremCallback
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+            && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
             && EventType.CLEAR_APPLICANT_POLICY.equals(eventType);
     }
 
@@ -50,8 +50,8 @@ public class ApplicantChangeOrgPolicyAboutToSubmitHandler extends FinremCallback
             .orgPolicyReference(null)
             .orgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getCcdCode())
             .build();
-
         caseData.setApplicantOrganisationPolicy(organisationPolicy);
+        caseData.setChangeOrganisationRequestField(null);
 
         log.info("cleared applicant org policy {} for Case ID: {}", organisationPolicy, caseId);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
