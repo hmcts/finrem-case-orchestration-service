@@ -19,10 +19,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.TOP_LEVEL_HEARING_ID;
 
 @Service
 @Slf4j
@@ -42,8 +42,6 @@ public class HearingService {
         }
     }
 
-    private static final UUID TOP_LEVEL_HEARING_KEY = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
     private static final String UNKNOWN_TEXT = "unknown";
 
     String toUnknownDisplayText() {
@@ -62,7 +60,7 @@ public class HearingService {
             return null;
         }
         return DynamicListElement.builder()
-            .code(TOP_LEVEL_HEARING_KEY.toString())
+            .code(TOP_LEVEL_HEARING_ID)
             .label(formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime))
             .build();
     }
