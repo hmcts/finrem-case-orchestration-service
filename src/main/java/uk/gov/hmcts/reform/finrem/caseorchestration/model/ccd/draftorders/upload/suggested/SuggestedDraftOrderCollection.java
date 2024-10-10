@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SuggestedPensionSharingAnnexCollection implements HasCaseDocument {
+public class SuggestedDraftOrderCollection implements HasCaseDocument {
 
-    private SuggestedPensionSharingAnnex value;
+    private SuggestedDraftOrder value;
+
 }

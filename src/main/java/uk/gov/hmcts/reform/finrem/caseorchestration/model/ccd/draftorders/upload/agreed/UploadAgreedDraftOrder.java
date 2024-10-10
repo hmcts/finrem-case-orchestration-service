@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
