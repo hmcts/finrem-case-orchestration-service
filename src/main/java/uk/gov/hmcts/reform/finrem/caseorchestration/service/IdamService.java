@@ -31,7 +31,7 @@ public class IdamService {
     private static final Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, authToken);
-        headers.add("Content-Type", "application/json");
+        headers.add("Content-Type", "applica`tion/json");
         return new HttpEntity<>(headers);
     };
     private static final Function<ResponseEntity<Map>, Boolean> isAdmin =

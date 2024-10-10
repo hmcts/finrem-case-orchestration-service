@@ -29,6 +29,19 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class HearingService {
 
+    // Helper class to handle sorting by date, time, and type.
+    private record HearingSortingKey(LocalDate hearingDate, String hearingTime, String hearingType) implements Comparable<HearingSortingKey> {
+
+        @Override
+        public int compareTo(HearingSortingKey other) {
+            return Comparator
+                .comparing(HearingSortingKey::hearingDate, Comparator.nullsLast(LocalDate::compareTo))
+                .thenComparing(HearingSortingKey::hearingTime, Comparator.nullsLast(String::compareTo))
+                .thenComparing(HearingSortingKey::hearingType, Comparator.nullsLast(String::compareTo))
+                .compare(this, other);
+        }
+    }
+
     private static final UUID TOP_LEVEL_HEARING_KEY = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     private static final String UNKNOWN_TEXT = "unknown";
@@ -66,7 +79,7 @@ public class HearingService {
 
     public DynamicList generateSelectableHearingsAsDynamicList(FinremCaseDetails caseDetails) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        Map<DynamicListElement, LocalDate> elementToDateMap = new HashMap<>();
+        Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
         FinremCaseData caseData = caseDetails.getData();
         HearingTypeDirection hearingType = caseData.getHearingType();
@@ -76,20 +89,25 @@ public class HearingService {
         DynamicListElement topLevelDynamicListElement = buildTopLevelHearingDynamicListElement(hearingType, hearingDate, hearingTime);
         if (topLevelDynamicListElement != null) {
             dynamicListElements.add(topLevelDynamicListElement);
-            elementToDateMap.put(topLevelDynamicListElement, hearingDate);
+            elementToSortingKeyMap.put(topLevelDynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType == null
+                ? null : hearingType.getId()));
         }
 
         ofNullable(caseData.getInterimWrapper().getInterimHearings()).orElse(List.of()).forEach(ihc -> {
             DynamicListElement interimDynamicListElement = buildInterimHearingDynamicListElement(ihc);
             if (interimDynamicListElement != null) {
                 LocalDate interimHearingDate = ihc.getValue().getInterimHearingDate();
+                String interimHearingTime = ihc.getValue().getInterimHearingTime();
+                String interimHearingType = ihc.getValue().getInterimHearingType() != null ? ihc.getValue().getInterimHearingType().getId() : null;
+
                 dynamicListElements.add(interimDynamicListElement);
-                elementToDateMap.put(interimDynamicListElement, interimHearingDate);
+                elementToSortingKeyMap.put(interimDynamicListElement, new HearingSortingKey(interimHearingDate, interimHearingTime,
+                    interimHearingType));
             }
         });
 
-        // Sort the dynamicListElements using the dates from the map
-        dynamicListElements.sort(Comparator.comparing(elementToDateMap::get));
+        // Sort the dynamicListElements using the sorting keys from the map
+        dynamicListElements.sort(Comparator.comparing(elementToSortingKeyMap::get));
 
         return generateSelectableHearingsAsDynamicList(dynamicListElements);
     }

@@ -17,13 +17,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,118 +33,241 @@ class HearingServiceTest {
     @InjectMocks
     private HearingService hearingService;
 
+    static InterimHearingCollection createInterimHearing(String id, InterimTypeOfHearing type, LocalDate date, String time) {
+        // Create the InterimHearingItem using the provided parameters
+        InterimHearingItem hearingItem = InterimHearingItem.builder()
+            .interimHearingType(type)
+            .interimHearingDate(date)
+            .interimHearingTime(time)
+            .build();
+
+        // Create and return the InterimHearingCollection
+        return InterimHearingCollection.builder()
+            .id(UUID.fromString(id)) // Convert the string ID to a UUID
+            .value(hearingItem) // Set the value to the created InterimHearingItem
+            .build();
+    }
+
+    static DynamicList createExpectedDynamicList(Map<String, String> itemsWithIds) {
+        // Create a DynamicList using the builder pattern
+        return DynamicList.builder()
+            .listItems(itemsWithIds.entrySet().stream()
+                .map(entry -> DynamicListElement.builder().code(entry.getKey()).label(entry.getValue()).build())
+                .toList()
+            )
+            .build();
+    }
+
     static Stream<Arguments> hearingCases() {
         return Stream.of(
-            // Edge Case 1: No Interim Hearings
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 1, 1), "10:00 AM",
-                List.of(), 1), // Only top-level hearing
+            // Basic Case: No Interim Hearings
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
+                List.of(),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                    }
+                })
+            ),
 
-            // Edge Case 2: Multiple Interim Hearings on the Same Date
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 1, 1), "10:00 AM",
+            // Case 1: One Interim Hearing
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1))
-                            .interimHearingTime("10:00 AM")
-                            .build())
-                        .build(),
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.FH)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1))
-                            .interimHearingTime("2:00 PM")
-                            .build())
-                        .build()
-                ), 3), // 1 top-level + 2 interim
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing
+                    }
+                })
+            ),
 
-            // Edge Case 3: Multiple Interim Hearings on Different Dates
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 1, 1), "10:00 AM",
+            // Case 2: Multiple Interim Hearings on the Same Date
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1))
-                            .interimHearingTime("10:00 AM")
-                            .build())
-                        .build(),
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.FH)
-                            .interimHearingDate(LocalDate.of(2024, 2, 2))
-                            .interimHearingTime("2:00 PM")
-                            .build())
-                        .build()
-                ), 3), // 1 top-level + 2 interim
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 1), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-01 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                    }
+                })
+            ),
 
-            // Edge Case 4: Mixed Hearing Types
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 1, 1), "10:00 AM",
+            // Case 3: Multiple Interim Hearings on Different Dates
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1))
-                            .interimHearingTime("10:00 AM")
-                            .build())
-                        .build(),
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.FH)
-                            .interimHearingDate(LocalDate.of(2024, 2, 2))
-                            .interimHearingTime("11:00 AM")
-                            .build())
-                        .build(),
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.FDA)
-                            .interimHearingDate(LocalDate.of(2024, 2, 3))
-                            .interimHearingTime("12:00 PM")
-                            .build())
-                        .build()
-                ), 4), // 1 top-level + 3 interim
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                    }
+                })
+            ),
 
-            // Edge Case 5: Invalid Dates or Times
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 1, 1), "10:00 AM",
+            // Case 4: Invalid Time Format for Interim Hearing
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 29)) // Invalid date (2024 is a leap year)
-                            .interimHearingTime("10:00 AM")
-                            .build())
-                        .build()
-                ), 2), // 1 top-level + 1 invalid interim
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "Invalid Time")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)");
+                        // UUID for interim hearing with invalid time
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 Invalid Time - Directions (DIR)");
+                    }
+                })
+            ),
 
-            // Edge Case 6: Top Level Hearing Date Later Than Interim Hearings
-            Arguments.of(HearingTypeDirection.FH, LocalDate.of(2024, 3, 1), "10:00 AM",
+            // Case 5: Top-Level Hearing Date Later Than Interim Hearings
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 3, 1),
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1)) // Earlier date
-                            .interimHearingTime("10:00 AM")
-                            .build())
-                        .build(),
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.FH)
-                            .interimHearingDate(LocalDate.of(2024, 2, 15)) // Earlier date
-                            .interimHearingTime("2:00 PM")
-                            .build())
-                        .build()
-                ), 3), // 1 top-level + 2 interim, // 1 top-level + 1 invalid interim
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "2024-03-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                    }
+                })
+            ),
 
-            // Edge Case 7: Test case for null top-level hearing fields
-            Arguments.of(null, null, null,
+            // Case 6: Null Hearing Type, Null LocalDate, Null Hearing Time
+            Arguments.of(
+                null, // Null Hearing Type
+                null, // Null LocalDate
+                null, // Null hearingTime
+                List.of(),
+                createExpectedDynamicList(new LinkedHashMap<>()) // Empty LinkedHashMap for null case
+            ),
+
+            // Case 7: Null Interim Hearing with Null Hearing Type, Null LocalDate, and Null Hearing Time
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM",
                 List.of(
-                    InterimHearingCollection.builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                        .value(InterimHearingItem.builder()
-                            .interimHearingType(InterimTypeOfHearing.DIR)
-                            .interimHearingDate(LocalDate.of(2024, 2, 1))
-                            .interimHearingTime("11:00 AM")
-                            .build())
-                        .build()
-                ), 1)
+                    // Interim hearing with null type
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", null, LocalDate.of(2024, 2, 1), "2:00 AM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - (unknown)"); // UUID for interim hearing with null type
+                    }
+                })
+            ),
+            // Case 8: Null Interim Hearing Date with Valid Hearing Time
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM",
+                List.of(
+                    // Interim hearing with null date
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, null, "2:00 AM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "(unknown) 2:00 AM - Directions (DIR)"); // Interim hearing with null date
+                    }
+                })
+            ),
+            // Case 9: Null Interim Hearing Time with Valid Hearing Date
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM",
+                List.of(
+                    // Interim hearing with null time
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), null)
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 (unknown) - Directions (DIR)"); // Interim hearing with null time
+                    }
+                })
+            ),
+            // Case 10: Null Top-Level Hearing with Interim Hearings
+            Arguments.of(
+                null, // Null Hearing Type
+                null, // Null LocalDate
+                null, // Null hearingTime
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                    }
+                })
+            ),
+            // Case 11: Multiple Interim Hearings with One Null Type
+            Arguments.of(
+                HearingTypeDirection.FH,
+                LocalDate.of(2024, 1, 1),
+                "10:00 AM",
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", null, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - (unknown)"); // Interim hearing 2 with null type
+                    }
+                })
+            ),
+            // Case 12: Null Top-Level Hearing Type with Valid Interim Hearings
+            Arguments.of(
+                null, // Null Hearing Type
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM", // Example time for top-level hearing
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                    }
+                })
+            )
         );
     }
 
@@ -154,7 +277,7 @@ class HearingServiceTest {
                                                  LocalDate topLevelHearingDate,
                                                  String topLevelHearingTime,
                                                  List<InterimHearingCollection> interimHearings,
-                                                 int expectedFinalSize) {
+                                                 DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
@@ -178,72 +301,20 @@ class HearingServiceTest {
         DynamicList dynamicList = hearingService.generateSelectableHearingsAsDynamicList(caseDetails);
 
         // Assert
-        List<DynamicListElement> elements = dynamicList.getListItems();
-        assertEquals(expectedFinalSize, elements.size());
+        assertEquals(expectedDynamicList.getListItems().size(), dynamicList.getListItems().size());
+        assertDynamicListEquals(expectedDynamicList, dynamicList);
+    }
 
-        // Verify that the elements are sorted by date.
-        for (int i = 1; i < elements.size(); i++) {
-            LocalDate previousDate = extractHearingDateFromLabel(elements.get(i - 1).getLabel());
-            LocalDate currentDate = extractHearingDateFromLabel(elements.get(i).getLabel());
-            assertTrue(previousDate.isBefore(currentDate) || previousDate.isEqual(currentDate),
-                "The list is not sorted by hearing date.");
+    // Helper method to assert that two DynamicLists are equal
+    private void assertDynamicListEquals(DynamicList expected, DynamicList actual) {
+        assertEquals(expected.getListItems().size(), actual.getListItems().size(), "Dynamic list sizes are not equal.");
+
+        for (int i = 0; i < expected.getListItems().size(); i++) {
+            assertEquals(expected.getListItems().get(i).getLabel(), actual.getListItems().get(i).getLabel(),
+                "Label at index " + i + " does not match.");
+            assertEquals(expected.getListItems().get(i).getCode(), actual.getListItems().get(i).getCode(),
+                "Code at index " + i + " does not match.");
         }
-
-        // Verify the HearingType for each element in the list.
-        for (DynamicListElement element : elements) {
-            String codeFromElement = element.getCode();
-            String label = element.getLabel();
-            String hearingTypeFromLabel = extractHearingTypeFromLabel(label);
-            LocalDate hearingDateFromLabel = extractHearingDateFromLabel(label);
-            String hearingTimeFromLabel = extractHearingTimeFromLabel(label);
-
-            // Check if the extracted hearing type matches either the top-level or one of the interim hearing types.
-            boolean isMatchingType = (topLevelHearingType != null && hearingTypeFromLabel.equals(topLevelHearingType.getId()))
-                || interimHearings.stream()
-                .anyMatch(interim -> interim.getValue().getInterimHearingType().getId().equals(hearingTypeFromLabel));
-
-            assertTrue(isMatchingType, "The hearing type in the label does not match the expected value: " + label);
-
-            // Verify the code for top-level hearing
-            if (topLevelHearingType != null && hearingTypeFromLabel.equals(topLevelHearingType.getId())
-                && hearingDateFromLabel.equals(topLevelHearingDate)
-                && hearingTimeFromLabel.equals(topLevelHearingTime)) {
-                assertEquals("00000000-0000-0000-0000-000000000000", codeFromElement,
-                    "The code for the top-level hearing does not match the expected static ID.");
-            } else {
-                // For interim hearings, check the code against the collection ID
-                UUID interimId = interimHearings.stream()
-                    .filter(interim -> interim.getValue().getInterimHearingType().getId().equals(hearingTypeFromLabel))
-                    .map(InterimHearingCollection::getId)
-                    .findFirst()
-                    .orElse(null);
-
-                assertNotNull(interimId, "No matching interim hearing found for hearing type: " + hearingTypeFromLabel);
-                assertEquals(interimId.toString(), codeFromElement,
-                    "The code for the interim hearing does not match the expected ID: " + codeFromElement);
-            }
-        }
-    }
-
-    private LocalDate extractHearingDateFromLabel(String label) {
-        // Assuming the label format is like "2024-02-01 10:00 AM - FH",
-        // where the date is at the beginning.
-        String dateString = label.substring(0, label.indexOf(" ")).trim();
-        return LocalDate.parse(dateString);
-    }
-
-    private String extractHearingTypeFromLabel(String label) {
-        // Assuming the label format is like "2024-02-01 10:00 AM - FH",
-        // extract the hearing type after the last " - ".
-        return label.substring(label.lastIndexOf("-") + 1).trim();
-    }
-
-    private String extractHearingTimeFromLabel(String label) {
-        // Assuming the label format is "2024-02-01 10:00 AM - FH"
-        // The time is located between the date and the hyphen.
-        int timeStartIndex = label.indexOf(" ") + 1; // Start after the first space
-        int timeEndIndex = label.lastIndexOf(" -"); // End before the last " -"
-        return label.substring(timeStartIndex, timeEndIndex).trim();
     }
 
 }
