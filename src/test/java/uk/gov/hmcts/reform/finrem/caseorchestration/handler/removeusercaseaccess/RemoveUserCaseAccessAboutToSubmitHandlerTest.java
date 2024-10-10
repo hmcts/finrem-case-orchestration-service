@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,14 +68,14 @@ class RemoveUserCaseAccessAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseId);
         request.getCaseDetails().getData().setUserCaseAccessList(createUserCaseAccessList(true));
 
-        when(systemUserService.getSysUserToken()).thenReturn(TEST_SERVICE_TOKEN);
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getWarnings()).isEmpty();
 
-        verify(ccdDataStoreService, times(1)).removeUserCaseRole(String.valueOf(caseId), TEST_SERVICE_TOKEN, "user1",
+        verify(ccdDataStoreService, times(1)).removeUserCaseRole(String.valueOf(caseId), TEST_SYSTEM_TOKEN, "user1",
             "[APPSOLICITOR]");
         verifyNoMoreInteractions(ccdDataStoreService);
 
