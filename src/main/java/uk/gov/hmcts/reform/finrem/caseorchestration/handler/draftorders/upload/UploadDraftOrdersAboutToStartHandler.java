@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadSuggestedDraftOrder;
 
 import java.util.List;
 
@@ -39,18 +40,23 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
+
         String applicantLName = finremCaseData.getApplicantLastName();
         String respondentLName = finremCaseData.getRespondentLastName();
 
         DynamicMultiSelectListElement element = DynamicMultiSelectListElement.builder()
-            .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName)
+            .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + "case")
             .code("1")
             .build();
 
         DynamicMultiSelectList list = DynamicMultiSelectList.builder()
             .listItems(List.of(element))
             .build();
-        finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setConfirmUploadedDocuments(list);
+
+        uploadSuggestedDraftOrder.setConfirmUploadedDocuments(list);
+
+        finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
