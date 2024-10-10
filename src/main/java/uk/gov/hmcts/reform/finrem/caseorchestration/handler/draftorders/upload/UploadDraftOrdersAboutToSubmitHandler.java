@@ -11,18 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.SuggestedDraftOrdersCategoriser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 
 @Slf4j
 @Service
 public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final SuggestedDraftOrdersCategoriser suggestedDraftOrdersCategoriser;
+    private final DraftOrdersCategoriser draftOrdersCategoriser;
 
 
-    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, SuggestedDraftOrdersCategoriser suggestedDraftOrdersCategoriser) {
+    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser) {
         super(finremCaseDetailsMapper);
-        this.suggestedDraftOrdersCategoriser = suggestedDraftOrdersCategoriser;
+        this.draftOrdersCategoriser = draftOrdersCategoriser;
 
     }
 
@@ -41,8 +41,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        suggestedDraftOrdersCategoriser.categorise(finremCaseData);
-
+        draftOrdersCategoriser.categorise(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
