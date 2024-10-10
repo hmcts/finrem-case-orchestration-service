@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -9,13 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.List;
@@ -39,12 +36,12 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
     private static final String TASK_NAME = "NullCaseRoleIdsWhereEmptyTask";
     private static final String SUMMARY = "DFR-3351";
 
-    @Value("${cron.bulkAddOrganisationPolicy.enabled:false}")
+    @Value("${cron.nullCaseRoleIdsWhereEmpty.enabled:false}")
     private boolean taskEnabled;
 
-    @Value("${cron.bulkAddOrganisationPolicy.caseTypeId:FinancialRemedyContested}")
+    @Value("${cron.nullCaseRoleIdsWhereEmpty.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
-    @Value("${cron.bulkAddOrganisationPolicy.batchSize:500}")
+    @Value("${cron.nullCaseRoleIdsWhereEmpty.batchSize:500}")
     private int batchSize;
 
     protected NullCaseRoleIdsWhereEmptyTask(CcdService ccdService, SystemUserService systemUserService,
@@ -85,47 +82,73 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
         return SUMMARY;
     }
 
+    // Needs tweaking.  Acts on caseRoleId = null - should skip those.  Easy refactor.
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        // If caseRoleId contains value and listItems, but they're null, the set caseRoleId to null.
-        if (Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
-                .map(DynamicList::getValueCode).
-                isEmpty()
-                &&
-                Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
-                .map(DynamicList::getListItems).
-                isEmpty()
+        if (Optional.ofNullable(caseData.getChangeOrganisationRequestField())
+                .map(ChangeOrganisationRequest::getCaseRoleId)
+                .isPresent()
+        ) {
+            // If caseRoleId contains value and listItems, but they're null, the set caseRoleId to null.
+            if (Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
+                    .map(DynamicList::getValueCode).
+                    isEmpty()
+                    &&
+                    Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
+                    .map(DynamicList::getListItems).
+                    isEmpty()
             ) {
-            // log to be removed when logic confirmed as working
-            log.info("Executing NullCaseRoleIdsWhereEmptyTask for {}", finremCaseDetails.getId());
-            // then do it
-            // caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
-            // caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+                // log to be removed when logic confirmed as working
+                log.info("Executing NullCaseRoleIdsWhereEmptyTask for {}", finremCaseDetails.getId());
+                // then do it
+                // caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+                // caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+            }
+
         }
     }
 
     private String getSearchQuery() {
 
         // Check that CaseRoleId is present in ES, indicating that postgres contains something not null.
-        BoolQueryBuilder caseRoleIdExistsQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId"));
+        // BoolQueryBuilder caseRoleIdExistsQuery = QueryBuilders.boolQuery()
+        // .must(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId"));
 
         // Check that CaseRoleId.value is not present in ES, indicating that Postgres contains something null.
-        BoolQueryBuilder caseRoleIdValueMissingQuery = QueryBuilders.boolQuery()
-                .mustNot(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId.value"));
+        // BoolQueryBuilder caseRoleIdValueMissingQuery = QueryBuilders.boolQuery()
+        // .mustNot(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId.value"));
 
+        // BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
+        // .mustNot(new TermQueryBuilder("state.keyword", "close"));
+
+        // BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery()
+        // .must(caseRoleIdExistsQuery)
+        // .must(stateQuery);
+        //
+        // SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+        // .size(batchSize)
+        // .query(finalQueryBuilder);
+
+        //above is what I want - below is debugging
+
+//        ExistsQueryBuilder changeOrganisationRequestFieldExistsQuery = QueryBuilders.existsQuery("data.changeOrganisationRequestField");
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
                 .mustNot(new TermQueryBuilder("state.keyword", "close"));
 
+        BoolQueryBuilder RespondemntRequestFieldExistsQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.existsQuery("data.RespondentOrganisationPolicy"));
+
+        BoolQueryBuilder changeOrganisationRequestFieldExistsQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.existsQuery("data.changeOrganisationRequestField"));
+
         BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery()
-                .must(caseRoleIdExistsQuery)
-                .must(caseRoleIdValueMissingQuery)
-                .must(stateQuery);
+        .must(RespondemntRequestFieldExistsQuery)
+//        .must(changeOrganisationRequestFieldExistsQuery)
+        .must(stateQuery);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .size(batchSize)
                 .query(finalQueryBuilder);
 
 
