@@ -65,4 +65,6 @@ public class OrchestrationConstants {
         "If you are applying for variation order, please upload the order you are varying";
     public static final String CONSENT_OTHER_DOC_LABEL_VALUE =
         "Upload other order documentation related to your application";
+
+    public static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
 }
