@@ -23,4 +23,7 @@ public class UploadAgreedDraftOrder {
     @JsonProperty("hearingDetails")
     private DynamicList hearingDetails;
 
+    @JsonProperty("judge")
+    private String judge;
+
 }
