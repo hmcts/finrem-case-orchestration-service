@@ -91,12 +91,10 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
                 && caseData.getChangeOrganisationRequestField().getCaseRoleId() != null
                 && caseData.getChangeOrganisationRequestField().getCaseRoleId().getValue() == null) {
 
-            // log to be removed when logic confirmed as working
-            log.info("Executing NullCaseRoleIdsWhereEmptyTask for {}", finremCaseDetails.getId());
+            log.info("Case {} will have caseRoleId set to null", finremCaseDetails.getId());
             // then do it
-            // caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
-            // caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
-
+             caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+             caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
         }
 
         // This optional code needs enhancement.
