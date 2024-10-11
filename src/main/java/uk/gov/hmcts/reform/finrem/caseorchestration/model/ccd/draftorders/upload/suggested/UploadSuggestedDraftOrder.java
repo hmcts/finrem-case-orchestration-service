@@ -24,12 +24,12 @@ public class UploadSuggestedDraftOrder {
     @JsonProperty("uploadParty")
     private String uploadParty;
 
-    @JsonProperty("uploadOrdersOrPSAs")
-    private List<String> uploadOrdersOrPSAs;
+    @JsonProperty("uploadOrdersOrPsas")
+    private List<String> uploadOrdersOrPsas;
 
     @JsonProperty("suggestedDraftOrderCollection")
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
 
-    @JsonProperty("suggestedPSACollection")
-    private List<SuggestedPensionSharingAnnexCollection> suggestedPSACollection;
+    @JsonProperty("suggestedPsaCollection")
+    private List<SuggestedPensionSharingAnnexCollection> suggestedPsaCollection;
 }

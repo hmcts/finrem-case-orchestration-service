@@ -37,9 +37,9 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
                 .getUploadSuggestedDraftOrder()
                 .getSuggestedDraftOrderCollection(), category);
 
-            categorisePSAs(finremCaseData.getDraftOrdersWrapper()
+            categorisePsas(finremCaseData.getDraftOrdersWrapper()
                 .getUploadSuggestedDraftOrder()
-                .getSuggestedPSACollection(), category);
+                .getSuggestedPsaCollection(), category);
         }
 
     }
@@ -68,9 +68,9 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
             .ifPresent(collections -> collections.forEach(collection -> setOrderCategoryIfAbsent(collection.getValue(), category)));
     }
 
-    private void categorisePSAs(List<SuggestedPensionSharingAnnexCollection> psaCollections, DocumentCategory category) {
+    private void categorisePsas(List<SuggestedPensionSharingAnnexCollection> psaCollections, DocumentCategory category) {
         Optional.ofNullable(psaCollections)
-            .ifPresent(collections -> collections.forEach(collection -> setPSACategoryIfAbsent(collection.getValue(), category)));
+            .ifPresent(collections -> collections.forEach(collection -> setPsaCategoryIfAbsent(collection.getValue(), category)));
     }
 
     private void setOrderCategoryIfAbsent(SuggestedDraftOrder order, DocumentCategory category) {
@@ -91,7 +91,7 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
         }
     }
 
-    private void setPSACategoryIfAbsent(SuggestedPensionSharingAnnex psa, DocumentCategory category) {
+    private void setPsaCategoryIfAbsent(SuggestedPensionSharingAnnex psa, DocumentCategory category) {
         if (psa != null && psa.getSuggestedPensionSharingAnnexes() != null
             && psa.getSuggestedPensionSharingAnnexes().getCategoryId() == null) {
             psa.getSuggestedPensionSharingAnnexes().setCategoryId(category.getDocumentCategoryId());
