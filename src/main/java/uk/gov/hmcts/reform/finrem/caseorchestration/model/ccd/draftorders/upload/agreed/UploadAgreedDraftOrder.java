@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -29,5 +31,14 @@ public class UploadAgreedDraftOrder {
 
     @JsonProperty("uploadParty")
     private DynamicRadioList uploadParty;
+
+    @JsonProperty("uploadOrdersOrPsas")
+    private List<String> uploadOrdersOrPsas;
+
+    @JsonProperty("agreedDraftOrderCollection")
+    private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
+
+    @JsonProperty("agreedPsaCollection")
+    private List<AgreedPensionSharingAnnexCollection> agreedPsaCollection;
 
 }
