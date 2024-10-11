@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -18,6 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
+
+import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Slf4j
 @Service
@@ -65,8 +71,13 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
             .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
             .confirmUploadedDocuments(list)
+            .uploadParty(DynamicRadioList.builder().listItems(List.of(
+                DynamicRadioListElement.builder()
+                    .code(UPLOAD_PARTY_APPLICANT).label(format("The applicant, %s", finremCaseData.getFullApplicantName())).build(),
+                DynamicRadioListElement.builder()
+                    .code(UPLOAD_PARTY_RESPONDENT).label(format("The respondent, %s", finremCaseData.getRespondentFullName())).build()
+            )).build())
             .build());
-
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();

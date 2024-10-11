@@ -67,4 +67,7 @@ public class OrchestrationConstants {
         "Upload other order documentation related to your application";
 
     public static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
+
+    public static final String UPLOAD_PARTY_APPLICANT = "theApplicant";
+    public static final String UPLOAD_PARTY_RESPONDENT = "theRespondent";
 }

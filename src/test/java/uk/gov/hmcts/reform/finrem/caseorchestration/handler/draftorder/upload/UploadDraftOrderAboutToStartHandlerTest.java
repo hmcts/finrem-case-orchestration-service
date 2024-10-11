@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
@@ -60,7 +62,9 @@ class UploadDraftOrderAboutToStartHandlerTest {
         )).build();
 
         when(caseData.getApplicantLastName()).thenReturn("Hello");
+        when(caseData.getFullApplicantName()).thenReturn("Hello World");
         when(caseData.getRespondentLastName()).thenReturn("Hey");
+        when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
         when(hearingService.generateSelectableHearingsAsDynamicList(any())).thenReturn(expectedDynamicList);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(FinremCallbackRequestFactory.from(caseData),
@@ -74,5 +78,12 @@ class UploadDraftOrderAboutToStartHandlerTest {
                 .build())).build()
         );
         assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getHearingDetails()).isEqualTo(expectedDynamicList);
+        assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadParty()).isEqualTo(
+            DynamicRadioList.builder()
+                .listItems(List.of(
+                    DynamicRadioListElement.builder().label("The applicant, Hello World").code("theApplicant").build(),
+                    DynamicRadioListElement.builder().label("The respondent, Hello Respondent").code("theRespondent").build()
+                )).build()
+        );
     }
 }

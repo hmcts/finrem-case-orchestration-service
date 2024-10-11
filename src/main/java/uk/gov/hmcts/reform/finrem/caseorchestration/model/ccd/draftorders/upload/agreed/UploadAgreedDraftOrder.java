@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -25,5 +26,8 @@ public class UploadAgreedDraftOrder {
 
     @JsonProperty("judge")
     private String judge;
+
+    @JsonProperty("uploadParty")
+    private DynamicRadioList uploadParty;
 
 }
