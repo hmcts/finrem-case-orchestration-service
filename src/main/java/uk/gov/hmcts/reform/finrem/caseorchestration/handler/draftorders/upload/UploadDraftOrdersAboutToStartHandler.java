@@ -46,7 +46,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         String respondentLName = finremCaseData.getRespondentLastName();
 
         DynamicMultiSelectListElement element = DynamicMultiSelectListElement.builder()
-            .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + "case")
+            .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + " case")
             .code("1")
             .build();
 
