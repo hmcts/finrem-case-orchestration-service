@@ -87,26 +87,26 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
 
+        if (caseData.getChangeOrganisationRequestField() != null
+                && caseData.getChangeOrganisationRequestField().getCaseRoleId() != null
+                && caseData.getChangeOrganisationRequestField().getCaseRoleId().getValue() == null) {
+
+            // log to be removed when logic confirmed as working
+            log.info("Executing NullCaseRoleIdsWhereEmptyTask for {}", finremCaseDetails.getId());
+            // then do it
+            // caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+            // caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+
+        }
+
+        // This optional code needs enhancement.
+        // when the caseRoleId or is null (which doesn't need attention) get value stills run so expression is true.
+        // same if the ChangeOrganisationRequest is null.
         if (Optional.ofNullable(caseData.getChangeOrganisationRequestField())
                 .map(ChangeOrganisationRequest::getCaseRoleId)
-                .isPresent()
-        ) {
-            // If caseRoleId contains value and listItems, but they're null, the set caseRoleId to null.
-            if (Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
-                    .map(DynamicList::getValueCode).
-                    isEmpty()
-                    &&
-                    Optional.ofNullable(caseData.getChangeOrganisationRequestField().getCaseRoleId())
-                    .map(DynamicList::getListItems).
-                    isEmpty()
-            ) {
-                // log to be removed when logic confirmed as working
-                log.info("Executing NullCaseRoleIdsWhereEmptyTask for {}", finremCaseDetails.getId());
-                // then do it
-                // caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
-                // caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
-            }
-
+                .map(DynamicList::getValue)
+                .isEmpty()) {
+            log.info("gone in - optional");
         }
     }
 
