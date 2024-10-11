@@ -43,8 +43,20 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         draftOrdersCategoriser.categorise(finremCaseData);
 
+        if ("aSuggestedDraftOrderPriorToAListedHearing".equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
+            handleSuggestedDraftOrders(finremCaseData);
+        } else {
+            handleAgreedDraftOrder(finremCaseData);
+        }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
+    }
+
+    private void handleAgreedDraftOrder(FinremCaseData finremCaseData) {
+    }
+
+    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData) {
     }
 
 }
