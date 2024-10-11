@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
 
@@ -22,8 +23,11 @@ import java.util.List;
 @Service
 public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final HearingService hearingService;
+
+    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingService hearingService) {
         super(finremCaseDetailsMapper);
+        this.hearingService = hearingService;
     }
 
     @Override
@@ -58,7 +62,11 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         uploadSuggestedDraftOrder.setConfirmUploadedDocuments(list);
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
-        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().confirmUploadedDocuments(list).build());
+        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
+            .confirmUploadedDocuments(list)
+            .build());
+
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();

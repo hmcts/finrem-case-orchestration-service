@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,4 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 public class UploadAgreedDraftOrder {
     @JsonProperty("confirmUploadedDocuments")
     private DynamicMultiSelectList confirmUploadedDocuments;
+
+    @JsonProperty("hearingDetails")
+    private DynamicList hearingDetails;
+
 }
