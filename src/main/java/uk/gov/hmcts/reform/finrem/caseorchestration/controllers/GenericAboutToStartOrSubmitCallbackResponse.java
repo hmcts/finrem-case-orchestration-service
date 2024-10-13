@@ -33,6 +33,11 @@ public class GenericAboutToStartOrSubmitCallbackResponse<D> {
 
     private String state;
 
+    @JsonProperty("confirmation_header")
+    private String confirmationHeader;
+    @JsonProperty("confirmation_body")
+    private String confirmationBody;
+
     public List<String> getErrors() {
         if (errors == null) {
             errors = new ArrayList<>();
