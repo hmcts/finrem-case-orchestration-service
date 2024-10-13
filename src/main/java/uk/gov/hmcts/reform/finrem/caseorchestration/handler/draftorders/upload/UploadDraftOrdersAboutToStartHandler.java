@@ -8,12 +8,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
 import java.util.List;
 
@@ -21,8 +24,12 @@ import java.util.List;
 @Service
 public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final CaseAssignedRoleService caseAssignedRoleService;
+
+    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                CaseAssignedRoleService caseAssignedRoleService) {
         super(finremCaseDetailsMapper);
+        this.caseAssignedRoleService = caseAssignedRoleService;
     }
 
     @Override
@@ -36,8 +43,9 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
-            callbackRequest.getEventType(), caseDetails.getId());
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("Invoking contested {} about to start callback for Case ID: {}", callbackRequest.getEventType(),
+            caseId);
         FinremCaseData finremCaseData = caseDetails.getData();
 
         UploadSuggestedDraftOrder uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
@@ -58,8 +66,18 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
 
+        YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
+            ? YesOrNo.YES : YesOrNo.NO;
+        finremCaseData.getDraftOrdersWrapper().setShowUploadPartyQuestion(showUploadPartyQuestion);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }
 
+    private boolean isShowUploadPartyQuestion(String caseId, String authToken) {
+        CaseAssignedUserRolesResource caseAssignedUserRolesResource =
+            caseAssignedRoleService.getCaseAssignedUserRole(caseId, authToken);
+
+        return caseAssignedUserRolesResource.getCaseAssignedUserRoles().isEmpty();
+    }
 }
