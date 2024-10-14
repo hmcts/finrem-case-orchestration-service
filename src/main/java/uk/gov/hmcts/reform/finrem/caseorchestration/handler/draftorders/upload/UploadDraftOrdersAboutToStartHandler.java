@@ -17,8 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
 
@@ -32,10 +34,13 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
     private final CaseAssignedRoleService caseAssignedRoleService;
 
-    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                CaseAssignedRoleService caseAssignedRoleService) {
+    private final HearingService hearingService;
+
+    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, CaseAssignedRoleService caseAssignedRoleService,
+                                                HearingService hearingService) {
         super(finremCaseDetailsMapper);
         this.caseAssignedRoleService = caseAssignedRoleService;
+        this.hearingService = hearingService;
     }
 
     @Override
@@ -87,6 +92,16 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
+        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
+            .confirmUploadedDocuments(list)
+            .uploadParty(DynamicRadioList.builder().listItems(List.of(
+                DynamicRadioListElement.builder()
+                    .code(UPLOAD_PARTY_APPLICANT).label(format("The applicant, %s", finremCaseData.getFullApplicantName())).build(),
+                DynamicRadioListElement.builder()
+                    .code(UPLOAD_PARTY_RESPONDENT).label(format("The respondent, %s", finremCaseData.getRespondentFullName())).build()
+            )).build())
+            .build());
 
         YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
             ? YesOrNo.YES : YesOrNo.NO;
