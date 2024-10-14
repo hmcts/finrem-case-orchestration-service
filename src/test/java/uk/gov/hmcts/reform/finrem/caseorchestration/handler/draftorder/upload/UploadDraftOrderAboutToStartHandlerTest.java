@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorder.upload;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload.UploadDraftOrdersAboutToStartHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -37,16 +34,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class UploadDraftOrderAboutToStartHandlerTest {
 
+    @InjectMocks
     private UploadDraftOrdersAboutToStartHandler handler;
 
     @Mock
     private HearingService hearingService;
-
-    @BeforeEach
-    public void setup() {
-        handler = new UploadDraftOrdersAboutToStartHandler(new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
-            hearingService);
-    }
 
     @Test
     void canHandle() {
