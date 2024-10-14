@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,5 +26,5 @@ public class SuggestedDraftOrder implements HasCaseDocument {
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
-    private List<CaseDocument> additionalDocs;
+    private List<CaseDocumentCollection> attachments;
 }
