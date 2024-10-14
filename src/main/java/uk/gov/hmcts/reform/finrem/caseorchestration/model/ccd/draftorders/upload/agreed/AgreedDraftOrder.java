@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class AgreedDraftOrder {
     private CaseDocument agreedDraftOrderDocument;
 
     @JsonProperty("resubmission")
-    private YesOrNo resubmission;
+    private List<String> resubmission;
 
     @JsonProperty("additionalDocuments")
     private List<AgreedDraftOrderAdditionalDocumentsCollection> agreedDraftOrderAdditionalDocumentsCollection;
