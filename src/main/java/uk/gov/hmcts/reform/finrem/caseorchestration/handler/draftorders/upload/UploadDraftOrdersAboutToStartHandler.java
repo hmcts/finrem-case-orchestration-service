@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -19,6 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
 import java.util.List;
+
+import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Slf4j
 @Service
@@ -53,16 +59,32 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         String applicantLName = finremCaseData.getApplicantLastName();
         String respondentLName = finremCaseData.getRespondentLastName();
 
-        DynamicMultiSelectListElement element = DynamicMultiSelectListElement.builder()
+        DynamicMultiSelectListElement elementConfirmation = DynamicMultiSelectListElement.builder()
             .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + " case")
             .code("1")
             .build();
 
         DynamicMultiSelectList list = DynamicMultiSelectList.builder()
-            .listItems(List.of(element))
+            .listItems(List.of(elementConfirmation))
             .build();
 
         uploadSuggestedDraftOrder.setConfirmUploadedDocuments(list);
+
+        DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
+            .code(UPLOAD_PARTY_APPLICANT)
+            .label(format("The applicant, %s", finremCaseData.getFullApplicantName()))
+            .build();
+
+        DynamicRadioListElement elementRespondent = DynamicRadioListElement.builder()
+            .code(UPLOAD_PARTY_RESPONDENT)
+            .label(format("The respondent, %s", finremCaseData.getRespondentFullName()))
+            .build();
+
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
+            .listItems(List.of(elementApplicant, elementRespondent))
+            .build();
+
+        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
 
