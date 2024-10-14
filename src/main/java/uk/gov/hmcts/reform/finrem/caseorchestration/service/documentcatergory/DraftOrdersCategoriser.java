@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -38,7 +38,7 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
         if (category != null) {
             categoriseOrders(finremCaseData.getDraftOrdersWrapper()
                 .getUploadSuggestedDraftOrder()
-                .getSuggestedDraftOrderCollection(), category);
+                .getUploadSuggestedDraftOrderCollection(), category);
 
             categorisePsas(finremCaseData.getDraftOrdersWrapper()
                 .getUploadSuggestedDraftOrder()
@@ -74,7 +74,7 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
         }
     }
 
-    private void categoriseOrders(List<SuggestedDraftOrderCollection> orderCollections, DocumentCategory category) {
+    private void categoriseOrders(List<UploadSuggestedDraftOrderCollection> orderCollections, DocumentCategory category) {
         Optional.ofNullable(orderCollections)
             .ifPresent(collections -> collections.forEach(collection -> setOrderCategoryIfAbsent(collection.getValue(), category)));
     }
@@ -84,14 +84,14 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
             .ifPresent(collections -> collections.forEach(collection -> setPsaCategoryIfAbsent(collection.getValue(), category)));
     }
 
-    private void setOrderCategoryIfAbsent(SuggestedDraftOrder order, DocumentCategory category) {
+    private void setOrderCategoryIfAbsent(UploadedDraftOrder order, DocumentCategory category) {
         if (order != null && order.getSuggestedDraftOrderDocument() != null
             && order.getSuggestedDraftOrderDocument().getCategoryId() == null) {
             order.getSuggestedDraftOrderDocument().setCategoryId(category.getDocumentCategoryId());
         }
 
         Optional.ofNullable(order)
-            .map(SuggestedDraftOrder::getSuggestedDraftOrderAdditionalDocumentsCollection)
+            .map(UploadedDraftOrder::getSuggestedDraftOrderAdditionalDocumentsCollection)
             .ifPresent(additionalDocs -> additionalDocs.forEach(doc -> setAdditionalDocumentsCategory(doc, category)));
     }
 
