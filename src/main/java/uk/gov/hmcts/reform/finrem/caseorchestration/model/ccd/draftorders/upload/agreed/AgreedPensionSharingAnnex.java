@@ -18,6 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 public class AgreedPensionSharingAnnex {
 
     @JsonProperty("agreedPensionSharingAnnexes")
-    CaseDocument agreedPensionSharingAnnexes;
+    private CaseDocument agreedPensionSharingAnnexes;
 
 }

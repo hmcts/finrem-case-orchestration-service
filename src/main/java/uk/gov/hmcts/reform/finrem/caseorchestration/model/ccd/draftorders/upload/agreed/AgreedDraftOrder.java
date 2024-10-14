@@ -21,10 +21,10 @@ import java.util.List;
 public class AgreedDraftOrder {
 
     @JsonProperty("agreedDraftOrderDocument")
-    CaseDocument agreedDraftOrderDocument;
+    private CaseDocument agreedDraftOrderDocument;
 
     @JsonProperty("resubmission")
-    YesOrNo resubmission;
+    private YesOrNo resubmission;
 
     @JsonProperty("additionalDocuments")
     private List<AgreedDraftOrderAdditionalDocumentsCollection> agreedDraftOrderAdditionalDocumentsCollection;
