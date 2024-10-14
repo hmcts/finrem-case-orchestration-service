@@ -11,11 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 
@@ -49,7 +52,10 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
         boolean hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadAgreedDraftOrder().getAgreedDraftOrderCollection())
             .orElse(List.of())
             .stream()
-            .anyMatch(d -> d.getValue() != null && !FileUtils.isWordDocument(d.getValue().getAgreedDraftOrderDocument()));
+            .map(AgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(AgreedDraftOrder::getAgreedDraftOrderDocument)
+            .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
         if (hasNonWordDocument) {
             errors.add("You must upload Microsoft Word documents. Document names should clearly reflect the party name, "
                 + "the type of hearing and the date of the hearing.");
