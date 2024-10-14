@@ -131,7 +131,8 @@ public class UpdateRepresentationService {
         if (Optional.ofNullable(changeRequest.getCaseRoleId())
                 .map(DynamicList::getValueCode)
                 .isEmpty()
-        ) {throw new UnsupportedOperationException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
+        ) {
+            throw new UnsupportedOperationException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
         }
         return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
     }
