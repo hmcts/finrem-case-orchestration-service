@@ -140,7 +140,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .submittedDate(LocalDateTime.now());
 
         //Map the draft order document
-        if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderDocument()) {
+        if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderDocument())) {
             suggestedDraftOrderBuilder.draftOrder(uploadDraftOrder.getSuggestedDraftOrderDocument());
         }
 
