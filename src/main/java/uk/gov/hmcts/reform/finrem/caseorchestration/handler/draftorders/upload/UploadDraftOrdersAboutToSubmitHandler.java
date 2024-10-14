@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,12 +31,9 @@ import java.util.List;
 @Service
 public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final DraftOrdersCategoriser draftOrdersCategoriser;
 
-
-    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser) {
+    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
-        this.draftOrdersCategoriser = draftOrdersCategoriser;
     }
 
     @Override
@@ -60,8 +56,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         } else {
             handleAgreedDraftOrder(finremCaseData);
         }
-
-        draftOrdersCategoriser.categorise(finremCaseData);
 
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
