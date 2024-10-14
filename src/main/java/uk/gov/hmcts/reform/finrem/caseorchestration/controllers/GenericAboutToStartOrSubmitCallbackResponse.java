@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,8 +34,10 @@ public class GenericAboutToStartOrSubmitCallbackResponse<D> {
 
     private String state;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("confirmation_header")
     private String confirmationHeader;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("confirmation_body")
     private String confirmationBody;
 
