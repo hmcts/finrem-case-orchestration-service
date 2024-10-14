@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 
 import java.time.LocalDateTime;
@@ -36,7 +35,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
 
-    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser, CaseAssignedRoleService caseAssignedRoleService) {
+    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
     }
@@ -56,25 +55,21 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-////         Get the current user case role
-//        CaseDocumentParty loggedInUserRole = getActiveUserCaseDocumentParty(caseDetails.getId().toString(), userAuthorisation);
-
-
-        draftOrdersCategoriser.categorise(finremCaseData);
-
         if ("aSuggestedDraftOrderPriorToAListedHearing".equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
             handleSuggestedDraftOrders(finremCaseData);
         } else {
             handleAgreedDraftOrder(finremCaseData);
         }
 
+        draftOrdersCategoriser.categorise(finremCaseData);
+
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }
 
     private void handleAgreedDraftOrder(FinremCaseData finremCaseData) {
-
-
+        // TODO for agreed
     }
 
     private void handleSuggestedDraftOrders(FinremCaseData finremCaseData) {
@@ -84,7 +79,8 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         if (uploadSuggestedDraftOrder != null) {
             List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = processSuggestedDraftOrders(uploadSuggestedDraftOrder);
 
-            List<SuggestedDraftOrderCollection> existingSuggestedDraftOrderCollections = getExistingSuggestedDraftOrderCollections(draftOrdersWrapper);
+            List<SuggestedDraftOrderCollection> existingSuggestedDraftOrderCollections =
+                getExistingSuggestedDraftOrderCollections(draftOrdersWrapper);
 
             existingSuggestedDraftOrderCollections.addAll(newSuggestedDraftOrderCollections);
             draftOrdersWrapper.setSuggestedDraftOrderCollection(existingSuggestedDraftOrderCollections);
@@ -144,14 +140,15 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .submittedDate(LocalDateTime.now());
 
         //Map the draft order document
-        if (uploadDraftOrder != null && uploadDraftOrder.getSuggestedDraftOrderDocument() != null) {
+        if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderDocument()) {
             suggestedDraftOrderBuilder.draftOrder(uploadDraftOrder.getSuggestedDraftOrderDocument());
         }
 
         // Add additional attachments for orders only
         if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection())) {
             List<CaseDocumentCollection> attachments = new ArrayList<>();
-            for (SuggestedDraftOrderAdditionalDocumentsCollection additionalDoc : uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection()) {
+            for (SuggestedDraftOrderAdditionalDocumentsCollection additionalDoc :
+                uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection()) {
                 if (additionalDoc.getValue() != null) {
                     attachments.add(CaseDocumentCollection.builder()
                         .value(additionalDoc.getValue())
