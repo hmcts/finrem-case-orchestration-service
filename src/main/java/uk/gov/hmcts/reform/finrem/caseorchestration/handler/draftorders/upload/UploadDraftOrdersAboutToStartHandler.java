@@ -56,16 +56,32 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         String applicantLName = finremCaseData.getApplicantLastName();
         String respondentLName = finremCaseData.getRespondentLastName();
 
-        DynamicMultiSelectListElement element = DynamicMultiSelectListElement.builder()
+        DynamicMultiSelectListElement elementConfirmation = DynamicMultiSelectListElement.builder()
             .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + " case")
             .code("1")
             .build();
 
         DynamicMultiSelectList list = DynamicMultiSelectList.builder()
-            .listItems(List.of(element))
+            .listItems(List.of(elementConfirmation))
             .build();
 
         uploadSuggestedDraftOrder.setConfirmUploadedDocuments(list);
+
+        DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
+            .code(UPLOAD_PARTY_APPLICANT)
+            .label(format("The applicant, %s", finremCaseData.getFullApplicantName()))
+            .build();
+
+        DynamicRadioListElement elementRespondent = DynamicRadioListElement.builder()
+            .code(UPLOAD_PARTY_RESPONDENT)
+            .label(format("The respondent, %s", finremCaseData.getRespondentFullName()))
+            .build();
+
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
+            .listItems(List.of(elementApplicant, elementRespondent))
+            .build();
+
+        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
         finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()

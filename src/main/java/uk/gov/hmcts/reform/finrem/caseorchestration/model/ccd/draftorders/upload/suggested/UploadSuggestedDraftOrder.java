@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class UploadSuggestedDraftOrder {
     private DynamicMultiSelectList confirmUploadedDocuments;
 
     @JsonProperty("uploadParty")
-    private String uploadParty;
+    private DynamicRadioList uploadParty;
 
     @JsonProperty("uploadOrdersOrPsas")
     private List<String> uploadOrdersOrPsas;
