@@ -62,5 +62,5 @@ class FileUtilsTest {
         assertFalse(FileUtils.isPdf(nullDocument));
         assertFalse(FileUtils.isWordDocument(nullDocument));
     }
-    
+
 }
