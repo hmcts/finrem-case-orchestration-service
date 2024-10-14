@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.sugges
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,25 +92,21 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
     private Optional<LocalDateTime> getLatestAgreedDraftOrder(
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection) {
-        if (CollectionUtils.isNotEmpty(agreedDraftOrderCollection)) {
-            return agreedDraftOrderCollection.stream()
-                .map(AgreedDraftOrderCollection::getValue)
-                .map(AgreedDraftOrder::getSubmittedDate)
-                .max(LocalDateTime::compareTo);
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(agreedDraftOrderCollection)
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(AgreedDraftOrderCollection::getValue)
+            .map(AgreedDraftOrder::getSubmittedDate)
+            .max(LocalDateTime::compareTo);
     }
 
     private Optional<LocalDateTime> getLatestSuggestedDraftOrder(
         List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection) {
-        if (CollectionUtils.isNotEmpty(suggestedDraftOrderCollection)) {
-            return suggestedDraftOrderCollection.stream()
-                .map(SuggestedDraftOrderCollection::getValue)
-                .map(SuggestedDraftOrder::getSubmittedDate)
-                .max(LocalDateTime::compareTo);
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(suggestedDraftOrderCollection)
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(SuggestedDraftOrderCollection::getValue)
+            .map(SuggestedDraftOrder::getSubmittedDate)
+            .max(LocalDateTime::compareTo);
     }
 }
