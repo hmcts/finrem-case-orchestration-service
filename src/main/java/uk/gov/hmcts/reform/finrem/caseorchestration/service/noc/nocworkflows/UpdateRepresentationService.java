@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tika.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Remov
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -127,7 +128,10 @@ public class UpdateRepresentationService {
     }
 
     private boolean isApplicant(CaseDetails caseDetails, ChangeOrganisationRequest changeRequest) {
-        if (StringUtils.isEmpty(changeRequest.getCaseRoleId().getValueCode())) {
+        if (Optional.ofNullable(changeRequest.getCaseRoleId())
+                .map(DynamicList::getValueCode)
+                .isEmpty()
+        ) {
             throw new UnsupportedOperationException(format("%s - unexpected empty caseRoleId", caseDetails.getId()));
         }
         return APP_SOLICITOR_POLICY.equals(changeRequest.getCaseRoleId().getValueCode());
