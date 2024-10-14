@@ -90,6 +90,7 @@ class UploadDraftOrderAboutToStartHandlerTest {
 
     @Test
     void shouldPopulateAgreedDraftOrderFlowProperties() {
+        long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
         DynamicList expectedDynamicList = DynamicList.builder().listItems(List.of(
@@ -102,8 +103,13 @@ class UploadDraftOrderAboutToStartHandlerTest {
         when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
         when(hearingService.generateSelectableHearingsAsDynamicList(any())).thenReturn(expectedDynamicList);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(FinremCallbackRequestFactory.from(caseData),
-            AUTH_TOKEN);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
+            CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(Collections.emptyList())
+                .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         DraftOrdersWrapper draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
         assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getConfirmUploadedDocuments()).isEqualTo(
