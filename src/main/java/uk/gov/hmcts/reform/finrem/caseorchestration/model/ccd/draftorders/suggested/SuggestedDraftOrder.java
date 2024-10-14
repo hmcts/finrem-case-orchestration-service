@@ -25,5 +25,5 @@ public class SuggestedDraftOrder implements HasCaseDocument {
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
-    private List<CaseDocument> additionalDocuments;
+    private List<CaseDocument> additionalDocs;
 }
