@@ -74,8 +74,8 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         }
 
         draftOrdersWrapper.setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
-                .confirmUploadedDocuments(confirmUploadedDocuments)
-                .uploadParty(uploadPartyRadioList)
+            .confirmUploadedDocuments(confirmUploadedDocuments)
+            .uploadParty(uploadPartyRadioList)
             .build());
 
         draftOrdersWrapper.setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
