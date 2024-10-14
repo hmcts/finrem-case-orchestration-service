@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
@@ -57,24 +58,58 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested {} about to start callback for Case ID: {}", callbackRequest.getEventType(),
             caseId);
+
         FinremCaseData finremCaseData = caseDetails.getData();
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        draftOrdersWrapper.setTypeOfDraftOrder(null);
 
-        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
+        YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
+            ? YesOrNo.YES : YesOrNo.NO;
+        draftOrdersWrapper.setShowUploadPartyQuestion(showUploadPartyQuestion);
 
+        DynamicMultiSelectList confirmUploadedDocuments = createConfirmUploadDocuments(finremCaseData);
+        DynamicRadioList uploadPartyRadioList = null;
+        if (YesOrNo.YES.equals(showUploadPartyQuestion)) {
+            uploadPartyRadioList = createUploadParty(finremCaseData);
+        }
+
+        draftOrdersWrapper.setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+            .confirmUploadedDocuments(confirmUploadedDocuments)
+            .uploadParty(uploadPartyRadioList)
+            .build());
+
+        draftOrdersWrapper.setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
+            .confirmUploadedDocuments(confirmUploadedDocuments)
+            .uploadParty(uploadPartyRadioList)
+            .build());
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(finremCaseData).build();
+    }
+
+    private DynamicMultiSelectList createConfirmUploadDocuments(FinremCaseData finremCaseData) {
         String applicantLName = finremCaseData.getApplicantLastName();
         String respondentLName = finremCaseData.getRespondentLastName();
 
         DynamicMultiSelectListElement elementConfirmation = DynamicMultiSelectListElement.builder()
-            .label("I confirm the uploaded documents are for the " + applicantLName + " v " + respondentLName + " case")
+            .label(format("I confirm the uploaded documents are for the %s v %s case", applicantLName, respondentLName))
             .code("1")
             .build();
 
-        DynamicMultiSelectList list = DynamicMultiSelectList.builder()
+        return DynamicMultiSelectList.builder()
             .listItems(List.of(elementConfirmation))
             .build();
+    }
 
-        uploadSuggestedDraftOrder.setConfirmUploadedDocuments(list);
+    private boolean isShowUploadPartyQuestion(String caseId, String authToken) {
+        CaseAssignedUserRolesResource caseAssignedUserRolesResource =
+            caseAssignedRoleService.getCaseAssignedUserRole(caseId, authToken);
 
+        return caseAssignedUserRolesResource.getCaseAssignedUserRoles().isEmpty();
+    }
+
+    private DynamicRadioList createUploadParty(FinremCaseData finremCaseData) {
         DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
             .code(UPLOAD_PARTY_APPLICANT)
             .label(format("The applicant, %s", finremCaseData.getFullApplicantName()))
@@ -85,36 +120,8 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
             .label(format("The respondent, %s", finremCaseData.getRespondentFullName()))
             .build();
 
-        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
+        return DynamicRadioList.builder()
             .listItems(List.of(elementApplicant, elementRespondent))
             .build();
-
-        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
-
-        finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
-        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
-            .hearingDetails(hearingService.generateSelectableHearingsAsDynamicList(caseDetails))
-            .confirmUploadedDocuments(list)
-            .uploadParty(DynamicRadioList.builder().listItems(List.of(
-                DynamicRadioListElement.builder()
-                    .code(UPLOAD_PARTY_APPLICANT).label(format("The applicant, %s", finremCaseData.getFullApplicantName())).build(),
-                DynamicRadioListElement.builder()
-                    .code(UPLOAD_PARTY_RESPONDENT).label(format("The respondent, %s", finremCaseData.getRespondentFullName())).build()
-            )).build())
-            .build());
-
-        YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
-            ? YesOrNo.YES : YesOrNo.NO;
-        finremCaseData.getDraftOrdersWrapper().setShowUploadPartyQuestion(showUploadPartyQuestion);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
-    }
-
-    private boolean isShowUploadPartyQuestion(String caseId, String authToken) {
-        CaseAssignedUserRolesResource caseAssignedUserRolesResource =
-            caseAssignedRoleService.getCaseAssignedUserRole(caseId, authToken);
-
-        return caseAssignedUserRolesResource.getCaseAssignedUserRoles().isEmpty();
     }
 }
