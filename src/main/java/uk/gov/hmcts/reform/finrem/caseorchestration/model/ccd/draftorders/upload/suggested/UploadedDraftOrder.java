@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SuggestedDraftOrder implements HasCaseDocument {
+public class UploadedDraftOrder implements HasCaseDocument {
 
     @JsonProperty("suggestedDraftOrderDocument")
     CaseDocument suggestedDraftOrderDocument;

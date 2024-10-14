@@ -29,7 +29,7 @@ public class UploadSuggestedDraftOrder {
     private List<String> uploadOrdersOrPsas;
 
     @JsonProperty("suggestedDraftOrderCollection")
-    private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
+    private List<UploadSuggestedDraftOrderCollection> uploadSuggestedDraftOrderCollection;
 
     @JsonProperty("suggestedPsaCollection")
     private List<SuggestedPensionSharingAnnexCollection> suggestedPsaCollection;
