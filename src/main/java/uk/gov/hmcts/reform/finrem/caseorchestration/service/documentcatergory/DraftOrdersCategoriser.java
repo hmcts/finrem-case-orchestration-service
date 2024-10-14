@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
+
 @Component
 public class DraftOrdersCategoriser extends DocumentCategoriser {
 
@@ -49,7 +52,15 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
     }
 
     private String determineChosenParty(FinremCaseData finremCaseData) {
-        return finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty();
+
+        String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
+
+        if (UPLOAD_PARTY_APPLICANT.equals(selectedPartyCode)) {
+            return UPLOAD_PARTY_APPLICANT;
+        } else if (UPLOAD_PARTY_RESPONDENT.equals(selectedPartyCode)) {
+            return UPLOAD_PARTY_RESPONDENT;
+        }
+        return selectedPartyCode;
     }
 
     private DocumentCategory determineCategory(String chosenParty) {
