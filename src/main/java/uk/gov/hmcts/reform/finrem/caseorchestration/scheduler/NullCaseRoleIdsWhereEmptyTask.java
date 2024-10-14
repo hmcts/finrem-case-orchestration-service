@@ -15,6 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +35,9 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
+
+    public static final String NOC_FIX_APPLIED_FLAG_FIELD = "isNocFixAppliedFlag";
+    private static final String CASE_DATA_NOC_FIX_APPLIED__FLAG = String.format("data.%s", NOC_FIX_APPLIED_FLAG_FIELD);
 
     private static final String TASK_NAME = "NullCaseRoleIdsWhereEmptyTask";
     private static final String SUMMARY = "DFR-3351";
@@ -51,12 +57,15 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
+        log.info("Getting case references for CFV migration");
         String searchQuery = getSearchQuery();
+
         String systemUserToken = getSystemUserToken();
         SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-        log.info("{} cases found for {}", searchResult.getTotal(), caseTypeId);
 
+        log.info("{} cases found for {}, returning first {} for NOC Fix", searchResult.getTotal(), caseTypeId, batchSize);
         return searchResult.getCases().stream()
+            .limit(batchSize)
             .map(caseDetails -> caseDetails.getId().toString())
             .map(CaseReference::new)
             .toList();
@@ -92,9 +101,9 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
                 && caseData.getChangeOrganisationRequestField().getCaseRoleId().getValue() == null) {
 
             log.info("Case {} will have caseRoleId set to null", finremCaseDetails.getId());
-            // then do it
-             caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
-             caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+            caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+            caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+            caseData.setIsNocFixAppliedFlag(YesOrNo.YES);
         }
 
         // This optional code needs enhancement.
@@ -110,45 +119,12 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
 
     private String getSearchQuery() {
 
-        // Check that CaseRoleId is present in ES, indicating that postgres contains something not null.
-        // BoolQueryBuilder caseRoleIdExistsQuery = QueryBuilders.boolQuery()
-        // .must(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId"));
-
-        // Check that CaseRoleId.value is not present in ES, indicating that Postgres contains something null.
-        // BoolQueryBuilder caseRoleIdValueMissingQuery = QueryBuilders.boolQuery()
-        // .mustNot(QueryBuilders.existsQuery("data.changeOrganisationRequestField.CaseRoleId.value"));
-
-        // BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-        // .mustNot(new TermQueryBuilder("state.keyword", "close"));
-
-        // BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery()
-        // .must(caseRoleIdExistsQuery)
-        // .must(stateQuery);
-        //
-        // SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-        // .size(batchSize)
-        // .query(finalQueryBuilder);
-
-        //above is what I want - below is debugging
-
-//        ExistsQueryBuilder changeOrganisationRequestFieldExistsQuery = QueryBuilders.existsQuery("data.changeOrganisationRequestField");
-        BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-                .mustNot(new TermQueryBuilder("state.keyword", "close"));
-
-        BoolQueryBuilder RespondemntRequestFieldExistsQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.existsQuery("data.RespondentOrganisationPolicy"));
-
-        BoolQueryBuilder changeOrganisationRequestFieldExistsQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.existsQuery("data.changeOrganisationRequestField"));
-
-        BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery()
-        .must(RespondemntRequestFieldExistsQuery)
-//        .must(changeOrganisationRequestFieldExistsQuery)
-        .must(stateQuery);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .mustNot(QueryBuilders.existsQuery(CASE_DATA_NOC_FIX_APPLIED__FLAG))
+            .mustNot(new TermQueryBuilder("state.keyword", "close"));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(finalQueryBuilder);
-
+                .query(boolQueryBuilder);
 
         return searchSourceBuilder.toString();
     }
