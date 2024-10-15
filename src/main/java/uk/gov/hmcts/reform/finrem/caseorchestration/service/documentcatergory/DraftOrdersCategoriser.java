@@ -8,23 +8,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
 
 @Component
-public class DraftOrdersCategoriser extends DocumentCategoriser {
+public class DraftOrdersCategoriser {
 
-    public DraftOrdersCategoriser(FeatureToggleService featureToggleService) {
-        super(featureToggleService);
+    public DraftOrdersCategoriser() {
+        super();
     }
 
-    @Override
-    protected void categoriseDocuments(FinremCaseData finremCaseData) {
+    public void categoriseDocuments(FinremCaseData finremCaseData, String userRole) {
         // Determine type of draft order
         if (!isSuggestedDraftOrderPriorToHearing(finremCaseData)) {
             return;
@@ -32,7 +32,7 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
 
         // Get the current user case role
         //NEED TO DO
-        String chosenParty = determineChosenParty(finremCaseData);
+        String chosenParty = determineChosenParty(finremCaseData, userRole);
 
         DocumentCategory category = determineCategory(chosenParty);
         if (category != null) {
@@ -51,23 +51,29 @@ public class DraftOrdersCategoriser extends DocumentCategoriser {
         return "aSuggestedDraftOrderPriorToAListedHearing".equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder());
     }
 
-    private String determineChosenParty(FinremCaseData finremCaseData) {
+    private String determineChosenParty(FinremCaseData finremCaseData, String userRole) {
 
-        String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
+        if (finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty() != null) {
+            String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
 
-        if (UPLOAD_PARTY_APPLICANT.equals(selectedPartyCode)) {
-            return UPLOAD_PARTY_APPLICANT;
-        } else if (UPLOAD_PARTY_RESPONDENT.equals(selectedPartyCode)) {
-            return UPLOAD_PARTY_RESPONDENT;
+            if (UPLOAD_PARTY_APPLICANT.equals(selectedPartyCode)) {
+                return APPLICANT.getValue();
+            } else if (UPLOAD_PARTY_RESPONDENT.equals(selectedPartyCode)) {
+                return RESPONDENT.getValue();
+            }
+            return selectedPartyCode;
+        } else {
+            return userRole;
         }
-        return selectedPartyCode;
+
+
     }
 
     private DocumentCategory determineCategory(String chosenParty) {
         switch (chosenParty) {
-            case "theApplicant":
+            case "applicant":
                 return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
-            case "theRespondent":
+            case "respondent":
                 return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
             default:
                 return null;
