@@ -49,4 +49,12 @@ public class DraftOrdersWrapper implements HasCaseDocument {
         }
         return uploadSuggestedDraftOrder;
     }
+
+    @JsonIgnore
+    public UploadAgreedDraftOrder getUploadAgreedDraftOrder() {
+        if (uploadAgreedDraftOrder == null) {
+            this.uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
+        }
+        return uploadAgreedDraftOrder;
+    }
 }
