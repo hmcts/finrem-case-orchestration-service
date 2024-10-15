@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
@@ -58,6 +60,54 @@ class UploadDraftOrderAboutToStartHandlerTest {
     }
 
     @Test
+    void testHandle() {
+        long caseID = 1727874196328932L;
+        FinremCaseData caseData = spy(new FinremCaseData());
+
+        DynamicList hearingDetails = DynamicList.builder().listItems(List.of(
+            DynamicListElement.builder().label("test").code(UUID.randomUUID().toString()).build()
+        )).build();
+
+        when(caseData.getApplicantLastName()).thenReturn("Hello");
+        when(caseData.getFullApplicantName()).thenReturn("Hello World");
+        when(caseData.getRespondentLastName()).thenReturn("Hey");
+        when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
+        when(hearingService.generateSelectableHearingsAsDynamicList(any())).thenReturn(hearingDetails);
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
+            CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(Collections.emptyList())
+                .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+
+        DraftOrdersWrapper draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = draftOrdersWrapper.getUploadAgreedDraftOrder();
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = draftOrdersWrapper.getUploadSuggestedDraftOrder();
+
+        assertThat(uploadAgreedDraftOrder.getHearingDetails()).isEqualTo(hearingDetails);
+
+        DynamicMultiSelectList confirmUploadedDocuments = DynamicMultiSelectList.builder()
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+            .label("I confirm the uploaded documents are for the Hello v Hey case")
+            .code("1")
+            .build())).build();
+        assertThat(uploadAgreedDraftOrder.getConfirmUploadedDocuments()).isEqualTo(confirmUploadedDocuments);
+        assertThat(uploadSuggestedDraftOrder.getConfirmUploadedDocuments()).isEqualTo(confirmUploadedDocuments);
+
+        DynamicRadioList expectedUploadParty = DynamicRadioList.builder()
+            .listItems(List.of(
+                DynamicRadioListElement.builder()
+                    .label("The applicant, Hello World").code("theApplicant").build(),
+                DynamicRadioListElement.builder()
+                    .label("The respondent, Hello Respondent").code("theRespondent").build()
+            )).build();
+        assertThat(uploadAgreedDraftOrder.getUploadParty()).isEqualTo(expectedUploadParty);
+        assertThat(uploadSuggestedDraftOrder.getUploadParty()).isEqualTo(expectedUploadParty);
+    }
+
+    @Test
     void givenUserIsCaseWorkerWhenHandleThenShowUploadQuestionIsYes() {
         long caseID = 1727874196328932L;
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
@@ -86,45 +136,5 @@ class UploadDraftOrderAboutToStartHandlerTest {
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
-    }
-
-    @Test
-    void shouldPopulateAgreedDraftOrderFlowProperties() {
-        long caseID = 1727874196328932L;
-        FinremCaseData caseData = spy(new FinremCaseData());
-
-        DynamicList expectedDynamicList = DynamicList.builder().listItems(List.of(
-            DynamicListElement.builder().label("test").code(UUID.randomUUID().toString()).build()
-        )).build();
-
-        when(caseData.getApplicantLastName()).thenReturn("Hello");
-        when(caseData.getFullApplicantName()).thenReturn("Hello World");
-        when(caseData.getRespondentLastName()).thenReturn("Hey");
-        when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
-        when(hearingService.generateSelectableHearingsAsDynamicList(any())).thenReturn(expectedDynamicList);
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
-            CaseAssignedUserRolesResource.builder()
-                .caseAssignedUserRoles(Collections.emptyList())
-                .build());
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-
-        DraftOrdersWrapper draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
-        assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getConfirmUploadedDocuments()).isEqualTo(
-            DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                .label("I confirm the uploaded documents are for the Hello v Hey case")
-                .code("1")
-                .build())).build()
-        );
-        assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getHearingDetails()).isEqualTo(expectedDynamicList);
-        assertThat(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadParty()).isEqualTo(
-            DynamicRadioList.builder()
-                .listItems(List.of(
-                    DynamicRadioListElement.builder().label("The applicant, Hello World").code("theApplicant").build(),
-                    DynamicRadioListElement.builder().label("The respondent, Hello Respondent").code("theRespondent").build()
-                )).build()
-        );
     }
 }
