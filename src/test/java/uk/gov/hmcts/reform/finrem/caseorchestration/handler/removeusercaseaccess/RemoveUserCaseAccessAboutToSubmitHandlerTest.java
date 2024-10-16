@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.List;
 
@@ -24,7 +25,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +37,8 @@ class RemoveUserCaseAccessAboutToSubmitHandlerTest {
     private RemoveUserCaseAccessAboutToSubmitHandler handler;
     @Mock
     private CcdDataStoreService ccdDataStoreService;
+    @Mock
+    private SystemUserService systemUserService;
 
     @Test
     void testHandle() {
@@ -63,14 +68,19 @@ class RemoveUserCaseAccessAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseId);
         request.getCaseDetails().getData().setUserCaseAccessList(createUserCaseAccessList(true));
 
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getWarnings()).isEmpty();
 
-        verify(ccdDataStoreService, times(1)).removeUserCaseRole(String.valueOf(caseId), AUTH_TOKEN, "user1",
+        verify(ccdDataStoreService, times(1)).removeUserCaseRole(String.valueOf(caseId), TEST_SYSTEM_TOKEN, "user1",
             "[APPSOLICITOR]");
         verifyNoMoreInteractions(ccdDataStoreService);
+
+        verify(systemUserService, times(1)).getSysUserToken();
+        verifyNoMoreInteractions(systemUserService);
     }
 
     private DynamicList createUserCaseAccessList(boolean valueSelected) {
