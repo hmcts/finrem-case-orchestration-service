@@ -36,7 +36,7 @@ public class UploadAgreedDraftOrder {
     private List<String> uploadOrdersOrPsas;
 
     @JsonProperty("agreedDraftOrderCollection")
-    private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
+    private List<UploadAgreedDraftOrderCollection> uploadAgreedDraftOrderCollection;
 
     @JsonProperty("agreedPsaCollection")
     private List<AgreedPensionSharingAnnexCollection> agreedPsaCollection;

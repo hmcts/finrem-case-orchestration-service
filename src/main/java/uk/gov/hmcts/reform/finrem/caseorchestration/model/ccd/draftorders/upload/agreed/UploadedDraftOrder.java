@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AgreedDraftOrder {
+public class UploadedDraftOrder {
 
     @JsonProperty("agreedDraftOrderDocument")
     private CaseDocument agreedDraftOrderDocument;

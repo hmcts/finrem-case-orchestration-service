@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgreedDraftOrderCollection {
+public class UploadAgreedDraftOrderCollection {
 
-    private AgreedDraftOrder value;
+    private UploadedDraftOrder value;
 
 }
