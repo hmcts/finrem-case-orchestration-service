@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SUGGESTED_DRAFT_ORDER_OPTION;
@@ -116,10 +117,9 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     private List<SuggestedDraftOrderCollection> processSuggestedDraftOrders(UploadSuggestedDraftOrder uploadSuggestedDraftOrder,
                                                                             String userAuthorisation) {
         List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = new ArrayList<>();
-        List<String> uploadOrdersOrPsas = uploadSuggestedDraftOrder.getUploadOrdersOrPsas();
 
         // First check if 'order' is selected
-        if (uploadOrdersOrPsas.contains(ORDER_TYPE)) {
+        if (isOrdersSelected(uploadSuggestedDraftOrder.getUploadOrdersOrPsas())) {
             for (UploadSuggestedDraftOrderCollection uploadCollection : uploadSuggestedDraftOrder.getUploadSuggestedDraftOrderCollection()) {
                 UploadedDraftOrder uploadDraftOrder = uploadCollection.getValue();
 
@@ -136,7 +136,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
 
         //check if 'psa' is selected
-        if (uploadOrdersOrPsas.contains(PSA_TYPE)) {
+        if (isPsaSelected(uploadSuggestedDraftOrder.getUploadOrdersOrPsas())) {
             for (SuggestedPensionSharingAnnexCollection psaCollection : uploadSuggestedDraftOrder.getSuggestedPsaCollection()) {
                 SuggestedPensionSharingAnnex uploadPsa = psaCollection.getValue();
 
@@ -239,5 +239,13 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         submittedInfo.setSubmittedBy(submittedByName);
         submittedInfo.setSubmittedDate(LocalDateTime.now());
         return submittedInfo;
+    }
+
+    private boolean isOrdersSelected(List<String> uploadOrdersOrPsas) {
+        return ofNullable(uploadOrdersOrPsas).orElse(List.of()).contains(ORDER_TYPE);
+    }
+
+    private boolean isPsaSelected(List<String> uploadOrdersOrPsas) {
+        return ofNullable(uploadOrdersOrPsas).orElse(List.of()).contains(PSA_TYPE);
     }
 }
