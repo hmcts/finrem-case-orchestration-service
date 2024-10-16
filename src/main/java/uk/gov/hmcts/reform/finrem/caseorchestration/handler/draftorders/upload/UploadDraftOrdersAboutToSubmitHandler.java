@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -48,6 +49,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
     private final IdamAuthService idamAuthService;
+
     private final CaseAssignedRoleService caseAssignedRoleService;
 
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
@@ -73,15 +75,12 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
-        String submittedByName = userInfo.getName();
-
         String userRole = checkRole(caseDetails.getId().toString(), userAuthorisation);
 
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
-            handleSuggestedDraftOrders(finremCaseData, submittedByName);
+            handleSuggestedDraftOrders(finremCaseData, userAuthorisation);
         } else {
-            handleAgreedDraftOrder(finremCaseData);
+            handleAgreedDraftOrder(finremCaseData, userAuthorisation);
         }
 
         draftOrdersCategoriser.categoriseDocuments(finremCaseData, userRole);
@@ -93,29 +92,29 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .data(finremCaseData).build();
     }
 
-    private void handleAgreedDraftOrder(FinremCaseData finremCaseData) {
+    private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation) {
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         // TODO for agreed
     }
 
-    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String submittedByName) {
+    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         UploadSuggestedDraftOrder uploadSuggestedDraftOrder = draftOrdersWrapper.getUploadSuggestedDraftOrder();
 
         if (uploadSuggestedDraftOrder != null) {
             List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = processSuggestedDraftOrders(uploadSuggestedDraftOrder,
-                submittedByName);
+                userAuthorisation);
 
             List<SuggestedDraftOrderCollection> existingSuggestedDraftOrderCollections =
                 getExistingSuggestedDraftOrderCollections(draftOrdersWrapper);
 
             existingSuggestedDraftOrderCollections.addAll(newSuggestedDraftOrderCollections);
             draftOrdersWrapper.setSuggestedDraftOrderCollection(existingSuggestedDraftOrderCollections);
-
         }
     }
 
     private List<SuggestedDraftOrderCollection> processSuggestedDraftOrders(UploadSuggestedDraftOrder uploadSuggestedDraftOrder,
-                                                                            String submittedByName) {
+                                                                            String userAuthorisation) {
         List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = new ArrayList<>();
         List<String> uploadOrdersOrPsas = uploadSuggestedDraftOrder.getUploadOrdersOrPsas();
 
@@ -125,7 +124,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
                 UploadedDraftOrder uploadDraftOrder = uploadCollection.getValue();
 
                 // Create the draft order element
-                SuggestedDraftOrder orderDraftOrder = mapToSuggestedDraftOrder(uploadDraftOrder, uploadSuggestedDraftOrder, submittedByName);
+                SuggestedDraftOrder orderDraftOrder = mapToSuggestedDraftOrder(uploadDraftOrder, uploadSuggestedDraftOrder, userAuthorisation);
 
                 SuggestedDraftOrderCollection orderCollection =
                     SuggestedDraftOrderCollection.builder()
@@ -142,7 +141,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
                 SuggestedPensionSharingAnnex uploadPsa = psaCollection.getValue();
 
                 //create the PSA element
-                SuggestedDraftOrder psaDraftOrder = mapToSuggestedDraftOrderForPsa(uploadPsa, uploadSuggestedDraftOrder, submittedByName);
+                SuggestedDraftOrder psaDraftOrder = mapToSuggestedDraftOrderForPsa(uploadPsa, uploadSuggestedDraftOrder, userAuthorisation);
 
                 SuggestedDraftOrderCollection psaOrderCollection =
                     SuggestedDraftOrderCollection.builder()
@@ -157,11 +156,9 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private SuggestedDraftOrder mapToSuggestedDraftOrder(
-        UploadedDraftOrder uploadDraftOrder, UploadSuggestedDraftOrder uploadSuggestedDraftOrder, String submittedByName) {
+        UploadedDraftOrder uploadDraftOrder, UploadSuggestedDraftOrder uploadSuggestedDraftOrder, String userAuthorisation) {
 
-        SuggestedDraftOrder.SuggestedDraftOrderBuilder suggestedDraftOrderBuilder = SuggestedDraftOrder.builder()
-            .submittedBy(submittedByName)
-            .submittedDate(LocalDateTime.now());
+        SuggestedDraftOrder.SuggestedDraftOrderBuilder suggestedDraftOrderBuilder = SuggestedDraftOrder.builder();
 
         if (uploadSuggestedDraftOrder.getUploadParty() != null) {
             suggestedDraftOrderBuilder.uploadedOnBehalfOf(uploadSuggestedDraftOrder.getUploadParty().getValue().getCode());
@@ -186,16 +183,13 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             suggestedDraftOrderBuilder.attachments(attachments);
         }
 
-        return suggestedDraftOrderBuilder.build();
+        return applySubmittedInfo(userAuthorisation, suggestedDraftOrderBuilder.build());
     }
 
     private SuggestedDraftOrder mapToSuggestedDraftOrderForPsa(
-        SuggestedPensionSharingAnnex uploadPsa,
-        UploadSuggestedDraftOrder uploadSuggestedDraftOrder, String submittedByName) {
+        SuggestedPensionSharingAnnex uploadPsa, UploadSuggestedDraftOrder uploadSuggestedDraftOrder, String userAuthorisation) {
 
-        SuggestedDraftOrder.SuggestedDraftOrderBuilder suggestedDraftOrderBuilder = SuggestedDraftOrder.builder()
-            .submittedBy(submittedByName)
-            .submittedDate(LocalDateTime.now());
+        SuggestedDraftOrder.SuggestedDraftOrderBuilder suggestedDraftOrderBuilder = SuggestedDraftOrder.builder();
 
         if (uploadSuggestedDraftOrder.getUploadParty() != null) {
             suggestedDraftOrderBuilder.uploadedOnBehalfOf(uploadSuggestedDraftOrder.getUploadParty().getValue().getCode());
@@ -206,7 +200,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             suggestedDraftOrderBuilder.pensionSharingAnnex(uploadPsa.getSuggestedPensionSharingAnnexes());
         }
 
-        return suggestedDraftOrderBuilder.build();
+        return applySubmittedInfo(userAuthorisation, suggestedDraftOrderBuilder.build());
     }
 
     private List<SuggestedDraftOrderCollection> getExistingSuggestedDraftOrderCollections(DraftOrdersWrapper draftOrdersWrapper) {
@@ -237,5 +231,13 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
 
         return CASE.getValue();
+    }
+
+    private <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
+        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
+        String submittedByName = userInfo.getName();
+        submittedInfo.setSubmittedBy(submittedByName);
+        submittedInfo.setSubmittedDate(LocalDateTime.now());
+        return submittedInfo;
     }
 }
