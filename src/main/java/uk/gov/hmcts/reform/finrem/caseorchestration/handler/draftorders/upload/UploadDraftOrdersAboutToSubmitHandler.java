@@ -34,6 +34,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
@@ -75,7 +78,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         String userRole = checkRole(caseDetails.getId().toString(), userAuthorisation);
 
-        if ("aSuggestedDraftOrderPriorToAListedHearing".equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
+        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
             handleSuggestedDraftOrders(finremCaseData, submittedByName);
         } else {
             handleAgreedDraftOrder(finremCaseData);
@@ -117,7 +120,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         List<String> uploadOrdersOrPsas = uploadSuggestedDraftOrder.getUploadOrdersOrPsas();
 
         // First check if 'order' is selected
-        if (uploadOrdersOrPsas.contains("orders")) {
+        if (uploadOrdersOrPsas.contains(ORDER_TYPE)) {
             for (UploadSuggestedDraftOrderCollection uploadCollection : uploadSuggestedDraftOrder.getUploadSuggestedDraftOrderCollection()) {
                 UploadedDraftOrder uploadDraftOrder = uploadCollection.getValue();
 
@@ -134,7 +137,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
 
         //check if 'psa' is selected
-        if (uploadOrdersOrPsas.contains("pensionSharingAnnexes")) {
+        if (uploadOrdersOrPsas.contains(PSA_TYPE)) {
             for (SuggestedPensionSharingAnnexCollection psaCollection : uploadSuggestedDraftOrder.getSuggestedPsaCollection()) {
                 SuggestedPensionSharingAnnex uploadPsa = psaCollection.getValue();
 
