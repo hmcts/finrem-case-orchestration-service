@@ -11,8 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -68,12 +67,12 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 errors.add(error);
             }
         } else {
-            hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadAgreedDraftOrder().getAgreedDraftOrderCollection())
+            hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
                 .orElse(List.of())
                 .stream()
-                .map(AgreedDraftOrderCollection::getValue)
+                .map(UploadAgreedDraftOrderCollection::getValue)
                 .filter(Objects::nonNull)
-                .map(AgreedDraftOrder::getAgreedDraftOrderDocument)
+                .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder::getAgreedDraftOrderDocument)
                 .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
             if (hasNonWordDocument) {
                 errors.add(error);
