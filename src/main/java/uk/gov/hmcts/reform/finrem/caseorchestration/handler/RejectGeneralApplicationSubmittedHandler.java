@@ -69,11 +69,11 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
                 caseDetails, callbackRequest.getCaseDetailsBefore()).getValue().getCode();
 
         log.info("General application receivedFrom: {} for Case ID: {} ", receivedFrom, caseDetails.getId());
-        if (APPLICANT.equals(receivedFrom)) {
+        if (APPLICANT.equalsIgnoreCase(receivedFrom)) {
             sendApplicantNotifications(userAuthorisation, caseDetails);
         }
 
-        if (RESPONDENT.equals(receivedFrom)) {
+        if (RESPONDENT.equalsIgnoreCase(receivedFrom)) {
             sendRespondentNotifications(userAuthorisation, caseDetails);
         }
 
