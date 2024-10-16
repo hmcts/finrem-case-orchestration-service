@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -67,7 +68,7 @@ public class PdfStampingService {
     }
 
     private byte[] stampDocument(byte[] inputDocInBytes, boolean isAnnexNeeded, StampType stampType) throws Exception {
-        PDDocument doc = PDDocument.load(inputDocInBytes);
+        PDDocument doc = Loader.loadPDF(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
         PDPage page = doc.getPage(0);
         PdfAnnexStampingInfo info = PdfAnnexStampingInfo.builder(page).build();
