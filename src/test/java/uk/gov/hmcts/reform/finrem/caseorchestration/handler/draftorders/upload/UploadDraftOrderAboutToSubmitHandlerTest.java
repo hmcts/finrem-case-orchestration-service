@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
@@ -66,22 +67,27 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidPsaAndOrderDetails_whenHandle_thenMapCorrectly() {
+    void givenValidPsaAndOrderDetailsWithAttachments_whenHandle_thenMapCorrectly() {
         // Given
-        long caseID = 123;
+        final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
-        // Setting up PSA and Order details
+        // Setting up Order, PSA and attachment details
         SuggestedPensionSharingAnnexCollection psaCollection = SuggestedPensionSharingAnnexCollection.builder()
             .value(SuggestedPensionSharingAnnex.builder()
                 .suggestedPensionSharingAnnexes(mock(CaseDocument.class))
                 .build())
             .build();
+        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocumentCollection = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+            .value(mock(CaseDocument.class))
+            .build();
         UploadSuggestedDraftOrderCollection orderCollection = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
                 .suggestedDraftOrderDocument(mock(CaseDocument.class))
+                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocumentCollection))
                 .build())
             .build();
+
 
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(Arrays.asList(ORDER_TYPE, PSA_TYPE));
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
@@ -106,7 +112,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(caseID, caseData), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         // Then
         List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
@@ -116,13 +122,91 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         assertThat(draftOrderResult.getSubmittedBy()).isNotNull();
         assertThat(draftOrderResult.getPensionSharingAnnex()).isNull();
         assertThat(draftOrderResult.getDraftOrder()).isNotNull();
+        assertThat(draftOrderResult.getAttachments()).isNotNull();
         assertThat(draftOrderResult.getUploadedOnBehalfOf()).isEqualTo(UPLOAD_PARTY_APPLICANT);
 
         SuggestedDraftOrder psaResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(psaResult.getSubmittedBy()).isNotNull();
         assertThat(psaResult.getPensionSharingAnnex()).isNotNull();
         assertThat(psaResult.getDraftOrder()).isNull();
+        assertThat(psaResult.getAttachments()).isNull();
         assertThat(psaResult.getUploadedOnBehalfOf()).isEqualTo(UPLOAD_PARTY_APPLICANT);
     }
 
+    @Test
+    void givenMultipleOrderDetailsWithAttachments_whenHandle_thenMapCorrectly() {
+        // Given
+        final Long caseID = 1727874196328932L;
+        FinremCaseData caseData = spy(new FinremCaseData());
+
+        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument1 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+            .value(mock(CaseDocument.class))
+            .build();
+        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument2 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+            .value(mock(CaseDocument.class))
+            .build();
+        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument3 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+            .value(mock(CaseDocument.class))
+            .build();
+        UploadSuggestedDraftOrderCollection orderCollection1 = UploadSuggestedDraftOrderCollection.builder()
+            .value(UploadedDraftOrder.builder()
+                .suggestedDraftOrderDocument(mock(CaseDocument.class))
+                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocument1, additionalDocument2))
+                .build())
+            .build();
+
+        UploadSuggestedDraftOrderCollection orderCollection2 = UploadSuggestedDraftOrderCollection.builder()
+            .value(UploadedDraftOrder.builder()
+                .suggestedDraftOrderDocument(mock(CaseDocument.class))
+                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocument3))
+                .build())
+            .build();
+
+        UploadSuggestedDraftOrderCollection orderCollection3 = UploadSuggestedDraftOrderCollection.builder()
+            .value(UploadedDraftOrder.builder()
+                .suggestedDraftOrderDocument(mock(CaseDocument.class))
+                .build())
+            .build();
+
+
+        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(List.of(ORDER_TYPE));
+        caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(
+            orderCollection1, orderCollection2, orderCollection3)));
+
+        DynamicRadioList uploadParty = DynamicRadioList.builder().value(
+            DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build()
+        ).build();
+
+        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
+
+        UserInfo mockUserInfo = mock(UserInfo.class);
+        when(idamAuthService.getUserInfo(AUTH_TOKEN)).thenReturn(mockUserInfo);
+        when(mockUserInfo.getName()).thenReturn("Hamzah");
+
+        doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
+
+        // When
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+
+        // Then
+        List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
+        Assertions.assertEquals(3, collectionResult.size());
+
+        SuggestedDraftOrder draftOrderResult1 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
+        assertThat(draftOrderResult1.getDraftOrder()).isNotNull();
+        Assertions.assertEquals(2, draftOrderResult1.getAttachments().size());
+
+        SuggestedDraftOrder draftOrderResult2 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
+        assertThat(draftOrderResult2.getDraftOrder()).isNotNull();
+        Assertions.assertEquals(1, draftOrderResult2.getAttachments().size());
+
+        SuggestedDraftOrder draftOrderResult3 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(2).getValue();
+        assertThat(draftOrderResult3.getDraftOrder()).isNotNull();
+        assertThat(draftOrderResult3.getAttachments()).isNull();
+    }
 }
