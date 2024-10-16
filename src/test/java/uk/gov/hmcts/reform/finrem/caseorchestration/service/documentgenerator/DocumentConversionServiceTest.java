@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +28,9 @@ import java.io.InputStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -61,18 +68,25 @@ public class DocumentConversionServiceTest {
     }
 
     @Test
-    public void flattenPdfDocument() throws IOException {
+    public void testFlattenPdfDocument() throws IOException {
 
-        // Note: Already flat PDFs are unchanged by flattening (see flattenFlattenedD11.pdf)
-        String editedPdfFixture = "/fixtures/D11Edited.pdf";
-        byte[] editedPdfBytes = loadResource(editedPdfFixture);
+        byte[] editedPdfBytes = loadResource("/fixtures/D11Edited.pdf");
 
-        String flatPdfFixture = "/fixtures/D11Edited-flattened.pdf";
-        byte[] expectedFlatPdfBytes = loadResource(flatPdfFixture);
+        // Ensure the original PDF has an AcroForm and at least one form field
+        try (PDDocument originalDoc = Loader.loadPDF(editedPdfBytes)) {
+            PDAcroForm originalAcroForm = originalDoc.getDocumentCatalog().getAcroForm();
+            assertNotNull("Document should have an AcroForm", originalAcroForm);
+            assertFalse("Document should have form fields", originalAcroForm.getFields().isEmpty());
+        }
 
-        byte[] result = documentConversionService.flattenPdfDocument(editedPdfBytes);
+        // Flatten the PDF using the method under test
+        byte[] flattenedPdfBytes = documentConversionService.flattenPdfDocument(editedPdfBytes);
 
-        assertThat(expectedFlatPdfBytes, is(result));
+        // Load the flattened PDF and check that form fields have been removed/flattened
+        try (PDDocument flattenedDoc = Loader.loadPDF(flattenedPdfBytes)) {
+            PDAcroForm flattenedAcroForm = flattenedDoc.getDocumentCatalog().getAcroForm();
+            assertTrue("AcroForm should be flattened", ObjectUtils.isEmpty(flattenedAcroForm.getFields()));
+        }
     }
 
     @Test
