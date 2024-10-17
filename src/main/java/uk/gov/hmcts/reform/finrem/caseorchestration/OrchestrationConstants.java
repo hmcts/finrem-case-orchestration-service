@@ -71,8 +71,6 @@ public class OrchestrationConstants {
     public static final String UPLOAD_PARTY_APPLICANT = "theApplicant";
     public static final String UPLOAD_PARTY_RESPONDENT = "theRespondent";
 
-    public static final String SUGGESTED_DRAFT_ORDER_OPTION = "aSuggestedDraftOrderPriorToAListedHearing";
-
     public static final String ORDER_TYPE = "orders";
 
     public static final String PSA_TYPE = "pensionSharingAnnexes";
