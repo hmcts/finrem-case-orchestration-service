@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.sugges
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,5 +57,12 @@ public class DraftOrdersWrapper implements HasCaseDocument {
             this.uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
         }
         return uploadAgreedDraftOrder;
+    }
+
+    public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
+        if (agreedDraftOrderCollection == null) {
+            agreedDraftOrderCollection = new ArrayList<>();
+        }
+        agreedDraftOrderCollection.addAll(newAgreedDraftOrderCollection);
     }
 }

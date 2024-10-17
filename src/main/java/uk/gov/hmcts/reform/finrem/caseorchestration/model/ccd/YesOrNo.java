@@ -63,4 +63,8 @@ public enum YesOrNo {
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
     }
+
+    public static YesOrNo forValue(boolean b) {
+        return forValue(b ? YES.value : NO.value);
+    }
 }
