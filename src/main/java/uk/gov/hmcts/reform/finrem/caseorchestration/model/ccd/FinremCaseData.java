@@ -643,6 +643,16 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
+    public String getApplicantLastName() {
+        return nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim();
+    }
+
+    @JsonIgnore
+    public String getRespondentLastName() {
+        return nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim();
+    }
+
+    @JsonIgnore
     public String getFullApplicantName() {
         return (
             nullToEmpty(getContactDetailsWrapper().getApplicantFmName()).trim()
@@ -1005,4 +1015,5 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return draftOrdersWrapper;
     }
+
 }

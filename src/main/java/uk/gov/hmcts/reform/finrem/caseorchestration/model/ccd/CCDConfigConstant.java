@@ -722,4 +722,7 @@ public class CCDConfigConstant {
     //international postal flag
     public static final String APPLICANT_RESIDE_OUTSIDE_UK = "applicantResideOutsideUK";
     public static final String RESPONDENT_RESIDE_OUTSIDE_UK = "respondentResideOutsideUK";
+
+    public static final String SUGGESTED_DRAFT_ORDER_OPTION = "aSuggestedDraftOrderPriorToAListedHearing";
+
 }
