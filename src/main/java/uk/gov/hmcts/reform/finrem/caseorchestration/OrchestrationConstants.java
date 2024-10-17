@@ -74,6 +74,5 @@ public class OrchestrationConstants {
     public static final String ORDER_TYPE = "orders";
 
     public static final String PSA_TYPE = "pensionSharingAnnexes";
-
-
+    
 }
