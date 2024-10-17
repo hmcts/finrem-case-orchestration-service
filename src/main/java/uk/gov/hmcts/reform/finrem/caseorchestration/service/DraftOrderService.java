@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class DraftOrderService {
 
     private final IdamAuthService idamAuthService;
+
     public <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
         UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
         String submittedByName = userInfo.getName();
