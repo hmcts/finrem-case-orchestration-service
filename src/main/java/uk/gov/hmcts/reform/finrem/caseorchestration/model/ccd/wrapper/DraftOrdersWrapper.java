@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.sugges
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -42,19 +42,10 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("suggestedDraftOrderCollection")
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
 
-    @JsonIgnore
-    public UploadSuggestedDraftOrder getUploadSuggestedDraftOrder() {
-        if (uploadSuggestedDraftOrder == null) {
-            this.uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
+    public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
+        if (agreedDraftOrderCollection == null) {
+            agreedDraftOrderCollection = new ArrayList<>();
         }
-        return uploadSuggestedDraftOrder;
-    }
-
-    @JsonIgnore
-    public UploadAgreedDraftOrder getUploadAgreedDraftOrder() {
-        if (uploadAgreedDraftOrder == null) {
-            this.uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
-        }
-        return uploadAgreedDraftOrder;
+        agreedDraftOrderCollection.addAll(newAgreedDraftOrderCollection);
     }
 }

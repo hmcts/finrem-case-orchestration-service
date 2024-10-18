@@ -19,7 +19,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo {
