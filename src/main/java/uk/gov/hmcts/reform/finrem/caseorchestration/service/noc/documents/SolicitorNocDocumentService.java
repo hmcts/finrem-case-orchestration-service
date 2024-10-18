@@ -20,7 +20,7 @@ public class SolicitorNocDocumentService extends NocDocumentService {
 
     @Override
     NocDocumentTemplate getNocDocumentTemplate() {
-        return new NocDocumentTemplate(documentConfiguration.getNocLetterNotificationSolicitorTemplate(),
+        return new NocDocumentTemplate("NO_THIS_DOCUMENT.docx",
             documentConfiguration.getNocLetterNotificationSolicitorFileName());
     }
 }
