@@ -58,14 +58,19 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
 
         List<GeneralApplicationCollectionData> existingGeneralApplication =
             helper.getGeneralApplicationList(caseData, GENERAL_APPLICATION_COLLECTION);
+
+        log.info("GA AboutToStartHandler beginning existing General Application List size: {} for case ID: {}",
+            existingGeneralApplication.size(), caseId);
+
         GeneralApplicationCollectionData data =
             helper.mapExistingGeneralApplicationToData(caseData, userAuthorisation, caseId);
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
-        log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
         if (data != null) {
+            log.info("Data found on working model for General Application model, "
+                + "adding to existing General Applications list");
             existingGeneralApplication.add(data);
         }
 
@@ -97,6 +102,9 @@ public class GeneralApplicationAboutToStartHandler extends FinremCallbackHandler
                 });
             }
         }
+
+        log.info("GA AboutToStartHandler end existing General Application List size: {} for case ID: {}",
+            existingGeneralApplication.size(), caseId);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

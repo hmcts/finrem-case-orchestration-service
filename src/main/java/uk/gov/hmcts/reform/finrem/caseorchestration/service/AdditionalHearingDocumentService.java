@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,8 +161,13 @@ public class AdditionalHearingDocumentService {
         List<DirectionDetailCollection> directionDetailsCollection
             = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
         if (!directionDetailsCollection.isEmpty()) {
-            directionDetailsCollection.sort((m1, m2) -> m2.getValue()
-                .getDateOfHearing().compareTo(m1.getValue().getDateOfHearing()));
+            directionDetailsCollection.sort(Comparator.comparing(
+                DirectionDetailCollection::getValue, Comparator.comparing(
+                    DirectionDetail::getDateOfHearing, Comparator.nullsLast(
+                        Comparator.reverseOrder()
+                    )
+                )
+            ));
         }
     }
 

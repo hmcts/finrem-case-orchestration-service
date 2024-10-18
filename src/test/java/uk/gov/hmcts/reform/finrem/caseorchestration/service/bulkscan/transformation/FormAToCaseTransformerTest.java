@@ -261,6 +261,22 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
+    public void childSupportAgencyCalculationMadeToNullWhenEmptyString() {
+        Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+            singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
+                ""))));
+        assertThat(optionOneTransformedData, hasEntry("ChildSupportAgencyCalculationMade", null));
+    }
+
+    @Test
+    public void childSupportAgencyCalculationMadeToNullWhenEmptySpaceString() {
+        Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+            singletonList(new OcrDataField("ChildSupportAgencyCalculationMade",
+                "   "))));
+        assertThat(optionOneTransformedData, hasEntry("ChildSupportAgencyCalculationMade", null));
+    }
+
+    @Test
     public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
         Map<String, Object> optionOneTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             singletonList(new OcrDataField("OrderForChildren",
@@ -364,7 +380,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
-            hasEntry(RESP_SOLICITOR_NAME, ""),
+            hasEntry(RESP_SOLICITOR_NAME, null),
             hasEntry(CONSENTED_RESPONDENT_REPRESENTED, NO_VALUE)
         ));
     }

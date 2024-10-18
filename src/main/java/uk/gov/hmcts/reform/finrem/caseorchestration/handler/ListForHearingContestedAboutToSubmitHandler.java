@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ContestedListForHearingCorrespondenceService;
 
 import java.util.List;
 
@@ -30,31 +29,25 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
     private final GenerateCoverSheetService coverSheetService;
-    private final ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService;
 
     public ListForHearingContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService,
                                                        AdditionalHearingDocumentService additionalHearingDocumentService,
                                                        CaseDataService caseDataService,
                                                        ValidateHearingService validateHearingService, ObjectMapper objectMapper,
                                                        NotificationService notificationService,
-                                                       GenerateCoverSheetService coverSheetService,
-                                                       ContestedListForHearingCorrespondenceService contestedListForHearingCorrespondenceService) {
+                                                       GenerateCoverSheetService coverSheetService) {
         super(finremCaseDetailsMapper);
         this.hearingDocumentService = hearingDocumentService;
         this.additionalHearingDocumentService = additionalHearingDocumentService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
         this.validateHearingService = validateHearingService;
         this.caseDataService = caseDataService;
         this.objectMapper = objectMapper;
         this.notificationService = notificationService;
         this.coverSheetService = coverSheetService;
-        this.contestedListForHearingCorrespondenceService = contestedListForHearingCorrespondenceService;
-
     }
 
     @Override
@@ -67,12 +60,12 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         validateCaseData(callbackRequest);
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         String caseId = finremCaseDetails.getId().toString();
-        log.info("Received request for validating a hearing for Case ID: {}", caseId);
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
+            callbackRequest.getEventType(), caseId);
 
         List<String> errors = validateHearingService.validateHearingErrors(finremCaseDetails);
 
@@ -117,7 +110,6 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             populateRespondentBulkPrintFieldsWithCoverSheet(finremCaseData, coverSheet, caseId);
         }
         callbackRequest.getCaseDetails().setData(finremCaseData);
-        contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).warnings(warnings).build();

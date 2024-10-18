@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
@@ -23,12 +23,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTest {
+@ExtendWith(MockitoExtension.class)
+class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
@@ -42,7 +42,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         caseDetails = caseDetails();
         applicantAndRespondentMultiLetterCorresponder =
@@ -52,7 +52,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     }
 
     @Test
-    public void getDocumentsToPrint() {
+    void getDocumentsToPrint() {
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(5, documentsToPrint.size());
     }

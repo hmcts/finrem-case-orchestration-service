@@ -156,7 +156,7 @@ public class BulkPrintService {
                 .bulkPrintDocuments(documents)
                 .build(), recipient, isInternational, auth);
 
-        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}, isInternationa {}",
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}, isInternational {}",
             caseId, letterId, documents.size(), letterType, documents, recipient, isInternational);
 
         return letterId;

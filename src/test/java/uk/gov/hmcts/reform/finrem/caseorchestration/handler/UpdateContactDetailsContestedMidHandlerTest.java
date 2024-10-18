@@ -5,9 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -22,8 +25,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CLOSE;
@@ -33,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @ExtendWith(MockitoExtension.class)
 class UpdateContactDetailsContestedMidHandlerTest {
-    public static final String AUTH_TOKEN = "tokien:)";
+
     @InjectMocks
     private UpdateContactDetailsContestedMidHandler handler;
 
@@ -63,12 +66,13 @@ class UpdateContactDetailsContestedMidHandlerTest {
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.UPDATE_CONTACT_DETAILS)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
-            .build();
+        return buildCallbackRequest(false);
+    }
+
+    private FinremCallbackRequest buildCallbackRequest(boolean consented) {
+        return FinremCallbackRequestFactory.from(EventType.UPDATE_CONTACT_DETAILS,
+            FinremCaseDetailsBuilderFactory.from(123L,
+                consented ? CONSENTED : CONTESTED));
     }
 
     @Test
@@ -104,7 +108,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for applicant address."));
+        assertEquals("Postcode field is required for applicant address.", handle.getErrors().get(0));
     }
 
     @Test
@@ -122,29 +126,54 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for applicant address."));
+        assertEquals("Postcode field is required for applicant address.", handle.getErrors().get(0));
     }
 
-    @Test
-    void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage(boolean consented) {
+        
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(consented);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode("");
-        data.getContactDetailsWrapper().setApplicantAddress(address);
-        data.getContactDetailsWrapper().setRespondentAddress(addressBlank);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setApplicantAddress(Address.builder().postCode("AB1 1AB").build());
+
+        if (consented) {
+            data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        } else {
+            data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        }
+        data.getContactDetailsWrapper().setRespondentAddress(Address.builder().build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for respondent address."));
+        assertEquals("Postcode field is required for respondent address.", handle.getErrors().get(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenConsentedCase_WhenEmptyRespondentPostCodeAndRespondentRepresentedIsTrue_thenHandlerWillNotShowMessage(boolean consented) {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(consented);
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setApplicantAddress(Address.builder().postCode("AB1 1AB").build());
+
+        if (consented) {
+            data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+        } else {
+            data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        }
+        data.getContactDetailsWrapper().setRespondentAddress(Address.builder().build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(0, handle.getErrors().size());
     }
 
     @Test
@@ -166,7 +195,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for respondent address."));
+        assertEquals("Postcode field is required for respondent address.", handle.getErrors().get(0));
     }
 
     @Test
@@ -187,7 +216,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for applicant solicitor address."));
+        assertEquals("Postcode field is required for applicant solicitor address.", handle.getErrors().get(0));
     }
 
     @Test
@@ -210,7 +239,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for respondent solicitor address."));
+        assertEquals("Postcode field is required for respondent solicitor address.", handle.getErrors().get(0));
     }
 
     @Test
@@ -231,7 +260,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for applicant solicitor address."));
+        assertEquals("Postcode field is required for applicant solicitor address.", handle.getErrors().get(0));
     }
 
     @Test
@@ -254,6 +283,6 @@ class UpdateContactDetailsContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertTrue(handle.getErrors().get(0).equals("Postcode field is required for respondent solicitor address."));
+        assertEquals("Postcode field is required for respondent solicitor address.", handle.getErrors().get(0));
     }
 }
