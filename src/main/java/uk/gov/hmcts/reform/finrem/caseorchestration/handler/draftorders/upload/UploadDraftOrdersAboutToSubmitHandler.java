@@ -102,7 +102,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         List<AgreedDraftOrderCollection> newAgreedDraftOrderCollections = draftOrderService
             .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
         draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
-        // TODO handle review package.
     }
 
     private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation) {
