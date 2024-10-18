@@ -113,6 +113,8 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
 
+        when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
+        when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -192,6 +194,9 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         when(mockUserInfo.getName()).thenReturn("Hamzah");
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
+
+        when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE))).thenReturn(true);
+        when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE))).thenReturn(false);
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
