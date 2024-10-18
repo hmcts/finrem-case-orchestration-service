@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -60,6 +61,9 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
     @Mock
     private IdamAuthService idamAuthService;
+
+    @Mock
+    private DraftOrderService draftOrderService;
 
     @Test
     void canHandle() {
