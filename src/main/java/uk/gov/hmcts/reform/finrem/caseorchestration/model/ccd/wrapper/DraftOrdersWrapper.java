@@ -48,4 +48,11 @@ public class DraftOrdersWrapper implements HasCaseDocument {
         }
         agreedDraftOrderCollection.addAll(newAgreedDraftOrderCollection);
     }
+
+    public void appendDraftOrdersReviewCollection(List<DraftOrdersReviewCollection> newDraftOrdersReviewCollection) {
+        if (draftOrdersReviewCollection == null) {
+            draftOrdersReviewCollection = new ArrayList<>();
+        }
+        draftOrdersReviewCollection.addAll(newDraftOrdersReviewCollection);
+    }
 }

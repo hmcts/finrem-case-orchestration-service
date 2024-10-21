@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,13 +11,17 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
@@ -28,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +42,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -55,6 +64,9 @@ class DraftOrderServiceTest {
 
     @Mock
     private IdamAuthService idamAuthService;
+
+    @Mock
+    private HearingService hearingService;
 
     @TestLogs
     private final TestLogger logs = new TestLogger(DraftOrderService.class);
@@ -280,6 +292,81 @@ class DraftOrderServiceTest {
             Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(null).build(),
                 List.of(expectedOrder1.toBuilder().uploadedOnBehalfOf(null).build()), true)
         );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, true", // Valid input with non-null hearing details and judge
+        "false, true, false", // Null hearing details
+        "true, false, false" // Null judge
+    })
+    @DisplayName("Should populate draft orders review collection based on hearingDetails and judge presence")
+    void shouldPopulateDraftOrdersReviewCollectionBasedOnHearingDetailsAndJudgePresence(
+        boolean hasHearingDetails,
+        boolean hasJudge,
+        boolean shouldPopulate) {
+
+        FinremCaseData finremCaseData = FinremCaseData.builder().ccdCaseId(TestConstants.CASE_ID).build();
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
+        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection = List.of(
+            AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build())
+                .build(),
+            AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().pensionSharingAnnex(CaseDocument.builder().build()).build())
+                .build()
+        );
+
+        // Mock hearingDetails and judge based on parameters
+        DynamicList hearingDetails = hasHearingDetails ? DynamicList.builder().build() : null;
+        uploadAgreedDraftOrder.setHearingDetails(hearingDetails);
+        uploadAgreedDraftOrder.setJudge(hasJudge ? "Judge Name" : null);
+
+        lenient().when(hearingService.getHearingType(any(), any())).thenReturn("Some Hearing Type");
+        lenient().when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.now());
+        lenient().when(hearingService.getHearingTime(any(), any())).thenReturn("10:00 AM");
+
+        // Call the method
+        draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
+
+        // Assert based on expected behavior
+        if (shouldPopulate) {
+            assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+                .isNotEmpty();
+
+            DraftOrdersReview populatedReview = finremCaseData.getDraftOrdersWrapper()
+                .getDraftOrdersReviewCollection().get(0).getValue();
+
+            assertThat(populatedReview.getHearingType()).isEqualTo("Some Hearing Type");
+            assertThat(populatedReview.getHearingDate()).isEqualTo(LocalDate.now());
+            assertThat(populatedReview.getHearingTime()).isEqualTo("10:00 AM");
+            assertThat(populatedReview.getHearingJudge()).isEqualTo("Judge Name");
+
+            // Further assertions for the draft order and PSA doc collections if needed
+            assertThat(populatedReview.getDraftOrderDocReviewCollection()).isNotEmpty();
+            assertThat(populatedReview.getPsaDocReviewCollection()).isNotEmpty();
+
+        } else {
+            assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+                .isNullOrEmpty();
+        }
+
+        // Verify interactions
+        if (shouldPopulate) {
+            verify(hearingService).getHearingType(any(), any());
+            verify(hearingService).getHearingDate(any(), any());
+            verify(hearingService).getHearingTime(any(), any());
+        } else {
+            verify(hearingService, never()).getHearingType(any(), any());
+            verify(hearingService, never()).getHearingDate(any(), any());
+            verify(hearingService, never()).getHearingTime(any(), any());
+        }
+        
+        if (!hasHearingDetails) {
+            assertThat(logs.getErrors()).containsExactly("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID);
+        } else if (!hasJudge) {
+            assertThat(logs.getErrors()).containsExactly("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
+        }
     }
 
 }

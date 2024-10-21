@@ -5,12 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
@@ -34,6 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class DraftOrderService {
 
     private final IdamAuthService idamAuthService;
+
+    private final HearingService hearingService;
 
     public <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
         UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
@@ -130,5 +139,74 @@ public class DraftOrderService {
 
         builder.orderStatus(OrderStatus.TO_BE_REVIEWED);
         return applySubmittedInfo(userAuthorisation, builder.build());
+    }
+
+    public void populateDraftOrdersReviewCollection(FinremCaseData finremCaseData, UploadAgreedDraftOrder uploadAgreedDraftOrder,
+                                                    List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
+        // ensure non-null hearing details
+        if (uploadAgreedDraftOrder.getHearingDetails() == null) {
+            log.error("Unexpected null hearing details for Case ID: {}", finremCaseData.getCcdCaseId());
+            return;
+        }
+
+        // ensure non-null judge
+        if (uploadAgreedDraftOrder.getJudge() == null) {
+            log.error("Unexpected null judge for Case ID: {}", finremCaseData.getCcdCaseId());
+            return;
+        }
+
+        DraftOrdersReview newDraftOrderReview = DraftOrdersReview.builder()
+            .hearingType(hearingService.getHearingType(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
+            .hearingDate(hearingService.getHearingDate(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
+            .hearingTime(hearingService.getHearingTime(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
+            .hearingJudge(uploadAgreedDraftOrder.getJudge())
+            .psaDocReviewCollection(new ArrayList<>())
+            .draftOrderDocReviewCollection(new ArrayList<>())
+            .build();
+
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>();
+        ofNullable(newAgreedDraftOrderCollection).orElse(List.of()).stream()
+            .map(AgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(ado -> ado.getDraftOrder() != null)
+            .map(ado -> DraftOrderDocReviewCollection.builder()
+                .value(DraftOrderDocumentReview.builder()
+                    .orderStatus(ado.getOrderStatus())
+                    .draftOrderDocument(ado.getDraftOrder())
+                    .submittedBy(ado.getSubmittedBy())
+                    .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
+                    .submittedDate(ado.getSubmittedDate())
+                    .resubmission(ado.getResubmission())
+                    .attachments(ado.getAttachments())
+                    .approvalJudge(newDraftOrderReview.getHearingJudge())
+                    .hearingType(newDraftOrderReview.getHearingType())
+                    .build())
+                .build())
+            .forEach(draftOrderDocReviewCollection::add);
+        newDraftOrderReview.getDraftOrderDocReviewCollection().addAll(draftOrderDocReviewCollection);
+
+        List<PsaDocReviewCollection> psaDocReviewCollection = new ArrayList<>();
+        ofNullable(newAgreedDraftOrderCollection).orElse(List.of()).stream()
+            .map(AgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(ado -> ado.getPensionSharingAnnex() != null)
+            .map(ado -> PsaDocReviewCollection.builder()
+                .value(PsaDocumentReview.builder()
+                    .orderStatus(ado.getOrderStatus())
+                    .psaDocument(ado.getPensionSharingAnnex())
+                    .submittedBy(ado.getSubmittedBy())
+                    .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
+                    .submittedDate(ado.getSubmittedDate())
+                    .resubmission(ado.getResubmission())
+                    .approvalJudge(newDraftOrderReview.getHearingJudge())
+                    .hearingType(newDraftOrderReview.getHearingType())
+                    .build())
+                .build())
+            .forEach(psaDocReviewCollection::add);
+        newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
+
+        finremCaseData.getDraftOrdersWrapper().appendDraftOrdersReviewCollection(List.of(
+            DraftOrdersReviewCollection.builder().value(newDraftOrderReview).build()
+        ));
     }
 }
