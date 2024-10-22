@@ -31,7 +31,6 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
     private final NotificationService notificationService;
 
-
     private static final String AGREED_DRAFT_ORDER_CONFIRMATION_BODY_FORMAT =
         "<br>You have uploaded your documents. They will now be reviewed by the Judge."
             + "<br><br>You can find the draft orders that you have uploaded on the "
@@ -64,6 +63,9 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         String confirmationBody = getConfirmationBody(caseDetails);
 
         notificationService.sendContestedOrderReadyToReviewToJudge(caseDetails);
+
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
