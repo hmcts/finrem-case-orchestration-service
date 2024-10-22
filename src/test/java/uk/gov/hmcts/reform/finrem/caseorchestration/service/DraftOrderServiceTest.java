@@ -343,9 +343,8 @@ class DraftOrderServiceTest {
             assertThat(populatedReview.getHearingJudge()).isEqualTo("Judge Name");
 
             // Further assertions for the draft order and PSA doc collections if needed
-            assertThat(populatedReview.getDraftOrderDocReviewCollection()).isNotEmpty();
-            assertThat(populatedReview.getPsaDocReviewCollection()).isNotEmpty();
-
+            assertThat(populatedReview.getDraftOrderDocReviewCollection()).hasSize(1);
+            assertThat(populatedReview.getPsaDocReviewCollection()).hasSize(1);
         } else {
             assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
                 .isNullOrEmpty();
