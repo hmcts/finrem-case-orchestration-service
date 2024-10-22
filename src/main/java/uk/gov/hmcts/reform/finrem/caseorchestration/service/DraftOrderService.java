@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -155,15 +156,44 @@ public class DraftOrderService {
             return;
         }
 
-        DraftOrdersReview newDraftOrderReview = DraftOrdersReview.builder()
-            .hearingType(hearingService.getHearingType(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
-            .hearingDate(hearingService.getHearingDate(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
-            .hearingTime(hearingService.getHearingTime(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue()))
-            .hearingJudge(uploadAgreedDraftOrder.getJudge())
-            .psaDocReviewCollection(new ArrayList<>())
-            .draftOrderDocReviewCollection(new ArrayList<>())
-            .build();
+        String hearingType = hearingService.getHearingType(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue());
+        LocalDate hearingDate = hearingService.getHearingDate(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue());
+        String hearingTime = hearingService.getHearingTime(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue());
+        String hearingJudge = uploadAgreedDraftOrder.getJudge();
 
+        // Check if DraftOrdersReview with the specified key exists
+        DraftOrdersReview existingDraftOrderReview = ofNullable(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .orElse(List.of()).stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .filter(Objects::nonNull)
+            .filter(dor -> dor.getHearingType().equals(hearingType) &&
+                dor.getHearingDate().equals(hearingDate) &&
+                dor.getHearingTime().equals(hearingTime) &&
+                dor.getHearingJudge().equals(hearingJudge))
+            .findFirst()
+            .orElse(null);
+
+        DraftOrdersReview newDraftOrderReview;
+        if (existingDraftOrderReview == null) {
+            // Create new DraftOrdersReview if it doesn't exist
+            newDraftOrderReview = DraftOrdersReview.builder()
+                .hearingType(hearingType)
+                .hearingDate(hearingDate)
+                .hearingTime(hearingTime)
+                .hearingJudge(hearingJudge)
+                .psaDocReviewCollection(new ArrayList<>())
+                .draftOrderDocReviewCollection(new ArrayList<>())
+                .build();
+
+            // Append new DraftOrdersReview to the collection
+            finremCaseData.getDraftOrdersWrapper().appendDraftOrdersReviewCollection(List.of(
+                DraftOrdersReviewCollection.builder().value(newDraftOrderReview).build()
+            ));
+        } else {
+            newDraftOrderReview = existingDraftOrderReview; // Use the existing DraftOrdersReview
+        }
+
+        // Process AgreedDraftOrderCollection
         List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>();
         ofNullable(newAgreedDraftOrderCollection).orElse(List.of()).stream()
             .filter(Objects::nonNull)
@@ -172,6 +202,7 @@ public class DraftOrderService {
             .filter(ado -> ado.getDraftOrder() != null)
             .map(ado -> DraftOrderDocReviewCollection.builder()
                 .value(DraftOrderDocumentReview.builder()
+                    .hearingType(hearingType)
                     .orderStatus(ado.getOrderStatus())
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
@@ -179,8 +210,6 @@ public class DraftOrderService {
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
                     .attachments(ado.getAttachments())
-                    .approvalJudge(newDraftOrderReview.getHearingJudge())
-                    .hearingType(newDraftOrderReview.getHearingType())
                     .build())
                 .build())
             .forEach(draftOrderDocReviewCollection::add);
@@ -194,21 +223,16 @@ public class DraftOrderService {
             .filter(ado -> ado.getPensionSharingAnnex() != null)
             .map(ado -> PsaDocReviewCollection.builder()
                 .value(PsaDocumentReview.builder()
+                    .hearingType(hearingType)
                     .orderStatus(ado.getOrderStatus())
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
-                    .approvalJudge(newDraftOrderReview.getHearingJudge())
-                    .hearingType(newDraftOrderReview.getHearingType())
                     .build())
                 .build())
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
-
-        finremCaseData.getDraftOrdersWrapper().appendDraftOrdersReviewCollection(List.of(
-            DraftOrdersReviewCollection.builder().value(newDraftOrderReview).build()
-        ));
     }
 }
