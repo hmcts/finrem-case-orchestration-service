@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,9 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
     protected List<CaseReference> getCaseReferences() {
         List<CaseReference> references = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/NOC_Refs.csv"))) {
+        try (InputStream is = NullCaseRoleIdsWhereEmptyTask.class.getClassLoader().getResourceAsStream("NOC_Refs.csv")) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
             String line;
             boolean firstLine = true;  // To skip the header
 
