@@ -597,7 +597,6 @@ class DraftOrderServiceTest {
             .hearingTime("1:00 PM")
             .hearingJudge("Mr Justice")
             .draftOrderDocReviewCollection(new ArrayList<>(List.of(existingDraftOrderDocReviewCollection)))
-            .psaDocReviewCollection(new ArrayList<>())  // Assuming there are no PSA orders
             .build();
 
         FinremCaseData finremCaseData = FinremCaseData.builder()
@@ -663,6 +662,122 @@ class DraftOrderServiceTest {
                             .build()
                     ))
                     .psaDocReviewCollection(List.of(
+                        PsaDocReviewCollection.builder()
+                            .value(PsaDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .psaDocument(CaseDocument.builder().documentUrl("NEW_PSA_1.doc").build())
+                                .hearingType("Existing Hearing Type")
+                                .build())
+                            .build()))
+                    .build());
+
+        // Verify interaction with mocked service
+        verify(hearingService).getHearingType(finremCaseData, selected);
+        verify(hearingService).getHearingDate(finremCaseData, selected);
+        verify(hearingService).getHearingTime(finremCaseData, selected);
+    }
+
+    @Test
+    void shouldAppendNewPsaToExistingDraftOrdersReview() {
+        // Arrange
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
+
+        DynamicListElement selected = DynamicListElement.builder().build();
+        DynamicList hearingDetails = DynamicList.builder().value(selected).build();
+        uploadAgreedDraftOrder.setHearingDetails(hearingDetails);
+        uploadAgreedDraftOrder.setJudge("Mr Justice");
+
+        // Mocking the service methods to return specific values
+        when(hearingService.getHearingType(any(), any())).thenReturn("Existing Hearing Type");
+        when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.of(2024, 10, 20));
+        when(hearingService.getHearingTime(any(), any())).thenReturn("1:00 PM");
+
+        // Existing DraftOrdersReview to be kept
+        PsaDocReviewCollection existingPsaDocReviewCollection =
+            PsaDocReviewCollection.builder()
+                .value(PsaDocumentReview.builder()
+                    .orderStatus(OrderStatus.APPROVED_BY_JUDGE)
+                    .submittedBy("Existing User")
+                    .submittedDate(LocalDateTime.of(2024, 10, 10, 12, 0))
+                    .approvalJudge("Approved Judge")
+                    .approvalDate(LocalDate.of(2023, 10, 10))
+                    .build())
+                .build();
+        DraftOrdersReview existingDraftOrderReview = DraftOrdersReview.builder()
+            .hearingType("Existing Hearing Type")
+            .hearingDate(LocalDate.of(2024, 10, 20))
+            .hearingTime("1:00 PM")
+            .hearingJudge("Mr Justice")
+            .psaDocReviewCollection(new ArrayList<>(List.of(existingPsaDocReviewCollection)))
+            .build();
+
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(new ArrayList<>(List.of(DraftOrdersReviewCollection.builder().value(existingDraftOrderReview).build())))
+                .build())
+            .build();
+
+        // Act
+        draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, List.of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder()
+                        .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                        .submittedBy("Mr ABC")
+                        .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                        .resubmission(YesOrNo.NO)
+                        .uploadedOnBehalfOf("theApplicant")
+                        .draftOrder(CaseDocument.builder().documentUrl("NEW_DO_1.doc").build())
+                        .build())
+                    .build(),
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder()
+                        .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                        .submittedBy("Mr ABC")
+                        .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                        .resubmission(YesOrNo.NO)
+                        .uploadedOnBehalfOf("theApplicant")
+                        .pensionSharingAnnex(CaseDocument.builder().documentUrl("NEW_PSA_1.doc").build())
+                        .build())
+                    .build()
+            )
+        );
+
+        // Assert
+        assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).isNotEmpty();
+        assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).hasSize(1);
+
+        // Check if new review is added as expected
+        DraftOrdersReview populatedReview = finremCaseData.getDraftOrdersWrapper()
+            .getDraftOrdersReviewCollection().get(0).getValue(); // This will depend on how your collection is ordered
+
+        // Verifying the populated properties using recursive comparison
+        assertThat(populatedReview)
+            .usingRecursiveComparison()
+            .isEqualTo(
+                DraftOrdersReview.builder()
+                    .hearingType("Existing Hearing Type")
+                    .hearingDate(LocalDate.of(2024, 10, 20))
+                    .hearingTime("1:00 PM")
+                    .hearingJudge("Mr Justice")
+                    .draftOrderDocReviewCollection(List.of(
+                        DraftOrderDocReviewCollection.builder()
+                            .value(DraftOrderDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .draftOrderDocument(CaseDocument.builder().documentUrl("NEW_DO_1.doc").build())
+                                .hearingType("Existing Hearing Type")
+                                .build())
+                            .build()
+                    ))
+                    .psaDocReviewCollection(List.of(
+                        existingPsaDocReviewCollection,
                         PsaDocReviewCollection.builder()
                             .value(PsaDocumentReview.builder()
                                 .orderStatus(OrderStatus.TO_BE_REVIEWED)
