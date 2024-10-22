@@ -105,6 +105,8 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
 
         if (noc != null && noc.getCaseRoleId() != null && noc.getCaseRoleId().getValue() == null) {
             log.info("Case {} will have caseRoleId set to null", finremCaseDetails.getId());
+            caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
+            caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
         } else {
             log.info("Case {} not affected by caseRoleId NOC bug", finremCaseDetails.getId());
         }
