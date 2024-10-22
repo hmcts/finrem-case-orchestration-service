@@ -166,6 +166,7 @@ public class DraftOrderService {
 
         List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>();
         ofNullable(newAgreedDraftOrderCollection).orElse(List.of()).stream()
+            .filter(Objects::nonNull)
             .map(AgreedDraftOrderCollection::getValue)
             .filter(Objects::nonNull)
             .filter(ado -> ado.getDraftOrder() != null)
@@ -187,6 +188,7 @@ public class DraftOrderService {
 
         List<PsaDocReviewCollection> psaDocReviewCollection = new ArrayList<>();
         ofNullable(newAgreedDraftOrderCollection).orElse(List.of()).stream()
+            .filter(Objects::nonNull)
             .map(AgreedDraftOrderCollection::getValue)
             .filter(Objects::nonNull)
             .filter(ado -> ado.getPensionSharingAnnex() != null)

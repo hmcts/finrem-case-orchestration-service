@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -21,8 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
@@ -35,6 +40,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -46,6 +52,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -306,16 +313,7 @@ class DraftOrderServiceTest {
         boolean hasJudge,
         boolean shouldPopulate) {
 
-        FinremCaseData finremCaseData = FinremCaseData.builder().ccdCaseId(TestConstants.CASE_ID).build();
         UploadAgreedDraftOrder uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
-        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection = List.of(
-            AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build())
-                .build(),
-            AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder().pensionSharingAnnex(CaseDocument.builder().build()).build())
-                .build()
-        );
 
         // Mock hearingDetails and judge based on parameters
         DynamicList hearingDetails = hasHearingDetails ? DynamicList.builder().build() : null;
@@ -326,6 +324,15 @@ class DraftOrderServiceTest {
         lenient().when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.now());
         lenient().when(hearingService.getHearingTime(any(), any())).thenReturn("10:00 AM");
 
+        FinremCaseData finremCaseData = FinremCaseData.builder().ccdCaseId(TestConstants.CASE_ID).build();
+        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection = List.of(
+            AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build())
+                .build(),
+            AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().pensionSharingAnnex(CaseDocument.builder().build()).build())
+                .build()
+        );
         // Call the method
         draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
 
@@ -368,4 +375,194 @@ class DraftOrderServiceTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideAgreedDraftOrderCollections")
+    @DisplayName("Should correctly populate DraftOrdersReview properties in FinremCaseData with varying numbers of AgreedDraftOrderCollection")
+    void shouldPopulateDraftOrdersReviewPropertiesWithVaryingNumbers(
+        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection,
+        DraftOrdersReview expectedDraftOrdersReview) {
+
+        // Arrange
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = new UploadAgreedDraftOrder();
+
+        DynamicListElement selected = DynamicListElement.builder().build();
+        DynamicList hearingDetails = DynamicList.builder().value(selected).build();
+        uploadAgreedDraftOrder.setHearingDetails(hearingDetails);
+        uploadAgreedDraftOrder.setJudge(expectedDraftOrdersReview.getHearingJudge());
+
+        // Mocking the service methods to return specific values
+        when(hearingService.getHearingType(any(), any())).thenReturn(expectedDraftOrdersReview.getHearingType());
+        when(hearingService.getHearingDate(any(), any())).thenReturn(expectedDraftOrdersReview.getHearingDate());
+        when(hearingService.getHearingTime(any(), any())).thenReturn(expectedDraftOrdersReview.getHearingTime());
+
+        FinremCaseData finremCaseData = new FinremCaseData();
+
+        // Act
+        draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
+
+        // Assert
+        assertThat(finremCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).isNotEmpty();
+
+        DraftOrdersReview populatedReview = finremCaseData.getDraftOrdersWrapper()
+            .getDraftOrdersReviewCollection().get(0).getValue();
+
+        // Verifying the populated properties using recursive comparison
+        assertThat(populatedReview)
+            .usingRecursiveComparison()
+            .isEqualTo(expectedDraftOrdersReview);
+
+        // Verify interaction with mocked service
+        verify(hearingService).getHearingType(finremCaseData, selected);
+        verify(hearingService).getHearingDate(finremCaseData, selected);
+        verify(hearingService).getHearingTime(finremCaseData, selected);
+    }
+
+    static Stream<Arguments> provideAgreedDraftOrderCollections() {
+        return Stream.of(
+            // Case 1: Empty list, no draft orders or PSA orders
+            Arguments.of(List.of(),
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of())  // No draft orders
+                    .psaDocReviewCollection(List.of())         // No PSA orders
+                    .build()),
+
+            // Case 2: Single draft order
+            Arguments.of(List.of(
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .draftOrder(CaseDocument.builder().build())
+                            .build())
+                        .build()),
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of(
+                        DraftOrderDocReviewCollection.builder()
+                            .value(DraftOrderDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .draftOrderDocument(CaseDocument.builder().build())
+                                .approvalJudge("Judge Name")
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build()))
+                    .psaDocReviewCollection(List.of())  // No PSA orders
+                    .build()),
+
+            // Case 3: Single PSA order
+            Arguments.of(List.of(
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .pensionSharingAnnex(CaseDocument.builder().build())
+                            .build())
+                        .build()),
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of())  // No draft orders
+                    .psaDocReviewCollection(List.of(
+                        PsaDocReviewCollection.builder()
+                            .value(PsaDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .psaDocument(CaseDocument.builder().build())
+                                .approvalJudge("Judge Name")
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build()))
+                    .build()),
+
+            // Case 4: Both draft and PSA orders
+            Arguments.of(List.of(
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .draftOrder(CaseDocument.builder().build())
+                            .build())
+                        .build(),
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .pensionSharingAnnex(CaseDocument.builder().build())
+                            .build())
+                        .build()),
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of(
+                        DraftOrderDocReviewCollection.builder()
+                            .value(DraftOrderDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .draftOrderDocument(CaseDocument.builder().build())
+                                .approvalJudge("Judge Name")
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build()))
+                    .psaDocReviewCollection(List.of(
+                        PsaDocReviewCollection.builder()
+                            .value(PsaDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .psaDocument(CaseDocument.builder().build())
+                                .approvalJudge("Judge Name")
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build()))
+                    .build()),
+
+            // Case 5:
+            Arguments.of(
+                Collections.singletonList((AgreedDraftOrderCollection) null), // Null entry in list
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of())  // No draft orders due to null entry
+                    .psaDocReviewCollection(List.of())         // No PSA orders due to null entry
+                    .build())
+
+        );
+    }
 }
