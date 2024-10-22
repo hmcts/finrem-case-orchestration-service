@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,6 +29,9 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
     private static final String CONFIRMATION_HEADER = "# Draft orders uploaded";
 
+    private final NotificationService notificationService;
+
+
     private static final String AGREED_DRAFT_ORDER_CONFIRMATION_BODY_FORMAT =
         "<br>You have uploaded your documents. They will now be reviewed by the Judge."
             + "<br><br>You can find the draft orders that you have uploaded on the "
@@ -38,8 +42,9 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             + "<br><br>You can find the documents that you have uploaded on the "
             + "['case documents' tab](/cases/case-details/%s#Case%%20documents).";
 
-    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService) {
         super(finremCaseDetailsMapper);
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -57,6 +62,8 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         String confirmationBody = getConfirmationBody(caseDetails);
+
+        notificationService.sendContestedOrderReadyToReviewToJudge(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
