@@ -65,11 +65,16 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
         SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
 
         log.info("{} cases found for {}, returning first {} for NOC Fix", searchResult.getTotal(), caseTypeId, batchSize);
-        return searchResult.getCases().stream()
-            .limit(batchSize)
-            .map(caseDetails -> caseDetails.getId().toString())
-            .map(CaseReference::new)
-            .toList();
+
+        List<CaseReference> caseReferences = searchResult.getCases().stream()
+                .limit(batchSize)
+                .map(caseDetails -> caseDetails.getId().toString())
+                .map(CaseReference::new)
+                .toList();
+
+        log.info("caseReferences has {} cases.", caseReferences.size());
+
+        return caseReferences;
     }
 
     @Override
