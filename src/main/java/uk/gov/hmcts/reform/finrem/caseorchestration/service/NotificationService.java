@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -27,8 +29,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -68,6 +72,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -106,6 +111,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @SuppressWarnings("java:S1133")
 public class NotificationService {
 
+    private final IdamService idamService;
+
     private final EmailService emailService;
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
@@ -118,6 +125,7 @@ public class NotificationService {
     private final CaseDataService caseDataService;
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
+    private final HearingService hearingService;
 
     /**
      * No Return.
@@ -181,7 +189,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -557,8 +565,7 @@ public class NotificationService {
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
 
         NotificationRequest notificationRequest =
-            notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper);
+            notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper);
         log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
@@ -1906,5 +1913,26 @@ public class NotificationService {
                 return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
             }
         }
+    }
+
+    public void sendContestedOrderReadyToReviewToJudge(String userAuthorisation, FinremCaseDetails caseDetails) {
+
+        FinremCaseData caseData = caseDetails.getData();
+        UploadAgreedDraftOrder agreedDraftOrder = caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder();
+
+        List<UserDetails> userDetailsList = idamService.getUserByEmailId(userAuthorisation, agreedDraftOrder.getJudge());
+
+        if (userDetailsList.isEmpty()) {
+            throw new IllegalStateException("No user found for the provided email");
+        }
+
+        String judgeName = userDetailsList.get(0).getFullName();
+        String hearingDate = String.valueOf(hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue()));
+
+        NotificationRequest judgeNotificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
+        judgeNotificationRequest.setHearingDate(hearingDate);
+        judgeNotificationRequest.setJudgeName(judgeName);
+        log.info("{} - Sending ready for review email to judge.", judgeNotificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
 }

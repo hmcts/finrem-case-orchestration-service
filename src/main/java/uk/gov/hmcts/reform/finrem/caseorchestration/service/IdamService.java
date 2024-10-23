@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.IdamServiceConfiguration;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.net.URI;
 import java.util.List;
@@ -25,6 +27,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @SuppressWarnings({"java:S3740", "java:S1905", "java:S4276"})
 public class IdamService {
+
+    private final IdamClient idamClient;
 
     private static final Function<IdamServiceConfiguration, URI> uriSupplier =
         serviceConf -> fromHttpUrl(serviceConf.getUrl() + serviceConf.getApi()).build().toUri();
@@ -81,6 +85,11 @@ public class IdamService {
     public String getUserEmailId(String authorisationToken) {
         return email.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
+    }
+
+    public List<UserDetails> getUserByEmailId(String bearerToken, String emailId) {
+        String searchQuery = "email:".concat(emailId);
+        return idamClient.searchUsers(bearerToken, searchQuery);
     }
 }
 
