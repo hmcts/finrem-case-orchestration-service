@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -182,4 +183,21 @@ public class FinremNotificationRequestMapper {
         return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
 
+    public NotificationRequest getNotificationRequestForOutstandingOrdersNeedReview(FinremCaseDetails caseDetails,
+                                                                                    String notificationEmail,
+                                                                                    DraftOrdersReview draftOrdersReview) {
+        NotificationRequest ret = getNotificationRequestForCaseworker(caseDetails, notificationEmail);
+        ret.setHearingDate(String.valueOf(draftOrdersReview.getHearingDate()));
+        ret.setEarliestToBeReviewedOrderDate(String.valueOf(draftOrdersReview.getEarliestToBeReviewedOrderDate()));
+        ret.setJudgeName(draftOrdersReview.getHearingJudge());// TODO Hamzah: lookup judgeName by getUserByEmailId
+        return ret;
+    }
+
+    public NotificationRequest getNotificationRequestForCaseworker(FinremCaseDetails caseDetails, String notificationEmail) {
+        return buildNotificationRequest(caseDetails, SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(notificationEmail)
+            .solicitorNameKey("")
+            .solicitorReferenceKey("")
+            .build());
+    }
 }

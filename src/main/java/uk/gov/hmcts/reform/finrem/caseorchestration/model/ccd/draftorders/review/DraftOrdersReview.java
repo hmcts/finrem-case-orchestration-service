@@ -8,10 +8,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Builder
 @Getter
@@ -41,4 +45,23 @@ public class DraftOrdersReview implements HasCaseDocument {
         }
         return this.psaDocReviewCollection;
     }
+
+    public LocalDate getEarliestToBeReviewedOrderDate() {
+        // Collect the concatenated streams into a list to avoid reusing the stream
+        List<? extends Reviewable> reviewables = Stream.concat(
+                draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue),
+                psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue))
+            .toList();
+
+        // Process the collected list to find the earliest date
+        return reviewables.stream()
+            .filter(r -> r.getOrderStatus() == null || OrderStatus.nonProcessedOrderStatuses().contains(r.getOrderStatus()))
+            .filter(r -> r.getNotificationSentDate() == null)
+            .map(Reviewable::getSubmittedDate)
+            .filter(Objects::nonNull)  // Ensure the date is not null
+            .map(LocalDateTime::toLocalDate)  // Convert LocalDateTime to LocalDate
+            .min(LocalDate::compareTo)  // Find the minimum LocalDate
+            .orElse(null);  // Return null if no dates are found
+    }
+
 }

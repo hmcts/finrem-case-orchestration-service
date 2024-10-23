@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -94,6 +95,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOTICE_OF_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_ORDER_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_UPDATE_FRC_COURT;
@@ -176,6 +178,22 @@ class FinremNotificationServiceTest {
 
         lenient().when(objectMapper.readValue(getCourtDetailsString(), HashMap.class))
             .thenReturn(new HashMap(Map.of("email", "FRCLondon@justice.gov.uk")));
+    }
+
+    @Test
+    void shouldSendOutstandingOrdersNeedReviewEmailToCaseworker() {
+        DraftOrdersReview draftOrderReview = DraftOrdersReview.builder().build();
+
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+        when(finremNotificationRequestMapper
+            .getNotificationRequestForOutstandingOrdersNeedReview(any(FinremCaseDetails.class), anyString(), eq(draftOrderReview)))
+            .thenReturn(NotificationRequest.builder().build());
+
+        notificationService.sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(contestedFinremCaseDetails, draftOrderReview);
+
+        verify(finremNotificationRequestMapper)
+            .getNotificationRequestForOutstandingOrdersNeedReview(eq(contestedFinremCaseDetails), anyString(), eq(draftOrderReview));
+        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER));
     }
 
     @Test

@@ -7,7 +7,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -24,11 +26,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -237,5 +241,60 @@ public class DraftOrderService {
                 .build())
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
+    }
+
+    public List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+        DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
+        return getOutstandingOrdersToBeReviewed(draftOrdersWrapper, daysSinceOrderUpload);
+    }
+
+    // Method to get DraftOrdersReview objects based on the specified conditions
+    public static List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
+        List<DraftOrdersReview> outstandingOrders = new ArrayList<>();
+
+
+        if (draftOrdersWrapper != null && draftOrdersWrapper.getDraftOrdersReviewCollection() != null) {
+            for (DraftOrdersReviewCollection draftOrdersReviewCollection : draftOrdersWrapper.getDraftOrdersReviewCollection()) {
+                boolean found = false;
+                if (draftOrdersReviewCollection != null && draftOrdersReviewCollection.getValue() != null) {
+                    DraftOrdersReview draftOrdersReview = draftOrdersReviewCollection.getValue();
+
+                    // Check DraftOrderDocReviewCollection
+                    if (draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
+                        for (DraftOrderDocReviewCollection docReviewCollection : draftOrdersReview.getDraftOrderDocReviewCollection()) {
+                            if (docReviewCollection != null && docReviewCollection.getValue() != null) {
+                                DraftOrderDocumentReview docReview = docReviewCollection.getValue();
+                                if (checkOrderCondition(Collections.singletonList(docReview), daysSinceOrderUpload)) {
+                                    outstandingOrders.add(draftOrdersReview);
+                                    found = true;
+                                }
+                            }
+                        }
+                    }
+
+                    // Check PsaDocReviewCollection
+                    if (!found && draftOrdersReview.getPsaDocReviewCollection() != null) {
+                        for (PsaDocReviewCollection psaReviewCollection : draftOrdersReview.getPsaDocReviewCollection()) {
+                            if (psaReviewCollection != null && psaReviewCollection.getValue() != null) {
+                                PsaDocumentReview psaReview = psaReviewCollection.getValue();
+                                if (checkOrderCondition(Collections.singletonList(psaReview), daysSinceOrderUpload)) {
+                                    outstandingOrders.add(draftOrdersReview);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return outstandingOrders;
+    }
+
+    static <T extends Reviewable> boolean checkOrderCondition(List<? extends T> orderCollections, int daysSinceOrderUpload) {
+        return orderCollections != null && orderCollections.stream()
+            .anyMatch(order -> order != null
+                && (order.getOrderStatus() == null || OrderStatus.nonProcessedOrderStatuses().contains(order.getOrderStatus()))
+                && order.getNotificationSentDate() == null
+                && order.getSubmittedDate() != null
+                && order.getSubmittedDate().isBefore(LocalDateTime.now().minusDays(daysSinceOrderUpload)));
     }
 }
