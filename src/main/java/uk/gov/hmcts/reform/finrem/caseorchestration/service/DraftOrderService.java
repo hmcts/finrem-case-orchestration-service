@@ -166,10 +166,10 @@ public class DraftOrderService {
             .orElse(List.of()).stream()
             .map(DraftOrdersReviewCollection::getValue)
             .filter(Objects::nonNull)
-            .filter(dor -> dor.getHearingType().equals(hearingType) &&
-                dor.getHearingDate().equals(hearingDate) &&
-                dor.getHearingTime().equals(hearingTime) &&
-                dor.getHearingJudge().equals(hearingJudge))
+            .filter(dor -> dor.getHearingType().equals(hearingType)
+                && dor.getHearingDate().equals(hearingDate)
+                && dor.getHearingTime().equals(hearingTime)
+                && dor.getHearingJudge().equals(hearingJudge))
             .findFirst()
             .orElse(null);
 

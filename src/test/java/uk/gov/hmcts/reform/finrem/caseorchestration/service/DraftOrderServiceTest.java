@@ -551,7 +551,7 @@ class DraftOrderServiceTest {
                             .build()))
                     .build()),
 
-            // Case 5:
+            // Case 5: null newAgreedDraftOrderCollection entry
             Arguments.of(
                 Collections.singletonList((AgreedDraftOrderCollection) null), // Null entry in list
                 DraftOrdersReview.builder()
@@ -561,6 +561,61 @@ class DraftOrderServiceTest {
                     .hearingJudge("Judge Name")
                     .draftOrderDocReviewCollection(List.of())  // No draft orders due to null entry
                     .psaDocReviewCollection(List.of())         // No PSA orders due to null entry
+                    .build()),
+
+            // Case 6: multiple draft orders should be grouped together
+            Arguments.of(List.of(
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .draftOrder(CaseDocument.builder().documentUrl("NEW_DOC1.doc").build())
+                            .build())
+                        .build(),
+
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                            .submittedBy("Mr ABC")
+                            .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                            .resubmission(YesOrNo.NO)
+                            .uploadedOnBehalfOf("theApplicant")
+                            .draftOrder(CaseDocument.builder().documentUrl("NEW_DOC2.doc").build())
+                            .build())
+                        .build()),
+                DraftOrdersReview.builder()
+                    .hearingType("First Directions Appointment (FDA)")
+                    .hearingDate(LocalDate.of(2024, 10, 21))
+                    .hearingTime("2:00 PM")
+                    .hearingJudge("Judge Name")
+                    .draftOrderDocReviewCollection(List.of(
+                        DraftOrderDocReviewCollection.builder()
+                            .value(DraftOrderDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .draftOrderDocument(CaseDocument.builder().documentUrl("NEW_DOC1.doc").build())
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build(),
+                        DraftOrderDocReviewCollection.builder()
+                            .value(DraftOrderDocumentReview.builder()
+                                .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                                .submittedBy("Mr ABC")
+                                .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                                .resubmission(YesOrNo.NO)
+                                .uploadedOnBehalfOf("theApplicant")
+                                .draftOrderDocument(CaseDocument.builder().documentUrl("NEW_DOC2.doc").build())
+                                .hearingType("First Directions Appointment (FDA)")
+                                .build())
+                            .build()
+                    ))
+                    .psaDocReviewCollection(List.of())  // No PSA orders
                     .build())
         );
     }
