@@ -384,19 +384,6 @@ class DraftOrderServiceTest {
             verify(hearingService, never()).getHearingDate(any(), any());
             verify(hearingService, never()).getHearingTime(any(), any());
         }
-        
-//        if (!hasHearingDetails) {
-//            Exception exception = assertThrows(AssignCaseAccessException.class, () ->
-//                assignApplicantSolicitorService.setApplicantSolicitor(caseDetails, USER_AUTH));
-//
-//            String expectedMessage = "Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID;
-//            String actualMessage = exception.getMessage();
-//            Assert.assertEquals(expectedMessage, actualMessage);
-//
-////            assertThat(logs.getErrors()).containsExactly("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID);
-//        } else if (!hasJudge) {
-//            assertThat(logs.getErrors()).containsExactly("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
-//        }
     }
 
     @ParameterizedTest
