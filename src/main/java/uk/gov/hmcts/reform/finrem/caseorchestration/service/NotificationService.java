@@ -561,8 +561,7 @@ public class NotificationService {
                                                      SolicitorCaseDataKeysWrapper dataKeysWrapper) {
 
         NotificationRequest notificationRequest =
-            notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-                dataKeysWrapper);
+            notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper);
         log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
