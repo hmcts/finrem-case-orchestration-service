@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,7 +150,7 @@ class UploadDraftOrdersSubmittedHandlerTest {
     }
 
     @Test
-    void shouldClearTemporaryFieldsAfterHandling() {
+    void givenCaseWithUploadedDraftOrdersWhenHandleThenClearTemporaryFieldsAndDisplayConfirmation() {
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -167,6 +168,7 @@ class UploadDraftOrdersSubmittedHandlerTest {
 
         var response = uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
 
+        verify(notificationService).sendContestedOrderReadyToReviewToJudge(any(FinremCaseDetails.class));
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
