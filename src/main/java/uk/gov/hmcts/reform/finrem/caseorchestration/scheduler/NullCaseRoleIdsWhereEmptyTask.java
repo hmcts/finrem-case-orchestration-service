@@ -1,22 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -55,27 +58,18 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        List<CaseReference> references = new ArrayList<>();
+        log.info("Getting case references for NOC migration");
+        String searchQuery = getSearchQuery();
 
-        try (InputStream is = NullCaseRoleIdsWhereEmptyTask.class.getClassLoader().getResourceAsStream("NOC_Refs.csv")) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String systemUserToken = getSystemUserToken();
+        SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
 
-            String line;
-            boolean firstLine = true;  // To skip the header
-
-            while ((line = br.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false;  // Skip the header line
-                    continue;
-                }
-
-                String[] values = line.split(",");
-                references.add(CaseReference.builder().caseReference(values[0]).build());
-            }
-        } catch (IOException e) {
-            log.info("Error loading in Case Data CSV {}", e.getMessage());
-        }
-        return references;
+        log.info("{} cases found for {}, returning first {} for NOC Fix", searchResult.getTotal(), caseTypeId, batchSize);
+        return searchResult.getCases().stream()
+            .limit(batchSize)
+            .map(caseDetails -> caseDetails.getId().toString())
+            .map(CaseReference::new)
+            .toList();
     }
 
     @Override
@@ -107,9 +101,26 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
             log.info("Case {} will have caseRoleId set to null", finremCaseDetails.getId());
             caseData.setCcdCaseId(String.valueOf(finremCaseDetails.getId()));
             caseData.getChangeOrganisationRequestField().setCaseRoleId(null);
+            caseData.setIsNocFixAppliedFlag(YesOrNo.YES);
         } else {
             log.info("Case {} not affected by caseRoleId NOC bug", finremCaseDetails.getId());
+            caseData.setIsNocFixAppliedFlag(YesOrNo.NO);
         }
+    }
+
+    private String getSearchQuery() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        LocalDateTime nocBugReleaseDateTime = LocalDateTime.parse("30-07-2024 23:59", formatter);
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .mustNot(QueryBuilders.existsQuery(CASE_DATA_NOC_FIX_APPLIED_FLAG))
+            .mustNot(new TermQueryBuilder("state.keyword", "close"))
+            .filter(QueryBuilders.rangeQuery("last_modified").from(nocBugReleaseDateTime));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+            .query(boolQueryBuilder);
+
+        return searchSourceBuilder.toString();
     }
 
     void setTaskEnabled(boolean taskEnabled) {
