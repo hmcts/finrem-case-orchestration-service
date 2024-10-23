@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -115,4 +116,39 @@ public class HearingService {
             .listItems(dynamicListElement)
             .build();
     }
+
+    public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected, FinremCaseData::getHearingDate, ihc -> ihc.getValue().getInterimHearingDate());
+    }
+
+    public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected, d -> d.getHearingType() == null ? "" : d.getHearingType().getId(),
+            ihc -> ihc.getValue().getInterimHearingType().getId());
+    }
+
+    public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected,  FinremCaseData::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
+    }
+
+    // Helper method to get hearing information
+    private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
+                                 Function<FinremCaseData, T> hearingExtractor,
+                                 Function<InterimHearingCollection, T> extractor) {
+        if (StringUtils.isEmpty(selected.getCode())) {
+            return null;
+        }
+
+        // Return time estimate for top-level hearing
+        if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
+            return hearingExtractor.apply(caseData); // Use hearingExtractor to get the value
+        }
+
+        // Search for the matching InterimHearingCollection
+        return ofNullable(caseData.getInterimWrapper().getInterimHearings()).orElse(List.of()).stream()
+            .filter(ihc -> ihc.getId().toString().equals(selected.getCode()) && ihc.getValue() != null)
+            .map(extractor)
+            .findFirst()
+            .orElse(null); // Return null if no match is found
+    }
+
 }
