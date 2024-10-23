@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -31,7 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -146,14 +149,14 @@ public class DraftOrderService {
                                                     List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         // ensure non-null hearing details
         if (uploadAgreedDraftOrder.getHearingDetails() == null) {
-            log.error("Unexpected null hearing details for Case ID: {}", finremCaseData.getCcdCaseId());
-            return;
+            throw new InvalidCaseDataException(BAD_REQUEST.value(),
+                format("Unexpected null hearing details for Case ID: %s", finremCaseData.getCcdCaseId()));
         }
 
         // ensure non-null judge
         if (uploadAgreedDraftOrder.getJudge() == null) {
-            log.error("Unexpected null judge for Case ID: {}", finremCaseData.getCcdCaseId());
-            return;
+            throw new InvalidCaseDataException(BAD_REQUEST.value(),
+                format("Unexpected null judge for Case ID: %s", finremCaseData.getCcdCaseId()));
         }
 
         String hearingType = hearingService.getHearingType(finremCaseData, uploadAgreedDraftOrder.getHearingDetails().getValue());

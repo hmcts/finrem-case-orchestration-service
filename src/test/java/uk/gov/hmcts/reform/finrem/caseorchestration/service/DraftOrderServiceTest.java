@@ -13,6 +13,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -50,6 +51,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -337,8 +339,19 @@ class DraftOrderServiceTest {
                 .value(AgreedDraftOrder.builder().pensionSharingAnnex(CaseDocument.builder().build()).build())
                 .build()
         );
+
         // Call the method
-        draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
+        if (!hasHearingDetails || !hasJudge) {
+            Exception exception = assertThrows(InvalidCaseDataException.class, () ->
+                draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection));
+            String expectedMessage = !hasHearingDetails
+                ? ("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID)
+                : ("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
+            String actualMessage = exception.getMessage();
+            assertEquals(expectedMessage, actualMessage);
+        } else {
+            draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
+        }
 
         // Assert based on expected behavior
         if (shouldPopulate) {
@@ -372,11 +385,18 @@ class DraftOrderServiceTest {
             verify(hearingService, never()).getHearingTime(any(), any());
         }
         
-        if (!hasHearingDetails) {
-            assertThat(logs.getErrors()).containsExactly("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID);
-        } else if (!hasJudge) {
-            assertThat(logs.getErrors()).containsExactly("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
-        }
+//        if (!hasHearingDetails) {
+//            Exception exception = assertThrows(AssignCaseAccessException.class, () ->
+//                assignApplicantSolicitorService.setApplicantSolicitor(caseDetails, USER_AUTH));
+//
+//            String expectedMessage = "Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID;
+//            String actualMessage = exception.getMessage();
+//            Assert.assertEquals(expectedMessage, actualMessage);
+//
+////            assertThat(logs.getErrors()).containsExactly("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID);
+//        } else if (!hasJudge) {
+//            assertThat(logs.getErrors()).containsExactly("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
+//        }
     }
 
     @ParameterizedTest
