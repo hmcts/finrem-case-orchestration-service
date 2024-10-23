@@ -29,8 +29,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -108,6 +110,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 @SuppressWarnings("java:S1133")
 public class NotificationService {
+
+    private final IdamService idamService;
 
     private final EmailService emailService;
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
@@ -1911,12 +1915,18 @@ public class NotificationService {
         }
     }
 
-    public void sendContestedOrderReadyToReviewToJudge(FinremCaseDetails caseDetails) {
+    public void sendContestedOrderReadyToReviewToJudge(String userAuthorisation, FinremCaseDetails caseDetails) {
 
         FinremCaseData caseData = caseDetails.getData();
         UploadAgreedDraftOrder agreedDraftOrder = caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder();
 
-        String judgeName = agreedDraftOrder.getJudge();
+        List<UserDetails> userDetailsList = idamService.getUserByEmailId(userAuthorisation, agreedDraftOrder.getJudge());
+
+        if (userDetailsList.isEmpty()) {
+            throw new IllegalStateException("No user found for the provided email");
+        }
+
+        String judgeName = userDetailsList.get(0).getFullName();
         String hearingDate = String.valueOf(hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue()));
 
         NotificationRequest judgeNotificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
