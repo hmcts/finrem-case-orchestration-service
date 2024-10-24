@@ -57,8 +57,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class RejectGeneralApplicationSubmittedHandlerTest {
 
-    public static final String APPLICANT = "applicant";
-    public static final String RESPONDENT = "respondent";
+    public static final String APPLICANT = "Applicant";
+    public static final String RESPONDENT = "Respondent";
     public static final String TEST_ID = "1fa411d2-3da3-468d-ad8d-3bfb2514203d";
 
     @InjectMocks
@@ -222,6 +222,91 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         verify(paperNotificationService, never()).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
         verify(paperNotificationService, never()).printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
 
+    }
+
+
+    @Test
+    public void givenApplicantSolicitorDigital_whenHandle_RejectApplication_thenSendEmailToAppSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicIntervenerListForApplicant();
+
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
+        verify(paperNotificationService, never()).printApplicantRejectionGeneralApplication(
+            caseDetailsBefore(buildDynamicIntervenerListForApplicant()), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenApplicantSolicitorNonDigital_whenHandle_RejectApplication_thenSendLetterToAppSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicIntervenerListForApplicant();
+
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
+            caseDetailsBefore(dynamicRadioList));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(paperNotificationService).printApplicantRejectionGeneralApplication(
+            caseDetailsBefore(buildDynamicIntervenerListForApplicant()), AUTH_TOKEN);
+        verify(notificationService, never()).sendGeneralApplicationRejectionEmailToAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void givenRespondentSolicitorDigital_whenHandle_RejectApplication_thenSendEmailToAppSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicIntervenerListForRespondent();
+
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService).sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
+        verify(paperNotificationService, never()).printApplicantRejectionGeneralApplication(
+            caseDetailsBefore(buildDynamicIntervenerListForRespondent()), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenRespondentSolicitorNonDigital_whenHandle_RejectApplication_thenSendLetterToAppSolicitor() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        DynamicRadioList dynamicRadioList = buildDynamicIntervenerListForRespondent();
+
+        when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
+        when(finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetails())).thenReturn(
+            caseDetailsBefore(dynamicRadioList));
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        wrapperBefore.getGeneralApplications().forEach(ga -> ga.getValue().setGeneralApplicationSender(
+            dynamicRadioList));
+        submittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(paperNotificationService).printRespondentRejectionGeneralApplication(
+            caseDetailsBefore(buildDynamicIntervenerListForRespondent()), AUTH_TOKEN);
+        verify(notificationService, never()).sendGeneralApplicationRejectionEmailToResSolicitor(callbackRequest.getCaseDetails());
     }
 
     private DynamicList generalApplicationDynamicList() {
