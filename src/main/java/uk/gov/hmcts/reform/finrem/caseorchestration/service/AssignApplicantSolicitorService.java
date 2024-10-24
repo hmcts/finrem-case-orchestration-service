@@ -46,7 +46,6 @@ public class AssignApplicantSolicitorService {
             } else {
                 String errorMessage = "Applicant organisation not selected";
                 log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
-                throw new AssignCaseAccessException(errorMessage);
             }
         } catch (Exception e) {
             log.error("Exception when trying to assign case access for Case ID: {}, {}",
