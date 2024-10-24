@@ -251,7 +251,7 @@ public class DraftOrderService {
         LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
         log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
 
-        return draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
             .map(DraftOrdersReviewCollection::getValue) // Get DraftOrdersReview from collection
             .filter(draftOrderReview -> draftOrderReview.getEarliestToBeReviewedOrderDate() != null
                 && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
