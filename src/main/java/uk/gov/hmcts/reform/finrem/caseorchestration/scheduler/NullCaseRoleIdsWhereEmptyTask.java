@@ -123,7 +123,8 @@ public class NullCaseRoleIdsWhereEmptyTask extends BaseTask {
             .filter(QueryBuilders.rangeQuery("last_modified").from(nocBugReleaseDateTime));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-            .query(boolQueryBuilder);
+            .query(boolQueryBuilder)
+            .size(batchSize);
 
         return searchSourceBuilder.toString();
     }
