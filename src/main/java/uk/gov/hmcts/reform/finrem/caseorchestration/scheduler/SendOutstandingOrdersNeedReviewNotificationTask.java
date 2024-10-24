@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
 /**
  * Scheduled task to send notification about outstanding orders need review (contested).
@@ -92,15 +98,56 @@ public class SendOutstandingOrdersNeedReviewNotificationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        draftOrderService.getOutstandingOrdersToBeReviewed(finremCaseDetails, daysSinceOrderUpload).forEach(draftOrderReview ->
-                notificationService.sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(finremCaseDetails, draftOrderReview));
+        draftOrderService.getOutstandingOrdersToBeReviewed(finremCaseDetails, daysSinceOrderUpload).forEach(draftOrderReview -> {
+            notificationService.sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(finremCaseDetails, draftOrderReview);
+            // TODO mark the notificationSentDate
+        });
     }
 
     private String getSearchQuery() {
-        // TODO Elastic Query
+        // 1. Query for psaDocReviewCollection or draftOrderDocReviewCollection where orderStatus is either null or not "TO_BE_REVIEWED"
+        BoolQueryBuilder orderStatusQuery = QueryBuilders.boolQuery()
+            .should(QueryBuilders.nestedQuery("data.psaDocReviewCollection",
+                QueryBuilders.boolQuery()
+                    .should(QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery("data.psaDocReviewCollection.value.orderStatus")))
+                    .should(QueryBuilders.boolQuery().mustNot(new TermQueryBuilder("data.psaDocReviewCollection.value.orderStatus.keyword",
+                        TO_BE_REVIEWED.name()))),
+                ScoreMode.None))
+            .should(QueryBuilders.nestedQuery("data.draftOrderDocReviewCollection",
+                QueryBuilders.boolQuery()
+                    .should(QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery("data.draftOrderDocReviewCollection.value.orderStatus")))
+                    .should(QueryBuilders.boolQuery().mustNot(new TermQueryBuilder("data.draftOrderDocReviewCollection.value.orderStatus.keyword",
+                        TO_BE_REVIEWED.name()))),
+                ScoreMode.None))
+            .minimumShouldMatch(1);
+
+        // 2. Query for submittedDate is null or older than 14 days
+        BoolQueryBuilder submittedDateQuery = QueryBuilders.boolQuery()
+            .should(QueryBuilders.boolQuery()
+                .mustNot(QueryBuilders.existsQuery("data.psaDocReviewCollection.value.submittedDate"))
+                .mustNot(QueryBuilders.existsQuery("data.draftOrderDocReviewCollection.value.submittedDate")))
+            .should(QueryBuilders.rangeQuery("data.psaDocReviewCollection.value.submittedDate")
+                .lt("now-" + daysSinceOrderUpload + "d/d"))
+            .should(QueryBuilders.rangeQuery("data.draftOrderDocReviewCollection.value.submittedDate")
+                .lt("now-" + daysSinceOrderUpload + "d/d"))
+            .minimumShouldMatch(1);
+
+        // 3. Query for notificationSentDate being null
+        BoolQueryBuilder approvalDateQuery = QueryBuilders.boolQuery()
+            .must(QueryBuilders.boolQuery()
+                .mustNot(QueryBuilders.existsQuery("data.psaDocReviewCollection.value.notificationSentDate"))
+                .mustNot(QueryBuilders.existsQuery("data.draftOrderDocReviewCollection.value.notificationSentDate")));
+
+        // Combine the conditions
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .must(orderStatusQuery)
+            .must(submittedDateQuery)
+            .must(approvalDateQuery);
+
+        // Create the search source
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-            .size(batchSize) //.query(boolQueryBuilder)
-            ;
+            .size(batchSize)
+            .query(boolQueryBuilder);
 
         return searchSourceBuilder.toString();
     }
