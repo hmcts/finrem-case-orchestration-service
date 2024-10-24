@@ -8,6 +8,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
+import org.apache.pdfbox.pdmodel.interactive.form.PDField;
+import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +36,7 @@ import static java.lang.String.format;
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.WIDTH_AND_HEIGHT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService.CONVERTER;
 
 @Service
@@ -96,6 +102,60 @@ public class PdfStampingService {
         doc.close();
 
         return outputBytes.toByteArray();
+    }
+
+    public Document approveDocument(Document document,
+                                    String authToken,
+                                    String dateTextBoxName,
+                                    String approvalDate,
+                                    String caseId) {
+        log.info("Approve document : {}", document);
+        try {
+            byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
+            byte[] approvedDoc = approveDocument(docInBytes, dateTextBoxName, approvalDate);
+            MultipartFile multipartFile =
+                FinremMultipartFile.builder().name(document.getFileName()).content(approvedDoc)
+                    .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
+            List<FileUploadResponse> uploadResponse =
+                emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
+            FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
+                .filter(response -> response.getStatus() == HttpStatus.OK)
+                .orElseThrow(() -> new DocumentStorageException("Failed to store document"));
+            return CONVERTER.apply(fileSaved);
+        } catch (Exception ex) {
+            throw new StampDocumentException(format("Failed to add approved date for document : %s, "
+                + "dateTextBoxName : %s, Exception  : %s", document, dateTextBoxName, ex.getMessage()), ex);
+        }
+    }
+
+    private byte[] approveDocument(byte[] inputDocInBytes, String dateTextBoxName, LocalDate approvalDate) throws Exception {
+        PDDocument doc = Loader.loadPDF(inputDocInBytes);
+        doc.setAllSecurityToBeRemoved(true);
+
+        Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
+
+        if (acroForm.isPresent()) {
+            PDField field = acroForm.get().getField(dateTextBoxName);
+            if (field instanceof PDTextField) {
+
+                PDTextField textBox = (PDTextField) field;
+                textBox.setDefaultAppearance("/Helv 12 Tf 0 g");
+                textBox.setValue(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(approvalDate));
+
+                ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
+                doc.save(outputBytes);
+                doc.close();
+
+                return outputBytes.toByteArray();
+            } else {
+                log.info("Pdf document does not contain Date Text Box {}",
+                    dateTextBoxName);
+            }
+        } else {
+            log.info("Pdf document is flatten / not editable");
+        }
+
+        return inputDocInBytes;
     }
 
     public byte[] imageAsBytes(String fileName) throws IOException {

@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +67,8 @@ public class ConsentOrderApprovedDocumentService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
     private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
+
+    private final String FORM_P1_PDF_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         String fileName;
@@ -118,18 +123,21 @@ public class ConsentOrderApprovedDocumentService {
     public List<PensionTypeCollection> stampPensionDocuments(List<PensionTypeCollection> pensionList,
                                                              String authToken,
                                                              StampType stampType,
+                                                             LocalDate approvalDate,
                                                              String caseId) {
         return pensionList.stream()
             .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
-            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken, stampType, caseId))
+            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken, stampType, approvalDate, caseId))
             .toList();
     }
 
     private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument,
                                                         String authToken,
                                                         StampType stampType,
+                                                        LocalDate approvalDate,
                                                         String caseId) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
+        CaseDocument approvedDocument = genericDocumentService.approveDocument(document, authToken, FORM_P1_PDF_TEXTBOX_NAME, approvalDate, caseId);
         CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, stampType, caseId);
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
@@ -210,7 +218,8 @@ public class ConsentOrderApprovedDocumentService {
                                                                                 String caseId) {
         List<PensionTypeCollection> pensionDocs = getContestedConsentPensionDocuments(caseData);
         StampType stampType = documentHelper.getStampType(caseData);
-        return stampPensionDocuments(pensionDocs, authToken, stampType, caseId);
+        LocalDate approvalDate = caseData.getConsentOrderWrapper().getConsentDateOfOrder();
+        return stampPensionDocuments(pensionDocs, authToken, stampType, approvalDate, caseId);
     }
 
     private List<PensionTypeCollection> getContestedConsentPensionDocuments(FinremCaseData caseData) {
@@ -335,6 +344,7 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument consentOrderAnnexStamped =
             genericDocumentService.annexStampDocument(finremCaseData.getLatestConsentOrder(),
                 userAuthorisation, stampType, caseId);
+        String approvalDate = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder()
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -347,7 +357,7 @@ public class ConsentOrderApprovedDocumentService {
                     + "stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
             List<PensionTypeCollection> stampedPensionDocs = stampPensionDocuments(pensionCollection,
-                userAuthorisation, stampType, caseId);
+                userAuthorisation, stampType, approvalDate, caseId);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseId);
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }

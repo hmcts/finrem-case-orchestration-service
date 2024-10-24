@@ -88,13 +88,31 @@ public class GenericDocumentService {
                                       StampType stampType,
                                       String caseId) {
         CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
-        log.info("Pdf converation if document is not pdf origial {} pdfdocument {} for Case ID: {}",
+        log.info("Pdf converation if document is not pdf original {} pdfdocument {} for Case ID: {}",
             document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
         Document stampedDocument = pdfStampingService.stampDocument(
             Document.builder().url(pdfCaseDocument.getDocumentUrl())
                 .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
                 .fileName(pdfCaseDocument.getDocumentFilename())
                 .build(), authorisationToken, false, stampType, caseId);
+        return toCaseDocument(stampedDocument);
+    }
+
+    public CaseDocument approveDocument(CaseDocument document,
+                                      String authorisationToken,
+                                        String dateTextBoxName,
+                                        String approvalDate,
+                                        String caseId) {
+        CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
+        log.info("Pdf converation if document is not pdf original {} pdfdocument {} for Case ID: {}",
+            document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
+
+        Document stampedDocument = pdfStampingService.approveDocument(
+            Document.builder().url(pdfCaseDocument.getDocumentUrl())
+                .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
+                .fileName(pdfCaseDocument.getDocumentFilename())
+                .build(), authorisationToken, dateTextBoxName, approvalDate, caseId);
+
         return toCaseDocument(stampedDocument);
     }
 
