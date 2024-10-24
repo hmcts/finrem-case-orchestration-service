@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
@@ -17,10 +18,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class DraftOrdersReview implements HasCaseDocument {
     private String hearingType;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -49,8 +53,8 @@ public class DraftOrdersReview implements HasCaseDocument {
     public LocalDate getEarliestToBeReviewedOrderDate() {
         // Collect the concatenated streams into a list to avoid reusing the stream
         List<? extends Reviewable> reviewables = Stream.concat(
-                draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue),
-                psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue))
+                ofNullable(draftOrderDocReviewCollection).orElse(List.of()).stream().map(DraftOrderDocReviewCollection::getValue),
+                ofNullable(psaDocReviewCollection).orElse(List.of()).stream().map(PsaDocReviewCollection::getValue))
             .toList();
 
         // Process the collected list to find the earliest date
