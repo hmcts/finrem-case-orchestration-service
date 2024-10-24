@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -48,12 +49,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -858,4 +862,246 @@ class DraftOrderServiceTest {
         verify(hearingService).getHearingDate(finremCaseData, selected);
         verify(hearingService).getHearingTime(finremCaseData, selected);
     }
+
+    @ParameterizedTest
+    @MethodSource("provideMultipleReviewsWithStatusTestCases")
+    void testGetEarliestToBeReviewedOrderDate_withMultipleReviewsAndStatus(List<Optional<LocalDateTime>> draftDates,
+                                                                           List<Optional<OrderStatus>> draftStatuses,
+                                                                           List<Optional<LocalDateTime>> psaDates,
+                                                                           List<Optional<OrderStatus>> psaStatuses,
+                                                                           List<Optional<LocalDateTime>> draftNotificationDates,
+                                                                           List<Optional<LocalDateTime>> psaNotificationDates,
+                                                                           int expectedSituationForCase1, int expectedSituationForCase2) {
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>();
+        List<PsaDocReviewCollection> psaDocReviewCollection = new ArrayList<>();
+
+        // Populate draft reviews
+        for (int i = 0; i < draftDates.size(); i++) {
+            DraftOrderDocumentReview reviewable = DraftOrderDocumentReview.builder()
+                .submittedDate(draftDates.get(i).orElse(null))
+                .orderStatus(draftStatuses.get(i).orElse(null))
+                .notificationSentDate(draftNotificationDates.get(i).orElse(null))
+                .build();
+
+            DraftOrderDocReviewCollection draftCollection = new DraftOrderDocReviewCollection();
+            draftCollection.setValue(reviewable);
+            draftOrderDocReviewCollection.add(draftCollection);
+        }
+
+        // Populate PSA reviews
+        for (int i = 0; i < psaDates.size(); i++) {
+            PsaDocumentReview reviewable = PsaDocumentReview.builder()
+                .submittedDate(psaDates.get(i).orElse(null))
+                .orderStatus(psaStatuses.get(i).orElse(null))
+                .notificationSentDate(psaNotificationDates.get(i).orElse(null))
+                .build();
+
+            PsaDocReviewCollection psaCollection = new PsaDocReviewCollection();
+            psaCollection.setValue(reviewable);
+            psaDocReviewCollection.add(psaCollection);
+        }
+
+        LocalDate fixedDate = LocalDate.of(2024, 10, 18);
+        try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
+            mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
+
+            // Case 1: Single draftOrdersReviewCollection
+            List<DraftOrdersReview> actual = draftOrderService.getOutstandingOrdersToBeReviewed(FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        // may need a multiple
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                                .psaDocReviewCollection(psaDocReviewCollection)
+                                .build()
+                            ).build()
+                    )).build())).build(), 14);
+            assertExpectedSituationForCase1(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase1);
+
+            // Case 2: Multiple draftOrdersReviewCollection
+            actual = draftOrderService.getOutstandingOrdersToBeReviewed(FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        // may need a multiple
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                                .build()
+                            ).build(),
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .psaDocReviewCollection(psaDocReviewCollection)
+                                .build()
+                            ).build()
+                    )).build())).build(), 14);
+            assertExpectedSituationForCase2(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase2);
+        }
+    }
+
+    private static void assertExpectedSituationForCase1(List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+                                                        List<PsaDocReviewCollection> psaDocReviewCollection,
+                                                        List<DraftOrdersReview> actual, int expectedSituationForCase1) {
+        switch (expectedSituationForCase1) {
+            case 0:
+                assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
+                break;
+            case 1:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                    .psaDocReviewCollection(psaDocReviewCollection)
+                    .build()), actual);
+                break;
+            default:
+                fail(String.format("Unexpected expectedSituationForCase1: %s", expectedSituationForCase1));
+                break;
+        }
+    }
+
+    private static void assertExpectedSituationForCase2(List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+                                                        List<PsaDocReviewCollection> psaDocReviewCollection,
+                                                        List<DraftOrdersReview> actual, int expectedSituationForCase2) {
+        switch (expectedSituationForCase2) {
+            case 0:
+                assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
+                break;
+            case 1:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                    .build()), actual);
+                break;
+            case 2:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .psaDocReviewCollection(psaDocReviewCollection)
+                    .build()), actual);
+                break;
+            case 3:
+                assertEquals(List.of(
+                    DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                        .build(),
+                    DraftOrdersReview.builder()
+                        .psaDocReviewCollection(psaDocReviewCollection)
+                        .build()
+                ), actual);
+                break;
+            default:
+                fail(String.format("Unexpected expectedSituationForCase2: %s", expectedSituationForCase2));
+                break;
+        }
+    }
+
+    static Stream<Arguments> provideMultipleReviewsWithStatusTestCases() {
+        return Stream.of(
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 21, 10, 0))), // Notification dates
+                1, 3
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024,10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 21, 10, 0))), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 1, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 5, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 1, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 12, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 1, 4, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.empty()), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty()), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 3, 3, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty()), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 4, 10, 0)), Optional.of(LocalDateTime.of(2024, 3, 2, 10, 0))), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 1, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 4, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.empty()), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.empty()), // Empty DraftOrderDocumentReview
+                List.of(Optional.empty()), // No statuses
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
+                1, 2
+            ),
+            Arguments.of(
+                List.of(Optional.empty()), // Empty DraftOrderDocumentReview
+                List.of(Optional.empty()), // No statuses
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 4, 0, 0))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 3, 23, 59))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(), // Empty DraftOrderDocumentReview
+                List.of(), // No statuses
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(), // No notification dates
+                List.of(), // No notification dates
+                0, 0
+            )
+        );
+    }
+
 }

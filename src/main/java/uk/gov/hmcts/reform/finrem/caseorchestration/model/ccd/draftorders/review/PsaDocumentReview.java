@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PsaDocumentReview implements HasCaseDocument {
+public class PsaDocumentReview implements HasCaseDocument, Reviewable {
     private CaseDocument psaDocument;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -37,4 +38,8 @@ public class PsaDocumentReview implements HasCaseDocument {
     private String hearingTimeEstimate;
     private String additionalTime;
     private String otherListingInstructions;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime reviewedDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime notificationSentDate;
 }

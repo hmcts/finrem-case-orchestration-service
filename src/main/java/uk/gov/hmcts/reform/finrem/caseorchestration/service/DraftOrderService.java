@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDate;
@@ -237,5 +239,22 @@ public class DraftOrderService {
                 .build())
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
+    }
+
+    public List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+        DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
+        return getOutstandingOrdersToBeReviewed(draftOrdersWrapper, daysSinceOrderUpload);
+    }
+
+    // Method to get DraftOrdersReview objects based on the specified conditions
+    public static List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
+        LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
+        log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
+
+        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
+            .map(DraftOrdersReviewCollection::getValue) // Get DraftOrdersReview from collection
+            .filter(draftOrderReview -> draftOrderReview.getEarliestToBeReviewedOrderDate() != null
+                && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
+            .toList();
     }
 }
