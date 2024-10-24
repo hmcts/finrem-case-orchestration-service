@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Collections;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SYSTEM_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.removeusercaseaccess.RemoveUserCaseAccessAboutToStartHandler.CODE_VALUES_SEPARATOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -40,6 +42,8 @@ class RemoveUserCaseAccessAboutToStartHandlerTest {
     private RemoveUserCaseAccessAboutToStartHandler handler;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private SystemUserService systemUserService;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @Mock
@@ -61,7 +65,8 @@ class RemoveUserCaseAccessAboutToStartHandlerTest {
         CaseAssignedUserRolesResource rolesResource = CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(Collections.emptyList())
             .build();
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN,String.valueOf(caseId), null))
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(dataStoreClient.getUserRoles(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN,String.valueOf(caseId), null))
             .thenReturn(rolesResource);
         when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
 
@@ -84,9 +89,10 @@ class RemoveUserCaseAccessAboutToStartHandlerTest {
         UserDetails userDetails1 = createUserDetails("user1", "user1@test.com", "Aye", "One");
         UserDetails userDetails2 = createUserDetails("user2", "user2@test.com", "Bee", "Two");
         UserDetails userDetails3 = createUserDetails("user3", "user3@test.com", "Cee", "Three");
-        when(idamAuthApi.getUserByUserId(AUTH_TOKEN, userDetails1.getId())).thenReturn(userDetails1);
-        when(idamAuthApi.getUserByUserId(AUTH_TOKEN, userDetails2.getId())).thenReturn(userDetails2);
-        when(idamAuthApi.getUserByUserId(AUTH_TOKEN, userDetails3.getId())).thenReturn(userDetails3);
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYSTEM_TOKEN);
+        when(idamAuthApi.getUserByUserId(TEST_SYSTEM_TOKEN, userDetails1.getId())).thenReturn(userDetails1);
+        when(idamAuthApi.getUserByUserId(TEST_SYSTEM_TOKEN, userDetails2.getId())).thenReturn(userDetails2);
+        when(idamAuthApi.getUserByUserId(TEST_SYSTEM_TOKEN, userDetails3.getId())).thenReturn(userDetails3);
 
         CaseAssignedUserRolesResource rolesResource = CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(List.of(
@@ -95,13 +101,13 @@ class RemoveUserCaseAccessAboutToStartHandlerTest {
                 createCaseAssignedUserRole(caseId, userDetails3.getId(), "[APPSOLICITOR]")
             ))
             .build();
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, TEST_SERVICE_TOKEN, caseId, null))
+        when(dataStoreClient.getUserRoles(TEST_SYSTEM_TOKEN, TEST_SERVICE_TOKEN, caseId, null))
             .thenReturn(rolesResource);
         when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(Long.parseLong(caseId));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(request, TEST_SYSTEM_TOKEN);
 
         assertThat(response.getErrors()).isEmpty();
         assertThat(response.getWarnings()).isEmpty();

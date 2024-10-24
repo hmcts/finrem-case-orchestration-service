@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
@@ -31,14 +32,17 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
     private final AuthTokenGenerator authTokenGenerator;
     private final DataStoreClient dataStoreClient;
     private final IdamAuthApi idamAuthApi;
+    private final SystemUserService systemUserService;
 
     public RemoveUserCaseAccessAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                    AuthTokenGenerator authTokenGenerator,
-                                                   DataStoreClient dataStoreClient, IdamAuthApi idamAuthApi) {
+                                                   DataStoreClient dataStoreClient, IdamAuthApi idamAuthApi,
+                                                   SystemUserService systemUserService) {
         super(finremCaseDetailsMapper);
         this.authTokenGenerator = authTokenGenerator;
         this.dataStoreClient = dataStoreClient;
         this.idamAuthApi = idamAuthApi;
+        this.systemUserService = systemUserService;
     }
 
     @Override
@@ -55,7 +59,9 @@ public class RemoveUserCaseAccessAboutToStartHandler extends FinremCallbackHandl
         String caseId = String.valueOf(finremCallbackRequest.getCaseDetails().getId());
         log.info("Remove User Case Access about to start callback for Case ID: {}", caseId);
 
-        DynamicList caseUserAccessList = getUserCaseAccessList(authToken, caseId);
+        String sysAuthToken = systemUserService.getSysUserToken();
+
+        DynamicList caseUserAccessList = getUserCaseAccessList(sysAuthToken, caseId);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         caseData.setUserCaseAccessList(caseUserAccessList);
 
