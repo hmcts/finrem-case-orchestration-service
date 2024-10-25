@@ -103,6 +103,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
         draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, draftOrdersWrapper.getUploadAgreedDraftOrder(),
             newAgreedDraftOrderCollections);
+
         draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
     }
 
