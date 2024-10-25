@@ -264,6 +264,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
+
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .containsAll(expectedAgreedDraftOrderCollection);
     }
