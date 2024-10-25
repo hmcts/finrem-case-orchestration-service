@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
@@ -100,5 +102,45 @@ class DraftOrdersCategoriserTest {
 
         assertThat(draftOrder.getSuggestedDraftOrderDocument().getCategoryId())
             .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId());
+    }
+
+    @Test
+    void givenBothDraftOrderAndPSA_whenCategoriseDocuments_thenSetCategoriesForBoth() {
+        caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder().build();
+        DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
+            .code(UPLOAD_PARTY_APPLICANT)
+            .label("The applicant")
+            .build();
+        uploadPartyRadioList.setListItems(List.of(elementApplicant));
+        uploadPartyRadioList.setValue(elementApplicant);
+
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
+        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
+
+        List<UploadSuggestedDraftOrderCollection> draftOrderCollection = new ArrayList<>();
+        UploadedDraftOrder draftOrder = new UploadedDraftOrder();
+        draftOrder.setSuggestedDraftOrderDocument(new CaseDocument());
+        draftOrderCollection.add(new UploadSuggestedDraftOrderCollection(draftOrder));
+
+        // Create and set PSA document
+        List<SuggestedPensionSharingAnnexCollection> psaCollection = new ArrayList<>();
+        SuggestedPensionSharingAnnex psa = new SuggestedPensionSharingAnnex();
+        psa.setSuggestedPensionSharingAnnexes(new CaseDocument());
+        psaCollection.add(new SuggestedPensionSharingAnnexCollection(psa));
+
+        // Set collections in the wrapper
+        uploadSuggestedDraftOrder.setUploadSuggestedDraftOrderCollection(draftOrderCollection);
+        uploadSuggestedDraftOrder.setSuggestedPsaCollection(psaCollection);
+        caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
+
+        categoriser.categoriseDocuments(caseData, "applicant");
+
+        assertThat(draftOrder.getSuggestedDraftOrderDocument().getCategoryId())
+            .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId());
+
+        assertThat(psa.getSuggestedPensionSharingAnnexes().getCategoryId())
+            .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId());
     }
 }
