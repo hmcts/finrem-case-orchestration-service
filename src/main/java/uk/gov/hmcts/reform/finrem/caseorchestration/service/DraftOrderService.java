@@ -238,5 +238,4 @@ public class DraftOrderService {
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
     }
-
 }
