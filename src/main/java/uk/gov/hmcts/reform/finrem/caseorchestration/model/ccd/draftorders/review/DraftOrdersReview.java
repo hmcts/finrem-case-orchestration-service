@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -26,4 +27,18 @@ public class DraftOrdersReview implements HasCaseDocument {
 
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
     private List<PsaDocReviewCollection> psaDocReviewCollection;
+
+    public List<DraftOrderDocReviewCollection> getDraftOrderDocReviewCollection() {
+        if (this.draftOrderDocReviewCollection == null) {
+            this.draftOrderDocReviewCollection = new ArrayList<>();
+        }
+        return this.draftOrderDocReviewCollection;
+    }
+
+    public List<PsaDocReviewCollection> getPsaDocReviewCollection() {
+        if (this.psaDocReviewCollection == null) {
+            this.psaDocReviewCollection = new ArrayList<>();
+        }
+        return this.psaDocReviewCollection;
+    }
 }
