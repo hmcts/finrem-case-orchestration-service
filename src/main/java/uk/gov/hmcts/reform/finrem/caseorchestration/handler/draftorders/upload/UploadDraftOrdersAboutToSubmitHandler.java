@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -35,9 +37,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
@@ -53,12 +52,16 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final CaseAssignedRoleService caseAssignedRoleService;
 
+    private final DraftOrderService draftOrderService;
+
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
-                                                 IdamAuthService idamAuthService, CaseAssignedRoleService caseAssignedRoleService) {
+                                                 IdamAuthService idamAuthService, CaseAssignedRoleService caseAssignedRoleService,
+                                                 DraftOrderService draftOrderService) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
         this.idamAuthService = idamAuthService;
         this.caseAssignedRoleService = caseAssignedRoleService;
+        this.draftOrderService = draftOrderService;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
+        log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
@@ -87,7 +90,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         draftOrdersCategoriser.categoriseDocuments(finremCaseData, userRole);
 
         finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-
+        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
@@ -95,7 +98,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        // TODO for agreed
+
+        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollections = draftOrderService
+            .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
+        draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
     }
 
     private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation) {
@@ -242,10 +248,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private boolean isOrdersSelected(List<String> uploadOrdersOrPsas) {
-        return ofNullable(uploadOrdersOrPsas).orElse(List.of()).contains(ORDER_TYPE);
+        return draftOrderService.isOrdersSelected(uploadOrdersOrPsas);
     }
 
     private boolean isPsaSelected(List<String> uploadOrdersOrPsas) {
-        return ofNullable(uploadOrdersOrPsas).orElse(List.of()).contains(PSA_TYPE);
+        return draftOrderService.isPsaSelected(uploadOrdersOrPsas);
     }
 }
