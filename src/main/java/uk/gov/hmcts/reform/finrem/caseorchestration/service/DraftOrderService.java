@@ -257,4 +257,59 @@ public class DraftOrderService {
                 && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
             .toList();
     }
+
+    public FinremCaseData applyCurrentNotificationTimestamp(FinremCaseData existingCaseData, final DraftOrdersReview draftOrdersReview) {
+        DraftOrdersWrapper wrapper = existingCaseData.getDraftOrdersWrapper();
+        // Stream through the collection, find and replace the matching DraftOrderReview
+        List<DraftOrdersReviewCollection> updatedDraftOrdersReviewCollection = wrapper.getDraftOrdersReviewCollection().stream()
+            .map(reviewCollection -> {
+                DraftOrdersReview newDraftOrdersReview = null;
+                // Check if the current reviewCollection's value matches the given draftOrderReview
+                if (reviewCollection.getValue().equals(draftOrdersReview)) {
+                    // Replace the item by building a new instance with the updated draftOrderReview
+                    LocalDateTime newDate = LocalDateTime.now();
+                    // Update notificationSentDate for each DraftOrderDocumentReview
+                    if (draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
+                        List<DraftOrderDocReviewCollection> updatedDraftOrderDocReviewCollections = draftOrdersReview
+                            .getDraftOrderDocReviewCollection().stream()
+                            .map(docReviewCollection -> docReviewCollection.toBuilder()
+                                .value(docReviewCollection.getValue()
+                                    .toBuilder()
+                                    .notificationSentDate(newDate)
+                                    .build())
+                                .build())
+                            .toList();
+                        newDraftOrdersReview = draftOrdersReview.toBuilder()
+                            .draftOrderDocReviewCollection(updatedDraftOrderDocReviewCollections)
+                            .build();
+                    } else {
+                        newDraftOrdersReview = draftOrdersReview;
+                    }
+
+                    // Update notificationSentDate for each PsaDocumentReview
+                    if (newDraftOrdersReview.getPsaDocReviewCollection() != null) {
+                        List<PsaDocReviewCollection> updatedPsaDocReviewCollections = newDraftOrdersReview.getPsaDocReviewCollection().stream()
+                            .map(psaReviewCollection -> psaReviewCollection.toBuilder()
+                                .value(psaReviewCollection.getValue()
+                                    .toBuilder()
+                                    .notificationSentDate(newDate)
+                                    .build())
+                                .build())
+                            .toList();
+                        newDraftOrdersReview = newDraftOrdersReview.toBuilder()
+                            .psaDocReviewCollection(updatedPsaDocReviewCollections)
+                            .build();
+                    }
+
+                    return reviewCollection.toBuilder()
+                        .value(newDraftOrdersReview)
+                        .build();
+                }
+                return reviewCollection;
+            })
+            .toList();
+
+        DraftOrdersWrapper newDraftOrdersWrapper = wrapper.toBuilder().draftOrdersReviewCollection(updatedDraftOrdersReviewCollection).build();
+        return existingCaseData.toBuilder().draftOrdersWrapper(newDraftOrdersWrapper).build();
+    }
 }

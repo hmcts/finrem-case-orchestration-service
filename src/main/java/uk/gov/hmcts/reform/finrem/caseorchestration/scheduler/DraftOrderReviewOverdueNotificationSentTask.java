@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -98,9 +99,11 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload).forEach(draftOrderReview -> {
+        List<DraftOrdersReview> overdoneDraftOrderReviews = draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload);
+
+        overdoneDraftOrderReviews.forEach(draftOrderReview -> {
             notificationService.sendDraftOrderReviewOverdueToCaseworker(finremCaseDetails, draftOrderReview);
-            // TODO mark the notificationSentDate
+            finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(), draftOrderReview));
         });
     }
 

@@ -52,9 +52,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1101,6 +1104,140 @@ class DraftOrderServiceTest {
                 List.of(), // No notification dates
                 0, 0
             )
+        );
+    }
+
+    @DisplayName("Test applyCurrentNotificationTimestamp with different scenarios")
+    @ParameterizedTest(name = "{index} => Test with draftOrdersWrapper={0}, draftOrdersReview={1}, shouldUpdate={2}")
+    @MethodSource("provideTestCases")
+    void testApplyCurrentNotificationTimestamp(List<Optional<DraftOrdersReview>> targetDraftOrdersReview, DraftOrdersReview target) {
+        // Arrange
+        FinremCaseData existingCaseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(
+                    targetDraftOrdersReview.stream()
+                        .filter(Optional::isPresent)
+                        .map(a -> DraftOrdersReviewCollection.builder()
+                            .value(a.get())
+                            .build())
+                        .toList()
+                )
+                .build())
+            .build();
+
+        // Act
+        FinremCaseData updatedCaseData = draftOrderService.applyCurrentNotificationTimestamp(existingCaseData, target);
+
+        // Assert
+        List<DraftOrdersReviewCollection> updatedCollection = updatedCaseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection();
+        assertNotNull(updatedCollection);
+
+        for (DraftOrdersReviewCollection collectionItem : updatedCollection) {
+            DraftOrdersReview review = collectionItem.getValue(); // Get the DraftOrdersReview from the collection item
+
+            assertEquals("hearingJudge", review.getHearingJudge());
+            assertEquals(LocalDate.of(2024, 1, 1), review.getHearingDate());
+
+            // Check for DraftOrderDocumentReview
+            if (review.getDraftOrderDocReviewCollection() != null) {
+                for (DraftOrderDocReviewCollection docReviewCollection : review.getDraftOrderDocReviewCollection()) {
+                    DraftOrderDocumentReview documentReview = docReviewCollection.getValue();
+                    CaseDocument caseDocument = documentReview.getDraftOrderDocument();
+
+                    // Check conditions
+                    if ("TARGET".equals(ofNullable(caseDocument).orElse(CaseDocument.builder().build()).getDocumentUrl())) {
+                        assertNotNull(documentReview.getNotificationSentDate());
+                    } else {
+                        assertNull(documentReview.getNotificationSentDate());
+                    }
+                }
+            }
+
+            // Check for PsaDocumentReview
+            if (review.getPsaDocReviewCollection() != null) {
+                for (PsaDocReviewCollection psaReviewCollection : review.getPsaDocReviewCollection()) {
+                    PsaDocumentReview psaDocumentReview = psaReviewCollection.getValue();
+                    CaseDocument psaCaseDocument = psaDocumentReview.getPsaDocument();
+
+                    // Check conditions
+                    if ("TARGET".equals(ofNullable(psaCaseDocument).orElse(CaseDocument.builder().build()).getDocumentUrl())) {
+                        assertNotNull(psaDocumentReview.getNotificationSentDate());
+                        assertEquals("approvalJudge", psaDocumentReview.getApprovalJudge());
+                    } else {
+                        assertNull(psaDocumentReview.getNotificationSentDate());
+                        assertEquals("nontarget-approvalJudge", psaDocumentReview.getApprovalJudge());
+                    }
+                }
+            }
+        }
+    }
+
+    private static List<Arguments> provideTestCases() {
+        DraftOrdersReview target = DraftOrdersReview.builder()
+            .hearingJudge("hearingJudge")
+            .hearingDate(LocalDate.of(2024, 1, 1))
+            .draftOrderDocReviewCollection(List.of(
+                DraftOrderDocReviewCollection.builder().value(
+                    DraftOrderDocumentReview.builder().approvalJudge("approvalJudge")
+                        .draftOrderDocument(CaseDocument.builder().documentUrl("TARGET").build()).build()
+                ).build()
+            ))
+            .psaDocReviewCollection(List.of(
+                PsaDocReviewCollection.builder().value(
+                    PsaDocumentReview.builder().approvalJudge("approvalJudge")
+                        .psaDocument(CaseDocument.builder().documentUrl("TARGET").build()).build()
+                ).build()
+            ))
+            .build();
+        DraftOrdersReview nonTarget = DraftOrdersReview.builder()
+            .hearingJudge("hearingJudge")
+            .hearingDate(LocalDate.of(2024, 1, 1))
+            .draftOrderDocReviewCollection(List.of(
+                DraftOrderDocReviewCollection.builder().value(
+                    DraftOrderDocumentReview.builder().approvalJudge("nontarget-approvalJudge").build()
+                ).build()
+            ))
+            .psaDocReviewCollection(List.of(
+                PsaDocReviewCollection.builder().value(
+                    PsaDocumentReview.builder().approvalJudge("nontarget-approvalJudge").build()
+                ).build()
+            ))
+            .build();
+
+        DraftOrdersReview target2 = DraftOrdersReview.builder()
+            .hearingJudge("hearingJudge")
+            .hearingDate(LocalDate.of(2024, 1, 1))
+            .draftOrderDocReviewCollection(List.of(
+                DraftOrderDocReviewCollection.builder().value(
+                    DraftOrderDocumentReview.builder().approvalJudge("approvalJudge")
+                        .draftOrderDocument(CaseDocument.builder().documentUrl("TARGET").build()).build()
+                ).build()
+            ))
+            .build();
+
+        DraftOrdersReview target3 = DraftOrdersReview.builder()
+            .hearingJudge("hearingJudge")
+            .hearingDate(LocalDate.of(2024, 1, 1))
+            .psaDocReviewCollection(List.of(
+                PsaDocReviewCollection.builder().value(
+                    PsaDocumentReview.builder().approvalJudge("approvalJudge")
+                        .psaDocument(CaseDocument.builder().documentUrl("TARGET").build()).build()
+                ).build()
+            ))
+            .build();
+        return List.of(
+            // Case 1
+            Arguments.of(List.of(Optional.of(target)), target),
+            // Case 2
+            Arguments.of(List.of(Optional.of(target), Optional.of(nonTarget)), target),
+            // Case 3
+            Arguments.of(List.of(Optional.of(target2)), target2),
+            // Case 3
+            Arguments.of(List.of(Optional.of(nonTarget), Optional.of(target2)), target2),
+            // Case 4
+            Arguments.of(List.of(Optional.of(target3)), target3),
+            // Case 4
+            Arguments.of(List.of(Optional.of(target3), Optional.of(nonTarget)), target3)
         );
     }
 
