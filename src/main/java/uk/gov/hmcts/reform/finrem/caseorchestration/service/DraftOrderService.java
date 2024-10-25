@@ -247,7 +247,7 @@ public class DraftOrderService {
     }
 
     // Method to get DraftOrdersReview objects based on the specified conditions
-    public static List<DraftOrdersReview> getDraftOrderReviewOverdue(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
+    private List<DraftOrdersReview> getDraftOrderReviewOverdue(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
         LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
         log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
 
