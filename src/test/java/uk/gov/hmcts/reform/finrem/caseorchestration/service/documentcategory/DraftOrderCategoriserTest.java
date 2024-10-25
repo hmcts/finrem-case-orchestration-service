@@ -105,7 +105,7 @@ class DraftOrdersCategoriserTest {
     }
 
     @Test
-    void givenBothDraftOrderAndPSA_whenCategoriseDocuments_thenSetCategoriesForBoth() {
+    void givenBothDraftOrderAndPensionSharingAnnex_whenCategoriseDocuments_thenSetCategoriesForBoth() {
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
         DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder().build();
