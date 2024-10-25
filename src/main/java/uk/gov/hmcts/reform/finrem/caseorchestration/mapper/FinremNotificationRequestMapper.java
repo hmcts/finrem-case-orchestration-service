@@ -183,9 +183,9 @@ public class FinremNotificationRequestMapper {
         return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
 
-    public NotificationRequest getNotificationRequestForOutstandingOrdersNeedReview(FinremCaseDetails caseDetails,
-                                                                                    String notificationEmail,
-                                                                                    DraftOrdersReview draftOrdersReview) {
+    public NotificationRequest getNotificationRequestForDraftOrderReviewOverdueToCaseworker(FinremCaseDetails caseDetails,
+                                                                                            String notificationEmail,
+                                                                                            DraftOrdersReview draftOrdersReview) {
         NotificationRequest ret = getNotificationRequestForCaseworker(caseDetails, notificationEmail);
         ret.setHearingDate(String.valueOf(draftOrdersReview.getHearingDate()));
         ret.setEarliestToBeReviewedOrderDate(String.valueOf(draftOrdersReview.getEarliestToBeReviewedOrderDate()));

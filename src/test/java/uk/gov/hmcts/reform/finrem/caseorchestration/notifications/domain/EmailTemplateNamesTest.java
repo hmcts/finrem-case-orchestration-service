@@ -15,13 +15,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_APPLICANT;
@@ -48,7 +48,7 @@ class EmailTemplateNamesTest {
             .put(FR_CONSENT_GENERAL_EMAIL, "FR_CONSENT_GENERAL_EMAIL")
             .put(FR_TRANSFER_TO_LOCAL_COURT, "FR_TRANSFER_TO_LOCAL_COURT")
             // contested
-            .put(FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER, "FR_CONTESTED_OS_ORDERS_NEED_REVIEW_CASEWORKER")
+            .put(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE, "FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE")
             .put(FR_CONTESTED_DRAFT_ORDER, "FR_CONTESTED_DRAFT_ORDER")
             .put(FR_CONTESTED_HWF_SUCCESSFUL, "FR_CONTESTED_HWF_SUCCESSFUL")
             .put(FR_CONTESTED_APPLICATION_ISSUED, "FR_CONTESTED_APPLICATION_ISSUED")

@@ -42,9 +42,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-class SendOutstandingOrdersNeedReviewNotificationTest {
+class DraftOrderReviewOverdueNotificationSentTest {
 
-    private SendOutstandingOrdersNeedReviewNotificationTask underTest;
+    private DraftOrderReviewOverdueNotificationSentTask underTest;
     private CcdService ccdService;
     private SystemUserService systemUserService;
     private DraftOrderService draftOrderService;
@@ -57,15 +57,15 @@ class SendOutstandingOrdersNeedReviewNotificationTest {
         draftOrderService = mock(DraftOrderService.class);
         notificationService = mock(NotificationService.class);
 
-        doCallRealMethod().when(draftOrderService).getOutstandingOrdersToBeReviewed(
+        doCallRealMethod().when(draftOrderService).getDraftOrderReviewOverdue(
             any(FinremCaseDetails.class), any(Integer.class));
-        doCallRealMethod().when(notificationService).sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(
+        doCallRealMethod().when(notificationService).sendDraftOrderReviewOverdueToCaseworker(
             any(FinremCaseDetails.class), any(DraftOrdersReview.class));
 
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
             new ObjectMapper().registerModule(new JavaTimeModule()));
 
-        underTest = new SendOutstandingOrdersNeedReviewNotificationTask(ccdService, systemUserService,
+        underTest = new DraftOrderReviewOverdueNotificationSentTask(ccdService, systemUserService,
             finremCaseDetailsMapper, notificationService, draftOrderService);
         underTest.setTaskEnabled(true);
     }

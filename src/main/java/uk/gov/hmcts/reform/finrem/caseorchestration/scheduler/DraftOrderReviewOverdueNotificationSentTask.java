@@ -26,38 +26,38 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
  * Scheduled task to send notification about outstanding orders need review (contested).
  * To enable the task to execute set environment variables:
  * <ul>
- *     <li>CRON_SEND_OUTSTANDING_ORDERS_NEED_REVIEW_ENABLED=true</li>
- *     <li>TASK_NAME=SendOutstandingOrdersNeedReviewNotificationTask</li>
- *     <li>CRON_SEND_OUTSTANDING_ORDERS_NEED_REVIEW_BATCH_SIZE=number of cases to search for</li>
- *     <li>CRON_SEND_OUTSTANDING_ORDERS_NEED_REVIEW_DAYS_SINCE_ORDER_UPLOAD=The number of days
+ *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_ENABLED=true</li>
+ *     <li>TASK_NAME=DraftOrderReviewOverdueNotificationSentTask</li>
+ *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_BATCH_SIZE=number of cases to search for</li>
+ *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_DAYS_SINCE_ORDER_UPLOAD=The number of days
  *     after the agreed draft order or pension sharing annex upload before sending a notification to review outstanding orders.</li>
  * </ul>
  */
 @Component
 @Slf4j
-public class SendOutstandingOrdersNeedReviewNotificationTask extends BaseTask {
+public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
 
-    private static final String TASK_NAME = "SendOutstandingOrdersNeedReviewNotificationTask";
+    private static final String TASK_NAME = "DraftOrderReviewOverdueNotificationSentTask";
     private static final String SUMMARY = "DFR-3329";
     private static final String CASE_TYPE_ID = "FinancialRemedyContested";
 
-    @Value("${cron.sendOutstandingOrdersNeedReviewNotification.enabled:false}")
+    @Value("${cron.draftOrderReviewOverdueNotificationSent.enabled:false}")
     private boolean taskEnabled;
 
-    @Value("${cron.sendOutstandingOrdersNeedReviewNotification.batchSize:500}")
+    @Value("${cron.draftOrderReviewOverdueNotificationSent.batchSize:500}")
     private int batchSize;
 
-    @Value("${cron.sendOutstandingOrdersNeedReviewNotification.daysSinceOrderUpload:14}")
+    @Value("${cron.draftOrderReviewOverdueNotificationSent.daysSinceOrderUpload:14}")
     private int daysSinceOrderUpload;
 
     private final NotificationService notificationService;
 
     private final DraftOrderService draftOrderService;
 
-    protected SendOutstandingOrdersNeedReviewNotificationTask(CcdService ccdService, SystemUserService systemUserService,
-                                                              FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                              NotificationService notificationService,
-                                                              DraftOrderService draftOrderService) {
+    protected DraftOrderReviewOverdueNotificationSentTask(CcdService ccdService, SystemUserService systemUserService,
+                                                          FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                          NotificationService notificationService,
+                                                          DraftOrderService draftOrderService) {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
         this.notificationService = notificationService;
         this.draftOrderService = draftOrderService;
@@ -98,8 +98,8 @@ public class SendOutstandingOrdersNeedReviewNotificationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        draftOrderService.getOutstandingOrdersToBeReviewed(finremCaseDetails, daysSinceOrderUpload).forEach(draftOrderReview -> {
-            notificationService.sendContestedOutstandingOrdersNeedReviewEmailToCaseworker(finremCaseDetails, draftOrderReview);
+        draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload).forEach(draftOrderReview -> {
+            notificationService.sendDraftOrderReviewOverdueToCaseworker(finremCaseDetails, draftOrderReview);
             // TODO mark the notificationSentDate
         });
     }

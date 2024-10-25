@@ -241,13 +241,13 @@ public class DraftOrderService {
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
     }
 
-    public List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+    public List<DraftOrdersReview> getDraftOrderReviewOverdue(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
         DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
-        return getOutstandingOrdersToBeReviewed(draftOrdersWrapper, daysSinceOrderUpload);
+        return getDraftOrderReviewOverdue(draftOrdersWrapper, daysSinceOrderUpload);
     }
 
     // Method to get DraftOrdersReview objects based on the specified conditions
-    public static List<DraftOrdersReview> getOutstandingOrdersToBeReviewed(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
+    public static List<DraftOrdersReview> getDraftOrderReviewOverdue(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
         LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
         log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
 

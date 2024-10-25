@@ -906,7 +906,7 @@ class DraftOrderServiceTest {
             mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
 
             // Case 1: Single draftOrdersReviewCollection
-            List<DraftOrdersReview> actual = draftOrderService.getOutstandingOrdersToBeReviewed(FinremCaseDetailsBuilderFactory
+            List<DraftOrdersReview> actual = draftOrderService.getDraftOrderReviewOverdue(FinremCaseDetailsBuilderFactory
                 .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .draftOrdersReviewCollection(List.of(
                         // may need a multiple
@@ -920,7 +920,7 @@ class DraftOrderServiceTest {
             assertExpectedSituationForCase1(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase1);
 
             // Case 2: Multiple draftOrdersReviewCollection
-            actual = draftOrderService.getOutstandingOrdersToBeReviewed(FinremCaseDetailsBuilderFactory
+            actual = draftOrderService.getDraftOrderReviewOverdue(FinremCaseDetailsBuilderFactory
                 .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .draftOrdersReviewCollection(List.of(
                         // may need a multiple

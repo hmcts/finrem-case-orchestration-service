@@ -84,7 +84,7 @@ class FinremNotificationRequestMapperTest {
         when(mockedDraftOrderReview.getEarliestToBeReviewedOrderDate()).thenReturn(LocalDate.of(2024, 1, 1));
         when(mockedDraftOrderReview.getHearingJudge()).thenReturn("JUDGE NAME");
 
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForOutstandingOrdersNeedReview(
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForDraftOrderReviewOverdueToCaseworker(
             consentedFinremCaseDetails, "notificationEmail", mockedDraftOrderReview);
         assertEquals("notificationEmail", notificationRequest.getNotificationEmail());
         assertEquals("JUDGE NAME", notificationRequest.getJudgeName());
