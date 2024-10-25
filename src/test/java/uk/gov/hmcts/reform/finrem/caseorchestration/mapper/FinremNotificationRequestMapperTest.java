@@ -79,7 +79,7 @@ class FinremNotificationRequestMapperTest {
     }
 
     @Test
-    void shouldCreateRequestForOutstandingOrdersNeedReview() {
+    void shouldCreateRequestForDraftOrderReviewOverdue() {
         DraftOrdersReview mockedDraftOrderReview = mock(DraftOrdersReview.class);
         when(mockedDraftOrderReview.getEarliestToBeReviewedOrderDate()).thenReturn(LocalDate.of(2024, 1, 1));
         when(mockedDraftOrderReview.getHearingJudge()).thenReturn("JUDGE NAME");
