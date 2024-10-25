@@ -409,6 +409,8 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     private CfvMigrationWrapper cfvMigrationWrapper;
 
+    private YesOrNo isNocFixAppliedFlag;
+
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
     @JsonIgnore
