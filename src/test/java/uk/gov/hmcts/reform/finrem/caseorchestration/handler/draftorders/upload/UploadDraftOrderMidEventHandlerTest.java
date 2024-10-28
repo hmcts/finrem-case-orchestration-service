@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
@@ -234,6 +236,71 @@ class UploadDraftOrderMidEventHandlerTest {
                     UploadAgreedDraftOrderCollection.builder()
                         .value(UploadedDraftOrder.builder()
                             .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample2.txt").build())
+                            .build())
+                        .build()
+                ), true
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSuggestedDraftOrderTestCases")
+    void shouldReturnNoErrorsWhenAllDocumentsAreWordFilesForSuggestedDraftOrders(List<UploadSuggestedDraftOrderCollection> suggestedDraftOrderCollection, boolean showErrorMessage) {
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .typeOfDraftOrder("aSuggestedDraftOrderPriorToAListedHearing") // Set type of draft order
+                    .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                        .uploadSuggestedDraftOrderCollection(suggestedDraftOrderCollection)
+                        .build())
+                    .build())
+                .build()), AUTH_TOKEN);
+
+        if (!showErrorMessage) {
+            assertThat(response.getErrors()).isEmpty();
+        } else {
+            assertThat(response.getErrors()).containsExactly("You must upload Microsoft Word documents. "
+                + "Document names should clearly reflect the party name, the type of hearing and the date of the hearing.");
+        }
+        assertThat(response.getData()).isNotNull();
+    }
+
+    private static Stream<Arguments> provideSuggestedDraftOrderTestCases() {
+        return Stream.of(
+            // Case 1: All valid Word documents
+            Arguments.of(
+                List.of(
+                    UploadSuggestedDraftOrderCollection.builder()
+                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested1.doc").build())
+                            .build())
+                        .build(),
+                    UploadSuggestedDraftOrderCollection.builder()
+                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested2.doc").build())
+                            .build())
+                        .build()
+                ), false
+            ),
+            // Case 2: One null document value
+            Arguments.of(
+                List.of(
+                    UploadSuggestedDraftOrderCollection.builder()
+                        .value(null) // Null document
+                        .build(),
+                    UploadSuggestedDraftOrderCollection.builder()
+                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested.doc").build())
+                            .build())
+                        .build()
+                ), false
+            ),
+            // Case 3: Invalid file type
+            Arguments.of(
+                List.of(
+                    UploadSuggestedDraftOrderCollection.builder()
+                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested.pdf").build())
                             .build())
                         .build()
                 ), true
