@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.14'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1412'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1426'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -40,7 +40,7 @@ def versions = [
         tika                 : '2.9.2',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.4',
-        elasticSearch        : '7.17.24',
+        elasticSearch        : '7.17.25',
         jacksonDatabind      : '2.18.0',
         retry                : '1.3.4',
         snakeyaml            : '2.3',
