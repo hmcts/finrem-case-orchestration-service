@@ -21,9 +21,8 @@ import java.util.List;
 public class UploadedDraftOrder implements HasCaseDocument {
 
     @JsonProperty("suggestedDraftOrderDocument")
-    CaseDocument suggestedDraftOrderDocument;
+    private CaseDocument suggestedDraftOrderDocument;
 
     @JsonProperty("additionalDocuments")
     private List<SuggestedDraftOrderAdditionalDocumentsCollection> suggestedDraftOrderAdditionalDocumentsCollection;
-
 }

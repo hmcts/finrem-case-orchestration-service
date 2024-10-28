@@ -27,5 +27,4 @@ public class UploadedDraftOrder {
 
     @JsonProperty("additionalDocuments")
     private List<AgreedDraftOrderAdditionalDocumentsCollection> agreedDraftOrderAdditionalDocumentsCollection;
-
 }

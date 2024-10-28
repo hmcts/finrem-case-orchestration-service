@@ -40,5 +40,4 @@ public class UploadAgreedDraftOrder {
 
     @JsonProperty("agreedPsaCollection")
     private List<AgreedPensionSharingAnnexCollection> agreedPsaCollection;
-
 }

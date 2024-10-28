@@ -19,6 +19,5 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 public class SuggestedPensionSharingAnnex implements HasCaseDocument {
 
     @JsonProperty("suggestedPensionSharingAnnexes")
-    CaseDocument suggestedPensionSharingAnnexes;
-
+    private CaseDocument suggestedPensionSharingAnnexes;
 }
