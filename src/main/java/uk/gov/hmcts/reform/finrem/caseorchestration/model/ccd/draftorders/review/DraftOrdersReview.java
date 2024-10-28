@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ public class DraftOrdersReview implements HasCaseDocument {
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
     private List<PsaDocReviewCollection> psaDocReviewCollection;
 
+    @JsonIgnore
     public List<DraftOrderDocReviewCollection> getDraftOrderDocReviewCollection() {
         if (this.draftOrderDocReviewCollection == null) {
             this.draftOrderDocReviewCollection = new ArrayList<>();
@@ -43,6 +45,7 @@ public class DraftOrdersReview implements HasCaseDocument {
         return this.draftOrderDocReviewCollection;
     }
 
+    @JsonIgnore
     public List<PsaDocReviewCollection> getPsaDocReviewCollection() {
         if (this.psaDocReviewCollection == null) {
             this.psaDocReviewCollection = new ArrayList<>();
@@ -50,6 +53,7 @@ public class DraftOrdersReview implements HasCaseDocument {
         return this.psaDocReviewCollection;
     }
 
+    @JsonIgnore
     public LocalDate getEarliestToBeReviewedOrderDate() {
         // Collect the concatenated streams into a list to avoid reusing the stream
         List<? extends Reviewable> reviewables = Stream.concat(
