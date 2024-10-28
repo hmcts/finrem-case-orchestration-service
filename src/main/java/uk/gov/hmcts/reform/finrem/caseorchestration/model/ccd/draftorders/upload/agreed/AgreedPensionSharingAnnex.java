@@ -19,5 +19,4 @@ public class AgreedPensionSharingAnnex {
 
     @JsonProperty("agreedPensionSharingAnnexes")
     private CaseDocument agreedPensionSharingAnnexes;
-
 }

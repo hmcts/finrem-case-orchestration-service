@@ -15,5 +15,4 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 public class UploadSuggestedDraftOrderCollection implements HasCaseDocument {
 
     private UploadedDraftOrder value;
-
 }
