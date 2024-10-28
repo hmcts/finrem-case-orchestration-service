@@ -245,7 +245,9 @@ class UploadDraftOrderMidEventHandlerTest {
 
     @ParameterizedTest
     @MethodSource("provideSuggestedDraftOrderTestCases")
-    void shouldReturnNoErrorsWhenAllDocumentsAreWordFilesForSuggestedDraftOrders(List<UploadSuggestedDraftOrderCollection> suggestedDraftOrderCollection, boolean showErrorMessage) {
+    void shouldReturnNoErrorsWhenAllDocumentsAreWordFilesForSuggestedDraftOrders(List<UploadSuggestedDraftOrderCollection>
+                                                                                     suggestedDraftOrderCollection,
+                                                                                 boolean showErrorMessage) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, FinremCaseData.builder()
                 .draftOrdersWrapper(DraftOrdersWrapper.builder()
