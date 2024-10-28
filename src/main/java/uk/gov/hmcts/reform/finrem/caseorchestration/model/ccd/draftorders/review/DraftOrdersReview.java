@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.revie
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Getter
 @NoArgsConstructor
@@ -26,7 +29,9 @@ public class DraftOrdersReview implements HasCaseDocument {
     private String hearingTime;
     private String hearingJudge;
 
+    @JsonProperty("draftOrderDocReviewCollection")
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
+    @JsonProperty("psaDocReviewCollection")
     private List<PsaDocReviewCollection> psaDocReviewCollection;
 
     @JsonIgnore
