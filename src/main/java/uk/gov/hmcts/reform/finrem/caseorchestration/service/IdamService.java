@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.IdamServiceConfiguration;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.net.URI;
 import java.util.List;
@@ -86,10 +85,4 @@ public class IdamService {
         return email.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
-
-    public List<UserDetails> getUserByEmailId(String bearerToken, String emailId) {
-        String searchQuery = "email:".concat(emailId);
-        return idamClient.searchUsers(bearerToken, searchQuery);
-    }
 }
-

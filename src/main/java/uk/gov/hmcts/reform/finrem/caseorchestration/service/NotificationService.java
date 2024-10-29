@@ -29,10 +29,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -1915,23 +1913,17 @@ public class NotificationService {
         }
     }
 
-    public void sendContestedOrderReadyToReviewToJudge(String userAuthorisation, FinremCaseDetails caseDetails) {
+    public void sendContestedOrderReadyToReviewToJudge(FinremCaseDetails caseDetails) {
 
         FinremCaseData caseData = caseDetails.getData();
         UploadAgreedDraftOrder agreedDraftOrder = caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder();
-
-        List<UserDetails> userDetailsList = idamService.getUserByEmailId(userAuthorisation, agreedDraftOrder.getJudge());
-
-        if (userDetailsList.isEmpty()) {
-            throw new IllegalStateException("No user found for the provided email");
-        }
-
-        String judgeName = userDetailsList.get(0).getFullName();
         String hearingDate = String.valueOf(hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue()));
 
         NotificationRequest judgeNotificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         judgeNotificationRequest.setHearingDate(hearingDate);
-        judgeNotificationRequest.setJudgeName(judgeName);
+        judgeNotificationRequest.setNotificationEmail(agreedDraftOrder.getJudge());
+        judgeNotificationRequest.setNotificationEmail(caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplicationReferToJudgeEmail());
+
         log.info("{} - Sending ready for review email to judge.", judgeNotificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
