@@ -60,12 +60,12 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                 finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        String confirmationBody = getConfirmationBody(caseDetails);
 
         notificationService.sendContestedReadyToReviewOrderToJudge(caseDetails);
-
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+
+        String confirmationBody = getConfirmationBody(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .confirmationHeader(CONFIRMATION_HEADER)
