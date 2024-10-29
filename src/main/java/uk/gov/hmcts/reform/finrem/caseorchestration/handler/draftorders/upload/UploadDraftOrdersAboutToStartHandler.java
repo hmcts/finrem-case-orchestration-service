@@ -33,6 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Service
 public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
+    private static final String CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE = "1";
+
     private final CaseAssignedRoleService caseAssignedRoleService;
 
     private final HearingService hearingService;
@@ -94,7 +96,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
         DynamicMultiSelectListElement elementConfirmation = DynamicMultiSelectListElement.builder()
             .label(format("I confirm the uploaded documents are for the %s v %s case", applicantLName, respondentLName))
-            .code("1")
+            .code(CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE)
             .build();
 
         return DynamicMultiSelectList.builder()
