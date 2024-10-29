@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -68,6 +70,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -107,6 +110,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class NotificationService {
 
     private final EmailService emailService;
+    private final HearingService hearingService;
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private static final String HWF_LOG = "Received request for notification email for HWFSuccessful. Case ID : {}";
     private static final String BARRISTER_ACCESS_LOG = "Received request for notification email for Barrister Access Added event. Case ID : {}";
@@ -181,7 +185,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -558,7 +562,7 @@ public class NotificationService {
 
         NotificationRequest notificationRequest =
             notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper);
+                dataKeysWrapper);
         log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
@@ -1906,5 +1910,19 @@ public class NotificationService {
                 return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
             }
         }
+    }
+
+    public void sendContestedReadyToReviewOrderToJudge(FinremCaseDetails caseDetails) {
+
+        FinremCaseData caseData = caseDetails.getData();
+        UploadAgreedDraftOrder agreedDraftOrder = caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder();
+        String hearingDate = String.valueOf(hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue()));
+
+        NotificationRequest judgeNotificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
+        judgeNotificationRequest.setHearingDate(hearingDate);
+        judgeNotificationRequest.setNotificationEmail(agreedDraftOrder.getJudge());
+
+        log.info("{} - Sending ready for review email to judge.", judgeNotificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
 }
