@@ -52,11 +52,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -246,6 +247,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
         assertThat(response.getData().getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
     }
 
     @ParameterizedTest
@@ -255,6 +257,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
                                       List<AgreedDraftOrderCollection> expectedAgreedDraftOrderCollection) {
         DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
         builder.uploadAgreedDraftOrder(uado);
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
         builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
         FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
 

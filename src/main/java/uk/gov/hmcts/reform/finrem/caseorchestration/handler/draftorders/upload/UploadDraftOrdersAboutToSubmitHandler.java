@@ -37,10 +37,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
 @Slf4j
 @Service
@@ -81,9 +82,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         String userRole = checkRole(caseDetails.getId().toString(), userAuthorisation);
 
-        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
+        String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
+        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation);
-        } else {
+        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation);
         }
 
@@ -236,7 +238,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
                     return RESPONDENT.getValue();
                 }
             }
-
         }
 
         return CASE.getValue();

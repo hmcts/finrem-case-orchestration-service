@@ -12,11 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Component
 public class DraftOrdersCategoriser {
@@ -32,7 +32,6 @@ public class DraftOrdersCategoriser {
         }
 
         // Get the current user case role
-        //NEED TO DO
         String chosenParty = determineChosenParty(finremCaseData, userRole);
 
         DocumentCategory category = determineCategory(chosenParty);
@@ -53,7 +52,6 @@ public class DraftOrdersCategoriser {
     }
 
     private String determineChosenParty(FinremCaseData finremCaseData, String userRole) {
-
         if (finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty() != null) {
             String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
 
@@ -66,8 +64,6 @@ public class DraftOrdersCategoriser {
         } else {
             return userRole;
         }
-
-
     }
 
     private DocumentCategory determineCategory(String chosenParty) {

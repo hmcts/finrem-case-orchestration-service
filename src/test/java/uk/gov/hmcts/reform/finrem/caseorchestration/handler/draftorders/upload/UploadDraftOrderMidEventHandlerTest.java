@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -148,6 +149,7 @@ class UploadDraftOrderMidEventHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, FinremCaseData.builder()
                 .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION)
                     .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
                         .uploadAgreedDraftOrderCollection(agreedDraftOrderCollection)
                         .build())
