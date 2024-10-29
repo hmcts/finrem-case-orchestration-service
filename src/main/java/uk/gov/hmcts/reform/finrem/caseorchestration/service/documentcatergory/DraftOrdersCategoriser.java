@@ -12,11 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Component
 public class DraftOrdersCategoriser {
@@ -32,7 +32,6 @@ public class DraftOrdersCategoriser {
         }
 
         // Get the current user case role
-        //NEED TO DO
         String chosenParty = determineChosenParty(finremCaseData, userRole);
 
         DocumentCategory category = determineCategory(chosenParty);
@@ -53,7 +52,6 @@ public class DraftOrdersCategoriser {
     }
 
     private String determineChosenParty(FinremCaseData finremCaseData, String userRole) {
-
         if (finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty() != null) {
             String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
 
@@ -66,18 +64,15 @@ public class DraftOrdersCategoriser {
         } else {
             return userRole;
         }
-
-
     }
 
     private DocumentCategory determineCategory(String chosenParty) {
-        switch (chosenParty) {
-            case "applicant":
-                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
-            case "respondent":
-                return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
-            default:
-                return null;
+        if (APPLICANT.getValue().equals(chosenParty)) {
+            return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+        } else if (RESPONDENT.getValue().equals(chosenParty)) {
+            return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+        } else {
+            return null;
         }
     }
 

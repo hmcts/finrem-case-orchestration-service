@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
 @Slf4j
 @Service
@@ -55,7 +56,8 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
         String error = "You must upload Microsoft Word documents. Document names should clearly reflect the party name, "
             + "the type of hearing and the date of the hearing.";
 
-        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder())) {
+        String typeOfDraftOrder = draftOrdersWrapper.getTypeOfDraftOrder();
+        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
                 .orElse(List.of())
                 .stream()
@@ -66,7 +68,7 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             if (hasNonWordDocument) {
                 errors.add(error);
             }
-        } else {
+        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
                 .orElse(List.of())
                 .stream()
@@ -78,7 +80,6 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 errors.add(error);
             }
         }
-
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).errors(errors).build();

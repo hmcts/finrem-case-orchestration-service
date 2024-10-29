@@ -23,12 +23,13 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.TOP_LEVEL_HEARING_ID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class HearingService {
+
+    static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
 
     // Helper class to handle sorting by date, time, and type.
     private record HearingSortingKey(LocalDate hearingDate, String hearingTime, String hearingType) implements Comparable<HearingSortingKey> {

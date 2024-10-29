@@ -37,9 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.*;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUGGESTED_DRAFT_ORDER_OPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.*;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -222,6 +222,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
                                       List<AgreedDraftOrderCollection> expectedAgreedDraftOrderCollection) {
         DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
         builder.uploadAgreedDraftOrder(uado);
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
         builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
         FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
 
