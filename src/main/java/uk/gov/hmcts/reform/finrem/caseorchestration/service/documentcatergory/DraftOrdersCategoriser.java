@@ -67,13 +67,12 @@ public class DraftOrdersCategoriser {
     }
 
     private DocumentCategory determineCategory(String chosenParty) {
-        switch (chosenParty) {
-            case "applicant":
-                return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
-            case "respondent":
-                return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
-            default:
-                return null;
+        if (APPLICANT.getValue().equals(chosenParty)) {
+            return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+        } else if (RESPONDENT.getValue().equals(chosenParty)) {
+            return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+        } else {
+            return null;
         }
     }
 
