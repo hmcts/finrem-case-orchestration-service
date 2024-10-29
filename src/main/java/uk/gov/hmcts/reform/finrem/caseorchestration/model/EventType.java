@@ -87,7 +87,7 @@ public enum EventType {
     APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
     REMOVE_CASE_DOCUMENT("FR_removeCaseDocument"),
     REMOVE_USER_CASE_ACCESS("FR_removeUserCaseAccess"),
-
+    DRAFT_ORDERS("FR_draftOrders"),
     @JsonEnumDefaultValue
     NONE("");
 

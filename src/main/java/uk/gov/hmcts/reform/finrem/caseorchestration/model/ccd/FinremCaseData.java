@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.FormAScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -330,6 +331,9 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFour intervenerFour;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private DraftOrdersWrapper draftOrdersWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private FormAScannedDocWrapper formAScannedDocWrapper;
@@ -638,6 +642,16 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String nullToEmpty(Object o) {
         return Objects.toString(o, "");
+    }
+
+    @JsonIgnore
+    public String getApplicantLastName() {
+        return nullToEmpty(getContactDetailsWrapper().getApplicantLname()).trim();
+    }
+
+    @JsonIgnore
+    public String getRespondentLastName() {
+        return nullToEmpty(getContactDetailsWrapper().getRespondentLname()).trim();
     }
 
     @JsonIgnore
@@ -995,4 +1009,13 @@ public class FinremCaseData implements HasCaseDocument {
 
         return barristerCollectionWrapper;
     }
+
+    @JsonIgnore
+    public DraftOrdersWrapper getDraftOrdersWrapper() {
+        if (draftOrdersWrapper == null) {
+            this.draftOrdersWrapper = new DraftOrdersWrapper();
+        }
+        return draftOrdersWrapper;
+    }
+
 }
