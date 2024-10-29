@@ -45,10 +45,6 @@ public class NotificationRequest {
     private String barristerReferenceNumber;
     @JsonProperty("hearingType")
     private String hearingType;
-    @JsonProperty("hearingDate")
-    private String hearingDate;
-    @JsonProperty("judgeName")
-    private String judgeName;
     @JsonProperty("intervenerSolicitorReferenceNumber")
     private String intervenerSolicitorReferenceNumber;
     @JsonProperty("intervenerFullName")
@@ -59,4 +55,6 @@ public class NotificationRequest {
     private byte[] documentContents;
     @JsonProperty("isNotDigital")
     private Boolean isNotDigital;
+    @JsonProperty("hearingDate")
+    private String hearingDate;
 }
