@@ -26,14 +26,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import java.util.List;
 
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Slf4j
 @Service
 public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
-
-    private static final String CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE = "1";
 
     private final CaseAssignedRoleService caseAssignedRoleService;
 
