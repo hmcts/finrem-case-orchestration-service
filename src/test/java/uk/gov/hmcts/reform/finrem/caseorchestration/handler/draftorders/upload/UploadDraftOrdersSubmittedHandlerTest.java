@@ -6,18 +6,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDateTime;
@@ -27,13 +32,24 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 
 @ExtendWith(MockitoExtension.class)
 class UploadDraftOrdersSubmittedHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersSubmittedHandler uploadDraftOrdersSubmittedHandler;
+
+    @Mock
+    private DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
+
+    @Mock
+    private EmailService emailService;
 
     @Test
     void testCanHandle() {
@@ -70,12 +86,20 @@ class UploadDraftOrdersSubmittedHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
                 CaseType.CONTESTED, caseData);
 
+        NotificationRequest mockNotificationRequest = NotificationRequest.builder()
+                .caseReferenceNumber(caseReference)
+                .build();
+
+        when(draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(any(FinremCaseDetails.class)))
+                .thenReturn(mockNotificationRequest);
+
         var response = uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
 
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class));
+        verify(emailService).sendConfirmationEmail(any(NotificationRequest.class), eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE)); //it doesn't like this
         String expectedConfirmationBody = isAgreedDraftOrderUpload
                 ? getExpectedAgreedConfirmationBody((caseReference))
                 : getExpectedSuggestedConfirmationBody(caseReference);
-
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
         assertThat(response.getConfirmationBody()).isEqualTo(expectedConfirmationBody);
         assertThat(response.getData()).isNull();
