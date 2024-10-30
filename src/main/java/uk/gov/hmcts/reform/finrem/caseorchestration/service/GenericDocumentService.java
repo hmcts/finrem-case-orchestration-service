@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class GenericDocumentService {
     public CaseDocument approveDocument(CaseDocument document,
                                       String authorisationToken,
                                         String dateTextBoxName,
-                                        String approvalDate,
+                                        LocalDate approvalDate,
                                         String caseId) {
         CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
         log.info("Pdf converation if document is not pdf original {} pdfdocument {} for Case ID: {}",

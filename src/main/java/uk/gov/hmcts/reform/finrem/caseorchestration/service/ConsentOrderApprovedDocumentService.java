@@ -138,7 +138,7 @@ public class ConsentOrderApprovedDocumentService {
                                                         String caseId) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
         CaseDocument approvedDocument = genericDocumentService.approveDocument(document, authToken, FORM_P1_PDF_TEXTBOX_NAME, approvalDate, caseId);
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, stampType, caseId);
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(approvedDocument, authToken, stampType, caseId);
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
@@ -344,7 +344,7 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument consentOrderAnnexStamped =
             genericDocumentService.annexStampDocument(finremCaseData.getLatestConsentOrder(),
                 userAuthorisation, stampType, caseId);
-        String approvalDate = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder()
+        LocalDate approvalDate = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder();
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)

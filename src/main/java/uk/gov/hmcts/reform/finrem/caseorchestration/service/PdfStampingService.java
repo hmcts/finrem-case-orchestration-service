@@ -7,6 +7,9 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
@@ -23,11 +26,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadRes
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -107,7 +112,7 @@ public class PdfStampingService {
     public Document approveDocument(Document document,
                                     String authToken,
                                     String dateTextBoxName,
-                                    String approvalDate,
+                                    LocalDate approvalDate,
                                     String caseId) {
         log.info("Approve document : {}", document);
         try {
@@ -134,28 +139,45 @@ public class PdfStampingService {
 
         Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
 
-        if (acroForm.isPresent()) {
+        if (acroForm.isPresent() && (acroForm.get().getField(dateTextBoxName) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(dateTextBoxName);
-            if (field instanceof PDTextField) {
 
                 PDTextField textBox = (PDTextField) field;
                 textBox.setDefaultAppearance("/Helv 12 Tf 0 g");
-                textBox.setValue(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(approvalDate));
+                textBox.setValue(approvalDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
 
                 ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
                 doc.save(outputBytes);
                 doc.close();
 
                 return outputBytes.toByteArray();
-            } else {
-                log.info("Pdf document does not contain Date Text Box {}",
-                    dateTextBoxName);
-            }
-        } else {
-            log.info("Pdf document is flatten / not editable");
         }
 
-        return inputDocInBytes;
+        log.info("Pdf document is flatten / not editable. Stamping Date Under Seal");
+        return approveStampFlattenedDocument(doc, approvalDate);
+    }
+
+
+    private byte[] approveStampFlattenedDocument(PDDocument doc, LocalDate approvalDate) throws Exception {
+        doc.setAllSecurityToBeRemoved(true);
+        PDPage page = doc.getPage(0);
+        PdfAnnexStampingInfo info = PdfAnnexStampingInfo.builder(page).build();
+        log.info("PdfAnnexStampingInfo data  = {}", info);
+
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true);
+
+        contentStream.beginText();
+        contentStream.newLineAtOffset(info.getHighCourtSealPositionX() + 20, info.getHighCourtSealPositionY() + 15);
+        PDFont pdfFont = new PDType1Font(Standard14Fonts.getMappedFontName("HELVETICA").HELVETICA);
+        contentStream.setFont(pdfFont, 12);
+        contentStream.setNonStrokingColor(Color.red);
+        contentStream.showText(approvalDate.format(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT)));
+        contentStream.endText();
+        contentStream.close();
+        ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
+        doc.save(outputBytes);
+        doc.close();
+        return outputBytes.toByteArray();
     }
 
     public byte[] imageAsBytes(String fileName) throws IOException {

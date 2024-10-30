@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
@@ -45,6 +47,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
 
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
@@ -81,6 +84,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
+        FinremCaseData finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(caseData, caseDetails.getCaseTypeId());
+        LocalDate approvalDate = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder();
+
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 
