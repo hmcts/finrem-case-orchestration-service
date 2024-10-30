@@ -12,17 +12,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 @Service
 @Slf4j
 public class RemoveUserCaseAccessAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final CcdDataStoreService ccdDataStoreService;
+    private final SystemUserService systemUserService;
 
     public RemoveUserCaseAccessAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    CcdDataStoreService ccdDataStoreService) {
+                                                    CcdDataStoreService ccdDataStoreService, SystemUserService systemUserService) {
         super(finremCaseDetailsMapper);
         this.ccdDataStoreService = ccdDataStoreService;
+        this.systemUserService = systemUserService;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class RemoveUserCaseAccessAboutToSubmitHandler extends FinremCallbackHand
         log.info("Remove User Case Access about to submit callback for Case ID: {}", caseId);
 
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
-        removeUserCaseAccess(caseId, caseData, authToken);
+        removeUserCaseAccess(caseId, caseData);
         caseData.setUserCaseAccessList(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -48,7 +51,7 @@ public class RemoveUserCaseAccessAboutToSubmitHandler extends FinremCallbackHand
             .build();
     }
 
-    private void removeUserCaseAccess(String caseId, FinremCaseData caseData, String authToken) {
+    private void removeUserCaseAccess(String caseId, FinremCaseData caseData) {
         DynamicListElement dynamicListElement = caseData.getUserCaseAccessList().getValue();
         if (dynamicListElement == null) {
             log.warn("Remove User Case Access Case Id {}: No user selected for removal", caseId);
@@ -59,6 +62,8 @@ public class RemoveUserCaseAccessAboutToSubmitHandler extends FinremCallbackHand
         String userId = values[0];
         String caseRole = values[1];
 
-        ccdDataStoreService.removeUserCaseRole(caseId, authToken, userId, caseRole);
+        String sysAuthToken = systemUserService.getSysUserToken();
+
+        ccdDataStoreService.removeUserCaseRole(caseId, sysAuthToken, userId, caseRole);
     }
 }
