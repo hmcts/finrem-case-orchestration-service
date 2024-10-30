@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Service
@@ -21,7 +22,8 @@ public class DraftOrdersNotificationRequestMapper {
     public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         UploadAgreedDraftOrder agreedDraftOrder = caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder();
-        String hearingDate = String.valueOf(hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue()));
+        LocalDate date = hearingService.getHearingDate(caseData, agreedDraftOrder.getHearingDetails().getValue());
+        String hearingDate = String.valueOf(date);
 
         NotificationRequest judgeNotificationRequest = new NotificationRequest();
         judgeNotificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
