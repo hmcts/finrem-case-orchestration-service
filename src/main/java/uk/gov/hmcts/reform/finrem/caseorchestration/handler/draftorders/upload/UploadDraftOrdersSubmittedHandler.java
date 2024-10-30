@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.time.LocalDateTime;
@@ -23,11 +26,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
+
 @Service
 @Slf4j
 public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
-    private final NotificationService notificationService;
+    private final DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
+
+    private final EmailService emailService;
+
 
     private static final String CONFIRMATION_HEADER = "# Draft orders uploaded";
 
@@ -41,9 +49,10 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                     + "<br><br>You can find the documents that you have uploaded on the "
                     + "['case documents' tab](/cases/case-details/%s#Case%%20documents).";
 
-    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService) {
+    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService, DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper, EmailService emailService) {
         super(finremCaseDetailsMapper);
-        this.notificationService = notificationService;
+        this.draftOrdersNotificationRequestMapper = draftOrdersNotificationRequestMapper;
+        this.emailService = emailService;
     }
 
     @Override
@@ -61,7 +70,7 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
-        notificationService.sendContestedReadyToReviewOrderToJudge(caseDetails);
+        sendContestedReadyToReviewOrderToJudge(caseDetails);
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
@@ -117,5 +126,12 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                 .map(SuggestedDraftOrderCollection::getValue)
                 .map(SuggestedDraftOrder::getSubmittedDate)
                 .max(LocalDateTime::compareTo);
+    }
+
+    private void sendContestedReadyToReviewOrderToJudge(FinremCaseDetails caseDetails) {
+        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
+
+        log.info("{} - Sending ready for review email to judge.", judgeNotificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
 }
