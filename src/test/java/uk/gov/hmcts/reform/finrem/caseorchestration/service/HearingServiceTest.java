@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService.TOP_LEVEL_HEARING_ID;
 
 @ExtendWith(MockitoExtension.class)
 class HearingServiceTest {
@@ -317,4 +320,174 @@ class HearingServiceTest {
         }
     }
 
+    static Stream<Arguments> hearingDateCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, LocalDate.of(2024, 10, 21)), // Top-level hearing
+            Arguments.of("11000000-0000-0000-0000-000000000000", LocalDate.of(2024, 10, 22)), // Valid interim hearing date
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
+    static Stream<Arguments> hearingTypeCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, HearingTypeDirection.FH.getId()), // Top-level hearing type
+            Arguments.of("11000000-0000-0000-0000-000000000000", InterimTypeOfHearing.DIR.getId()), // Valid interim hearing type
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
+    static Stream<Arguments> hearingTimeCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, "09:00 AM"), // Top-level hearing time
+            Arguments.of("11000000-0000-0000-0000-000000000000", "10:30 AM"), // Valid interim hearing time
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
+    static Stream<Arguments> hearingTimeEstimateCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, "1 hour"), // Top-level hearing time
+            Arguments.of("11000000-0000-0000-0000-000000000000", "1.5 hour"), // Valid interim hearing time
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingDateCases")
+    void testGetHearingDate(String selectedCode, LocalDate expectedDate) {
+        Arrays.asList(true, false).forEach(singleInterimHearing -> {
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            DynamicListElement selected = mock(DynamicListElement.class);
+            when(selected.getCode()).thenReturn(selectedCode);
+
+            // Mocking the data structure
+            caseData.setHearingDate(LocalDate.of(2024, 10, 21));
+            // Mocking the data structure based on the singleInterimHearing parameter
+            if (singleInterimHearing) {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingDate(LocalDate.of(2024, 10, 22)).build())
+                            .build()
+                    ))
+                    .build());
+            } else {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingDate(LocalDate.of(2024, 10, 22)).build())
+                            .build(),
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("12000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingDate(LocalDate.of(2024, 10, 23)).build())
+                            .build()
+                    ))
+                    .build());
+            }
+
+            // Act
+            LocalDate result = hearingService.getHearingDate(caseData, selected);
+
+            // Assert
+            assertEquals(expectedDate, result);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingTypeCases")
+    void testGetHearingType(String selectedCode, String expectedType) {
+        Arrays.asList(true, false).forEach(singleInterimHearing -> {
+            // Arrange
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            DynamicListElement selected = mock(DynamicListElement.class);
+            when(selected.getCode()).thenReturn(selectedCode);
+
+            // Mocking the data structure
+            caseData.setHearingType(HearingTypeDirection.FH);
+            // Mocking the data structure
+            if (singleInterimHearing) {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingType(InterimTypeOfHearing.DIR).build())
+                            .build()
+                    ))
+                    .build());
+            } else {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingType(InterimTypeOfHearing.DIR).build())
+                            .build(),
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("12000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingType(InterimTypeOfHearing.FDA).build())
+                            .build()
+                    ))
+                    .build());
+            }
+
+            // Act
+            String result = hearingService.getHearingType(caseData, selected);
+
+            // Assert
+            assertEquals(expectedType, result);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingTimeCases")
+    void testGetHearingTime(String selectedCode, String expectedTime) {
+        Arrays.asList(true, false).forEach(singleInterimHearing -> {
+            // Arrange
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            DynamicListElement selected = mock(DynamicListElement.class);
+            when(selected.getCode()).thenReturn(selectedCode);
+
+            // Mocking the data structure
+            caseData.setHearingTime("09:00 AM");
+            // Mocking the data structure
+            if (singleInterimHearing) {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingTime("10:30 AM").build())
+                            .build()
+                    ))
+                    .build());
+            } else {
+                caseData.setInterimWrapper(InterimWrapper.builder()
+                    .interimHearings(List.of(
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingTime("10:30 AM").build())
+                            .build(),
+                        InterimHearingCollection.builder()
+                            .id(UUID.fromString("12000000-0000-0000-0000-000000000000"))
+                            .value(InterimHearingItem.builder().interimHearingTime("11:30 AM").build())
+                            .build()
+                    ))
+                    .build());
+            }
+
+            // Act
+            String result = hearingService.getHearingTime(caseData, selected);
+
+            // Assert
+            assertEquals(expectedTime, result);
+        });
+    }
 }
