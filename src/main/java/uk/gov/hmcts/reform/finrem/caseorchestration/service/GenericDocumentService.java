@@ -28,6 +28,7 @@ public class GenericDocumentService {
     private final BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
     private final DocumentConversionService documentConversionService;
     private final PdfStampingService pdfStampingService;
+    private final PensionOrderDocumentService pensionOrderDocumentService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
@@ -99,20 +100,19 @@ public class GenericDocumentService {
         return toCaseDocument(stampedDocument);
     }
 
-    public CaseDocument approveDocument(CaseDocument document,
-                                      String authorisationToken,
-                                        String dateTextBoxName,
-                                        LocalDate approvalDate,
-                                        String caseId) {
+    public CaseDocument appendApprovedDateToPensionOrderDocument(CaseDocument document,
+                                                                 String authorisationToken,
+                                                                 LocalDate approvalDate,
+                                                                 String caseId) {
         CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
         log.info("Pdf converation if document is not pdf original {} pdfdocument {} for Case ID: {}",
             document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
 
-        Document stampedDocument = pdfStampingService.approveDocument(
+        Document stampedDocument = pensionOrderDocumentService.appendApprovedDateToDocument(
             Document.builder().url(pdfCaseDocument.getDocumentUrl())
                 .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
                 .fileName(pdfCaseDocument.getDocumentFilename())
-                .build(), authorisationToken, dateTextBoxName, approvalDate, caseId);
+                .build(), authorisationToken, approvalDate, caseId);
 
         return toCaseDocument(stampedDocument);
     }

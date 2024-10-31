@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +49,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +66,6 @@ public class ConsentOrderApprovedDocumentService {
     private final BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
     private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
 
-    private final String FORM_P1_PDF_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         String fileName;
@@ -137,7 +134,7 @@ public class ConsentOrderApprovedDocumentService {
                                                         LocalDate approvalDate,
                                                         String caseId) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument approvedDocument = genericDocumentService.approveDocument(document, authToken, FORM_P1_PDF_TEXTBOX_NAME, approvalDate, caseId);
+        CaseDocument approvedDocument = genericDocumentService.appendApprovedDateToPensionOrderDocument(document, authToken, approvalDate, caseId);
         CaseDocument stampedDocument = genericDocumentService.stampDocument(approvedDocument, authToken, stampType, caseId);
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
