@@ -26,8 +26,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import java.util.List;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.UPLOAD_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Slf4j
 @Service
@@ -94,7 +95,7 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
 
         DynamicMultiSelectListElement elementConfirmation = DynamicMultiSelectListElement.builder()
             .label(format("I confirm the uploaded documents are for the %s v %s case", applicantLName, respondentLName))
-            .code("1")
+            .code(CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE)
             .build();
 
         return DynamicMultiSelectList.builder()

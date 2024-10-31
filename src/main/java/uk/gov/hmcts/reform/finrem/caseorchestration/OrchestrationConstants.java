@@ -52,7 +52,6 @@ public class OrchestrationConstants {
 
     // VARIATION ORDER RELATED
 
-    public static final String APPLICANT_INTENDS = "applicantIntendsTo";
     public static final String VARIATION_ORDER = "Variation Order";
     public static final String CV_ORDER_CAMELCASE_LABEL_FIELD = "consentVariationOrderLabelC";
     public static final String VARIATION_ORDER_CAMELCASE_LABEL_VALUE = "Consent / Variation Order";
@@ -65,14 +64,4 @@ public class OrchestrationConstants {
         "If you are applying for variation order, please upload the order you are varying";
     public static final String CONSENT_OTHER_DOC_LABEL_VALUE =
         "Upload other order documentation related to your application";
-
-    public static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
-
-    public static final String UPLOAD_PARTY_APPLICANT = "theApplicant";
-    public static final String UPLOAD_PARTY_RESPONDENT = "theRespondent";
-
-    public static final String ORDER_TYPE = "orders";
-
-    public static final String PSA_TYPE = "pensionSharingAnnexes";
-    
 }

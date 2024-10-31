@@ -37,17 +37,15 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DraftOrderService {
-
     private final IdamAuthService idamAuthService;
-
     private final HearingService hearingService;
 
     public <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
@@ -263,7 +261,7 @@ public class DraftOrderService {
         // Stream through the collection, find and replace the matching DraftOrderReview
         List<DraftOrdersReviewCollection> updatedDraftOrdersReviewCollection = wrapper.getDraftOrdersReviewCollection().stream()
             .map(reviewCollection -> {
-                DraftOrdersReview newDraftOrdersReview = null;
+                DraftOrdersReview newDraftOrdersReview;
                 // Check if the current reviewCollection's value matches the given draftOrderReview
                 if (reviewCollection.getValue().equals(draftOrdersReview)) {
                     // Replace the item by building a new instance with the updated draftOrderReview
