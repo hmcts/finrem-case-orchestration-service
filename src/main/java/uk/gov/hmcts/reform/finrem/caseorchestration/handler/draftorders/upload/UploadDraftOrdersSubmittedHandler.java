@@ -45,7 +45,8 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             + "<br><br>You can find the documents that you have uploaded on the "
             + "['case documents' tab](/cases/case-details/%s#Case%%20documents).";
 
-    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService, DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper) {
+    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService,
+                                             DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper) {
         super(finremCaseDetailsMapper);
         this.notificationService = notificationService;
         this.draftOrdersNotificationRequestMapper = draftOrdersNotificationRequestMapper;
@@ -65,14 +66,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        String confirmationBody = getConfirmationBody(caseDetails);
-
         NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
         notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
+        String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
