@@ -15,10 +15,12 @@ public class NotificationRequestTest {
     @Test
     public void shouldGetHwfNotificationRequestData() {
         underTest = new NotificationRequest("123456",
-                "45623", "D123", "Padmaja", "test@test.com",
-                "nottingham", CONTESTED, "body", PHONE_OPENING_HOURS, "consent",
-                "Consent",
-                "rejectedReason","app", "res", "1234567890", "", "", "", "", null, null);
+            "45623", "D123", "Padmaja", "test@test.com",
+            "nottingham", CONTESTED, "body", PHONE_OPENING_HOURS, "consent",
+            "Consent",
+            "rejectedReason", "app", "res",
+            "1234567890", "", "", "",
+            "", null, null, "1999-08-06");
         assertEquals("123456", underTest.getCaseReferenceNumber());
         assertEquals("45623", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -32,6 +34,7 @@ public class NotificationRequestTest {
         assertEquals("rejectedReason", underTest.getGeneralApplicationRejectionReason());
         assertEquals("1234567890", underTest.getBarristerReferenceNumber());
         assertEquals("", underTest.getHearingType());
+        assertEquals("1999-08-06", underTest.getHearingDate());
     }
 
     @Test
