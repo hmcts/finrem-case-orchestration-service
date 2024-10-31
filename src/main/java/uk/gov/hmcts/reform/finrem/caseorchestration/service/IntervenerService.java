@@ -184,7 +184,7 @@ public class IntervenerService {
         if (userId.isPresent()) {
             assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
-            logError(email, caseId, errors);
+            logError(caseId, errors);
         }
     }
 
@@ -193,12 +193,12 @@ public class IntervenerService {
         if (userId.isPresent()) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
-            logError(email, caseId, errors);
+            logError(caseId, errors);
         }
     }
 
-    private void logError(String email, Long caseId, List<String> errors) {
-        String error = String.format("Could not find the user with email %s for caseId %s", email, caseId);
+    private void logError(Long caseId, List<String> errors) {
+        String error = String.format("Could not find intervener with provided email for caseId %s", caseId);
         log.error(error);
         errors.add(error);
     }
