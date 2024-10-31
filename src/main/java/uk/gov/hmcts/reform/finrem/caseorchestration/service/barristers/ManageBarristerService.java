@@ -320,7 +320,7 @@ public class ManageBarristerService {
 
     private Runnable throwNoSuchUserException() {
         return () -> {
-            throw new NoSuchUserException("Could not barrister with provided email");
+            throw new NoSuchUserException("Could not find barrister with provided email");
         };
     }
 }
