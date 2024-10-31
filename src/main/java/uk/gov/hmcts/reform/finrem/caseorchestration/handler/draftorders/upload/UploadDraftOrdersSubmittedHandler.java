@@ -58,6 +58,9 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         String confirmationBody = getConfirmationBody(caseDetails);
 
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
