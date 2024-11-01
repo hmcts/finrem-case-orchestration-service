@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -27,9 +28,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
@@ -47,6 +50,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @Service
 public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
 
+    private final NotificationService notificationService;
+
+    private final DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
+
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
     private final IdamAuthService idamAuthService;
@@ -55,10 +62,12 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final DraftOrderService draftOrderService;
 
-    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
+    public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService, DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper, DraftOrdersCategoriser draftOrdersCategoriser,
                                                  IdamAuthService idamAuthService, CaseAssignedRoleService caseAssignedRoleService,
                                                  DraftOrderService draftOrderService) {
         super(finremCaseDetailsMapper);
+        this.notificationService = notificationService;
+        this.draftOrdersNotificationRequestMapper = draftOrdersNotificationRequestMapper;
         this.draftOrdersCategoriser = draftOrdersCategoriser;
         this.idamAuthService = idamAuthService;
         this.caseAssignedRoleService = caseAssignedRoleService;
@@ -90,6 +99,12 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
 
         draftOrdersCategoriser.categoriseDocuments(finremCaseData, userRole);
+
+        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
+        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
