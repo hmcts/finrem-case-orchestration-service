@@ -57,8 +57,6 @@ public class NotificationRequest {
     private Boolean isNotDigital;
     @JsonProperty("hearingDate")
     private String hearingDate;
-    @JsonProperty("judgeName")
-    private String judgeName;
     @JsonProperty("earliestToBeReviewedOrderDate")
     private String earliestToBeReviewedOrderDate;
 }

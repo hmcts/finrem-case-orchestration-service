@@ -239,6 +239,10 @@ public class DraftOrderService {
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
     }
 
+    public boolean isDraftOrderReviewOverdue(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+        return !getDraftOrderReviewOverdue(caseDetails, daysSinceOrderUpload).isEmpty();
+    }
+
     public List<DraftOrdersReview> getDraftOrderReviewOverdue(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
         DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
         return getDraftOrderReviewOverdue(draftOrdersWrapper, daysSinceOrderUpload);

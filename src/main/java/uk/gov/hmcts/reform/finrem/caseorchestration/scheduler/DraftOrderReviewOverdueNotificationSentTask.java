@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -36,7 +37,7 @@ import java.util.List;
 public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
 
     private static final String TASK_NAME = "DraftOrderReviewOverdueNotificationSentTask";
-    private static final String SUMMARY = "DFR-3329";
+    private static final String SUMMARY = "Draft order review overdue notification sent";
     private static final String CASE_TYPE_ID = "FinancialRemedyContested";
 
     @Value("${cron.draftOrderReviewOverdueNotificationSent.enabled:false}")
@@ -49,7 +50,6 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
     private int daysSinceOrderUpload;
 
     private final NotificationService notificationService;
-
     private final DraftOrderService draftOrderService;
 
     protected DraftOrderReviewOverdueNotificationSentTask(CcdService ccdService, SystemUserService systemUserService,
@@ -59,19 +59,6 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
         this.notificationService = notificationService;
         this.draftOrderService = draftOrderService;
-    }
-
-    @Override
-    protected List<CaseReference> getCaseReferences() {
-        String searchQuery = getSearchQuery();
-        String systemUserToken = getSystemUserToken();
-        SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-        log.info("{} cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
-
-        return searchResult.getCases().stream()
-            .map(caseDetails -> caseDetails.getId().toString())
-            .map(CaseReference::new)
-            .toList();
     }
 
     @Override
@@ -96,27 +83,51 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        List<DraftOrdersReview> overdoneDraftOrderReviews = draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload);
+        List<DraftOrdersReview> overdoneDraftOrderReviews =
+            draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload);
 
-        overdoneDraftOrderReviews.forEach(draftOrderReview -> {
-            notificationService.sendDraftOrderReviewOverdueToCaseworker(finremCaseDetails, draftOrderReview);
-            finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(), draftOrderReview));
-        });
+        if (overdoneDraftOrderReviews.isEmpty()) {
+            log.info("{} - No draft order reviews overdue", finremCaseDetails.getId().toString());
+        } else {
+            overdoneDraftOrderReviews.forEach(draftOrderReview -> {
+                notificationService.sendDraftOrderReviewOverdueToCaseworker(finremCaseDetails, draftOrderReview);
+                finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(),
+                    draftOrderReview));
+            });
+        }
+    }
+
+    @Override
+    protected List<CaseReference> getCaseReferences() {
+        String searchQuery = getSearchQuery();
+        String systemUserToken = getSystemUserToken();
+
+        SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
+        log.info("{} 'To Be Reviewed' cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
+
+        List<CaseReference> caseReferences = filterOverdueCases(searchResult);
+        log.info("{} overdue cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
+        return caseReferences;
     }
 
     private String getSearchQuery() {
+        BoolQueryBuilder draftOrderOrderStatusQuery = QueryBuilders.boolQuery()
+            .must(new TermQueryBuilder(
+                "data.draftOrdersReviewCollection.value.draftOrderDocReviewCollection.value.orderStatus.keyword",
+                OrderStatus.TO_BE_REVIEWED));
+        BoolQueryBuilder psaOrderStatusQuery = QueryBuilders.boolQuery()
+            .must(new TermQueryBuilder(
+                "data.draftOrdersReviewCollection.value.psaDocReviewCollection.value.orderStatus.keyword",
+                OrderStatus.TO_BE_REVIEWED));
 
         BoolQueryBuilder orderStatusQuery = QueryBuilders.boolQuery()
-            .must(new TermQueryBuilder("data.draftOrdersReviewCollection.value.psaDocReviewCollection.value.orderStatus.keyword", "TO_BE_REVIEWED"));
+            .should(draftOrderOrderStatusQuery)
+            .should(psaOrderStatusQuery)
+            .minimumShouldMatch(1);
 
-        // Combine the conditions
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .must(orderStatusQuery);
-
-        // Create the search source
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(batchSize)
-            .query(boolQueryBuilder);
+            .query(orderStatusQuery);
 
         return searchSourceBuilder.toString();
     }
@@ -125,4 +136,12 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
         this.taskEnabled = taskEnabled;
     }
 
+    private List<CaseReference> filterOverdueCases(SearchResult searchResult) {
+        return searchResult.getCases().stream()
+            .map(finremCaseDetailsMapper::mapToFinremCaseDetails)
+            .filter(caseDetails -> draftOrderService.isDraftOrderReviewOverdue(caseDetails, daysSinceOrderUpload))
+            .map(caseDetails -> caseDetails.getId().toString())
+            .map(CaseReference::new)
+            .toList();
+    }
 }

@@ -189,7 +189,6 @@ public class FinremNotificationRequestMapper {
         NotificationRequest ret = getNotificationRequestForCaseworker(caseDetails, notificationEmail);
         ret.setHearingDate(String.valueOf(draftOrdersReview.getHearingDate()));
         ret.setEarliestToBeReviewedOrderDate(String.valueOf(draftOrdersReview.getEarliestToBeReviewedOrderDate()));
-        ret.setJudgeName(draftOrdersReview.getHearingJudge());// TODO Hamzah: lookup judgeName by getUserByEmailId
         return ret;
     }
 
