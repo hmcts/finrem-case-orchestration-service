@@ -17,6 +17,7 @@ class CourtDetailsConfigurationTest {
         config.getCourts().forEach((k,v) -> {
             assertThat(k).isNotNull();
             assertThat(v).isNotNull();
+            assertThat(v.getEmail()).isNotNull();
         });
         CourtDetails courtDetails = config.getCourts().get("FR_s_CFCList_1");
         assertThat(courtDetails.getCourtName()).isEqualTo("Bromley County Court And Family Court");
