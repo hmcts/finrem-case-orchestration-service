@@ -169,7 +169,6 @@ class UploadDraftOrdersSubmittedHandlerTest {
 
     @Test
     void testHandleClearsUploadedDraftOrders() {
-        // Arrange
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -181,10 +180,8 @@ class UploadDraftOrdersSubmittedHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
-        // Act
         uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
 
-        // Assert
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
     }
