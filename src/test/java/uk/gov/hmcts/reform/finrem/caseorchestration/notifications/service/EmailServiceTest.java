@@ -660,12 +660,16 @@ public class EmailServiceTest {
     public void givenJudgeReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
         setContestedData();
         notificationRequest.setHearingDate("1 January 2024");
+        notificationRequest.setNotificationEmail("judge@email.com");
 
         Map<String, Object> returnedTemplateVars =
             emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name());
 
+        assertEquals(TEST_CASE_FAMILY_MAN_ID, returnedTemplateVars.get("caseReferenceNumber"));
+        assertEquals("judge@email.com", returnedTemplateVars.get("notificationEmail"));
         assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
-
+        assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
+        assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
     }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {
