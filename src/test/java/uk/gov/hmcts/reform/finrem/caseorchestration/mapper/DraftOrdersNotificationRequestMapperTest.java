@@ -42,7 +42,7 @@ class DraftOrdersNotificationRequestMapperTest {
 
         verify(hearingService).getHearingDate(any(), any());
         assertEquals("123456789", result.getCaseReferenceNumber());
-        assertEquals("1999-08-06", result.getHearingDate());
+        assertEquals("6 August 1999", result.getHearingDate());
         assertEquals("judge@test.com", result.getNotificationEmail());
         assertEquals("Hamzah Tahir", result.getApplicantName());
         assertEquals("Anne Taylor", result.getRespondentName());
