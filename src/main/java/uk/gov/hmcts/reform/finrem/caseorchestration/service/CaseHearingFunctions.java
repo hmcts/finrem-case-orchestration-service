@@ -421,7 +421,7 @@ public final class CaseHearingFunctions {
      * @return Json string of court details
      * @deprecated Use {@link CourtDetailsConfiguration#getCourts()} instead.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated(since = "4 Nov 2024")
     public static String getCourtDetailsString() {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream("/json/court-details.json")) {
             return IOUtils.toString(inputStream, UTF_8);
