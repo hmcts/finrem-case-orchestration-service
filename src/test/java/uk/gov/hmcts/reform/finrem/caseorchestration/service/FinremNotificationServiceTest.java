@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
@@ -32,14 +33,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +59,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getConsentedFinremCaseDetails;
@@ -114,17 +111,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @ExtendWith(MockitoExtension.class)
 class FinremNotificationServiceTest {
 
     @InjectMocks
     private NotificationService notificationService;
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(NotificationService.class);
-
     @Mock
     private FeatureToggleService featureToggleService;
     @Mock
@@ -143,13 +135,15 @@ class FinremNotificationServiceTest {
     private NotificationServiceConfiguration notificationServiceConfiguration;
     @Mock
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     private final FinremCaseDetails consentedFinremCaseDetails = getConsentedFinremCaseDetails();
     private final FinremCaseDetails contestedFinremCaseDetails = getContestedFinremCaseDetails();
     private SolicitorCaseDataKeysWrapper dataKeysWrapper;
 
     @BeforeEach
-    void setUp() throws JsonProcessingException {
+    void setUp() {
         dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
         NotificationRequest notificationRequest = new NotificationRequest();
@@ -176,8 +170,11 @@ class FinremNotificationServiceTest {
         lenient().when(finremNotificationRequestMapper.buildNotificationRequest(any(FinremCaseDetails.class), any(IntervenerOne.class),
             anyString(), anyString(), anyString())).thenReturn(notificationRequest);
 
-        lenient().when(objectMapper.readValue(getCourtDetailsString(), HashMap.class))
-            .thenReturn(new HashMap(Map.of("email", "FRCLondon@justice.gov.uk")));
+        Map<String, CourtDetails> courtDetailsMap = Map.of(
+            "FR_s_NottinghamList_1", CourtDetails.builder().email("FRCLondon@justice.gov.uk").build(),
+            "someCourt", CourtDetails.builder().email("court@example.com").build()
+        );
+        lenient().when(courtDetailsConfiguration.getCourts()).thenReturn(courtDetailsMap);
     }
 
     @Test
@@ -994,57 +991,19 @@ class FinremNotificationServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideCourtDetailsTestCases")
-    void testGetRecipientEmailFromSelectedCourt(Map<String, Object> courtDetailsMap, String selectedAllocatedCourt, String expectedEmail,
-                                                boolean throwsException, String expectedLogMessage) throws Exception {
-        if (throwsException) {
-            lenient().when(objectMapper.readValue(anyString(), eq(HashMap.class))).thenThrow(new JsonProcessingException("error") {});
-        } else {
-            lenient().when(objectMapper.readValue(anyString(), eq(HashMap.class))).thenReturn((HashMap) courtDetailsMap);
-        }
-
-        // Call the method
+    void testGetRecipientEmailFromSelectedCourt(String selectedAllocatedCourt, String expectedEmail) {
         String result = notificationService.getRecipientEmailFromSelectedCourt(selectedAllocatedCourt);
-
-        // Verify the result
         assertEquals(expectedEmail, result);
-
-        // Verify log messages if expected
-        if (expectedLogMessage != null) {
-            assertThat(logs.getErrors()).containsExactly(expectedLogMessage);
-        } else {
-            assertThat(logs.getErrors()).isEmpty();
-        }
     }
 
     // MethodSource for the parameterized test
     static Stream<Arguments> provideCourtDetailsTestCases() {
-        Map<String, Object> validCourtDetailsMap = new HashMap<>();
-        Map<String, Object> courtWithValidEmail = new HashMap<>();
-        courtWithValidEmail.put(COURT_DETAILS_EMAIL_KEY, "court@example.com");
-        validCourtDetailsMap.put("someCourt", courtWithValidEmail);
-
-        Map<String, Object> courtWithEmptyEmail = new HashMap<>();
-        courtWithEmptyEmail.put(COURT_DETAILS_EMAIL_KEY, "");
-        Map<String, Object> emptyEmailCourtDetailsMap = new HashMap<>();
-        emptyEmailCourtDetailsMap.put("someCourt", courtWithEmptyEmail);
-
-        Map<String, Object> missingCourtDetailsMap = new HashMap<>(); // No court details for this test
-
         return Stream.of(
             // Scenario: valid court email is found, no error log expected
-            Arguments.of(validCourtDetailsMap, "someCourt", "court@example.com", false, null),
+            Arguments.of("someCourt", "court@example.com"),
 
             // Scenario: court details not found, log the error
-            Arguments.of(missingCourtDetailsMap, "nonExistentCourt", "fr_applicant_solicitor1@mailinator.com",
-                false, "Unable to lookup court details of nonExistentCourt from 'court-details.json'. Use DEFAULT_EMAIL instead"),
-
-            // Scenario: court email is empty, log the error
-            Arguments.of(emptyEmailCourtDetailsMap, "someCourt", "fr_applicant_solicitor1@mailinator.com",
-                false, "Get an empty email after looking up court details of someCourt from 'court-details.json'. Use DEFAULT_EMAIL instead"),
-
-            // Scenario: JsonProcessingException thrown, log the error
-            Arguments.of(null, "someCourt", "fr_applicant_solicitor1@mailinator.com",
-                true, "Fail to read 'court-details.json'")
+            Arguments.of("nonExistentCourt", "fr_applicant_solicitor1@mailinator.com")
         );
     }
 

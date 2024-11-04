@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
@@ -123,6 +124,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private EmailService emailService;
     @Autowired
     private ConsentedHearingHelper helper;
+    @Autowired
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @MockBean
     private FeatureToggleService featureToggleService;
