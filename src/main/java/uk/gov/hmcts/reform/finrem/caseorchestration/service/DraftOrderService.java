@@ -284,7 +284,7 @@ public class DraftOrderService {
     private boolean isOverdue(Reviewable reviewable, LocalDate thresholdDate) {
         return reviewable.getNotificationSentDate() == null
             && reviewable.getOrderStatus() != null
-            && OrderStatus.nonProcessedOrderStatuses().contains(reviewable.getOrderStatus())
+            && OrderStatus.TO_BE_REVIEWED.equals(reviewable.getOrderStatus())
             && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay());
     }
 }

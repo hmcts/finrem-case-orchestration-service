@@ -68,7 +68,7 @@ public class DraftOrdersReview implements HasCaseDocument {
 
         // Process the collected list to find the earliest date
         return reviewables.stream()
-            .filter(r -> r.getOrderStatus() == null || OrderStatus.nonProcessedOrderStatuses().contains(r.getOrderStatus()))
+            .filter(r -> OrderStatus.TO_BE_REVIEWED.equals(r.getOrderStatus()))
             .filter(r -> r.getNotificationSentDate() == null)
             .map(Reviewable::getSubmittedDate)
             .filter(Objects::nonNull)  // Ensure the date is not null
@@ -76,5 +76,4 @@ public class DraftOrdersReview implements HasCaseDocument {
             .min(LocalDate::compareTo)  // Find the minimum LocalDate
             .orElse(null);  // Return null if no dates are found
     }
-
 }

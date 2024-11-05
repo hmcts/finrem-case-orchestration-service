@@ -38,14 +38,17 @@ class DraftOrdersReviewTest {
     void testGetEarliestToBeReviewedOrderDate_withValidDates() {
         // Create Reviewable objects with LocalDateTime dates
         DraftOrderDocumentReview reviewable1 = DraftOrderDocumentReview.builder()
+            .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedDate(LocalDateTime.of(2023, 5, 10, 10, 0))
             .build();
 
         PsaDocumentReview reviewable2 = PsaDocumentReview.builder()
+            .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedDate(LocalDateTime.of(2023, 3, 15, 10, 0))
             .build();
 
         PsaDocumentReview reviewable3 = PsaDocumentReview.builder()
+            .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedDate(LocalDateTime.of(2023, 4, 20, 10, 0))
             .build();
 
@@ -73,10 +76,12 @@ class DraftOrdersReviewTest {
     @Test
     void testGetEarliestToBeReviewedOrderDate_withNullDates() {
         DraftOrderDocumentReview reviewable1 = DraftOrderDocumentReview.builder()
+            .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedDate(null)
             .build();
 
         PsaDocumentReview reviewable2 = PsaDocumentReview.builder()
+            .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedDate(null)
             .build();
 
