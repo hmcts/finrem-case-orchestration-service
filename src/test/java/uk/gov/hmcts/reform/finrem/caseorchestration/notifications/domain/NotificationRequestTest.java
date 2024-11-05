@@ -35,7 +35,7 @@ public class NotificationRequestTest {
         assertEquals("", underTest.getHearingType());
         assertEquals("judgeName", underTest.getJudgeName());
         assertEquals("2024-01-01", underTest.getHearingDate());
-        assertEquals("2024-01-01", underTest.getEarliestToBeReviewedOrderDate());
+        assertEquals("2024-01-01", underTest.getOldestDraftOrderDate());
     }
 
     @Test

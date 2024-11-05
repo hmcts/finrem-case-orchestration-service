@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -21,12 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +33,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -71,33 +66,8 @@ class FinremNotificationRequestMapperTest {
 
     @BeforeEach
     public void setup() {
-        // Initialize mock objects
-        MockitoAnnotations.openMocks(this);
-
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
-    }
-
-    @Test
-    void shouldCreateRequestForDraftOrderReviewOverdue() {
-        DraftOrdersReview mockedDraftOrderReview = mock(DraftOrdersReview.class);
-        when(mockedDraftOrderReview.getEarliestToBeReviewedOrderDate()).thenReturn(LocalDate.of(2024, 1, 1));
-        when(mockedDraftOrderReview.getHearingJudge()).thenReturn("JUDGE NAME");
-
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForDraftOrderReviewOverdueToCaseworker(
-            consentedFinremCaseDetails, "notificationEmail", mockedDraftOrderReview);
-        assertEquals("notificationEmail", notificationRequest.getNotificationEmail());
-        assertEquals("JUDGE NAME", notificationRequest.getJudgeName());
-        assertEquals("2024-01-01", notificationRequest.getEarliestToBeReviewedOrderDate());
-    }
-
-    @Test
-    void shouldCreateRequestForCaseworker() {
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForCaseworker(
-            consentedFinremCaseDetails, "notificationEmail");
-        assertEquals("notificationEmail", notificationRequest.getNotificationEmail());
-        assertEquals("", notificationRequest.getName());
-        assertEquals("", notificationRequest.getSolicitorReferenceNumber());
     }
 
     @Test

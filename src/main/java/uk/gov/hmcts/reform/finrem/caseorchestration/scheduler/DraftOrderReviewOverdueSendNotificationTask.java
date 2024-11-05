@@ -8,11 +8,13 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -34,7 +36,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
+public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
 
     private static final String TASK_NAME = "DraftOrderReviewOverdueNotificationSentTask";
     private static final String SUMMARY = "Draft order review overdue notification sent";
@@ -47,18 +49,21 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
     private int batchSize;
 
     @Value("${cron.draftOrderReviewOverdueNotificationSent.daysSinceOrderUpload:14}")
-    private int daysSinceOrderUpload;
+    private int daysSinceOrderUpload = 14;
 
     private final NotificationService notificationService;
     private final DraftOrderService draftOrderService;
+    private final DraftOrdersNotificationRequestMapper notificationRequestMapper;
 
-    protected DraftOrderReviewOverdueNotificationSentTask(CcdService ccdService, SystemUserService systemUserService,
+    protected DraftOrderReviewOverdueSendNotificationTask(CcdService ccdService, SystemUserService systemUserService,
                                                           FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                           NotificationService notificationService,
-                                                          DraftOrderService draftOrderService) {
+                                                          DraftOrderService draftOrderService,
+                                                          DraftOrdersNotificationRequestMapper notificationRequestMapper) {
         super(ccdService, systemUserService, finremCaseDetailsMapper);
         this.notificationService = notificationService;
         this.draftOrderService = draftOrderService;
+        this.notificationRequestMapper = notificationRequestMapper;
     }
 
     @Override
@@ -86,15 +91,11 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
         List<DraftOrdersReview> overdoneDraftOrderReviews =
             draftOrderService.getDraftOrderReviewOverdue(finremCaseDetails, daysSinceOrderUpload);
 
-        if (overdoneDraftOrderReviews.isEmpty()) {
-            log.info("{} - No draft order reviews overdue", finremCaseDetails.getId().toString());
-        } else {
-            overdoneDraftOrderReviews.forEach(draftOrderReview -> {
-                notificationService.sendDraftOrderReviewOverdueToCaseworker(finremCaseDetails, draftOrderReview);
-                finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(),
-                    draftOrderReview));
-            });
-        }
+        overdoneDraftOrderReviews.forEach(draftOrdersReview -> {
+            sendNotification(finremCaseDetails, draftOrdersReview);
+            finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(),
+                draftOrdersReview));
+        });
     }
 
     @Override
@@ -106,7 +107,7 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
         log.info("{} 'To Be Reviewed' cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
 
         List<CaseReference> caseReferences = filterOverdueCases(searchResult);
-        log.info("{} overdue cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
+        log.info("{} overdue cases found for {}", caseReferences.size(), CASE_TYPE_ID);
         return caseReferences;
     }
 
@@ -143,5 +144,11 @@ public class DraftOrderReviewOverdueNotificationSentTask extends BaseTask {
             .map(caseDetails -> caseDetails.getId().toString())
             .map(CaseReference::new)
             .toList();
+    }
+
+    private void sendNotification(FinremCaseDetails caseDetails, DraftOrdersReview draftOrdersReview) {
+        NotificationRequest notificationRequest = notificationRequestMapper.buildCaseworkerDraftOrderReviewOverdue(
+            caseDetails, draftOrdersReview);
+        notificationService.sendDraftOrderReviewOverdueToCaseworker(notificationRequest);
     }
 }

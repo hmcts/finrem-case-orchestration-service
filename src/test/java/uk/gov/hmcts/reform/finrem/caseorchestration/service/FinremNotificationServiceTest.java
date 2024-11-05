@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -83,7 +82,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -175,22 +173,6 @@ class FinremNotificationServiceTest {
             "someCourt", CourtDetails.builder().email("court@example.com").build()
         );
         lenient().when(courtDetailsConfiguration.getCourts()).thenReturn(courtDetailsMap);
-    }
-
-    @Test
-    void shouldSendDraftOrderReviewOverdueToCaseworker() {
-        DraftOrdersReview draftOrderReview = DraftOrdersReview.builder().build();
-
-        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
-        when(finremNotificationRequestMapper
-            .getNotificationRequestForDraftOrderReviewOverdueToCaseworker(any(FinremCaseDetails.class), anyString(), eq(draftOrderReview)))
-            .thenReturn(NotificationRequest.builder().build());
-
-        notificationService.sendDraftOrderReviewOverdueToCaseworker(contestedFinremCaseDetails, draftOrderReview);
-
-        verify(finremNotificationRequestMapper)
-            .getNotificationRequestForDraftOrderReviewOverdueToCaseworker(eq(contestedFinremCaseDetails), anyString(), eq(draftOrderReview));
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE));
     }
 
     @Test

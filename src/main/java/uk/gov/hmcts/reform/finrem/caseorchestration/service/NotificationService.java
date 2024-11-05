@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
@@ -120,11 +119,8 @@ public class NotificationService {
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    public void sendDraftOrderReviewOverdueToCaseworker(FinremCaseDetails caseDetails, DraftOrdersReview draftOrdersReview) {
-        NotificationRequest notificationRequest = finremNotificationRequestMapper
-            .getNotificationRequestForDraftOrderReviewOverdueToCaseworker(caseDetails, getRecipientEmail(caseDetails), draftOrdersReview);
-
-        log.info("{} - Sending draft order review overdue to caseworker.", notificationRequest.getCaseReferenceNumber());
+    public void sendDraftOrderReviewOverdueToCaseworker(NotificationRequest notificationRequest) {
+        log.info("{} - Sending draft order review overdue to caseworker", notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE);
     }
 
