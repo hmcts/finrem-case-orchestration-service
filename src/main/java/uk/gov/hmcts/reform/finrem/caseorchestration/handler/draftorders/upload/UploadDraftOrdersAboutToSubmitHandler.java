@@ -91,9 +91,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         draftOrdersCategoriser.categoriseDocuments(finremCaseData, userRole);
 
-        finremCaseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        finremCaseData.getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
     }

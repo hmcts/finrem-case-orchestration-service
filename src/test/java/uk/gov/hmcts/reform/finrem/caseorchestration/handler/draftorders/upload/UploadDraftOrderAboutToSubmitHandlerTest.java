@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -231,23 +230,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         SuggestedDraftOrder draftOrderResult3 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(2).getValue();
         assertThat(draftOrderResult3.getDraftOrder()).isNotNull();
         assertThat(draftOrderResult3.getAttachments()).isNull();
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldClearTemporaryFields(boolean scenario) {
-        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
-        if (scenario) {
-            builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build());
-        } else {
-            builder.uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build());
-        }
-        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-        assertThat(response.getData().getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
-        assertThat(response.getData().getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
     }
 
     @ParameterizedTest

@@ -55,4 +55,6 @@ public class NotificationRequest {
     private byte[] documentContents;
     @JsonProperty("isNotDigital")
     private Boolean isNotDigital;
+    @JsonProperty("hearingDate")
+    private String hearingDate;
 }
