@@ -47,10 +47,10 @@ public class PrdOrganisationService {
     @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {
-            log.info("finding user by email {}", maskEmail(email));
+            log.info("Finding user by email");
             return Optional.of(organisationApi.findUserByEmail(authToken, authTokenGenerator.generate(), email).getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
-            log.info("User with email {} not found", maskEmail(email));
+            log.info("Could not find user by email");
             return Optional.empty();
         } catch (FeignException exception) {
             throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");

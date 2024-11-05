@@ -39,7 +39,7 @@ public class IntervenerService {
             log.info("Revoke case role for {} for Case ID: {}", intervenerWrapper.getIntervenerSolicitorCaseRole(), caseId);
             String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             String email = intervenerWrapper.getIntervenerSolEmail();
-            remokeIntervenerRole(caseId, email, orgId,
+            revokeIntervenerRole(caseId, email, orgId,
                 intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
         }
 
@@ -78,7 +78,7 @@ public class IntervenerService {
                     && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
 
                     log.info("{} now not represented for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
-                    remokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
+                    revokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
                         beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID(),
                         intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
                     intervenerWrapper.setIntervenerSolEmail(null);
@@ -116,7 +116,7 @@ public class IntervenerService {
             && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
-                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
+                revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
                     beforeOrgId,
                     intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
             }
@@ -184,21 +184,21 @@ public class IntervenerService {
         if (userId.isPresent()) {
             assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
-            logError(email, caseId, errors);
+            logError(caseId, errors);
         }
     }
 
-    private void remokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
+    private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
-            logError(email, caseId, errors);
+            logError(caseId, errors);
         }
     }
 
-    private void logError(String email, Long caseId, List<String> errors) {
-        String error = String.format("Could not find the user with email %s for caseId %s", email, caseId);
+    private void logError(Long caseId, List<String> errors) {
+        String error = String.format("Could not find intervener with provided email for caseId %s", caseId);
         log.error(error);
         errors.add(error);
     }
