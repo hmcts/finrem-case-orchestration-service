@@ -40,7 +40,7 @@ public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
 
     private static final String TASK_NAME = "DraftOrderReviewOverdueNotificationSentTask";
     private static final String SUMMARY = "Draft order review overdue notification sent";
-    private static final String CASE_TYPE_ID = "FinancialRemedyContested";
+    private static final CaseType CASE_TYPE = CaseType.CONTESTED;
 
     @Value("${cron.draftOrderReviewOverdueNotificationSent.enabled:false}")
     private boolean taskEnabled;
@@ -78,7 +78,7 @@ public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
 
     @Override
     protected CaseType getCaseType() {
-        return CaseType.forValue(CASE_TYPE_ID);
+        return CASE_TYPE;
     }
 
     @Override
@@ -104,10 +104,10 @@ public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
         String systemUserToken = getSystemUserToken();
 
         SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
-        log.info("{} 'To Be Reviewed' cases found for {}", searchResult.getTotal(), CASE_TYPE_ID);
+        log.info("{} 'To Be Reviewed' cases found for {}", searchResult.getTotal(), CASE_TYPE.getCcdType());
 
         List<CaseReference> caseReferences = filterOverdueCases(searchResult);
-        log.info("{} overdue cases found for {}", caseReferences.size(), CASE_TYPE_ID);
+        log.info("{} overdue cases found for {}", caseReferences.size(), CASE_TYPE.getCcdType());
         return caseReferences;
     }
 
