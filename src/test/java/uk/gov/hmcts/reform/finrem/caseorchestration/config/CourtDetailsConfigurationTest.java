@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.DefaultResourceLoader;
 
 import java.io.IOException;
 
@@ -11,7 +12,7 @@ class CourtDetailsConfigurationTest {
 
     @Test
     void testConstructor() throws IOException {
-        CourtDetailsConfiguration config = new CourtDetailsConfiguration(new ObjectMapper());
+        CourtDetailsConfiguration config = new CourtDetailsConfiguration(new DefaultResourceLoader(), new ObjectMapper());
 
         assertThat(config.getCourts()).hasSize(137);
         config.getCourts().forEach((k,v) -> {
