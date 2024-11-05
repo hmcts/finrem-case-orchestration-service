@@ -46,7 +46,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final ConsentOrderPrintService consentOrderPrintService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
-
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
@@ -83,7 +82,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         LocalDate approvalDate = documentHelper.getConsentDateOfOrder(caseData);
-
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 

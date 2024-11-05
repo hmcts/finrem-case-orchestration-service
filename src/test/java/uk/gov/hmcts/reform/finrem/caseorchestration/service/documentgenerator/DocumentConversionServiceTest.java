@@ -92,7 +92,7 @@ public class DocumentConversionServiceTest {
     @Test
     public void doNotFlattenPdfDocumentWithNoFromLayer() throws IOException {
 
-        String editedPdfFixture = "/fixtures/D81_consent_order.pdf";
+        String editedPdfFixture = "/fixtures/P1_pension_sharing_annex.pdf";
         byte[] pdfBytes = loadResource(editedPdfFixture);
         byte[] result = documentConversionService.flattenPdfDocument(pdfBytes);
 
