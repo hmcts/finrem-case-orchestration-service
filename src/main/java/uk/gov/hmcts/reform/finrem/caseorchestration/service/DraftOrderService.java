@@ -249,7 +249,6 @@ public class DraftOrderService {
         return getDraftOrderReviewOverdue(draftOrdersWrapper, daysSinceOrderUpload);
     }
 
-    // Method to get DraftOrdersReview objects based on the specified conditions
     private List<DraftOrdersReview> getDraftOrderReviewOverdue(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
         LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
         log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
@@ -282,9 +281,8 @@ public class DraftOrderService {
     }
 
     private boolean isOverdue(Reviewable reviewable, LocalDate thresholdDate) {
-        return reviewable.getNotificationSentDate() == null
-            && reviewable.getOrderStatus() != null
-            && OrderStatus.TO_BE_REVIEWED.equals(reviewable.getOrderStatus())
-            && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay());
+        return OrderStatus.TO_BE_REVIEWED.equals(reviewable.getOrderStatus())
+            && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay())
+            && reviewable.getNotificationSentDate() == null;
     }
 }

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -905,7 +906,7 @@ class DraftOrderServiceTest {
             mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
 
             // Case 1: Single draftOrdersReviewCollection
-            List<DraftOrdersReview> actual = draftOrderService.getDraftOrderReviewOverdue(FinremCaseDetailsBuilderFactory
+            FinremCaseDetails caseDetails1 = FinremCaseDetailsBuilderFactory
                 .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .draftOrdersReviewCollection(List.of(
                         // may need a multiple
@@ -915,11 +916,12 @@ class DraftOrderServiceTest {
                                 .psaDocReviewCollection(psaDocReviewCollection)
                                 .build()
                             ).build()
-                    )).build())).build(), 14);
+                    )).build())).build();
+            List<DraftOrdersReview> actual = draftOrderService.getDraftOrderReviewOverdue(caseDetails1, 14);
             assertExpectedSituationForCase1(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase1);
 
             // Case 2: Multiple draftOrdersReviewCollection
-            actual = draftOrderService.getDraftOrderReviewOverdue(FinremCaseDetailsBuilderFactory
+            FinremCaseDetails caseDetails2 = FinremCaseDetailsBuilderFactory
                 .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .draftOrdersReviewCollection(List.of(
                         // may need a multiple
@@ -933,7 +935,8 @@ class DraftOrderServiceTest {
                                 .psaDocReviewCollection(psaDocReviewCollection)
                                 .build()
                             ).build()
-                    )).build())).build(), 14);
+                    )).build())).build();
+            actual = draftOrderService.getDraftOrderReviewOverdue(caseDetails2, 14);
             assertExpectedSituationForCase2(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase2);
         }
     }
@@ -1100,6 +1103,42 @@ class DraftOrderServiceTest {
                 List.of(), // No notification dates
                 0, 0
             )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testIsDraftOrderReviewOverdue")
+    void testIsDraftOrderReviewOverdue(LocalDate submissionDate, boolean expected) {
+        DraftOrdersReview draftOrdersReview = DraftOrdersReview.builder()
+            .draftOrderDocReviewCollection(List.of(
+                createDraftOrder(OrderStatus.TO_BE_REVIEWED, submissionDate, null)
+            ))
+            .build();
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection = List.of(
+            DraftOrdersReviewCollection.builder()
+              .value(draftOrdersReview)
+              .build()
+        );
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(draftOrdersReviewCollection)
+                .build())
+            .build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(caseData)
+            .build();
+        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+        try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
+            boolean actual = draftOrderService.isDraftOrderReviewOverdue(caseDetails, 14);
+            assertThat(actual).isEqualTo(expected);
+        }
+    }
+
+    static Stream<Arguments> testIsDraftOrderReviewOverdue() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2024, 10, 20), true),
+            Arguments.of(LocalDate.of(2024, 11, 4), false)
         );
     }
 
