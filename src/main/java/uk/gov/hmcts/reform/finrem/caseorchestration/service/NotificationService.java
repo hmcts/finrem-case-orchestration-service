@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -180,7 +181,7 @@ public class NotificationService {
      * No Return.
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
-     * @param caseDetails instance of CaseDetails
+     * @param caseDetails     instance of CaseDetails
      * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
      * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
      */
@@ -557,7 +558,7 @@ public class NotificationService {
 
         NotificationRequest notificationRequest =
             notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails,
-            dataKeysWrapper);
+                dataKeysWrapper);
         log.info("Received request to send notification email to intervener for 'List for hearing'. Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_PREPARE_FOR_HEARING_INTERVENER_SOL);
@@ -1888,5 +1889,10 @@ public class NotificationService {
                 return FR_CONTEST_ORDER_APPROVED_INTERVENER1;
             }
         }
+    }
+
+    public void sendContestedReadyToReviewOrderToJudge(NotificationRequest judgeNotificationRequest) {
+        log.info("{} - Sending ready for review email to judge.", judgeNotificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
 }
