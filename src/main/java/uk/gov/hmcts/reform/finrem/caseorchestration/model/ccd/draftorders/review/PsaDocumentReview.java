@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Builder(toBuilder = true)
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
