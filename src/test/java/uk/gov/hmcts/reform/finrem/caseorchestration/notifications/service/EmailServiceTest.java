@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -662,6 +663,22 @@ public class EmailServiceTest {
     }
 
     @Test
+    public void givenJudgeReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
+        setContestedData();
+        notificationRequest.setHearingDate("1 January 2024");
+        notificationRequest.setNotificationEmail("judge@email.com");
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name());
+
+        assertEquals(TEST_CASE_FAMILY_MAN_ID, returnedTemplateVars.get("caseReferenceNumber"));
+        assertEquals("judge@email.com", returnedTemplateVars.get("notificationEmail"));
+        assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
+        assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
+        assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
+    }
+
+    @Test
     public void testSendConfirmationEmailForContestedDraftOrderReviewOverdue() throws NotificationClientException {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("recipient@test.com")
@@ -695,13 +712,10 @@ public class EmailServiceTest {
             anyString());
 
         Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
-        expectedTemplateFields.forEach((k, v) -> {
-            assertEquals(v, actualTemplateFields.get(k));
-        });
+        expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
     }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {
-
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertNull(returnedTemplateVars.get("generalEmailBody"));
