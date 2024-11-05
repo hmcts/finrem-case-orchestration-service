@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Builder(toBuilder = true)
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

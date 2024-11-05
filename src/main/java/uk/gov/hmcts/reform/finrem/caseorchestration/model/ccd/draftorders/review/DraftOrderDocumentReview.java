@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Builder(toBuilder = true)
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
