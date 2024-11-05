@@ -28,7 +28,7 @@ import java.util.List;
  * To enable the task to execute set environment variables:
  * <ul>
  *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_ENABLED=true</li>
- *     <li>TASK_NAME=DraftOrderReviewOverdueNotificationSentTask</li>
+ *     <li>TASK_NAME=DraftOrderReviewOverdueSendNotificationTask</li>
  *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_BATCH_SIZE=number of cases to search for</li>
  *     <li>CRON_DRAFT_ORDER_REVIEW_OVERDUE_NOTIFICATION_SENT_DAYS_SINCE_ORDER_UPLOAD=The number of days
  *     after the agreed draft order or pension sharing annex upload before sending a notification to review outstanding orders.</li>
@@ -38,7 +38,7 @@ import java.util.List;
 @Slf4j
 public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
 
-    private static final String TASK_NAME = "DraftOrderReviewOverdueNotificationSentTask";
+    private static final String TASK_NAME = "DraftOrderReviewOverdueSendNotificationTask";
     private static final String SUMMARY = "Draft order review overdue notification sent";
     private static final CaseType CASE_TYPE = CaseType.CONTESTED;
 
@@ -93,8 +93,7 @@ public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
 
         overdoneDraftOrderReviews.forEach(draftOrdersReview -> {
             sendNotification(finremCaseDetails, draftOrdersReview);
-            finremCaseDetails.setData(draftOrderService.applyCurrentNotificationTimestamp(finremCaseDetails.getData(),
-                draftOrdersReview));
+            draftOrderService.updateOverdueDocuments(draftOrdersReview, daysSinceOrderUpload);
         });
     }
 
@@ -126,9 +125,16 @@ public class DraftOrderReviewOverdueSendNotificationTask extends BaseTask {
             .should(psaOrderStatusQuery)
             .minimumShouldMatch(1);
 
+        BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
+            .mustNot(new TermQueryBuilder("state.keyword", "close"));
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+            .must(orderStatusQuery)
+            .must(stateQuery);
+
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(batchSize)
-            .query(orderStatusQuery);
+            .query(boolQueryBuilder);
 
         return searchSourceBuilder.toString();
     }

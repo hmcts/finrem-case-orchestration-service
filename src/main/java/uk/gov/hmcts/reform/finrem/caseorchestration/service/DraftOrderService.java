@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -94,8 +95,8 @@ public class DraftOrderService {
         return ret;
     }
 
-    private static void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
-                                              AgreedDraftOrder.AgreedDraftOrderBuilder builder) {
+    private void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
+                                       AgreedDraftOrder.AgreedDraftOrderBuilder builder) {
         ofNullable(uploadAgreedDraftOrder.getUploadParty())
             .map(DynamicRadioList::getValue)
             .map(DynamicRadioListElement::getCode)
@@ -260,58 +261,30 @@ public class DraftOrderService {
             .toList();
     }
 
-    public FinremCaseData applyCurrentNotificationTimestamp(FinremCaseData existingCaseData, final DraftOrdersReview draftOrdersReview) {
-        DraftOrdersWrapper wrapper = existingCaseData.getDraftOrdersWrapper();
-        // Stream through the collection, find and replace the matching DraftOrderReview
-        List<DraftOrdersReviewCollection> updatedDraftOrdersReviewCollection = wrapper.getDraftOrdersReviewCollection().stream()
-            .map(reviewCollection -> {
-                DraftOrdersReview newDraftOrdersReview;
-                // Check if the current reviewCollection's value matches the given draftOrderReview
-                if (reviewCollection.getValue().equals(draftOrdersReview)) {
-                    // Replace the item by building a new instance with the updated draftOrderReview
-                    LocalDateTime newDate = LocalDateTime.now();
-                    // Update notificationSentDate for each DraftOrderDocumentReview
-                    if (draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
-                        List<DraftOrderDocReviewCollection> updatedDraftOrderDocReviewCollections = draftOrdersReview
-                            .getDraftOrderDocReviewCollection().stream()
-                            .map(docReviewCollection -> docReviewCollection.toBuilder()
-                                .value(docReviewCollection.getValue()
-                                    .toBuilder()
-                                    .notificationSentDate(newDate)
-                                    .build())
-                                .build())
-                            .toList();
-                        newDraftOrdersReview = draftOrdersReview.toBuilder()
-                            .draftOrderDocReviewCollection(updatedDraftOrderDocReviewCollections)
-                            .build();
-                    } else {
-                        newDraftOrdersReview = draftOrdersReview;
-                    }
+    /**
+     * Sets the notification sent date on any Draft Order or Pension Sharing Annex documents where a review is overdue.
+     *
+     * @param draftOrdersReview    draft order documents for a hearing
+     * @param daysSinceOrderUpload threshold days for when a review becomes overdue
+     */
+    public void updateOverdueDocuments(DraftOrdersReview draftOrdersReview, int daysSinceOrderUpload) {
+        LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
+        LocalDateTime notificationSentDate = LocalDateTime.now();
+        draftOrdersReview.getDraftOrderDocReviewCollection().stream()
+            .map(DraftOrderDocReviewCollection::getValue)
+            .filter(d -> isOverdue(d, thresholdDate))
+            .toList().forEach(d -> d.setNotificationSentDate(notificationSentDate));
 
-                    // Update notificationSentDate for each PsaDocumentReview
-                    if (newDraftOrdersReview.getPsaDocReviewCollection() != null) {
-                        List<PsaDocReviewCollection> updatedPsaDocReviewCollections = newDraftOrdersReview.getPsaDocReviewCollection().stream()
-                            .map(psaReviewCollection -> psaReviewCollection.toBuilder()
-                                .value(psaReviewCollection.getValue()
-                                    .toBuilder()
-                                    .notificationSentDate(newDate)
-                                    .build())
-                                .build())
-                            .toList();
-                        newDraftOrdersReview = newDraftOrdersReview.toBuilder()
-                            .psaDocReviewCollection(updatedPsaDocReviewCollections)
-                            .build();
-                    }
+        draftOrdersReview.getPsaDocReviewCollection().stream()
+            .map(PsaDocReviewCollection::getValue)
+            .filter(d -> isOverdue(d, thresholdDate))
+            .toList().forEach(d -> d.setNotificationSentDate(notificationSentDate));
+    }
 
-                    return reviewCollection.toBuilder()
-                        .value(newDraftOrdersReview)
-                        .build();
-                }
-                return reviewCollection;
-            })
-            .toList();
-
-        DraftOrdersWrapper newDraftOrdersWrapper = wrapper.toBuilder().draftOrdersReviewCollection(updatedDraftOrdersReviewCollection).build();
-        return existingCaseData.toBuilder().draftOrdersWrapper(newDraftOrdersWrapper).build();
+    private boolean isOverdue(Reviewable reviewable, LocalDate thresholdDate) {
+        return reviewable.getNotificationSentDate() == null
+            && reviewable.getOrderStatus() != null
+            && OrderStatus.nonProcessedOrderStatuses().contains(reviewable.getOrderStatus())
+            && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay());
     }
 }
