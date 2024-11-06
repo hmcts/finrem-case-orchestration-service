@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
@@ -653,6 +654,22 @@ public class EmailServiceTest {
         assertEquals("test name", returnedTemplateVars.get("intervenerFullName"));
         assertEquals("test firm", returnedTemplateVars.get("intervenerSolicitorFirm"));
         assertEquals(PHONE_OPENING_HOURS, returnedTemplateVars.get("phoneOpeningHours"));
+    }
+
+    @Test
+    public void givenJudgeReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
+        setContestedData();
+        notificationRequest.setHearingDate("1 January 2024");
+        notificationRequest.setNotificationEmail("judge@email.com");
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name());
+
+        assertEquals(TEST_CASE_FAMILY_MAN_ID, returnedTemplateVars.get("caseReferenceNumber"));
+        assertEquals("judge@email.com", returnedTemplateVars.get("notificationEmail"));
+        assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
+        assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
+        assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
     }
 
     private void assertContestedTemplateVariablesAreAbsent(Map<String, Object> returnedTemplateVars) {

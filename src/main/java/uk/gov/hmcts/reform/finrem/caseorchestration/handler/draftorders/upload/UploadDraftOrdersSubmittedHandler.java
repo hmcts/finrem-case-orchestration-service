@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -16,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -25,6 +28,10 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
+
+    private final NotificationService notificationService;
+
+    private final DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
 
     private static final String CONFIRMATION_HEADER = "# Draft orders uploaded";
 
@@ -38,8 +45,11 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             + "<br><br>You can find the documents that you have uploaded on the "
             + "['case documents' tab](/cases/case-details/%s#Case%%20documents).";
 
-    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService,
+                                             DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper) {
         super(finremCaseDetailsMapper);
+        this.notificationService = notificationService;
+        this.draftOrdersNotificationRequestMapper = draftOrdersNotificationRequestMapper;
     }
 
     @Override
@@ -56,8 +66,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        String confirmationBody = getConfirmationBody(caseDetails);
+        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
+        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
 
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+
+        String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
