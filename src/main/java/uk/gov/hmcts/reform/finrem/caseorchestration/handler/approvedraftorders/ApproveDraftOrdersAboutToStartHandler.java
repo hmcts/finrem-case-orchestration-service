@@ -74,7 +74,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .label(hearing.getHearingType() + " on " + hearing.getHearingDate().toString() + " by " + hearing.getHearingJudge())
                     .build())
                 .toList();
-
         }
 
         //Set the filtered hearings in the DynamicList
