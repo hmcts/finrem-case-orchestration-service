@@ -28,7 +28,7 @@ public class GenericDocumentService {
     private final BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
     private final DocumentConversionService documentConversionService;
     private final PdfStampingService pdfStampingService;
-    private final PensionOrderDocumentService pensionOrderDocumentService;
+    private final PensionAnnexDateStampService pensionAnnexDateStampService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
@@ -108,7 +108,7 @@ public class GenericDocumentService {
         log.info("Pdf converation if document is not pdf original {} pdfdocument {} for Case ID: {}",
             document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
 
-        Document stampedDocument = pensionOrderDocumentService.appendApprovedDateToDocument(
+        Document stampedDocument = pensionAnnexDateStampService.appendApprovedDateToDocument(
             Document.builder().url(pdfCaseDocument.getDocumentUrl())
                 .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
                 .fileName(pdfCaseDocument.getDocumentFilename())

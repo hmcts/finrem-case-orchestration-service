@@ -32,14 +32,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PensionOrderDocumentService {
+public class PensionAnnexDateStampService {
 
     public static final String APPLICATION_PDF_CONTENT_TYPE = "application/pdf";
     private final EvidenceManagementUploadService emUploadService;
 
     private final EvidenceManagementDownloadService emDownloadService;
 
-    private static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
+    public static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
 
     public Document appendApprovedDateToDocument(Document document,
                                                  String authToken,
@@ -67,24 +67,19 @@ public class PensionOrderDocumentService {
     public byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
         PDDocument doc = Loader.loadPDF(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
-
         Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
-
         if (acroForm.isPresent() && (acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
-
             PDTextField textBox = (PDTextField) field;
             textBox.setDefaultAppearance("/Helv 12 Tf 0 g");
             textBox.setValue(approvalDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
-
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);
             doc.close();
-
             return outputBytes.toByteArray();
+        } else {
+            log.info("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.");
+            return inputDocInBytes;
         }
-
-        log.info("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.");
-        return inputDocInBytes;
     }
 }
