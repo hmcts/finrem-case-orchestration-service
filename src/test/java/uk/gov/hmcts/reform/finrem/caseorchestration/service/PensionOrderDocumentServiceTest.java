@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fil
 @ExtendWith(MockitoExtension.class)
 class PensionOrderDocumentServiceTest {
 
-    @Autowired
+    @InjectMocks
     private PensionOrderDocumentService service;
 
     @Mock
