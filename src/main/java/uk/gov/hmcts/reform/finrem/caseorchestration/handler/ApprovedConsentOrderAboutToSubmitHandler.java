@@ -79,11 +79,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                                              CaseDetails caseDetailsBefore, CaseDocument latestConsentOrder) {
         String caseId = caseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
-
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         LocalDate approvalDate = documentHelper.getConsentDateOfOrder(caseData);
-
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 
