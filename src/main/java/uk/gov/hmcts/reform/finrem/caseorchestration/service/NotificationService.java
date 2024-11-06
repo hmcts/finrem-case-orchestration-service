@@ -1897,6 +1897,11 @@ public class NotificationService {
 
     public void sendDraftOrderReviewOverdueToCaseworker(NotificationRequest notificationRequest) {
         log.info("{} - Sending draft order review overdue to caseworker", notificationRequest.getCaseReferenceNumber());
+
+        if (!featureToggleService.isSendToFRCEnabled()) {
+            notificationRequest.setNotificationEmail(DEFAULT_EMAIL);
+        }
+
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE);
     }
 }
