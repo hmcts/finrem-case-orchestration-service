@@ -64,7 +64,7 @@ public class PensionOrderDocumentService {
         }
     }
 
-    private byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
+    public byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
         PDDocument doc = Loader.loadPDF(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
 
