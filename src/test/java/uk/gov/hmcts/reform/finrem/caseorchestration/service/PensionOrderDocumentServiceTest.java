@@ -6,10 +6,12 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,18 +40,16 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fileUploadResponse;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application.properties")
+@ExtendWith(MockitoExtension.class)
 class PensionOrderDocumentServiceTest {
 
     @Autowired
-    private PensionOrderDocumentService pensionOrderDocumentService;
+    private PensionOrderDocumentService service;
 
-   @MockBean
-   private final EvidenceManagementUploadService emUploadService;
-   @MockBean
-   private final EvidenceManagementDownloadService emDownloadService;
+    @Mock
+   private EvidenceManagementUploadService emUploadService;
+    @Mock
+   private EvidenceManagementDownloadService emDownloadService;
 
 
     private String caseId = "123123123";
@@ -66,7 +66,7 @@ class PensionOrderDocumentServiceTest {
 
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
 
-        when(emDownloadService.download(any(), "auth"))
+        when(emDownloadService.download(document.getBinaryUrl(), "auth"))
             .thenReturn(docInBytes);
 
         when(emUploadService.upload(any(), anyString(), any()))
