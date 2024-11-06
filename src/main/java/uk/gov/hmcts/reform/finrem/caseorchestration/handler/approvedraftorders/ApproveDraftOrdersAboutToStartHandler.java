@@ -56,9 +56,9 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                 DraftOrdersReview draftOrdersReview = reviewCollection.getValue();
 
                 boolean isReviewableHearing = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
-                    .anyMatch(doc -> doc.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED) ||
-                    draftOrdersReview.getPsaDocReviewCollection().stream()
-                        .anyMatch(psa -> psa.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED);
+                    .anyMatch(doc -> doc.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED)
+                    || draftOrdersReview.getPsaDocReviewCollection().stream()
+                    .anyMatch(psa -> psa.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED);
 
                 //Only add hearing if there is an order or PSA with TO_BE_REVIEWED
                 if (isReviewableHearing) {
