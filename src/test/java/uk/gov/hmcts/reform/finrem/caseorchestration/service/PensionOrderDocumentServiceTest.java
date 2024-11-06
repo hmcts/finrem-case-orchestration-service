@@ -60,10 +60,9 @@ class PensionOrderDocumentServiceTest {
     @Test
     void shouldUpdatePensionOrderDocument() throws IOException {
         Document document = Document.builder()
-            .binaryUrl("http://mockDoc/123/binary")
-            .fileName("PensionSharingAnnex")
-            .url("http://mockDoc/123")
-            .build();
+            .binaryUrl("https:mockurl/binary")
+            .fileName("Testfile")
+            .url("http:mockfile").build();
 
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
 
@@ -79,25 +78,15 @@ class PensionOrderDocumentServiceTest {
     }
 
     @Test
-    public void shouldAppendApprovalDateToPensionOrderDocument() throws IOException {
+    public void shouldAppendApprovalDateToPensionOrderDocument() throws Exception {
+
+        Document document = document();
         LocalDate approvalDate = LocalDate.of(2024, 12, 31);
 
-        Document document = Document.builder()
-            .binaryUrl("http://mockDoc/123/binary")
-            .fileName("PensionSharingAnnex")
-            .url("http://mockDoc/123")
-            .build();
-
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
-        when(emDownloadService.download(document.getBinaryUrl(), "auth"))
-            .thenReturn(docInBytes);
+        byte[] actualApprovedAndDatedDocument = service.appendApprovedDateToDocument(docInBytes, approvalDate);
 
-        when(emUploadService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
-
-        Document approvedAndDatedDocument = service.appendApprovedDateToDocument(document, "auth", approvalDate, caseId);
-
-        PDDocument pDFdocument = Loader.loadPDF(docInBytes);
+        PDDocument pDFdocument = Loader.loadPDF(actualApprovedAndDatedDocument);
         pDFdocument.getDocumentCatalog().getAcroForm();
 
         Optional<PDAcroForm> acroForm = Optional.ofNullable(pDFdocument.getDocumentCatalog().getAcroForm());
@@ -106,29 +95,24 @@ class PensionOrderDocumentServiceTest {
         PDTextField textBox = (PDTextField) field;
 
         assertEquals("31 December 2024", textBox.getValueAsString());
-        assertThat(approvedAndDatedDocument, not(equalTo(document)));
     }
 
-//    void shouldNotUpdateFlattenDocument() throws IOException {
-//        Document document = document();
-//
-//        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
-//        when(evidenceManagementDownloadService.download(any(), "auth"))
-//            .thenReturn(docInBytes);
-//
-//        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
-//            .thenReturn(fileUploadResponse());
-//
-//        Document approvedAndDatedDocument = service.appendApprovedDateToDocument(document, "auth", approvalDate, caseId);
-//
-//        try (PDDocument originalDoc = Loader.loadPDF(file)) {
-//            PDAcroForm originalAcroForm = originalDoc.getDocumentCatalog().getAcroForm();
-//            assertNotNull("Document should have an AcroForm", originalAcroForm);
-//            assertFalse("Document should have form fields", originalAcroForm.getFields().isEmpty());
-//        }
-//        assertEquals(approvedAndDatedDocument, document);
-//
-//    }
+    @Test
+    void shouldNotUpdateFlattenDocument() throws Exception {
+        Document document = document();
+
+        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
+        byte[] actualApprovedAndDatedDocument = service.appendApprovedDateToDocument(docInBytes, approvalDate);
+
+        Document approvedAndDatedDocument = service.appendApprovedDateToDocument(document, "auth", approvalDate, caseId);
+
+        try (PDDocument originalDoc = Loader.loadPDF(actualApprovedAndDatedDocument)) {
+            PDAcroForm originalAcroForm = originalDoc.getDocumentCatalog().getAcroForm();
+            assertNotNull("Document should have an AcroForm", originalAcroForm);
+            assertFalse("Document should have form fields", originalAcroForm.getFields().isEmpty());
+        }
+        assertEquals(approvedAndDatedDocument, document);
+    }
 
     private byte[] loadResource(String testPdf) throws IOException {
 
