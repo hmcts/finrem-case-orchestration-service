@@ -84,7 +84,7 @@ class PensionOrderDocumentServiceTest {
         LocalDate approvalDate = LocalDate.of(2024, 12, 31);
 
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
-        when(emDownloadService.download(any(), "auth"))
+        when(emDownloadService.download(document.getBinaryUrl(), "auth"))
             .thenReturn(docInBytes);
 
         when(emUploadService.upload(any(), anyString(), any()))
