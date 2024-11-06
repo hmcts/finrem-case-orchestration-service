@@ -47,7 +47,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        // XXX
+        // TODO populate the following from draftOrdersWrapper.draftOrdersReviewCollection
         draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
             .reviewablePsaCollection(List.of(
                 ReviewablePsaCollection.builder()
