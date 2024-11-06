@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 
 import java.util.List;
 
@@ -18,9 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JudgeApproval {
-
-    @JsonProperty("hearingDetails")
-    private DynamicList hearingDetails;
 
     @JsonProperty("reviewableDraftOrderCollection")
     private List<ReviewableDraftOrderCollection> reviewableDraftOrderCollection;
