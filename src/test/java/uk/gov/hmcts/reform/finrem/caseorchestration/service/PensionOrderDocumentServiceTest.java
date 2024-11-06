@@ -60,9 +60,10 @@ class PensionOrderDocumentServiceTest {
     @Test
     void shouldUpdatePensionOrderDocument() throws IOException {
         Document document = Document.builder()
-            .binaryUrl("https:mockurl/binary")
-            .fileName("Testfile")
-            .url("http:mockfile").build();
+            .binaryUrl("http://mockDoc/123/binary")
+            .fileName("PensionSharingAnnex")
+            .url("http://mockDoc/123")
+            .build();
 
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
 
@@ -79,9 +80,13 @@ class PensionOrderDocumentServiceTest {
 
     @Test
     public void shouldAppendApprovalDateToPensionOrderDocument() throws IOException {
-
-        Document document = document();
         LocalDate approvalDate = LocalDate.of(2024, 12, 31);
+
+        Document document = Document.builder()
+            .binaryUrl("http://mockDoc/123/binary")
+            .fileName("PensionSharingAnnex")
+            .url("http://mockDoc/123")
+            .build();
 
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
         when(emDownloadService.download(document.getBinaryUrl(), "auth"))
