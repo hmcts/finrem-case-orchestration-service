@@ -20,10 +20,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -72,7 +75,7 @@ public class PensionAnnexDateStampService {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
             textBox.setDefaultAppearance("/Helv 12 Tf 0 g");
-            textBox.setValue(approvalDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+            textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy").withLocale(Locale.UK)));
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);
             doc.close();
