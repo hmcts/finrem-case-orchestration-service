@@ -64,7 +64,7 @@ class PensionOrderDocumentServiceTest {
             .fileName("Testfile")
             .url("http:mockfile").build();
 
-        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
+        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
 
         when(emDownloadService.download(document.getBinaryUrl(), "auth"))
             .thenReturn(docInBytes);
@@ -77,37 +77,37 @@ class PensionOrderDocumentServiceTest {
         assertThat(approvedAndDatedDocument, not(equalTo(document)));
     }
 
-//    @Test
-//    public void shouldAppendApprovalDateToPensionOrderDocument() throws IOException {
-//
-//        Document document = document();
-//        LocalDate approvalDate = LocalDate.of(2024, 12, 31);
-//
-//        byte[] docInBytes = loadResource(FORM_PENSION_ORDER_PDF);
-//        when(evidenceManagementDownloadService.download(any(), "auth"))
-//            .thenReturn(docInBytes);
-//
-//        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
-//            .thenReturn(fileUploadResponse());
-//
-//        Document approvedAndDatedDocument = service.appendApprovedDateToDocument(document, "auth", approvalDate, caseId);
-//
-//        PDDocument pDFdocument = Loader.loadPDF(file);
-//        pDFdocument.getDocumentCatalog().getAcroForm();
-//
-//        Optional<PDAcroForm> acroForm = Optional.ofNullable(pDFdocument.getDocumentCatalog().getAcroForm());
-//
-//        PDField field = acroForm.get().getField("Date the court made/varied/discharged an order");
-//        PDTextField textBox = (PDTextField) field;
-//
-//        assertEquals("31 December 2024", textBox.getValueAsString());
-//        assertThat(approvedAndDatedDocument, not(equalTo(document)));
-//    }
+    @Test
+    public void shouldAppendApprovalDateToPensionOrderDocument() throws IOException {
+
+        Document document = document();
+        LocalDate approvalDate = LocalDate.of(2024, 12, 31);
+
+        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
+        when(emDownloadService.download(any(), "auth"))
+            .thenReturn(docInBytes);
+
+        when(emUploadService.upload(any(), anyString(), any()))
+            .thenReturn(fileUploadResponse());
+
+        Document approvedAndDatedDocument = service.appendApprovedDateToDocument(document, "auth", approvalDate, caseId);
+
+        PDDocument pDFdocument = Loader.loadPDF(docInBytes);
+        pDFdocument.getDocumentCatalog().getAcroForm();
+
+        Optional<PDAcroForm> acroForm = Optional.ofNullable(pDFdocument.getDocumentCatalog().getAcroForm());
+
+        PDField field = acroForm.get().getField("Date the court made/varied/discharged an order");
+        PDTextField textBox = (PDTextField) field;
+
+        assertEquals("31 December 2024", textBox.getValueAsString());
+        assertThat(approvedAndDatedDocument, not(equalTo(document)));
+    }
 
 //    void shouldNotUpdateFlattenDocument() throws IOException {
 //        Document document = document();
 //
-//        byte[] docInBytes = loadResource(FORM_PENSION_ORDER_FLATTENDED_PDF);
+//        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
 //        when(evidenceManagementDownloadService.download(any(), "auth"))
 //            .thenReturn(docInBytes);
 //
