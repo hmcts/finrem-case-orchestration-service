@@ -66,6 +66,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                 }
             }
 
+            //Sort the hearings by date
             hearingsForReview.sort(Comparator.comparing(DraftOrdersReview::getHearingDate));
 
             hearingOptions = hearingsForReview.stream()
