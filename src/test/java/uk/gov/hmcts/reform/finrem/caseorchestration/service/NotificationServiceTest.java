@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
@@ -84,6 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
@@ -123,6 +125,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private EmailService emailService;
     @Autowired
     private ConsentedHearingHelper helper;
+    @Autowired
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -1566,6 +1570,19 @@ public class NotificationServiceTest extends BaseServiceTest {
         assertEquals("4Email", fourDataKey.getSolicitorEmailKey());
         assertEquals("4Name", fourDataKey.getSolicitorNameKey());
         assertEquals("4Ref", fourDataKey.getSolicitorReferenceKey());
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToJudge() {
+        // Arrange
+        NotificationRequest judgeNotificationRequest = new NotificationRequest();
+        judgeNotificationRequest.setCaseReferenceNumber("123456789");
+
+        // Act
+        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+
+        // Assert
+        verify(emailService).sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
     }
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {

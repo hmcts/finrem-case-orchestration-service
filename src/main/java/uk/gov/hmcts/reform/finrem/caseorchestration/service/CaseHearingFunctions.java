@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -414,6 +415,13 @@ public final class CaseHearingFunctions {
             .build();
     }
 
+    /**
+     * Get court details as a Json string.
+     *
+     * @return Json string of court details
+     * @deprecated Use {@link CourtDetailsConfiguration#getCourts()} instead.
+     */
+    @Deprecated(since = "4 Nov 2024")
     public static String getCourtDetailsString() {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream("/json/court-details.json")) {
             return IOUtils.toString(inputStream, UTF_8);

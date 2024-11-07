@@ -91,11 +91,11 @@ public class EmailService {
 
         //general emails and transfer to local court emails are the only templates that require the generalEmailBody
         if (CONSENT_GENERAL_EMAIL.equals(templateName)
-                || CONTESTED_GENERAL_EMAIL.equals(templateName)
-                || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-                || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-                || TRANSFER_TO_LOCAL_COURT.equals(templateName)
-                || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
+            || CONTESTED_GENERAL_EMAIL.equals(templateName)
+            || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+            || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+            || TRANSFER_TO_LOCAL_COURT.equals(templateName)
+            || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
         }
         if (CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
@@ -124,6 +124,9 @@ public class EmailService {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
+        }
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)) {
+            addJudgeReadyToReviewTemplateVars(notificationRequest, templateVars);
         }
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
@@ -175,6 +178,11 @@ public class EmailService {
             log.warn("Failed to attach document to email", e);
         }
         return null;
+    }
+
+    private void addJudgeReadyToReviewTemplateVars(NotificationRequest notificationRequest,
+                                                   Map<String, Object> templateVars) {
+        templateVars.put("hearingDate", notificationRequest.getHearingDate());
     }
 
 }
