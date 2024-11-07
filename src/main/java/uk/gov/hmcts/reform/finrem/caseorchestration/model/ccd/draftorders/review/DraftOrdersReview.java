@@ -64,6 +64,7 @@ public class DraftOrdersReview implements HasCaseDocument {
         return Optional.empty();
     }
 
+    @JsonIgnore
     public String getHearingId() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = hearingDate != null ? hearingDate.format(dateFormatter) : "N/A";
