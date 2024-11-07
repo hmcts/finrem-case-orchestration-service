@@ -58,9 +58,13 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     public void appendDraftOrdersReviewCollection(List<DraftOrdersReviewCollection> newDraftOrdersReviewCollection) {
+        getDraftOrdersReviewCollection().addAll(newDraftOrdersReviewCollection);
+    }
+
+    public List<DraftOrdersReviewCollection> getDraftOrdersReviewCollection() {
         if (draftOrdersReviewCollection == null) {
             draftOrdersReviewCollection = new ArrayList<>();
         }
-        draftOrdersReviewCollection.addAll(newDraftOrdersReviewCollection);
+        return draftOrdersReviewCollection;
     }
 }
