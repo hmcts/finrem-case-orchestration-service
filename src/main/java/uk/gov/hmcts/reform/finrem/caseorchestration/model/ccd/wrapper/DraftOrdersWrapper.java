@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -66,5 +67,11 @@ public class DraftOrdersWrapper implements HasCaseDocument {
             draftOrdersReviewCollection = new ArrayList<>();
         }
         return draftOrdersReviewCollection;
+    }
+
+    @JsonIgnore
+    public List<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
+        return getDraftOrdersReviewCollection().stream().filter(a -> a.getValue().getHearingId().equals(hearingsReadyForReview.getValueCode()))
+            .toList();
     }
 }

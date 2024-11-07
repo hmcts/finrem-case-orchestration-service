@@ -40,7 +40,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     }
 
     private List<ReviewableDraftOrderCollection> createReviewableDraftOrderCollection(DraftOrdersWrapper draftOrdersWrapper) {
-        return draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+        return draftOrdersWrapper.getSelectedDraftOrdersReviewCollection().stream()
             .map(DraftOrdersReviewCollection::getValue)
             .map(DraftOrdersReview::getDraftOrderDocReviewCollection)
             .flatMap(List::stream)
@@ -55,7 +55,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     }
 
     private List<ReviewablePsaCollection> createReviewablePsaCollection(DraftOrdersWrapper draftOrdersWrapper) {
-        return draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+        return draftOrdersWrapper.getSelectedDraftOrdersReviewCollection().stream()
             .map(DraftOrdersReviewCollection::getValue)
             .map(DraftOrdersReview::getPsaDocReviewCollection)
             .flatMap(List::stream)
