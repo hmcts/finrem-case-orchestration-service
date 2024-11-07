@@ -57,6 +57,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .hearingDate(LocalDate.of(2024, 8, 6))
             .hearingType("Hearing Type 1")
             .hearingJudge("Judge 1")
+            .hearingTime("09:00 A.M.")
             .draftOrderDocReviewCollection(List.of(collectionItem1, collectionItem2))
             .build();
 
@@ -72,7 +73,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         DynamicList hearingsReadyForReview = caseData.getDraftOrdersWrapper().getHearingsReadyForReview();
         assertThat(hearingsReadyForReview).isNotNull();
         Assertions.assertEquals(1, hearingsReadyForReview.getListItems().size());
-        Assertions.assertEquals("Hearing Type 1 on 2024-08-06 by Judge 1", hearingsReadyForReview.getListItems().get(0).getLabel());
+        Assertions.assertEquals("Hearing Type 1 on 2024-08-06 09:00 A.M. by Judge 1", hearingsReadyForReview.getListItems().get(0).getLabel());
     }
 
     @Test
@@ -86,6 +87,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .hearingDate(LocalDate.of(2024, 8, 6))
             .hearingType("Hearing Type 1")
             .hearingJudge("Judge 1")
+            .hearingTime("09:00 A.M.")
             .psaDocReviewCollection(List.of(psaCollectionItem1))
             .build();
 
@@ -101,7 +103,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         DynamicList hearingsReadyForReview = caseData.getDraftOrdersWrapper().getHearingsReadyForReview();
         assertThat(hearingsReadyForReview).isNotNull();
         Assertions.assertEquals(1, hearingsReadyForReview.getListItems().size());
-        Assertions.assertEquals("Hearing Type 1 on 2024-08-06 by Judge 1", hearingsReadyForReview.getListItems().get(0).getLabel());
+        Assertions.assertEquals("Hearing Type 1 on 2024-08-06 09:00 A.M. by Judge 1", hearingsReadyForReview.getListItems().get(0).getLabel());
     }
 
     @Test
