@@ -78,7 +78,6 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        // TODO depending on the selected hearing
         List<ReviewableDraftOrderCollection> reviewableDraftOrderCollection = createReviewableDraftOrderCollection(draftOrdersWrapper);
         List<ReviewablePsaCollection> reviewablePsaCollection = createReviewablePsaCollection(draftOrdersWrapper);
 
