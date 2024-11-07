@@ -800,10 +800,6 @@ public class DocumentHelper {
         return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
     }
 
-    public LocalDate getConsentDateOfOrder(Map<String, Object> caseData) {
-        return (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE);
-    }
-
     public boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument caseDocument) {
         if (!finalOrderCollection.isEmpty()) {
             Set<String> filenames = new HashSet<>();
