@@ -92,7 +92,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
-            LocalDate approvalDate = getConsentDateOfOrder(caseData);
+            LocalDate approvalDate = (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
                 documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseId);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
@@ -133,8 +133,5 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         return pensionDocumentsData.isEmpty();
     }
 
-    private LocalDate getConsentDateOfOrder(Map<String, Object> caseData) {
-        return (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE);
-    }
 }
 
