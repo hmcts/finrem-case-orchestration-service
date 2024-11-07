@@ -132,7 +132,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
         return pensionDocumentsData.isEmpty();
     }
-    public LocalDate getConsentDateOfOrder(Map<String, Object> caseData) {
+    private LocalDate getConsentDateOfOrder(Map<String, Object> caseData) {
         return (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE);
     }
 }
