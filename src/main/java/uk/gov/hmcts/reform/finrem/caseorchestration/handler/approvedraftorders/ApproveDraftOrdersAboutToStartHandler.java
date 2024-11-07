@@ -71,7 +71,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             if (ObjectUtils.isEmpty(hearingsForReview)) {
                 errors.add(error);
             }
-
+            
             //Sort the hearings by date
             hearingsForReview.sort(Comparator.comparing(DraftOrdersReview::getHearingDate));
 
