@@ -19,9 +19,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -76,9 +80,17 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             hearingsForReview.sort(Comparator.comparing(DraftOrdersReview::getHearingDate));
 
             hearingOptions = hearingsForReview.stream()
-                .map(hearing -> DynamicListElement.builder()
-                    .code(hearing.getHearingType() + "-" + hearing.getHearingDate())
-                    .label(hearing.getHearingType() + " on " + hearing.getHearingDate().toString() + " by " + hearing.getHearingJudge())
+                .map(draftOrdersReview -> DynamicListElement.builder()
+                    .code(draftOrdersReview.getHearingId())
+                    .label(format(
+                        "%s on %s %s by %s",
+                        Optional.ofNullable(draftOrdersReview.getHearingType()).orElse("N/A"),
+                        Optional.ofNullable(draftOrdersReview.getHearingDate())
+                            .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                            .orElse("N/A"),
+                        Optional.ofNullable(draftOrdersReview.getHearingTime()).orElse("N/A"),
+                        Optional.ofNullable(draftOrdersReview.getHearingJudge()).orElse("N/A")
+                    ))
                     .build())
                 .toList();
         } else {
