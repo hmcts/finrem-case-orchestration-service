@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
@@ -36,33 +35,6 @@ public class DraftOrdersReview implements HasCaseDocument {
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
     @JsonProperty("psaDocReviewCollection")
     private List<PsaDocReviewCollection> psaDocReviewCollection;
-
-    private static final String HEARING_ID_FORMAT = "\\$\\$";
-
-    public static Optional<LocalDate> parseHearingDate(String hearingId) {
-        String[] parts = hearingId.split(HEARING_ID_FORMAT);
-        if (parts.length > 0 && !parts[0].isEmpty()) {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            return Optional.of(LocalDate.parse(parts[0], dateFormatter));
-        }
-        return Optional.empty();
-    }
-
-    public static Optional<String> parseHearingTime(String hearingId) {
-        String[] parts = hearingId.split(HEARING_ID_FORMAT);
-        if (parts.length > 1 && !parts[1].isEmpty()) {
-            return Optional.of(parts[1]);
-        }
-        return Optional.empty();
-    }
-    
-    public static Optional<String> parseHearingJudge(String hearingId) {
-        String[] parts = hearingId.split(HEARING_ID_FORMAT);
-        if (parts.length > 2 && !parts[2].isEmpty()) {
-            return Optional.of(parts[2]);
-        }
-        return Optional.empty();
-    }
 
     @JsonIgnore
     public String getHearingId() {
