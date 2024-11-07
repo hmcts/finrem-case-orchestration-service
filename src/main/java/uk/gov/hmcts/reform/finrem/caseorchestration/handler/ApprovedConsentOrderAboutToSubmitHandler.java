@@ -79,7 +79,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
-        LocalDate approvalDate = documentHelper.getConsentDateOfOrder(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType, caseId);
 
@@ -92,7 +91,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
-
+            LocalDate approvalDate = documentHelper.getConsentDateOfOrder(caseData);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
                 documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseId);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());

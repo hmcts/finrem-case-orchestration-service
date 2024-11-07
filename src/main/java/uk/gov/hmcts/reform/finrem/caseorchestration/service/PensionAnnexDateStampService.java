@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService.CONVERTER;
 
 @Service
@@ -34,12 +35,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @Slf4j
 public class PensionAnnexDateStampService {
 
-    public static final String APPLICATION_PDF_CONTENT_TYPE = "application/pdf";
     private final EvidenceManagementUploadService emUploadService;
 
     private final EvidenceManagementDownloadService emDownloadService;
 
-    public static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
+    static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
 
     public Document appendApprovedDateToDocument(Document document,
                                                  String authToken,
@@ -51,7 +51,7 @@ public class PensionAnnexDateStampService {
             byte[] approvedDoc = appendApprovedDateToDocument(docInBytes, approvalDate);
             MultipartFile multipartFile =
                 FinremMultipartFile.builder().name(document.getFileName()).content(approvedDoc)
-                    .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
+                    .contentType(APPLICATION_PDF_VALUE).build();
             List<FileUploadResponse> uploadResponse =
                 emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
             FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
@@ -64,7 +64,7 @@ public class PensionAnnexDateStampService {
         }
     }
 
-    public byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
+    private byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
         PDDocument doc = Loader.loadPDF(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
         Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
