@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.approvedraftorders;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -40,6 +41,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        List<String> errors = new ArrayList<>();
+        String error = "There are no outstanding draft orders or pension sharing annexes that are ready to review.";
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
@@ -65,7 +68,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     hearingsForReview.add(draftOrdersReview);
                 }
             }
-
+            if (ObjectUtils.isEmpty(hearingsForReview)) {
+                errors.add(error);
+            }
+            
             //Sort the hearings by date
             hearingsForReview.sort(Comparator.comparing(DraftOrdersReview::getHearingDate));
 
@@ -75,6 +81,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .label(hearing.getHearingType() + " on " + hearing.getHearingDate().toString() + " by " + hearing.getHearingJudge())
                     .build())
                 .toList();
+        } else {
+            errors.add(error);
         }
 
         //Set the filtered hearings in the DynamicList
@@ -85,7 +93,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         draftOrdersWrapper.setHearingsReadyForReview(hearingsReadyForReview);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .build();
+            .data(finremCaseData).errors(errors).build();
+
     }
 }
