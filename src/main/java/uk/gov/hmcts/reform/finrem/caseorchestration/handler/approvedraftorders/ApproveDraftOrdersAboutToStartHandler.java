@@ -54,7 +54,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         List<DraftOrdersReview> hearingsForReview = new ArrayList<>();
 
         //Check each hearing in draftOrdersReviewCollection
-        if (draftOrdersWrapper.getDraftOrdersReviewCollection() != null) {
+        if (!ObjectUtils.isEmpty(draftOrdersWrapper.getDraftOrdersReviewCollection())) {
             for (DraftOrdersReviewCollection reviewCollection : draftOrdersWrapper.getDraftOrdersReviewCollection()) {
                 DraftOrdersReview draftOrdersReview = reviewCollection.getValue();
 
@@ -71,7 +71,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             if (ObjectUtils.isEmpty(hearingsForReview)) {
                 errors.add(error);
             }
-            
+
             //Sort the hearings by date
             hearingsForReview.sort(Comparator.comparing(DraftOrdersReview::getHearingDate));
 
