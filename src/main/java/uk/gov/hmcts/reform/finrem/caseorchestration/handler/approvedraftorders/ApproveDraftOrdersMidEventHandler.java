@@ -8,16 +8,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsaCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
@@ -37,6 +39,35 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
 
+    private List<ReviewableDraftOrderCollection> createReviewableDraftOrderCollection(DraftOrdersWrapper draftOrdersWrapper) {
+        return draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .map(DraftOrdersReview::getDraftOrderDocReviewCollection)
+            .flatMap(List::stream)
+            .map(DraftOrderDocReviewCollection::getValue)
+            .map(a -> ReviewableDraftOrderCollection.builder()
+                .value(ReviewableDraftOrder.builder()
+                    .document(a.getDraftOrderDocument())
+                    .attachments(a.getAttachments())
+                    .build())
+                .build())
+            .toList();
+    }
+
+    private List<ReviewablePsaCollection> createReviewablePsaCollection(DraftOrdersWrapper draftOrdersWrapper) {
+        return draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .map(DraftOrdersReview::getPsaDocReviewCollection)
+            .flatMap(List::stream)
+            .map(PsaDocReviewCollection::getValue)
+            .map(a -> ReviewablePsaCollection.builder()
+                .value(ReviewablePsa.builder()
+                    .document(a.getPsaDocument())
+                    .build())
+                .build())
+            .toList();
+    }
+
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
@@ -47,51 +78,13 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        // TODO populate the following from draftOrdersWrapper.draftOrdersReviewCollection
+        // TODO depending on the selected hearing
+        List<ReviewableDraftOrderCollection> reviewableDraftOrderCollection = createReviewableDraftOrderCollection(draftOrdersWrapper);
+        List<ReviewablePsaCollection> reviewablePsaCollection = createReviewablePsaCollection(draftOrdersWrapper);
+
         draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
-            .reviewablePsaCollection(List.of(
-                ReviewablePsaCollection.builder()
-                    .value(ReviewablePsa.builder()
-                        .document(
-                            CaseDocument.builder().documentFilename("PSA.pdf")
-                                .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/afd2faae-de15-4ab8-8d0c-d5d0fef41e62")
-                                .build()
-                        )
-                        .build())
-                    .build()
-            ))
-            .reviewableDraftOrderCollection(List.of(
-                ReviewableDraftOrderCollection.builder()
-                    .value(ReviewableDraftOrder.builder()
-                        .document(
-                            CaseDocument.builder().documentFilename("DO_A.pdf")
-                                .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/afd2faae-de15-4ab8-8d0c-d5d0fef41e62")
-                                .build()
-                        )
-                        .attachments(List.of(
-                            CaseDocumentCollection.builder().value(
-                                    CaseDocument.builder().documentFilename("Attachment-A.pdf")
-                                        .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/afd2faae-de15-4ab8-8d0c-d5d0fef41e62")
-                                        .build())
-                                .build(),
-                            CaseDocumentCollection.builder().value(
-                                    CaseDocument.builder().documentFilename("Attachment-B.pdf")
-                                        .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/afd2faae-de15-4ab8-8d0c-d5d0fef41e62")
-                                        .build())
-                                .build()
-                        ))
-                        .build())
-                    .build(),
-                ReviewableDraftOrderCollection.builder()
-                    .value(ReviewableDraftOrder.builder()
-                        .document(
-                            CaseDocument.builder().documentFilename("PSA_A.pdf")
-                                .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/afd2faae-de15-4ab8-8d0c-d5d0fef41e62")
-                                .build()
-                        )
-                        .build())
-                    .build()
-            ))
+            .reviewablePsaCollection(reviewablePsaCollection)
+            .reviewableDraftOrderCollection(reviewableDraftOrderCollection)
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
