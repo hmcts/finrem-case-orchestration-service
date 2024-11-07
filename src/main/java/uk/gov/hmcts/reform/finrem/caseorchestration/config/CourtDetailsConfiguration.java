@@ -13,29 +13,19 @@ import java.util.Map;
 @Slf4j
 @Component
 @Getter
-public class CourtDetailsConfiguration {
+public class CourtDetailsConfiguration implements AutoCloseable {
     private final Map<String, CourtDetails> courts;
 
     public CourtDetailsConfiguration(ObjectMapper objectMapper) throws IOException {
-        InputStream inputStream = CourtDetailsConfiguration.class
-                .getResourceAsStream("/json/court-details.json");
-        try {
+        try (InputStream inputStream = CourtDetailsConfiguration.class
+                .getResourceAsStream("/json/court-details.json")) {
             courts = objectMapper.readValue(inputStream, new TypeReference<>() {
             });
-        } finally {
-            if (inputStream != null) {
-                safeClose(inputStream);
-            }
         }
     }
 
-    public static void safeClose(InputStream inputStream) {
-        if (inputStream != null) {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                log.error("Failed to close inputStream in CourtDetailsConfiguration.java: {}", e.getMessage());
-            }
-        }
+    @Override
+    public void close() throws Exception {
+        log.info("Closed CourtDetailsConfiguration inputStream");
     }
 }
