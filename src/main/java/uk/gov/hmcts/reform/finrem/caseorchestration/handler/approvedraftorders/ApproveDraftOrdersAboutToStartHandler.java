@@ -58,7 +58,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         List<DraftOrdersReview> hearingsForReview = new ArrayList<>();
 
         //Check each hearing in draftOrdersReviewCollection
-        if (!draftOrdersWrapper.getDraftOrdersReviewCollection().isEmpty()) {
+        if (!ObjectUtils.isEmpty(draftOrdersWrapper.getDraftOrdersReviewCollection())) {
             for (DraftOrdersReviewCollection reviewCollection : draftOrdersWrapper.getDraftOrdersReviewCollection()) {
                 DraftOrdersReview draftOrdersReview = reviewCollection.getValue();
 
