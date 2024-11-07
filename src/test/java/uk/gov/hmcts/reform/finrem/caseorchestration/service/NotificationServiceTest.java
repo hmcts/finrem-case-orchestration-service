@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
@@ -1610,9 +1611,32 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testSendDraftOrderReviewOverdueToCaseworker() {
-        NotificationRequest nr = new NotificationRequest();
+    public void testSendDraftOrderReviewOverdueToCaseworkerSendToFrcEnabled() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+        NotificationRequest nr = NotificationRequest.builder()
+            .notificationEmail("test@test.com")
+            .build();
         notificationService.sendDraftOrderReviewOverdueToCaseworker(nr);
-        verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("test@test.com", actual.getNotificationEmail());
+    }
+
+    @Test
+    public void testSendDraftOrderReviewOverdueToCaseworkerSendToFrcDisabled() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
+        NotificationRequest nr = NotificationRequest.builder()
+            .notificationEmail("test@test.com")
+            .build();
+        notificationService.sendDraftOrderReviewOverdueToCaseworker(nr);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("fr_applicant_solicitor1@mailinator.com", actual.getNotificationEmail());
     }
 }
