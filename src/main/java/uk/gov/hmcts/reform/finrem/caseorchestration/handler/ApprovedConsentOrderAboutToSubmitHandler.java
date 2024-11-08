@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -92,7 +93,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
-            LocalDate approvalDate = (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE);
+            LocalDate approvalDate = getLocalDateFromMap(caseData, CONTESTED_ORDER_DIRECTION_DATE);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
                 documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseId);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
@@ -133,5 +134,26 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         return pensionDocumentsData.isEmpty();
     }
 
+    private static LocalDate getLocalDateFromMap(Map<String, Object> map, String key) {
+        return Optional.ofNullable(map.get(key))
+            .filter(value -> value instanceof LocalDate || value instanceof String)
+            .map(value -> {
+                if (value instanceof LocalDate) {
+                    return (LocalDate) value;
+                } else {
+                    try {
+                        return LocalDate.parse((String) value);
+                    } catch (Exception e) {
+                        log.info("Invalid Approved date of order for key '" + key + "': " + e.getMessage());
+                        return null;
+                    }
+                }
+            })
+            .orElseGet(() -> {
+                log.info("Approved Date of Order for key '" + key + "' is null or invalid");
+                return null;
+            });
+    }
 }
+
 

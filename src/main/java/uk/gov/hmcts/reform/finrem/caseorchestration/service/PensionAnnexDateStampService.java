@@ -47,8 +47,15 @@ public class PensionAnnexDateStampService {
                                                  String caseId) {
         log.info("Adding date stamp to Pension Order document : {}", document);
         try {
-            byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
-            byte[] approvedDoc = appendApprovedDateToDocument(docInBytes, approvalDate);
+            byte[] approvedDoc = null;
+            Optional<LocalDate> optionalApprovalDate = Optional.ofNullable(approvalDate);
+            if (optionalApprovalDate.isPresent()) {
+                byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
+                approvedDoc = appendApprovedDateToDocument(docInBytes, approvalDate);
+            } else {
+                log.error("Missing or Invalid Approved Date of Order");
+                approvedDoc = emDownloadService.download(document.getBinaryUrl(), authToken);
+            }
             MultipartFile multipartFile =
                 FinremMultipartFile.builder().name(document.getFileName()).content(approvedDoc)
                     .contentType(APPLICATION_PDF_VALUE).build();

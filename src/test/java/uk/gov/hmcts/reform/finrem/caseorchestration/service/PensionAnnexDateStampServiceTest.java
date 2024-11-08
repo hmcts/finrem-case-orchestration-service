@@ -25,10 +25,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fileUploadResponse;
 
@@ -71,7 +73,22 @@ class PensionAnnexDateStampServiceTest {
     }
 
     @Test
-    void shouldNotAddApprovalDateToPensionOrderDocument() throws Exception {
+    void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() throws IOException {
+        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
+        when(emDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
+            .thenReturn(docInBytes);
+        when(emUploadService.upload(any(), anyString(), any()))
+            .thenReturn(fileUploadResponse());
+        service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId);
+
+        verify(emUploadService).upload(filesCaptor.capture(), anyString(), anyString());
+        List<MultipartFile> uploadedMultipartFiles = filesCaptor.getValue();
+        byte[] bytes = uploadedMultipartFiles.get(0).getBytes();
+        verifyEmptyDateOfOrderField(bytes);
+    }
+
+    @Test
+    void shouldNotAddApprovalDateToPensionOrderFlattenedDocument() throws Exception {
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
         when(emDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
             .thenReturn(docInBytes);
@@ -108,6 +125,16 @@ class PensionAnnexDateStampServiceTest {
             document.setAllSecurityToBeRemoved(true);
             PDAcroForm pdAcroForm = document.getDocumentCatalog().getAcroForm();
             assertNull(pdAcroForm.getField(PensionAnnexDateStampService.FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME));
+        }
+    }
+
+    private void verifyEmptyDateOfOrderField(byte[] bytes) throws IOException {
+        try (PDDocument document = Loader.loadPDF(bytes)) {
+            document.setAllSecurityToBeRemoved(true);
+            PDAcroForm pdAcroForm = document.getDocumentCatalog().getAcroForm();
+            PDField field = pdAcroForm.getField(PensionAnnexDateStampService.FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
+            PDTextField textBox = (PDTextField) field;
+            assertTrue(isEmpty(textBox.getValueAsString()));
         }
     }
 }
