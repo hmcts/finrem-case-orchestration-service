@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -67,19 +68,15 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     public void appendDraftOrdersReviewCollection(List<DraftOrdersReviewCollection> newDraftOrdersReviewCollection) {
-        getDraftOrdersReviewCollection().addAll(newDraftOrdersReviewCollection);
-    }
-
-    public List<DraftOrdersReviewCollection> getDraftOrdersReviewCollection() {
         if (draftOrdersReviewCollection == null) {
             draftOrdersReviewCollection = new ArrayList<>();
         }
-        return draftOrdersReviewCollection;
+        draftOrdersReviewCollection.addAll(newDraftOrdersReviewCollection);
     }
 
     @JsonIgnore
     public List<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
-        return getDraftOrdersReviewCollection().stream().filter(a -> hearingsReadyForReview != null
+        return Optional.ofNullable(draftOrdersReviewCollection).orElse(List.of()).stream().filter(a -> hearingsReadyForReview != null
             && a.getValue().getHearingId().equals(hearingsReadyForReview.getValueCode()))
             .toList();
     }
