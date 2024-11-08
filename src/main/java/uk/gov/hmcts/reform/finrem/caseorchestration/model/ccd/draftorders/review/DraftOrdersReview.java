@@ -41,8 +41,9 @@ public class DraftOrdersReview implements HasCaseDocument {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = hearingDate != null ? hearingDate.format(dateFormatter) : "N/A";
 
-        return String.format("%s$$%s$$%s", formattedDate,
+        return String.format("%s$$%s$$%s$$%s", formattedDate,
             Objects.toString(hearingTime, "N/A"),
+            Objects.toString(hearingType, "N/A"),
             Objects.toString(hearingJudge, "N/A"));
     }
 

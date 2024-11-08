@@ -51,6 +51,14 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("judgeApproval")
     private JudgeApproval judgeApproval;
 
+    @JsonIgnore
+    public JudgeApproval getJudgeApproval() {
+        if (judgeApproval == null) {
+            this.judgeApproval = new JudgeApproval();
+        }
+        return judgeApproval;
+    }
+
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
             agreedDraftOrderCollection = new ArrayList<>();
@@ -71,7 +79,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     @JsonIgnore
     public List<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
-        return getDraftOrdersReviewCollection().stream().filter(a -> a.getValue().getHearingId().equals(hearingsReadyForReview.getValueCode()))
+        return getDraftOrdersReviewCollection().stream().filter(a -> hearingsReadyForReview != null
+            && a.getValue().getHearingId().equals(hearingsReadyForReview.getValueCode()))
             .toList();
     }
 }
