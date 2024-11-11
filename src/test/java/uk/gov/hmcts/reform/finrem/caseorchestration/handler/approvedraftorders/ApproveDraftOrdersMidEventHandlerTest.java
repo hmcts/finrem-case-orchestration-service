@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
@@ -135,6 +137,9 @@ class ApproveDraftOrdersMidEventHandlerTest {
                     .build(),
                 List.of(ReviewableDraftOrderCollection.builder()
                     .value(ReviewableDraftOrder.builder()
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .label("This is a final order")
+                            .build())).build())
                         .document(sampleDraftOrderDocument)
                         .attachments(List.of(
                             CaseDocumentCollection.builder().value(CaseDocument.builder().documentFilename("attachment1").build())
@@ -214,6 +219,9 @@ class ApproveDraftOrdersMidEventHandlerTest {
                     .build(),
                 List.of(ReviewableDraftOrderCollection.builder()
                     .value(ReviewableDraftOrder.builder()
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .label("This is a final order")
+                            .build())).build())
                         .document(sampleDraftOrderDocument)
                         .attachments(List.of(
                             CaseDocumentCollection.builder().value(CaseDocument.builder().documentFilename("attachment1").build())
@@ -262,6 +270,9 @@ class ApproveDraftOrdersMidEventHandlerTest {
                     .build(),
                 List.of(ReviewableDraftOrderCollection.builder()
                     .value(ReviewableDraftOrder.builder()
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .label("This is a final order")
+                            .build())).build())
                         .document(sampleDraftOrderDocument)
                         .attachments(List.of(
                             CaseDocumentCollection.builder().value(CaseDocument.builder().documentFilename("attachment1").build())
