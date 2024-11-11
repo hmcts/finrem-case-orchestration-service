@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -47,6 +49,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .map(DraftOrderDocReviewCollection::getValue)
             .map(a -> ReviewableDraftOrderCollection.builder()
                 .value(ReviewableDraftOrder.builder()
+                    .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                        .label("This is a final order")
+                        .build())).build())
                     .document(a.getDraftOrderDocument())
                     .attachments(a.getAttachments())
                     .build())
