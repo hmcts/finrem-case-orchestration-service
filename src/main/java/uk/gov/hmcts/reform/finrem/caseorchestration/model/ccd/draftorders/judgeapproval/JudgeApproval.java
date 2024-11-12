@@ -2,13 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judge
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -18,9 +16,18 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JudgeApproval {
 
-    @JsonProperty("reviewableDraftOrderCollection")
-    private List<ReviewableDraftOrderCollection> reviewableDraftOrderCollection;
+    private YesOrNo showMoreDraftOrdersMessage;
+    private ReviewableDraftOrder reviewableDraftOrder1;
+    private ReviewableDraftOrder reviewableDraftOrder2;
+    private ReviewableDraftOrder reviewableDraftOrder3;
+    private ReviewableDraftOrder reviewableDraftOrder4;
+    private ReviewableDraftOrder reviewableDraftOrder5;
 
-    @JsonProperty("reviewablePsaCollection")
-    private List<ReviewablePsaCollection> reviewablePsaCollection;
+    private YesOrNo showMorePsasMessage;
+    private ReviewablePsa reviewablePsa1;
+    private ReviewablePsa reviewablePsa2;
+    private ReviewablePsa reviewablePsa3;
+    private ReviewablePsa reviewablePsa4;
+    private ReviewablePsa reviewablePsa5;
+
 }

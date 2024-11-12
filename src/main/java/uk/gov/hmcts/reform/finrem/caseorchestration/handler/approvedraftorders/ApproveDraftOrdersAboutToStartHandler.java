@@ -31,7 +31,7 @@ import static java.lang.String.format;
 @Service
 public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    private static final String ERROR_MESSAGE = "There are no outstanding draft orders or pension sharing annexes that are ready to review.";
+    private static final String ERROR_MESSAGE = "There are no draft orders or pension sharing annexes to review.";
 
     public ApproveDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);

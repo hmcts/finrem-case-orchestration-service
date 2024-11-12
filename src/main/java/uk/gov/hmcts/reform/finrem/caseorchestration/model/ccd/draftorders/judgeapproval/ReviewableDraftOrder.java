@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDo
 
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -20,6 +22,10 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReviewableDraftOrder {
+
+    private String hearingInfo;
+
+    private YesOrNo hasAttachment;
 
     @JsonProperty("document")
     private CaseDocument document;
@@ -32,4 +38,8 @@ public class ReviewableDraftOrder {
 
     @JsonProperty("isFinalOrder")
     private YesOrNo isFinalOrder;
+
+    public YesOrNo getHasAttachment() {
+        return YesOrNo.forValue(!ofNullable(attachments).orElse(List.of()).isEmpty());
+    }
 }

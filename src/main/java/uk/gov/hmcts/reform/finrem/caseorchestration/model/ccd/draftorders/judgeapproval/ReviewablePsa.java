@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReviewablePsa {
 
+    private String hearingInfo;
+
     @JsonProperty("document")
     private CaseDocument document;
 

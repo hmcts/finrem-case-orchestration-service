@@ -132,7 +132,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         Assertions.assertEquals(1, response.getErrors().size());
-        assertThat(response.getErrors()).contains("There are no outstanding draft orders or pension sharing annexes that are ready to review.");
+        assertThat(response.getErrors()).contains("There are no draft orders or pension sharing annexes to review.");
     }
 
     @Test
@@ -143,7 +143,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         Assertions.assertEquals(1, response.getErrors().size());
-        assertThat(response.getErrors()).contains("There are no outstanding draft orders or pension sharing annexes that are ready to review.");
+        assertThat(response.getErrors()).contains("There are no draft orders or pension sharing annexes to review.");
     }
 
 }

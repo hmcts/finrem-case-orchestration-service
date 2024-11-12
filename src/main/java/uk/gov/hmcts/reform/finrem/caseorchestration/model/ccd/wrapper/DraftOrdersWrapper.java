@@ -19,8 +19,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -75,9 +80,21 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public List<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
-        return Optional.ofNullable(draftOrdersReviewCollection).orElse(List.of()).stream().filter(a -> hearingsReadyForReview != null
-            && a.getValue().getHearingId().equals(hearingsReadyForReview.getValueCode()))
-            .toList();
+    public Stream<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
+        Stream<DraftOrdersReviewCollection> draftOrdersStream = ofNullable(draftOrdersReviewCollection)
+            .orElse(List.of())
+            .stream()
+            .filter(a -> a != null && a.getValue() != null); // General null filter for safety
+
+        if (hearingsReadyForReview != null) {
+            return draftOrdersStream.filter(a ->
+                hearingsReadyForReview.getValueCode().equals(a.getValue().getHearingId()));
+        } else {
+            return draftOrdersStream.sorted(
+                Comparator.comparing((DraftOrdersReviewCollection a) -> a.getValue().getHearingDate(), nullsLast(naturalOrder()))
+                    .thenComparing(a -> a.getValue().getHearingTime(), nullsLast(naturalOrder()))
+                    .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())));
+        }
     }
+
 }
