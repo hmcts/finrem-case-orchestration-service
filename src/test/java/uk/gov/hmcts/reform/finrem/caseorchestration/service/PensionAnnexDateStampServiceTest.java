@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,24 +44,26 @@ class PensionAnnexDateStampServiceTest {
     private EvidenceManagementUploadService emUploadService;
     @Mock
     private EvidenceManagementDownloadService emDownloadService;
+    @Mock
     private final String caseId = "123123123";
     private final LocalDate approvalDate = LocalDate.of(2024, 12, 31);
     @Captor
     private ArgumentCaptor<List<MultipartFile>> filesCaptor;
-    private Document document;
+    private CaseDocument document;
+
 
     @BeforeEach
     void setUp() {
-        document = Document.builder()
-            .binaryUrl("https:mockurl/binary")
-            .fileName("Testfile")
-            .url("http:mockfile").build();
+        document = CaseDocument.builder()
+            .documentBinaryUrl("https:mockurl/binary")
+            .documentFilename("Testfile")
+            .documentUrl("http:mockfile").build();
     }
 
     @Test
-    void shouldAddApprovalDateToPensionOrderDocument() throws IOException {
+    void shouldAddApprovalDateToPensionOrderDocument() throws Exception {
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
-        when(emDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
+        when(emDownloadService.download(document.getDocumentBinaryUrl(), AUTH_TOKEN))
             .thenReturn(docInBytes);
         when(emUploadService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
@@ -73,34 +76,19 @@ class PensionAnnexDateStampServiceTest {
     }
 
     @Test
-    void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() throws IOException {
-        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
-        when(emDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
-            .thenReturn(docInBytes);
-        when(emUploadService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
-        service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId);
-
-        verify(emUploadService).upload(filesCaptor.capture(), anyString(), anyString());
-        List<MultipartFile> uploadedMultipartFiles = filesCaptor.getValue();
-        byte[] bytes = uploadedMultipartFiles.get(0).getBytes();
-        verifyEmptyDateOfOrderField(bytes);
+    void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() {
+        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId));
+        assertEquals("Missing or Invalid Approved Date of Order", exception.getMessage());
     }
 
     @Test
-    void shouldNotAddApprovalDateToPensionOrderFlattenedDocument() throws Exception {
+    void shouldNotAddApprovalDateToPensionOrderFlattenedDocument() throws IOException {
         byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_flattened.pdf");
-        when(emDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
+        when(emDownloadService.download(document.getDocumentBinaryUrl(), AUTH_TOKEN))
             .thenReturn(docInBytes);
-        when(emUploadService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
 
-        service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId);
-
-        verify(emUploadService).upload(filesCaptor.capture(), anyString(), anyString());
-        List<MultipartFile> uploadedMultipartFiles = filesCaptor.getValue();
-        byte[] bytes = uploadedMultipartFiles.get(0).getBytes();
-        verifyNoDateOfOrderField(bytes);
+        Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId));
+        assertEquals("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.", exception.getMessage());
     }
 
     private byte[] loadResource(String testPdf) throws IOException {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -65,7 +67,7 @@ public class ConsentOrderApprovedDocumentService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final BulkPrintCoverLetterDetailsMapper bulkPrintLetterDetailsMapper;
     private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
-
+    private final PensionAnnexDateStampService pensionAnnexDateStampService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         String fileName;
@@ -134,8 +136,14 @@ public class ConsentOrderApprovedDocumentService {
                                                         LocalDate approvalDate,
                                                         String caseId) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument approvedDocument = genericDocumentService.appendApprovedDateToPensionOrderDocument(document, authToken, approvalDate, caseId);
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(approvedDocument, authToken, stampType, caseId);
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, stampType, caseId);
+        try {
+            stampedDocument = pensionAnnexDateStampService.appendApprovedDateToDocument(stampedDocument,
+                authToken, approvalDate, caseId);
+        } catch (Exception ex) {
+            throw new StampDocumentException(format("Failed to add date stamp to Pension Order document : %s, "
+                + ", Exception  : %s", document, ex.getMessage()), ex);
+        }
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;

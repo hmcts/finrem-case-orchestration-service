@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ public class GenericDocumentService {
     private final BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
     private final DocumentConversionService documentConversionService;
     private final PdfStampingService pdfStampingService;
-    private final PensionAnnexDateStampService pensionAnnexDateStampService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
@@ -97,23 +95,6 @@ public class GenericDocumentService {
                 .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
                 .fileName(pdfCaseDocument.getDocumentFilename())
                 .build(), authorisationToken, false, stampType, caseId);
-        return toCaseDocument(stampedDocument);
-    }
-
-    public CaseDocument appendApprovedDateToPensionOrderDocument(CaseDocument document,
-                                                                 String authorisationToken,
-                                                                 LocalDate approvalDate,
-                                                                 String caseId) {
-        CaseDocument pdfCaseDocument = convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
-        log.info("Pdf conversion if document is not pdf original {} pdfdocument {} for Case ID: {}",
-            document.getDocumentFilename(), pdfCaseDocument.getDocumentFilename(), caseId);
-
-        Document stampedDocument = pensionAnnexDateStampService.appendApprovedDateToDocument(
-            Document.builder().url(pdfCaseDocument.getDocumentUrl())
-                .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
-                .fileName(pdfCaseDocument.getDocumentFilename())
-                .build(), authorisationToken, approvalDate, caseId);
-
         return toCaseDocument(stampedDocument);
     }
 
