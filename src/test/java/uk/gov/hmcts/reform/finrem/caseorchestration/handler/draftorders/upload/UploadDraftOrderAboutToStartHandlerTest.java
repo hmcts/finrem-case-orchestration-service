@@ -8,12 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -22,14 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,7 +55,6 @@ class UploadDraftOrderAboutToStartHandlerTest {
 
     @Test
     void testHandle() {
-        long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
         DynamicList hearingDetails = DynamicList.builder().listItems(List.of(
@@ -73,11 +66,6 @@ class UploadDraftOrderAboutToStartHandlerTest {
         when(caseData.getRespondentLastName()).thenReturn("Hey");
         when(caseData.getRespondentFullName()).thenReturn("Hello Respondent");
         when(hearingService.generateSelectableHearingsAsDynamicList(any())).thenReturn(hearingDetails);
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
-            CaseAssignedUserRolesResource.builder()
-                .caseAssignedUserRoles(Collections.emptyList())
-                .build());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
@@ -105,36 +93,5 @@ class UploadDraftOrderAboutToStartHandlerTest {
             )).build();
         assertThat(uploadAgreedDraftOrder.getUploadParty()).isEqualTo(expectedUploadParty);
         assertThat(uploadSuggestedDraftOrder.getUploadParty()).isEqualTo(expectedUploadParty);
-    }
-
-    @Test
-    void givenUserIsCaseWorkerWhenHandleThenShowUploadQuestionIsYes() {
-        long caseID = 1727874196328932L;
-        FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
-            CaseAssignedUserRolesResource.builder()
-                .caseAssignedUserRoles(Collections.emptyList())
-                .build());
-
-        var response = handler.handle(request, AUTH_TOKEN);
-
-        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.YES);
-    }
-
-    @Test
-    void givenUserIsNotCaseWorkerWhenHandleThenShowUploadQuestionIsNo() {
-        long caseID = 1727874196328932L;
-        FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
-        CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
-            .caseRole(CaseRole.APP_SOLICITOR.getCcdCode())
-            .build();
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
-            CaseAssignedUserRolesResource.builder()
-                .caseAssignedUserRoles(List.of(caseAssignedUserRole))
-                .build());
-
-        var response = handler.handle(request, AUTH_TOKEN);
-
-        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
     }
 }
