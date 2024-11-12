@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -64,15 +62,8 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         draftOrdersWrapper.setTypeOfDraftOrder(null);
 
-        YesOrNo showUploadPartyQuestion = isShowUploadPartyQuestion(caseId, userAuthorisation)
-            ? YesOrNo.YES : YesOrNo.NO;
-        draftOrdersWrapper.setShowUploadPartyQuestion(showUploadPartyQuestion);
-
         DynamicMultiSelectList confirmUploadedDocuments = createConfirmUploadDocuments(finremCaseData);
-        DynamicRadioList uploadPartyRadioList = null;
-        if (YesOrNo.YES.equals(showUploadPartyQuestion)) {
-            uploadPartyRadioList = createUploadParty(finremCaseData);
-        }
+        DynamicRadioList uploadPartyRadioList = createUploadParty(finremCaseData);
 
         draftOrdersWrapper.setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
             .confirmUploadedDocuments(confirmUploadedDocuments)
@@ -101,13 +92,6 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         return DynamicMultiSelectList.builder()
             .listItems(List.of(elementConfirmation))
             .build();
-    }
-
-    private boolean isShowUploadPartyQuestion(String caseId, String authToken) {
-        CaseAssignedUserRolesResource caseAssignedUserRolesResource =
-            caseAssignedRoleService.getCaseAssignedUserRole(caseId, authToken);
-
-        return caseAssignedUserRolesResource.getCaseAssignedUserRoles().isEmpty();
     }
 
     private DynamicRadioList createUploadParty(FinremCaseData finremCaseData) {
