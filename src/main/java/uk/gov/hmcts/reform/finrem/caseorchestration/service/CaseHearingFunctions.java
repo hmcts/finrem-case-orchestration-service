@@ -318,6 +318,7 @@ public final class CaseHearingFunctions {
 
     /**
      * Return BulkPrintDocument.
+     *
      * <p>Please use @{@link #buildFrcCourtDetails(FinremCaseData)}</p>
      *
      * @param data instance of Map
