@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
@@ -32,14 +31,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @Service
 public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    private final CaseAssignedRoleService caseAssignedRoleService;
-
     private final HearingService hearingService;
 
-    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, CaseAssignedRoleService caseAssignedRoleService,
+    public UploadDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                 HearingService hearingService) {
         super(finremCaseDetailsMapper);
-        this.caseAssignedRoleService = caseAssignedRoleService;
         this.hearingService = hearingService;
     }
 

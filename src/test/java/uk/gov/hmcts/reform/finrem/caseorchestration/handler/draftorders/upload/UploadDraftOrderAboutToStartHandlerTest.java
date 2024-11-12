@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
@@ -45,8 +44,6 @@ class UploadDraftOrderAboutToStartHandlerTest {
 
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
-    private CaseAssignedRoleService caseAssignedRoleService;
 
     @Test
     void canHandle() {
