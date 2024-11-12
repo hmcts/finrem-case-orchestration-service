@@ -162,6 +162,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
