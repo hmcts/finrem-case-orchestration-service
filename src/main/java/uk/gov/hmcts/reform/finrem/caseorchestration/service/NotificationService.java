@@ -121,6 +121,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -143,6 +144,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -179,6 +181,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -206,6 +209,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -222,6 +226,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -240,6 +245,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderMadeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -268,6 +274,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -284,6 +291,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderNotApprovedEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -309,6 +317,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -325,6 +334,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -343,6 +353,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderAvailableEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -371,6 +382,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderAvailableCtscEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -397,6 +409,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedHwfSuccessfulConfirmationEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -419,6 +432,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedApplicationIssuedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -453,6 +467,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestOrderApprovedEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -477,6 +492,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestOrderApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper, IntervenerType)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -514,6 +530,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendPrepareForHearingEmailApplicant(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -530,6 +547,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendPrepareForHearingEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -546,6 +564,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendPrepareForHearingEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -582,6 +601,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendPrepareForHearingOrderSentEmailApplicant(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -598,6 +618,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendPrepareForHearingOrderSentEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -620,6 +641,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendSolicitorToDraftOrderEmailApplicant(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -636,6 +658,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendSolicitorToDraftOrderEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -652,6 +675,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendSolicitorToDraftOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -677,6 +701,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentGeneralEmail(FinremCaseDetails, String)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -722,6 +747,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralEmail(FinremCaseDetails, String)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -748,6 +774,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestOrderNotApprovedEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -764,6 +791,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestOrderNotApprovedEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -780,6 +808,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestOrderNotApprovedEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -807,6 +836,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -823,6 +853,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -839,6 +870,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderApprovedEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -866,6 +898,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -882,6 +915,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -898,6 +932,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentOrderNotApprovedEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -925,6 +960,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -941,6 +977,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -957,6 +994,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedConsentGeneralOrderEmailIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -984,6 +1022,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentedGeneralOrderEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1000,6 +1039,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentedGeneralOrderEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1022,6 +1062,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralOrderEmailApplicant(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1038,6 +1079,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralOrderEmailRespondent(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1054,6 +1096,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralOrderEmailIntervener(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -1081,6 +1124,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1112,6 +1156,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendContestedGeneralApplicationOutcomeEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1138,6 +1183,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1154,6 +1200,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1170,6 +1217,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentOrderNotApprovedSentEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -1197,6 +1245,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails, Map)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1224,6 +1273,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendConsentHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails, Map)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1245,6 +1295,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendInterimNotificationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1275,6 +1326,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendInterimNotificationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1291,6 +1343,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendInterimNotificationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -1322,6 +1375,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendTransferToLocalCourtEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1353,6 +1407,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToAppSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1369,6 +1424,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1385,6 +1441,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails     instance of CaseDetails
@@ -1409,6 +1466,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendUpdateFrcInformationEmailToCourt(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1435,6 +1493,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendGeneralApplicationRejectionEmailToAppSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1451,6 +1510,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendGeneralApplicationRejectionEmailToResSolicitor(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1478,6 +1538,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1499,6 +1560,7 @@ public class NotificationService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendBarristerRemovedEmail(FinremCaseDetails, Barrister)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1661,6 +1723,7 @@ public class NotificationService {
 
     /**
      * Do not expect any return.
+     *
      * <p>Please use @{@link #sendNoticeOfChangeEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1722,6 +1785,7 @@ public class NotificationService {
 
     /**
      * Return String Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #sendNocEmailIfSolicitorIsDigital(FinremCaseDetails, NotificationRequest, EmailTemplateNames)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -1787,6 +1851,7 @@ public class NotificationService {
 
     /**
      * Return EmailTemplateNames Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #getNoticeOfChangeTemplate(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -1841,7 +1906,8 @@ public class NotificationService {
     }
 
     /**
-     * Return Recipient Email for given Case .
+     * Return Recipient Email for given Case.
+     *
      * <p>Please use @{@link #getRecipientEmail(FinremCaseDetails)}</p>
      *
      * @param caseDetails instance of CaseDetails

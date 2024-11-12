@@ -118,6 +118,7 @@ public class HearingDocumentService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #sendInitialHearingCorrespondence(FinremCaseDetails, String)}</p>
      *
      * @param caseDetails        instance of CaseDetails
