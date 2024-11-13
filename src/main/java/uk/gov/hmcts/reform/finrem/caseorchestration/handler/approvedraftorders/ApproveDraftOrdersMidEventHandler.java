@@ -51,9 +51,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     }
 
     private ReviewableDraftOrder createReviewableDraftOrder(DraftOrdersWrapper draftOrdersWrapper, int index) {
-        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedDraftOrdersReviewCollection());
+        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection());
 
-        List<ReviewableDraftOrder> collection = draftOrdersWrapper.getSelectedDraftOrdersReviewCollection()
+        List<ReviewableDraftOrder> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
             .map(DraftOrdersReview::getDraftOrderDocReviewCollection)
             .flatMap(List::stream)
@@ -71,9 +71,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     }
 
     private ReviewablePsa createReviewablePsa(DraftOrdersWrapper draftOrdersWrapper, int index) {
-        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedDraftOrdersReviewCollection());
+        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection());
 
-        List<ReviewablePsa> collection = draftOrdersWrapper.getSelectedDraftOrdersReviewCollection()
+        List<ReviewablePsa> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
             .map(DraftOrdersReview::getPsaDocReviewCollection)
             .flatMap(List::stream)

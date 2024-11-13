@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -80,11 +81,15 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public Stream<DraftOrdersReviewCollection> getSelectedDraftOrdersReviewCollection() {
+    public Stream<DraftOrdersReviewCollection> getSelectedOutstandingDraftOrdersReviewCollection() {
         Stream<DraftOrdersReviewCollection> draftOrdersStream = ofNullable(draftOrdersReviewCollection)
             .orElse(List.of())
             .stream()
-            .filter(a -> a != null && a.getValue() != null); // General null filter for safety
+            .filter(a -> a != null && a.getValue() != null)
+            .filter(a -> a.getValue().getDraftOrderDocReviewCollection().stream()
+                .anyMatch(doc -> doc.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED)
+                || a.getValue().getPsaDocReviewCollection().stream()
+                    .anyMatch(doc -> doc.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED));
 
         if (hearingsReadyForReview != null) {
             return draftOrdersStream.filter(a ->
