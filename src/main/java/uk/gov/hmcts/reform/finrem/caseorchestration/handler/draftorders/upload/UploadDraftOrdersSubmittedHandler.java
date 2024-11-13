@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -14,12 +15,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -66,11 +70,20 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
-        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
 
-        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+        List<DraftOrdersReviewCollection> reviewCollection = caseDetails.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
+        Optional<DraftOrdersReview> lastReview = getLastAddedDraftOrdersReview(reviewCollection);
+
+        if (lastReview.isEmpty()) {
+            String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseDetails.getId());
+            throw new IllegalStateException(exceptionMessage);
+        }
+
+        LocalDate hearingDate = lastReview.get().getHearingDate();
+        String hearingJudge = lastReview.get().getHearingJudge();
+        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
+            caseDetails, hearingDate, hearingJudge);
+        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
 
         String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -123,5 +136,21 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .map(SuggestedDraftOrderCollection::getValue)
             .map(SuggestedDraftOrder::getSubmittedDate)
             .max(LocalDateTime::compareTo);
+    }
+
+
+    private Optional<DraftOrdersReview> getLastAddedDraftOrdersReview(
+        List<DraftOrdersReviewCollection> reviewCollection) {
+
+        if (ObjectUtils.isEmpty(reviewCollection)) {
+            return Optional.empty();
+        }
+
+        //Get the last elements value
+        DraftOrdersReview lastReview = reviewCollection
+            .get(reviewCollection.size() - 1)
+            .getValue();
+
+        return Optional.ofNullable(lastReview);
     }
 }
