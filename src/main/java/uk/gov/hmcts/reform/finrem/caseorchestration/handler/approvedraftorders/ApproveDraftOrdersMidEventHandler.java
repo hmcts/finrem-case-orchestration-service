@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -47,9 +48,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
     }
 
-    private ReviewableDraftOrder createReviewableDraftOrder(DraftOrdersWrapper draftOrdersWrapper, int index) {
+    private ReviewableDraftOrder createReviewableDraftOrder(Stream<DraftOrdersReviewCollection> outstanding, int index) {
         // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewableDraftOrder> collection = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection()
+        List<ReviewableDraftOrder> collection = outstanding
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
@@ -71,9 +72,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         return collection.get(index - 1);
     }
 
-    private ReviewablePsa createReviewablePsa(DraftOrdersWrapper draftOrdersWrapper, int index) {
+    private ReviewablePsa createReviewablePsa(Stream<DraftOrdersReviewCollection> outstanding, int index) {
         // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewablePsa> collection = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection()
+        List<ReviewablePsa> collection = outstanding
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
@@ -103,18 +104,19 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        Stream<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
 
         draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
-            .reviewablePsa1(createReviewablePsa(draftOrdersWrapper,1))
-            .reviewablePsa2(createReviewablePsa(draftOrdersWrapper,2))
-            .reviewablePsa3(createReviewablePsa(draftOrdersWrapper,3))
-            .reviewablePsa4(createReviewablePsa(draftOrdersWrapper,4))
-            .reviewablePsa5(createReviewablePsa(draftOrdersWrapper,5))
-            .reviewableDraftOrder1(createReviewableDraftOrder(draftOrdersWrapper, 1))
-            .reviewableDraftOrder2(createReviewableDraftOrder(draftOrdersWrapper, 2))
-            .reviewableDraftOrder3(createReviewableDraftOrder(draftOrdersWrapper, 3))
-            .reviewableDraftOrder4(createReviewableDraftOrder(draftOrdersWrapper, 4))
-            .reviewableDraftOrder5(createReviewableDraftOrder(draftOrdersWrapper, 5))
+            .reviewablePsa1(createReviewablePsa(outstanding,1))
+            .reviewablePsa2(createReviewablePsa(outstanding,2))
+            .reviewablePsa3(createReviewablePsa(outstanding,3))
+            .reviewablePsa4(createReviewablePsa(outstanding,4))
+            .reviewablePsa5(createReviewablePsa(outstanding,5))
+            .reviewableDraftOrder1(createReviewableDraftOrder(outstanding, 1))
+            .reviewableDraftOrder2(createReviewableDraftOrder(outstanding, 2))
+            .reviewableDraftOrder3(createReviewableDraftOrder(outstanding, 3))
+            .reviewableDraftOrder4(createReviewableDraftOrder(outstanding, 4))
+            .reviewableDraftOrder5(createReviewableDraftOrder(outstanding, 5))
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
