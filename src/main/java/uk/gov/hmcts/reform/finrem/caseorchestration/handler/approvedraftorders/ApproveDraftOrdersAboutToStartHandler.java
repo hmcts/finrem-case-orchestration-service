@@ -16,13 +16,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
 
 @Slf4j
 @Service
@@ -64,9 +65,9 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                 DraftOrdersReview draftOrdersReview = reviewCollection.getValue();
 
                 boolean isReviewableHearing = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
-                    .anyMatch(doc -> doc.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED)
+                    .anyMatch(doc -> isJudgeReviewable(doc.getValue().getOrderStatus()))
                     || draftOrdersReview.getPsaDocReviewCollection().stream()
-                    .anyMatch(psa -> psa.getValue().getOrderStatus() == OrderStatus.TO_BE_REVIEWED);
+                    .anyMatch(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()));
 
                 //Only add hearing if there is an order or PSA with TO_BE_REVIEWED
                 if (isReviewableHearing) {

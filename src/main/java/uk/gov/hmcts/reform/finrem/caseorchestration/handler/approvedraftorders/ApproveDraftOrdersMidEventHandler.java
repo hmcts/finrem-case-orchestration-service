@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
@@ -59,6 +60,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .map(DraftOrdersReview::getDraftOrderDocReviewCollection)
             .flatMap(List::stream)
             .map(DraftOrderDocReviewCollection::getValue)
+            .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
             .map(a -> ReviewableDraftOrder.builder()
                 .hearingInfo(hearingInfo)
                 .document(a.getDraftOrderDocument())
