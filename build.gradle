@@ -37,7 +37,7 @@ def versions = [
         skyscreamer          : '1.5.3',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '2.9.2',
+        tika                 : '3.0.0',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.4',
         elasticSearch        : '7.17.25',
