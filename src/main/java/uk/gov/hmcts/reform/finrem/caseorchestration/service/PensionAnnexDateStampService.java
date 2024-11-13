@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -63,12 +64,11 @@ public class PensionAnnexDateStampService {
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
             return genericDocumentService.toCaseDocument(dateStampedDocument);
         } else {
-            throw new StampDocumentException("Missing or Invalid Approved Date of Order",
-                new Exception("Unable to append date stamp to Pension Order document "));
+            throw new StampDocumentException("Missing or Invalid Approved Date of Order. Unable to append date stamp to Pension Order document ");
         }
     }
 
-    private byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws Exception {
+    private byte[] appendApprovedDateToDocument(byte[] inputDocInBytes, LocalDate approvalDate) throws StampDocumentException, IOException {
         PDDocument doc = Loader.loadPDF(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
         Optional<PDAcroForm> acroForm = Optional.ofNullable(doc.getDocumentCatalog().getAcroForm());
@@ -83,7 +83,7 @@ public class PensionAnnexDateStampService {
             doc.close();
             return outputBytes.toByteArray();
         } else {
-            throw new Exception("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.");
+            throw new StampDocumentException("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.");
         }
     }
 }
