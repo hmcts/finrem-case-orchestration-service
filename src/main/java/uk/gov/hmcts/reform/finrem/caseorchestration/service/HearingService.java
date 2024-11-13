@@ -159,7 +159,7 @@ public class HearingService {
             "%s on %s %s by %s",
             Optional.ofNullable(hearingType).orElse("N/A"),
             Optional.ofNullable(hearingDate)
-                .map(date -> hearingDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .map(date -> hearingDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
                 .orElse("N/A"),
             Optional.ofNullable(hearingTime).orElse("N/A"),
             Optional.ofNullable(hearingJudge).orElse("N/A")
