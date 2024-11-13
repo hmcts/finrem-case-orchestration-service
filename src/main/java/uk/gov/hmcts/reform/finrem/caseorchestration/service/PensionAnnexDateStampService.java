@@ -35,14 +35,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @RequiredArgsConstructor
 @Slf4j
 public class PensionAnnexDateStampService {
-
     private final EvidenceManagementUploadService emUploadService;
-
     private final EvidenceManagementDownloadService emDownloadService;
-
     private final GenericDocumentService genericDocumentService;
-
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
+    static final String DEFAULT_PDTYPE_FONT_HELVETICA = "/Helv 12 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
@@ -76,7 +73,7 @@ public class PensionAnnexDateStampService {
             && (acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
-            textBox.setDefaultAppearance("/Helv 12 Tf 0 g");
+            textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELVETICA);
             textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy").withLocale(Locale.UK)));
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);
