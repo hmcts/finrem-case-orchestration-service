@@ -81,7 +81,7 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public Stream<DraftOrdersReviewCollection> getSelectedOutstandingDraftOrdersReviewCollection() {
+    public Stream<DraftOrdersReviewCollection> getOutstandingDraftOrdersReviewCollection() {
         Stream<DraftOrdersReviewCollection> draftOrdersStream = ofNullable(draftOrdersReviewCollection)
             .orElse(List.of())
             .stream()

@@ -49,7 +49,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
     private ReviewableDraftOrder createReviewableDraftOrder(DraftOrdersWrapper draftOrdersWrapper, int index) {
         // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewableDraftOrder> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
+        List<ReviewableDraftOrder> collection = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
@@ -73,7 +73,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
     private ReviewablePsa createReviewablePsa(DraftOrdersWrapper draftOrdersWrapper, int index) {
         // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewablePsa> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
+        List<ReviewablePsa> collection = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
