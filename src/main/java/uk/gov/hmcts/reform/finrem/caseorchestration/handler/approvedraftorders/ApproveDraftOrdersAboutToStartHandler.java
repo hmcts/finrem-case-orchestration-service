@@ -18,23 +18,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
 public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
+    private final HearingService hearingService;
+
     private static final String ERROR_MESSAGE = "There are no draft orders or pension sharing annexes to review.";
 
-    public ApproveDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    public ApproveDraftOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingService hearingService) {
         super(finremCaseDetailsMapper);
+        this.hearingService = hearingService;
     }
 
     @Override
@@ -83,14 +83,11 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             hearingOptions = hearingsForReview.stream()
                 .map(draftOrdersReview -> DynamicListElement.builder()
                     .code(draftOrdersReview.getHearingId())
-                    .label(format(
-                        "%s on %s %s by %s",
-                        Optional.ofNullable(draftOrdersReview.getHearingType()).orElse("N/A"),
-                        Optional.ofNullable(draftOrdersReview.getHearingDate())
-                            .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                            .orElse("N/A"),
-                        Optional.ofNullable(draftOrdersReview.getHearingTime()).orElse("N/A"),
-                        Optional.ofNullable(draftOrdersReview.getHearingJudge()).orElse("N/A")
+                    .label(
+                        hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
+                            draftOrdersReview.getHearingDate(),
+                            draftOrdersReview.getHearingTime(),
+                            draftOrdersReview.getHearingJudge()
                     ))
                     .build())
                 .toList();

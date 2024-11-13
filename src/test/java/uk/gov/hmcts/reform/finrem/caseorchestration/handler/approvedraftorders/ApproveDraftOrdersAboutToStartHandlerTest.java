@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -18,12 +19,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
@@ -36,6 +39,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     @InjectMocks
     private ApproveDraftOrdersAboutToStartHandler handler;
 
+    @Mock
+    private HearingService hearingService;
+
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.APPROVE_ORDERS);
@@ -43,6 +49,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @Test
     void givenUserHasHearingsReadyToReview_whenHandle_thenReturnSortedHearings() {
+        when(hearingService.formatHearingInfo("Hearing Type 1", LocalDate.of(2024, 8, 6), "09:00 A.M.", "Judge 1"))
+            .thenReturn("Hearing Type 1 on 2024-08-06 09:00 A.M. by Judge 1");
         FinremCaseData caseData = spy(new FinremCaseData());
 
         DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
@@ -78,6 +86,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @Test
     void givenUserHasPsaReadyToReview_whenHandle_thenReturnSortedHearings() {
+        when(hearingService.formatHearingInfo("Hearing Type 1", LocalDate.of(2024, 8, 6), "09:00 A.M.", "Judge 1"))
+            .thenReturn("Hearing Type 1 on 2024-08-06 09:00 A.M. by Judge 1");
         FinremCaseData caseData = spy(new FinremCaseData());
         PsaDocumentReview document1 = PsaDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
             .build();

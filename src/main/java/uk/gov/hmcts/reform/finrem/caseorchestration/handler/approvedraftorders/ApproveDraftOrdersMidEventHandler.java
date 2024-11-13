@@ -19,18 +19,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
 public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
-    public ApproveDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final HearingService hearingService;
+
+    public ApproveDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingService hearingService) {
         super(finremCaseDetailsMapper);
+        this.hearingService = hearingService;
     }
 
     @Override
@@ -40,13 +42,12 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
 
-    private static String buildHearingInfoFromDraftOrdersReview(Stream<DraftOrdersReviewCollection> selected) {
+    private String buildHearingInfoFromDraftOrdersReview(Stream<DraftOrdersReviewCollection> selected) {
         return selected.findFirst().map(draftOrdersReviewCollection ->
-            format("%s (%s:%s)",
-                draftOrdersReviewCollection.getValue().getHearingType(),
-                draftOrdersReviewCollection.getValue().getHearingDate(),
-                draftOrdersReviewCollection.getValue().getHearingTime()))
-            // TODO align the format with ApproveDraftOrdersAboutToStartHandler
+                hearingService.formatHearingInfo(draftOrdersReviewCollection.getValue().getHearingType(),
+                    draftOrdersReviewCollection.getValue().getHearingDate(),
+                    draftOrdersReviewCollection.getValue().getHearingTime(),
+                    draftOrdersReviewCollection.getValue().getHearingJudge()))
             .orElse(null);
     }
 
