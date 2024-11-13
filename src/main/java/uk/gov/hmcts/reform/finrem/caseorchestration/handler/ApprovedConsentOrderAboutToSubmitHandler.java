@@ -134,7 +134,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         return pensionDocumentsData.isEmpty();
     }
 
-    private static LocalDate getApprovalDate(Map<String, Object> caseData) {
+    private LocalDate getApprovalDate(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(CONTESTED_ORDER_DIRECTION_DATE))
             .filter(value -> value instanceof LocalDate || value instanceof String)
             .map(value -> {
@@ -144,13 +144,13 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                     try {
                         return LocalDate.parse((String) value);
                     } catch (Exception e) {
-                        log.info("Invalid Approved date of order for key '" + caseData + "': " + e.getMessage());
+                        log.info("Invalid Approved date of order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "': " + e.getMessage());
                         return null;
                     }
                 }
             })
             .orElseGet(() -> {
-                log.info("Approved Date of Order for key '" + caseData + "' is null or invalid");
+                log.info("Approved Date of Order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "' is null or invalid");
                 return null;
             });
     }
