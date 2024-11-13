@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -62,7 +63,8 @@ public class PensionAnnexDateStampService {
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
             return genericDocumentService.toCaseDocument(dateStampedDocument);
         } else {
-            throw new Exception("Missing or Invalid Approved Date of Order");
+            throw new StampDocumentException("Missing or Invalid Approved Date of Order",
+                new Exception("Unable to append date stamp to Pension Order document "));
         }
     }
 
