@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -117,6 +118,13 @@ class ApproveDraftOrdersMidEventHandlerTest {
             + "There are additional draft orders/pension sharing annexes requiring review that are not shown.";
 
         return Stream.of(
+            // Test with empty DraftOrdersWrapper
+            Arguments.of(
+                DraftOrdersWrapper.builder().draftOrdersReviewCollection(Collections.emptyList()).build(),
+                null, null, null, null, null,
+                null, null, null, null, null,
+                null
+            ),
             // Test with non-empty DraftOrdersWrapper with one draft order and one PSA
             Arguments.of(
                 DraftOrdersWrapper.builder()
