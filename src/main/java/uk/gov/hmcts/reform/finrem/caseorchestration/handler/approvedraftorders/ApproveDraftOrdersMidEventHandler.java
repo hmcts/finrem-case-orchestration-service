@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -43,30 +42,29 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
 
-    private String buildHearingInfoFromDraftOrdersReview(Stream<DraftOrdersReviewCollection> selected) {
-        return selected.findFirst().map(draftOrdersReviewCollection ->
-                hearingService.formatHearingInfo(draftOrdersReviewCollection.getValue().getHearingType(),
-                    draftOrdersReviewCollection.getValue().getHearingDate(),
-                    draftOrdersReviewCollection.getValue().getHearingTime(),
-                    draftOrdersReviewCollection.getValue().getHearingJudge()))
-            .orElse(null);
+    private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
+        return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
+            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
     }
 
     private ReviewableDraftOrder createReviewableDraftOrder(DraftOrdersWrapper draftOrdersWrapper, int index) {
-        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection());
-
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
         List<ReviewableDraftOrder> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
-            .map(DraftOrdersReview::getDraftOrderDocReviewCollection)
-            .flatMap(List::stream)
-            .map(DraftOrderDocReviewCollection::getValue)
-            .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
-            .map(a -> ReviewableDraftOrder.builder()
-                .hearingInfo(hearingInfo)
-                .document(a.getDraftOrderDocument())
-                .attachments(a.getAttachments())
-                .build())
+            .flatMap(draftOrdersReview -> {
+                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
+                return draftOrdersReview.getDraftOrderDocReviewCollection().stream()
+                    .map(DraftOrderDocReviewCollection::getValue)
+                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
+                    .map(a -> ReviewableDraftOrder.builder()
+                        .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
+                        .document(a.getDraftOrderDocument())
+                        .attachments(a.getAttachments())
+                        .build());
+            }) // Flatten the stream of streams
             .toList();
+
+        // Return the specified item if it exists in the collection, otherwise return null
         if (collection.size() < index) {
             return null;
         }
@@ -74,18 +72,22 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     }
 
     private ReviewablePsa createReviewablePsa(DraftOrdersWrapper draftOrdersWrapper, int index) {
-        String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection());
-
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
         List<ReviewablePsa> collection = draftOrdersWrapper.getSelectedOutstandingDraftOrdersReviewCollection()
             .map(DraftOrdersReviewCollection::getValue)
-            .map(DraftOrdersReview::getPsaDocReviewCollection)
-            .flatMap(List::stream)
-            .map(PsaDocReviewCollection::getValue)
-            .map(a -> ReviewablePsa.builder()
-                .hearingInfo(hearingInfo)
-                .document(a.getPsaDocument())
-                .build())
+            .flatMap(draftOrdersReview -> {
+                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
+                return draftOrdersReview.getPsaDocReviewCollection().stream()
+                    .map(PsaDocReviewCollection::getValue)
+                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
+                    .map(a -> ReviewablePsa.builder()
+                        .hearingInfo(hearingInfo)
+                        .document(a.getPsaDocument())
+                        .build());
+            }) // Flatten the stream of streams
             .toList();
+
+        // Return the specified item if it exists in the collection, otherwise return null
         if (collection.size() < index) {
             return null;
         }
