@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.15'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1450'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1456'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -37,7 +37,7 @@ def versions = [
         skyscreamer          : '1.5.3',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '2.9.2',
+        tika                 : '3.0.0',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.4',
         elasticSearch        : '7.17.25',
@@ -59,7 +59,7 @@ mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationA
 
 checkstyle {
     maxWarnings = 0
-    toolVersion = '10.18.2'
+    toolVersion = '10.20.1'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
