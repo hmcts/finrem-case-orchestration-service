@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -281,5 +283,34 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
             // Null input with empty collection
             Arguments.of(uadoWithNull, List.of(), List.of())
         );
+    }
+
+
+    private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
+        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
+
+        return agreedDraftOrderSubmittedDates.stream()
+            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
+            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
+            .toList();
+    }
+
+    @Test
+    void testHandleClearsUploadedDraftOrders() {
+        String caseReference = "1727874196328932";
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build())
+                .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
+                .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
+                .build())
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData);
+
+        handler.handle(request, AUTH_TOKEN);
+
+        assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
+        assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
     }
 }
