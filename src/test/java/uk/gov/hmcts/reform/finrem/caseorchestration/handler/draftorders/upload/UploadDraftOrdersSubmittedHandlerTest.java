@@ -6,24 +6,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDateTime;
@@ -33,8 +27,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,13 +34,6 @@ class UploadDraftOrdersSubmittedHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersSubmittedHandler uploadDraftOrdersSubmittedHandler;
-
-    @Mock
-    private NotificationService notificationService;
-
-    @Mock
-    private DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
-
 
     @Test
     void testCanHandle() {
@@ -64,9 +49,7 @@ class UploadDraftOrdersSubmittedHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
-        assertThatThrownBy(() -> {
-            uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
-        }).isInstanceOf(IllegalStateException.class)
+        assertThatThrownBy(() -> uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN)).isInstanceOf(IllegalStateException.class)
             .hasMessage("No uploaded draft order found for Case ID: " + caseReference);
     }
 
@@ -91,8 +74,6 @@ class UploadDraftOrdersSubmittedHandlerTest {
             ? getExpectedAgreedConfirmationBody((caseReference))
             : getExpectedSuggestedConfirmationBody(caseReference);
 
-        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class));
-        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
         assertThat(response.getConfirmationBody()).isEqualTo(expectedConfirmationBody);
         assertThat(response.getData()).isNull();
@@ -165,24 +146,5 @@ class UploadDraftOrdersSubmittedHandlerTest {
             + "['case documents' tab](/cases/case-details/"
             + caseReference
             + "#Case%20documents).";
-    }
-
-    @Test
-    void testHandleClearsUploadedDraftOrders() {
-        String caseReference = "1727874196328932";
-        FinremCaseData caseData = FinremCaseData.builder()
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build())
-                .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
-                .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
-                .build())
-            .build();
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
-            CaseType.CONTESTED, caseData);
-
-        uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
-
-        assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
-        assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
     }
 }

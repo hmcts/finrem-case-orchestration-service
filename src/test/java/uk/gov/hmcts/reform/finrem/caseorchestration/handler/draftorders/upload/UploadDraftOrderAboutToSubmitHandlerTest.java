@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
@@ -34,9 +37,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,6 +81,12 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
     @Mock
     private DraftOrderService draftOrderService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
 
     @Test
     void canHandle() {
@@ -134,6 +145,8 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         // Then
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
         List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
         Assertions.assertEquals(2, collectionResult.size());
 
@@ -216,6 +229,8 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
         // Then
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
         List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
         Assertions.assertEquals(3, collectionResult.size());
 
@@ -248,6 +263,8 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
             handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .containsAll(expectedAgreedDraftOrderCollection);
@@ -281,5 +298,33 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
             // Null input with empty collection
             Arguments.of(uadoWithNull, List.of(), List.of())
         );
+    }
+
+    private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
+        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
+
+        return agreedDraftOrderSubmittedDates.stream()
+            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
+            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
+            .toList();
+    }
+
+    @Test
+    void testHandleClearsUploadedDraftOrders() {
+        String caseReference = "1727874196328932";
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build())
+                .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
+                .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
+                .build())
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData);
+
+        handler.handle(request, AUTH_TOKEN);
+
+        assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
+        assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
     }
 }
