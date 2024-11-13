@@ -81,7 +81,7 @@ class PensionAnnexDateStampServiceTest {
     @Test
     void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() {
         Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId));
-        assertEquals("Missing or Invalid Approved Date of Order", exception.getMessage());
+        assertEquals("Missing or Invalid Approved Date of Order.", exception.getMessage());
     }
 
     @Test
@@ -91,7 +91,7 @@ class PensionAnnexDateStampServiceTest {
             .thenReturn(docInBytes);
 
         Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId));
-        assertEquals("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.", exception.getMessage());
+        assertEquals("Pension Order document PDF is flattened / not editable.", exception.getMessage());
     }
 
     private byte[] loadResource(String testPdf) throws IOException {

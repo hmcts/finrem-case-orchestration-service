@@ -48,7 +48,7 @@ public class PensionAnnexDateStampService {
                                                      String authToken,
                                                      LocalDate approvalDate,
                                                      String caseId) throws Exception {
-        log.info("Adding date stamp to Pension Order document : {}", document);
+        log.info("Adding date stamp to Pension Sharing Annex : {}", document);
         Optional<LocalDate> optionalApprovalDate = Optional.ofNullable(approvalDate);
         if (optionalApprovalDate.isPresent()) {
             byte[] docInBytes = emDownloadService.download(document.getDocumentBinaryUrl(), authToken);
@@ -64,7 +64,7 @@ public class PensionAnnexDateStampService {
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
             return genericDocumentService.toCaseDocument(dateStampedDocument);
         } else {
-            throw new StampDocumentException("Missing or Invalid Approved Date of Order. Unable to append date stamp to Pension Order document ");
+            throw new StampDocumentException("Missing or Invalid Approved Date of Order.");
         }
     }
 
@@ -83,7 +83,7 @@ public class PensionAnnexDateStampService {
             doc.close();
             return outputBytes.toByteArray();
         } else {
-            throw new StampDocumentException("Unable to append Date of Order. Pension Order document PDF is flattened / not editable.");
+            throw new StampDocumentException("Pension Order document PDF is flattened / not editable.");
         }
     }
 }
