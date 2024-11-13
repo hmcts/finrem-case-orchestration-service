@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,8 +15,6 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class DraftOrdersNotificationRequestMapper {
-
-    private final HearingService hearingService;
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -14,20 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrdersNotificationRequestMapperTest {
-
-    @Mock
-    HearingService hearingService;
 
     @InjectMocks
     private DraftOrdersNotificationRequestMapper mapper;
@@ -35,12 +27,11 @@ class DraftOrdersNotificationRequestMapperTest {
     @Test
     void shouldBuildJudgeNotificationRequestWithValidData() {
         FinremCaseDetails caseDetails = createCaseDetails();
+        LocalDate date = LocalDate.of(1999, 8, 6);
+        String judgeEmail = "judge@test.com";
 
-        when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.of(1999, 8, 6));
+        NotificationRequest result = mapper.buildJudgeNotificationRequest(caseDetails, date, judgeEmail);
 
-        NotificationRequest result = mapper.buildJudgeNotificationRequest(caseDetails);
-
-        verify(hearingService).getHearingDate(any(), any());
         assertEquals("123456789", result.getCaseReferenceNumber());
         assertEquals("6 August 1999", result.getHearingDate());
         assertEquals("judge@test.com", result.getNotificationEmail());
