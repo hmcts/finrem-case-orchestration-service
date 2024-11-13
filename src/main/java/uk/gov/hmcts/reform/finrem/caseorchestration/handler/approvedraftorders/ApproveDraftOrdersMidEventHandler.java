@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -48,9 +47,8 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
     }
 
-    private ReviewableDraftOrder createReviewableDraftOrder(Stream<DraftOrdersReviewCollection> outstanding, int index) {
-        // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewableDraftOrder> collection = outstanding
+    private List<ReviewableDraftOrder> getReviewableDraftOrders(List<DraftOrdersReviewCollection> outstanding) {
+        return outstanding.stream()
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
@@ -64,7 +62,11 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                         .build());
             }) // Flatten the stream of streams
             .toList();
+    }
 
+    private ReviewableDraftOrder createReviewableDraftOrder(List<DraftOrdersReviewCollection> outstanding, int index) {
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
+        List<ReviewableDraftOrder> collection = getReviewableDraftOrders(outstanding);
         // Return the specified item if it exists in the collection, otherwise return null
         if (collection.size() < index) {
             return null;
@@ -72,9 +74,8 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         return collection.get(index - 1);
     }
 
-    private ReviewablePsa createReviewablePsa(Stream<DraftOrdersReviewCollection> outstanding, int index) {
-        // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewablePsa> collection = outstanding
+    private List<ReviewablePsa> getReviewablePsas(List<DraftOrdersReviewCollection> outstanding) {
+        return outstanding.stream()
             .map(DraftOrdersReviewCollection::getValue)
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
@@ -87,7 +88,11 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                         .build());
             }) // Flatten the stream of streams
             .toList();
+    }
 
+    private ReviewablePsa createReviewablePsa(List<DraftOrdersReviewCollection> outstanding, int index) {
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
+        List<ReviewablePsa> collection = getReviewablePsas(outstanding);
         // Return the specified item if it exists in the collection, otherwise return null
         if (collection.size() < index) {
             return null;
@@ -104,7 +109,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        Stream<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
+        List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
 
         draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
             .reviewablePsa1(createReviewablePsa(outstanding,1))
@@ -117,6 +122,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .reviewableDraftOrder3(createReviewableDraftOrder(outstanding, 3))
             .reviewableDraftOrder4(createReviewableDraftOrder(outstanding, 4))
             .reviewableDraftOrder5(createReviewableDraftOrder(outstanding, 5))
+            .warningMessageToJudge(getReviewableDraftOrders(outstanding).size() > 5 || getReviewablePsas(outstanding).size() > 5
+                ? ("This page is limited to showing only 5 draft orders/PSAs requiring review. "
+                + "There are additional draft orders/PSAs requiring review that are not shown.") : null)
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();

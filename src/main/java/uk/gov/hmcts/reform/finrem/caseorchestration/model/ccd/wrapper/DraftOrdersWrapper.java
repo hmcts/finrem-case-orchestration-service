@@ -81,7 +81,7 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public Stream<DraftOrdersReviewCollection> getOutstandingDraftOrdersReviewCollection() {
+    public List<DraftOrdersReviewCollection> getOutstandingDraftOrdersReviewCollection() {
         Stream<DraftOrdersReviewCollection> draftOrdersStream = ofNullable(draftOrdersReviewCollection)
             .orElse(List.of())
             .stream()
@@ -93,12 +93,13 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
         if (hearingsReadyForReview != null) {
             return draftOrdersStream.filter(a ->
-                hearingsReadyForReview.getValueCode().equals(a.getValue().getHearingId()));
+                hearingsReadyForReview.getValueCode().equals(a.getValue().getHearingId())).toList();
         } else {
             return draftOrdersStream.sorted(
                 Comparator.comparing((DraftOrdersReviewCollection a) -> a.getValue().getHearingDate(), nullsLast(naturalOrder()))
                     .thenComparing(a -> a.getValue().getHearingTime(), nullsLast(naturalOrder()))
-                    .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())));
+                    .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())))
+                .toList();
         }
     }
 
