@@ -202,6 +202,7 @@ public class ConsentHearingService {
 
     /**
      * Do not expect any return.
+     *
      * <p>Please use @{@link #getNewOrDateTimeModifiedHearingIdsList(List, List)}</p>
      * @param caseDetails instance of CaseDetails
      * @param caseDetailsBefore instance of CaseDetails
@@ -256,6 +257,7 @@ public class ConsentHearingService {
 
     /**
      * Do not expect any return.
+     *
      * <p>Please use @{@link #getModifiedHearingIds(List, List)}</p>
      * @param caseData instance of Map
      * @param caseDataBefore instance of Map

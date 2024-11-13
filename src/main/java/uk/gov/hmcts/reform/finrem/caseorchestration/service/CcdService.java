@@ -42,6 +42,7 @@ public class CcdService {
 
     /**
      * Start a CCD event.
+     *
      * <p>The event should be submitted by a subsequent call to {@link #submitEventForCaseWorker}.</p>
      * @param authorisation auth token
      * @param caseId case id
@@ -67,6 +68,7 @@ public class CcdService {
 
     /**
      * Submit an event to CCD.
+     *
      * <p>The case data in {@code startEventResponse} should be from the return value of the initial call to
      * {@link #startEventForCaseWorker}. Do not use case data from another source to avoid data loss due to concurrent
      * case data updates.</p>

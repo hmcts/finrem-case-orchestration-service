@@ -222,6 +222,7 @@ public class CaseDataService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+     *
      * <p>Use @link isConsentedInContestedCase(FinremCaseDetails caseDetails) instead </p>
      *
      * @return boolean to be return
@@ -272,6 +273,7 @@ public class CaseDataService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+     *
      * <p>Use @link isContestedApplication(FinremCaseDetails caseDetails) instead </p>
      *
      * @return boolean to be return
@@ -308,6 +310,7 @@ public class CaseDataService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+     *
      * <p>Use @link isApplicantAddressConfidential(FinremCaseData caseData) instead </p>
      *
      * @return boolean to be returned
@@ -327,6 +330,7 @@ public class CaseDataService {
     /**
      * Please upgrade your code.
      * This method will be removed in future versions.
+     *
      * <p>Use @link isRespondentAddressConfidential(FinremCaseData caseData) instead </p>
      *
      * @return boolean to be returned
