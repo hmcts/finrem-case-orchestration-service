@@ -123,8 +123,8 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .reviewableDraftOrder4(createReviewableDraftOrder(outstanding, 4))
             .reviewableDraftOrder5(createReviewableDraftOrder(outstanding, 5))
             .warningMessageToJudge(getReviewableDraftOrders(outstanding).size() > 5 || getReviewablePsas(outstanding).size() > 5
-                ? ("This page is limited to showing only 5 draft orders/PSAs requiring review. "
-                + "There are additional draft orders/PSAs requiring review that are not shown.") : null)
+                ? ("This page is limited to showing only 5 draft orders/pension sharing annexes requiring review. "
+                + "There are additional draft orders/pension sharing annexes requiring review that are not shown.") : null)
             .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
