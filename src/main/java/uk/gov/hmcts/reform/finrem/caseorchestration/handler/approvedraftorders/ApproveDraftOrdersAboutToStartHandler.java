@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -66,6 +68,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> ReviewableDraftOrder.builder()
                         .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .code("Yes")
+                            .label("This is a final order")
+                            .build())).build())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .submittedDate(a.getSubmittedDate())
