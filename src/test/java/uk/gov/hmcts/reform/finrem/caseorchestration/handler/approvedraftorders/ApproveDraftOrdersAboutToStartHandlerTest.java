@@ -533,11 +533,40 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             null);
     }
 
+    private static Arguments withFiveReviewablesSubmittedDateOrdering() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
+                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED, LocalDateTime.now())
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            // expectedReviewableDraftOrder(1-5)
+            null, null, null, null, null,
+            // expectedReviewablePsa(1-5)
+            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
+            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
+            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
+            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
+            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
+            // expectedWarningMessageToJudge
+            null);
+    }
+
     private static Stream<Arguments> provideDraftOrderData() {
         return Stream.of(
             withEmptyDraftOrdersWrapper(), withOneDraftOrderAndOnePsa(), withTwoDraftOrderAndZeroPsa(),
             withDifferentHearingInfo(), withProcessedDraftOrderAndPsa(), withSixPsas(),
-            withFiveReviewablePsas()
+            withFiveReviewablePsas(), withFiveReviewablesSubmittedDateOrdering()
         );
     }
 }
