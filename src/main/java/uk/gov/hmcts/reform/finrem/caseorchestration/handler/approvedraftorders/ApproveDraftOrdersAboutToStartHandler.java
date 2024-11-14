@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.SortKey;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
@@ -68,10 +69,12 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
-                        .submittedDate(a.getSubmittedDate())
+                        .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
+                            draftOrdersReview.getHearingDate(),
+                            a.getSubmittedDate()))
                         .build());
             }) // Flatten the stream of streams
-            .sorted(Comparator.comparing(ReviewableDraftOrder::getSubmittedDate, nullsLast(naturalOrder())))
+            .sorted(Comparator.comparing(ReviewableDraftOrder::getSortKey, nullsLast(naturalOrder())))
             .toList();
     }
 
@@ -95,11 +98,13 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> ReviewablePsa.builder()
                         .hearingInfo(hearingInfo)
-                        .submittedDate(a.getSubmittedDate())
+                        .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
+                            draftOrdersReview.getHearingDate(),
+                            a.getSubmittedDate()))
                         .document(a.getPsaDocument())
                         .build());
             }) // Flatten the stream of streams
-            .sorted(Comparator.comparing(ReviewablePsa::getSubmittedDate, nullsLast(naturalOrder())))
+            .sorted(Comparator.comparing(ReviewablePsa::getSortKey, nullsLast(naturalOrder())))
             .toList();
     }
 
