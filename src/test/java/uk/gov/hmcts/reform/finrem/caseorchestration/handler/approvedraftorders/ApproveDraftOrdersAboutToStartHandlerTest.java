@@ -233,10 +233,24 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         );
 
         for (int i = 0; i < 5; i++) {
-            assertEquals(expectedReviewableDraftOrders.get(i).orElse(null),
-                judgeApproval.getClass().getMethod("getReviewableDraftOrder" + (i + 1)).invoke(judgeApproval));
-            assertEquals(expectedReviewablePsas.get(i).orElse(null),
-                judgeApproval.getClass().getMethod("getReviewablePsa" + (i + 1)).invoke(judgeApproval));
+            var actualDo = (ReviewableDraftOrder) judgeApproval.getClass().getMethod("getReviewableDraftOrder" + (i + 1)).invoke(judgeApproval);
+            var expectedDo = expectedReviewableDraftOrders.get(i).orElse(null);
+            if (expectedDo != null && actualDo != null) {
+                assertEquals(expectedDo.getDocument(), actualDo.getDocument());
+                assertEquals(expectedDo.getHearingInfo(), actualDo.getHearingInfo());
+                assertEquals(expectedDo.getAttachments(), actualDo.getAttachments());
+            } else {
+                assertEquals(expectedDo, actualDo);
+            }
+
+            var actualPsa = (ReviewablePsa) judgeApproval.getClass().getMethod("getReviewablePsa" + (i + 1)).invoke(judgeApproval);
+            var expectedPsa = expectedReviewablePsas.get(i).orElse(null);
+            if (expectedPsa != null && actualPsa != null) {
+                assertEquals(expectedPsa.getDocument(), actualPsa.getDocument());
+                assertEquals(expectedPsa.getHearingInfo(), actualPsa.getHearingInfo());
+            } else {
+                assertEquals(expectedPsa, actualPsa);
+            }
         }
         assertEquals(expectedWarningMessageToJudge, judgeApproval.getWarningMessageToJudge());
     }
@@ -268,35 +282,49 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .hearingJudge("Mr. Judge");
     }
 
-    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments) {
-        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, null);
-    }
-
-    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments, OrderStatus orderStatus) {
-        return DraftOrderDocReviewCollection.builder()
-            .value(DraftOrderDocumentReview.builder().draftOrderDocument(draftOrderDocument).attachments(attachments).orderStatus(orderStatus)
-                .build()).build();
-    }
-
     private static CaseDocument randomCaseDocument() {
         return CaseDocument.builder().documentFilename(LocalDateTime.now().toString()).build();
     }
 
+    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
+                                                                               List<CaseDocumentCollection> attachments) {
+        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, null, LocalDateTime.now());
+    }
+
+    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
+                                                                               List<CaseDocumentCollection> attachments, OrderStatus orderStatus) {
+        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, orderStatus, LocalDateTime.now());
+    }
+
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(OrderStatus orderStatus) {
+        return buildDraftOrderDocumentReview(randomCaseDocument(), null, orderStatus, LocalDateTime.now());
+    }
+
+    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
+                                                                               List<CaseDocumentCollection> attachments, OrderStatus orderStatus,
+                                                                               LocalDateTime submittedDate) {
         return DraftOrderDocReviewCollection.builder()
-            .value(DraftOrderDocumentReview.builder().draftOrderDocument(randomCaseDocument()).orderStatus(orderStatus)
-                .build()).build();
+            .value(DraftOrderDocumentReview.builder()
+                .draftOrderDocument(draftOrderDocument)
+                .attachments(attachments)
+                .orderStatus(orderStatus)
+                .submittedDate(submittedDate)
+                .build())
+            .build();
     }
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument) {
-        return buildPsaDocReviewCollection(psaDocument, null);
+        return buildPsaDocReviewCollection(psaDocument, null, LocalDateTime.now());
     }
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument, OrderStatus orderStatus) {
+        return buildPsaDocReviewCollection(psaDocument, orderStatus, LocalDateTime.now());
+    }
+
+    private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument, OrderStatus orderStatus,
+                                                                      LocalDateTime submittedDate) {
         return PsaDocReviewCollection.builder()
-            .value(PsaDocumentReview.builder().psaDocument(psaDocument).orderStatus(orderStatus).build())
+            .value(PsaDocumentReview.builder().psaDocument(psaDocument).orderStatus(orderStatus).submittedDate(submittedDate).build())
             .build();
     }
 
@@ -445,7 +473,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             null);
     }
 
-    private static Arguments withSixPSAs() {
+    private static Arguments withSixPsas() {
         return Arguments.of(
             DraftOrdersWrapper.builder()
                 .draftOrdersReviewCollection(List.of(
@@ -475,7 +503,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             WARNING_MESSAGE);
     }
 
-    private static Arguments withFiveReviewablePSAs() {
+    private static Arguments withFiveReviewablePsas() {
         return Arguments.of(
             DraftOrdersWrapper.builder()
                 .draftOrdersReviewCollection(List.of(
@@ -508,8 +536,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static Stream<Arguments> provideDraftOrderData() {
         return Stream.of(
             withEmptyDraftOrdersWrapper(), withOneDraftOrderAndOnePsa(), withTwoDraftOrderAndZeroPsa(),
-            withDifferentHearingInfo(), withProcessedDraftOrderAndPsa(), withSixPSAs(),
-            withFiveReviewablePSAs()
+            withDifferentHearingInfo(), withProcessedDraftOrderAndPsa(), withSixPsas(),
+            withFiveReviewablePsas()
         );
     }
 }

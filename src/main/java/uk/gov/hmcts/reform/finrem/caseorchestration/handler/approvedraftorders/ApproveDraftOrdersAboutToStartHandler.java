@@ -24,8 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
 
 @Slf4j
@@ -65,8 +68,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
+                        .submittedDate(a.getSubmittedDate())
                         .build());
             }) // Flatten the stream of streams
+            .sorted(Comparator.comparing(ReviewableDraftOrder::getSubmittedDate, nullsLast(naturalOrder())))
             .toList();
     }
 
@@ -90,9 +95,11 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> ReviewablePsa.builder()
                         .hearingInfo(hearingInfo)
+                        .submittedDate(a.getSubmittedDate())
                         .document(a.getPsaDocument())
                         .build());
             }) // Flatten the stream of streams
+            .sorted(Comparator.comparing(ReviewablePsa::getSubmittedDate, nullsLast(naturalOrder())))
             .toList();
     }
 
