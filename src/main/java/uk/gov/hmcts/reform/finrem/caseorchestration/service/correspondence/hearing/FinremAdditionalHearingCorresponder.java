@@ -47,7 +47,8 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
             documents.add(additionalHearingDocumentCollection.getValue().getDocument());
         }
 
-        CaseDocument additionalListOfHearingDocuments = caseDetails.getData().getAdditionalListOfHearingDocuments();
+        CaseDocument additionalListOfHearingDocuments = caseDetails.getData().getListForHearingWrapper()
+            .getAdditionalListOfHearingDocuments();
         if (additionalListOfHearingDocuments != null) {
             documents.add(additionalListOfHearingDocuments);
         }

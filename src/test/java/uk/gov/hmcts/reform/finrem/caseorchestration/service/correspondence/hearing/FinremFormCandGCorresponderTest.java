@@ -62,6 +62,7 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
         FinremCaseData caseData = FinremCaseData.builder()
             .listForHearingWrapper(ListForHearingWrapper.builder()
                 .hearingDate(LocalDate.parse(DATE_OF_HEARING))
+                .additionalListOfHearingDocuments(caseDocument())
                 .build())
             .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
             .formC(caseDocument())
@@ -74,7 +75,6 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
                         .build())
                     .build()))
             .outOfFamilyCourtResolution(caseDocument())
-            .additionalListOfHearingDocuments(caseDocument())
             .build();
         return FinremCaseDetails.builder().id(1234L).data(caseData).build();
     }

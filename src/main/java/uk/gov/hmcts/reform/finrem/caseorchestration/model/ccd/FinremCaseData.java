@@ -381,9 +381,6 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private BulkPrintCoversheetWrapper bulkPrintCoversheetWrapper;
-    private YesOrNo additionalHearingDocumentsOption;
-    private CaseDocument additionalListOfHearingDocuments;
-
     @JsonProperty("typeOfDocument")
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;

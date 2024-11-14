@@ -910,7 +910,9 @@ class DuplicateFilenameDocumentCheckerTest {
                 .outOfFamilyCourtResolution(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .additionalListOfHearingDocuments(DUPLICATED_CASE_DOCUMENT)
+                    .listForHearingWrapper(ListForHearingWrapper.builder()
+                        .additionalListOfHearingDocuments(DUPLICATED_CASE_DOCUMENT)
+                        .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .variationOrderDocument(DUPLICATED_CASE_DOCUMENT)
