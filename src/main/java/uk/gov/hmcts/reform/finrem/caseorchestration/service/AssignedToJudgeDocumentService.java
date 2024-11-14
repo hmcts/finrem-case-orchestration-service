@@ -20,6 +20,7 @@ public class AssignedToJudgeDocumentService {
 
     /**
      * Do not expect any return.
+     *
      * <p>Please use @{@link #generateAssignedToJudgeNotificationLetter(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient )}</p>
      * @param caseDetails instance of CaseDetails
      * @param authToken instance of String

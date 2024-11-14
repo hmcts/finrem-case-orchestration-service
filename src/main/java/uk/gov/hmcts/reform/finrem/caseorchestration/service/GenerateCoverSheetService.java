@@ -55,6 +55,7 @@ public class GenerateCoverSheetService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #generateApplicantCoverSheet(FinremCaseDetails, String)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -84,6 +85,7 @@ public class GenerateCoverSheetService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #generateRespondentCoverSheet(FinremCaseDetails, String)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -113,6 +115,7 @@ public class GenerateCoverSheetService {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #generateIntervenerCoverSheet(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient)}</p>
      *
      * @param caseDetails instance of CaseDetails
