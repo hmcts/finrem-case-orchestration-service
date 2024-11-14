@@ -95,6 +95,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEma
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
@@ -328,12 +329,14 @@ class DuplicateFilenameDocumentCheckerTest {
                     .build()))
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .additionalHearingDocuments(List.of(AdditionalHearingDocumentCollection.builder()
-                    .value(AdditionalHearingDocument.builder()
-                        .document(DUPLICATED_CASE_DOCUMENT)
+                    .listForHearingWrapper(ListForHearingWrapper.builder()
+                        .additionalHearingDocuments(List.of(AdditionalHearingDocumentCollection.builder()
+                            .value(AdditionalHearingDocument.builder()
+                                .document(DUPLICATED_CASE_DOCUMENT)
+                                .build())
+                            .build()))
                         .build())
-                    .build()))
-                .build()),
+                        .build()),
             Arguments.of(FinremCaseData.builder()
                 .hearingNoticeDocumentPack(List.of(DocumentCollection.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)

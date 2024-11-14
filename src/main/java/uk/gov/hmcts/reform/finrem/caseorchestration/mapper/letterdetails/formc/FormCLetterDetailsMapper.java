@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.Abstrac
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormCLetterDetails;
 
@@ -21,7 +22,8 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
-        LocalDate hearingDate = caseData.getHearingDate();
+        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
+        LocalDate hearingDate = listForHearingWrapper.getHearingDate();
         return FormCLetterDetails.builder()
             .applicantFmName(caseData.getContactDetailsWrapper().getApplicantFmName())
             .applicantLName(caseData.getContactDetailsWrapper().getApplicantLname())
@@ -34,9 +36,9 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .hearingDateLess14Days(String.valueOf(hearingDate.minusDays(14)))
             .solicitorReference(caseData.getContactDetailsWrapper().getSolicitorReference())
             .respondentSolicitorReference(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
-            .additionalInformationAboutHearing(caseData.getAdditionalInformationAboutHearing())
-            .hearingTime(caseData.getHearingTime())
-            .timeEstimate(caseData.getTimeEstimate())
+            .additionalInformationAboutHearing(caseData.getListForHearingWrapper().getAdditionalInformationAboutHearing())
+            .hearingTime(listForHearingWrapper.getHearingTime())
+            .timeEstimate(listForHearingWrapper.getTimeEstimate())
             .formCCreatedDate(String.valueOf(LocalDate.now()))
             .eventDatePlus21Days(String.valueOf(LocalDate.now().plusDays(21)))
             .build();

@@ -35,7 +35,7 @@ public class ValidateHearingService {
 
         List<String> errors = new ArrayList<>();
         if (caseData.getIssueDate() == null
-            || caseData.getHearingDate() == null
+            || caseData.getListForHearingWrapper().getHearingDate() == null
             || caseData.getFastTrackDecision() == null) {
             errors.add(REQUIRED_FIELD_EMPTY_ERROR);
         }
@@ -50,7 +50,7 @@ public class ValidateHearingService {
     public List<String> validateHearingWarnings(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         LocalDate issueDate = caseData.getIssueDate();
-        LocalDate hearingDate = caseData.getHearingDate();
+        LocalDate hearingDate = caseData.getListForHearingWrapper().getHearingDate();
 
         boolean fastTrackApplication = caseData.isFastTrackApplication();
         if (fastTrackApplication) {

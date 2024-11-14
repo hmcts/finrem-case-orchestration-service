@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
 import java.time.LocalDate;
@@ -82,9 +83,9 @@ public class HearingService {
         Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
         FinremCaseData caseData = caseDetails.getData();
-        HearingTypeDirection hearingType = caseData.getHearingType();
-        LocalDate hearingDate = caseData.getHearingDate();
-        String hearingTime = caseData.getHearingTime();
+        HearingTypeDirection hearingType = caseData.getListForHearingWrapper().getHearingType();
+        LocalDate hearingDate = caseData.getListForHearingWrapper().getHearingDate();
+        String hearingTime = caseData.getListForHearingWrapper().getHearingTime();
 
         DynamicListElement topLevelDynamicListElement = buildTopLevelHearingDynamicListElement(hearingType, hearingDate, hearingTime);
         if (topLevelDynamicListElement != null) {
@@ -119,7 +120,7 @@ public class HearingService {
     }
 
     public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, FinremCaseData::getHearingDate, ihc -> ihc.getValue().getInterimHearingDate());
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate, ihc -> ihc.getValue().getInterimHearingDate());
     }
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
@@ -128,12 +129,12 @@ public class HearingService {
     }
 
     public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected,  FinremCaseData::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
+        return getHearingInfo(caseData, selected,  ListForHearingWrapper::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
     }
 
     // Helper method to get hearing information
     private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
-                                 Function<FinremCaseData, T> hearingExtractor,
+                                 Function<ListForHearingWrapper, T> hearingExtractor,
                                  Function<InterimHearingCollection, T> extractor) {
         if (StringUtils.isEmpty(selected.getCode())) {
             return null;
@@ -141,7 +142,7 @@ public class HearingService {
 
         // Return time estimate for top-level hearing
         if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
-            return hearingExtractor.apply(caseData); // Use hearingExtractor to get the value
+            return hearingExtractor.apply(caseData.getListForHearingWrapper()); // Use hearingExtractor to get the value
         }
 
         // Search for the matching InterimHearingCollection
