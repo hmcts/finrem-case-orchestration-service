@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -38,9 +37,6 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     private String typeOfDraftOrder;
     private YesOrNo showUploadPartyQuestion;
-
-    @JsonProperty("hearingsReadyForReview")
-    private DynamicList hearingsReadyForReview;
 
     @JsonProperty("uploadSuggestedDraftOrder")
     private UploadSuggestedDraftOrder uploadSuggestedDraftOrder;
@@ -90,17 +86,11 @@ public class DraftOrdersWrapper implements HasCaseDocument {
                 .anyMatch(draftOrderDoc -> isJudgeReviewable(draftOrderDoc.getValue().getOrderStatus()))
                 || a.getValue().getPsaDocReviewCollection().stream()
                     .anyMatch(psa -> isJudgeReviewable(psa.getValue().getOrderStatus())));
-
-        if (hearingsReadyForReview != null) {
-            return draftOrdersStream.filter(a ->
-                hearingsReadyForReview.getValueCode().equals(a.getValue().getHearingId())).toList();
-        } else {
-            return draftOrdersStream.sorted(
-                Comparator.comparing((DraftOrdersReviewCollection a) -> a.getValue().getHearingDate(), nullsLast(naturalOrder()))
-                    .thenComparing(a -> a.getValue().getHearingTime(), nullsLast(naturalOrder()))
-                    .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())))
-                .toList();
-        }
+        return draftOrdersStream.sorted(
+            Comparator.comparing((DraftOrdersReviewCollection a) -> a.getValue().getHearingDate(), nullsLast(naturalOrder()))
+                .thenComparing(a -> a.getValue().getHearingTime(), nullsLast(naturalOrder()))
+                .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())))
+            .toList();
     }
 
 }
