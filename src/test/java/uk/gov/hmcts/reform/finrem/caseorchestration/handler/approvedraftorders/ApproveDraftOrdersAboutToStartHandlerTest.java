@@ -260,6 +260,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static final CaseDocument DO_DOC_3 = CaseDocument.builder().documentFilename("sampleDocument3").build();
     private static final CaseDocument DO_DOC_4 = CaseDocument.builder().documentFilename("sampleDocument4").build();
     private static final CaseDocument DO_DOC_5 = CaseDocument.builder().documentFilename("sampleDocument5").build();
+    private static final CaseDocument DO_DOC_6 = CaseDocument.builder().documentFilename("sampleDocument6").build();
     private static final CaseDocument PSA_DOC_1 = CaseDocument.builder().documentFilename("samplePsaDocument1").build();
     private static final CaseDocument PSA_DOC_2 = CaseDocument.builder().documentFilename("samplePsaDocument2").build();
     private static final CaseDocument PSA_DOC_3 = CaseDocument.builder().documentFilename("samplePsaDocument3").build();
@@ -338,7 +339,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     }
 
     private static ReviewableDraftOrder buildReviewableDraftOrder(String hearingInfo, CaseDocument draftOrderDocument,
-                                                           List<CaseDocumentCollection> attachments) {
+                                                                  List<CaseDocumentCollection> attachments) {
         return ReviewableDraftOrder.builder().hearingInfo(hearingInfo)
             .document(draftOrderDocument)
             .attachments(attachments)
@@ -506,6 +507,36 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             WARNING_MESSAGE);
     }
 
+    private static Arguments withSixDraftOrders() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo2(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(DO_DOC_1, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_2, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_3, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_6, List.of(), TO_BE_REVIEWED)
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            // expectedReviewableDraftOrder(1-5)
+            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_1, List.of()),
+            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_2, List.of()),
+            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_3, List.of()),
+            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_4, List.of()),
+            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_5, List.of()),
+            // expectedReviewablePsa(1-5)
+            null, null, null, null, null,
+            // expectedWarningMessageToJudge
+            WARNING_MESSAGE);
+    }
+
     private static Arguments withFiveReviewablePsas() {
         return Arguments.of(
             DraftOrdersWrapper.builder()
@@ -627,7 +658,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             withEmptyDraftOrdersWrapper(), withOneDraftOrderAndOnePsa(), withTwoDraftOrderAndZeroPsa(),
             withDifferentHearingInfo(), withProcessedDraftOrderAndPsa(), withSixPsas(),
             withFiveReviewablePsas(), withDraftOrdersAndPsaAndShouldOrderBySubmittedDate(),
-            withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate()
+            withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate(),
+            withSixDraftOrders()
         );
     }
 }
