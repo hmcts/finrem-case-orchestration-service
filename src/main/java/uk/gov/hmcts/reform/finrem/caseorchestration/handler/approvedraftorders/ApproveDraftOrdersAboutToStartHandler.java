@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @Service
 public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    private static final String ERROR_MESSAGE = "There are no draft orders or pension sharing annexes to review.";
+    private static final String NO_ORDERS_TO_BE_REVIEWED_MESSAGE = "There are no draft orders or pension sharing annexes to review.";
 
     private final HearingService hearingService;
 
@@ -143,7 +143,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
     private List<String> validateDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
         List<String> errors = new ArrayList<>();
         if (ObjectUtils.isEmpty(draftOrdersWrapper.getDraftOrdersReviewCollection())) {
-            errors.add(ERROR_MESSAGE);
+            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
             return errors;
         }
         boolean hasReviewableHearing = draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
@@ -155,7 +155,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             );
 
         if (!hasReviewableHearing) {
-            errors.add(ERROR_MESSAGE);
+            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
         }
         return errors;
     }
