@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
 import java.math.BigDecimal;
@@ -436,6 +437,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private RefugeWrapper refugeWrapper;
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
