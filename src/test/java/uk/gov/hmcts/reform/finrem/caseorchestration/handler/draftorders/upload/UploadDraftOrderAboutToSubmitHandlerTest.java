@@ -285,7 +285,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         );
     }
 
-
     private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
         List<LocalDateTime> agreedDraftOrderSubmittedDates) {
 

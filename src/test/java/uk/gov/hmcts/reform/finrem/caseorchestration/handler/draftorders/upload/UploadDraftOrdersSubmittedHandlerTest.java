@@ -112,7 +112,8 @@ class UploadDraftOrdersSubmittedHandlerTest {
             ? getExpectedAgreedConfirmationBody((caseReference))
             : getExpectedSuggestedConfirmationBody(caseReference);
 
-        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class), any(LocalDate.class), any(String.class));
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class),
+            any(LocalDate.class), any(String.class));
         verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
         assertThat(response.getConfirmationBody()).isEqualTo(expectedConfirmationBody);
