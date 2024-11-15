@@ -270,7 +270,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument, OrderStatus orderStatus,
                                                                       LocalDateTime submittedDate) {
-        return PsaDocReviewCollection.builder()-
+        return PsaDocReviewCollection.builder()
             .value(PsaDocumentReview.builder().psaDocument(psaDocument).orderStatus(orderStatus).submittedDate(submittedDate).build())
             .build();
     }
