@@ -45,7 +45,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
@@ -129,7 +128,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     @SneakyThrows
     @Test
     void givenUserHasNoHearingsForReview_whenHandle_thenReturnError() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+        FinremCaseData caseData = new FinremCaseData();
 
         DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(APPROVED_BY_JUDGE)
             .build();
@@ -163,8 +162,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @SneakyThrows
     @Test
-    void givenUserHasDraftOrders_whenHandle_thenReturnError() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+    void givenUserHasNoDraftOrders_whenHandle_thenReturnError() {
+        FinremCaseData caseData = new FinremCaseData();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
