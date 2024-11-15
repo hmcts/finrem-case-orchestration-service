@@ -219,7 +219,6 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
         var judgeApproval = responseDraftOrdersWrapper.getJudgeApproval();
         assertNotNull(judgeApproval);
-        assertNotNull(judgeApproval);
 
         var expectedReviewableDraftOrders = List.of(
             Optional.ofNullable(expectedReviewableDraftOrder1), Optional.ofNullable(expectedReviewableDraftOrder2),
