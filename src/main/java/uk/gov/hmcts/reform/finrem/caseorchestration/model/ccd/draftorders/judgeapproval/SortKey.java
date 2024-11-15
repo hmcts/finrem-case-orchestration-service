@@ -15,15 +15,12 @@ public class SortKey implements Comparable<SortKey> {
     private LocalDate hearingDate;
     private LocalDateTime documentSubmittedDate;
 
-    // Constructor, Getters, and Setters
-
     public SortKey(String hearingTime, LocalDate hearingDate, LocalDateTime documentSubmittedDate) {
         this.hearingTime = hearingTime;
         this.hearingDate = hearingDate;
         this.documentSubmittedDate = documentSubmittedDate;
     }
 
-    // Comparable implementation
     @Override
     public int compareTo(SortKey other) {
         // Null checks with default ordering behavior
@@ -41,7 +38,6 @@ public class SortKey implements Comparable<SortKey> {
         return compareWithNullCheck(this.documentSubmittedDate, other.documentSubmittedDate);
     }
 
-    // Utility method for null-safe comparison
     private <T extends Comparable<T>> int compareWithNullCheck(T a, T b) {
         if (a == null && b == null) {
             return 0;
