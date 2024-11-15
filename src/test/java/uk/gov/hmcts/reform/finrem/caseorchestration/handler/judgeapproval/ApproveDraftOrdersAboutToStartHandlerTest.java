@@ -235,7 +235,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
                                                                                List<CaseDocumentCollection> attachments) {
-        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, null, LocalDateTime.now());
+        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, LocalDateTime.now());
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
@@ -261,7 +261,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     }
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument) {
-        return buildPsaDocReviewCollection(psaDocument, null, LocalDateTime.now());
+        return buildPsaDocReviewCollection(psaDocument, TO_BE_REVIEWED, LocalDateTime.now());
     }
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument, OrderStatus orderStatus) {
@@ -270,7 +270,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument, OrderStatus orderStatus,
                                                                       LocalDateTime submittedDate) {
-        return PsaDocReviewCollection.builder()
+        return PsaDocReviewCollection.builder()-
             .value(PsaDocumentReview.builder().psaDocument(psaDocument).orderStatus(orderStatus).submittedDate(submittedDate).build())
             .build();
     }
@@ -527,7 +527,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                                 buildDraftOrderDocumentReview(DO_DOC_1, List.of()),
                                 buildDraftOrderDocumentReview(DO_DOC_2, List.of()),
                                 buildDraftOrderDocumentReview(DO_DOC_3, List.of()),
-                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), null, LocalDateTime.now().minusDays(1)),
+                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
                                 buildDraftOrderDocumentReview(DO_DOC_5, List.of())
                             ))
                         ).build())
@@ -561,7 +561,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                                 buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1))
                             ))
                             .draftOrderDocReviewCollection(List.of(
-                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), null, LocalDateTime.now().minusDays(1)),
+                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
                                 buildDraftOrderDocumentReview(DO_DOC_4, List.of())
                             ))
                         ).build())
