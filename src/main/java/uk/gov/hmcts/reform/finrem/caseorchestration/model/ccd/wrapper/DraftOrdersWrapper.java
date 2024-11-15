@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -51,12 +52,23 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("judgeApproval")
     private JudgeApproval judgeApproval;
 
+    @JsonProperty("hearingInstruction")
+    private HearingInstruction hearingInstruction;
+
     @JsonIgnore
     public JudgeApproval getJudgeApproval() {
         if (judgeApproval == null) {
             this.judgeApproval = new JudgeApproval();
         }
         return judgeApproval;
+    }
+
+    @JsonIgnore
+    public HearingInstruction getHearingInstruction() {
+        if (hearingInstruction == null) {
+            this.hearingInstruction = new HearingInstruction();
+        }
+        return hearingInstruction;
     }
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
