@@ -52,6 +52,60 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
 
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        String caseId = String.valueOf(caseDetails.getId());
+        log.info("Invoking contested {} about to start event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
+
+        FinremCaseData finremCaseData = caseDetails.getData();
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+
+        List<String> errors = validateDraftOrdersWrapper(draftOrdersWrapper);
+        if (errors.isEmpty()) {
+            List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
+
+            draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
+                .reviewablePsa1(createReviewablePsa(outstanding, 1))
+                .reviewablePsa2(createReviewablePsa(outstanding, 2))
+                .reviewablePsa3(createReviewablePsa(outstanding, 3))
+                .reviewablePsa4(createReviewablePsa(outstanding, 4))
+                .reviewablePsa5(createReviewablePsa(outstanding, 5))
+                .reviewableDraftOrder1(createReviewableDraftOrder(outstanding, 1))
+                .reviewableDraftOrder2(createReviewableDraftOrder(outstanding, 2))
+                .reviewableDraftOrder3(createReviewableDraftOrder(outstanding, 3))
+                .reviewableDraftOrder4(createReviewableDraftOrder(outstanding, 4))
+                .reviewableDraftOrder5(createReviewableDraftOrder(outstanding, 5))
+                .warningMessageToJudge(getReviewableDraftOrders(outstanding).size() > 5 || getReviewablePsas(outstanding).size() > 5
+                    ? ("This page is limited to showing only 5 draft orders/pension sharing annexes requiring review. "
+                    + "There are additional draft orders/pension sharing annexes requiring review that are not shown.") : null)
+                .build());
+        }
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
+    }
+
+    private List<String> validateDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
+        List<String> errors = new ArrayList<>();
+        if (ObjectUtils.isEmpty(draftOrdersWrapper.getDraftOrdersReviewCollection())) {
+            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
+            return errors;
+        }
+        boolean hasReviewableHearing = draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .anyMatch(review -> review.getDraftOrderDocReviewCollection().stream()
+                .anyMatch(doc -> isJudgeReviewable(doc.getValue().getOrderStatus()))
+                || review.getPsaDocReviewCollection().stream()
+                .anyMatch(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()))
+            );
+
+        if (!hasReviewableHearing) {
+            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
+        }
+        return errors;
+    }
+
     private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
         return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
             draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
@@ -116,60 +170,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             return null;
         }
         return collection.get(index - 1);
-    }
-
-    @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested {} mid event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
-
-        FinremCaseData finremCaseData = caseDetails.getData();
-        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-
-        List<String> errors = validateDraftOrdersWrapper(draftOrdersWrapper);
-        if (errors.isEmpty()) {
-            List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
-
-            draftOrdersWrapper.setJudgeApproval(JudgeApproval.builder()
-                .reviewablePsa1(createReviewablePsa(outstanding, 1))
-                .reviewablePsa2(createReviewablePsa(outstanding, 2))
-                .reviewablePsa3(createReviewablePsa(outstanding, 3))
-                .reviewablePsa4(createReviewablePsa(outstanding, 4))
-                .reviewablePsa5(createReviewablePsa(outstanding, 5))
-                .reviewableDraftOrder1(createReviewableDraftOrder(outstanding, 1))
-                .reviewableDraftOrder2(createReviewableDraftOrder(outstanding, 2))
-                .reviewableDraftOrder3(createReviewableDraftOrder(outstanding, 3))
-                .reviewableDraftOrder4(createReviewableDraftOrder(outstanding, 4))
-                .reviewableDraftOrder5(createReviewableDraftOrder(outstanding, 5))
-                .warningMessageToJudge(getReviewableDraftOrders(outstanding).size() > 5 || getReviewablePsas(outstanding).size() > 5
-                    ? ("This page is limited to showing only 5 draft orders/pension sharing annexes requiring review. "
-                    + "There are additional draft orders/pension sharing annexes requiring review that are not shown.") : null)
-                .build());
-        }
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
-    }
-
-    private List<String> validateDraftOrdersWrapper(DraftOrdersWrapper draftOrdersWrapper) {
-        List<String> errors = new ArrayList<>();
-        if (ObjectUtils.isEmpty(draftOrdersWrapper.getDraftOrdersReviewCollection())) {
-            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
-            return errors;
-        }
-        boolean hasReviewableHearing = draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
-            .map(DraftOrdersReviewCollection::getValue)
-            .anyMatch(review -> review.getDraftOrderDocReviewCollection().stream()
-                .anyMatch(doc -> isJudgeReviewable(doc.getValue().getOrderStatus()))
-                || review.getPsaDocReviewCollection().stream()
-                .anyMatch(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()))
-            );
-
-        if (!hasReviewableHearing) {
-            errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
-        }
-        return errors;
     }
 
 }
