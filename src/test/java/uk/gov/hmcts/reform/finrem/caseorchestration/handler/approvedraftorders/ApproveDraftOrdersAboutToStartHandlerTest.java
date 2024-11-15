@@ -73,7 +73,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @Test
     void givenUserHasHearingsReadyToReview_whenHandle_thenReturnSortedHearings() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+        FinremCaseData caseData = new FinremCaseData();
 
         DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
             .build();
@@ -103,7 +103,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @Test
     void givenUserHasPsaReadyToReview_whenHandle_thenReturnSortedHearings() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+        FinremCaseData caseData = new FinremCaseData();
         PsaDocumentReview document1 = PsaDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
             .build();
         PsaDocReviewCollection psaCollectionItem1 = new PsaDocReviewCollection(document1);
