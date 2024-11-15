@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.approvedraftorders;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.SortKey;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
@@ -53,78 +54,12 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
 
-    private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
-        return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
-            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
-    }
-
-    private List<ReviewableDraftOrder> getReviewableDraftOrders(List<DraftOrdersReviewCollection> outstanding) {
-        return outstanding.stream()
-            .map(DraftOrdersReviewCollection::getValue)
-            .flatMap(draftOrdersReview -> {
-                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
-                return draftOrdersReview.getDraftOrderDocReviewCollection().stream()
-                    .map(DraftOrderDocReviewCollection::getValue)
-                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
-                    .map(a -> ReviewableDraftOrder.builder()
-                        .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
-                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                            .code("Yes")
-                            .label("This is a final order")
-                            .build())).build())
-                        .document(a.getDraftOrderDocument())
-                        .attachments(a.getAttachments())
-                        .submittedDate(a.getSubmittedDate())
-                        .build());
-            }) // Flatten the stream of streams
-            .sorted(Comparator.comparing(ReviewableDraftOrder::getSubmittedDate, nullsLast(naturalOrder())))
-            .toList();
-    }
-
-    private ReviewableDraftOrder createReviewableDraftOrder(List<DraftOrdersReviewCollection> outstanding, int index) {
-        // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewableDraftOrder> collection = getReviewableDraftOrders(outstanding);
-        // Return the specified item if it exists in the collection, otherwise return null
-        if (collection.size() < index) {
-            return null;
-        }
-        return collection.get(index - 1);
-    }
-
-    private List<ReviewablePsa> getReviewablePsas(List<DraftOrdersReviewCollection> outstanding) {
-        return outstanding.stream()
-            .map(DraftOrdersReviewCollection::getValue)
-            .flatMap(draftOrdersReview -> {
-                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
-                return draftOrdersReview.getPsaDocReviewCollection().stream()
-                    .map(PsaDocReviewCollection::getValue)
-                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
-                    .map(a -> ReviewablePsa.builder()
-                        .hearingInfo(hearingInfo)
-                        .submittedDate(a.getSubmittedDate())
-                        .document(a.getPsaDocument())
-                        .build());
-            }) // Flatten the stream of streams
-            .sorted(Comparator.comparing(ReviewablePsa::getSubmittedDate, nullsLast(naturalOrder())))
-            .toList();
-    }
-
-    private ReviewablePsa createReviewablePsa(List<DraftOrdersReviewCollection> outstanding, int index) {
-        // Build a collection of reviewable draft orders with specific hearingInfo for each item
-        List<ReviewablePsa> collection = getReviewablePsas(outstanding);
-        // Return the specified item if it exists in the collection, otherwise return null
-        if (collection.size() < index) {
-            return null;
-        }
-        return collection.get(index - 1);
-    }
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested {} mid event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
+        log.info("Invoking contested {} about to start event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
@@ -171,6 +106,76 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             errors.add(NO_ORDERS_TO_BE_REVIEWED_MESSAGE);
         }
         return errors;
+    }
+
+    private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
+        return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
+            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
+    }
+
+    private List<ReviewableDraftOrder> getReviewableDraftOrders(List<DraftOrdersReviewCollection> outstanding) {
+        return outstanding.stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .flatMap(draftOrdersReview -> {
+                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
+                return draftOrdersReview.getDraftOrderDocReviewCollection().stream()
+                    .map(DraftOrderDocReviewCollection::getValue)
+                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
+                    .map(a -> ReviewableDraftOrder.builder()
+                        .hearingInfo(hearingInfo) // Set specific hearingInfo for each item
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .code("Yes")
+                            .label("This is a final order")
+                            .build())).build())
+                        .document(a.getDraftOrderDocument())
+                        .attachments(a.getAttachments())
+                        .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
+                            draftOrdersReview.getHearingDate(),
+                            a.getSubmittedDate()))
+                        .build());
+            }) // Flatten the stream of streams
+            .sorted(Comparator.comparing(ReviewableDraftOrder::getSortKey, nullsLast(naturalOrder())))
+            .toList();
+    }
+
+    private ReviewableDraftOrder createReviewableDraftOrder(List<DraftOrdersReviewCollection> outstanding, int index) {
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
+        List<ReviewableDraftOrder> collection = getReviewableDraftOrders(outstanding);
+        // Return the specified item if it exists in the collection, otherwise return null
+        if (collection.size() < index) {
+            return null;
+        }
+        return collection.get(index - 1);
+    }
+
+    private List<ReviewablePsa> getReviewablePsas(List<DraftOrdersReviewCollection> outstanding) {
+        return outstanding.stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .flatMap(draftOrdersReview -> {
+                String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
+                return draftOrdersReview.getPsaDocReviewCollection().stream()
+                    .map(PsaDocReviewCollection::getValue)
+                    .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
+                    .map(a -> ReviewablePsa.builder()
+                        .hearingInfo(hearingInfo)
+                        .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
+                            draftOrdersReview.getHearingDate(),
+                            a.getSubmittedDate()))
+                        .document(a.getPsaDocument())
+                        .build());
+            }) // Flatten the stream of streams
+            .sorted(Comparator.comparing(ReviewablePsa::getSortKey, nullsLast(naturalOrder())))
+            .toList();
+    }
+
+    private ReviewablePsa createReviewablePsa(List<DraftOrdersReviewCollection> outstanding, int index) {
+        // Build a collection of reviewable draft orders with specific hearingInfo for each item
+        List<ReviewablePsa> collection = getReviewablePsas(outstanding);
+        // Return the specified item if it exists in the collection, otherwise return null
+        if (collection.size() < index) {
+            return null;
+        }
+        return collection.get(index - 1);
     }
 
 }

@@ -18,12 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsLast;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
 
@@ -86,11 +83,7 @@ public class DraftOrdersWrapper implements HasCaseDocument {
                 .anyMatch(draftOrderDoc -> isJudgeReviewable(draftOrderDoc.getValue().getOrderStatus()))
                 || a.getValue().getPsaDocReviewCollection().stream()
                     .anyMatch(psa -> isJudgeReviewable(psa.getValue().getOrderStatus())));
-        return draftOrdersStream.sorted(
-            Comparator.comparing((DraftOrdersReviewCollection a) -> a.getValue().getHearingDate(), nullsLast(naturalOrder()))
-                .thenComparing(a -> a.getValue().getHearingTime(), nullsLast(naturalOrder()))
-                .thenComparing(a -> a.getValue().getHearingType(), nullsLast(naturalOrder())))
-            .toList();
+        return draftOrdersStream.toList();
     }
 
 }

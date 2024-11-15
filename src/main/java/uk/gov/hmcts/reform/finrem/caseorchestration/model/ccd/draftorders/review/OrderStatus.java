@@ -6,6 +6,6 @@ public enum OrderStatus {
     PROCESSED_BY_ADMIN;
 
     public static boolean isJudgeReviewable(OrderStatus status) {
-        return status == null || status == TO_BE_REVIEWED;
+        return status == TO_BE_REVIEWED;
     }
 }
