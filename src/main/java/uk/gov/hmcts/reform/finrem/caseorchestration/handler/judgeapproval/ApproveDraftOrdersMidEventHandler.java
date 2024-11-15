@@ -11,7 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -38,9 +44,26 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-
+        draftOrdersWrapper.getHearingInstruction().setShowRequireAnotherHearingQuestion(YesOrNo.forValue(
+            IntStream.rangeClosed(1, 5)
+                .mapToObj(i -> getReviewableDraftOrder(draftOrdersWrapper, i))
+                .filter(Objects::nonNull) // Filter out null ReviewableDraftOrder objects
+                .map(ReviewableDraftOrder::getJudgeDecision)
+                .filter(Objects::nonNull) // Filter out null JudgeDecision objects
+                .anyMatch(JudgeDecision::isHearingInstructionRequired)
+        ));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
+    private ReviewableDraftOrder getReviewableDraftOrder(DraftOrdersWrapper draftOrdersWrapper, int index) {
+        return switch (index) {
+            case 1 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder1();
+            case 2 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder2();
+            case 3 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder3();
+            case 4 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder4();
+            case 5 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder5();
+            default -> null; // If index is out of range
+        };
+    }
 }
