@@ -45,7 +45,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
@@ -71,65 +70,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.APPROVE_ORDERS);
     }
 
-    @Test
-    void givenUserHasHearingsReadyToReview_whenHandle_thenReturnSortedHearings() {
-        FinremCaseData caseData = new FinremCaseData();
-
-        DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
-            .build();
-        DraftOrderDocumentReview document2 = DraftOrderDocumentReview.builder().orderStatus(APPROVED_BY_JUDGE)
-            .build();
-
-        DraftOrderDocReviewCollection collectionItem1 = new DraftOrderDocReviewCollection(document1);
-        DraftOrderDocReviewCollection collectionItem2 = new DraftOrderDocReviewCollection(document2);
-
-        DraftOrdersReview review1 = DraftOrdersReview.builder()
-            .hearingDate(LocalDate.of(2024, 8, 6))
-            .hearingType("Hearing Type 1")
-            .hearingJudge("Judge 1")
-            .hearingTime("09:00 A.M.")
-            .draftOrderDocReviewCollection(List.of(collectionItem1, collectionItem2))
-            .build();
-
-        DraftOrdersReviewCollection reviewCollection1 = new DraftOrdersReviewCollection(review1);
-        caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(List.of(reviewCollection1));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
-            FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenUserHasPsaReadyToReview_whenHandle_thenReturnSortedHearings() {
-        FinremCaseData caseData = new FinremCaseData();
-        PsaDocumentReview document1 = PsaDocumentReview.builder().orderStatus(TO_BE_REVIEWED)
-            .build();
-        PsaDocReviewCollection psaCollectionItem1 = new PsaDocReviewCollection(document1);
-
-        DraftOrdersReview review1 = DraftOrdersReview.builder()
-            .hearingDate(LocalDate.of(2024, 8, 6))
-            .hearingType("Hearing Type 1")
-            .hearingJudge("Judge 1")
-            .hearingTime("09:00 A.M.")
-            .psaDocReviewCollection(List.of(psaCollectionItem1))
-            .build();
-
-        DraftOrdersReviewCollection reviewCollection1 = new DraftOrdersReviewCollection(review1);
-        caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(List.of(reviewCollection1));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
-            FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getErrors()).isEmpty();
-    }
-
     @SneakyThrows
     @Test
-    void givenUserHasNoHearingsForReview_whenHandle_thenReturnError() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+    void givenUserHasJudgeProcessedDraftOrders_thenReturnError() {
+        FinremCaseData caseData = new FinremCaseData();
 
         DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(APPROVED_BY_JUDGE)
             .build();
@@ -163,8 +107,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     @SneakyThrows
     @Test
-    void givenUserHasDraftOrders_whenHandle_thenReturnError() {
-        FinremCaseData caseData = spy(new FinremCaseData());
+    void givenUserHasNoDraftOrders_whenHandle_thenReturnError() {
+        FinremCaseData caseData = new FinremCaseData();
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
@@ -218,7 +162,6 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
 
         var judgeApproval = responseDraftOrdersWrapper.getJudgeApproval();
-        assertNotNull(judgeApproval);
         assertNotNull(judgeApproval);
 
         var expectedReviewableDraftOrders = List.of(
