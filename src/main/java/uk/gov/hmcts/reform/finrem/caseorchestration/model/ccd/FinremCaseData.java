@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrappe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -436,6 +437,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private RefugeWrapper refugeWrapper;
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
@@ -1018,4 +1023,11 @@ public class FinremCaseData implements HasCaseDocument {
         return draftOrdersWrapper;
     }
 
+    @JsonIgnore
+    public RefugeWrapper getRefugeWrapper() {
+        if (refugeWrapper == null) {
+            this.refugeWrapper = new RefugeWrapper();
+        }
+        return refugeWrapper;
+    }
 }
