@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
@@ -27,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService.CONVERTER;
@@ -39,7 +42,9 @@ public class PensionAnnexDateStampService {
     private final EvidenceManagementDownloadService emDownloadService;
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
-    static final String DEFAULT_PDTYPE_FONT_HELVETICA = "/Helv 12 Tf 0 g";
+    static final String DEFAULT_PDTYPE_FONT_ARIAL = "/Arial 12 Tf 0 g";
+    static final String DEFAULT_PDTYPE_PREFIX = "/";
+    static final String DEFAULT_PDTYPE_POSTFIX = " 12 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
@@ -73,7 +78,7 @@ public class PensionAnnexDateStampService {
             && (acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
-            textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELVETICA);
+            textBox.setDefaultAppearance(getDefaultFont(acroForm.get()));
             textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy").withLocale(Locale.UK)));
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);
@@ -82,5 +87,24 @@ public class PensionAnnexDateStampService {
         } else {
             throw new StampDocumentException("Pension Order document PDF is flattened / not editable.");
         }
+    }
+
+    static String getDefaultFont(PDAcroForm acroForm) {
+        PDResources pdResources = acroForm.getDefaultResources();
+        return StreamSupport.stream(pdResources.getFontNames().spliterator(), false)
+            .map(cosName -> {
+                try {
+                    PDFont font = pdResources.getFont(cosName);
+                    if (font != null && font.isEmbedded()) {
+                        return DEFAULT_PDTYPE_PREFIX + cosName.getName() + DEFAULT_PDTYPE_POSTFIX;
+                    }
+                } catch (IOException e) {
+                    return DEFAULT_PDTYPE_FONT_ARIAL;
+                }
+                return null;
+            })
+            .filter(result -> result != null)
+            .findFirst()
+            .orElse(DEFAULT_PDTYPE_FONT_ARIAL);
     }
 }
