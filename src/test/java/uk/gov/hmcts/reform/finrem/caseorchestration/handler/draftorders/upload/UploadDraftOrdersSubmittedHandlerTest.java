@@ -18,8 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -58,25 +62,10 @@ class UploadDraftOrdersSubmittedHandlerTest {
     }
 
     @Test
-    void givenCaseWithNoDraftOrdersReviewWhenHandleThenThrowsException() {
-        String caseReference = "1727874196328932";
-        FinremCaseData caseData = FinremCaseData.builder()
-            .draftOrdersWrapper(DraftOrdersWrapper.builder().build())
-            .build();
-
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
-            CaseType.CONTESTED, caseData);
-
-        assertThatThrownBy(() -> uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("No draft order in review found for Case ID: " + caseReference);
-    }
-
-    @Test
     void givenCaseWithNoUploadedDraftOrdersWhenHandleThenThrowsException() {
         String caseReference = "1727874196328932";
         DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
-            .draftOrdersReviewCollection(mockDraftOrdersReviewCollection())
+            .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().build()))
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(draftOrdersWrapper)
@@ -92,14 +81,15 @@ class UploadDraftOrdersSubmittedHandlerTest {
     @MethodSource
     void testHandle(List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
                     List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection,
+                    List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
                     boolean isAgreedDraftOrderUpload) {
         String caseReference = "1727874196328932";
         DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
-            .draftOrdersReviewCollection(mockDraftOrdersReviewCollection())
             .build();
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(draftOrdersWrapper)
             .build();
+        draftOrdersWrapper.setDraftOrdersReviewCollection(draftOrdersReviewCollection);
         draftOrdersWrapper.setAgreedDraftOrderCollection(agreedDraftOrderCollection);
         draftOrdersWrapper.setSuggestedDraftOrderCollection(suggestedDraftOrderCollection);
 
@@ -112,9 +102,12 @@ class UploadDraftOrdersSubmittedHandlerTest {
             ? getExpectedAgreedConfirmationBody((caseReference))
             : getExpectedSuggestedConfirmationBody(caseReference);
 
-        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class),
-            any(LocalDate.class), any(String.class));
-        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
+        if (isAgreedDraftOrderUpload) {
+            verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class),
+                any(LocalDate.class), any(String.class));
+            verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
+        }
+
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
         assertThat(response.getConfirmationBody()).isEqualTo(expectedConfirmationBody);
         assertThat(response.getData()).isNull();
@@ -125,32 +118,40 @@ class UploadDraftOrdersSubmittedHandlerTest {
     private static Stream<Arguments> testHandle() {
         return Stream.of(
             Arguments.of(
-                agreedDraftOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 0))),
+                agreedDraftOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 Collections.emptyList(),
+                mockDraftOrdersReviewCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 true),
             Arguments.of(
                 Collections.emptyList(),
                 suggestedOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 0))),
+                Collections.emptyList(),
                 false),
             Arguments.of(
                 agreedDraftOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 suggestedOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 0))),
+                mockDraftOrdersReviewCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 true),
             Arguments.of(
                 agreedDraftOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 suggestedOrdersCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 2))),
+                Collections.emptyList(),
                 false),
             Arguments.of(
                 agreedDraftOrdersCollection(List.of(LocalDateTime.of(2024, 9, 10, 1, 0, 1),
                     LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 suggestedOrdersCollection(List.of(LocalDateTime.of(2024, 10, 8, 1, 0, 0),
                     LocalDateTime.of(2024, 10, 7, 1, 0, 1))),
+                mockDraftOrdersReviewCollection(List.of(LocalDateTime.of(2024, 10, 10, 1, 0, 1),
+                    LocalDateTime.of(2024, 10, 10, 1, 0, 1))),
                 true),
             Arguments.of(
                 agreedDraftOrdersCollection(List.of(LocalDateTime.of(2023, 10, 10, 1, 0, 1),
                     LocalDateTime.of(2024, 10, 10, 1, 0, 4))),
                 suggestedOrdersCollection(List.of(LocalDateTime.of(2024, 3, 10, 1, 0, 2),
                     LocalDateTime.of(2024, 10, 10, 1, 5, 4))),
+                mockDraftOrdersReviewCollection(List.of(LocalDateTime.of(2023, 10, 10, 1, 0, 1),
+                    LocalDateTime.of(2024, 10, 10, 1, 0, 4))),
                 false)
         );
     }
@@ -189,10 +190,23 @@ class UploadDraftOrdersSubmittedHandlerTest {
             + "#Case%20documents).";
     }
 
-    private List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection() {
+    private static List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection(List<LocalDateTime> dateTimes) {
+
+        List<DraftOrderDocReviewCollection> draftOrdersReviewCollection = dateTimes.stream().map(dateTime -> {
+                DraftOrderDocumentReview draftOrderDocument = DraftOrderDocumentReview.builder()
+                    .submittedDate(dateTime)
+                    .build();
+
+                return DraftOrderDocReviewCollection.builder()
+                    .value(draftOrderDocument)
+                    .build();
+            })
+            .toList();
+
         DraftOrdersReview review = DraftOrdersReview.builder()
             .hearingDate(LocalDate.now())
             .hearingJudge("Judge Smith")
+            .draftOrderDocReviewCollection(draftOrdersReviewCollection)
             .build();
 
         DraftOrdersReviewCollection reviewCollection = DraftOrdersReviewCollection.builder()
