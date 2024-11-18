@@ -26,10 +26,10 @@ public class FormGLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .respondentLName(caseData.getContactDetailsWrapper().getRespondentLname())
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
-            .hearingDate(String.valueOf(caseData.getHearingDate()))
+            .hearingDate(String.valueOf(caseData.getListForHearingWrapper().getHearingDate()))
             .solicitorReference(caseData.getContactDetailsWrapper().getSolicitorReference())
             .respondentSolicitorReference(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
-            .hearingTime(caseData.getHearingTime())
+            .hearingTime(caseData.getListForHearingWrapper().getHearingTime())
             .build();
     }
 }
