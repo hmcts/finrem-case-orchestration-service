@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -15,7 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -78,11 +80,11 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             Optional<LocalDateTime> latestSubmissionDate = getLatestAgreedDraftOrder(caseDetails.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection());
             List<DraftOrdersReviewCollection> draftOrdersReviewCollection = caseDetails.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
 
-            Optional<Pair<LocalDate, String>> hearingDetails = findHearingDetailsBySubmissionDate(draftOrdersReviewCollection, latestSubmissionDate, caseReference);
+            DraftOrdersReview foundDraftOrderForReview = findHearingDetailsBySubmissionDate(draftOrdersReviewCollection, latestSubmissionDate, caseReference);
 
             // Extract hearing date and judge if present, else set to null
-            LocalDate hearingDate = hearingDetails.map(Pair::getLeft).orElse(null);
-            String hearingJudge = hearingDetails.map(Pair::getRight).orElse(null);
+            LocalDate hearingDate = foundDraftOrderForReview.getHearingDate();
+            String hearingJudge = foundDraftOrderForReview.getHearingJudge();
 
             // Build notification request and send notification
             NotificationRequest judgeNotificationRequest =
@@ -145,14 +147,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .max(LocalDateTime::compareTo);
     }
 
-    public Optional<Pair<LocalDate, String>> findHearingDetailsBySubmissionDate(
+    public DraftOrdersReview findHearingDetailsBySubmissionDate(
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection, Optional<LocalDateTime> targetSubmissionDate, String caseReference) {
 
         // Unwrap targetSubmissionDate for comparison
         if (targetSubmissionDate.isEmpty()) {
             String exceptionMessage = String.format("No submission date found on agreed draft order for Case ID: %s", caseReference);
             throw new IllegalStateException(exceptionMessage);
-
         }
 
         LocalDateTime targetDate = targetSubmissionDate.get();
@@ -162,33 +163,29 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             DraftOrdersReview review = draftOrdersReview.getValue();
 
             // Search in draftOrderDocReviewCollection
-            Optional<Pair<LocalDate, String>> draftOrderMatch = review.getDraftOrderDocReviewCollection()
+            boolean draftOrderMatch = review.getDraftOrderDocReviewCollection()
                 .stream()
                 .map(DraftOrderDocReviewCollection::getValue) // Extract DraftOrderDocumentReview
                 .filter(Objects::nonNull)
-                .filter(draftOrderReview -> targetDate.equals(draftOrderReview.getSubmittedDate()))
-                .map(draftOrderReview -> Pair.of(review.getHearingDate(), review.getHearingJudge())) // Use parent hearing info
-                .findFirst();
+                .anyMatch(draftOrderReview -> targetDate.equals(draftOrderReview.getSubmittedDate()));
 
-            if (draftOrderMatch.isPresent()) {
-                return draftOrderMatch;
+            if (draftOrderMatch) {
+                return review;
             }
 
             // Search in psaDocReviewCollection
-            Optional<Pair<LocalDate, String>> psaDocMatch = review.getPsaDocReviewCollection()
+            boolean psaDocMatch = review.getPsaDocReviewCollection()
                 .stream()
                 .map(PsaDocReviewCollection::getValue) // Extract PsaDocumentReview
                 .filter(Objects::nonNull)
-                .filter(psaDocReview -> targetDate.equals(psaDocReview.getSubmittedDate()))
-                .map(psaDocReview -> Pair.of(review.getHearingDate(), review.getHearingJudge())) // Use parent hearing info
-                .findFirst();
+                .anyMatch(psaDocReview -> targetDate.equals(psaDocReview.getSubmittedDate()));
 
-            if (psaDocMatch.isPresent()) {
-                return psaDocMatch;
+            if (psaDocMatch) {
+                return review;
             }
         }
 
-        // Return empty if no match found in any DraftOrdersReview
-        throw new IllegalStateException("No match found in any DraftOrdersReview");
+        // Throw exception if no match found in any DraftOrdersReview
+        throw new IllegalStateException("No matching DraftOrdersReview found for submission date in Case ID: " + caseReference);
     }
 }
