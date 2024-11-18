@@ -193,15 +193,14 @@ class UploadDraftOrdersSubmittedHandlerTest {
     private static List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection(List<LocalDateTime> dateTimes) {
 
         List<DraftOrderDocReviewCollection> draftOrdersReviewCollection = dateTimes.stream().map(dateTime -> {
-                DraftOrderDocumentReview draftOrderDocument = DraftOrderDocumentReview.builder()
-                    .submittedDate(dateTime)
-                    .build();
+            DraftOrderDocumentReview draftOrderDocument = DraftOrderDocumentReview.builder()
+                .submittedDate(dateTime)
+                .build();
 
-                return DraftOrderDocReviewCollection.builder()
-                    .value(draftOrderDocument)
-                    .build();
-            })
-            .toList();
+            return DraftOrderDocReviewCollection.builder()
+                .value(draftOrderDocument)
+                .build();
+        }).toList();
 
         DraftOrdersReview review = DraftOrdersReview.builder()
             .hearingDate(LocalDate.now())
@@ -270,5 +269,4 @@ class UploadDraftOrdersSubmittedHandlerTest {
         assertThat(response.getWarnings()).isEmpty();
         assertThat(response.getErrors()).isEmpty();
     }
-
 }
