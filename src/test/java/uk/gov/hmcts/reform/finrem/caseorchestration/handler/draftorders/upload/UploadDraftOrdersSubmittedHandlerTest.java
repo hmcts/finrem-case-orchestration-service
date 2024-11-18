@@ -215,4 +215,60 @@ class UploadDraftOrdersSubmittedHandlerTest {
 
         return List.of(reviewCollection);
     }
+
+    @Test
+    void shouldReturnHearingDateAndJudgeWhenSubmittedDateMatchesInPsaDocReviewCollection() {
+        // Arrange
+        String caseReference = "1727874196328932";
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(draftOrdersWrapper)
+            .build();
+
+        LocalDateTime targetDate = LocalDateTime.of(2023, 10, 10, 1, 0, 1);
+        String hearingJudge = "Judge John";
+        LocalDate hearingDate = LocalDate.of(2024, 10, 21);
+
+        PsaDocumentReview matchingPsaReview = PsaDocumentReview.builder()
+            .submittedDate(targetDate)
+            .build();
+        PsaDocReviewCollection psaDocReviewCollection = PsaDocReviewCollection.builder()
+            .value(matchingPsaReview)
+            .build();
+
+        DraftOrdersReview review = DraftOrdersReview.builder()
+            .hearingDate(hearingDate)
+            .hearingJudge(hearingJudge)
+            .psaDocReviewCollection(List.of(psaDocReviewCollection))
+            .build();
+
+        DraftOrdersReviewCollection reviewCollection = DraftOrdersReviewCollection.builder()
+            .value(review)
+            .build();
+
+        AgreedDraftOrder agreedDraftOrder = AgreedDraftOrder.builder()
+            .submittedDate(targetDate)
+            .build();
+
+        AgreedDraftOrderCollection agreedDraftOrderCollection = AgreedDraftOrderCollection.builder()
+            .value(agreedDraftOrder)
+            .build();
+
+        draftOrdersWrapper.setDraftOrdersReviewCollection(List.of(reviewCollection));
+        draftOrdersWrapper.setAgreedDraftOrderCollection(List.of(agreedDraftOrderCollection));
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData);
+        var response = uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
+
+        verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class),
+            any(LocalDate.class), any(String.class));
+        verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
+
+        assertThat(response.getData()).isNull();
+        assertThat(response.getWarnings()).isEmpty();
+        assertThat(response.getErrors()).isEmpty();
+    }
+
 }
