@@ -77,10 +77,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
         if (isAgreedLatest) {
-            Optional<LocalDateTime> latestSubmissionDate = getLatestAgreedDraftOrder(caseDetails.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection());
-            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = caseDetails.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
+            Optional<LocalDateTime> latestSubmissionDate = getLatestAgreedDraftOrder(caseDetails.getData().getDraftOrdersWrapper()
+                .getAgreedDraftOrderCollection());
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = caseDetails.getData().getDraftOrdersWrapper()
+                .getDraftOrdersReviewCollection();
 
-            DraftOrdersReview foundDraftOrderForReview = findHearingDetailsBySubmissionDate(draftOrdersReviewCollection, latestSubmissionDate, caseReference);
+            DraftOrdersReview foundDraftOrderForReview = findHearingDetailsBySubmissionDate(draftOrdersReviewCollection,
+                latestSubmissionDate, caseReference);
 
             // Extract hearing date and judge if present, else set to null
             LocalDate hearingDate = foundDraftOrderForReview.getHearingDate();
@@ -148,7 +151,8 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
     }
 
     public DraftOrdersReview findHearingDetailsBySubmissionDate(
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection, Optional<LocalDateTime> targetSubmissionDate, String caseReference) {
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection, Optional<LocalDateTime> targetSubmissionDate,
+        String caseReference) {
 
         // Unwrap targetSubmissionDate for comparison
         if (targetSubmissionDate.isEmpty()) {
