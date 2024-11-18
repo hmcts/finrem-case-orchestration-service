@@ -30,10 +30,6 @@ public class RegionWrapper {
     @Getter(AccessLevel.NONE)
     GeneralApplicationRegionWrapper generalApplicationRegionWrapper;
 
-    @JsonUnwrapped
-    @Getter(AccessLevel.NONE)
-    HearingRegionWrapper hearingRegionWrapper;
-
     @JsonIgnore
     public AllocatedRegionWrapper getAllocatedRegionWrapper() {
         if (allocatedRegionWrapper == null) {

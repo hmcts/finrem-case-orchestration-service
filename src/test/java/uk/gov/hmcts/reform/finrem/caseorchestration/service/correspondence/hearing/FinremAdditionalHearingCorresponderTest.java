@@ -65,7 +65,7 @@ class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenc
         additionalHearingDocumentCollections.add(document2);
         additionalHearingDocumentCollections.add(document3);
         additionalHearingDocumentCollections.add(document4);
-        caseDetails.getData().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
+        caseDetails.getData().getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
         assertThat(documentsToPrint).contains(CaseDocument.builder().documentFilename("latest").build());
@@ -98,7 +98,7 @@ class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenc
         additionalHearingDocumentCollections.add(document2);
         additionalHearingDocumentCollections.add(document3);
         additionalHearingDocumentCollections.add(document4);
-        caseDetails.getData().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
+        caseDetails.getData().getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
         assertEquals(2, documentsToPrint.size());
         assertThat(documentsToPrint).contains(CaseDocument.builder().documentFilename("latest").build());

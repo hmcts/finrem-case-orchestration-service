@@ -297,12 +297,13 @@ public class AdditionalHearingDocumentService {
             .build();
 
         FinremCaseData data = caseDetails.getData();
-        List<AdditionalHearingDocumentCollection> additionalHearingDocumentCollections
-            = Optional.ofNullable(data.getAdditionalHearingDocuments()).orElse(new ArrayList<>(1));
+        List<AdditionalHearingDocumentCollection> additionalHearingDocumentCollections = Optional.ofNullable(
+            data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .orElse(new ArrayList<>(1));
 
         additionalHearingDocumentCollections.add(generatedDocumentData);
 
-        data.setAdditionalHearingDocuments(additionalHearingDocumentCollections);
+        data.getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
     }
 
 
