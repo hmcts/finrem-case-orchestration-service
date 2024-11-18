@@ -22,7 +22,7 @@ def versions = [
         commonsLang3         : '3.17.0',
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.34',
+        lombok               : '1.18.36',
         mockito              : '3.12.4',
         pact                 : '4.6.15',
         pdfbox               : '3.0.3',
