@@ -138,19 +138,50 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .max(LocalDateTime::compareTo);
     }
 
+    public Optional<Pair<LocalDate, String>> findHearingDetailsBySubmissionDate(
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection, Optional<LocalDateTime> targetSubmissionDate, String caseReference) {
 
-    private Optional<DraftOrdersReview> getLastAddedDraftOrdersReview(
-        List<DraftOrdersReviewCollection> reviewCollection) {
+        // Unwrap targetSubmissionDate for comparison
+        if (targetSubmissionDate.isEmpty()) {
+            String exceptionMessage = String.format("No submission date found on agreed draft order for Case ID: %s", caseReference);
+            throw new IllegalStateException(exceptionMessage);
 
-        if (ObjectUtils.isEmpty(reviewCollection)) {
-            return Optional.empty();
         }
 
-        //Get the last elements value
-        DraftOrdersReview lastReview = reviewCollection
-            .get(reviewCollection.size() - 1)
-            .getValue();
+        LocalDateTime targetDate = targetSubmissionDate.get();
 
-        return Optional.ofNullable(lastReview);
+        // Iterate over each DraftOrdersReview in the collection
+        for (DraftOrdersReviewCollection draftOrdersReview : draftOrdersReviewCollection) {
+            DraftOrdersReview review = draftOrdersReview.getValue();
+
+            // Search in draftOrderDocReviewCollection
+            Optional<Pair<LocalDate, String>> draftOrderMatch = review.getDraftOrderDocReviewCollection()
+                .stream()
+                .map(DraftOrderDocReviewCollection::getValue) // Extract DraftOrderDocumentReview
+                .filter(Objects::nonNull)
+                .filter(draftOrderReview -> targetDate.equals(draftOrderReview.getSubmittedDate()))
+                .map(draftOrderReview -> Pair.of(review.getHearingDate(), review.getHearingJudge())) // Use parent hearing info
+                .findFirst();
+
+            if (draftOrderMatch.isPresent()) {
+                return draftOrderMatch;
+            }
+
+            // Search in psaDocReviewCollection
+            Optional<Pair<LocalDate, String>> psaDocMatch = review.getPsaDocReviewCollection()
+                .stream()
+                .map(PsaDocReviewCollection::getValue) // Extract PsaDocumentReview
+                .filter(Objects::nonNull)
+                .filter(psaDocReview -> targetDate.equals(psaDocReview.getSubmittedDate()))
+                .map(psaDocReview -> Pair.of(review.getHearingDate(), review.getHearingJudge())) // Use parent hearing info
+                .findFirst();
+
+            if (psaDocMatch.isPresent()) {
+                return psaDocMatch;
+            }
+        }
+
+        // Return empty if no match found in any DraftOrdersReview
+        throw new IllegalStateException("No match found in any DraftOrdersReview");
     }
 }
