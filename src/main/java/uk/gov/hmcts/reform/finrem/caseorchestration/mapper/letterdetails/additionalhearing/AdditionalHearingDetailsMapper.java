@@ -32,11 +32,11 @@ public class AdditionalHearingDetailsMapper extends AbstractLetterDetailsMapper 
             .courtAddress(courtDetails.getCourtAddress())
             .courtEmail(courtDetails.getEmail())
             .courtPhone(courtDetails.getPhoneNumber())
-            .hearingDate(String.valueOf(caseDetails.getData().getHearingDate()))
-            .hearingType(caseDetails.getData().getHearingType().getId())
+            .hearingDate(String.valueOf(caseDetails.getData().getListForHearingWrapper().getHearingDate()))
+            .hearingType(caseDetails.getData().getListForHearingWrapper().getHearingType().getId())
             .hearingVenue(courtDetails.getCourtName())
-            .hearingLength(caseDetails.getData().getTimeEstimate())
-            .hearingTime(caseDetails.getData().getHearingTime())
+            .hearingLength(caseDetails.getData().getListForHearingWrapper().getTimeEstimate())
+            .hearingTime(caseDetails.getData().getListForHearingWrapper().getHearingTime())
             .additionalHearingDated(new Date())
             .build();
     }

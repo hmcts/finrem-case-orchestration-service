@@ -44,7 +44,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void issueDateEmpty() {
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.setIssueDate(null);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestErrors();
         caseData.setPartiesOnCase(getPartiesOnCase());
 
@@ -54,7 +54,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     @Test
     public void fastTrackDecisionEmpty() {
         caseData.setIssueDate(LocalDate.now());
-        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         caseData.setFastTrackDecisionReason(null);
         caseData.setPartiesOnCase(getPartiesOnCase());
 
@@ -66,7 +66,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void hearingDateEmpty() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
-        caseData.setHearingDate(null);
+        caseData.getListForHearingWrapper().setHearingDate(null);
         caseData.setPartiesOnCase(getPartiesOnCase());
         List<String> errors = doTestErrors();
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -76,7 +76,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void givenHearingWithNoAppRespNotificationSelected_whenValidate_thenThrowErrorCustomMessage() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
 
         DynamicMultiSelectList partiesOnCase = getPartiesOnCaseMissingSelectedAppAndResp();
 
@@ -127,7 +127,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void noErrors() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestErrors();
         assertThat(errors, hasSize(0));
     }
@@ -136,7 +136,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(null);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         caseData.setCaseAllocatedTo(YesOrNo.YES);
         List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
@@ -146,7 +146,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
     }
@@ -155,7 +155,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void fastTrackHearingDatesNoWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(7));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestWarnings();
         assertThat(errors, hasSize(0));
     }
@@ -164,7 +164,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void nonFastTrackHearingDatesWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(3));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
         assertThat(errors, hasItem(DATE_BETWEEN_12_AND_16_WEEKS));
     }
@@ -173,7 +173,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     public void nonFastTrackHearingDatesNoWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.setHearingDate(LocalDate.now().plusWeeks(13));
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(13));
         List<String> errors = doTestWarnings();
         assertThat(errors, hasSize(0));
     }

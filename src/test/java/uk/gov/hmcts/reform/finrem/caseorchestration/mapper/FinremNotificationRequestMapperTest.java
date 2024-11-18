@@ -160,7 +160,7 @@ class FinremNotificationRequestMapperTest {
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
         FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        caseDetails.getData().getListForHearingWrapper().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
 
@@ -178,7 +178,7 @@ class FinremNotificationRequestMapperTest {
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
         FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        caseDetails.getData().getListForHearingWrapper().setHearingType(HearingTypeDirection.FDA);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
             .solicitorNameKey(TEST_SOLICITOR_NAME)
