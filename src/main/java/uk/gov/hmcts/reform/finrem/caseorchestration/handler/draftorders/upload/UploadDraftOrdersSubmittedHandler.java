@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -15,8 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -27,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -70,20 +70,27 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        String caseReference = String.valueOf(caseDetails.getId());
 
-        List<DraftOrdersReviewCollection> reviewCollection = caseDetails.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
-        Optional<DraftOrdersReview> lastReview = getLastAddedDraftOrdersReview(reviewCollection);
+        boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
-        if (lastReview.isEmpty()) {
-            String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseDetails.getId());
-            throw new IllegalStateException(exceptionMessage);
+        if (isAgreedLatest) {
+            Optional<LocalDateTime> latestSubmissionDate = getLatestAgreedDraftOrder(caseDetails.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection());
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = caseDetails.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
+
+            Optional<Pair<LocalDate, String>> hearingDetails = findHearingDetailsBySubmissionDate(draftOrdersReviewCollection, latestSubmissionDate, caseReference);
+
+            // Extract hearing date and judge if present, else set to null
+            LocalDate hearingDate = hearingDetails.map(Pair::getLeft).orElse(null);
+            String hearingJudge = hearingDetails.map(Pair::getRight).orElse(null);
+
+            // Build notification request and send notification
+            NotificationRequest judgeNotificationRequest =
+                draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
+                    caseDetails, hearingDate, hearingJudge);
+            notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
         }
 
-        LocalDate hearingDate = lastReview.get().getHearingDate();
-        String hearingJudge = lastReview.get().getHearingJudge();
-        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
-            caseDetails, hearingDate, hearingJudge);
-        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
 
         String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
