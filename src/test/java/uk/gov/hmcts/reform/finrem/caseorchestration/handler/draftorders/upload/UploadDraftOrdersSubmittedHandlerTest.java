@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -105,6 +106,11 @@ class UploadDraftOrdersSubmittedHandlerTest {
             verify(draftOrdersNotificationRequestMapper).buildJudgeNotificationRequest(any(FinremCaseDetails.class),
                 any(LocalDate.class), any(String.class));
             verify(notificationService).sendContestedReadyToReviewOrderToJudge(any());
+        } else {
+            verify(draftOrdersNotificationRequestMapper, never()).buildJudgeNotificationRequest(
+                any(FinremCaseDetails.class), any(LocalDate.class), any(String.class)
+            );
+            verify(notificationService, never()).sendContestedReadyToReviewOrderToJudge(any());
         }
 
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders uploaded");
