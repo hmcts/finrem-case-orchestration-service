@@ -39,8 +39,8 @@ public class ListForHearingContestedAboutToStartHandler extends FinremCallbackHa
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        if (caseData.getAdditionalHearingDocumentsOption() == null) {
-            caseData.setAdditionalHearingDocumentsOption(YesOrNo.NO);
+        if (caseData.getListForHearingWrapper().getAdditionalHearingDocumentsOption() == null) {
+            caseData.getListForHearingWrapper().setAdditionalHearingDocumentsOption(YesOrNo.NO);
         }
         caseData.setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();

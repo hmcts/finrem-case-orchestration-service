@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.ObjectUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,21 +11,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -123,7 +122,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void fastTrackDecisionNotSupplied() {
-        CaseDetails caseDetails = CaseDetails.builder().data(ImmutableMap.of()).build();
+        CaseDetails caseDetails = CaseDetails.builder().data(Map.of()).build();
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
     }
 
@@ -158,7 +157,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void sendToBulkPrint() {
-        CaseDetails caseDetails = caseDetails(NO_VALUE);
+        FinremCaseDetails caseDetails = finremCaseDetails(YesOrNo.NO);
 
         hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
@@ -171,9 +170,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void sendToBulkPrint_multipleFormA() {
-        CaseDetails caseDetails = caseDetails(YES_VALUE);
-
-        caseDetails.getData().put(FORM_A_COLLECTION, asList(paymentDocumentCollection(), paymentDocumentCollection(), paymentDocumentCollection()));
+        FinremCaseDetails caseDetails = finremCaseDetails(YesOrNo.YES);
+        caseDetails.getData().setCopyOfPaperFormA(List.of(
+            paymentDocumentCollection(), paymentDocumentCollection(), paymentDocumentCollection()));
 
         hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
@@ -407,33 +406,6 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyCourtDetailsFieldsNotSet();
     }
 
-    private List<String> fullPartyList() {
-        return of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.APP_BARRISTER.getCcdCode(),
-            CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.RESP_BARRISTER.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_BARRISTER_1.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_BARRISTER_2.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_BARRISTER_3.getCcdCode(),
-            CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode());
-    }
-
-    private DynamicMultiSelectList buildDynamicSelectableParties(List<String> parties) {
-
-        List<DynamicMultiSelectListElement> list = new ArrayList<>();
-        parties.forEach(role -> list.add(getElementList(role)));
-
-        return DynamicMultiSelectList.builder()
-            .value(list)
-            .listItems(list)
-            .build();
-    }
-
-    private DynamicMultiSelectListElement getElementList(String role) {
-        return DynamicMultiSelectListElement.builder()
-            .code(role)
-            .label(role)
-            .build();
-    }
-
     private CaseDetails makeItNonFastTrackDecisionCase() {
         return caseDetails(NO_VALUE);
     }
@@ -444,17 +416,33 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
         Map<String, Object> caseData =
-            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
+            Map.of(FAST_TRACK_DECISION, NO_VALUE,
                 CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
     private CaseDetails caseDetailsWithHearingCourtDetails(String region, String frcList, String frc, String courtList, String court) {
         Map<String, Object> caseData =
-            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, HEARING_REGION_LIST,
+            Map.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, HEARING_REGION_LIST,
                 region, frcList, frc, courtList, court, REGION, WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURT_LIST,
                 "FR_swansea_hc_list_1");
         return CaseDetails.builder().data(caseData).build();
+    }
+
+    private FinremCaseDetails finremCaseDetails(YesOrNo fastTrackDecision) {
+        return FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .fastTrackDecision(fastTrackDecision)
+                .listForHearingWrapper(ListForHearingWrapper.builder()
+                    .hearingDate(LocalDate.parse(DATE_OF_HEARING, FinremDateUtils.getDateFormatter()))
+                    .additionalListOfHearingDocuments(caseDocument())
+                    .build())
+                .copyOfPaperFormA(singletonList(paymentDocumentCollection()))
+                .formC(caseDocument())
+                .formG(caseDocument())
+                .outOfFamilyCourtResolution(caseDocument())
+                .build())
+            .build();
     }
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
@@ -474,13 +462,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
             .data(caseData).build();
     }
 
-    private CaseDetails caseDetailsWithCourtDetails(String region, String frcList, String frc, String courtList, String court) {
-        Map<String, Object> caseData =
-            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, REGION, region, frcList, frc, courtList, court);
-        return CaseDetails.builder().data(caseData).build();
-    }
-
-    void verifyAdditionalFastTrackFields() {
+    private void verifyAdditionalFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())),
             eq(documentConfiguration.getFormCFileName()));
@@ -494,7 +476,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
     }
 
-    void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
+    private void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         @SuppressWarnings("unchecked")
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
@@ -504,12 +486,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(courtDetails.get(HEARING_COURT_DETAILS_PHONE_KEY), is(phone));
     }
 
-    void verifyCourtDetailsFieldsNotSet() {
+    private void verifyCourtDetailsFieldsNotSet() {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertTrue(ObjectUtils.isEmpty(data.get("courtDetails")));
     }
 
-    void verifyAdditionalNonFastTrackFields() {
+    private void verifyAdditionalNonFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())),
             eq(documentConfiguration.getFormCFileName()));

@@ -284,7 +284,7 @@ public class DocumentHelperTest {
         additionalHearingDocuments.add(doc1);
         additionalHearingDocuments.add(doc2);
 
-        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
+        caseData.getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocuments);
 
         Optional<CaseDocument> latestDocumentAvailable = documentHelper.getLatestAdditionalHearingDocument(caseData);
 
