@@ -77,11 +77,7 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         if (isAgreedLatest) {
             DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
-                .getDraftOrdersWrapper());
-            if (review == null) {
-                String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseReference);
-                throw new IllegalStateException(exceptionMessage);
-            }
+                .getDraftOrdersWrapper(), caseReference);
 
             LocalDate hearingDate = review.getHearingDate();
             String judge = review.getHearingJudge();
@@ -144,11 +140,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .max(LocalDateTime::compareTo);
     }
 
-    private DraftOrdersReview getDraftOrderReviewWithLatestSubmissionDate(DraftOrdersWrapper draftOrdersWrapper) {
+    private DraftOrdersReview getDraftOrderReviewWithLatestSubmissionDate(DraftOrdersWrapper draftOrdersWrapper, String caseReference) {
+        String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseReference);
+
         return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
             .map(DraftOrdersReviewCollection::getValue)
             .filter(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder() != null) // Ensure there's a reviewable order
             .max(Comparator.comparing(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder().getSubmittedDate())) // Get the latest
-            .orElse(null);
+            .orElseThrow(() -> new IllegalStateException(exceptionMessage));
     }
 }
