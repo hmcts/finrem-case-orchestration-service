@@ -49,7 +49,7 @@ class PensionAnnexDateStampServiceTest {
     @Captor
     private ArgumentCaptor<List<MultipartFile>> filesCaptor;
     private CaseDocument document;
-
+    private final String testPdf = "/fixtures/P1_pension_sharing_annex.pdf";
 
     @BeforeEach
     void setUp() {
@@ -61,7 +61,7 @@ class PensionAnnexDateStampServiceTest {
 
     @Test
     void shouldAddApprovalDateToPensionOrderDocument() throws Exception {
-        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex.pdf");
+        byte[] docInBytes = loadResource(testPdf);
         when(emDownloadService.download(document.getDocumentBinaryUrl(), AUTH_TOKEN))
             .thenReturn(docInBytes);
         when(emUploadService.upload(any(), anyString(), any()))
