@@ -19,8 +19,10 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HearingInstruction {
 
+    @JsonProperty("requireAnotherHearing")
     private YesOrNo requireAnotherHearing;
 
+    @JsonProperty("showRequireAnotherHearingQuestion")
     private YesOrNo showRequireAnotherHearingQuestion;
 
     @JsonProperty("anotherHearingRequestCollection")
