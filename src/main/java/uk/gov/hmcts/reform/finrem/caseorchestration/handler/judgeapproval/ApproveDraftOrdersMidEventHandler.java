@@ -12,10 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -51,6 +54,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 .map(ReviewableDraftOrder::getJudgeDecision)
                 .filter(Objects::nonNull) // Filter out null JudgeDecision objects
                 .anyMatch(JudgeDecision::isHearingInstructionRequired)
+        ));
+        draftOrdersWrapper.getHearingInstruction().setAnotherHearingRequestCollection(List.of(
+            AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
         ));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();

@@ -17,14 +17,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
@@ -130,5 +134,41 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 YES
             )
         );
+    }
+
+    @Test
+    void shouldPopulateAnEmptyAnotherHearingRequestEntry() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(12345L)
+                .data(FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder().judgeApproval(JudgeApproval.builder()
+                        .reviewableDraftOrder1(ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build())
+                        .build()).build())
+                    .build())
+                .build())
+            .build();
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertNotNull(response);
+        FinremCaseData responseData = response.getData();
+        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
+
+        List<AnotherHearingRequestCollection> actualCollection =
+            responseDraftOrdersWrapper.getHearingInstruction().getAnotherHearingRequestCollection();
+
+        assertNotNull(actualCollection, "anotherHearingRequestCollection should not be null");
+        assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
+        AnotherHearingRequest actualRequest = actualCollection.get(0).getValue();
+        assertNotNull(actualRequest, "The AnotherHearingRequest object should not be null");
+        assertNull(actualRequest.getWhichOrder(), "whichOrder should be null");
+        assertNull(actualRequest.getTypeOfHearing(), "typeOfHearing should be null");
+        assertNull(actualRequest.getTimeEstimate(), "timeEstimate should be null");
+        assertNull(actualRequest.getAdditionalTime(), "additionalTime should be null");
+        assertNull(actualRequest.getAnyOtherListingInstructions(), "anyOtherListingInstructions should be null");
     }
 }
