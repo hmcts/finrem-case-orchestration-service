@@ -96,9 +96,9 @@ public class ApprovedOrderNoticeOfHearingService {
     }
 
     private void addAdditionalHearingDocument(FinremCaseData caseData, CaseDocument documentToAdd) {
-
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments
-            = Optional.ofNullable(caseData.getAdditionalHearingDocuments()).orElse(new ArrayList<>());
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = Optional
+            .ofNullable(caseData.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .orElse(new ArrayList<>());
 
         AdditionalHearingDocumentCollection hearingDocumentCollection
             = AdditionalHearingDocumentCollection.builder()
@@ -108,7 +108,7 @@ public class ApprovedOrderNoticeOfHearingService {
                 .build()).build();
         additionalHearingDocuments.add(hearingDocumentCollection);
 
-        caseData.setAdditionalHearingDocuments(additionalHearingDocuments);
+        caseData.getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocuments);
     }
 
     public void printHearingNoticePackAndSendToApplicantAndRespondent(CaseDetails caseDetails,
