@@ -31,6 +31,9 @@ public class ReviewableDraftOrder {
     @JsonProperty("document")
     private CaseDocument document;
 
+    @JsonProperty("amendedDocument")
+    private CaseDocument amendedDocument;
+
     @JsonProperty("judgeDecision")
     private JudgeDecision judgeDecision;
 
