@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -49,9 +50,7 @@ public class PensionAnnexDateStampService {
     static final String DEFAULT_PDTYPE_FONT_ARIAL = "/Arial 12 Tf 0 g";
     static final String DEFAULT_PDTYPE_PREFIX = "/";
     static final String DEFAULT_PDTYPE_POSTFIX = " 12 Tf 0 g";
-    static PDResources pdResources = null;
     static PDDocument document = null;
-
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
                                                      LocalDate approvalDate,
@@ -100,7 +99,7 @@ public class PensionAnnexDateStampService {
     }
 
     private String getDefaultFont(PDAcroForm acroForm) {
-        pdResources = acroForm.getDefaultResources();
+        PDResources pdResources = acroForm.getDefaultResources();
         return StreamSupport.stream(pdResources.getFontNames().spliterator(), false)
             .map(cosName -> {
                 try {
@@ -110,24 +109,19 @@ public class PensionAnnexDateStampService {
                     }
                 } catch (IOException e) {
                     try {
-                        setDefaultEmbeddedFont();
-                    } catch (IOException ex) {
+                        COSName fontName = COSName.getPDFName("Arial");
+                        if (pdResources.getFont(fontName) == null) {
+                            PDType0Font font = PDType0Font.load(document, new File("Arial.ttf"));
+                            pdResources.put(fontName, font);
+                        }                    } catch (IOException ex) {
                         throw new StampDocumentException("PDF Document is missing embedded font.",ex);
                     }
                     return DEFAULT_PDTYPE_FONT_ARIAL;
                 }
                 return null;
             })
-            .filter(result -> result != null)
+            .filter(Objects::nonNull)
             .findFirst()
             .orElse(DEFAULT_PDTYPE_FONT_ARIAL);
-    }
-
-    private void setDefaultEmbeddedFont() throws IOException {
-        COSName fontName = COSName.getPDFName("Arial");
-        if (pdResources.getFont(fontName) == null) {
-            PDType0Font font = PDType0Font.load(document, new File("Arial.ttf"));
-            pdResources.put(fontName, font);
-        }
     }
 }
