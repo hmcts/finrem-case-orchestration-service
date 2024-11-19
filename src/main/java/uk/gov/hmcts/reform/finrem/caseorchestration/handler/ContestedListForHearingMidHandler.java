@@ -43,8 +43,9 @@ public class ContestedListForHearingMidHandler extends FinremCallbackHandler {
             EventType.LIST_FOR_HEARING, caseId);
         FinremCaseData caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
-        if (caseData.getAdditionalHearingDocumentsOption().isYes()) {
-            CaseDocument additionalListOfHearingDocument = caseData.getAdditionalListOfHearingDocuments();
+        if (caseData.getListForHearingWrapper().getAdditionalHearingDocumentsOption().isYes()) {
+            CaseDocument additionalListOfHearingDocument = caseData.getListForHearingWrapper()
+                .getAdditionalListOfHearingDocuments();
             service.validateEncryptionOnUploadedDocument(additionalListOfHearingDocument,
                 caseId, errors, userAuthorisation);
         }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.hearingbundles;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
 
@@ -18,7 +19,8 @@ public class HearingDatePopulatedValidatorTest {
 
     @Test
     public void shouldReturn_no_error_whenHearingDatePopulated() {
-        assertTrue(hearingDatePopulatedValidator.validateHearingDate(FinremCaseData.builder().hearingDate(LocalDate.now()).build()).isEmpty());
+        assertTrue(hearingDatePopulatedValidator.validateHearingDate(FinremCaseData.builder()
+            .listForHearingWrapper(ListForHearingWrapper.builder().hearingDate(LocalDate.now()).build())
+            .build()).isEmpty());
     }
-
 }

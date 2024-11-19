@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -133,7 +134,10 @@ public class FinremNotificationRequestMapper {
             log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
                 notificationRequest.getCaseReferenceNumber());
         }
-        notificationRequest.setHearingType(caseData.getHearingType() != null ? caseData.getHearingType().getId() : "");
+        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
+        notificationRequest.setHearingType(listForHearingWrapper.getHearingType() != null
+            ? listForHearingWrapper.getHearingType().getId()
+            : "");
         notificationRequest.setIsNotDigital(caseDataKeysWrapper.getSolicitorIsNotDigitalKey());
 
         return notificationRequest;

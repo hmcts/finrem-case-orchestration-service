@@ -70,7 +70,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(YesOrNo.NO, response.getData().getAdditionalHearingDocumentsOption());
+        assertEquals(YesOrNo.NO, response.getData().getListForHearingWrapper().getAdditionalHearingDocumentsOption());
     }
 
 
