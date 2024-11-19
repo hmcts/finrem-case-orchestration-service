@@ -15,24 +15,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
 public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
-
-    private final DraftOrderService draftOrderService;
 
     private final NotificationService notificationService;
 
@@ -50,11 +51,9 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             + "<br><br>You can find the documents that you have uploaded on the "
             + "['case documents' tab](/cases/case-details/%s#Case%%20documents).";
 
-    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrderService draftOrderService,
-                                             NotificationService notificationService,
+    public UploadDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService,
                                              DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper) {
         super(finremCaseDetailsMapper);
-        this.draftOrderService = draftOrderService;
         this.notificationService = notificationService;
         this.draftOrdersNotificationRequestMapper = draftOrdersNotificationRequestMapper;
     }
@@ -73,15 +72,19 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        String caseReference = String.valueOf(caseDetails.getId());
+        boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
-        DraftOrdersReview review = draftOrderService.getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData().
-            getDraftOrdersWrapper());
-        LocalDate hearingDate = review.getHearingDate();
-        String judge = review.getHearingJudge();
+        if (isAgreedLatest) {
+            DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData().
+                getDraftOrdersWrapper());
+            LocalDate hearingDate = review.getHearingDate();
+            String judge = review.getHearingJudge();
 
-        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
-            caseDetails, hearingDate, judge);
-        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+            NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
+                caseDetails, hearingDate, judge);
+            notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+        }
 
         String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -134,5 +137,13 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .map(SuggestedDraftOrderCollection::getValue)
             .map(SuggestedDraftOrder::getSubmittedDate)
             .max(LocalDateTime::compareTo);
+    }
+
+    private DraftOrdersReview getDraftOrderReviewWithLatestSubmissionDate(DraftOrdersWrapper draftOrdersWrapper) {
+        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .filter(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder() != null) // Ensure there's a reviewable order
+            .max(Comparator.comparing(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder().getSubmittedDate())) // Get the latest
+            .orElse(null);
     }
 }

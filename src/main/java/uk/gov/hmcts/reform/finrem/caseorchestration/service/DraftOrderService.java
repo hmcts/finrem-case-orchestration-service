@@ -24,13 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -237,13 +235,5 @@ public class DraftOrderService {
                 .build())
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
-    }
-
-    public DraftOrdersReview getDraftOrderReviewWithLatestSubmissionDate(DraftOrdersWrapper draftOrdersWrapper) {
-        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
-            .map(DraftOrdersReviewCollection::getValue)
-            .filter(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder() != null) // Ensure there's a reviewable order
-            .max(Comparator.comparing(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder().getSubmittedDate())) // Get the latest
-            .orElse(null);
     }
 }
