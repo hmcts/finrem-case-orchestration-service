@@ -96,12 +96,12 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
         caseData.getContactDetailsWrapper().setRespondentLname("Respondent");
         caseData.setDivorceCaseNumber("DD12D12345");
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
-        caseData.setHearingDate(HEARING_DATE);
+        caseData.getListForHearingWrapper().setHearingDate(HEARING_DATE);
         caseData.getContactDetailsWrapper().setSolicitorReference("Test Sol Reference");
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference("Test Resp Sol Ref");
-        caseData.setAdditionalInformationAboutHearing("Test");
-        caseData.setHearingTime("1pm");
-        caseData.setTimeEstimate("1 hour");
+        caseData.getListForHearingWrapper().setAdditionalInformationAboutHearing("Test");
+        caseData.getListForHearingWrapper().setHearingTime("1pm");
+        caseData.getListForHearingWrapper().setTimeEstimate("1 hour");
 
         caseDetails = FinremCaseDetails.builder().id(12345L).caseType(CaseType.CONTESTED).data(caseData).build();
     }
