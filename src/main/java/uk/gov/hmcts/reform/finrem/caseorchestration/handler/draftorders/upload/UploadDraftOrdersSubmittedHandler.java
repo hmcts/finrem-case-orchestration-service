@@ -78,6 +78,11 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         if (isAgreedLatest) {
             DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
                 .getDraftOrdersWrapper());
+            if (review == null) {
+                String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseReference);
+                throw new IllegalStateException(exceptionMessage);
+            }
+
             LocalDate hearingDate = review.getHearingDate();
             String judge = review.getHearingJudge();
 
