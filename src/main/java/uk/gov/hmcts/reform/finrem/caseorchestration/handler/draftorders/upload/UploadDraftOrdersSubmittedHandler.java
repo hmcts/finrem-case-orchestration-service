@@ -76,8 +76,8 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
         if (isAgreedLatest) {
-            DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData().
-                getDraftOrdersWrapper());
+            DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
+                .getDraftOrdersWrapper());
             LocalDate hearingDate = review.getHearingDate();
             String judge = review.getHearingJudge();
 
