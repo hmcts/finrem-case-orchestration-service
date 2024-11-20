@@ -8,13 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DraftOrdersNotificationRequestMapper {
-    
+
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
 
@@ -24,7 +23,7 @@ public class DraftOrdersNotificationRequestMapper {
         judgeNotificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         judgeNotificationRequest.setHearingDate(dateFormatter.format(hearingDate));
         judgeNotificationRequest.setNotificationEmail(judge);
-        judgeNotificationRequest.setApplicantName(Objects.toString(caseDetails.getData().getFullApplicantName()));
+        judgeNotificationRequest.setApplicantName(caseDetails.getData().getFullApplicantName());
         judgeNotificationRequest.setRespondentName(caseDetails.getData().getRespondentFullName());
 
         return judgeNotificationRequest;
