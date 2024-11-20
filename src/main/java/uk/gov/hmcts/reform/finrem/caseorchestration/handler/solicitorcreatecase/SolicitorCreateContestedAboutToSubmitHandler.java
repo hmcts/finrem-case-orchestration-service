@@ -83,9 +83,14 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
 
-        // populates the tab version of applicantInRefuge with the version provided by the solicitor.
+        // updates the tab version of applicantInRefuge with the question version, then removes question version.
         Optional.ofNullable(caseData.getRefugeWrapper().getApplicantInRefugeQuestion())
-                .ifPresent(question -> caseData.getRefugeWrapper().setApplicantInRefugeTab(question));
+                .ifPresent(question -> {
+                    caseData.getRefugeWrapper().setApplicantInRefugeTab(question);
+                    log.info("Updating applicantInRefugeTab for case reference {}. Removing applicantInRefugeQuestion",
+                            caseDetails.getId());
+                    caseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
+                });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
