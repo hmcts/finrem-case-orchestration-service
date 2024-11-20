@@ -141,6 +141,37 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         Assertions.assertThat(response.getData()).isNotNull();
     }
 
+    @Test
+    public void givenCase_whenApplicantRefugeQuestionAnswered_thenApplicantRefugeTabUpdated() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // imitate user answering YES to applicant in refuge question on create case journey.
+        caseDetails.getData().getRefugeWrapper().setApplicantInRefugeQuestion(YesOrNo.YES);
+        assertEquals(YesOrNo.YES, caseDetails.getData().getRefugeWrapper().getApplicantInRefugeQuestion());
+
+        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
+
+        // Assert handler updated applicantInRefugeTab from applicantInRefugeQuestion, and latter then cleared.
+        assertEquals(YesOrNo.YES, responseCaseData.getRefugeWrapper().getApplicantInRefugeTab());
+        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeQuestion());
+    }
+
+    @Test
+    public void givenCase_whenApplicantRefugeQuestionUnanswered_thenApplicantRefugeTabUnchanged() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // imitate user not answering applicant in refuge question on create case journey.
+        assertNull(caseDetails.getData().getRefugeWrapper().getApplicantInRefugeQuestion());
+
+        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
+
+        // Assert handler didn't update applicantInRefugeTab from applicantInRefugeQuestion, which remains null.
+        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeTab());
+        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeQuestion());
+    }
+
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
         assertEquals(YesOrNo.NO, responseCaseData.getCivilPartnership());
         assertEquals(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS,
