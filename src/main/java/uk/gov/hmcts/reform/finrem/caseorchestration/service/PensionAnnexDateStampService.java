@@ -47,10 +47,11 @@ public class PensionAnnexDateStampService {
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    static final String DEFAULT_PDTYPE_FONT_ARIAL = "/Arial 12 Tf 0 g";
+    static final String DEFAULT_PDTYPE_FONT_ARIAL = "/Arial";
     static final String DEFAULT_PDTYPE_PREFIX = "/";
-    static final String DEFAULT_PDTYPE_POSTFIX = " 12 Tf 0 g";
+    static final String DEFAULT_PDTYPE_POSTFIX = " 10 Tf 0 g";
     static PDDocument document = null;
+
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
                                                      LocalDate approvalDate,
@@ -86,7 +87,7 @@ public class PensionAnnexDateStampService {
             try {
                 textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
             } catch (IOException ex) {
-                textBox.setDefaultAppearance(getDefaultFont(acroForm.get()));
+                textBox.setDefaultAppearance(getDefaultFont(acroForm.get()) + DEFAULT_PDTYPE_POSTFIX);
                 textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
             }
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
@@ -98,14 +99,14 @@ public class PensionAnnexDateStampService {
         }
     }
 
-    private String getDefaultFont(PDAcroForm acroForm) {
+    static String getDefaultFont(PDAcroForm acroForm) {
         PDResources pdResources = acroForm.getDefaultResources();
         return StreamSupport.stream(pdResources.getFontNames().spliterator(), false)
             .map(cosName -> {
                 try {
                     PDFont font = pdResources.getFont(cosName);
                     if (font != null && font.isEmbedded()) {
-                        return DEFAULT_PDTYPE_PREFIX + cosName.getName() + DEFAULT_PDTYPE_POSTFIX;
+                        return DEFAULT_PDTYPE_PREFIX + cosName.getName();
                     }
                 } catch (IOException e) {
                     try {
@@ -113,7 +114,8 @@ public class PensionAnnexDateStampService {
                         if (pdResources.getFont(fontName) == null) {
                             PDType0Font font = PDType0Font.load(document, new File("Arial.ttf"));
                             pdResources.put(fontName, font);
-                        }                    } catch (IOException ex) {
+                        }
+                    } catch (IOException ex) {
                         throw new StampDocumentException("PDF Document is missing embedded font.",ex);
                     }
                     return DEFAULT_PDTYPE_FONT_ARIAL;
