@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,8 +27,11 @@ import java.util.stream.IntStream;
 @Service
 public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
-    public ApproveDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ApproveOrderService approveOrderService;
+
+    public ApproveDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService) {
         super(finremCaseDetailsMapper);
+        this.approveOrderService = approveOrderService;
     }
 
     @Override
@@ -56,7 +60,11 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 .anyMatch(JudgeDecision::isHearingInstructionRequired)
         ));
         draftOrdersWrapper.getHearingInstruction().setAnotherHearingRequestCollection(List.of(
-            AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
+            AnotherHearingRequestCollection.builder()
+                .value(AnotherHearingRequest.builder()
+                    .whichOrder(approveOrderService.buildWhichOrderDynamicList(draftOrdersWrapper.getJudgeApproval()))
+                    .build())
+                .build()
         ));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();

@@ -8,12 +8,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,6 +32,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
@@ -43,6 +47,9 @@ class ApproveDraftOrdersMidEventHandlerTest {
 
     @InjectMocks
     private ApproveDraftOrdersMidEventHandler handler;
+
+    @Mock
+    private ApproveOrderService approveOrderService;
 
     @Test
     void canHandle() {
@@ -139,16 +146,20 @@ class ApproveDraftOrdersMidEventHandlerTest {
     @Test
     void shouldPopulateAnEmptyAnotherHearingRequestEntry() {
         // Arrange
+        JudgeApproval judgeApproval = null;
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(12345L)
                 .data(FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder().judgeApproval(JudgeApproval.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder().judgeApproval(judgeApproval = JudgeApproval.builder()
                         .reviewableDraftOrder1(ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build())
                         .build()).build())
                     .build())
                 .build())
             .build();
+
+        DynamicList expectedDynamicList = DynamicList.builder().build();
+        when(approveOrderService.buildWhichOrderDynamicList(judgeApproval)).thenReturn(expectedDynamicList);
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -165,7 +176,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
         assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
         AnotherHearingRequest actualRequest = actualCollection.get(0).getValue();
         assertNotNull(actualRequest, "The AnotherHearingRequest object should not be null");
-        assertNull(actualRequest.getWhichOrder(), "whichOrder should be null");
+        assertEquals(actualRequest.getWhichOrder(), expectedDynamicList);
         assertNull(actualRequest.getTypeOfHearing(), "typeOfHearing should be null");
         assertNull(actualRequest.getTimeEstimate(), "timeEstimate should be null");
         assertNull(actualRequest.getAdditionalTime(), "additionalTime should be null");
