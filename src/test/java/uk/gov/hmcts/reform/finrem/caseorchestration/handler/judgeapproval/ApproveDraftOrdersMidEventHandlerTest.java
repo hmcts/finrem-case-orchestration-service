@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -62,12 +63,21 @@ class ApproveDraftOrdersMidEventHandlerTest {
         + "reviewableDraftOrder3={2}"
         + "reviewableDraftOrder4={3}"
         + "reviewableDraftOrder5={4}"
-        + "expectedShowRequireAnotherHearingQuestion={5}")
-    @MethodSource("provideDraftOrderData")
+        + "reviewablePsa1={5}"
+        + "reviewablePsa2={6}"
+        + "reviewablePsa3={7}"
+        + "reviewablePsa4={8}"
+        + "reviewablePsa5={9}"
+        + "expectedShowRequireAnotherHearingQuestion={10}")
+    @MethodSource("provideDraftOrderOrPsaData")
     @DisplayName("Test handle method with different DraftOrdersWrapper inputs")
     void handle_withVariousDraftOrdersWrapperData(ReviewableDraftOrder reviewableDraftOrder1, ReviewableDraftOrder reviewableDraftOrder2,
-        ReviewableDraftOrder reviewableDraftOrder3, ReviewableDraftOrder reviewableDraftOrder4, ReviewableDraftOrder reviewableDraftOrder5,
-        YesOrNo expectedShowRequireAnotherHearingQuestion) {
+                                                  ReviewableDraftOrder reviewableDraftOrder3, ReviewableDraftOrder reviewableDraftOrder4,
+                                                  ReviewableDraftOrder reviewableDraftOrder5,
+
+                                                  ReviewablePsa reviewablePsa1, ReviewablePsa reviewablePsa2,
+                                                  ReviewablePsa reviewablePsa3, ReviewablePsa reviewablePsa4, ReviewablePsa reviewablePsa5,
+                                                  YesOrNo expectedShowRequireAnotherHearingQuestion) {
 
         // Arrange
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
@@ -80,6 +90,11 @@ class ApproveDraftOrdersMidEventHandlerTest {
                             .reviewableDraftOrder3(reviewableDraftOrder3)
                             .reviewableDraftOrder4(reviewableDraftOrder4)
                             .reviewableDraftOrder5(reviewableDraftOrder5)
+                            .reviewablePsa1(reviewablePsa1)
+                            .reviewablePsa2(reviewablePsa2)
+                            .reviewablePsa3(reviewablePsa3)
+                            .reviewablePsa4(reviewablePsa4)
+                            .reviewablePsa5(reviewablePsa5)
                         .build()).build())
                     .build())
                 .build())
@@ -99,22 +114,26 @@ class ApproveDraftOrdersMidEventHandlerTest {
         assertEquals(expectedShowRequireAnotherHearingQuestion, hearingInstruction.getShowRequireAnotherHearingQuestion());
     }
 
-    private static Stream<Arguments> provideDraftOrderData() {
+    private static Stream<Arguments> provideDraftOrderOrPsaData() {
         return Stream.of(
             Arguments.of(
+                null, null, null, null, null, null, null, null, null, null, NO
+            ),
+            Arguments.of(
+                ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(), null, null, null, null,
+                null, null, null, null, null, YES
+            ),
+            Arguments.of(
+                ReviewableDraftOrder.builder().judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES).build(), null, null, null, null,
+                null, null, null, null, null, YES
+            ),
+            Arguments.of(
+                ReviewableDraftOrder.builder().judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE).build(), null, null, null, null,
                 null, null, null, null, null, NO
             ),
             Arguments.of(
-                ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(), null, null, null, null, YES
-            ),
-            Arguments.of(
-                ReviewableDraftOrder.builder().judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES).build(), null, null, null, null, YES
-            ),
-            Arguments.of(
-                ReviewableDraftOrder.builder().judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE).build(), null, null, null, null, NO
-            ),
-            Arguments.of(
-                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(), null, null, null, null, NO
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(), null, null, null, null,
+                null, null, null, null, null, NO
             ),
             Arguments.of(
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
@@ -122,6 +141,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                null, null, null, null, null,
                 YES
             ),
             Arguments.of(
@@ -130,6 +150,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                null, null, null, null, null,
                 YES
             ),
             Arguments.of(
@@ -138,6 +159,23 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
                 ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
                 ReviewableDraftOrder.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                null, null, null, null, null,
+                YES
+            ),
+            Arguments.of(
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
+                ReviewableDraftOrder.builder().judgeDecision(REVIEW_LATER).build(),
+                ReviewablePsa.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                null, null, null, null,
+                YES
+            ),
+            Arguments.of(
+                null, null, null, null, null,
+                ReviewablePsa.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                null, null, null, null,
                 YES
             )
         );

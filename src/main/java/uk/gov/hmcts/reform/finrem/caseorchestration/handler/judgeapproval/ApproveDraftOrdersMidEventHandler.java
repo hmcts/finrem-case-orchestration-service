@@ -15,12 +15,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeReviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -52,12 +55,8 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
         draftOrdersWrapper.getHearingInstruction().setShowRequireAnotherHearingQuestion(YesOrNo.forValue(
-            IntStream.rangeClosed(1, 5)
-                .mapToObj(i -> getReviewableDraftOrder(draftOrdersWrapper, i))
-                .filter(Objects::nonNull) // Filter out null ReviewableDraftOrder objects
-                .map(ReviewableDraftOrder::getJudgeDecision)
-                .filter(Objects::nonNull) // Filter out null JudgeDecision objects
-                .anyMatch(JudgeDecision::isHearingInstructionRequired)
+            hasHearingInstructionRequired(draftOrdersWrapper, this::getReviewableDraftOrder)
+                || hasHearingInstructionRequired(draftOrdersWrapper, this::getReviewablePsa)
         ));
         draftOrdersWrapper.getHearingInstruction().setAnotherHearingRequestCollection(List.of(
             AnotherHearingRequestCollection.builder()
@@ -79,5 +78,26 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             case 5 -> draftOrdersWrapper.getJudgeApproval().getReviewableDraftOrder5();
             default -> null; // If index is out of range
         };
+    }
+
+    private ReviewablePsa getReviewablePsa(DraftOrdersWrapper draftOrdersWrapper, int index) {
+        return switch (index) {
+            case 1 -> draftOrdersWrapper.getJudgeApproval().getReviewablePsa1();
+            case 2 -> draftOrdersWrapper.getJudgeApproval().getReviewablePsa2();
+            case 3 -> draftOrdersWrapper.getJudgeApproval().getReviewablePsa3();
+            case 4 -> draftOrdersWrapper.getJudgeApproval().getReviewablePsa4();
+            case 5 -> draftOrdersWrapper.getJudgeApproval().getReviewablePsa5();
+            default -> null; // If index is out of range
+        };
+    }
+
+    private boolean hasHearingInstructionRequired(DraftOrdersWrapper draftOrdersWrapper,
+                                                  BiFunction<DraftOrdersWrapper, Integer, ? extends JudgeReviewable> getReviewableMethod) {
+        return IntStream.rangeClosed(1, 5)
+            .mapToObj(i -> getReviewableMethod.apply(draftOrdersWrapper, i))
+            .filter(Objects::nonNull)
+            .map(JudgeReviewable::getJudgeDecision)
+            .filter(Objects::nonNull)
+            .anyMatch(JudgeDecision::isHearingInstructionRequired);
     }
 }
