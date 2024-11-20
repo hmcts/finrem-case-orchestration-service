@@ -29,4 +29,7 @@ public class ReviewablePsa {
     @JsonIgnore
     private SortKey sortKey;
 
+    @JsonProperty("amendedDocument")
+    private CaseDocument amendedDocument;
+
 }
