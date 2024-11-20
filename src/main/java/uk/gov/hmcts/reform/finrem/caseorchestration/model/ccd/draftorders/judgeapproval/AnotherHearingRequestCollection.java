@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AnotherHearingRequestCollection {
+
     private AnotherHearingRequest value;
 }

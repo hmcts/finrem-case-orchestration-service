@@ -22,7 +22,7 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReviewableDraftOrder {
+public class ReviewableDraftOrder implements JudgeReviewable {
 
     private String hearingInfo;
 
