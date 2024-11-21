@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
@@ -17,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -26,14 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -55,10 +49,6 @@ class PensionAnnexDateStampServiceTest {
     @Captor
     private ArgumentCaptor<List<MultipartFile>> filesCaptor;
     private CaseDocument document;
-    private PDAcroForm mockAcroForm;
-    private PDResources mockPdResources;
-    private PDFont mockEmbeddedFont;
-    private PDFont mockNonEmbeddedFont;
 
     @BeforeEach
     void setUp() {
@@ -98,85 +88,6 @@ class PensionAnnexDateStampServiceTest {
 
         Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId));
         assertEquals("Pension Order document PDF is flattened / not editable.", exception.getMessage());
-    }
-
-    @Test
-    void testGetDefaultFont_withEmbeddedFont() throws IOException {
-        mockAcroForm = mock(PDAcroForm.class);
-        mockPdResources = mock(PDResources.class);
-        mockEmbeddedFont = mock(PDFont.class);
-        mockNonEmbeddedFont = mock(PDFont.class);
-        when(mockAcroForm.getDefaultResources()).thenReturn(mockPdResources);
-
-        COSName fontName1 = COSName.getPDFName("Font1");
-        COSName fontName2 = COSName.getPDFName("Font2");
-
-        when(mockPdResources.getFontNames()).thenReturn(Arrays.asList(fontName1, fontName2));
-
-        when(mockPdResources.getFont(fontName1)).thenReturn(mockEmbeddedFont);
-        when(mockEmbeddedFont.isEmbedded()).thenReturn(true);
-
-        String result = service.getDefaultFont(mockAcroForm);
-
-        assertEquals("/Font1", result); // Ensure the expected format is correct
-        verify(mockPdResources).getFont(fontName1);
-    }
-
-    @Test
-    void testGetDefaultFont_withNoEmbeddedFont() throws IOException {
-        mockAcroForm = mock(PDAcroForm.class);
-        mockPdResources = mock(PDResources.class);
-        mockEmbeddedFont = mock(PDFont.class);
-        mockNonEmbeddedFont = mock(PDFont.class);
-        when(mockAcroForm.getDefaultResources()).thenReturn(mockPdResources);
-
-        COSName fontName1 = COSName.getPDFName("Font1");
-        COSName fontName2 = COSName.getPDFName("Font2");
-        when(mockPdResources.getFontNames()).thenReturn(Arrays.asList(fontName1, fontName2));
-        when(mockPdResources.getFont(fontName1)).thenReturn(mockNonEmbeddedFont);
-        when(mockPdResources.getFont(fontName2)).thenReturn(mockNonEmbeddedFont);
-        when(mockNonEmbeddedFont.isEmbedded()).thenReturn(false);
-
-        String result = service.getDefaultFont(mockAcroForm);
-
-        assertEquals("/Arial", result); // Use the default font if no embedded font is found
-        verify(mockPdResources).getFont(fontName1);
-        verify(mockPdResources).getFont(fontName2);
-    }
-
-    @Test
-    void testGetDefaultFont_withIoException() throws IOException {
-        mockAcroForm = mock(PDAcroForm.class);
-        mockPdResources = mock(PDResources.class);
-        mockEmbeddedFont = mock(PDFont.class);
-        mockNonEmbeddedFont = mock(PDFont.class);
-        when(mockAcroForm.getDefaultResources()).thenReturn(mockPdResources);
-
-        COSName fontName1 = COSName.getPDFName("Font1");
-        COSName fontName2 = COSName.getPDFName("Arial");
-        when(mockPdResources.getFontNames()).thenReturn(Arrays.asList(fontName1, fontName2));
-        when(mockPdResources.getFont(fontName1)).thenThrow(new IOException("Simulated IOException"));
-        when(mockPdResources.getFont(fontName2)).thenReturn(mockNonEmbeddedFont);
-
-        String result = service.getDefaultFont(mockAcroForm);
-
-        assertEquals("/Arial", result); // Should return the default font if an exception occurs
-        verify(mockPdResources).getFont(fontName1); // Ensure the first font was attempted
-        verify(mockPdResources).getFont(fontName2); // Ensure the second font was checked
-    }
-
-    @Test
-    void testGetDefaultFont_throwsStampDocumentException() throws IOException {
-        mockAcroForm = mock(PDAcroForm.class);
-        mockPdResources = mock(PDResources.class);
-        when(mockAcroForm.getDefaultResources()).thenReturn(mockPdResources);
-        COSName fontName1 = COSName.getPDFName("Font1");
-        COSName fontName2 = COSName.getPDFName("Font2");
-        when(mockPdResources.getFontNames()).thenReturn(Arrays.asList(fontName1, fontName2));
-        when(mockPdResources.getFont(fontName1)).thenThrow(new IOException("Simulated IOException"));
-
-        Exception exception = assertThrows(StampDocumentException.class, () -> service.getDefaultFont(mockAcroForm));
-        assertEquals("PDF Document is missing embedded font.", exception.getMessage());
     }
 
     private byte[] loadResource(String testPdf) throws IOException {
