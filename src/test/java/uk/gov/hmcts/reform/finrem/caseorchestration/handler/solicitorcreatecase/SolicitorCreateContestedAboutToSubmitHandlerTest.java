@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -34,16 +34,16 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorCreateContestedAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private SolicitorCreateContestedAboutToSubmitHandler handler;
@@ -63,8 +63,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    public void init() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
@@ -75,21 +75,21 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
+    void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
             is(false));
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
+    void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
             is(true));
     }
 
     @Test
-    public void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
+    void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
@@ -111,7 +111,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
+    void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
@@ -130,7 +130,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
+    void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
             .thenReturn(List.of("Validation failed"));
@@ -142,7 +142,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenApplicantRefugeQuestionAnswered_thenApplicantRefugeTabUpdated() {
+    void givenCase_whenApplicantRefugeQuestionAnswered_thenApplicantRefugeTabUpdated() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
@@ -158,7 +158,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenApplicantRefugeQuestionUnanswered_thenApplicantRefugeTabUnchanged() {
+    void givenCase_whenApplicantRefugeQuestionUnanswered_thenApplicantRefugeTabUnchanged() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
