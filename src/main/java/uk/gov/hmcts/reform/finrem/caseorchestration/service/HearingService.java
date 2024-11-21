@@ -30,7 +30,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class HearingService {
 
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy");
+    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy");
 
     static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
 
