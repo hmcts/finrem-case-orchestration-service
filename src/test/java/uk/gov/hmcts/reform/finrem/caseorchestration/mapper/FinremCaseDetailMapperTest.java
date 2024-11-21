@@ -370,7 +370,7 @@ class FinremCaseDetailMapperTest {
         assertEquals(ApplicantRole.FR_ApplicantsRoleInDivorce_1, caseData.getDivRoleOfFrApplicant());
         assertEquals(ApplicantRepresentedPaper.FR_applicant_represented_1, caseData.getApplicantRepresentedPaper());
         assertEquals(AuthorisationSignedBy.LITIGATION_FRIEND, caseData.getAuthorisationSignedBy());
-        assertEquals(HearingTypeDirection.DIR, caseData.getHearingType());
+        assertEquals(HearingTypeDirection.DIR, caseData.getListForHearingWrapper().getHearingType());
         assertTrue(caseData.getJudgeAllocated().containsAll(List.of(
             JudgeAllocated.FR_JUDGE_ALLOCATED_LIST_1,
             JudgeAllocated.FR_JUDGE_ALLOCATED_LIST_3)));
@@ -516,7 +516,7 @@ class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertEquals(1, caseData.getAdditionalHearingDocuments().size());
+        assertEquals(1, caseData.getListForHearingWrapper().getAdditionalHearingDocuments().size());
     }
 
     private void assertUploadGeneralDocuments(FinremCaseData caseData) {

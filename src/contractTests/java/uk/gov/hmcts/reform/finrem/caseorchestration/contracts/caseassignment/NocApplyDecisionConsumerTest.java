@@ -168,7 +168,7 @@ public class NocApplyDecisionConsumerTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentLname("Respondent");
         caseData.setDivorceCaseNumber("DD12D12345");
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
-        caseData.setHearingDate(HEARING_DATE);
+        caseData.getListForHearingWrapper().setHearingDate(HEARING_DATE);
         caseData.getContactDetailsWrapper().setSolicitorReference("Test Sol Reference");
         caseData.setChangeOrganisationRequestField(ChangeOrganisationRequest
             .builder()

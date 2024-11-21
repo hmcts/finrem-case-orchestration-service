@@ -42,15 +42,12 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
             .ifPresent(caseDocuments::add);
         Optional.ofNullable(caseData.getOutOfFamilyCourtResolution()).ifPresent(
             caseDocuments::add);
-        Optional.ofNullable(caseData.getAdditionalListOfHearingDocuments())
+        Optional.ofNullable(caseData.getListForHearingWrapper().getAdditionalListOfHearingDocuments())
             .ifPresent(caseDocuments::add);
-
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments);
 
         return caseDocuments;
     }
-
-
 }

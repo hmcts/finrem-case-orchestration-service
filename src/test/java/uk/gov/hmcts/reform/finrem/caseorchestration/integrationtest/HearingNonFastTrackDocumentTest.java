@@ -137,11 +137,12 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Before
     public void setUp() throws IOException {
+        LocalDate hearingDate = LocalDate.now().plusDays(100);
         request = objectMapper.readValue(requestJson, CallbackRequest.class);
-        request.getCaseDetails().getData().put("hearingDate", LocalDate.now().plusDays(100));
+        request.getCaseDetails().getData().put("hearingDate", hearingDate);
         request.getCaseDetails().getData().put("issueDate", LocalDate.now());
         finremRequest = objectMapper.readValue(requestJson, FinremCallbackRequest.class);
-        finremRequest.getCaseDetails().getData().setHearingDate(LocalDate.now().plusDays(100));
+        finremRequest.getCaseDetails().getData().getListForHearingWrapper().setHearingDate(hearingDate);
         finremRequest.getCaseDetails().getData().setIssueDate(LocalDate.now());
     }
 
@@ -166,7 +167,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             finremCaseDetails.getData().setFastTrackDecision(null);
         }
         if (missingFieldKey.equals(HEARING_DATE)) {
-            finremCaseDetails.getData().setHearingDate(null);
+            finremCaseDetails.getData().getListForHearingWrapper().setHearingDate(null);
         }
         if (missingFieldKey.equals(ISSUE_DATE)) {
             finremCaseDetails.getData().setIssueDate(null);
