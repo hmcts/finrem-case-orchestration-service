@@ -279,6 +279,7 @@ public class GeneralOrderService {
             List<AttachmentToShareCollection> attachmentElements = Arrays.stream(attachments)
                 .map(attachment -> AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
+                        .documentId(getDocumentId(attachment))
                         .attachmentName(attachment.getDocumentFilename())
                         .documentToShare(YesOrNo.YES) // default to yes
                         .build())
@@ -287,6 +288,7 @@ public class GeneralOrderService {
             builder.attachmentsToShare(attachmentElements);
         }
         orderToShareCollection.add(OrderToShareCollection.builder().value(builder
+            .documentId(getDocumentId(document))
             .documentName(String.format(format, document.getDocumentFilename()))
             .build()).build());
     }
@@ -344,7 +346,7 @@ public class GeneralOrderService {
             || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
     }
 
-    public Pair<List<CaseDocument>, List<CaseDocument>> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
+    public Pair<List<CaseDocument>, List<CaseDocument>> hearingOrdersToShare(FinremCaseDetails caseDetails, List<OrderToShare> selectedOrders) {
         FinremCaseData caseData = caseDetails.getData();
         final List<CaseDocument> legacyOrders = new ArrayList<>();
         final List<CaseDocument> newOrders = new ArrayList<>();
@@ -354,25 +356,25 @@ public class GeneralOrderService {
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
-        if (selectedDocs != null) {
-            List<DynamicMultiSelectListElement> selected = selectedDocs.getValue();
-            selected.forEach(checkboxSelected -> {
-                boolean addedToOrders = populateSelectedUploadHearingOrder(legacyOrders, hearingOrders, checkboxSelected);
+        if (selectedOrders != null) {
+            selectedOrders.forEach(selected -> {
+                boolean addedToOrders = populateSelectedUploadHearingOrder(legacyOrders, hearingOrders, selected);
                 if (!addedToOrders) { // if addedToOrders equals to true then break the loop
-                    addedToOrders = populateSelectedFinalisedOrders(newOrders, finalisedOrders, checkboxSelected);
+                    addedToOrders = populateSelectedFinalisedOrders(newOrders, finalisedOrders, selected);
                 }
                 if (!addedToOrders) {
-                    populateSelectedProcessedOrders(newOrders, agreedDraftOrderCollection, checkboxSelected);
+                    populateSelectedProcessedOrders(newOrders, agreedDraftOrderCollection, selected);
                 }
             });
+            // TODO getting attachment document and put it to newOrders
         }
         return Pair.of(legacyOrders, newOrders);
     }
 
-    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, ContestedGeneralOrder order) {
+    public boolean isSelectedOrderMatches(List<OrderToShare> selectedDocs, ContestedGeneralOrder order) {
         if (order != null) {
-            Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
-                .filter(e -> e.getCode().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
+            Optional<OrderToShare> listElement = selectedDocs.stream()
+                .filter(e -> e.getDocumentId().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
             return listElement.isPresent();
         }
         return false;
@@ -395,26 +397,26 @@ public class GeneralOrderService {
     }
 
     private boolean populateSelectedUploadHearingOrder(List<CaseDocument> orders, List<DirectionOrderCollection> hearingOrders,
-                                                       DynamicMultiSelectListElement checkboxSelected) {
-        return addToOrders(checkboxSelected, hearingOrders, obj -> obj.getValue().getUploadDraftDocument(), orders);
+                                                       OrderToShare selected) {
+        return addToOrders(selected, hearingOrders, obj -> obj.getValue().getUploadDraftDocument(), orders);
     }
 
     private boolean populateSelectedFinalisedOrders(List<CaseDocument> orders, List<FinalisedOrderCollection> finalisedOrders,
-                                                    DynamicMultiSelectListElement checkboxSelected) {
-        return addToOrders(checkboxSelected, finalisedOrders, obj -> obj.getValue().getFinalisedDocument(), orders);
+                                                    OrderToShare selected) {
+        return addToOrders(selected, finalisedOrders, obj -> obj.getValue().getFinalisedDocument(), orders);
     }
 
     private void populateSelectedProcessedOrders(List<CaseDocument> orders, List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
-                                                 DynamicMultiSelectListElement checkboxSelected) {
-        addToOrders(checkboxSelected, agreedDraftOrderCollection, obj -> obj.getValue().getTargetDocument(), orders);
+                                                 OrderToShare selected) {
+        addToOrders(selected, agreedDraftOrderCollection, obj -> obj.getValue().getTargetDocument(), orders);
     }
 
-    private <T> boolean addToOrders(DynamicMultiSelectListElement doc, List<T> collection, Function<T, CaseDocument> documentExtractor,
+    private <T> boolean addToOrders(OrderToShare selected, List<T> collection, Function<T, CaseDocument> documentExtractor,
                                     List<CaseDocument> orders) {
         return emptyIfNull(collection).stream()
             .map(documentExtractor)
             .filter(Objects::nonNull)
-            .filter(caseDocument -> getDocumentId(caseDocument).equals(doc.getCode()))
+            .filter(caseDocument -> getDocumentId(caseDocument).equals(selected.getDocumentId()))
             .findFirst()
             .map(orders::add)
             .orElse(false);

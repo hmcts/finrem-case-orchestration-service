@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
@@ -28,6 +27,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -41,11 +44,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 
 @Slf4j
 @Service
@@ -78,7 +83,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+            && SEND_ORDER.equals(eventType);
     }
 
     @Override
@@ -92,10 +97,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseData caseData = caseDetails.getData();
         try {
             List<String> parties = generalOrderService.getParties(caseDetails);
-            log.info("Selected parties {} on Case ID: {}", parties, caseId);
+            List<OrderToShare> selectedOrders = getSelectedOrders(caseData.getSendOrderWrapper());
 
-            DynamicMultiSelectList selectedOrders = caseData.getSendOrderWrapper().getOrdersToShare();
-            log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
+            logSelectedPartiesAndOrders(parties,selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
             CaseDocument document = caseData.getSendOrderWrapper().getAdditionalDocument();
@@ -248,7 +252,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void clearTemporaryFields(FinremCaseData caseData) {
         caseData.getSendOrderWrapper().setAdditionalDocument(null);
-        caseData.getSendOrderWrapper().setOrdersToShare(null);
+        caseData.getSendOrderWrapper().setOrdersToShare(null); // it is not used in the new flow.
         caseData.getSendOrderWrapper().getOrdersToSend().setValue(null);
     }
 
@@ -298,7 +302,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void shareAndSendGeneralOrderWithSelectedParties(FinremCaseDetails caseDetails,
                                                              List<String> partyList,
-                                                             DynamicMultiSelectList selectedOrders,
+                                                             List<OrderToShare> selectedOrders,
                                                              List<OrderSentToPartiesCollection> printOrderCollection) {
         Long caseId = caseDetails.getId();
         log.info("Share selected 'GeneralOrder' With selected parties for caseId {}", caseId);
@@ -373,5 +377,31 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .isOrderStamped(YesOrNo.YES)
                 .build())
             .build();
+    }
+
+    private List<OrderToShare> getSelectedOrders(SendOrderWrapper sendOrderWrapper) {
+        return emptyIfNull(sendOrderWrapper.getOrdersToSend().getValue()).stream().map(OrderToShareCollection::getValue)
+            .filter(orderToShare -> YesOrNo.isYes(orderToShare.getDocumentToShare()))
+            .toList();
+    }
+
+    private String formatSelectedAttachment(OrderToShare o) {
+        return emptyIfNull(o.getAttachmentsToShare()).stream()
+            .map(AttachmentToShareCollection::getValue)
+            .filter(a -> YesOrNo.isYes(a.getDocumentToShare()))
+            .map(a -> a.getDocumentId() + "|" + a.getAttachmentName())
+            .collect(Collectors.joining(","));
+    }
+
+    private String formatOrderToShare(OrderToShare o) {
+        return format("%s|%s ===> [%s]", o.getDocumentId(), o.getDocumentName(), formatSelectedAttachment(o));
+    }
+
+    private String formatOrderToShareList(List<OrderToShare> selectedOrders) {
+        return selectedOrders.stream().map(this::formatOrderToShare).collect(Collectors.joining(","));
+    }
+
+    private void logSelectedPartiesAndOrders(List<String> parties, List<OrderToShare> selectedOrders, String caseId) {
+        log.info("{} - sending orders: ({}) to parties: {} on Case ID: {}", formatOrderToShareList(selectedOrders), SEND_ORDER, parties, caseId);
     }
 }

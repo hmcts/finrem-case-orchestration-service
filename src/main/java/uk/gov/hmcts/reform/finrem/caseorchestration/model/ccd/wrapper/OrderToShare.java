@@ -22,6 +22,8 @@ import static java.util.Optional.ofNullable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderToShare {
 
+    private String documentId;
+
     private String documentName;
 
     private YesOrNo documentToShare;

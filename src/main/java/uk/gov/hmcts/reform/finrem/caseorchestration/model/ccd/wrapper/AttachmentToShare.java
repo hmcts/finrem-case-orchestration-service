@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttachmentToShare {
 
+    private String documentId;
+
     private String attachmentName;
 
     private YesOrNo documentToShare;
