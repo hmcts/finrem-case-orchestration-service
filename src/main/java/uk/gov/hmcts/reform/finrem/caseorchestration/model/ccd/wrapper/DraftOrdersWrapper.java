@@ -65,46 +65,6 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("judgeApproval5")
     private JudgeApproval judgeApproval5;
 
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval1() {
-        if (judgeApproval1 == null) {
-            this.judgeApproval1 = new JudgeApproval();
-        }
-        return judgeApproval1;
-    }
-
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval2() {
-        if (judgeApproval2 == null) {
-            this.judgeApproval2 = new JudgeApproval();
-        }
-        return judgeApproval2;
-    }
-
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval3() {
-        if (judgeApproval3 == null) {
-            this.judgeApproval3 = new JudgeApproval();
-        }
-        return judgeApproval3;
-    }
-
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval4() {
-        if (judgeApproval4 == null) {
-            this.judgeApproval4 = new JudgeApproval();
-        }
-        return judgeApproval4;
-    }
-
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval5() {
-        if (judgeApproval5 == null) {
-            this.judgeApproval5 = new JudgeApproval();
-        }
-        return judgeApproval5;
-    }
-
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
             agreedDraftOrderCollection = new ArrayList<>();
