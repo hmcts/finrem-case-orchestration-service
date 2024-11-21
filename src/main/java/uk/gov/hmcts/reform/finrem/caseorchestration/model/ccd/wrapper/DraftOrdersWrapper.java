@@ -48,15 +48,61 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("suggestedDraftOrderCollection")
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
 
-    @JsonProperty("judgeApproval")
-    private JudgeApproval judgeApproval;
+    private YesOrNo showWarningMessageToJudge;
+
+    @JsonProperty("judgeApproval1")
+    private JudgeApproval judgeApproval1;
+
+    @JsonProperty("judgeApproval2")
+    private JudgeApproval judgeApproval2;
+
+    @JsonProperty("judgeApproval3")
+    private JudgeApproval judgeApproval3;
+
+    @JsonProperty("judgeApproval4")
+    private JudgeApproval judgeApproval4;
+
+    @JsonProperty("judgeApproval5")
+    private JudgeApproval judgeApproval5;
 
     @JsonIgnore
-    public JudgeApproval getJudgeApproval() {
-        if (judgeApproval == null) {
-            this.judgeApproval = new JudgeApproval();
+    public JudgeApproval getJudgeApproval1() {
+        if (judgeApproval1 == null) {
+            this.judgeApproval1 = new JudgeApproval();
         }
-        return judgeApproval;
+        return judgeApproval1;
+    }
+
+    @JsonIgnore
+    public JudgeApproval getJudgeApproval2() {
+        if (judgeApproval2 == null) {
+            this.judgeApproval2 = new JudgeApproval();
+        }
+        return judgeApproval2;
+    }
+
+    @JsonIgnore
+    public JudgeApproval getJudgeApproval3() {
+        if (judgeApproval3 == null) {
+            this.judgeApproval3 = new JudgeApproval();
+        }
+        return judgeApproval3;
+    }
+
+    @JsonIgnore
+    public JudgeApproval getJudgeApproval4() {
+        if (judgeApproval4 == null) {
+            this.judgeApproval4 = new JudgeApproval();
+        }
+        return judgeApproval4;
+    }
+
+    @JsonIgnore
+    public JudgeApproval getJudgeApproval5() {
+        if (judgeApproval5 == null) {
+            this.judgeApproval5 = new JudgeApproval();
+        }
+        return judgeApproval5;
     }
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
