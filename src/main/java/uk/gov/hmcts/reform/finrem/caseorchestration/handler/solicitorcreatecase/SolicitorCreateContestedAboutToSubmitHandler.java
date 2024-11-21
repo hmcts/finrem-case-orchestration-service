@@ -92,7 +92,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                     caseData.getRefugeWrapper().setRespondentInRefugeQuestion(null);
                 });
 
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }
