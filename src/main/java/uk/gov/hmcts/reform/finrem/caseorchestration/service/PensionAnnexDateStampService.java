@@ -40,11 +40,9 @@ public class PensionAnnexDateStampService {
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    static final String DEFAULT_PDTYPE_FONT_ARIAL = "Arial";
     static final String DEFAULT_PDTYPE_FONT_HELV = "Helv";
     static final String DEFAULT_PDTYPE_PREFIX = "/";
     static final String DEFAULT_PDTYPE_POSTFIX = " 10 Tf 0 g";
-    static PDDocument document = null;
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
