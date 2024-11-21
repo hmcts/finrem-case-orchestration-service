@@ -24,6 +24,8 @@ import static java.util.Optional.ofNullable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JudgeApproval {
 
+    private JudgeApprovalDocType docType;
+
     private String title;
 
     private String hearingInfo;

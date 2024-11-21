@@ -28,6 +28,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
 
 @Slf4j
@@ -111,7 +113,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(DraftOrderDocReviewCollection::getValue)
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> JudgeApproval.builder()
-                        .title("Draft Order")
+                        .docType(DRAFT_ORDER)
+                        .title(DRAFT_ORDER.getTitle())
                         .hearingInfo(hearingInfo)
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
@@ -125,7 +128,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(PsaDocReviewCollection::getValue)
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> JudgeApproval.builder()
-                        .title("PSA")
+                        .docType(PSA)
+                        .title(PSA.getTitle())
                         .hearingInfo(hearingInfo)
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
