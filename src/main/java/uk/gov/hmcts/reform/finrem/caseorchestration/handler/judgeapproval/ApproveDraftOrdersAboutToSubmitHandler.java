@@ -41,15 +41,17 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        clearInputFields(draftOrdersWrapper);
 
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    }
+
+    private void clearInputFields(DraftOrdersWrapper draftOrdersWrapper) {
         draftOrdersWrapper.setJudgeApproval1(null);
         draftOrdersWrapper.setJudgeApproval2(null);
         draftOrdersWrapper.setJudgeApproval3(null);
         draftOrdersWrapper.setJudgeApproval4(null);
         draftOrdersWrapper.setJudgeApproval5(null);
         draftOrdersWrapper.setHearingInstruction(null);
-
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 }
