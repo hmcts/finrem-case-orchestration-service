@@ -34,6 +34,8 @@ public interface IntervenerDetails {
 
     LocalDate getIntervenerDateAdded();
 
+    YesOrNo getIntervenerAddressConfidential();
+
     void setIntervenerName(String intervenerName);
 
     void setIntervenerEmail(String intervenerEmail);
@@ -59,4 +61,6 @@ public interface IntervenerDetails {
     void setIntervenerResideOutsideUK(YesOrNo intervenerResideOutsideUK);
 
     void setIntervenerDateAdded(LocalDate intervenerDateAdded);
+
+    void setIntervenerAddressConfidential(YesOrNo intervenerAddressConfidential);
 }
