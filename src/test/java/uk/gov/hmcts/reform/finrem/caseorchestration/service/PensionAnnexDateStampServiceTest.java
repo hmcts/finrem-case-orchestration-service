@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
@@ -65,7 +64,6 @@ class PensionAnnexDateStampServiceTest {
             .thenReturn(docInBytes);
         when(emUploadService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
-        when(genericDocumentService.toCaseDocument(any(Document.class))).thenCallRealMethod();
         service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId);
 
         verify(emUploadService).upload(filesCaptor.capture(), anyString(), anyString());
@@ -77,7 +75,7 @@ class PensionAnnexDateStampServiceTest {
     @Test
     void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() {
         Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId));
-        assertEquals("Missing or Invalid Approved Date of Order.", exception.getMessage());
+        assertEquals("Missing or Invalid Approved Date of Order for Case id: " + caseId, exception.getMessage());
     }
 
     @Test

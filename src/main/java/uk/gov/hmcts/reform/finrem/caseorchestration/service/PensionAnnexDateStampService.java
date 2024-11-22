@@ -40,15 +40,13 @@ public class PensionAnnexDateStampService {
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    static final String DEFAULT_PDTYPE_FONT_HELV = "Helv";
-    static final String DEFAULT_PDTYPE_PREFIX = "/";
-    static final String DEFAULT_PDTYPE_POSTFIX = " 10 Tf 0 g";
+    private static final String DEFAULT_PDTYPE_FONT_HELV = "/Helv 10 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
                                                      LocalDate approvalDate,
                                                      String caseId) throws Exception {
-        log.info("Adding date stamp to Pension Sharing Annex : {}", document);
+        log.info("Adding date stamp to Pension Sharing Annex for Case id: {}", caseId);
         Optional<LocalDate> optionalApprovalDate = Optional.ofNullable(approvalDate);
         if (optionalApprovalDate.isPresent()) {
             byte[] docInBytes = emDownloadService.download(document.getDocumentBinaryUrl(), authToken);
@@ -60,11 +58,11 @@ public class PensionAnnexDateStampService {
                 emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
             FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
                 .filter(response -> response.getStatus() == HttpStatus.OK)
-                .orElseThrow(() -> new DocumentStorageException("Failed to store document"));
+                .orElseThrow(() -> new DocumentStorageException("Failed to store document Case id: " + caseId));
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
             return genericDocumentService.toCaseDocument(dateStampedDocument);
         } else {
-            throw new StampDocumentException("Missing or Invalid Approved Date of Order.");
+            throw new StampDocumentException("Missing or Invalid Approved Date of Order for Case id: " + caseId);
         }
     }
 
@@ -76,8 +74,8 @@ public class PensionAnnexDateStampService {
             && (acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
-            if (textBox.getDefaultAppearance() == null && textBox.getDefaultAppearance().isEmpty()) {
-                textBox.setDefaultAppearance(DEFAULT_PDTYPE_PREFIX + DEFAULT_PDTYPE_FONT_HELV + DEFAULT_PDTYPE_POSTFIX);
+            if (textBox.getDefaultAppearance().isBlank()) {
+                textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELV);
             }
             textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
