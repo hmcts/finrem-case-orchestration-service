@@ -71,5 +71,4 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
-
 }
