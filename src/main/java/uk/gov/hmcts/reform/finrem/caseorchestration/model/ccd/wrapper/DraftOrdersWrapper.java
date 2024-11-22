@@ -69,14 +69,6 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("hearingInstruction")
     private HearingInstruction hearingInstruction;
 
-    @JsonIgnore
-    public HearingInstruction getHearingInstruction() {
-        if (hearingInstruction == null) {
-            this.hearingInstruction = new HearingInstruction();
-        }
-        return hearingInstruction;
-    }
-
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
             agreedDraftOrderCollection = new ArrayList<>();

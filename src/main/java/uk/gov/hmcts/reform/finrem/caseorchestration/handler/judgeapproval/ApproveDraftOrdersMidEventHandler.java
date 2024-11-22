@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
@@ -56,15 +57,16 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .map(JudgeApproval::getJudgeDecision)
             .anyMatch(decision -> decision != null && decision.isHearingInstructionRequired());
 
-        draftOrdersWrapper.getHearingInstruction().setShowRequireAnotherHearingQuestion(YesOrNo.forValue(isHearingInstructionRequired));
-
-        draftOrdersWrapper.getHearingInstruction().setAnotherHearingRequestCollection(List.of(
-            AnotherHearingRequestCollection.builder()
-                .value(AnotherHearingRequest.builder()
-                    .whichOrder(approveOrderService.buildWhichOrderDynamicList(draftOrdersWrapper))
-                    .build())
-                .build()
-        ));
+        draftOrdersWrapper.setHearingInstruction(HearingInstruction.builder()
+            .showRequireAnotherHearingQuestion(YesOrNo.forValue(isHearingInstructionRequired))
+            .anotherHearingRequestCollection(List.of(
+                AnotherHearingRequestCollection.builder()
+                    .value(AnotherHearingRequest.builder()
+                        .whichOrder(approveOrderService.buildWhichOrderDynamicList(draftOrdersWrapper))
+                        .build())
+                    .build()
+            ))
+            .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
