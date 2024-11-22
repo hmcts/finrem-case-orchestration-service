@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 @Slf4j
@@ -39,7 +40,14 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Invoking contested {} about-to-submit event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
         FinremCaseData finremCaseData = caseDetails.getData();
-        // DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+
+        draftOrdersWrapper.setJudgeApproval1(null);
+        draftOrdersWrapper.setJudgeApproval2(null);
+        draftOrdersWrapper.setJudgeApproval3(null);
+        draftOrdersWrapper.setJudgeApproval4(null);
+        draftOrdersWrapper.setJudgeApproval5(null);
+        draftOrdersWrapper.setHearingInstruction(null);
 
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
