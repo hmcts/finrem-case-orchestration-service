@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandle
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -28,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
@@ -120,7 +122,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
-                            a.getSubmittedDate()))
+                            a.getSubmittedDate(), ofNullable(a.getDraftOrderDocument()).orElse(CaseDocument.builder().documentFilename("").build())
+                            .getDocumentFilename()))
                         .build());
 
                 // Process PSAs
@@ -134,7 +137,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
-                            a.getSubmittedDate()))
+                            a.getSubmittedDate(), ofNullable(a.getPsaDocument()).orElse(CaseDocument.builder().documentFilename("").build())
+                            .getDocumentFilename()))
                         .build());
 
                 // Combine the two streams
@@ -143,7 +147,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             .sorted(Comparator.comparing(JudgeApproval::getSortKey, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
     }
-
 
     private JudgeApproval createReviewableItems(List<DraftOrdersReviewCollection> outstanding, int index) {
         List<JudgeApproval> collection = getReviewableItems(outstanding);
