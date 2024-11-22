@@ -42,7 +42,6 @@ class PensionAnnexDateStampServiceTest {
     @Mock
     private EvidenceManagementDownloadService emDownloadService;
     @Mock
-    private GenericDocumentService genericDocumentService;
     private final String caseId = "123123123";
     private final LocalDate approvalDate = LocalDate.of(2024, 12, 31);
     @Captor
