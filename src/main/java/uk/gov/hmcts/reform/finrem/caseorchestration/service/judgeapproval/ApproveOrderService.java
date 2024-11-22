@@ -19,6 +19,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApproveOrderService {
 
+    /**
+     * Builds a {@link DynamicList} representing the orders available for selection
+     * based on the given {@link DraftOrdersWrapper}. Each order is represented as a
+     * {@link DynamicListElement} containing a code and label.
+     *
+     * <p>The method processes up to 5 judge approvals, where each approval contributes a list item
+     * if the approval is non-null and the associated document filename is not empty.</p>
+     *
+     * <p>For each {@link JudgeApproval}:</p>
+     * <ul>
+     *     <li>The code is prefixed with "draftOrder" or "psa", depending on the document type.</li>
+     *     <li>The filename is used as the label of the list item.</li>
+     * </ul>
+     *
+     * <p>Example:</p>
+     * <pre>
+     * Code: draftOrder_1, Label: OrderDocument1.pdf
+     * Code: psa_2, Label: PensionSharingAnnex1.pdf
+     * </pre>
+     *
+     * @param draftOrdersWrapper the {@link DraftOrdersWrapper} containing the judge approvals.
+     * @return a {@link DynamicList} populated with items representing the orders.
+     */
     public DynamicList buildWhichOrderDynamicList(DraftOrdersWrapper draftOrdersWrapper) {
         List<DynamicListElement> listItems = new ArrayList<>();
 
