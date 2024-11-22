@@ -16,6 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 
@@ -43,10 +49,10 @@ class ApproveOrderServiceTest {
         if (expectedCode == null) {
             Assertions.assertTrue(dynamicList.getListItems().isEmpty());
         } else {
-            Assertions.assertEquals(1, dynamicList.getListItems().size());
+            assertEquals(1, dynamicList.getListItems().size());
             DynamicListElement element = dynamicList.getListItems().get(0);
-            Assertions.assertEquals(expectedCode, element.getCode());
-            Assertions.assertEquals(expectedLabel, element.getLabel());
+            assertEquals(expectedCode, element.getCode());
+            assertEquals(expectedLabel, element.getLabel());
         }
     }
 
@@ -66,16 +72,16 @@ class ApproveOrderServiceTest {
         DynamicList dynamicList = underTest.buildWhichOrderDynamicList(draftOrdersWrapper);
 
         // Assert
-        Assertions.assertEquals(2,dynamicList.getListItems().size());
+        assertEquals(2,dynamicList.getListItems().size());
 
         List<DynamicListElement> listItems = dynamicList.getListItems();
 
         // Additional checks to validate correct elements
-        Assertions.assertEquals("draftOrder_" + 1, listItems.get(0).getCode());
-        Assertions.assertEquals(expectedDocumentNamePrefix("READY_TO_BE_SEALED") + "DraftDocument" + 1 + ".pdf", listItems.get(0).getLabel());
+        assertEquals("draftOrder_" + 1, listItems.get(0).getCode());
+        assertEquals(expectedDocumentNamePrefix("READY_TO_BE_SEALED") + "DraftDocument" + 1 + ".pdf", listItems.get(0).getLabel());
 
-        Assertions.assertEquals("psa_" + 3, listItems.get(1).getCode());
-        Assertions.assertEquals(expectedDocumentNamePrefix("JUDGE_NEEDS_TO_MAKE_CHANGES") + "PsaDocument" + 3 + ".pdf", listItems.get(1).getLabel());
+        assertEquals("psa_" + 3, listItems.get(1).getCode());
+        assertEquals(expectedDocumentNamePrefix("JUDGE_NEEDS_TO_MAKE_CHANGES") + "PsaDocument" + 3 + ".pdf", listItems.get(1).getLabel());
     }
 
     private void setJudgeApprovalToDraftOrdersWrapper(int index, DraftOrdersWrapper draftOrdersWrapper, JudgeApproval target) {
@@ -120,6 +126,38 @@ class ApproveOrderServiceTest {
         }
 
         return judgeApproval;
+    }
+
+    @Test
+    void testResolveJudgeApproval() {
+        // Mock DraftOrdersWrapper
+        DraftOrdersWrapper draftOrdersWrapper = mock(DraftOrdersWrapper.class);
+
+        // Mock JudgeApproval objects
+        JudgeApproval judgeApproval1 = new JudgeApproval();
+        JudgeApproval judgeApproval2 = new JudgeApproval();
+        JudgeApproval judgeApproval3 = new JudgeApproval();
+        JudgeApproval judgeApproval4 = new JudgeApproval();
+        JudgeApproval judgeApproval5 = new JudgeApproval();
+
+        // Stub the DraftOrdersWrapper methods
+        when(draftOrdersWrapper.getJudgeApproval1()).thenReturn(judgeApproval1);
+        when(draftOrdersWrapper.getJudgeApproval2()).thenReturn(judgeApproval2);
+        when(draftOrdersWrapper.getJudgeApproval3()).thenReturn(judgeApproval3);
+        when(draftOrdersWrapper.getJudgeApproval4()).thenReturn(judgeApproval4);
+        when(draftOrdersWrapper.getJudgeApproval5()).thenReturn(judgeApproval5);
+
+        // Test valid indices
+        assertEquals(judgeApproval1, underTest.resolveJudgeApproval(draftOrdersWrapper, 1));
+        assertEquals(judgeApproval2, underTest.resolveJudgeApproval(draftOrdersWrapper, 2));
+        assertEquals(judgeApproval3, underTest.resolveJudgeApproval(draftOrdersWrapper, 3));
+        assertEquals(judgeApproval4, underTest.resolveJudgeApproval(draftOrdersWrapper, 4));
+        assertEquals(judgeApproval5, underTest.resolveJudgeApproval(draftOrdersWrapper, 5));
+
+        // Test invalid index
+        assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, 6));
+        assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, 0));
+        assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, -1));
     }
 
 }

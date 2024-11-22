@@ -52,7 +52,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
         boolean isHearingInstructionRequired = IntStream.rangeClosed(1, 5)
-            .mapToObj(i -> locateJudgeApproval(draftOrdersWrapper, i))
+            .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
             .filter(Objects::nonNull)
             .map(JudgeApproval::getJudgeDecision)
             .anyMatch(decision -> decision != null && decision.isHearingInstructionRequired());
@@ -71,15 +71,5 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
-    private JudgeApproval locateJudgeApproval(DraftOrdersWrapper draftOrdersWrapper, int index) {
-        return switch (index) {
-            case 1 -> draftOrdersWrapper.getJudgeApproval1();
-            case 2 -> draftOrdersWrapper.getJudgeApproval2();
-            case 3 -> draftOrdersWrapper.getJudgeApproval3();
-            case 4 -> draftOrdersWrapper.getJudgeApproval4();
-            case 5 -> draftOrdersWrapper.getJudgeApproval5();
-            default -> null;
-        };
-    }
 
 }
