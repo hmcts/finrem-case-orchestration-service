@@ -429,7 +429,6 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
-    private YesOrNo applicantInRefuge;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -1023,7 +1022,7 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return refugeWrapper;
     }
-  
+
     @JsonIgnore
     public ListForHearingWrapper getListForHearingWrapper() {
         if (listForHearingWrapper == null) {
