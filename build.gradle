@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.15'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1463'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1471'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -18,7 +18,7 @@ def versions = [
         guava                : '33.3.1-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.5-SPRING2',
-        commonsIo            : '2.17.0',
+        commonsIo            : '2.18.0',
         commonsLang3         : '3.17.0',
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
@@ -27,7 +27,7 @@ def versions = [
         pact                 : '4.6.15',
         pdfbox               : '3.0.3',
         reformLogging        : '6.1.7',
-        serenity             : '4.2.8',
+        serenity             : '4.2.9',
         serviceTokenGenerator: '5.2.0',
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
