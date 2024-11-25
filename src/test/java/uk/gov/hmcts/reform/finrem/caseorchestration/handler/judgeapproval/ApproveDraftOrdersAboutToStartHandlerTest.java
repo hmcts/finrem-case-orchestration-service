@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
@@ -165,7 +166,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             if (expected != null && actual != null) {
                 assertEquals(expected.getDocument(), actual.getDocument());
                 assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
-                assertEquals(expected.getAttachments(), actual.getAttachments());
+                if (expected.getHasAttachment() == YES) {
+                    assertEquals(expected.getAttachments(), actual.getAttachments());
+                }
             } else {
                 assertEquals(expected, actual);
             }
@@ -209,7 +212,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReviewWithoutSubmittedDate(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments) {
+                                                                                                   List<CaseDocumentCollection> attachments) {
         return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, null);
     }
 
@@ -356,7 +359,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static Arguments withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate() {
         DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReview(DO_DOC_1, List.of(DO_ATTACHMENT_1));
         DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2));
-        PsaDocReviewCollection doc2 =  buildPsaDocReviewCollection(PSA_DOC_1);
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollection(PSA_DOC_1);
 
         return Arguments.of(
             DraftOrdersWrapper.builder()
@@ -382,7 +385,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static Arguments withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate2() {
         DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReview(DO_DOC_1, List.of(DO_ATTACHMENT_1));
-        PsaDocReviewCollection doc2 =  buildPsaDocReviewCollection(PSA_DOC_1);
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollection(PSA_DOC_1);
         DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2));
 
         return Arguments.of(
@@ -409,7 +412,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static Arguments withSameHearingInfoAndDocumentShouldBeSortedByDocumentFilename() {
         DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReviewWithoutSubmittedDate(DO_DOC_1, List.of(DO_ATTACHMENT_1));
-        PsaDocReviewCollection doc2 =  buildPsaDocReviewCollectionWithoutSumittedDate(PSA_DOC_1);
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollectionWithoutSumittedDate(PSA_DOC_1);
         DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReviewWithoutSubmittedDate(DO_DOC_2, List.of(DO_ATTACHMENT_2));
 
         return Arguments.of(
@@ -434,225 +437,196 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             NO);
     }
 
-//
-//    private static Arguments withProcessedDraftOrderAndPsa() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo1(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(APPROVED_BY_JUDGE),
-//                                buildPsaDocReviewCollection(PROCESSED_BY_ADMIN),
-//                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED)
-//                            ))
-//                            .draftOrderDocReviewCollection(List.of(
-//                                buildDraftOrderDocumentReview(APPROVED_BY_JUDGE),
-//                                buildDraftOrderDocumentReview(PROCESSED_BY_ADMIN),
-//                                buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2), TO_BE_REVIEWED)
-//                            )))
-//                            .build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
-//            null, null, null, null,
-//            // expectedReviewablePsa(1-5)
-//
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-//            null, null, null, null,
-//            // expectedWarningMessageToJudge
-//            null);
-//    }
-//
-//    private static Arguments withSixPsas() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo1(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_6, TO_BE_REVIEWED)
-//                            ))
-//                            ).build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            null, null, null, null, null,
-//            // expectedReviewablePsa(1-5)
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
-//            // expectedWarningMessageToJudge
-//            WARNING_MESSAGE);
-//    }
-//
-//    private static Arguments withSixDraftOrders() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo2(DraftOrdersReview.builder()
-//                            .draftOrderDocReviewCollection(List.of(
-//                                buildDraftOrderDocumentReview(DO_DOC_1, List.of(), TO_BE_REVIEWED),
-//                                buildDraftOrderDocumentReview(DO_DOC_2, List.of(), TO_BE_REVIEWED),
-//                                buildDraftOrderDocumentReview(DO_DOC_3, List.of(), TO_BE_REVIEWED),
-//                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED),
-//                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED),
-//                                buildDraftOrderDocumentReview(DO_DOC_6, List.of(), TO_BE_REVIEWED)
-//                            ))
-//                        ).build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_1, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_2, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_3, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_4, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_5, List.of()),
-//            // expectedReviewablePsa(1-5)
-//            null, null, null, null, null,
-//            // expectedWarningMessageToJudge
-//            WARNING_MESSAGE);
-//    }
-//
-//    private static Arguments withFiveReviewablePsas() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo1(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED),
-//                                buildPsaDocReviewCollection(APPROVED_BY_JUDGE)
-//                            ))
-//                        ).build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            null, null, null, null, null,
-//            // expectedReviewablePsa(1-5)
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
-//            // expectedWarningMessageToJudge
-//            null);
-//    }
-//
-//    private static Arguments withDraftOrdersAndPsaAndShouldOrderBySubmittedDate() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo1(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED, LocalDateTime.now()),
-//                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
-//                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED, LocalDateTime.now()),
-//                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED, LocalDateTime.now()),
-//                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED, LocalDateTime.now())
-//                            ))
-//                            .draftOrderDocReviewCollection(List.of(
-//                                buildDraftOrderDocumentReview(DO_DOC_1, List.of()),
-//                                buildDraftOrderDocumentReview(DO_DOC_2, List.of()),
-//                                buildDraftOrderDocumentReview(DO_DOC_3, List.of()),
-//                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
-//                                buildDraftOrderDocumentReview(DO_DOC_5, List.of())
-//                            ))
-//                        ).build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_4, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_3, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_5, List.of()),
-//            // expectedReviewablePsa(1-5)
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
-//            // expectedWarningMessageToJudge
-//            null);
-//    }
-//
-//    private static Arguments withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate() {
-//        return Arguments.of(
-//            DraftOrdersWrapper.builder()
-//                .draftOrdersReviewCollection(List.of(
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo2(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED, LocalDateTime.now()),
-//                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1))
-//                            ))
-//                            .draftOrderDocReviewCollection(List.of(
-//                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
-//                                buildDraftOrderDocumentReview(DO_DOC_4, List.of())
-//                            ))
-//                        ).build())
-//                        .build(),
-//                    DraftOrdersReviewCollection.builder()
-//                        .value(applyHearingInfo1(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(
-//                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED, LocalDateTime.now()),
-//                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED, LocalDateTime.now())
-//                            ))
-//                            .draftOrderDocReviewCollection(List.of(
-//                                buildDraftOrderDocumentReview(DO_DOC_1, List.of()),
-//                                buildDraftOrderDocumentReview(DO_DOC_2, List.of())
-//                            ))
-//                        ).build())
-//                        .build()
-//                ))
-//                .build(),
-//            // expectedReviewableDraftOrder(1-5)
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_5, List.of()),
-//            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_4, List.of()),
-//            null,
-//            // expectedReviewablePsa(1-5)
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-//            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-//            buildReviewablePsa("hearingServiceFormattedString2", PSA_DOC_2),
-//            buildReviewablePsa("hearingServiceFormattedString2", PSA_DOC_1),
-//            null,
-//            // expectedWarningMessageToJudge
-//            null);
-//    }
-//
+    private static Arguments withProcessedDraftOrderAndPsa() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(APPROVED_BY_JUDGE),
+                                buildPsaDocReviewCollection(PROCESSED_BY_ADMIN),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED)
+                            ))
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(APPROVED_BY_JUDGE),
+                                buildDraftOrderDocumentReview(PROCESSED_BY_ADMIN),
+                                buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2), TO_BE_REVIEWED)
+                            )))
+                            .build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            null, null, null,
+            NO);
+    }
+
+    private static Arguments withSixPsas() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_6, TO_BE_REVIEWED)
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            YES);
+    }
+
+    private static Arguments withSixDraftOrders() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo2(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(DO_DOC_1, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_2, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_3, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED),
+                                buildDraftOrderDocumentReview(DO_DOC_6, List.of(), TO_BE_REVIEWED)
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_5, List.of()),
+            // expectedWarningMessageToJudge
+            YES);
+    }
+
+    private static Arguments withFiveReviewablePsas() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED),
+                                buildPsaDocReviewCollection(APPROVED_BY_JUDGE)
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            NO);
+    }
+
+    private static Arguments withDraftOrdersAndPsaAndShouldOrderBySubmittedDate() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
+                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED, LocalDateTime.now())
+                            ))
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(DO_DOC_1, List.of()),
+                                buildDraftOrderDocumentReview(DO_DOC_2, List.of()),
+                                buildDraftOrderDocumentReview(DO_DOC_3, List.of()),
+                                buildDraftOrderDocumentReview(DO_DOC_4, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
+                                buildDraftOrderDocumentReview(DO_DOC_5, List.of())
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
+            // expectedWarningMessageToJudge
+            YES);
+    }
+
+    private static Arguments withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate() {
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo2(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_1, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED, LocalDateTime.now().minusDays(1))
+                            ))
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(DO_DOC_5, List.of(), TO_BE_REVIEWED, LocalDateTime.now().minusDays(1)),
+                                buildDraftOrderDocumentReview(DO_DOC_4, List.of())
+                            ))
+                        ).build())
+                        .build(),
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PSA_DOC_3, TO_BE_REVIEWED, LocalDateTime.now()),
+                                buildPsaDocReviewCollection(PSA_DOC_4, TO_BE_REVIEWED, LocalDateTime.now())
+                            ))
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocumentReview(DO_DOC_1, List.of()),
+                                buildDraftOrderDocumentReview(DO_DOC_2, List.of())
+                            ))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", PSA_DOC_2, List.of()),
+            // expectedWarningMessageToJudge
+            YES);
+    }
+
     private static Stream<Arguments> provideDraftOrderData() {
         return Stream.of(
             withEmptyDraftOrdersWrapper(), withOneDraftOrderAndOnePsa(), withTwoDraftOrderAndZeroPsa(),
             withDifferentHearingInfo(),
             withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate(),
             withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate2(),
-            withSameHearingInfoAndDocumentShouldBeSortedByDocumentFilename()
-//            withProcessedDraftOrderAndPsa(), withSixPsas()
-//            withFiveReviewablePsas(), withDraftOrdersAndPsaAndShouldOrderBySubmittedDate(),
-//            withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate(),
-//            withSixDraftOrders()
+            withSameHearingInfoAndDocumentShouldBeSortedByDocumentFilename(),
+            withProcessedDraftOrderAndPsa(),
+            withSixPsas(),
+            withFiveReviewablePsas(),
+            withDraftOrdersAndPsaAndShouldOrderBySubmittedDate(),
+            withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate(),
+            withSixDraftOrders()
         );
     }
 }
