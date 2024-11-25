@@ -72,7 +72,7 @@ class HearingServiceTest {
                 List.of(),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                     }
                 })
             ),
@@ -87,8 +87,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing
                     }
                 })
             ),
@@ -104,9 +104,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-01 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "1 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
                     }
                 })
             ),
@@ -122,9 +122,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
                     }
                 })
             ),
@@ -140,9 +140,9 @@ class HearingServiceTest {
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
                         // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)");
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)");
                         // UUID for interim hearing with invalid time
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 Invalid Time - Directions (DIR)");
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 Invalid Time - Directions (DIR)");
                     }
                 })
             ),
@@ -158,9 +158,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
-                        put("00000000-0000-0000-0000-000000000000", "2024-03-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Mar 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                     }
                 })
             ),
@@ -185,8 +185,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - (unknown)"); // UUID for interim hearing with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - (unknown)"); // UUID for interim hearing with null type
                     }
                 })
             ),
@@ -201,7 +201,7 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                         put("00000000-0000-0000-0000-000000000002", "(unknown) 2:00 AM - Directions (DIR)"); // Interim hearing with null date
                     }
                 })
@@ -217,8 +217,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 (unknown) - Directions (DIR)"); // Interim hearing with null time
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 (unknown) - Directions (DIR)"); // Interim hearing with null time
                     }
                 })
             ),
@@ -233,8 +233,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
                 })
             ),
@@ -249,9 +249,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - (unknown)"); // Interim hearing 2 with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - (unknown)"); // Interim hearing 2 with null type
                     }
                 })
             ),
@@ -266,9 +266,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - (unknown)"); // Top-level hearing with null type
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
                 })
             )
