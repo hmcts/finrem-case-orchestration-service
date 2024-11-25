@@ -429,6 +429,7 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
+    private YesOrNo applicantInRefuge;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
