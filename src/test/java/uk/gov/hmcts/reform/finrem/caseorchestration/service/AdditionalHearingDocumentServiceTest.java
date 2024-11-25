@@ -199,7 +199,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertEquals(1, data.getFinalOrderCollection().size());
         assertEquals(1, data.getUploadHearingOrder().size());
         assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertEquals(caseDocument(), data.getListForHearingWrapper()
+            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
     }
 
     @Test
@@ -254,7 +255,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertEquals(1, data.getFinalOrderCollection().size());
         assertEquals(1, data.getUploadHearingOrder().size());
         assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertEquals(caseDocument(), data.getListForHearingWrapper()
+            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
     }
 
     @Test
@@ -311,7 +313,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertEquals(2, data.getFinalOrderCollection().size());
         assertEquals(1, data.getUploadHearingOrder().size());
         assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertEquals(caseDocument(), data.getListForHearingWrapper()
+            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
     }
 
     @Test
@@ -363,7 +366,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertEquals(2, data.getFinalOrderCollection().size());
         assertEquals(1, data.getUploadHearingOrder().size());
         assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertNull(data.getAdditionalHearingDocuments());
+        assertNull(data.getListForHearingWrapper().getAdditionalHearingDocuments());
     }
 
     @Test
