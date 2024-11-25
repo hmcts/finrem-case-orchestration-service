@@ -429,7 +429,8 @@ public class DocumentHelper {
     }
 
     public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getListForHearingWrapper()
+            .getAdditionalHearingDocuments();
         Optional<AdditionalHearingDocumentCollection> documentCollection
             = ofNullable(additionalHearingDocuments)
             .orElse(emptyList())

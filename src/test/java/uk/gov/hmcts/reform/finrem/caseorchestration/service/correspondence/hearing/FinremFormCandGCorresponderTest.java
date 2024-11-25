@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -43,7 +44,7 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         caseDetails = caseDetails();
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
@@ -59,7 +60,10 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
 
     private FinremCaseDetails caseDetails() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .hearingDate(LocalDate.parse(DATE_OF_HEARING))
+            .listForHearingWrapper(ListForHearingWrapper.builder()
+                .hearingDate(LocalDate.parse(DATE_OF_HEARING))
+                .additionalListOfHearingDocuments(caseDocument())
+                .build())
             .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
             .formC(caseDocument())
             .formG(caseDocument())
@@ -71,7 +75,6 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
                         .build())
                     .build()))
             .outOfFamilyCourtResolution(caseDocument())
-            .additionalListOfHearingDocuments(caseDocument())
             .build();
         return FinremCaseDetails.builder().id(1234L).data(caseData).build();
     }
