@@ -44,10 +44,10 @@ public class SortKey implements Comparable<SortKey> {
     /**
      * Constructs a {@link SortKey} with the specified details.
      *
-     * @param hearingTime         the hearing time, can be null.
-     * @param hearingDate         the hearing date, can be null.
+     * @param hearingTime           the hearing time, can be null.
+     * @param hearingDate           the hearing date, can be null.
      * @param documentSubmittedDate the document submission date and time, can be null.
-     * @param documentFilename    the filename of the document, can be null.
+     * @param documentFilename      the filename of the document, can be null.
      */
     public SortKey(String hearingTime, LocalDate hearingDate, LocalDateTime documentSubmittedDate, String documentFilename) {
         this.hearingTime = hearingTime;
@@ -62,7 +62,7 @@ public class SortKey implements Comparable<SortKey> {
      *
      * @param other the other {@link SortKey} to compare against.
      * @return a negative integer, zero, or a positive integer as this object is less than,
-     * equal to, or greater than the specified object.
+     *              equal to, or greater than the specified object.
      */
     @Override
     public int compareTo(SortKey other) {
