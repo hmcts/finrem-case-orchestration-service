@@ -70,10 +70,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                 .mapToInt(outstandingItem ->
                     outstandingItem.getValue().getDraftOrderDocReviewCollection().stream()
                         .filter(draftOrderDoc -> isJudgeReviewable(draftOrderDoc.getValue().getOrderStatus()))
-                        .toList().size() +
-                        outstandingItem.getValue().getPsaDocReviewCollection().stream()
-                            .filter(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()))
-                            .toList().size()
+                        .toList().size()
+                        + outstandingItem.getValue().getPsaDocReviewCollection().stream()
+                        .filter(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()))
+                        .toList().size()
                 )
                 .sum();
 
