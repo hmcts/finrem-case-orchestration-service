@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -75,5 +76,21 @@ public class DraftOrdersReview implements HasCaseDocument {
             .map(LocalDateTime::toLocalDate)  // Convert LocalDateTime to LocalDate
             .min(LocalDate::compareTo)  // Find the minimum LocalDate
             .orElse(null);  // Return null if no dates are found
+    }
+
+    @JsonIgnore
+    public Reviewable getLatestToBeReviewedOrder() {
+        // Collect reviewable items from both collections
+        List<? extends Reviewable> reviewables = Stream.concat(
+                ofNullable(draftOrderDocReviewCollection).orElse(List.of()).stream().map(DraftOrderDocReviewCollection::getValue),
+                ofNullable(psaDocReviewCollection).orElse(List.of()).stream().map(PsaDocReviewCollection::getValue))
+            .toList();
+
+        // Find the item with the latest submission date
+        return reviewables.stream()
+            .filter(r -> OrderStatus.TO_BE_REVIEWED.equals(r.getOrderStatus()))
+            .filter(r -> r.getSubmittedDate() != null)
+            .max(Comparator.comparing(Reviewable::getSubmittedDate)) // Find the latest by submission date
+            .orElse(null);
     }
 }

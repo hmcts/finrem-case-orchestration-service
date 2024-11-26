@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,36 +35,31 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrdersNotificationRequestMapperTest {
-
     @Mock
-    HearingService hearingService;
-    @Mock
-    CourtDetailsConfiguration courtDetailsConfiguration;
+    private CourtDetailsConfiguration courtDetailsConfiguration;
     @InjectMocks
     private DraftOrdersNotificationRequestMapper mapper;
 
     @Test
     void shouldBuildJudgeNotificationRequestWithValidData() {
         FinremCaseDetails caseDetails = createCaseDetails();
+        LocalDate hearingDate = LocalDate.of(2024, 11, 10);
+        String judge = "judge@test.com";
 
-        when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.of(1999, 8, 6));
+        NotificationRequest result = mapper.buildJudgeNotificationRequest(caseDetails, hearingDate, judge);
 
-        NotificationRequest result = mapper.buildJudgeNotificationRequest(caseDetails);
-
-        verify(hearingService).getHearingDate(any(), any());
         assertEquals("123456789", result.getCaseReferenceNumber());
-        assertEquals("6 August 1999", result.getHearingDate());
+        assertEquals("10 November 2024", result.getHearingDate());
         assertEquals("judge@test.com", result.getNotificationEmail());
         assertEquals("Hamzah Tahir", result.getApplicantName());
         assertEquals("Anne Taylor", result.getRespondentName());
+
     }
 
     private FinremCaseDetails createCaseDetails() {
