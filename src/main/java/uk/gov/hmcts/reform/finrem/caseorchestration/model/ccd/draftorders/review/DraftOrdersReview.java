@@ -8,19 +8,26 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class DraftOrdersReview implements HasCaseDocument {
     private String hearingType;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -48,5 +55,21 @@ public class DraftOrdersReview implements HasCaseDocument {
             this.psaDocReviewCollection = new ArrayList<>();
         }
         return this.psaDocReviewCollection;
+    }
+
+    @JsonIgnore
+    public Reviewable getLatestToBeReviewedOrder() {
+        // Collect reviewable items from both collections
+        List<? extends Reviewable> reviewables = Stream.concat(
+                ofNullable(draftOrderDocReviewCollection).orElse(List.of()).stream().map(DraftOrderDocReviewCollection::getValue),
+                ofNullable(psaDocReviewCollection).orElse(List.of()).stream().map(PsaDocReviewCollection::getValue))
+            .toList();
+
+        // Find the item with the latest submission date
+        return reviewables.stream()
+            .filter(r -> OrderStatus.TO_BE_REVIEWED.equals(r.getOrderStatus()))
+            .filter(r -> r.getSubmittedDate() != null)
+            .max(Comparator.comparing(Reviewable::getSubmittedDate)) // Find the latest by submission date
+            .orElse(null);
     }
 }
