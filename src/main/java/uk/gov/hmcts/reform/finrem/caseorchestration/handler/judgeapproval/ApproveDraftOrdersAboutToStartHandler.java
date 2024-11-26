@@ -68,12 +68,23 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         if (errors.isEmpty()) {
             List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
 
-            draftOrdersWrapper.setShowWarningMessageToJudge(YesOrNo.forValue(outstanding.size() > 5));
-            draftOrdersWrapper.setJudgeApproval1(createReviewableItems(outstanding,1));
-            draftOrdersWrapper.setJudgeApproval2(createReviewableItems(outstanding,2));
-            draftOrdersWrapper.setJudgeApproval3(createReviewableItems(outstanding,3));
-            draftOrdersWrapper.setJudgeApproval4(createReviewableItems(outstanding,4));
-            draftOrdersWrapper.setJudgeApproval5(createReviewableItems(outstanding,5));
+            int totalOutstandingReviews = outstanding.stream()
+                .mapToInt(outstandingItem ->
+                    outstandingItem.getValue().getDraftOrderDocReviewCollection().stream()
+                        .filter(draftOrderDoc -> isJudgeReviewable(draftOrderDoc.getValue().getOrderStatus()))
+                        .toList().size()
+                        + outstandingItem.getValue().getPsaDocReviewCollection().stream()
+                        .filter(psa -> isJudgeReviewable(psa.getValue().getOrderStatus()))
+                        .toList().size()
+                )
+                .sum();
+
+            draftOrdersWrapper.setShowWarningMessageToJudge(YesOrNo.forValue(totalOutstandingReviews > 5));
+            draftOrdersWrapper.setJudgeApproval1(createReviewableItems(outstanding, 1));
+            draftOrdersWrapper.setJudgeApproval2(createReviewableItems(outstanding, 2));
+            draftOrdersWrapper.setJudgeApproval3(createReviewableItems(outstanding, 3));
+            draftOrdersWrapper.setJudgeApproval4(createReviewableItems(outstanding, 4));
+            draftOrdersWrapper.setJudgeApproval5(createReviewableItems(outstanding, 5));
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
