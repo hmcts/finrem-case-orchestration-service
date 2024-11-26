@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,10 +31,13 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class HearingService {
 
+    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy");
+
     static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
 
     // Helper class to handle sorting by date, time, and type.
-    private record HearingSortingKey(LocalDate hearingDate, String hearingTime, String hearingType) implements Comparable<HearingSortingKey> {
+    private record HearingSortingKey(LocalDate hearingDate, String hearingTime,
+                                     String hearingType) implements Comparable<HearingSortingKey> {
 
         @Override
         public int compareTo(HearingSortingKey other) {
@@ -55,7 +57,7 @@ public class HearingService {
 
     String formatDynamicListElementLabel(String hearingTypeInString, LocalDate hearingDate, String hearingTime) {
         return format("%s %s - %s",
-            hearingDate == null ? toUnknownDisplayText() : FinremDateUtils.getDateFormatter().format(hearingDate),
+            hearingDate == null ? toUnknownDisplayText() : dateFormatter.format(hearingDate),
             StringUtils.isEmpty(hearingTime) ? toUnknownDisplayText() : hearingTime,
             StringUtils.isEmpty(hearingTypeInString) ? toUnknownDisplayText() : hearingTypeInString);
     }
@@ -131,7 +133,7 @@ public class HearingService {
     }
 
     public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected,  ListForHearingWrapper::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
     }
 
     // Helper method to get hearing information
