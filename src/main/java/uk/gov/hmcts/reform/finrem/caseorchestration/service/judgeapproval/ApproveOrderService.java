@@ -77,12 +77,12 @@ public class ApproveOrderService {
         draftOrdersWrapper.getDraftOrdersReviewCollection().forEach(el -> {
             if (el.getValue() != null) {
                 processDraftOrderDocReviewCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-                processPsaDocReviewCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, userAuthorisation);
+                processPsaDocReviewCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
             }
         });
         draftOrdersWrapper.getAgreedDraftOrderCollection().forEach(el -> {
             if (el.getValue() != null) {
-                processAgreedDraftOrderCollection(el.getValue(), targetDoc);
+                processAgreedDraftOrderCollection(el.getValue(), targetDoc, judgeApproval);
             }
         });
     }
@@ -98,22 +98,35 @@ public class ApproveOrderService {
         }
     }
 
-    private void processPsaDocReviewCollection(List<PsaDocReviewCollection> psaReviews, CaseDocument targetDoc, String userAuthorisation) {
+    private void processPsaDocReviewCollection(List<PsaDocReviewCollection> psaReviews, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                               String userAuthorisation) {
         if (psaReviews != null) {
             psaReviews.forEach(el -> {
                 if (targetDoc.equals(el.getValue().getPsaDocument())) {
-                    handlePsaDocumentUpdate(el.getValue(), userAuthorisation);
+                    handlePsaDocumentUpdate(el.getValue(), judgeApproval, userAuthorisation);
                 }
             });
         }
     }
 
-    private void processAgreedDraftOrderCollection(AgreedDraftOrder agreedDraftOrder, CaseDocument targetDoc) {
-        if (agreedDraftOrder != null
-            && (targetDoc.equals(agreedDraftOrder.getDraftOrder()) || targetDoc.equals(agreedDraftOrder.getPensionSharingAnnex()))) {
-            agreedDraftOrder.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
+    private void processAgreedDraftOrderCollection(AgreedDraftOrder agreedDraftOrder, CaseDocument targetDoc, JudgeApproval judgeApproval) {
+        if (agreedDraftOrder == null
+            || (!targetDoc.equals(agreedDraftOrder.getDraftOrder()) && !targetDoc.equals(agreedDraftOrder.getPensionSharingAnnex()))) {
+            return;
+        }
+
+        agreedDraftOrder.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
+
+        if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
+            CaseDocument amendedDocument = judgeApproval.getAmendedDocument();
+            if (targetDoc.equals(agreedDraftOrder.getDraftOrder())) {
+                agreedDraftOrder.setDraftOrder(amendedDocument);
+            } else if (targetDoc.equals(agreedDraftOrder.getPensionSharingAnnex())) {
+                agreedDraftOrder.setPensionSharingAnnex(amendedDocument);
+            }
         }
     }
+
 
     private void handleDraftOrderDocumentUpdate(DraftOrderDocumentReview review, JudgeApproval judgeApproval, String userAuthorisation) {
         if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
@@ -124,7 +137,10 @@ public class ApproveOrderService {
         review.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
     }
 
-    private void handlePsaDocumentUpdate(PsaDocumentReview review, String userAuthorisation) {
+    private void handlePsaDocumentUpdate(PsaDocumentReview review, JudgeApproval judgeApproval, String userAuthorisation) {
+        if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
+            review.setPsaDocument(judgeApproval.getAmendedDocument());
+        }
         review.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
         review.setApprovalDate(LocalDate.now());
         review.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
