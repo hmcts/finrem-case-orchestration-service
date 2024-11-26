@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,8 +30,6 @@ import java.time.LocalDateTime;
  *
  * @see Comparable
  */
-@Setter
-@Getter
 @Data
 public class SortKey implements Comparable<SortKey> {
     private String hearingTime;
