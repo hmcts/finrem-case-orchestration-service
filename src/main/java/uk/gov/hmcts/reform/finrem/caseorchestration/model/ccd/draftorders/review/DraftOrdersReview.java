@@ -15,9 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -55,6 +57,25 @@ public class DraftOrdersReview implements HasCaseDocument {
             this.psaDocReviewCollection = new ArrayList<>();
         }
         return this.psaDocReviewCollection;
+    }
+
+    @JsonIgnore
+    public LocalDate getEarliestToBeReviewedOrderDate() {
+        // Collect the concatenated streams into a list to avoid reusing the stream
+        List<? extends Reviewable> reviewables = Stream.concat(
+                ofNullable(draftOrderDocReviewCollection).orElse(List.of()).stream().map(DraftOrderDocReviewCollection::getValue),
+                ofNullable(psaDocReviewCollection).orElse(List.of()).stream().map(PsaDocReviewCollection::getValue))
+            .toList();
+
+        // Process the collected list to find the earliest date
+        return reviewables.stream()
+            .filter(r -> OrderStatus.TO_BE_REVIEWED.equals(r.getOrderStatus()))
+            .filter(r -> r.getNotificationSentDate() == null)
+            .map(Reviewable::getSubmittedDate)
+            .filter(Objects::nonNull)  // Ensure the date is not null
+            .map(LocalDateTime::toLocalDate)  // Convert LocalDateTime to LocalDate
+            .min(LocalDate::compareTo)  // Find the minimum LocalDate
+            .orElse(null);  // Return null if no dates are found
     }
 
     @JsonIgnore

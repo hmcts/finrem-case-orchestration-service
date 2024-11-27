@@ -41,4 +41,8 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable {
     private String hearingTimeEstimate;
     private String additionalTime;
     private String otherListingInstructions;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime reviewedDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime notificationSentDate;
 }

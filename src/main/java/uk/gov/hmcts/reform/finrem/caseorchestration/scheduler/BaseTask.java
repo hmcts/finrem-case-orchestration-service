@@ -25,7 +25,7 @@ public abstract class BaseTask implements Runnable {
 
     protected final CcdService ccdService;
     private final SystemUserService systemUserService;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    protected final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Value("${cron.batchsize:500}")
     private int bulkPrintBatchSize;
