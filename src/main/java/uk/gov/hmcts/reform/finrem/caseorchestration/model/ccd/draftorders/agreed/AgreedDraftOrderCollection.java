@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -12,6 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgreedDraftOrderCollection implements HasCaseDocument {
+public class AgreedDraftOrderCollection implements HasCaseDocument, HasApprovable {
     private AgreedDraftOrder value;
+
+    @JsonIgnore
+    @Override
+    public Approvable getApprovable() {
+        return value;
+    }
 }

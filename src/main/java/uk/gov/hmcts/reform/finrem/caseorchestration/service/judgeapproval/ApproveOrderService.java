@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
@@ -51,14 +50,25 @@ public class ApproveOrderService {
     public void populateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
-            if (isJudgeApprovalValid(judgeApproval)) {
+            if (isJudgeApproved(judgeApproval)) {
                 CaseDocument targetDoc = validateJudgeApprovalDocument(judgeApproval, i);
-                updateDraftOrders(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
+                populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
             }
         }
     }
 
-    private boolean isJudgeApprovalValid(JudgeApproval judgeApproval) {
+    private void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                       String userAuthorisation) {
+        draftOrdersWrapper.getDraftOrdersReviewCollection().forEach(el -> {
+            if (el.getValue() != null) {
+                processApprovableCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
+                processApprovableCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
+            }
+        });
+        processApprovableCollection(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetDoc, judgeApproval, userAuthorisation);
+    }
+
+    private boolean isJudgeApproved(JudgeApproval judgeApproval) {
         return judgeApproval != null && Arrays.asList(READY_TO_BE_SEALED, JUDGE_NEEDS_TO_MAKE_CHANGES).contains(judgeApproval.getJudgeDecision());
     }
 
@@ -71,21 +81,6 @@ public class ApproveOrderService {
         return doc;
     }
 
-    private void updateDraftOrders(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                   String userAuthorisation) {
-        draftOrdersWrapper.getDraftOrdersReviewCollection().forEach(el -> {
-            if (el.getValue() != null) {
-                processApprovableCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-                processApprovableCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-            }
-        });
-        draftOrdersWrapper.getAgreedDraftOrderCollection().forEach(el -> {
-            if (el.getValue() != null) {
-                processAgreedDraftOrderCollection(el.getValue(), targetDoc, judgeApproval);
-            }
-        });
-    }
-
     private void processApprovableCollection(List<? extends HasApprovable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                              String userAuthorisation) {
         Optional.ofNullable(approvables)
@@ -95,24 +90,6 @@ public class ApproveOrderService {
                     .ifPresent(approvable -> handleApprovable(approvable, judgeApproval, userAuthorisation))
                 )
             );
-    }
-
-    private void processAgreedDraftOrderCollection(AgreedDraftOrder agreedDraftOrder, CaseDocument targetDoc, JudgeApproval judgeApproval) {
-        if (agreedDraftOrder == null
-            || (!targetDoc.equals(agreedDraftOrder.getDraftOrder()) && !targetDoc.equals(agreedDraftOrder.getPensionSharingAnnex()))) {
-            return;
-        }
-
-        agreedDraftOrder.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
-
-        if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
-            CaseDocument amendedDocument = judgeApproval.getAmendedDocument();
-            if (targetDoc.equals(agreedDraftOrder.getDraftOrder())) {
-                agreedDraftOrder.setDraftOrder(amendedDocument);
-            } else if (targetDoc.equals(agreedDraftOrder.getPensionSharingAnnex())) {
-                agreedDraftOrder.setPensionSharingAnnex(amendedDocument);
-            }
-        }
     }
 
     private void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
