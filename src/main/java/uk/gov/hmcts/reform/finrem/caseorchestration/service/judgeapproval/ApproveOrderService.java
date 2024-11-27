@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -8,10 +9,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -19,9 +25,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
@@ -30,11 +38,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @RequiredArgsConstructor
 public class ApproveOrderService {
 
+    private static final String SEPARATOR = "#";
+
     private final IdamService idamService;
 
     /**
      * Populates judge decisions for draft orders by iterating through a predefined range of indexes (1 to 5),
-     * resolving judge approvals, and updating the corresponding draft orders and PSA documents.
+     * resolving judge approvals, and updating the corresponding draft orders and PSA documents statuses and hearing instructions.
      *
      * <p>For each index, the method:
      * <ol>
@@ -59,13 +69,32 @@ public class ApproveOrderService {
 
     private void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                        String userAuthorisation) {
-        draftOrdersWrapper.getDraftOrdersReviewCollection().forEach(el -> {
-            if (el.getValue() != null) {
-                processApprovableCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-                processApprovableCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-            }
-        });
-        processApprovableCollection(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetDoc, judgeApproval, userAuthorisation);
+        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+            .ifPresent(collection -> collection.forEach(el -> {
+                if (el.getValue() != null) {
+                    ofNullable(el.getValue().getDraftOrderDocReviewCollection())
+                        .ifPresent(draftOrderDocReviewCollection ->
+                            processApprovableCollection(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue)
+                                .toList(), targetDoc, judgeApproval, userAuthorisation)
+                        );
+
+                    ofNullable(el.getValue().getPsaDocReviewCollection())
+                        .ifPresent(psaDocReviewCollection ->
+                            processApprovableCollection(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue)
+                                .toList(), targetDoc, judgeApproval, userAuthorisation)
+                        );
+                }
+            }));
+
+        ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
+            .ifPresent(agreedDraftOrderCollections ->
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue)
+                    .toList(), targetDoc, judgeApproval, userAuthorisation)
+            );
+
+        ofNullable(draftOrdersWrapper.getHearingInstruction())
+            .map(HearingInstruction::getAnotherHearingRequestCollection)
+            .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
     }
 
     private boolean isJudgeApproved(JudgeApproval judgeApproval) {
@@ -75,17 +104,16 @@ public class ApproveOrderService {
     private CaseDocument validateJudgeApprovalDocument(JudgeApproval judgeApproval, int index) {
         CaseDocument doc = judgeApproval.getDocument();
         if (doc == null) {
-            throw new IllegalArgumentException(format(
-                "Document is null for JudgeApproval at index %d. Please check the data integrity.", index));
+            throw new IllegalArgumentException(format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index));
         }
         return doc;
     }
 
-    private void processApprovableCollection(List<? extends HasApprovable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
+    private void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                              String userAuthorisation) {
-        Optional.ofNullable(approvables)
+        ofNullable(approvables)
             .ifPresent(list ->
-                list.forEach(el -> Optional.ofNullable(el.getApprovable())
+                list.forEach(el -> ofNullable(el)
                     .filter(approvable -> approvable.match(targetDoc))
                     .ifPresent(approvable -> handleApprovable(approvable, judgeApproval, userAuthorisation))
                 )
@@ -99,6 +127,53 @@ public class ApproveOrderService {
         approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
         approvable.setApprovalDate(LocalDate.now());
         approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
+    }
+
+    @SneakyThrows
+    private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
+        String[] splitResult = ofNullable(anotherHearingRequest)
+            .map(AnotherHearingRequest::getWhichOrder)
+            .map(DynamicList::getValueCode)
+            .map(valueCode -> valueCode.split(SEPARATOR))
+            .orElseThrow(() -> new IllegalStateException("Required value is missing: " + anotherHearingRequest));
+
+        String orderIndex = splitResult[1];
+
+        JudgeApproval judgeApproval = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (orderIndex))
+            .invoke(draftOrdersWrapper);
+        CaseDocument targetDoc = judgeApproval.getDocument();
+
+        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+            .ifPresent(collection -> collection.forEach(el -> {
+                if (el.getValue() != null) {
+                    ofNullable(el.getValue().getDraftOrderDocReviewCollection())
+                        .ifPresent(draftOrderDocReviewCollection ->
+                            processHearingInstruction(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue).toList(),
+                                targetDoc, anotherHearingRequest)
+                        );
+
+                    ofNullable(el.getValue().getPsaDocReviewCollection())
+                        .ifPresent(psaDocReviewCollection ->
+                            processHearingInstruction(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue).toList(),
+                                targetDoc, anotherHearingRequest)
+                        );
+                }
+            }));
+    }
+
+    private void processHearingInstruction(List<? extends HearingInstructionProcessable> hip,
+                                           CaseDocument targetDoc,
+                                           AnotherHearingRequest anotherHearingRequest) {
+        ofNullable(hip)
+            .ifPresent(list -> list.forEach(el -> {
+                if (el.match(targetDoc)) {
+                    el.setAnotherHearingToBeListed(YesOrNo.YES);
+                    el.setHearingType(anotherHearingRequest.getTypeOfHearing().name());
+                    el.setAdditionalTime(anotherHearingRequest.getAdditionalTime());
+                    el.setHearingTimeEstimate(anotherHearingRequest.getTimeEstimate().getValue());
+                    el.setOtherListingInstructions(anotherHearingRequest.getAnyOtherListingInstructions());
+                }
+            }));
     }
 
     /**
@@ -130,8 +205,8 @@ public class ApproveOrderService {
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
             if (judgeApproval != null) {
-                String codePrefix = JudgeApprovalDocType.DRAFT_ORDER == judgeApproval.getDocType() ? "draftOrder" : "psa";
-                String code = codePrefix + "_" + i;
+                String codePrefix = DRAFT_ORDER == judgeApproval.getDocType() ? DRAFT_ORDER.name() : PSA.name();
+                String code = codePrefix + SEPARATOR + i;
 
                 String filename = getDocumentFileName(judgeApproval);
                 if (!StringUtils.isEmpty(filename)) {

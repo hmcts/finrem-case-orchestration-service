@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
@@ -24,7 +25,7 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Approvable {
+public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Approvable, HearingInstructionProcessable {
     private CaseDocument draftOrderDocument;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)

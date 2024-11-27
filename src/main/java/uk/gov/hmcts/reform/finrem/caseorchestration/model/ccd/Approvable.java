@@ -4,9 +4,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 
 import java.time.LocalDate;
 
-public interface Approvable {
-
-    boolean match(CaseDocument targetDoc);
+public interface Approvable extends DocumentMatcher {
 
     void setOrderStatus(OrderStatus orderStatus);
 
