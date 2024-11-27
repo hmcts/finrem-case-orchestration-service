@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -48,12 +50,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -62,14 +67,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrderServiceTest {
 
-    private static final String UPLOAD_PARTY_THE_APPLICANT = "theApplicant";
-
     private static final DynamicRadioList UPLOAD_PARTY = DynamicRadioList.builder()
-        .value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_THE_APPLICANT).build())
+        .value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build())
         .build();
 
     @InjectMocks
@@ -165,7 +169,7 @@ class DraftOrderServiceTest {
             .resubmission(YesOrNo.YES)
             .submittedBy("<SUBMITTED_BY>")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
-            .uploadedOnBehalfOf(UPLOAD_PARTY_THE_APPLICANT)
+            .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(CaseDocumentCollection.builder().value(attachment1).build()))
             .build();
 
@@ -199,7 +203,7 @@ class DraftOrderServiceTest {
             .resubmission(YesOrNo.YES)
             .submittedBy("<SUBMITTED_BY>")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
-            .uploadedOnBehalfOf(UPLOAD_PARTY_THE_APPLICANT)
+            .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
                 CaseDocumentCollection.builder().value(attachment1).build(),
                 CaseDocumentCollection.builder().value(attachment2).build()
@@ -233,14 +237,14 @@ class DraftOrderServiceTest {
             .resubmission(YesOrNo.NO)
             .submittedBy("<SUBMITTED_BY>")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
-            .uploadedOnBehalfOf(UPLOAD_PARTY_THE_APPLICANT)
+            .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .build();
 
         AgreedDraftOrder expectedOrder5 = AgreedDraftOrder.builder()
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedBy("<SUBMITTED_BY>")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
-            .uploadedOnBehalfOf(UPLOAD_PARTY_THE_APPLICANT)
+            .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .pensionSharingAnnex(psa1)
             .build();
 
@@ -669,26 +673,26 @@ class DraftOrderServiceTest {
 
         // Act
         draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, List.of(
-            AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder()
-                    .orderStatus(OrderStatus.TO_BE_REVIEWED)
-                    .submittedBy("Mr ABC")
-                    .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
-                    .resubmission(YesOrNo.NO)
-                    .uploadedOnBehalfOf("theApplicant")
-                    .draftOrder(CaseDocument.builder().documentUrl("NEW_DO_1.doc").build())
-                    .build())
-                .build(),
-            AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder()
-                    .orderStatus(OrderStatus.TO_BE_REVIEWED)
-                    .submittedBy("Mr ABC")
-                    .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
-                    .resubmission(YesOrNo.NO)
-                    .uploadedOnBehalfOf("theApplicant")
-                    .pensionSharingAnnex(CaseDocument.builder().documentUrl("NEW_PSA_1.doc").build())
-                    .build())
-                .build()
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder()
+                        .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                        .submittedBy("Mr ABC")
+                        .submittedDate(LocalDateTime.of(2024, 10, 10, 23, 59))
+                        .resubmission(YesOrNo.NO)
+                        .uploadedOnBehalfOf("theApplicant")
+                        .draftOrder(CaseDocument.builder().documentUrl("NEW_DO_1.doc").build())
+                        .build())
+                    .build(),
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder()
+                        .orderStatus(OrderStatus.TO_BE_REVIEWED)
+                        .submittedBy("Mr ABC")
+                        .submittedDate(LocalDateTime.of(2024, 10, 10, 22, 59))
+                        .resubmission(YesOrNo.NO)
+                        .uploadedOnBehalfOf("theApplicant")
+                        .pensionSharingAnnex(CaseDocument.builder().documentUrl("NEW_PSA_1.doc").build())
+                        .build())
+                    .build()
             )
         );
 
@@ -857,5 +861,383 @@ class DraftOrderServiceTest {
         verify(hearingService).getHearingType(finremCaseData, selected);
         verify(hearingService).getHearingDate(finremCaseData, selected);
         verify(hearingService).getHearingTime(finremCaseData, selected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideMultipleReviewsWithStatusTestCases")
+    void testGetEarliestToBeReviewedOrderDate_withMultipleReviewsAndStatus(List<Optional<LocalDateTime>> draftDates,
+                                                                           List<Optional<OrderStatus>> draftStatuses,
+                                                                           List<Optional<LocalDateTime>> psaDates,
+                                                                           List<Optional<OrderStatus>> psaStatuses,
+                                                                           List<Optional<LocalDateTime>> draftNotificationDates,
+                                                                           List<Optional<LocalDateTime>> psaNotificationDates,
+                                                                           int expectedSituationForCase1, int expectedSituationForCase2) {
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>();
+        List<PsaDocReviewCollection> psaDocReviewCollection = new ArrayList<>();
+
+        // Populate draft reviews
+        for (int i = 0; i < draftDates.size(); i++) {
+            DraftOrderDocumentReview reviewable = DraftOrderDocumentReview.builder()
+                .submittedDate(draftDates.get(i).orElse(null))
+                .orderStatus(draftStatuses.get(i).orElse(null))
+                .notificationSentDate(draftNotificationDates.get(i).orElse(null))
+                .build();
+
+            DraftOrderDocReviewCollection draftCollection = new DraftOrderDocReviewCollection();
+            draftCollection.setValue(reviewable);
+            draftOrderDocReviewCollection.add(draftCollection);
+        }
+
+        // Populate PSA reviews
+        for (int i = 0; i < psaDates.size(); i++) {
+            PsaDocumentReview reviewable = PsaDocumentReview.builder()
+                .submittedDate(psaDates.get(i).orElse(null))
+                .orderStatus(psaStatuses.get(i).orElse(null))
+                .notificationSentDate(psaNotificationDates.get(i).orElse(null))
+                .build();
+
+            PsaDocReviewCollection psaCollection = new PsaDocReviewCollection();
+            psaCollection.setValue(reviewable);
+            psaDocReviewCollection.add(psaCollection);
+        }
+
+        LocalDate fixedDate = LocalDate.of(2024, 10, 18);
+        try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class)) {
+            mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
+
+            // Case 1: Single draftOrdersReviewCollection
+            FinremCaseDetails caseDetails1 = FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        // may need a multiple
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                                .psaDocReviewCollection(psaDocReviewCollection)
+                                .build()
+                            ).build()
+                    )).build())).build();
+            List<DraftOrdersReview> actual = draftOrderService.getDraftOrderReviewOverdue(caseDetails1, 14);
+            assertExpectedSituationForCase1(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase1);
+
+            // Case 2: Multiple draftOrdersReviewCollection
+            FinremCaseDetails caseDetails2 = FinremCaseDetailsBuilderFactory
+                .from(Long.valueOf(TestConstants.CASE_ID), FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        // may need a multiple
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                                .build()
+                            ).build(),
+                        DraftOrdersReviewCollection.builder()
+                            .value(DraftOrdersReview.builder()
+                                .psaDocReviewCollection(psaDocReviewCollection)
+                                .build()
+                            ).build()
+                    )).build())).build();
+            actual = draftOrderService.getDraftOrderReviewOverdue(caseDetails2, 14);
+            assertExpectedSituationForCase2(draftOrderDocReviewCollection, psaDocReviewCollection, actual, expectedSituationForCase2);
+        }
+    }
+
+    private static void assertExpectedSituationForCase1(List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+                                                        List<PsaDocReviewCollection> psaDocReviewCollection,
+                                                        List<DraftOrdersReview> actual, int expectedSituationForCase1) {
+        switch (expectedSituationForCase1) {
+            case 0:
+                assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
+                break;
+            case 1:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                    .psaDocReviewCollection(psaDocReviewCollection)
+                    .build()), actual);
+                break;
+            default:
+                fail(String.format("Unexpected expectedSituationForCase1: %s", expectedSituationForCase1));
+                break;
+        }
+    }
+
+    private static void assertExpectedSituationForCase2(List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+                                                        List<PsaDocReviewCollection> psaDocReviewCollection,
+                                                        List<DraftOrdersReview> actual, int expectedSituationForCase2) {
+        switch (expectedSituationForCase2) {
+            case 0:
+                assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
+                break;
+            case 1:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                    .build()), actual);
+                break;
+            case 2:
+                assertEquals(List.of(DraftOrdersReview.builder()
+                    .psaDocReviewCollection(psaDocReviewCollection)
+                    .build()), actual);
+                break;
+            case 3:
+                assertEquals(List.of(
+                    DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                        .build(),
+                    DraftOrdersReview.builder()
+                        .psaDocReviewCollection(psaDocReviewCollection)
+                        .build()
+                ), actual);
+                break;
+            default:
+                fail(String.format("Unexpected expectedSituationForCase2: %s", expectedSituationForCase2));
+                break;
+        }
+    }
+
+    static Stream<Arguments> provideMultipleReviewsWithStatusTestCases() {
+        return Stream.of(
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 21, 10, 0))), // Notification dates
+                1, 3
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 21, 10, 0))), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 1, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 5, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 1, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 12, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 1, 4, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.empty()), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 20, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty()), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 3, 3, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
+                List.of(Optional.empty()), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 3, 4, 10, 0)), Optional.of(LocalDateTime.of(2024, 3, 2, 10, 0))), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 1, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 4, 10, 0))),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.empty()), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.empty()), // Empty DraftOrderDocumentReview
+                List.of(Optional.empty()), // No statuses
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
+                1, 2
+            ),
+            Arguments.of(
+                List.of(Optional.empty()), // Empty DraftOrderDocumentReview
+                List.of(Optional.empty()), // No statuses
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
+                List.of(Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 4, 0, 0))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                0, 0
+            ),
+            Arguments.of(
+                List.of(Optional.of(LocalDateTime.of(2024, 10, 3, 23, 59))), // Single DraftOrderDocumentReview
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(Optional.empty()), // Notification dates
+                List.of(), // Notification dates
+                1, 1
+            ),
+            Arguments.of(
+                List.of(), // Empty DraftOrderDocumentReview
+                List.of(), // No statuses
+                List.of(), // Empty PsaDocumentReview
+                List.of(), // No statuses
+                List.of(), // No notification dates
+                List.of(), // No notification dates
+                0, 0
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testIsDraftOrderReviewOverdue")
+    void testIsDraftOrderReviewOverdue(LocalDate submissionDate, boolean expected) {
+        DraftOrdersReview draftOrdersReview = DraftOrdersReview.builder()
+            .draftOrderDocReviewCollection(List.of(
+                createDraftOrder(OrderStatus.TO_BE_REVIEWED, submissionDate, null)
+            ))
+            .build();
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection = List.of(
+            DraftOrdersReviewCollection.builder()
+              .value(draftOrdersReview)
+              .build()
+        );
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(draftOrdersReviewCollection)
+                .build())
+            .build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(caseData)
+            .build();
+        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+        try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
+            boolean actual = draftOrderService.isDraftOrderReviewOverdue(caseDetails, 14);
+            assertThat(actual).isEqualTo(expected);
+        }
+    }
+
+    static Stream<Arguments> testIsDraftOrderReviewOverdue() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2024, 10, 20), true),
+            Arguments.of(LocalDate.of(2024, 11, 4), false)
+        );
+    }
+
+    @Test
+    void testUpdateOverdueDocuments() {
+        DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
+        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+        LocalDateTime fixedDateTime = LocalDateTime.of(2024, 11, 4, 10, 23, 4);
+        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS);
+             MockedStatic<LocalDateTime> mockedLocalDateTime = Mockito.mockStatic(LocalDateTime.class,
+                 Mockito.CALLS_REAL_METHODS)) {
+            mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
+            mockedLocalDateTime.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            draftOrderService.updateOverdueDocuments(draftOrdersReview, 14);
+        }
+
+        List<DraftOrderDocReviewCollection> draftOrderCollection = draftOrdersReview.getDraftOrderDocReviewCollection();
+        // Notification already sent
+        verifyDraftOrderOverdueNotificationSent(draftOrderCollection, 0, LocalDateTime.of(2024, 10, 4, 12, 0, 5));
+        // Notification sent
+        verifyDraftOrderOverdueNotificationSent(draftOrderCollection, 1, LocalDateTime.of(2024, 11, 4, 10, 23, 4));
+        // Not overdue
+        verifyDraftOrderOverdueNotificationSent(draftOrderCollection, 2, null);
+        verifyDraftOrderOverdueNotificationSent(draftOrderCollection, 3, null);
+        verifyDraftOrderOverdueNotificationSent(draftOrderCollection, 4, null);
+
+        List<PsaDocReviewCollection> psaCollection = draftOrdersReview.getPsaDocReviewCollection();
+        // Notification already sent
+        verifyPsaOverdueNotificationSent(psaCollection, 0, LocalDateTime.of(2024, 10, 4, 12, 0, 5));
+        // Notification sent
+        verifyPsaOverdueNotificationSent(psaCollection, 1, LocalDateTime.of(2024, 11, 4, 10, 23, 4));
+        // Not overdue
+        verifyPsaOverdueNotificationSent(psaCollection, 2, null);
+        verifyPsaOverdueNotificationSent(psaCollection, 3, null);
+        verifyPsaOverdueNotificationSent(psaCollection, 4, null);
+    }
+
+    private void verifyDraftOrderOverdueNotificationSent(List<DraftOrderDocReviewCollection> collection, int index,
+                                                         LocalDateTime expectedNotificationSentDate) {
+        DraftOrderDocumentReview draftOrderDocumentReview = collection.get(index).getValue();
+        if (expectedNotificationSentDate != null) {
+            LocalDateTime actualNotificationSentDate = draftOrderDocumentReview.getNotificationSentDate();
+            assertThat(actualNotificationSentDate).isEqualTo(expectedNotificationSentDate);
+        } else {
+            assertThat(draftOrderDocumentReview.getNotificationSentDate()).isNull();
+        }
+    }
+
+    private void verifyPsaOverdueNotificationSent(List<PsaDocReviewCollection> collection, int index,
+                                                  LocalDateTime expectedNotificationSentDate) {
+        PsaDocumentReview psaDocumentReview = collection.get(index).getValue();
+        if (expectedNotificationSentDate != null) {
+            LocalDateTime actualNotificationSentDate = psaDocumentReview.getNotificationSentDate();
+            assertThat(actualNotificationSentDate).isEqualTo(expectedNotificationSentDate);
+        } else {
+            assertThat(psaDocumentReview.getNotificationSentDate()).isNull();
+        }
+    }
+
+    private DraftOrdersReview createDraftOrdersReview() {
+        return DraftOrdersReview.builder()
+            .draftOrderDocReviewCollection(List.of(
+                createDraftOrder(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1),
+                    LocalDateTime.of(2024, 10, 4, 12, 0, 5)),
+                createDraftOrder(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1), null),
+                createDraftOrder(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 11, 1), null),
+                createDraftOrder(OrderStatus.APPROVED_BY_JUDGE, LocalDate.of(2024, 9, 1), null),
+                createDraftOrder(OrderStatus.PROCESSED_BY_ADMIN, LocalDate.of(2024, 9, 1), null)
+            ))
+            .psaDocReviewCollection(List.of(
+                createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1),
+                    LocalDateTime.of(2024, 10, 4, 12, 0, 5)),
+                createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1), null),
+                createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 11, 1), null),
+                createPsa(OrderStatus.APPROVED_BY_JUDGE, LocalDate.of(2024, 9, 1), null),
+                createPsa(OrderStatus.PROCESSED_BY_ADMIN, LocalDate.of(2024, 9, 1), null)
+            ))
+            .build();
+    }
+
+    private DraftOrderDocReviewCollection createDraftOrder(OrderStatus orderStatus, LocalDate submittedDate,
+                                                           LocalDateTime notificationSentDate) {
+        return DraftOrderDocReviewCollection.builder()
+            .value(DraftOrderDocumentReview.builder()
+                .orderStatus(orderStatus)
+                .submittedDate(submittedDate.atStartOfDay())
+                .notificationSentDate(notificationSentDate)
+                .build())
+            .build();
+    }
+
+    private PsaDocReviewCollection createPsa(OrderStatus orderStatus, LocalDate submittedDate,
+                                             LocalDateTime notificationSentDate) {
+        return PsaDocReviewCollection.builder()
+            .value(PsaDocumentReview.builder()
+                .orderStatus(orderStatus)
+                .submittedDate(submittedDate.atStartOfDay())
+                .notificationSentDate(notificationSentDate)
+                .build())
+            .build();
     }
 }

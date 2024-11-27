@@ -7,7 +7,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDate;
@@ -92,8 +95,8 @@ public class DraftOrderService {
         return ret;
     }
 
-    private static void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
-                                              AgreedDraftOrder.AgreedDraftOrderBuilder builder) {
+    private void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
+                                       AgreedDraftOrder.AgreedDraftOrderBuilder builder) {
         ofNullable(uploadAgreedDraftOrder.getUploadParty())
             .map(DynamicRadioList::getValue)
             .map(DynamicRadioListElement::getCode)
@@ -235,5 +238,51 @@ public class DraftOrderService {
                 .build())
             .forEach(psaDocReviewCollection::add);
         newDraftOrderReview.getPsaDocReviewCollection().addAll(psaDocReviewCollection);
+    }
+
+    public boolean isDraftOrderReviewOverdue(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+        return !getDraftOrderReviewOverdue(caseDetails, daysSinceOrderUpload).isEmpty();
+    }
+
+    public List<DraftOrdersReview> getDraftOrderReviewOverdue(FinremCaseDetails caseDetails, int daysSinceOrderUpload) {
+        DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
+        return getDraftOrderReviewOverdue(draftOrdersWrapper, daysSinceOrderUpload);
+    }
+
+    private List<DraftOrdersReview> getDraftOrderReviewOverdue(DraftOrdersWrapper draftOrdersWrapper, int daysSinceOrderUpload) {
+        LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
+        log.info("thresholdDate for daysSinceOrderUpload={}: {}", daysSinceOrderUpload, thresholdDate);
+
+        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
+            .map(DraftOrdersReviewCollection::getValue) // Get DraftOrdersReview from collection
+            .filter(draftOrderReview -> draftOrderReview.getEarliestToBeReviewedOrderDate() != null
+                && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
+            .toList();
+    }
+
+    /**
+     * Sets the notification sent date on any Draft Order or Pension Sharing Annex documents where a review is overdue.
+     *
+     * @param draftOrdersReview    draft order documents for a hearing
+     * @param daysSinceOrderUpload threshold days for when a review becomes overdue
+     */
+    public void updateOverdueDocuments(DraftOrdersReview draftOrdersReview, int daysSinceOrderUpload) {
+        LocalDate thresholdDate = LocalDate.now().minusDays(daysSinceOrderUpload);
+        LocalDateTime notificationSentDate = LocalDateTime.now();
+        draftOrdersReview.getDraftOrderDocReviewCollection().stream()
+            .map(DraftOrderDocReviewCollection::getValue)
+            .filter(d -> isOverdue(d, thresholdDate))
+            .toList().forEach(d -> d.setNotificationSentDate(notificationSentDate));
+
+        draftOrdersReview.getPsaDocReviewCollection().stream()
+            .map(PsaDocReviewCollection::getValue)
+            .filter(d -> isOverdue(d, thresholdDate))
+            .toList().forEach(d -> d.setNotificationSentDate(notificationSentDate));
+    }
+
+    private boolean isOverdue(Reviewable reviewable, LocalDate thresholdDate) {
+        return OrderStatus.TO_BE_REVIEWED.equals(reviewable.getOrderStatus())
+            && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay())
+            && reviewable.getNotificationSentDate() == null;
     }
 }
