@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -58,5 +59,24 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval3()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval4()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval5()).isNull();
+    }
+
+    @Test
+    void shouldInvokeApprovalServicePopulateJudgeDecisions() {
+        DraftOrdersWrapper draftOrdersWrapper = null;
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(draftOrdersWrapper = DraftOrdersWrapper.builder()
+                .hearingInstruction(HearingInstruction.builder().build())
+                .judgeApproval1(JudgeApproval.builder().build())
+                .judgeApproval2(JudgeApproval.builder().build())
+                .judgeApproval3(JudgeApproval.builder().build())
+                .judgeApproval4(JudgeApproval.builder().build())
+                .judgeApproval5(JudgeApproval.builder().build())
+                .build())
+            .build();
+
+        handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+
+        verify(approveOrderService).populateJudgeDecisions(draftOrdersWrapper, AUTH_TOKEN);
     }
 }
