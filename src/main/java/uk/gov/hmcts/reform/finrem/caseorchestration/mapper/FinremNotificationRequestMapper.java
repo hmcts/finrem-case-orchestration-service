@@ -185,5 +185,4 @@ public class FinremNotificationRequestMapper {
     private String getCaseType(FinremCaseDetails caseDetails) {
         return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
-
 }
