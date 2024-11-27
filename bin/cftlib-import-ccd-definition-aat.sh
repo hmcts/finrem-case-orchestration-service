@@ -51,18 +51,30 @@ binFolder=$(dirname "$0")
 
 echo "Requesting IDAM access token"
 accessToken="$("$binFolder"/idam-access-token.sh $idamApiHost "$FINREM_CLIENT_SECRET_AAT" "$CCD_IMPORT_USERNAME_AAT" "$CCD_IMPORT_PASSWORD_AAT")"
+if [[ $? -ne 0 ]]; then
+  echo 1>&2 "Error: Failed to get IDAM access token"
+  exit 1
+fi
 
 echo "Requesting service token"
 serviceToken="$("$binFolder"/s2s-token.sh $s2sHost)"
+if [[ $? -ne 0 ]]; then
+  echo 1>&2 "Error: Failed to get service token"
+  exit 1
+fi
 
 if [[ ${PWD##*/} = "bin" ]]; then
   cd ..
 fi
 
-cd "$(find ../ -name finrem-ccd-definitions -maxdepth 1 -mindepth  1 -type d)" || exit 1
+cd "$(find ../ -name finrem-ccd-definitions -maxdepth 1 -mindepth 1 -type d)" || exit 1
 
 if [[ $importContested = true ]]; then
   yarn generate-excel-local-contested
+  if [[ $? -ne 0 ]]; then
+    echo 1>&2 "Error: Failed to generate contested Excel file"
+    exit 1
+  fi
 
   contestedFile="./definitions/contested/xlsx/ccd-config-local-contested-base.xlsx"
   echo "Importing $contestedFile"
@@ -72,10 +84,18 @@ if [[ $importContested = true ]]; then
   --header "ServiceAuthorization: $serviceToken" \
   --header 'Content-Type: multipart/form-data' \
   --form "file=@$contestedFile"
+  if [[ $? -ne 0 ]]; then
+    echo 1>&2 "Error: Failed to import contested file"
+    exit 1
+  fi
 fi
 
 if [[ $importConsented = true ]]; then
   yarn generate-excel-local-consented
+  if [[ $? -ne 0 ]]; then
+    echo 1>&2 "Error: Failed to generate consented Excel file"
+    exit 1
+  fi
 
   consentedFile="./definitions/consented/xlsx/ccd-config-local-consented-base.xlsx"
   echo "Importing $consentedFile"
@@ -85,4 +105,10 @@ if [[ $importConsented = true ]]; then
   --header "ServiceAuthorization: $serviceToken" \
   --header 'Content-Type: multipart/form-data' \
   --form "file=@$consentedFile"
+  if [[ $? -ne 0 ]]; then
+    echo 1>&2 "Error: Failed to import consented file"
+    exit 1
+  fi
 fi
+
+exit 0
