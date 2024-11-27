@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
@@ -15,12 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PsaDocumentReview implements HasCaseDocument, Reviewable {
+public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvable {
     private CaseDocument psaDocument;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -42,4 +44,15 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable {
     private LocalDateTime reviewedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
+
+    @Override
+    public boolean match(CaseDocument targetDoc) {
+        return Optional.ofNullable(targetDoc).map(CaseDocument::getDocumentUrl).equals(Optional.ofNullable(psaDocument)
+            .map(CaseDocument::getDocumentUrl));
+    }
+
+    @Override
+    public void replaceDocument(CaseDocument amendedDocument) {
+        this.setPsaDocument(amendedDocument);
+    }
 }

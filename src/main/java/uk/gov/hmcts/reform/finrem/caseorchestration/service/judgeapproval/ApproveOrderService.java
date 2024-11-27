@@ -4,17 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -22,6 +20,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
@@ -76,8 +75,8 @@ public class ApproveOrderService {
                                    String userAuthorisation) {
         draftOrdersWrapper.getDraftOrdersReviewCollection().forEach(el -> {
             if (el.getValue() != null) {
-                processDraftOrderDocReviewCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
-                processPsaDocReviewCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
+                processApprovableCollection(el.getValue().getDraftOrderDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
+                processApprovableCollection(el.getValue().getPsaDocReviewCollection(), targetDoc, judgeApproval, userAuthorisation);
             }
         });
         draftOrdersWrapper.getAgreedDraftOrderCollection().forEach(el -> {
@@ -87,26 +86,15 @@ public class ApproveOrderService {
         });
     }
 
-    private void processDraftOrderDocReviewCollection(List<DraftOrderDocReviewCollection> docReviews, CaseDocument targetDoc,
-                                                      JudgeApproval judgeApproval, String userAuthorisation) {
-        if (docReviews != null) {
-            docReviews.forEach(el -> {
-                if (targetDoc.equals(el.getValue().getDraftOrderDocument())) {
-                    handleDraftOrderDocumentUpdate(el.getValue(), judgeApproval, userAuthorisation);
-                }
-            });
-        }
-    }
-
-    private void processPsaDocReviewCollection(List<PsaDocReviewCollection> psaReviews, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                               String userAuthorisation) {
-        if (psaReviews != null) {
-            psaReviews.forEach(el -> {
-                if (targetDoc.equals(el.getValue().getPsaDocument())) {
-                    handlePsaDocumentUpdate(el.getValue(), judgeApproval, userAuthorisation);
-                }
-            });
-        }
+    private void processApprovableCollection(List<? extends HasApprovable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                             String userAuthorisation) {
+        Optional.ofNullable(approvables)
+            .ifPresent(list ->
+                list.forEach(el -> Optional.ofNullable(el.getApprovable())
+                    .filter(approvable -> approvable.match(targetDoc))
+                    .ifPresent(approvable -> handleApprovable(approvable, judgeApproval, userAuthorisation))
+                )
+            );
     }
 
     private void processAgreedDraftOrderCollection(AgreedDraftOrder agreedDraftOrder, CaseDocument targetDoc, JudgeApproval judgeApproval) {
@@ -127,23 +115,13 @@ public class ApproveOrderService {
         }
     }
 
-
-    private void handleDraftOrderDocumentUpdate(DraftOrderDocumentReview review, JudgeApproval judgeApproval, String userAuthorisation) {
+    private void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
         if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
-            review.setDraftOrderDocument(judgeApproval.getAmendedDocument());
+            approvable.replaceDocument(judgeApproval.getAmendedDocument());
         }
-        review.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
-        review.setApprovalDate(LocalDate.now());
-        review.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
-    }
-
-    private void handlePsaDocumentUpdate(PsaDocumentReview review, JudgeApproval judgeApproval, String userAuthorisation) {
-        if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
-            review.setPsaDocument(judgeApproval.getAmendedDocument());
-        }
-        review.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
-        review.setApprovalDate(LocalDate.now());
-        review.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
+        approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
+        approvable.setApprovalDate(LocalDate.now());
+        approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
     }
 
     /**
