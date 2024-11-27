@@ -1021,7 +1021,6 @@ public class FinremCaseData implements HasCaseDocument {
             this.refugeWrapper = new RefugeWrapper();
         }
         return refugeWrapper;
-
     }
 
     @JsonIgnore

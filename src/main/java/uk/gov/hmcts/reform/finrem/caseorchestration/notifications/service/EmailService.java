@@ -36,8 +36,8 @@ public class EmailService {
     @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
     private Map<String, Map<String, String>> contestedContactEmails;
 
-    private static final String CONTESTED = "contested";
-    private static final String CONSENTED = "consented";
+    public static final String CONTESTED = "contested";
+    public static final String CONSENTED = "consented";
     private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
     private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
     private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
@@ -131,6 +131,10 @@ public class EmailService {
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
 
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
+            addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
+        }
+
         templateVars.putAll(emailTemplateVars.get(templateName));
         return templateVars;
     }
@@ -142,6 +146,13 @@ public class EmailService {
             templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
+    }
+
+    private void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
+                                                        Map<String, Object> templateVars) {
+        templateVars.put("hearingDate", notificationRequest.getHearingDate());
+        templateVars.put("judgeName", notificationRequest.getJudgeName());
+        templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
     }
 
     private EmailToSend generateEmail(String destinationAddress,
