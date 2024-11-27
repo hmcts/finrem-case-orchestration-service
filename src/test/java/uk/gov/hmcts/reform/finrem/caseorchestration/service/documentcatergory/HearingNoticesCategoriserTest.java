@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
@@ -71,7 +72,9 @@ class HearingNoticesCategoriserTest {
 
         return FinremCaseData.builder()
             .hearingNoticeDocumentPack(hearingNoticeDocumentPack)
-            .additionalHearingDocuments(additionalHearingDocuments)
+            .listForHearingWrapper(ListForHearingWrapper.builder()
+                .additionalHearingDocuments(additionalHearingDocuments)
+                .build())
             .build();
     }
 

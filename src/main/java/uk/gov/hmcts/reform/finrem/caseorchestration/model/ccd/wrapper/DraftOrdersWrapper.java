@@ -48,16 +48,22 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("suggestedDraftOrderCollection")
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
 
-    @JsonProperty("judgeApproval")
-    private JudgeApproval judgeApproval;
+    private YesOrNo showWarningMessageToJudge;
 
-    @JsonIgnore
-    public JudgeApproval getJudgeApproval() {
-        if (judgeApproval == null) {
-            this.judgeApproval = new JudgeApproval();
-        }
-        return judgeApproval;
-    }
+    @JsonProperty("judgeApproval1")
+    private JudgeApproval judgeApproval1;
+
+    @JsonProperty("judgeApproval2")
+    private JudgeApproval judgeApproval2;
+
+    @JsonProperty("judgeApproval3")
+    private JudgeApproval judgeApproval3;
+
+    @JsonProperty("judgeApproval4")
+    private JudgeApproval judgeApproval4;
+
+    @JsonProperty("judgeApproval5")
+    private JudgeApproval judgeApproval5;
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {

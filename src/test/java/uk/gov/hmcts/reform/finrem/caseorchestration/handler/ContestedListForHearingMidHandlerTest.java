@@ -72,13 +72,13 @@ class ContestedListForHearingMidHandlerTest extends BaseHandlerTestSetup {
 
 
     @Test
-    void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenListForHearingAdditionalUploadedButNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.LIST_FOR_HEARING);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        caseData.setAdditionalHearingDocumentsOption(YesOrNo.YES);
-        caseData.setAdditionalListOfHearingDocuments(caseDocument);
+        caseData.getListForHearingWrapper().setAdditionalHearingDocumentsOption(YesOrNo.YES);
+        caseData.getListForHearingWrapper().setAdditionalListOfHearingDocuments(caseDocument);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 

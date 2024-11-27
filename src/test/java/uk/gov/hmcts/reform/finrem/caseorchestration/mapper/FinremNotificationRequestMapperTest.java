@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -67,9 +66,6 @@ class FinremNotificationRequestMapperTest {
 
     @BeforeEach
     public void setup() {
-        // Initialize mock objects
-        MockitoAnnotations.openMocks(this);
-
         // Register the JavaTimeModule for Java 8 Date/Time support
         mapper.registerModule(new JavaTimeModule());
     }
@@ -164,7 +160,7 @@ class FinremNotificationRequestMapperTest {
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
         FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        caseDetails.getData().getListForHearingWrapper().setHearingType(HearingTypeDirection.FDA);
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails);
 
@@ -182,7 +178,7 @@ class FinremNotificationRequestMapperTest {
     @Test
     void shouldReturnHearingTypeForPrepareForHearingContestedEventInvokeIntervener() {
         FinremCaseDetails caseDetails = getContestedFinremCaseDetails();
-        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        caseDetails.getData().getListForHearingWrapper().setHearingType(HearingTypeDirection.FDA);
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(TEST_SOLICITOR_EMAIL)
             .solicitorNameKey(TEST_SOLICITOR_NAME)

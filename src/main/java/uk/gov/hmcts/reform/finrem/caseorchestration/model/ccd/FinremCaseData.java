@@ -38,10 +38,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
@@ -226,19 +228,13 @@ public class FinremCaseData implements HasCaseDocument {
     private String familyMediatorServiceName1;
     private String soleTraderName1;
     private YesOrNo promptForAnyDocument;
-    private List<AdditionalHearingDocumentCollection> additionalHearingDocuments;
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
     private List<DocumentCollection> hearingNoticeDocumentPack;
     private List<DocumentCollection> hearingNoticesDocumentCollection;
     private Map<String, Object> courtDetails;
-
-    private HearingTypeDirection hearingType;
-    private String timeEstimate;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate hearingDate;
-    private String additionalInformationAboutHearing;
-    private String hearingTime;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ListForHearingWrapper listForHearingWrapper;
     private List<JudgeAllocated> judgeAllocated;
     private YesOrNo applicationAllocatedTo;
     private YesOrNo caseAllocatedTo;
@@ -386,9 +382,6 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private BulkPrintCoversheetWrapper bulkPrintCoversheetWrapper;
-    private YesOrNo additionalHearingDocumentsOption;
-    private CaseDocument additionalListOfHearingDocuments;
-
     @JsonProperty("typeOfDocument")
     private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
     private List<ScannedDocumentCollection> applicantScanDocuments;
@@ -436,6 +429,10 @@ public class FinremCaseData implements HasCaseDocument {
 
     private String previousState;
     private DynamicList userCaseAccessList;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private RefugeWrapper refugeWrapper;
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
@@ -1018,4 +1015,19 @@ public class FinremCaseData implements HasCaseDocument {
         return draftOrdersWrapper;
     }
 
+    @JsonIgnore
+    public RefugeWrapper getRefugeWrapper() {
+        if (refugeWrapper == null) {
+            this.refugeWrapper = new RefugeWrapper();
+        }
+        return refugeWrapper;
+    }
+
+    @JsonIgnore
+    public ListForHearingWrapper getListForHearingWrapper() {
+        if (listForHearingWrapper == null) {
+            listForHearingWrapper = new ListForHearingWrapper();
+        }
+        return listForHearingWrapper;
+    }
 }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ class HearingServiceTest {
                 List.of(),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                     }
                 })
             ),
@@ -87,8 +88,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing
                     }
                 })
             ),
@@ -104,9 +105,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-01 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "1 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
                     }
                 })
             ),
@@ -122,9 +123,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
                     }
                 })
             ),
@@ -140,9 +141,9 @@ class HearingServiceTest {
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
                         // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)");
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)");
                         // UUID for interim hearing with invalid time
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 Invalid Time - Directions (DIR)");
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 Invalid Time - Directions (DIR)");
                     }
                 })
             ),
@@ -158,9 +159,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
-                        put("00000000-0000-0000-0000-000000000000", "2024-03-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // UUID for interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Mar 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                     }
                 })
             ),
@@ -185,8 +186,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - (unknown)"); // UUID for interim hearing with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - (unknown)"); // UUID for interim hearing with null type
                     }
                 })
             ),
@@ -201,7 +202,7 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                         put("00000000-0000-0000-0000-000000000002", "(unknown) 2:00 AM - Directions (DIR)"); // Interim hearing with null date
                     }
                 })
@@ -217,8 +218,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 (unknown) - Directions (DIR)"); // Interim hearing with null time
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 (unknown) - Directions (DIR)"); // Interim hearing with null time
                     }
                 })
             ),
@@ -233,8 +234,8 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
                 })
             ),
@@ -249,9 +250,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - (unknown)"); // Interim hearing 2 with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - (unknown)"); // Interim hearing 2 with null type
                     }
                 })
             ),
@@ -266,9 +267,9 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "2024-01-01 10:00 AM - (unknown)"); // Top-level hearing with null type
-                        put("00000000-0000-0000-0000-000000000002", "2024-02-01 2:00 AM - Directions (DIR)"); // Interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2024-02-02 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
                 })
             )
@@ -286,16 +287,11 @@ class HearingServiceTest {
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
 
-        // Set top-level fields only if they are not null
-        if (topLevelHearingType != null) {
-            caseDataBuilder.hearingType(topLevelHearingType);
-        }
-        if (topLevelHearingDate != null) {
-            caseDataBuilder.hearingDate(topLevelHearingDate);
-        }
-        if (topLevelHearingTime != null) {
-            caseDataBuilder.hearingTime(topLevelHearingTime);
-        }
+        caseDataBuilder.listForHearingWrapper(ListForHearingWrapper.builder()
+            .hearingType(topLevelHearingType)
+            .hearingDate(topLevelHearingDate)
+            .hearingTime(topLevelHearingTime)
+            .build());
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData caseData = caseDataBuilder.build();
@@ -351,16 +347,6 @@ class HearingServiceTest {
         );
     }
 
-    static Stream<Arguments> hearingTimeEstimateCases() {
-        return Stream.of(
-            Arguments.of("", null), // Edge case: empty selected code
-            Arguments.of(TOP_LEVEL_HEARING_ID, "1 hour"), // Top-level hearing time
-            Arguments.of("11000000-0000-0000-0000-000000000000", "1.5 hour"), // Valid interim hearing time
-            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
-            Arguments.of(null, null) // Case with null value in Interim Hearing
-        );
-    }
-
     @ParameterizedTest
     @MethodSource("hearingDateCases")
     void testGetHearingDate(String selectedCode, LocalDate expectedDate) {
@@ -370,7 +356,7 @@ class HearingServiceTest {
             when(selected.getCode()).thenReturn(selectedCode);
 
             // Mocking the data structure
-            caseData.setHearingDate(LocalDate.of(2024, 10, 21));
+            caseData.getListForHearingWrapper().setHearingDate(LocalDate.of(2024, 10, 21));
             // Mocking the data structure based on the singleInterimHearing parameter
             if (singleInterimHearing) {
                 caseData.setInterimWrapper(InterimWrapper.builder()
@@ -414,7 +400,7 @@ class HearingServiceTest {
             when(selected.getCode()).thenReturn(selectedCode);
 
             // Mocking the data structure
-            caseData.setHearingType(HearingTypeDirection.FH);
+            caseData.getListForHearingWrapper().setHearingType(HearingTypeDirection.FH);
             // Mocking the data structure
             if (singleInterimHearing) {
                 caseData.setInterimWrapper(InterimWrapper.builder()
@@ -458,7 +444,7 @@ class HearingServiceTest {
             when(selected.getCode()).thenReturn(selectedCode);
 
             // Mocking the data structure
-            caseData.setHearingTime("09:00 AM");
+            caseData.getListForHearingWrapper().setHearingTime("09:00 AM");
             // Mocking the data structure
             if (singleInterimHearing) {
                 caseData.setInterimWrapper(InterimWrapper.builder()

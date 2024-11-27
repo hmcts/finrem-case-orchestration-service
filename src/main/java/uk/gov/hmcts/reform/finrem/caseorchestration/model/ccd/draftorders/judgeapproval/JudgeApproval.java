@@ -1,11 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
+
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -15,18 +25,33 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JudgeApproval {
 
-    private String warningMessageToJudge;
+    private String title;
 
-    private ReviewableDraftOrder reviewableDraftOrder1;
-    private ReviewableDraftOrder reviewableDraftOrder2;
-    private ReviewableDraftOrder reviewableDraftOrder3;
-    private ReviewableDraftOrder reviewableDraftOrder4;
-    private ReviewableDraftOrder reviewableDraftOrder5;
+    private String hearingInfo;
 
-    private ReviewablePsa reviewablePsa1;
-    private ReviewablePsa reviewablePsa2;
-    private ReviewablePsa reviewablePsa3;
-    private ReviewablePsa reviewablePsa4;
-    private ReviewablePsa reviewablePsa5;
+    private YesOrNo hasAttachment;
+
+    @JsonProperty("document")
+    private CaseDocument document;
+
+    @JsonProperty("amendedDocument")
+    private CaseDocument amendedDocument;
+
+    @JsonProperty("judgeDecision")
+    private JudgeDecision judgeDecision;
+
+    @JsonProperty("attachments")
+    private List<CaseDocumentCollection> attachments;
+
+    @JsonProperty("isFinalOrder")
+    private DynamicMultiSelectList isFinalOrder;
+
+    @JsonIgnore
+    private SortKey sortKey;
+
+    @JsonIgnore
+    public YesOrNo getHasAttachment() {
+        return YesOrNo.forValue(!ofNullable(attachments).orElse(List.of()).isEmpty());
+    }
 
 }

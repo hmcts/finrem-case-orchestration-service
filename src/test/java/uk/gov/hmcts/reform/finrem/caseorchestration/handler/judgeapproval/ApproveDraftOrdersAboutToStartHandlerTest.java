@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewableDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ReviewablePsa;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -46,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
@@ -56,8 +56,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static final String NOT_AVAILABLE_ERROR_MESSAGE = "There are no draft orders or pension sharing annexes to review.";
 
-    private static final String WARNING_MESSAGE = "This page is limited to showing only 5 draft orders/pension sharing annexes requiring review. "
-        + "There are additional draft orders/pension sharing annexes requiring review that are not shown.";
+    private static final int NUMBER_OF_DOC_TO_BE_REVIEWED = 5;
 
     @Mock
     private HearingService hearingService;
@@ -96,12 +95,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
-        Assertions.assertEquals(1, response.getErrors().size());
+        assertEquals(1, response.getErrors().size());
         assertThat(response.getErrors()).contains(NOT_AVAILABLE_ERROR_MESSAGE);
-        var judgeApproval = response.getData().getDraftOrdersWrapper().getJudgeApproval();
-        for (int i = 1; i <= 5; i++) {
-            assertThat(judgeApproval.getClass().getMethod("getReviewableDraftOrder" + i).invoke(judgeApproval)).isNull();
-            assertThat(judgeApproval.getClass().getMethod("getReviewablePsa" + i).invoke(judgeApproval)).isNull();
+        var draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
+        for (int i = 1; i <= NUMBER_OF_DOC_TO_BE_REVIEWED; i++) {
+            assertThat(draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + i).invoke(draftOrdersWrapper)).isNull();
         }
     }
 
@@ -113,30 +111,26 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
-        Assertions.assertEquals(1, response.getErrors().size());
+        assertEquals(1, response.getErrors().size());
         assertThat(response.getErrors()).contains(NOT_AVAILABLE_ERROR_MESSAGE);
-        var judgeApproval = response.getData().getDraftOrdersWrapper().getJudgeApproval();
-        for (int i = 1; i <= 5; i++) {
-            assertThat(judgeApproval.getClass().getMethod("getReviewableDraftOrder" + i).invoke(judgeApproval)).isNull();
-            assertThat(judgeApproval.getClass().getMethod("getReviewablePsa" + i).invoke(judgeApproval)).isNull();
+        var draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
+        for (int i = 1; i <= NUMBER_OF_DOC_TO_BE_REVIEWED; i++) {
+            assertThat(draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + i).invoke(draftOrdersWrapper)).isNull();
         }
     }
 
     @SneakyThrows
-    @ParameterizedTest(name = "{index} => draftOrdersWrapper={0}, expectedReviewableDraftOrder1={1}, expectedReviewableDraftOrder2={2},"
-        + "expectedReviewableDraftOrder3={3}, expectedReviewableDraftOrder4={4}, expectedReviewableDraftOrder5={5},"
-        + "expectedReviewablePsa1={6}, expectedReviewablePsa2={7}, expectedReviewablePsa3={8}, expectedReviewablePsa4={9}"
-        + "expectedReviewablePsa5={10}, expectedWarningMessageToJudge={11}")
+    @ParameterizedTest(name = "{index} => draftOrdersWrapper={0}, expectedJudgeApproval1={1}, expectedJudgeApproval2={2},"
+        + "expectedJudgeApproval3={3}, expectedJudgeApproval4={4}, expectedJudgeApproval5={5},"
+        + "expectedShowWarningMessageToJudge={6}")
     @MethodSource("provideDraftOrderData")
     @DisplayName("Test handle method with different DraftOrdersWrapper inputs")
     void handle_withVariousDraftOrdersWrapperData(
         DraftOrdersWrapper draftOrdersWrapper,
-        ReviewableDraftOrder expectedReviewableDraftOrder1, ReviewableDraftOrder expectedReviewableDraftOrder2,
-        ReviewableDraftOrder expectedReviewableDraftOrder3, ReviewableDraftOrder expectedReviewableDraftOrder4,
-        ReviewableDraftOrder expectedReviewableDraftOrder5,
-        ReviewablePsa expectedReviewablePsa1, ReviewablePsa expectedReviewablePsa2, ReviewablePsa expectedReviewablePsa3,
-        ReviewablePsa expectedReviewablePsa4, ReviewablePsa expectedReviewablePsa5,
-        String expectedWarningMessageToJudge) {
+        JudgeApproval expectedJudgeApproval1, JudgeApproval expectedJudgeApproval2,
+        JudgeApproval expectedJudgeApproval3, JudgeApproval expectedJudgeApproval4,
+        JudgeApproval expectedJudgeApproval5,
+        YesOrNo expectedShowWarningMessageToJudge) {
 
         // Arrange
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
@@ -158,44 +152,28 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         // Assert
         assertNotNull(response);
         FinremCaseData responseData = response.getData();
-        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
+        draftOrdersWrapper = responseData.getDraftOrdersWrapper();
 
-
-        var judgeApproval = responseDraftOrdersWrapper.getJudgeApproval();
-        assertNotNull(judgeApproval);
-
-        var expectedReviewableDraftOrders = List.of(
-            Optional.ofNullable(expectedReviewableDraftOrder1), Optional.ofNullable(expectedReviewableDraftOrder2),
-            Optional.ofNullable(expectedReviewableDraftOrder3), Optional.ofNullable(expectedReviewableDraftOrder4),
-            Optional.ofNullable(expectedReviewableDraftOrder5)
+        var expectedJudgeApproval = List.of(
+            Optional.ofNullable(expectedJudgeApproval1), Optional.ofNullable(expectedJudgeApproval2),
+            Optional.ofNullable(expectedJudgeApproval3), Optional.ofNullable(expectedJudgeApproval4),
+            Optional.ofNullable(expectedJudgeApproval5)
         );
 
-        var expectedReviewablePsas = List.of(
-            Optional.ofNullable(expectedReviewablePsa1), Optional.ofNullable(expectedReviewablePsa2), Optional.ofNullable(expectedReviewablePsa3),
-            Optional.ofNullable(expectedReviewablePsa4), Optional.ofNullable(expectedReviewablePsa5)
-        );
-
-        for (int i = 0; i < 5; i++) {
-            var actualDo = (ReviewableDraftOrder) judgeApproval.getClass().getMethod("getReviewableDraftOrder" + (i + 1)).invoke(judgeApproval);
-            var expectedDo = expectedReviewableDraftOrders.get(i).orElse(null);
-            if (expectedDo != null && actualDo != null) {
-                assertEquals(expectedDo.getDocument(), actualDo.getDocument());
-                assertEquals(expectedDo.getHearingInfo(), actualDo.getHearingInfo());
-                assertEquals(expectedDo.getAttachments(), actualDo.getAttachments());
+        for (int i = 0; i < NUMBER_OF_DOC_TO_BE_REVIEWED; i++) {
+            var actual = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (i + 1)).invoke(draftOrdersWrapper);
+            var expected = expectedJudgeApproval.get(i).orElse(null);
+            if (expected != null && actual != null) {
+                assertEquals(expected.getDocument(), actual.getDocument());
+                assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
+                if (expected.getHasAttachment() == YES) {
+                    assertEquals(expected.getAttachments(), actual.getAttachments());
+                }
             } else {
-                assertEquals(expectedDo, actualDo);
-            }
-
-            var actualPsa = (ReviewablePsa) judgeApproval.getClass().getMethod("getReviewablePsa" + (i + 1)).invoke(judgeApproval);
-            var expectedPsa = expectedReviewablePsas.get(i).orElse(null);
-            if (expectedPsa != null && actualPsa != null) {
-                assertEquals(expectedPsa.getDocument(), actualPsa.getDocument());
-                assertEquals(expectedPsa.getHearingInfo(), actualPsa.getHearingInfo());
-            } else {
-                assertEquals(expectedPsa, actualPsa);
+                assertEquals(expected, actual);
             }
         }
-        assertEquals(expectedWarningMessageToJudge, judgeApproval.getWarningMessageToJudge());
+        assertEquals(expectedShowWarningMessageToJudge, draftOrdersWrapper.getShowWarningMessageToJudge());
     }
 
     private static final CaseDocument DO_DOC_1 = CaseDocument.builder().documentFilename("sampleDocument1").build();
@@ -233,6 +211,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         return CaseDocument.builder().documentFilename(LocalDateTime.now().toString()).build();
     }
 
+    private static DraftOrderDocReviewCollection buildDraftOrderDocumentReviewWithoutSubmittedDate(CaseDocument draftOrderDocument,
+                                                                                                   List<CaseDocumentCollection> attachments) {
+        return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, null);
+    }
+
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
                                                                                List<CaseDocumentCollection> attachments) {
         return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, LocalDateTime.now());
@@ -260,6 +243,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .build();
     }
 
+    private static PsaDocReviewCollection buildPsaDocReviewCollectionWithoutSumittedDate(CaseDocument psaDocument) {
+        return buildPsaDocReviewCollection(psaDocument, TO_BE_REVIEWED, null);
+    }
+
     private static PsaDocReviewCollection buildPsaDocReviewCollection(CaseDocument psaDocument) {
         return buildPsaDocReviewCollection(psaDocument, TO_BE_REVIEWED, LocalDateTime.now());
     }
@@ -281,25 +268,18 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .build();
     }
 
-    private static ReviewableDraftOrder buildReviewableDraftOrder(String hearingInfo, CaseDocument draftOrderDocument,
-                                                                  List<CaseDocumentCollection> attachments) {
-        return ReviewableDraftOrder.builder().hearingInfo(hearingInfo)
-            .document(draftOrderDocument)
+    private static JudgeApproval buildJudgeApproval(String hearingInfo, CaseDocument document,
+                                                    List<CaseDocumentCollection> attachments) {
+        return JudgeApproval.builder().hearingInfo(hearingInfo)
+            .document(document)
             .attachments(attachments)
-            .hasAttachment(YesOrNo.forValue(!attachments.isEmpty()))
-            .build();
-    }
-
-    private static ReviewablePsa buildReviewablePsa(String hearingInfo, CaseDocument psaDocument) {
-        return ReviewablePsa.builder().hearingInfo(hearingInfo)
-            .document(psaDocument)
+            .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
             .build();
     }
 
     private static Arguments withEmptyDraftOrdersWrapper() {
         return Arguments.of(
             DraftOrdersWrapper.builder().draftOrdersReviewCollection(Collections.emptyList()).build(),
-            null, null, null, null, null,
             null, null, null, null, null,
             null
         );
@@ -321,14 +301,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder1
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            null, null, null, null,
-            // expectedReviewablePsa1
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-            null, null, null, null,
-            // expectedWarningMessageToJudge
-            null);
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            null, null, null,
+            NO);
     }
 
     private static Arguments withTwoDraftOrderAndZeroPsa() {
@@ -345,14 +321,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder1
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            // expectedReviewableDraftOrder2
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null, null,
-            null, null, null, null, null,
-            // expectedWarningMessageToJudge
-            null);
+            NO);
     }
 
     private static Arguments withDifferentHearingInfo() {
@@ -377,16 +349,92 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder1
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            // expectedReviewableDraftOrder2
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
-            null, null, null,
-            // expectedReviewablePsa1
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-            null, null, null, null,
-            // expectedWarningMessageToJudge
-            null);
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            null, null,
+            NO);
+    }
+
+    private static Arguments withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate() {
+        DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReview(DO_DOC_1, List.of(DO_ATTACHMENT_1));
+        DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2));
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollection(PSA_DOC_1);
+
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc1))
+                            .psaDocReviewCollection(List.of(doc2))).build())
+                        .build(),
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc3))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            null, null,
+            NO);
+    }
+
+    private static Arguments withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate2() {
+        DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReview(DO_DOC_1, List.of(DO_ATTACHMENT_1));
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollection(PSA_DOC_1);
+        DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2));
+
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc1))
+                            .psaDocReviewCollection(List.of(doc2))).build())
+                        .build(),
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc3))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            null, null,
+            NO);
+    }
+
+    private static Arguments withSameHearingInfoAndDocumentShouldBeSortedByDocumentFilename() {
+        DraftOrderDocReviewCollection doc1 = buildDraftOrderDocumentReviewWithoutSubmittedDate(DO_DOC_1, List.of(DO_ATTACHMENT_1));
+        PsaDocReviewCollection doc2 = buildPsaDocReviewCollectionWithoutSumittedDate(PSA_DOC_1);
+        DraftOrderDocReviewCollection doc3 = buildDraftOrderDocumentReviewWithoutSubmittedDate(DO_DOC_2, List.of(DO_ATTACHMENT_2));
+
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc1))
+                            .psaDocReviewCollection(List.of(doc2))).build())
+                        .build(),
+                    DraftOrdersReviewCollection.builder()
+                        .value(applyHearingInfo1(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(doc3))
+                        ).build())
+                        .build()
+                ))
+                .build(),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            null, null,
+            NO);
     }
 
     private static Arguments withProcessedDraftOrderAndPsa() {
@@ -409,15 +457,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
-            null, null, null, null,
-            // expectedReviewablePsa(1-5)
-
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-            null, null, null, null,
-            // expectedWarningMessageToJudge
-            null);
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            null, null, null,
+            NO);
     }
 
     private static Arguments withSixPsas() {
@@ -434,20 +477,16 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                                 buildPsaDocReviewCollection(PSA_DOC_5, TO_BE_REVIEWED),
                                 buildPsaDocReviewCollection(PSA_DOC_6, TO_BE_REVIEWED)
                             ))
-                            ).build())
+                        ).build())
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            null, null, null, null, null,
-            // expectedReviewablePsa(1-5)
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
-            // expectedWarningMessageToJudge
-            WARNING_MESSAGE);
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            YES);
     }
 
     private static Arguments withSixDraftOrders() {
@@ -468,16 +507,13 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_1, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_2, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_3, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_4, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_5, List.of()),
-            // expectedReviewablePsa(1-5)
-            null, null, null, null, null,
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_5, List.of()),
             // expectedWarningMessageToJudge
-            WARNING_MESSAGE);
+            YES);
     }
 
     private static Arguments withFiveReviewablePsas() {
@@ -498,16 +534,12 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            null, null, null, null, null,
-            // expectedReviewablePsa(1-5)
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
-            // expectedWarningMessageToJudge
-            null);
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            NO);
     }
 
     private static Arguments withDraftOrdersAndPsaAndShouldOrderBySubmittedDate() {
@@ -534,20 +566,13 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_4, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_3, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_5, List.of()),
-            // expectedReviewablePsa(1-5)
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_2),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_1),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_5),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
             // expectedWarningMessageToJudge
-            null);
+            YES);
     }
 
     private static Arguments withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate() {
@@ -580,27 +605,26 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            // expectedReviewableDraftOrder(1-5)
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_1, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString1", DO_DOC_2, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_5, List.of()),
-            buildReviewableDraftOrder("hearingServiceFormattedString2", DO_DOC_4, List.of()),
-            null,
-            // expectedReviewablePsa(1-5)
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_3),
-            buildReviewablePsa("hearingServiceFormattedString1", PSA_DOC_4),
-            buildReviewablePsa("hearingServiceFormattedString2", PSA_DOC_2),
-            buildReviewablePsa("hearingServiceFormattedString2", PSA_DOC_1),
-            null,
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of()),
+            buildJudgeApproval("hearingServiceFormattedString2", PSA_DOC_2, List.of()),
             // expectedWarningMessageToJudge
-            null);
+            YES);
     }
 
     private static Stream<Arguments> provideDraftOrderData() {
         return Stream.of(
             withEmptyDraftOrdersWrapper(), withOneDraftOrderAndOnePsa(), withTwoDraftOrderAndZeroPsa(),
-            withDifferentHearingInfo(), withProcessedDraftOrderAndPsa(), withSixPsas(),
-            withFiveReviewablePsas(), withDraftOrdersAndPsaAndShouldOrderBySubmittedDate(),
+            withDifferentHearingInfo(),
+            withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate(),
+            withSameHearingInfoAndDocumentShouldBeSortedBySubmittedDate2(),
+            withSameHearingInfoAndDocumentShouldBeSortedByDocumentFilename(),
+            withProcessedDraftOrderAndPsa(),
+            withSixPsas(),
+            withFiveReviewablePsas(),
+            withDraftOrdersAndPsaAndShouldOrderBySubmittedDate(),
             withDraftOrdersAndPsaAndShouldOrderByHearingAndThenSubmittedDate(),
             withSixDraftOrders()
         );
