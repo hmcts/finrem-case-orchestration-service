@@ -37,9 +37,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -56,7 +59,43 @@ class ApproveOrderServiceTest {
     private ApproveOrderService underTest;
 
     @Mock
-    private IdamService idamService;;
+    private IdamService idamService;
+
+    @ParameterizedTest
+    @MethodSource("provideApprovableCollections")
+    void testProcessApprovableCollection(List<? extends Approvable> approvables,
+                                         CaseDocument targetDoc,
+                                         JudgeApproval judgeApproval,
+                                         int expectedHandledCount) {
+        // Mock the method to count calls to handleApprovable
+        ApproveOrderService spyService = spy(underTest);
+        lenient().doNothing().when(spyService).handleApprovable(any(), any(), any());
+
+        spyService.processApprovableCollection(approvables, targetDoc, judgeApproval, AUTH_TOKEN);
+
+        // Verify the number of handleApprovable invocations
+        verify(spyService, times(expectedHandledCount))
+            .handleApprovable(any(Approvable.class), eq(judgeApproval), eq(AUTH_TOKEN));
+    }
+
+    private static Stream<Arguments> provideApprovableCollections() {
+        CaseDocument targetDoc = mock(CaseDocument.class);
+        JudgeApproval judgeApproval = mock(JudgeApproval.class);
+
+        Approvable matchingApprovable = mock(Approvable.class);
+        when(matchingApprovable.match(targetDoc)).thenReturn(true);
+
+        Approvable nonMatchingApprovable = mock(Approvable.class);
+        when(nonMatchingApprovable.match(targetDoc)).thenReturn(false);
+
+        return Stream.of(
+            Arguments.of(List.of(matchingApprovable), targetDoc, judgeApproval, 1),
+            Arguments.of(List.of(nonMatchingApprovable), targetDoc, judgeApproval, 0),
+            Arguments.of(List.of(matchingApprovable, nonMatchingApprovable), targetDoc, judgeApproval, 1),
+            Arguments.of(null, targetDoc, judgeApproval, 0),
+            Arguments.of(List.of(), targetDoc, judgeApproval, 0)
+        );
+    }
 
     @ParameterizedTest
     @CsvSource({

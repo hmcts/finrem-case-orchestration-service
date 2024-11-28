@@ -109,7 +109,7 @@ public class ApproveOrderService {
         return doc;
     }
 
-    private void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
+    protected void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                              String userAuthorisation) {
         ofNullable(approvables)
             .ifPresent(list ->
