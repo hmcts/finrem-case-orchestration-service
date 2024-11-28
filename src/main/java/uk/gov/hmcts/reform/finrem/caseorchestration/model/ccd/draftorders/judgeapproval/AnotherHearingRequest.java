@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
@@ -18,7 +18,7 @@ public class AnotherHearingRequest {
 
     private DynamicList whichOrder;
 
-    private HearingTypeDirection typeOfHearing;
+    private InterimTypeOfHearing typeOfHearing;
 
     private HearingTimeDirection timeEstimate;
 
