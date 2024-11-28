@@ -106,8 +106,8 @@ class ApproveOrderServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "1, READY_TO_BE_SEALED, DRAFT_ORDER#1, DraftDocument1.pdf",
-        "2, JUDGE_NEEDS_TO_MAKE_CHANGES, DRAFT_ORDER#2, AmendedDraftDocument2.pdf",
+        "1, READY_TO_BE_SEALED, DRAFT_ORDER" + SEPARATOR + "1, DraftDocument1.pdf",
+        "2, JUDGE_NEEDS_TO_MAKE_CHANGES, DRAFT_ORDER" + SEPARATOR + "2, AmendedDraftDocument2.pdf",
         "3, REVIEW_LATER, , "
     })
     void testBuildWhichOrderDynamicListWithoutReviewablePsa(int index, String decision, String expectedCode, String expectedLabel) {
@@ -150,10 +150,10 @@ class ApproveOrderServiceTest {
         List<DynamicListElement> listItems = dynamicList.getListItems();
 
         // Additional checks to validate correct elements
-        assertEquals("DRAFT_ORDER#" + 1, listItems.get(0).getCode());
+        assertEquals("DRAFT_ORDER" + SEPARATOR + 1, listItems.get(0).getCode());
         assertEquals(expectedDocumentNamePrefix("READY_TO_BE_SEALED") + "DraftDocument" + 1 + ".pdf", listItems.get(0).getLabel());
 
-        assertEquals("PSA#" + 3, listItems.get(1).getCode());
+        assertEquals("PSA" + SEPARATOR + 3, listItems.get(1).getCode());
         assertEquals(expectedDocumentNamePrefix("JUDGE_NEEDS_TO_MAKE_CHANGES") + "PsaDocument" + 3 + ".pdf", listItems.get(1).getLabel());
     }
 
