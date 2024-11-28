@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,21 +27,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 
 @ExtendWith(MockitoExtension.class)
-public class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
+class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
-    public static final String AUTH_TOKEN = "tokien:)";
+    private static final String AUTH_TOKEN = "tokien:)";
     private PaperCaseCreateContestedAboutToSubmitHandler handler;
     @Mock
     private IdamService idamService;
     @Mock
     private CaseFlagsService caseFlagsService;
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @BeforeEach
     void setup() {
-        objectMapper = new ObjectMapper();
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         handler = new PaperCaseCreateContestedAboutToSubmitHandler(finremCaseDetailsMapper, caseFlagsService, idamService);
     }
 
