@@ -7,8 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -22,6 +24,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -30,6 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -51,10 +57,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService.SEPARATOR;
 
 @ExtendWith(MockitoExtension.class)
 class ApproveOrderServiceTest {
 
+    private static final CaseDocument TARGET_DOC = mock(CaseDocument.class);
+
+    @Spy
     @InjectMocks
     private ApproveOrderService underTest;
 
@@ -68,14 +78,12 @@ class ApproveOrderServiceTest {
                                          JudgeApproval judgeApproval,
                                          int expectedHandledCount) {
         // Mock the method to count calls to handleApprovable
-        ApproveOrderService spyService = spy(underTest);
-        lenient().doNothing().when(spyService).handleApprovable(any(), any(), any());
+        lenient().doNothing().when(underTest).handleApprovable(any(), any(), any());
 
-        spyService.processApprovableCollection(approvables, targetDoc, judgeApproval, AUTH_TOKEN);
+        underTest.processApprovableCollection(approvables, targetDoc, judgeApproval, AUTH_TOKEN);
 
         // Verify the number of handleApprovable invocations
-        verify(spyService, times(expectedHandledCount))
-            .handleApprovable(any(Approvable.class), eq(judgeApproval), eq(AUTH_TOKEN));
+        verify(underTest, times(expectedHandledCount)).handleApprovable(any(Approvable.class), eq(judgeApproval), eq(AUTH_TOKEN));
     }
 
     private static Stream<Arguments> provideApprovableCollections() {
@@ -250,7 +258,7 @@ class ApproveOrderServiceTest {
                 () -> underTest.validateJudgeApprovalDocument(judgeApproval, index)
             );
             assertEquals(
-                String.format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index),
+                format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index),
                 exception.getMessage()
             );
         } else {
@@ -386,6 +394,37 @@ class ApproveOrderServiceTest {
             Arguments.of(mock(PsaDocumentReview.class), judgeApproves, false),
             Arguments.of(mock(DraftOrderDocumentReview.class), judgeNeedsChanges, true),
             Arguments.of(mock(DraftOrderDocumentReview.class), judgeApproves, false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideProcessHearingInstructionData")
+    void testProcessHearingInstruction2(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest,
+                                        boolean invokeProcessHearingInstructionExpected) {
+        underTest.processHearingInstruction(draftOrdersWrapper, anotherHearingRequest);
+
+        // Verify the method call on processHearingInstruction
+        // Capture the arguments passed to processHearingInstruction
+        verify(underTest, times(invokeProcessHearingInstructionExpected ? 2 : 0))
+            .processHearingInstruction(
+                anyList(),  // Matcher for List type
+                eq(TARGET_DOC),  // Matcher for CaseDocument
+                ArgumentMatchers.any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
+            );
+    }
+
+    static Stream<Arguments> provideProcessHearingInstructionData() {
+        return Stream.of(
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
+                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).build())
+                    .build(),
+                AnotherHearingRequest.builder()
+                    .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
+                    .build(),
+                true
+            )
         );
     }
 }

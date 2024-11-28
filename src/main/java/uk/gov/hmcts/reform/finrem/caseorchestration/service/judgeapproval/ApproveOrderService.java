@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @RequiredArgsConstructor
 public class ApproveOrderService {
 
-    private static final String SEPARATOR = "#";
+    protected static final String SEPARATOR = "#";
 
     private final IdamService idamService;
 
@@ -130,7 +130,7 @@ public class ApproveOrderService {
     }
 
     @SneakyThrows
-    private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
+    protected void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
         String[] splitResult = ofNullable(anotherHearingRequest)
             .map(AnotherHearingRequest::getWhichOrder)
             .map(DynamicList::getValueCode)
