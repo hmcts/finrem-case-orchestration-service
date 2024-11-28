@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -129,18 +129,29 @@ public class ApproveOrderService {
         approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
     }
 
-    @SneakyThrows
     protected void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
         String[] splitResult = ofNullable(anotherHearingRequest)
             .map(AnotherHearingRequest::getWhichOrder)
             .map(DynamicList::getValueCode)
             .map(valueCode -> valueCode.split(SEPARATOR))
             .orElseThrow(() -> new IllegalStateException("Missing selected value in AnotherHearingRequest.whichOrder"));
+        if (splitResult.length != 2) {
+            String valueCode = Optional.of(anotherHearingRequest)
+                .map(AnotherHearingRequest::getWhichOrder)
+                .map(DynamicList::getValueCode)
+                .orElse(null);
+            throw new IllegalStateException(format("Unexpected selected value in AnotherHearingRequest.whichOrder: %s", valueCode));
+        }
 
         String orderIndex = splitResult[1];
 
-        JudgeApproval judgeApproval = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (orderIndex))
-            .invoke(draftOrdersWrapper);
+        JudgeApproval judgeApproval = null;
+        try {
+            judgeApproval = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (orderIndex))
+                .invoke(draftOrdersWrapper);
+        } catch (Exception e) {
+            throw new IllegalStateException(format("Unexpected method \"getJudgeApproval%s\" was invoked", orderIndex), e);
+        }
         ofNullable(judgeApproval)
             .map(JudgeApproval::getDocument).ifPresent(targetDoc -> ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
                 .ifPresent(collection -> collection.forEach(el -> {
