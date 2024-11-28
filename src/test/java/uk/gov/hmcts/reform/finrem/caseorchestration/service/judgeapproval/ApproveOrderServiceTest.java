@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -409,7 +408,7 @@ class ApproveOrderServiceTest {
             .processHearingInstruction(
                 anyList(),  // Matcher for List type
                 eq(TARGET_DOC),  // Matcher for CaseDocument
-                ArgumentMatchers.any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
+                any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
             );
     }
 
