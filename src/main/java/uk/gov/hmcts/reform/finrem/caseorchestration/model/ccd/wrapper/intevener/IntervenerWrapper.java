@@ -64,6 +64,8 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
 
     private OrganisationPolicy intervenerOrganisation;
 
+    private YesOrNo intervenerAddressConfidential;
+
     protected IntervenerWrapper() {
         intervenerCorrespondenceEnabled = Boolean.FALSE;
     }
