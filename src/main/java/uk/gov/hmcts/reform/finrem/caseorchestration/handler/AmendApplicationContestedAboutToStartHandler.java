@@ -57,6 +57,10 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         }
         miamLegacyExemptionsService.convertLegacyExemptions(miamWrapper);
 
+        // populate applicant and respondent in refuge question from tab value.
+        // and write the test.
+        // Can you write this code as a util.
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
             .warnings(warnings)

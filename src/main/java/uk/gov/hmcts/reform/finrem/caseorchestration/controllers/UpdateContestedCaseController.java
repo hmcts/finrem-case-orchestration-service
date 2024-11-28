@@ -112,6 +112,11 @@ public class UpdateContestedCaseController extends BaseController {
 
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
+        // Refactor this handler.
+        // Copy the refuge question to tab.  Delete the refuge question.
+        // Write the tests.
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
