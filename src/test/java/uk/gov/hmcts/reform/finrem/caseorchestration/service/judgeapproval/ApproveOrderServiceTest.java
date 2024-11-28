@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -22,6 +25,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
 @ExtendWith(MockitoExtension.class)
 class ApproveOrderServiceTest {
@@ -156,6 +161,21 @@ class ApproveOrderServiceTest {
         assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, 6));
         assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, 0));
         assertNull(underTest.resolveJudgeApproval(draftOrdersWrapper, -1));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideJudgeApprovalTestCases")
+    void testIsJudgeApproved(JudgeDecision judgeDecision, boolean expectedApproval) {
+        boolean result = underTest.isJudgeApproved(JudgeApproval.builder().judgeDecision(judgeDecision).build());
+        assertEquals(expectedApproval, result);
+    }
+
+    private static Stream<Arguments> provideJudgeApprovalTestCases() {
+        return Stream.of(
+            Arguments.of(READY_TO_BE_SEALED, true),
+            Arguments.of(JUDGE_NEEDS_TO_MAKE_CHANGES, true),
+            Arguments.of(null, false)
+        );
     }
 
 }

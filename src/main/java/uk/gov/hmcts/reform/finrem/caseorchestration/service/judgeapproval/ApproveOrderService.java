@@ -97,7 +97,7 @@ public class ApproveOrderService {
             .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
     }
 
-    private boolean isJudgeApproved(JudgeApproval judgeApproval) {
+    protected boolean isJudgeApproved(JudgeApproval judgeApproval) {
         return judgeApproval != null && Arrays.asList(READY_TO_BE_SEALED, JUDGE_NEEDS_TO_MAKE_CHANGES).contains(judgeApproval.getJudgeDecision());
     }
 
