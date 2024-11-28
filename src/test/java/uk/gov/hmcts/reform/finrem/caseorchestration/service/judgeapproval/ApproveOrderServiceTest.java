@@ -424,6 +424,16 @@ class ApproveOrderServiceTest {
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
                     .build(),
                 true
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
+                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).build())
+                    .build(),
+                AnotherHearingRequest.builder()
+                    .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
+                    .build(),
+                false
             )
         );
     }

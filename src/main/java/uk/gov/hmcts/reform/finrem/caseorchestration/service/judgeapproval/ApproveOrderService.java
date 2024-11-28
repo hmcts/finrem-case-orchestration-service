@@ -141,24 +141,23 @@ public class ApproveOrderService {
 
         JudgeApproval judgeApproval = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (orderIndex))
             .invoke(draftOrdersWrapper);
-        CaseDocument targetDoc = judgeApproval.getDocument();
+        ofNullable(judgeApproval)
+            .map(JudgeApproval::getDocument).ifPresent(targetDoc -> ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+                .ifPresent(collection -> collection.forEach(el -> {
+                    if (el.getValue() != null) {
+                        ofNullable(el.getValue().getDraftOrderDocReviewCollection())
+                            .ifPresent(draftOrderDocReviewCollection ->
+                                processHearingInstruction(draftOrderDocReviewCollection.stream()
+                                        .map(DraftOrderDocReviewCollection::getValue).toList(), targetDoc, anotherHearingRequest)
+                            );
 
-        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> collection.forEach(el -> {
-                if (el.getValue() != null) {
-                    ofNullable(el.getValue().getDraftOrderDocReviewCollection())
-                        .ifPresent(draftOrderDocReviewCollection ->
-                            processHearingInstruction(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue).toList(),
-                                targetDoc, anotherHearingRequest)
-                        );
-
-                    ofNullable(el.getValue().getPsaDocReviewCollection())
-                        .ifPresent(psaDocReviewCollection ->
-                            processHearingInstruction(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue).toList(),
-                                targetDoc, anotherHearingRequest)
-                        );
-                }
-            }));
+                        ofNullable(el.getValue().getPsaDocReviewCollection())
+                            .ifPresent(psaDocReviewCollection ->
+                                processHearingInstruction(psaDocReviewCollection.stream()
+                                        .map(PsaDocReviewCollection::getValue).toList(), targetDoc, anotherHearingRequest)
+                            );
+                    }
+                })));
     }
 
     protected void processHearingInstruction(List<? extends HearingInstructionProcessable> hip,
