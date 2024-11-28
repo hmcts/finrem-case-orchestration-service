@@ -8,10 +8,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -21,7 +24,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -31,19 +36,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @ExtendWith(MockitoExtension.class)
 class ApproveOrderServiceTest {
 
     @InjectMocks
     private ApproveOrderService underTest;
+
+    @Mock
+    private IdamService idamService;;
 
     @ParameterizedTest
     @CsvSource({
@@ -223,32 +236,48 @@ class ApproveOrderServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideHearingInstructionTestData_DraftOrderDocumentReview")
-    void testProcessDraftOrderDocumentReview(List<DraftOrderDocumentReview> draftOrderDocumentReviews,
+    @MethodSource("provideHearingInstructionTestData")
+    void testProcessHearingInstruction(List<? extends HearingInstructionProcessable> hearingInstructionProcessables,
                                        CaseDocument targetDoc,
                                        AnotherHearingRequest anotherHearingRequest) {
-        underTest.processHearingInstruction(draftOrderDocumentReviews, targetDoc, anotherHearingRequest);
+        underTest.processHearingInstruction(hearingInstructionProcessables, targetDoc, anotherHearingRequest);
 
-        if (draftOrderDocumentReviews != null) {
-            for (DraftOrderDocumentReview element : draftOrderDocumentReviews) {
+        if (hearingInstructionProcessables != null) {
+            for (HearingInstructionProcessable element : hearingInstructionProcessables) {
                 if (element.match(targetDoc)) {
-                    assertEquals(YesOrNo.YES, element.getAnotherHearingToBeListed());
-                    assertEquals(anotherHearingRequest.getTypeOfHearing().name(), element.getHearingType());
-                    assertEquals(anotherHearingRequest.getAdditionalTime(), element.getAdditionalTime());
-                    assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), element.getHearingTimeEstimate());
-                    assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), element.getOtherListingInstructions());
+                    if (element instanceof DraftOrderDocumentReview draftOrderDocumentReview) {
+                        assertEquals(YesOrNo.YES, draftOrderDocumentReview.getAnotherHearingToBeListed());
+                        assertEquals(anotherHearingRequest.getTypeOfHearing().name(), draftOrderDocumentReview.getHearingType());
+                        assertEquals(anotherHearingRequest.getAdditionalTime(), draftOrderDocumentReview.getAdditionalTime());
+                        assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), draftOrderDocumentReview.getHearingTimeEstimate());
+                        assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), draftOrderDocumentReview.getOtherListingInstructions());
+                    } else if (element instanceof PsaDocumentReview psaDocumentReview) {
+                        assertEquals(YesOrNo.YES, psaDocumentReview.getAnotherHearingToBeListed());
+                        assertEquals(anotherHearingRequest.getTypeOfHearing().name(), psaDocumentReview.getHearingType());
+                        assertEquals(anotherHearingRequest.getAdditionalTime(), psaDocumentReview.getAdditionalTime());
+                        assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), psaDocumentReview.getHearingTimeEstimate());
+                        assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), psaDocumentReview.getOtherListingInstructions());
+                    }
                 } else {
-                    assertNull(element.getAnotherHearingToBeListed());
-                    assertNull(element.getHearingType());
-                    assertNull(element.getAdditionalTime());
-                    assertNull(element.getHearingTimeEstimate());
-                    assertNull(element.getOtherListingInstructions());
+                    if (element instanceof DraftOrderDocumentReview draftOrderDocumentReview) {
+                        assertNull(draftOrderDocumentReview.getAnotherHearingToBeListed());
+                        assertNull(draftOrderDocumentReview.getHearingType());
+                        assertNull(draftOrderDocumentReview.getAdditionalTime());
+                        assertNull(draftOrderDocumentReview.getHearingTimeEstimate());
+                        assertNull(draftOrderDocumentReview.getOtherListingInstructions());
+                    } else if (element instanceof PsaDocumentReview psaDocumentReview) {
+                        assertNull(psaDocumentReview.getAnotherHearingToBeListed());
+                        assertNull(psaDocumentReview.getHearingType());
+                        assertNull(psaDocumentReview.getAdditionalTime());
+                        assertNull(psaDocumentReview.getHearingTimeEstimate());
+                        assertNull(psaDocumentReview.getOtherListingInstructions());
+                    }
                 }
             }
         }
     }
 
-    static Stream<Arguments> provideHearingInstructionTestData_DraftOrderDocumentReview() {
+    static Stream<Arguments> provideHearingInstructionTestData() {
         DraftOrderDocumentReview matchingElement = spy(DraftOrderDocumentReview.class);
         CaseDocument targetDoc = mock(CaseDocument.class);
         when(matchingElement.match(targetDoc)).thenReturn(true);
@@ -262,59 +291,62 @@ class ApproveOrderServiceTest {
         when(anotherHearingRequest.getTimeEstimate()).thenReturn(HearingTimeDirection.STANDARD_TIME);
         when(anotherHearingRequest.getAnyOtherListingInstructions()).thenReturn("Test instructions");
 
-        return Stream.of(
+        Stream<Arguments> r1 = Stream.of(
             Arguments.of(List.of(matchingElement), targetDoc, anotherHearingRequest),
             Arguments.of(List.of(nonMatchingElement), targetDoc, anotherHearingRequest),
             Arguments.of(List.of(matchingElement, nonMatchingElement), targetDoc, anotherHearingRequest),
             Arguments.of(null, targetDoc, anotherHearingRequest)
         );
+
+        PsaDocumentReview matchingElement1 = spy(PsaDocumentReview.class);
+        when(matchingElement1.match(targetDoc)).thenReturn(true);
+
+        PsaDocumentReview nonMatchingElement1 = spy(PsaDocumentReview.class);
+        when(nonMatchingElement1.match(targetDoc)).thenReturn(false);
+
+        Stream<Arguments> r2 = Stream.of(
+            Arguments.of(List.of(matchingElement1), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(nonMatchingElement1), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(matchingElement1, nonMatchingElement1), targetDoc, anotherHearingRequest),
+            Arguments.of(null, targetDoc, anotherHearingRequest)
+        );
+        return Stream.concat(r1, r2);
     }
 
     @ParameterizedTest
-    @MethodSource("provideHearingInstructionTestData_PsaDocumentReview")
-    void testProcessPsaDocumentReview(List<PsaDocumentReview> psaDocumentReviews,
-                                       CaseDocument targetDoc,
-                                       AnotherHearingRequest anotherHearingRequest) {
-        underTest.processHearingInstruction(psaDocumentReviews, targetDoc, anotherHearingRequest);
+    @MethodSource("provideApprovableTestData")
+    void testHandleApprovable(Approvable approvable, JudgeApproval judgeApproval, boolean documentReplaced) {
+        String mockJudgeName = "Judge TestName";
+        when(idamService.getIdamFullName(any())).thenReturn(mockJudgeName);
 
-        if (psaDocumentReviews != null) {
-            for (PsaDocumentReview element : psaDocumentReviews) {
-                if (element.match(targetDoc)) {
-                    assertEquals(YesOrNo.YES, element.getAnotherHearingToBeListed());
-                    assertEquals(anotherHearingRequest.getTypeOfHearing().name(), element.getHearingType());
-                    assertEquals(anotherHearingRequest.getAdditionalTime(), element.getAdditionalTime());
-                    assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), element.getHearingTimeEstimate());
-                    assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), element.getOtherListingInstructions());
-                } else {
-                    assertNull(element.getAnotherHearingToBeListed());
-                    assertNull(element.getHearingType());
-                    assertNull(element.getAdditionalTime());
-                    assertNull(element.getHearingTimeEstimate());
-                    assertNull(element.getOtherListingInstructions());
-                }
-            }
+        underTest.handleApprovable(approvable, judgeApproval, AUTH_TOKEN);
+
+        verify(approvable).setOrderStatus(APPROVED_BY_JUDGE);
+        verify(approvable).setApprovalDate(LocalDate.now());
+        verify(approvable).setApprovalJudge(mockJudgeName);
+
+        if (documentReplaced) {
+            verify(approvable).replaceDocument(judgeApproval.getAmendedDocument());
+        } else {
+            verify(approvable, never()).replaceDocument(any());
         }
     }
 
-    static Stream<Arguments> provideHearingInstructionTestData_PsaDocumentReview() {
-        PsaDocumentReview matchingElement = spy(PsaDocumentReview.class);
-        CaseDocument targetDoc = mock(CaseDocument.class);
-        when(matchingElement.match(targetDoc)).thenReturn(true);
+    static Stream<Arguments> provideApprovableTestData() {
+        CaseDocument amendedDocument = mock(CaseDocument.class);
 
-        PsaDocumentReview nonMatchingElement = spy(PsaDocumentReview.class);
-        when(nonMatchingElement.match(targetDoc)).thenReturn(false);
+        JudgeApproval judgeNeedsChanges = mock(JudgeApproval.class);
+        when(judgeNeedsChanges.getJudgeDecision()).thenReturn(JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES);
+        when(judgeNeedsChanges.getAmendedDocument()).thenReturn(amendedDocument);
 
-        AnotherHearingRequest anotherHearingRequest = spy(AnotherHearingRequest.class);
-        when(anotherHearingRequest.getTypeOfHearing()).thenReturn(InterimTypeOfHearing.FH);
-        when(anotherHearingRequest.getAdditionalTime()).thenReturn("30 minutes");
-        when(anotherHearingRequest.getTimeEstimate()).thenReturn(HearingTimeDirection.STANDARD_TIME);
-        when(anotherHearingRequest.getAnyOtherListingInstructions()).thenReturn("Test instructions");
+        JudgeApproval judgeApproves = mock(JudgeApproval.class);
+        when(judgeApproves.getJudgeDecision()).thenReturn(READY_TO_BE_SEALED);
 
         return Stream.of(
-            Arguments.of(List.of(matchingElement), targetDoc, anotherHearingRequest),
-            Arguments.of(List.of(nonMatchingElement), targetDoc, anotherHearingRequest),
-            Arguments.of(List.of(matchingElement, nonMatchingElement), targetDoc, anotherHearingRequest),
-            Arguments.of(null, targetDoc, anotherHearingRequest)
+            Arguments.of(mock(PsaDocumentReview.class), judgeNeedsChanges, true),
+            Arguments.of(mock(PsaDocumentReview.class), judgeApproves, false),
+            Arguments.of(mock(DraftOrderDocumentReview.class), judgeNeedsChanges, true),
+            Arguments.of(mock(DraftOrderDocumentReview.class), judgeApproves, false)
         );
     }
 }
