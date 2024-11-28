@@ -12,16 +12,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
@@ -178,4 +188,84 @@ class ApproveOrderServiceTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("provideValidateJudgeApprovalDocumentTestData")
+    void testValidateJudgeApprovalDocument(JudgeApproval judgeApproval, int index, boolean expectException) {
+        if (expectException) {
+            IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> underTest.validateJudgeApprovalDocument(judgeApproval, index)
+            );
+            assertEquals(
+                String.format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index),
+                exception.getMessage()
+            );
+        } else {
+            CaseDocument result = assertDoesNotThrow(() -> underTest.validateJudgeApprovalDocument(judgeApproval, index));
+            assertNotNull(result);
+            assertSame(judgeApproval.getDocument(), result);
+        }
+    }
+
+    static Stream<Arguments> provideValidateJudgeApprovalDocumentTestData() {
+        JudgeApproval validApproval = mock(JudgeApproval.class);
+        CaseDocument validDoc = mock(CaseDocument.class);
+        when(validApproval.getDocument()).thenReturn(validDoc);
+
+        JudgeApproval invalidApproval = mock(JudgeApproval.class);
+        when(invalidApproval.getDocument()).thenReturn(null);
+
+        return Stream.of(
+            Arguments.of(validApproval, 0, false),  // Valid case: should not throw exception
+            Arguments.of(invalidApproval, 1, true) // Invalid case: should throw exception
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideHearingInstructionTestData")
+    void testProcessHearingInstruction(List<DraftOrderDocumentReview> draftOrderDocumentReviews,
+                                       CaseDocument targetDoc,
+                                       AnotherHearingRequest anotherHearingRequest) {
+        underTest.processHearingInstruction(draftOrderDocumentReviews, targetDoc, anotherHearingRequest);
+
+        if (draftOrderDocumentReviews != null) {
+            for (DraftOrderDocumentReview element : draftOrderDocumentReviews) {
+                if (element.match(targetDoc)) {
+                    assertEquals(YesOrNo.YES, element.getAnotherHearingToBeListed());
+                    assertEquals(anotherHearingRequest.getTypeOfHearing().name(), element.getHearingType());
+                    assertEquals(anotherHearingRequest.getAdditionalTime(), element.getAdditionalTime());
+                    assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), element.getHearingTimeEstimate());
+                    assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), element.getOtherListingInstructions());
+                } else {
+                    assertNull(element.getAnotherHearingToBeListed());
+                    assertNull(element.getHearingType());
+                    assertNull(element.getAdditionalTime());
+                    assertNull(element.getHearingTimeEstimate());
+                    assertNull(element.getOtherListingInstructions());
+                }
+            }
+        }
+    }
+
+    static Stream<Arguments> provideHearingInstructionTestData() {
+        DraftOrderDocumentReview matchingElement = spy(DraftOrderDocumentReview.class);
+        CaseDocument targetDoc = mock(CaseDocument.class);
+        when(matchingElement.match(targetDoc)).thenReturn(true);
+
+        DraftOrderDocumentReview nonMatchingElement = spy(DraftOrderDocumentReview.class);
+        when(nonMatchingElement.match(targetDoc)).thenReturn(false);
+
+        AnotherHearingRequest anotherHearingRequest = spy(AnotherHearingRequest.class);
+        when(anotherHearingRequest.getTypeOfHearing()).thenReturn(InterimTypeOfHearing.FH);
+        when(anotherHearingRequest.getAdditionalTime()).thenReturn("30 minutes");
+        when(anotherHearingRequest.getTimeEstimate()).thenReturn(HearingTimeDirection.STANDARD_TIME);
+        when(anotherHearingRequest.getAnyOtherListingInstructions()).thenReturn("Test instructions");
+
+        return Stream.of(
+            Arguments.of(List.of(matchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(nonMatchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(matchingElement, nonMatchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(null, targetDoc, anotherHearingRequest)/*
+        );
+    }
 }

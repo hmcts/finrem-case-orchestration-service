@@ -101,7 +101,7 @@ public class ApproveOrderService {
         return judgeApproval != null && Arrays.asList(READY_TO_BE_SEALED, JUDGE_NEEDS_TO_MAKE_CHANGES).contains(judgeApproval.getJudgeDecision());
     }
 
-    private CaseDocument validateJudgeApprovalDocument(JudgeApproval judgeApproval, int index) {
+    protected CaseDocument validateJudgeApprovalDocument(JudgeApproval judgeApproval, int index) {
         CaseDocument doc = judgeApproval.getDocument();
         if (doc == null) {
             throw new IllegalArgumentException(format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index));
@@ -161,7 +161,7 @@ public class ApproveOrderService {
             }));
     }
 
-    private void processHearingInstruction(List<? extends HearingInstructionProcessable> hip,
+    protected void processHearingInstruction(List<? extends HearingInstructionProcessable> hip,
                                            CaseDocument targetDoc,
                                            AnotherHearingRequest anotherHearingRequest) {
         ofNullable(hip)
