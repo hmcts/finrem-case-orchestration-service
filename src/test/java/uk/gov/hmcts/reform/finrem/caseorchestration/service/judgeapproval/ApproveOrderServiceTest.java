@@ -265,7 +265,7 @@ class ApproveOrderServiceTest {
             Arguments.of(List.of(matchingElement), targetDoc, anotherHearingRequest),
             Arguments.of(List.of(nonMatchingElement), targetDoc, anotherHearingRequest),
             Arguments.of(List.of(matchingElement, nonMatchingElement), targetDoc, anotherHearingRequest),
-            Arguments.of(null, targetDoc, anotherHearingRequest)/*
+            Arguments.of(null, targetDoc, anotherHearingRequest)
         );
     }
 }
