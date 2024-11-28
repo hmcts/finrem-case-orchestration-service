@@ -120,7 +120,7 @@ public class ApproveOrderService {
             );
     }
 
-    private void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
+    protected void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
         if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
             approvable.replaceDocument(judgeApproval.getAmendedDocument());
         }

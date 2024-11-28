@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
@@ -222,8 +223,8 @@ class ApproveOrderServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideHearingInstructionTestData")
-    void testProcessHearingInstruction(List<DraftOrderDocumentReview> draftOrderDocumentReviews,
+    @MethodSource("provideHearingInstructionTestData_DraftOrderDocumentReview")
+    void testProcessDraftOrderDocumentReview(List<DraftOrderDocumentReview> draftOrderDocumentReviews,
                                        CaseDocument targetDoc,
                                        AnotherHearingRequest anotherHearingRequest) {
         underTest.processHearingInstruction(draftOrderDocumentReviews, targetDoc, anotherHearingRequest);
@@ -247,12 +248,60 @@ class ApproveOrderServiceTest {
         }
     }
 
-    static Stream<Arguments> provideHearingInstructionTestData() {
+    static Stream<Arguments> provideHearingInstructionTestData_DraftOrderDocumentReview() {
         DraftOrderDocumentReview matchingElement = spy(DraftOrderDocumentReview.class);
         CaseDocument targetDoc = mock(CaseDocument.class);
         when(matchingElement.match(targetDoc)).thenReturn(true);
 
         DraftOrderDocumentReview nonMatchingElement = spy(DraftOrderDocumentReview.class);
+        when(nonMatchingElement.match(targetDoc)).thenReturn(false);
+
+        AnotherHearingRequest anotherHearingRequest = spy(AnotherHearingRequest.class);
+        when(anotherHearingRequest.getTypeOfHearing()).thenReturn(InterimTypeOfHearing.FH);
+        when(anotherHearingRequest.getAdditionalTime()).thenReturn("30 minutes");
+        when(anotherHearingRequest.getTimeEstimate()).thenReturn(HearingTimeDirection.STANDARD_TIME);
+        when(anotherHearingRequest.getAnyOtherListingInstructions()).thenReturn("Test instructions");
+
+        return Stream.of(
+            Arguments.of(List.of(matchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(nonMatchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(List.of(matchingElement, nonMatchingElement), targetDoc, anotherHearingRequest),
+            Arguments.of(null, targetDoc, anotherHearingRequest)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideHearingInstructionTestData_PsaDocumentReview")
+    void testProcessPsaDocumentReview(List<PsaDocumentReview> psaDocumentReviews,
+                                       CaseDocument targetDoc,
+                                       AnotherHearingRequest anotherHearingRequest) {
+        underTest.processHearingInstruction(psaDocumentReviews, targetDoc, anotherHearingRequest);
+
+        if (psaDocumentReviews != null) {
+            for (PsaDocumentReview element : psaDocumentReviews) {
+                if (element.match(targetDoc)) {
+                    assertEquals(YesOrNo.YES, element.getAnotherHearingToBeListed());
+                    assertEquals(anotherHearingRequest.getTypeOfHearing().name(), element.getHearingType());
+                    assertEquals(anotherHearingRequest.getAdditionalTime(), element.getAdditionalTime());
+                    assertEquals(anotherHearingRequest.getTimeEstimate().getValue(), element.getHearingTimeEstimate());
+                    assertEquals(anotherHearingRequest.getAnyOtherListingInstructions(), element.getOtherListingInstructions());
+                } else {
+                    assertNull(element.getAnotherHearingToBeListed());
+                    assertNull(element.getHearingType());
+                    assertNull(element.getAdditionalTime());
+                    assertNull(element.getHearingTimeEstimate());
+                    assertNull(element.getOtherListingInstructions());
+                }
+            }
+        }
+    }
+
+    static Stream<Arguments> provideHearingInstructionTestData_PsaDocumentReview() {
+        PsaDocumentReview matchingElement = spy(PsaDocumentReview.class);
+        CaseDocument targetDoc = mock(CaseDocument.class);
+        when(matchingElement.match(targetDoc)).thenReturn(true);
+
+        PsaDocumentReview nonMatchingElement = spy(PsaDocumentReview.class);
         when(nonMatchingElement.match(targetDoc)).thenReturn(false);
 
         AnotherHearingRequest anotherHearingRequest = spy(AnotherHearingRequest.class);
