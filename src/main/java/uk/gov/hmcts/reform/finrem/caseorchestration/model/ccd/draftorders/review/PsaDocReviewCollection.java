@@ -13,5 +13,5 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PsaDocReviewCollection implements HasCaseDocument {
-    private PsaDocumentReview value;0
+    private PsaDocumentReview value;
 }
