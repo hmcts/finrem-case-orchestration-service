@@ -52,3 +52,19 @@ FINREM_IDAM_CLIENT_SECRET
 CCD_IMPORT_USERNAME_AAT
 CCD_IMPORT_PASSWORD_AAT
 ```
+
+## Elasticsearch
+Elasticsearch is used by the application to store case data. The Elasticsearch container is started by cftlib.
+
+The Financial Remedy case types have a separate index.
+
+| Case Type | Search URL                                                          | Mapping URL                                                          |
+|-----------|---------------------------------------------------------------------|----------------------------------------------------------------------|
+| Contested | http://localhost:9200/financialremedycontested_cases-000001/_search | http://localhost:9200/financialremedycontested_cases-000001/_mapping |
+| Consented | http://localhost:9200/financialremedymvp2_cases-000001/_search      | http://localhost:9200/financialremedymvp2_cases-000001/_mapping      |
+
+### Reindex
+To reindex the Elasticsearch data you can use the following command:
+```bash
+./bin/elasticsearch/reindex.sh [contested | consented]
+```
