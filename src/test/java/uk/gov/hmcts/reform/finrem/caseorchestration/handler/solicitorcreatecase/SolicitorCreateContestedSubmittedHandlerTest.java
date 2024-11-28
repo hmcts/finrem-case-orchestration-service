@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -87,6 +88,7 @@ class SolicitorCreateContestedSubmittedHandlerTest {
         verify(assignApplicantSolicitorService, times(1))
             .setApplicantSolicitor(callbackRequest.getCaseDetails(), AUTH_TOKEN);
 
+        assertEquals(2, response.getErrors().size());
         assertTrue(response.getErrors().contains("Exception message"));
         assertTrue(response.getErrors()
             .contains("Failed to assign applicant solicitor to case, "
