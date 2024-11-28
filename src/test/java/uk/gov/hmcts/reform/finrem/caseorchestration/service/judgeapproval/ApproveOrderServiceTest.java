@@ -399,17 +399,22 @@ class ApproveOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideProcessHearingInstructionData")
     void testProcessHearingInstruction2(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest,
-                                        boolean invokeProcessHearingInstructionExpected) {
-        underTest.processHearingInstruction(draftOrdersWrapper, anotherHearingRequest);
-
-        // Verify the method call on processHearingInstruction
-        // Capture the arguments passed to processHearingInstruction
-        verify(underTest, times(invokeProcessHearingInstructionExpected ? 2 : 0))
-            .processHearingInstruction(
-                anyList(),  // Matcher for List type
-                eq(TARGET_DOC),  // Matcher for CaseDocument
-                any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
+                                        boolean invokeProcessHearingInstructionExpected, boolean illegalStateExceptionExpected) {
+        if (!illegalStateExceptionExpected) {
+            underTest.processHearingInstruction(draftOrdersWrapper, anotherHearingRequest);
+            verify(underTest, times(invokeProcessHearingInstructionExpected ? 2 : 0))
+                .processHearingInstruction(
+                    anyList(),  // Matcher for List type
+                    eq(TARGET_DOC),  // Matcher for CaseDocument
+                    any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
+                );
+        } else {
+            IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> underTest.processHearingInstruction(draftOrdersWrapper, anotherHearingRequest)
             );
+            assertEquals("Missing selected value in AnotherHearingRequest.whichOrder", exception.getMessage());
+        }
     }
 
     static Stream<Arguments> provideProcessHearingInstructionData() {
@@ -422,7 +427,7 @@ class ApproveOrderServiceTest {
                 AnotherHearingRequest.builder()
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
                     .build(),
-                true
+                true, false
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -432,7 +437,24 @@ class ApproveOrderServiceTest {
                 AnotherHearingRequest.builder()
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
                     .build(),
-                false
+                false, false
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
+                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).build())
+                    .build(),
+                AnotherHearingRequest.builder()
+                    .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("PSA%s1", SEPARATOR)).build()).build())
+                    .build(),
+                false, false
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder().build(),
+                AnotherHearingRequest.builder()
+                    .whichOrder(DynamicList.builder().value(DynamicListElement.builder().build()).build())
+                    .build(),
+                false, true
             )
         );
     }

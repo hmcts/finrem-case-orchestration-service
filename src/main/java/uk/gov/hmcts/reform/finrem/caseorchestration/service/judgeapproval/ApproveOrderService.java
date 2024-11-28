@@ -135,7 +135,7 @@ public class ApproveOrderService {
             .map(AnotherHearingRequest::getWhichOrder)
             .map(DynamicList::getValueCode)
             .map(valueCode -> valueCode.split(SEPARATOR))
-            .orElseThrow(() -> new IllegalStateException("Required value is missing: " + anotherHearingRequest));
+            .orElseThrow(() -> new IllegalStateException("Missing selected value in AnotherHearingRequest.whichOrder"));
 
         String orderIndex = splitResult[1];
 
