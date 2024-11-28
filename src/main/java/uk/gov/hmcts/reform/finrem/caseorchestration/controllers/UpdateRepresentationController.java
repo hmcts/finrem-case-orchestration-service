@@ -77,6 +77,10 @@ public class UpdateRepresentationController extends BaseController {
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         validateCaseData(ccdRequest);
 
+        // refactor this controller into a handler
+        // populate the question from the tab
+        // write new tests
+
         caseData.put(NOC_PARTY, null);
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
 

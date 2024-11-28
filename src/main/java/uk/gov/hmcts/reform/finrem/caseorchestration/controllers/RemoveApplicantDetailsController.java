@@ -77,6 +77,10 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.put(MINI_FORM_A, document);
         }
 
+        // refactor this controller into a handler
+        // populate the question from the tab
+        // write new tests
+
         if (includesRepresentationChange) {
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, authorisationToken,
                 callback.getCaseDetailsBefore()));
