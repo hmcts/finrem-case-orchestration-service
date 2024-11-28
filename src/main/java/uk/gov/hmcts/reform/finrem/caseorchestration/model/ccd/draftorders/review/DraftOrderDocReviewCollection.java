@@ -14,5 +14,4 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @NoArgsConstructor
 public class DraftOrderDocReviewCollection implements HasCaseDocument {
     private DraftOrderDocumentReview value;
-
 }
