@@ -14,16 +14,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -66,11 +72,20 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(caseDetails);
-        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+        String caseReference = String.valueOf(caseDetails.getId());
+        boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
-        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+        if (isAgreedLatest) {
+            DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
+                .getDraftOrdersWrapper(), caseReference);
+
+            LocalDate hearingDate = review.getHearingDate();
+            String judge = review.getHearingJudge();
+
+            NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
+                caseDetails, hearingDate, judge);
+            notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+        }
 
         String confirmationBody = getConfirmationBody(caseDetails);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -123,5 +138,15 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .map(SuggestedDraftOrderCollection::getValue)
             .map(SuggestedDraftOrder::getSubmittedDate)
             .max(LocalDateTime::compareTo);
+    }
+
+    private DraftOrdersReview getDraftOrderReviewWithLatestSubmissionDate(DraftOrdersWrapper draftOrdersWrapper, String caseReference) {
+        String exceptionMessage = String.format("No draft order in review found for Case ID: %s", caseReference);
+
+        return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
+            .map(DraftOrdersReviewCollection::getValue)
+            .filter(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder() != null) // Ensure there's a reviewable order
+            .max(Comparator.comparing(draftOrderReview -> draftOrderReview.getLatestToBeReviewedOrder().getSubmittedDate())) // Get the latest
+            .orElseThrow(() -> new IllegalStateException(exceptionMessage));
     }
 }
