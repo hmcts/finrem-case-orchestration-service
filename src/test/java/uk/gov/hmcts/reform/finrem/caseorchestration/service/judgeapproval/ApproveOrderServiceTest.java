@@ -511,7 +511,7 @@ class ApproveOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideGetDocumentFileNameData")
     void testGetDocumentFileName(JudgeApproval judgeApproval, String expectedFilename) {
-        String actualFilename = ApproveOrderService.getDocumentFileName(judgeApproval);
+        String actualFilename = underTest.getDocumentFileName(judgeApproval);
         assertEquals(expectedFilename, actualFilename);
     }
 

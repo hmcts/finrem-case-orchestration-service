@@ -220,7 +220,7 @@ public class ApproveOrderService {
         return DynamicList.builder().listItems(listItems).build();
     }
 
-    protected static String getDocumentFileName(JudgeApproval judgeApproval) {
+    protected String getDocumentFileName(JudgeApproval judgeApproval) {
         String filename = null;
         if (JUDGE_NEEDS_TO_MAKE_CHANGES == judgeApproval.getJudgeDecision()) {
             filename = judgeApproval.getAmendedDocument() != null
