@@ -67,7 +67,7 @@ public class ApproveOrderService {
         }
     }
 
-    private void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+    protected void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                        String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> collection.forEach(el -> {

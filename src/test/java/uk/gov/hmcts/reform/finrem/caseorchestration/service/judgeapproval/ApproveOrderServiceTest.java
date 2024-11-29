@@ -54,7 +54,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.REVIEW_LATER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService.SEPARATOR;
 
@@ -244,6 +246,8 @@ class ApproveOrderServiceTest {
         return Stream.of(
             Arguments.of(READY_TO_BE_SEALED, true),
             Arguments.of(JUDGE_NEEDS_TO_MAKE_CHANGES, true),
+            Arguments.of(LEGAL_REP_NEEDS_TO_MAKE_CHANGE, false),
+            Arguments.of(REVIEW_LATER, false),
             Arguments.of(null, false)
         );
     }
@@ -537,4 +541,61 @@ class ApproveOrderServiceTest {
             )
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("providePopulateJudgeDecisionsData")
+    void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper,
+                                    int expectedPopulateJudgeDecisionInvoked) {
+        // Act
+        underTest.populateJudgeDecisions(draftOrdersWrapper, AUTH_TOKEN);
+
+        // Verify if `populateJudgeDecision` is invoked the expected number of times
+        verify(underTest, times(expectedPopulateJudgeDecisionInvoked))
+            .populateJudgeDecision(
+                eq(draftOrdersWrapper), // Matcher for DraftOrdersWrapper
+                any(CaseDocument.class), // Matcher for CaseDocument
+                any(JudgeApproval.class), // Matcher for JudgeApproval
+                eq(AUTH_TOKEN) // Matcher for String userAuthorisation
+            );
+
+    }
+
+    static Stream<Arguments> providePopulateJudgeDecisionsData() {
+        return Stream.of(
+            // Happy path: judge approval exists for all iterations
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval3(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval4(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval5(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .build(),
+                5
+            ),
+            // Partial approval: only some approvals exist
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
+                    .judgeApproval4(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .build(),
+                2
+            ),
+            // No approvals: no judge approvals exist
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
+                    .judgeApproval5(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
+                    .build(),
+                0 // Expected number of calls to populateJudgeDecision
+            ),
+            // No approvals: no judge approvals exist
+            Arguments.of(
+                DraftOrdersWrapper.builder().build(),
+                0 // Expected number of calls to populateJudgeDecision
+            )
+        );
+    }
+
 }
