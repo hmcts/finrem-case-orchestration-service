@@ -593,8 +593,8 @@ class ApproveOrderServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("providePopulateJudgeDecisionData")
-    void testPopulateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+    @MethodSource("provideShouldInvokeProcessHearingInstructionData")
+    void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                    int expectHearingInvocationCount) {
         lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
 
@@ -603,9 +603,17 @@ class ApproveOrderServiceTest {
         verify(underTest, times(expectHearingInvocationCount)).processHearingInstruction(eq(draftOrdersWrapper),  any(AnotherHearingRequest.class));
     }
 
-    static Stream<Arguments> providePopulateJudgeDecisionData() {
+    static Stream<Arguments> provideShouldInvokeProcessHearingInstructionData() {
         CaseDocument targetDoc = CaseDocument.builder().build();
         return Stream.of(
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .hearingInstruction(HearingInstruction.builder().build())
+                    .build(),
+                targetDoc,
+                JudgeApproval.builder().build(),
+                0
+            ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .hearingInstruction(HearingInstruction.builder()
