@@ -128,6 +128,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(a -> JudgeApproval.builder()
                         .docType(DRAFT_ORDER)
                         .title(DRAFT_ORDER.getTitle())
+                        .titleInJudgeDecisionMessage(DRAFT_ORDER.getDescription())
                         .hearingInfo(hearingInfo)
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
@@ -144,6 +145,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(a -> JudgeApproval.builder()
                         .docType(PSA)
                         .title(PSA.getTitle())
+                        .titleInJudgeDecisionMessage(PSA.getDescription())
                         .hearingInfo(hearingInfo)
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
