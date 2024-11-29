@@ -70,20 +70,14 @@ public class ApproveOrderService {
     protected void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                          String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> collection.forEach(el -> {
-                if (el.getValue() != null) {
-                    ofNullable(el.getValue().getDraftOrderDocReviewCollection())
-                        .ifPresent(draftOrderDocReviewCollection ->
-                            processApprovableCollection(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue).toList(),
-                                targetDoc, judgeApproval, userAuthorisation));
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
+                .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
+                .toList(), targetDoc, judgeApproval, userAuthorisation));
 
-                    ofNullable(el.getValue().getPsaDocReviewCollection())
-                        .ifPresent(psaDocReviewCollection ->
-                            processApprovableCollection(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue).toList(), targetDoc,
-                                judgeApproval, userAuthorisation));
-
-                }
-            }));
+        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
+                .flatMap(c -> c.getValue().getPsaDocReviewCollection().stream().map(PsaDocReviewCollection::getValue))
+                .toList(), targetDoc, judgeApproval, userAuthorisation));
 
         ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
             .ifPresent(agreedDraftOrderCollections ->

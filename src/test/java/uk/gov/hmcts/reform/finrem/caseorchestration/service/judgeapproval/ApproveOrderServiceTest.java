@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -640,7 +641,8 @@ class ApproveOrderServiceTest {
     @MethodSource("provideShouldInvokeProcessApprovableCollectionData")
     void shouldInvokeProcessApprovableCollection(DraftOrdersWrapper draftOrdersWrapper,
                                                  List<AgreedDraftOrder> agreedDraftOrders,
-                                                 List<DraftOrderDocumentReview> draftOrderDocumentReviews) {
+                                                 List<DraftOrderDocumentReview> draftOrderDocumentReviews,
+                                                 List<PsaDocumentReview> psaDocumentReviews) {
         CaseDocument targetDoc = CaseDocument.builder().build();
         JudgeApproval judgeApproval = mock(JudgeApproval.class);
 
@@ -653,6 +655,8 @@ class ApproveOrderServiceTest {
             .processApprovableCollection(agreedDraftOrders, targetDoc, judgeApproval, AUTH_TOKEN);
         verify(underTest, times(draftOrderDocumentReviews == null ? 0 : 1))
             .processApprovableCollection(draftOrderDocumentReviews, targetDoc, judgeApproval, AUTH_TOKEN);
+        verify(underTest, times(psaDocumentReviews == null ? 0 : 1))
+            .processApprovableCollection(psaDocumentReviews, targetDoc, judgeApproval, AUTH_TOKEN);
     }
 
     static Stream<Arguments> provideShouldInvokeProcessApprovableCollectionData() {
@@ -661,7 +665,53 @@ class ApproveOrderServiceTest {
         List<DraftOrderDocumentReview> draftOrderDocumentReviews0 = List.of(DraftOrderDocumentReview.builder().build());
         List<DraftOrderDocumentReview> draftOrderDocumentReviews1 = List.of(DraftOrderDocumentReview.builder().build(),
             DraftOrderDocumentReview.builder().build());
+        List<PsaDocumentReview> psaDocumentReviews0 = List.of(PsaDocumentReview.builder().build());
+        List<PsaDocumentReview> psaDocumentReviews1 = List.of(PsaDocumentReview.builder().build(), PsaDocumentReview.builder().build());
+
         return Stream.of(
+            // Only PsaDocumentReview
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews0.get(0)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .build(),
+                null, null, psaDocumentReviews0
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews1.get(0)).build(),
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews1.get(1)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .build(),
+                null, null, psaDocumentReviews1
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews1.get(0)).build()
+                            ))
+                            .build()).build(),
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews1.get(1)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .build(),
+                null, null, psaDocumentReviews1
+            ),
             // Only DraftOrdersReview
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -673,8 +723,7 @@ class ApproveOrderServiceTest {
                             .build()).build()
                     ))
                     .build(),
-                null,
-                draftOrderDocumentReviews0
+                null, draftOrderDocumentReviews0, null
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -687,8 +736,24 @@ class ApproveOrderServiceTest {
                             .build()).build()
                     ))
                     .build(),
-                null,
-                draftOrderDocumentReviews1
+                null, draftOrderDocumentReviews1, null
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                DraftOrderDocReviewCollection.builder().value(draftOrderDocumentReviews1.get(0)).build()
+                            ))
+                            .build()).build(),
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                DraftOrderDocReviewCollection.builder().value(draftOrderDocumentReviews1.get(1)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .build(),
+                null, draftOrderDocumentReviews1, null
             ),
             // Only AgreedDraftOrder
             Arguments.of(
@@ -697,7 +762,7 @@ class ApproveOrderServiceTest {
                         AgreedDraftOrderCollection.builder().value(agreedDraftOrders0.get(0)).build()
                     ))
                     .build(),
-                agreedDraftOrders0, null
+                agreedDraftOrders0, null, null
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -706,9 +771,48 @@ class ApproveOrderServiceTest {
                         AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(1)).build()
                     ))
                     .build(),
-                agreedDraftOrders1, null
+                agreedDraftOrders1, null, null
             ),
-            Arguments.of(DraftOrdersWrapper.builder().build(), null, null)
+            // Mixed Cases
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                DraftOrderDocReviewCollection.builder().value(draftOrderDocumentReviews1.get(0)).build()
+                            ))
+                            .build()).build(),
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                DraftOrderDocReviewCollection.builder().value(draftOrderDocumentReviews1.get(1)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(0)).build(),
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(1)).build()
+                    ))
+                    .build(),
+                agreedDraftOrders1, draftOrderDocumentReviews1, null
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .draftOrdersReviewCollection(List.of(
+                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(psaDocumentReviews0.get(0)).build()
+                            ))
+                            .build()).build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(0)).build(),
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(1)).build()
+                    ))
+                    .build(),
+                agreedDraftOrders1, null, psaDocumentReviews0
+            ),
+            // Empty case
+            Arguments.of(DraftOrdersWrapper.builder().build(), null, null, null)
         );
     }
 }
