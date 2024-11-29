@@ -497,4 +497,44 @@ class ApproveOrderServiceTest {
             )
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("provideGetDocumentFileNameData")
+    void testGetDocumentFileName(JudgeApproval judgeApproval, String expectedFilename) {
+        String actualFilename = ApproveOrderService.getDocumentFileName(judgeApproval);
+        assertEquals(expectedFilename, actualFilename);
+    }
+
+    private static Stream<Arguments> provideGetDocumentFileNameData() {
+        CaseDocument amendedDocument = CaseDocument.builder().documentFilename("AmendedDoc.pdf").build();
+        CaseDocument originalDocument = CaseDocument.builder().documentFilename("OriginalDoc.pdf").build();
+
+        return Stream.of(
+            // Scenario 1: Judge needs to make changes, and amended document exists
+            Arguments.of(
+                JudgeApproval.builder().judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES).amendedDocument(amendedDocument).build(),
+                "AmendedDoc.pdf"
+            ),
+            // Scenario 2: Judge needs to make changes, but no amended document
+            Arguments.of(
+                JudgeApproval.builder().judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES).build(),
+                "Unknown Filename"
+            ),
+            // Scenario 3: Ready to be sealed, and original document exists
+            Arguments.of(
+                JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).document(originalDocument).build(),
+                "OriginalDoc.pdf"
+            ),
+            // Scenario 4: Ready to be sealed, but no original document
+            Arguments.of(
+                JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+                "Unknown Filename"
+            ),
+            // Scenario 5: No judge decision provided
+            Arguments.of(
+                JudgeApproval.builder().build(),
+                null
+            )
+        );
+    }
 }
