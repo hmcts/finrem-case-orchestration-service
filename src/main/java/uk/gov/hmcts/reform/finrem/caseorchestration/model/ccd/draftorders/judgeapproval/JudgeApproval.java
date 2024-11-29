@@ -28,6 +28,8 @@ public class JudgeApproval {
 
     private String title;
 
+    private String titleInJudgeDecisionMessage;
+
     private String hearingInfo;
 
     private YesOrNo hasAttachment;

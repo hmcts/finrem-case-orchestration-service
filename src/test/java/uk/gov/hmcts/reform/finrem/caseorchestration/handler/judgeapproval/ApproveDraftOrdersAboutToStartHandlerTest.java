@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -46,6 +47,8 @@ import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
@@ -164,6 +167,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             var actual = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (i + 1)).invoke(draftOrdersWrapper);
             var expected = expectedJudgeApproval.get(i).orElse(null);
             if (expected != null && actual != null) {
+                assertEquals(expected.getTitle(), actual.getTitle());
+                assertEquals(expected.getTitleInJudgeDecisionMessage(), actual.getTitleInJudgeDecisionMessage());
                 assertEquals(expected.getDocument(), actual.getDocument());
                 assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
                 if (expected.getHasAttachment() == YES) {
@@ -268,9 +273,12 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .build();
     }
 
-    private static JudgeApproval buildJudgeApproval(String hearingInfo, CaseDocument document,
+    private static JudgeApproval buildJudgeApproval(JudgeApprovalDocType docType,
+                                                    String hearingInfo, CaseDocument document,
                                                     List<CaseDocumentCollection> attachments) {
         return JudgeApproval.builder().hearingInfo(hearingInfo)
+            .title(docType.getTitle())
+            .titleInJudgeDecisionMessage(docType.getDescription())
             .document(document)
             .attachments(attachments)
             .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
@@ -301,8 +309,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
             null, null, null,
             NO);
     }
@@ -321,8 +329,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null, null,
             NO);
     }
@@ -349,9 +357,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null,
             NO);
     }
@@ -376,9 +384,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
             null, null,
             NO);
     }
@@ -403,9 +411,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null,
             NO);
     }
@@ -430,9 +438,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
             null, null,
             NO);
     }
@@ -457,8 +465,8 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null, null,
             NO);
     }
@@ -481,11 +489,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_5, null),
             YES);
     }
 
@@ -507,11 +515,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_1, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_2, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_3, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_4, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString2", DO_DOC_5, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_1, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_2, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_3, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_4, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_5, List.of()),
             // expectedWarningMessageToJudge
             YES);
     }
@@ -534,11 +542,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, null),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_5, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_2, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_3, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_4, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_5, null),
             NO);
     }
 
@@ -566,11 +574,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_2, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_4, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_1, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_2, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_4, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_4, List.of()),
             // expectedWarningMessageToJudge
             YES);
     }
@@ -605,11 +613,11 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .build()
                 ))
                 .build(),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_3, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", PSA_DOC_4, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_1, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString1", DO_DOC_2, List.of()),
-            buildJudgeApproval("hearingServiceFormattedString2", PSA_DOC_2, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_3, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_4, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of()),
+            buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_2, List.of()),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString2", PSA_DOC_2, List.of()),
             // expectedWarningMessageToJudge
             YES);
     }
