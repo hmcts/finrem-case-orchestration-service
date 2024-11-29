@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -599,7 +598,7 @@ class ApproveOrderServiceTest {
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper,
                                    int expectHearingInvocationCount) {
-        doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+        lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
 
         underTest.populateJudgeDecision(draftOrdersWrapper, CaseDocument.builder().build(), JudgeApproval.builder().build(), AUTH_TOKEN);
 
