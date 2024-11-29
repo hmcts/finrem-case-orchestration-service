@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -51,14 +53,14 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
             caseDetails.getId(), EventType.NEW_PAPER_CASE);
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
-            caseData.getContactDetailsWrapper().setIsAdmin(YesOrNo.YES.toString());
+            caseData.getContactDetailsWrapper().setIsAdmin(YES_VALUE);
         } else {
-            caseData.getContactDetailsWrapper().setIsAdmin(YesOrNo.NO.toString());
+            caseData.getContactDetailsWrapper().setIsAdmin(NO_VALUE);
             caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
 
         caseData.setPaperApplication(YesOrNo.YES);
-        if (caseData.getFastTrackDecision().isNoOrNull()) {
+        if (caseData.getFastTrackDecision() == null) {
             caseData.setFastTrackDecision(YesOrNo.NO);
         }
 
