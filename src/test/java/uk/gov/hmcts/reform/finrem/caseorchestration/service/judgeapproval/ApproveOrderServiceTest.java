@@ -646,7 +646,7 @@ class ApproveOrderServiceTest {
         JudgeApproval judgeApproval = mock(JudgeApproval.class);
 
         lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
-        lenient().doNothing().when(underTest).processApprovableCollection(any(), eq(targetDoc), eq(judgeApproval), eq(AUTH_TOKEN) );
+        lenient().doNothing().when(underTest).processApprovableCollection(any(), eq(targetDoc), eq(judgeApproval), eq(AUTH_TOKEN));
 
         underTest.populateJudgeDecision(draftOrdersWrapper, CaseDocument.builder().build(), judgeApproval, AUTH_TOKEN);
 
@@ -675,7 +675,7 @@ class ApproveOrderServiceTest {
                     .build(),
                 agreedDraftOrders1
             ),
-            Arguments.of(DraftOrdersWrapper.builder() .build(), List.of())
+            Arguments.of(DraftOrdersWrapper.builder().build(), List.of())
         );
     }
 }
