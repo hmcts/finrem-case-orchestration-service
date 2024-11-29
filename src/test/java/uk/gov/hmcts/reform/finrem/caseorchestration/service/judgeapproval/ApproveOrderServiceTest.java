@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstruction
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
@@ -42,9 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -124,7 +127,7 @@ class ApproveOrderServiceTest {
 
         // Assert
         if (expectedCode == null) {
-            Assertions.assertTrue(dynamicList.getListItems().isEmpty());
+            assertTrue(dynamicList.getListItems().isEmpty());
         } else {
             assertEquals(1, dynamicList.getListItems().size());
             DynamicListElement element = dynamicList.getListItems().get(0);
@@ -594,24 +597,21 @@ class ApproveOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
-    void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+    void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper,
                                    int expectHearingInvocationCount) {
-        lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+        doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
 
-        underTest.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
+        underTest.populateJudgeDecision(draftOrdersWrapper, CaseDocument.builder().build(), JudgeApproval.builder().build(), AUTH_TOKEN);
 
-        verify(underTest, times(expectHearingInvocationCount)).processHearingInstruction(eq(draftOrdersWrapper),  any(AnotherHearingRequest.class));
+        verify(underTest, times(expectHearingInvocationCount)).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
     }
 
     static Stream<Arguments> provideShouldInvokeProcessHearingInstructionData() {
-        CaseDocument targetDoc = CaseDocument.builder().build();
         return Stream.of(
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .hearingInstruction(HearingInstruction.builder().build())
                     .build(),
-                targetDoc,
-                JudgeApproval.builder().build(),
                 0
             ),
             Arguments.of(
@@ -622,8 +622,6 @@ class ApproveOrderServiceTest {
                         ))
                         .build())
                     .build(),
-                targetDoc,
-                JudgeApproval.builder().build(),
                 1
             ),
             Arguments.of(
@@ -635,10 +633,49 @@ class ApproveOrderServiceTest {
                         ))
                         .build())
                     .build(),
-                targetDoc,
-                JudgeApproval.builder().build(),
                 2
             )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideShouldInvokeProcessApprovableCollectionData")
+    void shouldInvokeProcessApprovableCollection(DraftOrdersWrapper draftOrdersWrapper,
+                                                 List<AgreedDraftOrder> agreedDraftOrders) {
+        CaseDocument targetDoc = CaseDocument.builder().build();
+        JudgeApproval judgeApproval = mock(JudgeApproval.class);
+
+        lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+        lenient().doNothing().when(underTest).processApprovableCollection(any(), eq(targetDoc), eq(judgeApproval), eq(AUTH_TOKEN) );
+
+        underTest.populateJudgeDecision(draftOrdersWrapper, CaseDocument.builder().build(), judgeApproval, AUTH_TOKEN);
+
+        verify(underTest, times(agreedDraftOrders.isEmpty() ? 0 : 1))
+            .processApprovableCollection(agreedDraftOrders, targetDoc, judgeApproval, AUTH_TOKEN);
+    }
+
+    static Stream<Arguments> provideShouldInvokeProcessApprovableCollectionData() {
+        List<AgreedDraftOrder> agreedDraftOrders0 = List.of(AgreedDraftOrder.builder().build());
+        List<AgreedDraftOrder> agreedDraftOrders1 = List.of(AgreedDraftOrder.builder().build(), AgreedDraftOrder.builder().build());
+        return Stream.of(
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders0.get(0)).build()
+                    ))
+                    .build(),
+                agreedDraftOrders0
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(0)).build(),
+                        AgreedDraftOrderCollection.builder().value(agreedDraftOrders1.get(1)).build()
+                    ))
+                    .build(),
+                agreedDraftOrders1
+            ),
+            Arguments.of(DraftOrdersWrapper.builder() .build(), List.of())
         );
     }
 }

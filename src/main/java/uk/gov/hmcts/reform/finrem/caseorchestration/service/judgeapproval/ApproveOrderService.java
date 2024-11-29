@@ -74,23 +74,23 @@ public class ApproveOrderService {
                 if (el.getValue() != null) {
                     ofNullable(el.getValue().getDraftOrderDocReviewCollection())
                         .ifPresent(draftOrderDocReviewCollection ->
-                            processApprovableCollection(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue)
-                                .toList(), targetDoc, judgeApproval, userAuthorisation)
+                            draftOrderDocReviewCollection.forEach(draftOrderDocReview -> processApprovableCollection(
+                                List.of(draftOrderDocReview.getValue()), targetDoc, judgeApproval, userAuthorisation))
                         );
 
                     ofNullable(el.getValue().getPsaDocReviewCollection())
                         .ifPresent(psaDocReviewCollection ->
-                            processApprovableCollection(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue)
-                                .toList(), targetDoc, judgeApproval, userAuthorisation)
+                            psaDocReviewCollection.forEach(psaDocReview -> processApprovableCollection(List.of(psaDocReview.getValue()), targetDoc,
+                                judgeApproval, userAuthorisation))
                         );
+
                 }
             }));
 
         ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
             .ifPresent(agreedDraftOrderCollections ->
-                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue)
-                    .toList(), targetDoc, judgeApproval, userAuthorisation)
-            );
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
+                    judgeApproval, userAuthorisation));
 
         ofNullable(draftOrdersWrapper.getHearingInstruction())
             .map(HearingInstruction::getAnotherHearingRequestCollection)
