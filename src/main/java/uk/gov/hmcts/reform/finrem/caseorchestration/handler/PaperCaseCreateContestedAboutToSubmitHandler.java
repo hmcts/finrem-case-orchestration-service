@@ -36,7 +36,7 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && (EventType.NEW_PAPER_CASE.equals(eventType));
     }

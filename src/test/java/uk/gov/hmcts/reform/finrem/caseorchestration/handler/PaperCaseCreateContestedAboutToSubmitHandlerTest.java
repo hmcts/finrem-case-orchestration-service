@@ -47,13 +47,13 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     @Test
     void canHandle() {
         assertTrue(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.NEW_PAPER_CASE));
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE));
     }
 
     @Test
     void canNotHandle() {
         assertFalse(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.NEW_PAPER_CASE));
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.NEW_PAPER_CASE));
     }
 
     @Test
@@ -124,5 +124,4 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         assertEquals(caseData.getPaperApplication(), YesOrNo.YES);
         assertTrue(caseData.isApplicantRepresentedByASolicitor());
     }
-
 }
