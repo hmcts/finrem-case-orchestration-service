@@ -74,15 +74,13 @@ public class ApproveOrderService {
                 if (el.getValue() != null) {
                     ofNullable(el.getValue().getDraftOrderDocReviewCollection())
                         .ifPresent(draftOrderDocReviewCollection ->
-                            draftOrderDocReviewCollection.forEach(draftOrderDocReview -> processApprovableCollection(
-                                List.of(draftOrderDocReview.getValue()), targetDoc, judgeApproval, userAuthorisation))
-                        );
+                            processApprovableCollection(draftOrderDocReviewCollection.stream().map(DraftOrderDocReviewCollection::getValue).toList(),
+                                targetDoc, judgeApproval, userAuthorisation));
 
                     ofNullable(el.getValue().getPsaDocReviewCollection())
                         .ifPresent(psaDocReviewCollection ->
-                            psaDocReviewCollection.forEach(psaDocReview -> processApprovableCollection(List.of(psaDocReview.getValue()), targetDoc,
-                                judgeApproval, userAuthorisation))
-                        );
+                            processApprovableCollection(psaDocReviewCollection.stream().map(PsaDocReviewCollection::getValue).toList(), targetDoc,
+                                judgeApproval, userAuthorisation));
 
                 }
             }));
