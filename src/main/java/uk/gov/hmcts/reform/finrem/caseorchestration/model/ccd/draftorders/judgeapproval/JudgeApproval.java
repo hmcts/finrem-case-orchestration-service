@@ -47,6 +47,10 @@ public class JudgeApproval {
     @JsonProperty("isFinalOrder")
     private YesOrNo isFinalOrder;
 
+
+    @JsonProperty("changesRequestedByJudge")
+    private String changesRequestedByJudge;
+
     @JsonIgnore
     private SortKey sortKey;
 
