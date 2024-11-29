@@ -70,12 +70,13 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void shouldSuccessfullyReturnAsAdminConsentedPaperCase() {
+
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
+
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
-
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        when(caseData.getFastTrackDecision().isNoOrNull()).thenReturn(true);
+        caseData.setFastTrackDecision(null);
 
         assertEquals(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole(), CaseRole.APP_SOLICITOR.getCcdCode());
         assertEquals(caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole(), CaseRole.RESP_SOLICITOR.getCcdCode());
@@ -86,12 +87,12 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void shouldSuccessfullyReturnNotAsAdminConsentedPaperCase() {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
-
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseData.getFastTrackDecision().isNoOrNull()).thenReturn(false);
+        caseData.setFastTrackDecision(null);
 
         assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), NO_VALUE);
         assertEquals(caseData.getFastTrackDecision(), YesOrNo.NO);
@@ -101,12 +102,12 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void shouldSuccessfullyReturnAsAdminContestedPaperCase() {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
+
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
-
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        when(caseData.getFastTrackDecision().isNoOrNull()).thenReturn(true);
+        caseData.setFastTrackDecision(null);
 
         assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), YES_VALUE);
         assertEquals(caseData.getFastTrackDecision(), YesOrNo.YES);
@@ -115,11 +116,11 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void shouldSuccessfullyReturnNotAsAdminContestedPaperCase() {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
-
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
 
         assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), NO_VALUE);
         assertEquals(caseData.getFastTrackDecision(), YesOrNo.NO);
