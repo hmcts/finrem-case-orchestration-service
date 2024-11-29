@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
@@ -546,18 +548,10 @@ class ApproveOrderServiceTest {
     @MethodSource("providePopulateJudgeDecisionsData")
     void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper,
                                     int expectedPopulateJudgeDecisionInvoked) {
-        // Act
         underTest.populateJudgeDecisions(draftOrdersWrapper, AUTH_TOKEN);
 
-        // Verify if `populateJudgeDecision` is invoked the expected number of times
-        verify(underTest, times(expectedPopulateJudgeDecisionInvoked))
-            .populateJudgeDecision(
-                eq(draftOrdersWrapper), // Matcher for DraftOrdersWrapper
-                any(CaseDocument.class), // Matcher for CaseDocument
-                any(JudgeApproval.class), // Matcher for JudgeApproval
-                eq(AUTH_TOKEN) // Matcher for String userAuthorisation
-            );
-
+        verify(underTest, times(expectedPopulateJudgeDecisionInvoked)).populateJudgeDecision(eq(draftOrdersWrapper), any(CaseDocument.class),
+            any(JudgeApproval.class), eq(AUTH_TOKEN));
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {
@@ -598,4 +592,45 @@ class ApproveOrderServiceTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("providePopulateJudgeDecisionData")
+    void testPopulateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                   int expectHearingInvocationCount) {
+        lenient().doNothing().when(underTest).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+
+        underTest.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
+
+        verify(underTest, times(expectHearingInvocationCount)).processHearingInstruction(eq(draftOrdersWrapper),  any(AnotherHearingRequest.class));
+    }
+
+    static Stream<Arguments> providePopulateJudgeDecisionData() {
+        CaseDocument targetDoc = CaseDocument.builder().build();
+        return Stream.of(
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .hearingInstruction(HearingInstruction.builder()
+                        .anotherHearingRequestCollection(List.of(
+                            AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
+                        ))
+                        .build())
+                    .build(),
+                targetDoc,
+                JudgeApproval.builder().build(),
+                1
+            ),
+            Arguments.of(
+                DraftOrdersWrapper.builder()
+                    .hearingInstruction(HearingInstruction.builder()
+                        .anotherHearingRequestCollection(List.of(
+                            AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build(),
+                            AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
+                        ))
+                        .build())
+                    .build(),
+                targetDoc,
+                JudgeApproval.builder().build(),
+                2
+            )
+        );
+    }
 }
