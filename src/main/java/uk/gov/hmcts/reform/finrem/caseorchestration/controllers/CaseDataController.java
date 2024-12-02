@@ -123,23 +123,6 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(data).errors(errors).build());
     }
 
-    @PostMapping(path = "/contested/set-paper-case-defaults",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Set default values for contested paper case journey")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseDefaultValues(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-        @RequestBody final CallbackRequest callbackRequest) {
-        log.info("Setting default values for contested paper case journey.");
-        validateCaseData(callbackRequest);
-        caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        setData(authToken, caseData);
-        setPaperCaseData(caseData);
-        addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(path = "/contested/set-paper-case-org-policy",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
