@@ -43,7 +43,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     @JsonProperty("draftOrdersReviewCollection")
     private List<DraftOrdersReviewCollection> draftOrdersReviewCollection;
-
+    @JsonProperty("refusedOrdersCollection")
+    private List<DraftOrdersReviewCollection> refusedOrdersCollection;
     @JsonProperty("agreedDraftOrderCollection")
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     @JsonProperty("suggestedDraftOrderCollection")
