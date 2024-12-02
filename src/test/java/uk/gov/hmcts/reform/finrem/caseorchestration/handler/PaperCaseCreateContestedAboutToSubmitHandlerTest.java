@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -46,26 +47,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
 
     @Test
     void canHandle() {
-        assertTrue(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE));
-    }
-
-    @Test
-    void canNotHandle() {
-        assertFalse(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.NEW_PAPER_CASE));
-    }
-
-    @Test
-    void canNotHandleWrongEventType() {
-        assertFalse(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE));
-    }
-
-    @Test
-    void canNotHandleWrongCallbackType() {
-        assertFalse(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE));
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE);
     }
 
     @Test
