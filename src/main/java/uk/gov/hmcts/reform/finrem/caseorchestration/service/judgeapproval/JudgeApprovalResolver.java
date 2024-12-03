@@ -55,9 +55,9 @@ class JudgeApprovalResolver {
                     judgeApproval, userAuthorisation));
 
         if (isJudgeApproved(judgeApproval)) {
-        ofNullable(draftOrdersWrapper.getHearingInstruction())
-            .map(HearingInstruction::getAnotherHearingRequestCollection)
-            .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
+            ofNullable(draftOrdersWrapper.getHearingInstruction())
+                .map(HearingInstruction::getAnotherHearingRequestCollection)
+                .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
         }
     }
 
