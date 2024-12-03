@@ -59,6 +59,7 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval3()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval4()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval5()).isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getShowWarningMessageToJudge()).isNull();
     }
 
     @Test
