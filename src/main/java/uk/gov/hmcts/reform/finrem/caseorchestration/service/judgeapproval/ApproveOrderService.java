@@ -49,7 +49,6 @@ public class ApproveOrderService {
         return doc;
     }
 
-
     /**
      * Resolves the {@link JudgeApproval} object from the provided {@link DraftOrdersWrapper}
      * based on the specified index. Each index corresponds to a specific judge approval field
