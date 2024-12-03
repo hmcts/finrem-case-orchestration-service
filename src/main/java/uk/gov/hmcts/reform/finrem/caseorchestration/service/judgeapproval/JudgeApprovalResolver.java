@@ -12,14 +12,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -59,6 +64,8 @@ class JudgeApprovalResolver {
                 .map(HearingInstruction::getAnotherHearingRequestCollection)
                 .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
         }
+
+        moveRefusedDraftOrdersAndPsaToRefusedOrders(draftOrdersWrapper);
     }
 
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
@@ -150,6 +157,50 @@ class JudgeApprovalResolver {
                     el.setOtherListingInstructions(anotherHearingRequest.getAnyOtherListingInstructions());
                 }
             }));
+    }
+
+    void moveRefusedDraftOrdersAndPsaToRefusedOrders(DraftOrdersWrapper draftOrdersWrapper)  {
+        draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(new ArrayList<>(),
+            draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
+    }
+
+    public List<DraftOrdersReviewCollection> filterDraftOrdersReviewCollectionWithRemovedItems(
+        List<DraftOrderDocReviewCollection> removedItems,
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
+        OrderStatus statusToRemove) {
+
+        return draftOrdersReviewCollection.stream()
+            .map(draftOrdersReview -> {
+                DraftOrdersReview.DraftOrdersReviewBuilder updatedReviewBuilder = draftOrdersReview.getValue().toBuilder();
+
+                // Partition items into kept and removed
+                Map<Boolean, List<DraftOrderDocReviewCollection>> partitioned =
+                    partitionDraftOrderDocReviewCollection(
+                        draftOrdersReview.getValue().getDraftOrderDocReviewCollection(),
+                        statusToRemove
+                    );
+
+                // Keep the items not matching the status
+                updatedReviewBuilder.draftOrderDocReviewCollection(partitioned.get(false));
+
+                // Collect the removed items
+                removedItems.addAll(partitioned.get(true));
+
+                // Create a new DraftOrdersReviewCollection
+                DraftOrdersReviewCollection updatedCollection = new DraftOrdersReviewCollection();
+                updatedCollection.setValue(updatedReviewBuilder.build());
+                return updatedCollection;
+            })
+            .toList();
+    }
+
+    private Map<Boolean, List<DraftOrderDocReviewCollection>> partitionDraftOrderDocReviewCollection(
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+        OrderStatus statusToRemove) {
+        return draftOrderDocReviewCollection.stream()
+            .collect(Collectors.partitioningBy(
+                docReview -> docReview.getValue().getOrderStatus().equals(statusToRemove)
+            ));
     }
 
 }
