@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +47,7 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     }
 
     @Override
-    public void setApprovalDate(LocalDate localDate) {
+    public void setApprovalDate(LocalDateTime approvalDate) {
         //  no approval date; Ignore it.
     }
 

@@ -16,8 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import java.time.LocalDate;
 import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +78,7 @@ class JudgeApprovalResolver {
                 approvable.replaceDocument(judgeApproval.getAmendedDocument());
             }
             approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
-            approvable.setApprovalDate(LocalDate.now());
+            approvable.setApprovalDate(LocalDateTime.now());
             approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
         }
     }
