@@ -2,11 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
-import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -31,22 +30,13 @@ public class ApproveOrderService {
      *
      * @param draftOrdersWrapper the wrapper object containing draft orders and PSA document collections to be updated
      * @param userAuthorisation  the authorisation token of the user, used to fetch the approving judge's details
-     * @throws IllegalArgumentException if a judge approval is found with a null document at a given index
      */
     public void populateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
-            CaseDocument targetDoc = validateJudgeApprovalDocument(judgeApproval, i);
-            judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
+            ofNullable(judgeApproval).map(JudgeApproval::getDocument)
+                .ifPresent(targetDoc -> judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation));
         }
-    }
-
-    private CaseDocument validateJudgeApprovalDocument(JudgeApproval judgeApproval, int index) {
-        CaseDocument doc = judgeApproval.getDocument();
-        if (doc == null) {
-            throw new IllegalArgumentException(format("Document is null for JudgeApproval at index %d. Please check the data integrity.", index));
-        }
-        return doc;
     }
 
     /**
