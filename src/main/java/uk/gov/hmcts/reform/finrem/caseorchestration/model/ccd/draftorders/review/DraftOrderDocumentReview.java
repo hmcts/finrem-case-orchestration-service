@@ -41,7 +41,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
     private String additionalTime;
     private String otherListingInstructions;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime reviewedDate;
+    private LocalDateTime refusedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
 

@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstruction
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -41,7 +38,7 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvabl
     private String additionalTime;
     private String otherListingInstructions;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime reviewedDate;
+    private LocalDateTime refusedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
 

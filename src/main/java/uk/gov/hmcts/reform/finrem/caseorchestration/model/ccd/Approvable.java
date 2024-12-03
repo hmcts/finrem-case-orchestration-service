@@ -13,4 +13,6 @@ public interface Approvable extends DocumentMatcher {
     void setApprovalJudge(String approvalJudge);
 
     void replaceDocument(CaseDocument amendedDocument);
+
+    void setRefusedDate(LocalDateTime refusedDate);
 }

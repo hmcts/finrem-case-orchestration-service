@@ -57,6 +57,11 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     }
 
     @Override
+    public void setRefusedDate(LocalDateTime refusedDate) {
+        //  no refused date; Ignore it.
+    }
+
+    @Override
     public void replaceDocument(CaseDocument amendedDocument) {
         if (this.draftOrder != null) {
             this.draftOrder = amendedDocument;
