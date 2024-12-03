@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails.UpdateContactDetailsContestedMidHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -132,7 +133,7 @@ class UpdateContactDetailsContestedMidHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenConsentedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowMessage(boolean consented) {
-        
+
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(consented);
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();

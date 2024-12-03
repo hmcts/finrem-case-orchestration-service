@@ -60,26 +60,4 @@ public class UpdateRepresentationController extends BaseController {
         updateRepresentationService.addRemovedSolicitorOrganisationFieldToCaseData(caseDetails);
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
-
-    @PostMapping(path = "/set-update-defaults")
-    @Operation(summary = "Sets default values for update contact details event")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setNocDefaults(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
-        log.info("Received request to set default values for Update Contact Details Event for Case ID: {}",
-            ccdRequest.getCaseDetails().getId());
-
-        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
-        validateCaseData(ccdRequest);
-
-        caseData.put(NOC_PARTY, null);
-        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
 }
