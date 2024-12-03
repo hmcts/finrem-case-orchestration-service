@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -44,7 +45,7 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("draftOrdersReviewCollection")
     private List<DraftOrdersReviewCollection> draftOrdersReviewCollection;
     @JsonProperty("refusedOrdersCollection")
-    private List<DraftOrdersReviewCollection> refusedOrdersCollection;
+    private List<RefusedOrderCollection> refusedOrdersCollection;
     @JsonProperty("agreedDraftOrderCollection")
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     @JsonProperty("suggestedDraftOrderCollection")
