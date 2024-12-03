@@ -32,9 +32,8 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvabl
     private String submittedBy;
     private String uploadedOnBehalfOf;
     private String approvalJudge;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate approvalDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime approvalDate;
     private YesOrNo finalOrder;
     private YesOrNo anotherHearingToBeListed;
     private String hearingType;
