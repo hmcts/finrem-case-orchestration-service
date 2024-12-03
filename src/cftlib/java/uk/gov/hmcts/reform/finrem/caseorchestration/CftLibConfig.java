@@ -41,7 +41,8 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-divorce-bulkscan",
             "caseworker-divorce-financialremedy",
             "caseworker-caa",
-            "caseworker-divorce-financialremedy-superuser"
+            "caseworker-divorce-financialremedy-superuser",
+            "caseworker-financialremedy-rparobot"
         );
     }
 
