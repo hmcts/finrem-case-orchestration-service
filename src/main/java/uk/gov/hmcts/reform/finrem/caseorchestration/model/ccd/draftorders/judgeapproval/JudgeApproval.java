@@ -56,7 +56,6 @@ public class JudgeApproval {
     @JsonIgnore
     private SortKey sortKey;
 
-    @JsonIgnore
     public YesOrNo getHasAttachment() {
         return YesOrNo.forValue(!ofNullable(attachments).orElse(List.of()).isEmpty());
     }
