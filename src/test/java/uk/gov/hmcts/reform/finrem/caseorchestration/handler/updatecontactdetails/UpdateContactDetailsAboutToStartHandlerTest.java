@@ -50,6 +50,6 @@ class UpdateContactDetailsAboutToStartHandlerTest {
 
         var response = handler.handle(request, AUTH_TOKEN);
         assertNull(response.getData().getContactDetailsWrapper().getNocParty());
-        assertNull(response.getData().getContactDetailsWrapper().getNocParty());
+        assertNull(response.getData().getContactDetailsWrapper().getUpdateIncludesRepresentativeChange());
     }
 }
