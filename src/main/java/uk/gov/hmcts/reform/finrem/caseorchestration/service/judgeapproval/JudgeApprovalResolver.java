@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
@@ -74,7 +75,7 @@ class JudgeApprovalResolver {
     }
 
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                               String userAuthorisation) {
+                                     String userAuthorisation) {
         ofNullable(approvables)
             .ifPresent(list ->
                 list.forEach(el -> ofNullable(el)
@@ -135,30 +136,33 @@ class JudgeApprovalResolver {
         return caseDetails;
     }
 
-    void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
-                                                     JudgeApproval judgeApproval, String userAuthorisation) {
+    private void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
+                                                             JudgeApproval judgeApproval, String userAuthorisation) {
         List<DraftOrderDocReviewCollection> removedItems = new ArrayList<>();
         draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(removedItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
 
-        List<RefusedOrderCollection> modifiedRefusedOrdersCollection = ofNullable(draftOrdersWrapper.getRefusedOrdersCollection())
-            .orElse(new ArrayList<>());
-        modifiedRefusedOrdersCollection.addAll(removedItems.stream()
-            .map(a -> RefusedOrderCollection.builder()
-                .value(RefusedOrder.builder()
-                    .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
-                    .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(), userAuthorisation))
-                    .refusedDate(a.getValue().getRefusedDate())
-                    .submittedBy(a.getValue().getSubmittedBy())
-                    .attachments(a.getValue().getAttachments())
-                    .refusalJudge(a.getValue().getApprovalJudge())
-                    .build())
-                .build())
-            .toList());
-        draftOrdersWrapper.setRefusedOrdersCollection(modifiedRefusedOrdersCollection);
+        draftOrdersWrapper.setRefusedOrdersCollection(
+            Stream.concat(
+                ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new).stream(),
+                removedItems.stream()
+                    .filter(a -> a.getValue() != null)
+                    .map(a -> RefusedOrderCollection.builder()
+                        .value(RefusedOrder.builder()
+                            .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
+                            .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(), userAuthorisation))
+                            .refusedDate(a.getValue().getRefusedDate())
+                            .submittedDate(a.getValue().getSubmittedDate())
+                            .submittedBy(a.getValue().getSubmittedBy())
+                            .attachments(a.getValue().getAttachments())
+                            .refusalJudge(a.getValue().getApprovalJudge())
+                            .build())
+                        .build())
+            ).toList()
+        );
     }
 
-    public List<DraftOrdersReviewCollection> filterDraftOrdersReviewCollectionWithRemovedItems(
+    private List<DraftOrdersReviewCollection> filterDraftOrdersReviewCollectionWithRemovedItems(
         List<DraftOrderDocReviewCollection> removedItems,
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         OrderStatus statusToRemove) {
