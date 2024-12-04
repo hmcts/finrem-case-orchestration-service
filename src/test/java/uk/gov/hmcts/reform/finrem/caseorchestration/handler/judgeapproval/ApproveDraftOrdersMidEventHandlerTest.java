@@ -15,17 +15,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -139,45 +145,43 @@ class ApproveDraftOrdersMidEventHandlerTest {
         );
     }
 
-//    @Test
-//    void shouldPopulateAnEmptyAnotherHearingRequestEntry() {
-//        // Arrange
-//        DraftOrdersWrapper draftOrdersWrapper = null;
-//        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-//            .caseDetails(FinremCaseDetails.builder()
-//                .id(12345L)
-//                .data(FinremCaseData.builder()
-//                    .draftOrdersWrapper(draftOrdersWrapper = DraftOrdersWrapper.builder()
-//                        .judgeApproval1(JudgeApproval.builder()
-//                            .judgeDecision(REVIEW_LATER)
-//                            .build())
-//                        .build())
-//                    .build())
-//                .build())
-//            .build();
-//
-//        DynamicList expectedDynamicList = DynamicList.builder().build();
-//        when(approveOrderService.buildWhichOrderDynamicList(draftOrdersWrapper)).thenReturn(expectedDynamicList);
-//
-//        // Act
-//        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-//
-//        // Assert
-//        assertNotNull(response);
-//        FinremCaseData responseData = response.getData();
-//        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
-//
-//        List<AnotherHearingRequestCollection> actualCollection =
-//            responseDraftOrdersWrapper.getHearingInstruction().getAnotherHearingRequestCollection();
-//
-//        assertNotNull(actualCollection, "anotherHearingRequestCollection should not be null");
-//        assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
-//        AnotherHearingRequest actualRequest = actualCollection.get(0).getValue();
-//        assertNotNull(actualRequest, "The AnotherHearingRequest object should not be null");
-//        assertEquals(actualRequest.getWhichOrder(), expectedDynamicList);
-//        assertNull(actualRequest.getTypeOfHearing(), "typeOfHearing should be null");
-//        assertNull(actualRequest.getTimeEstimate(), "timeEstimate should be null");
-//        assertNull(actualRequest.getAdditionalTime(), "additionalTime should be null");
-//        assertNull(actualRequest.getAnyOtherListingInstructions(), "anyOtherListingInstructions should be null");
-//    }
+    @Test
+    void shouldPopulateAnEmptyAnotherHearingRequestEntry() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(12345L)
+                .data(FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .judgeApproval1(JudgeApproval.builder()
+                            .judgeDecision(REVIEW_LATER)
+                            .build())
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        DynamicList expectedDynamicList = DynamicList.builder().listItems(new ArrayList<>()).build();
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertNotNull(response);
+        FinremCaseData responseData = response.getData();
+        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
+
+        List<AnotherHearingRequestCollection> actualCollection =
+            responseDraftOrdersWrapper.getHearingInstruction().getAnotherHearingRequestCollection();
+
+        assertNotNull(actualCollection, "anotherHearingRequestCollection should not be null");
+        assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
+        AnotherHearingRequest actualRequest = actualCollection.get(0).getValue();
+        assertNotNull(actualRequest, "The AnotherHearingRequest object should not be null");
+        assertEquals(actualRequest.getWhichOrder(), expectedDynamicList);
+        assertNull(actualRequest.getTypeOfHearing(), "typeOfHearing should be null");
+        assertNull(actualRequest.getTimeEstimate(), "timeEstimate should be null");
+        assertNull(actualRequest.getAdditionalTime(), "additionalTime should be null");
+        assertNull(actualRequest.getAnyOtherListingInstructions(), "anyOtherListingInstructions should be null");
+    }
 }

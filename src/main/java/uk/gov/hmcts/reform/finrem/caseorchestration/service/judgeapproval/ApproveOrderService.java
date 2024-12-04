@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -10,13 +11,10 @@ import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ApproveOrderService {
 
     private final JudgeApprovalResolver judgeApprovalResolver;
-
-    public ApproveOrderService(JudgeApprovalResolver judgeApprovalResolver) {
-        this.judgeApprovalResolver = judgeApprovalResolver;
-    }
 
     /**
      * Populates judge decisions for draft orders by iterating through a predefined range of indexes (1 to 5),

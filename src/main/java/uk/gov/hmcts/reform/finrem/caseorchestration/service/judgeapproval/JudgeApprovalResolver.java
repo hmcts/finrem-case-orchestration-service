@@ -10,12 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
@@ -35,11 +31,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
@@ -50,13 +44,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @RequiredArgsConstructor
 class JudgeApprovalResolver {
 
-    private static final String SEPARATOR = "#";
-
     private final IdamService idamService;
 
+    private final HearingProcessor hearingProcessor;
 
-    void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                               String userAuthorisation) {
+    void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
+                               JudgeApproval judgeApproval, String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
@@ -75,9 +68,8 @@ class JudgeApprovalResolver {
         if (isJudgeApproved(judgeApproval)) {
             ofNullable(draftOrdersWrapper.getHearingInstruction())
                 .map(HearingInstruction::getAnotherHearingRequestCollection)
-                .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
+                .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
         }
-
         moveRefusedDraftOrdersAndPsaToRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
     }
 
@@ -105,67 +97,15 @@ class JudgeApprovalResolver {
             approvable.setOrderStatus(REFUSED);
             approvable.setRefusedDate(LocalDateTime.now());
         }
+
     }
 
     private boolean isJudgeApproved(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isApproved).orElse(false);
     }
 
-    void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
-        String[] splitResult = ofNullable(anotherHearingRequest)
-            .map(AnotherHearingRequest::getWhichOrder)
-            .map(DynamicList::getValueCode)
-            .map(valueCode -> valueCode.split(SEPARATOR))
-            .orElseThrow(() -> new IllegalStateException("Missing selected value in AnotherHearingRequest.whichOrder"));
-        if (splitResult.length != 2) {
-            String valueCode = Optional.of(anotherHearingRequest)
-                .map(AnotherHearingRequest::getWhichOrder)
-                .map(DynamicList::getValueCode)
-                .orElse(null);
-            throw new IllegalStateException(format("Unexpected selected value in AnotherHearingRequest.whichOrder: %s", valueCode));
-        }
-
-        String orderIndex = splitResult[1];
-
-        JudgeApproval judgeApproval = null;
-        try {
-            judgeApproval = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (orderIndex))
-                .invoke(draftOrdersWrapper);
-        } catch (Exception e) {
-            throw new IllegalStateException(format("Unexpected method \"getJudgeApproval%s\" was invoked", orderIndex), e);
-        }
-        ofNullable(judgeApproval)
-            .map(JudgeApproval::getDocument).ifPresent(targetDoc -> ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-                .ifPresent(collection -> collection.forEach(el -> {
-                    if (el.getValue() != null) {
-                        ofNullable(el.getValue().getDraftOrderDocReviewCollection())
-                            .ifPresent(draftOrderDocReviewCollection ->
-                                processHearingInstruction(draftOrderDocReviewCollection.stream()
-                                    .map(DraftOrderDocReviewCollection::getValue).toList(), targetDoc, anotherHearingRequest)
-                            );
-
-                        ofNullable(el.getValue().getPsaDocReviewCollection())
-                            .ifPresent(psaDocReviewCollection ->
-                                processHearingInstruction(psaDocReviewCollection.stream()
-                                    .map(PsaDocReviewCollection::getValue).toList(), targetDoc, anotherHearingRequest)
-                            );
-                    }
-                })));
-    }
-
-    void processHearingInstruction(List<? extends HearingInstructionProcessable> hip,
-                                             CaseDocument targetDoc,
-                                             AnotherHearingRequest anotherHearingRequest) {
-        ofNullable(hip)
-            .ifPresent(list -> list.forEach(el -> {
-                if (el.match(targetDoc)) {
-                    el.setAnotherHearingToBeListed(YesOrNo.YES);
-                    el.setHearingType(anotherHearingRequest.getTypeOfHearing().name());
-                    el.setAdditionalTime(anotherHearingRequest.getAdditionalTime());
-                    el.setHearingTimeEstimate(anotherHearingRequest.getTimeEstimate().getValue());
-                    el.setOtherListingInstructions(anotherHearingRequest.getAnyOtherListingInstructions());
-                }
-            }));
+    private boolean isJudgeRefused(JudgeApproval judgeApproval) {
+        return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
     }
 
     private final GenericDocumentService genericDocumentService;
@@ -196,11 +136,8 @@ class JudgeApprovalResolver {
         return caseDetails;
     }
 
-    private boolean isJudgeRefused(JudgeApproval judgeApproval) {
-        return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
-    }
-
-    void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, JudgeApproval judgeApproval, String userAuthorisation) {
+    void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
+                                                     JudgeApproval judgeApproval, String userAuthorisation) {
         List<DraftOrderDocReviewCollection> removedItems = new ArrayList<>();
         draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(removedItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
