@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -147,12 +148,11 @@ class ApproveDraftOrdersMidEventHandlerTest {
     @Test
     void shouldPopulateAnEmptyAnotherHearingRequestEntry() {
         // Arrange
-        DraftOrdersWrapper draftOrdersWrapper = null;
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(12345L)
                 .data(FinremCaseData.builder()
-                    .draftOrdersWrapper(draftOrdersWrapper = DraftOrdersWrapper.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
                         .judgeApproval1(JudgeApproval.builder()
                             .judgeDecision(REVIEW_LATER)
                             .build())
@@ -161,8 +161,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 .build())
             .build();
 
-        DynamicList expectedDynamicList = DynamicList.builder().build();
-        when(approveOrderService.buildWhichOrderDynamicList(draftOrdersWrapper)).thenReturn(expectedDynamicList);
+        DynamicList expectedDynamicList = DynamicList.builder().listItems(new ArrayList<>()).build();
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
