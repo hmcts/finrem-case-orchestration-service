@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
 
@@ -56,6 +59,11 @@ public class UpdateContactDetailsService {
         caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 
+    public void persistOrgPolicies(FinremCaseData finremCaseData, FinremCaseData originalDetails) {
+        finremCaseData.setApplicantOrganisationPolicy(originalDetails.getApplicantOrganisationPolicy());
+        finremCaseData.setRespondentOrganisationPolicy(originalDetails.getRespondentOrganisationPolicy());
+    }
+
     public boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
         return YES_VALUE.equals(caseData.get(INCLUDES_REPRESENTATION_CHANGE));
     }
@@ -80,6 +88,18 @@ public class UpdateContactDetailsService {
         }
     }
 
+    public void handleRepresentationChange(FinremCaseDetails caseDetails) {
+        CaseType caseTypeId = caseDetails.getCaseType();
+        String nocPart = caseDetails.getData().getContactDetailsWrapper().getNocParty().getValue();
+        if (APPLICANT.equalsIgnoreCase(nocPart)) {
+            removeApplicantSolicitorDetails(caseDetails.getData(), caseTypeId);
+        }
+
+        if (RESPONDENT.equalsIgnoreCase(nocPart)) {
+            removeRespondentDetails(caseDetails.getData(), caseTypeId);
+        }
+    }
+
     void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
@@ -97,11 +117,38 @@ public class UpdateContactDetailsService {
         }
     }
 
+    void removeApplicantSolicitorDetails(FinremCaseData caseData, CaseType caseType) {
+        boolean isContested = CaseType.CONTESTED.equals(caseType);
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+
+        if (contactDetailsWrapper.getApplicantRepresented().isNoOrNull()) {
+            if (isContested) {
+                contactDetailsWrapper.setApplicantSolicitorName(null);
+                contactDetailsWrapper.setApplicantSolicitorFirm(null);
+                contactDetailsWrapper.setApplicantSolicitorAddress(null);
+                contactDetailsWrapper.setApplicantSolicitorPhone(null);
+                contactDetailsWrapper.setApplicantSolicitorEmail(null);
+                contactDetailsWrapper.setApplicantSolicitorConsentForEmails(null);
+            } else {
+                contactDetailsWrapper.setSolicitorName(null);
+                contactDetailsWrapper.setSolicitorFirm(null);
+                contactDetailsWrapper.setSolicitorAddress(null);
+                contactDetailsWrapper.setSolicitorPhone(null);
+                contactDetailsWrapper.setSolicitorEmail(null);
+                contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
+            }
+            contactDetailsWrapper.setSolicitorReference(null);
+            caseData.setApplicantOrganisationPolicy(null);
+        }
+    }
+
     void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
+
         String respondentRepresented = isContested
             ? nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED))
             : nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED));
+
         if (respondentRepresented.equals(YES_VALUE)) {
             caseData.remove(RESPONDENT_ADDRESS);
             caseData.remove(RESPONDENT_PHONE);
@@ -116,6 +163,31 @@ public class UpdateContactDetailsService {
             caseData.remove(RESP_SOLICITOR_DX_NUMBER);
             caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
             caseData.remove(RESPONDENT_ORGANISATION_POLICY);
+        }
+    }
+
+    void removeRespondentDetails(FinremCaseData caseData, CaseType caseType) {
+        boolean isContested = CaseType.CONTESTED.equals(caseType);
+
+        ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+
+        boolean respondentRepresented = isContested
+            ? contactDetailsWrapper.getContestedRespondentRepresented().isYes()
+            : contactDetailsWrapper.getConsentedRespondentRepresented().isYes();
+
+        if (respondentRepresented) {
+            contactDetailsWrapper.setRespondentAddress(null);
+            contactDetailsWrapper.setRespondentPhone(null);
+            contactDetailsWrapper.setRespondentResideOutsideUK(null);
+        } else {
+            contactDetailsWrapper.setRespondentSolicitorName(null);
+            contactDetailsWrapper.setRespondentSolicitorFirm(null);
+            contactDetailsWrapper.setRespondentSolicitorAddress(null);
+            contactDetailsWrapper.setRespondentSolicitorPhone(null);
+            contactDetailsWrapper.setRespondentSolicitorEmail(null);
+            contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
+            contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
+            caseData.setRespondentOrganisationPolicy(null);
         }
     }
 }
