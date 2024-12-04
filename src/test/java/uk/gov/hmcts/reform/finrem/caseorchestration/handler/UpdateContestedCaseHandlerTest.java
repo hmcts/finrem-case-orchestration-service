@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,10 +9,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
 import java.io.File;
@@ -25,22 +28,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.*;
 
-@WebMvcTest(UpdateContestedCaseController.class)
+@WebMvcTest(CcdCallbackController.class)
 @Import(MiamLegacyExemptionsService.class)
-public class UpdateContestedCaseControllerTest extends BaseControllerTest {
+// adding AmendApplicationContestedAboutToSubmitHandler.class causes issues with downstream dependencies.
+@ContextConfiguration(classes = {CallbackDispatchService.class, AmendApplicationContestedAboutToSubmitHandler.class, FinremCaseDetailsMapper.class})
 
-    private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
+public class UpdateContestedCaseHandlerTest extends BaseControllerTest {
+
+    private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/ccdAboutToSubmitEvent";
     private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_1 = "$.data.divorceUploadEvidence1";
     private static final String DATA_DIVORCE_DECREE_NISI_DATE = "$.data.divorceDecreeNisiDate";
     private static final String DIVORCE_PETITION_ISSUED_DATE = "$.data.divorcePetitionIssuedDate";
@@ -58,6 +60,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockBean
     private CaseFlagsService caseFlagsService;
+    @MockBean
+    private IdamService idamService;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
@@ -75,6 +79,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteNoDecreeAbsoluteWhenDecreeNisiSelectedBySolicitor() throws Exception {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(caseDocument());
+
+        when(idamService.getIdamUserId(CcdServiceTest.AUTH_TOKEN)).thenReturn("userId");
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
@@ -429,6 +435,17 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
+
+        // Lines 439 tp 447 debug only.  Breakpoint ln 447 allows inspection of the response data.
+        ResultActions response = mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        System.out.println(response.toString());
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -437,15 +454,6 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.promptForAnyDocument").exists())
             .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
-
-        // Following lines for debug only, remove.
-
-        ResultActions response = mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        System.out.println(response.toString());
     }
 
     @Test
@@ -466,4 +474,5 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(FEE_LOOKUP_JSON).toURI()));
     }
+
 }
