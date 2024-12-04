@@ -1,9 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -12,11 +20,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
@@ -24,26 +36,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 
 @Component
+@RequiredArgsConstructor
 class JudgeApprovalResolver {
 
     private static final String SEPARATOR = "#";
 
     private final IdamService idamService;
 
-    JudgeApprovalResolver(IdamService idamService) {
-        this.idamService = idamService;
-    }
 
-    void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                         String userAuthorisation) {
+    void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                               String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
@@ -65,7 +78,7 @@ class JudgeApprovalResolver {
                 .ifPresent(collection -> collection.forEach(a -> processHearingInstruction(draftOrdersWrapper, a.getValue())));
         }
 
-        moveRefusedDraftOrdersAndPsaToRefusedOrders(draftOrdersWrapper);
+        moveRefusedDraftOrdersAndPsaToRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
     }
 
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
@@ -80,13 +93,13 @@ class JudgeApprovalResolver {
     }
 
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
+        approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
         if (isJudgeApproved(judgeApproval)) {
             if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
                 approvable.replaceDocument(judgeApproval.getAmendedDocument());
             }
             approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
             approvable.setApprovalDate(LocalDateTime.now());
-            approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
         }
         if (isJudgeRefused(judgeApproval)) {
             approvable.setOrderStatus(REFUSED);
@@ -96,10 +109,6 @@ class JudgeApprovalResolver {
 
     private boolean isJudgeApproved(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isApproved).orElse(false);
-    }
-
-    private boolean isJudgeRefused(JudgeApproval judgeApproval) {
-        return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
     }
 
     void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, AnotherHearingRequest anotherHearingRequest) {
@@ -159,9 +168,58 @@ class JudgeApprovalResolver {
             }));
     }
 
-    void moveRefusedDraftOrdersAndPsaToRefusedOrders(DraftOrdersWrapper draftOrdersWrapper)  {
-        draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(new ArrayList<>(),
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentConfiguration documentConfiguration;
+    private final DocumentHelper documentHelper;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final BiFunction<FinremCaseDetails, String, CaseDetails> addExtraFields = this::applyAddExtraFields;
+
+    private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String reason, String authorisationToken) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(finremCaseDetails, reason),
+            documentConfiguration.getContestedDraftOrderNotApprovedTemplate(caseDetails),
+            documentConfiguration.getContestedDraftOrderNotApprovedFileName());
+    }
+
+    private CaseDetails applyAddExtraFields(FinremCaseDetails finremCaseDetails, String refusalReason) {
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        caseDetails.getData().put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        caseDetails.getData().put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
+        caseDetails.getData().put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
+        caseDetails.getData().put("JudgeDetails",
+            StringUtils.joinWith(" ",
+                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE),
+                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME)));
+        caseDetails.getData().put("ContestOrderNotApprovedRefusalReasonsFormatted", refusalReason);
+
+        return caseDetails;
+    }
+
+    private boolean isJudgeRefused(JudgeApproval judgeApproval) {
+        return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
+    }
+
+    void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, JudgeApproval judgeApproval, String userAuthorisation) {
+        List<DraftOrderDocReviewCollection> removedItems = new ArrayList<>();
+        draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(removedItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
+
+        List<RefusedOrderCollection> modifiedRefusedOrdersCollection = ofNullable(draftOrdersWrapper.getRefusedOrdersCollection())
+            .orElse(new ArrayList<>());
+        modifiedRefusedOrdersCollection.addAll(removedItems.stream()
+            .map(a -> RefusedOrderCollection.builder()
+                .value(RefusedOrder.builder()
+                    .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
+                    .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(), userAuthorisation))
+                    .refusedDate(a.getValue().getRefusedDate())
+                    .submittedBy(a.getValue().getSubmittedBy())
+                    .attachments(a.getValue().getAttachments())
+                    .refusalJudge(a.getValue().getApprovalJudge())
+                    .build())
+                .build())
+            .toList());
+        draftOrdersWrapper.setRefusedOrdersCollection(modifiedRefusedOrdersCollection);
     }
 
     public List<DraftOrdersReviewCollection> filterDraftOrdersReviewCollectionWithRemovedItems(
@@ -199,7 +257,11 @@ class JudgeApprovalResolver {
         OrderStatus statusToRemove) {
         return draftOrderDocReviewCollection.stream()
             .collect(Collectors.partitioningBy(
-                docReview -> docReview.getValue().getOrderStatus().equals(statusToRemove)
+                docReview -> ofNullable(docReview)
+                    .map(DraftOrderDocReviewCollection::getValue)
+                    .map(DraftOrderDocumentReview::getOrderStatus)
+                    .filter(statusToRemove::equals)
+                    .isPresent()
             ));
     }
 
