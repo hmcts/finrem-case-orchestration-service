@@ -28,10 +28,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,16 +112,16 @@ class JudgeApprovalResolver {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private final BiFunction<FinremCaseDetails, String, CaseDetails> addExtraFields = this::applyAddExtraFields;
 
-    private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String reason, String authorisationToken) {
+    private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String reason, String refusedDateInString,
+                                             String authorisationToken) {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(finremCaseDetails, reason),
+        return genericDocumentService.generateDocument(authorisationToken, applyAddExtraFields(finremCaseDetails, reason, refusedDateInString),
             documentConfiguration.getContestedDraftOrderNotApprovedTemplate(caseDetails),
             documentConfiguration.getContestedDraftOrderNotApprovedFileName());
     }
 
-    private CaseDetails applyAddExtraFields(FinremCaseDetails finremCaseDetails, String refusalReason) {
+    private CaseDetails applyAddExtraFields(FinremCaseDetails finremCaseDetails, String refusalReason, String refusedDate) {
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         caseDetails.getData().put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
@@ -132,6 +132,7 @@ class JudgeApprovalResolver {
                 caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE),
                 caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME)));
         caseDetails.getData().put("ContestOrderNotApprovedRefusalReasonsFormatted", refusalReason);
+        caseDetails.getData().put("refusalOrderDate", refusedDate);
 
         return caseDetails;
     }
@@ -150,7 +151,8 @@ class JudgeApprovalResolver {
                     .map(a -> RefusedOrderCollection.builder()
                         .value(RefusedOrder.builder()
                             .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
-                            .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(), userAuthorisation))
+                            .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd").format(a.getValue().getRefusedDate()), userAuthorisation))
                             .refusedDate(a.getValue().getRefusedDate())
                             .submittedDate(a.getValue().getSubmittedDate())
                             .submittedBy(a.getValue().getSubmittedBy())
