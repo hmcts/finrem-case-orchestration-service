@@ -43,7 +43,7 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Amend Application Details contested for Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Amend Application Details contested about to start for Case ID : {}", callbackRequest.getCaseDetails().getId());
 
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
