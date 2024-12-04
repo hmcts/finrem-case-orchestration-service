@@ -49,7 +49,7 @@ public class JudgeApproval {
 
     @JsonProperty("isFinalOrder")
     private DynamicMultiSelectList isFinalOrder;
-    
+
     @JsonProperty("changesRequestedByJudge")
     private String changesRequestedByJudge;
 

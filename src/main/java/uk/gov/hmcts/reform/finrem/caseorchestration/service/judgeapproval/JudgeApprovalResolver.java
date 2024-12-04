@@ -97,7 +97,6 @@ class JudgeApprovalResolver {
             approvable.setOrderStatus(REFUSED);
             approvable.setRefusedDate(LocalDateTime.now());
         }
-
     }
 
     private boolean isJudgeApproved(JudgeApproval judgeApproval) {
