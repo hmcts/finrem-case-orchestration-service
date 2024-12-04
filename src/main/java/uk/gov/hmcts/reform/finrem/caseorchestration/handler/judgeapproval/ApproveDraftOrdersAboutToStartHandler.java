@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -126,6 +128,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(a -> JudgeApproval.builder()
                         .title("Draft Order")
                         .hearingInfo(hearingInfo)
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .code("Yes")
+                            .label("This is a final order")
+                            .build())).build())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -141,6 +147,10 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(a -> JudgeApproval.builder()
                         .title("PSA")
                         .hearingInfo(hearingInfo)
+                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+                            .code("Yes")
+                            .label("This is a final order")
+                            .build())).build())
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
