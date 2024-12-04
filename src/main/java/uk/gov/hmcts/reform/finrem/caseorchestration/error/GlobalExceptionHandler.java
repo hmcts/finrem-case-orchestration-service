@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidDataException.class)
     ResponseEntity<Object> handleInvalidDataException(InvalidDataException exception) {
-        log.warn(exception.getMessage(), exception);
+        log.warn(exception.getMessage());
 
         return ResponseEntity
             .status(HttpStatus.UNPROCESSABLE_ENTITY)
