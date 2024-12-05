@@ -10,7 +10,11 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DETAILS;
 
-public abstract class TestUtils {
+public class TestUtils {
+
+    private TestUtils() {
+        // all access through static methods
+    }
 
     /**
      * Builds a {@link CaseDetails} object from a JSON resource file.
