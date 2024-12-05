@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 
-
 @Component
 public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterDetailsMapper {
 
