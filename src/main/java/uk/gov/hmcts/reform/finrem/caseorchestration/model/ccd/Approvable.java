@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 public interface Approvable extends DocumentMatcher {
 
+    OrderStatus getOrderStatus();
+
     void setOrderStatus(OrderStatus orderStatus);
 
     void setApprovalDate(LocalDateTime approvalDate);

@@ -7,13 +7,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contest
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -136,23 +138,40 @@ class JudgeApprovalResolver {
     private void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
                                                              JudgeApproval judgeApproval, String userAuthorisation) {
         List<DraftOrderDocReviewCollection> removedItems = new ArrayList<>();
-        draftOrdersWrapper.setDraftOrdersReviewCollection(filterDraftOrdersReviewCollectionWithRemovedItems(removedItems,
+        List<PsaDocReviewCollection> removedPsaItems = new ArrayList<>();
+        draftOrdersWrapper.setDraftOrdersReviewCollection(filterAndCollectRemovedItemsFromDraftOrderDocReviewCollection(removedItems,
+            draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
+        draftOrdersWrapper.setDraftOrdersReviewCollection(filterAndCollectRemovedItemsFromPsaDocReviewCollection(removedPsaItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
 
         draftOrdersWrapper.setRefusedOrdersCollection(
             Stream.concat(
-                ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new).stream(),
-                removedItems.stream()
+                Stream.concat(
+                    ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new).stream(),
+                    removedItems.stream()
+                        .filter(a -> a.getValue() != null)
+                        .map(a -> RefusedOrderCollection.builder()
+                            .value(RefusedOrder.builder()
+                                .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
+                                .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
+                                    a.getValue().getRefusedDate(), a.getValue().getApprovalJudge(), null, userAuthorisation))
+                                .refusedDate(a.getValue().getRefusedDate())
+                                .submittedDate(a.getValue().getSubmittedDate())
+                                .submittedBy(a.getValue().getSubmittedBy())
+                                .attachments(a.getValue().getAttachments())
+                                .refusalJudge(a.getValue().getApprovalJudge())
+                                .build())
+                            .build())),
+                removedPsaItems.stream()
                     .filter(a -> a.getValue() != null)
                     .map(a -> RefusedOrderCollection.builder()
                         .value(RefusedOrder.builder()
-                            .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
+                            .draftOrderOrPsa(a.getValue().getPsaDocument())
                             .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
                                 a.getValue().getRefusedDate(), a.getValue().getApprovalJudge(), null, userAuthorisation))
                             .refusedDate(a.getValue().getRefusedDate())
                             .submittedDate(a.getValue().getSubmittedDate())
                             .submittedBy(a.getValue().getSubmittedBy())
-                            .attachments(a.getValue().getAttachments())
                             .refusalJudge(a.getValue().getApprovalJudge())
                             .build())
                         .build())
@@ -160,30 +179,52 @@ class JudgeApprovalResolver {
         );
     }
 
-    private List<DraftOrdersReviewCollection> filterDraftOrdersReviewCollectionWithRemovedItems(
+    private List<DraftOrdersReviewCollection> filterAndCollectRemovedItemsFromDraftOrderDocReviewCollection(
         List<DraftOrderDocReviewCollection> removedItems,
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         OrderStatus statusToRemove) {
+        return filterAndCollectRemovedItemsFromReviewCollection(
+            removedItems,
+            draftOrdersReviewCollection,
+            statusToRemove,
+            DraftOrdersReview::getDraftOrderDocReviewCollection,
+            DraftOrdersReview.DraftOrdersReviewBuilder::draftOrderDocReviewCollection
+        );
+    }
+
+    private List<DraftOrdersReviewCollection> filterAndCollectRemovedItemsFromPsaDocReviewCollection(
+        List<PsaDocReviewCollection> removedItems,
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
+        OrderStatus statusToRemove) {
+        return filterAndCollectRemovedItemsFromReviewCollection(
+            removedItems,
+            draftOrdersReviewCollection,
+            statusToRemove,
+            DraftOrdersReview::getPsaDocReviewCollection,
+            DraftOrdersReview.DraftOrdersReviewBuilder::psaDocReviewCollection
+        );
+    }
+
+    private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollectRemovedItemsFromReviewCollection(
+        List<T> removedItems,
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
+        OrderStatus statusToRemove,
+        Function<DraftOrdersReview, List<T>> getReviewCollection,
+        BiConsumer<DraftOrdersReview.DraftOrdersReviewBuilder, List<T>> setReviewCollection) {
 
         return draftOrdersReviewCollection.stream()
             .map(draftOrdersReview -> {
                 DraftOrdersReview.DraftOrdersReviewBuilder updatedReviewBuilder = draftOrdersReview.getValue().toBuilder();
 
                 // Partition items into kept and removed
-                Map<Boolean, List<DraftOrderDocReviewCollection>> partitioned =
+                Map<Boolean, List<T>> partitioned =
                     partitionDraftOrderDocReviewCollection(
-                        draftOrdersReview.getValue().getDraftOrderDocReviewCollection(),
+                        getReviewCollection.apply(draftOrdersReview.getValue()),
                         statusToRemove
                     );
-//                Map<Boolean, List<PsaDocReviewCollection>> psaPartitioneds =
-//                    partitionDraftOrderDocReviewCollection(
-//                        draftOrdersReview.getValue().getPsaDocReviewCollection(),
-//                        statusToRemove
-//                    );
 
                 // Keep the items not matching the status
-                updatedReviewBuilder.draftOrderDocReviewCollection(partitioned.get(false));
-                // TODO  PSA
+                setReviewCollection.accept(updatedReviewBuilder, partitioned.get(false));
 
                 // Collect the removed items
                 removedItems.addAll(partitioned.get(true));
@@ -196,14 +237,14 @@ class JudgeApprovalResolver {
             .toList();
     }
 
-    private Map<Boolean, List<DraftOrderDocReviewCollection>> partitionDraftOrderDocReviewCollection(
-        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection,
+    private <T extends HasApprovable> Map<Boolean, List<T>> partitionDraftOrderDocReviewCollection(
+        List<T> draftOrderDocReviewCollection,
         OrderStatus statusToRemove) {
         return draftOrderDocReviewCollection.stream()
             .collect(Collectors.partitioningBy(
                 docReview -> ofNullable(docReview)
-                    .map(DraftOrderDocReviewCollection::getValue)
-                    .map(DraftOrderDocumentReview::getOrderStatus)
+                    .map(HasApprovable::getValue)
+                    .map(Approvable::getOrderStatus)
                     .filter(statusToRemove::equals)
                     .isPresent()
             ));
