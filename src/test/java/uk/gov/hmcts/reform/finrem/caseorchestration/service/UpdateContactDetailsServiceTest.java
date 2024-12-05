@@ -1,24 +1,39 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -52,8 +67,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONTESTED;
 
-public class UpdateContactDetailsServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UpdateContactDetailsServiceTest {
 
     private final UpdateContactDetailsService service = new UpdateContactDetailsService();
 
@@ -61,7 +79,7 @@ public class UpdateContactDetailsServiceTest {
     UpdateContactDetailsService updateContactDetailsService;
 
     @Test
-    public void shouldPersistOrgPolicies() {
+    void shouldPersistOrgPolicies() {
         Map<String, Object> originalData = new HashMap<>();
         originalData.put(APPLICANT_ORGANISATION_POLICY, "ApplicantPolicyData");
         originalData.put(RESPONDENT_ORGANISATION_POLICY, "RespondentPolicyData");
@@ -77,7 +95,39 @@ public class UpdateContactDetailsServiceTest {
     }
 
     @Test
-    public void shouldReturnTrueIfRepresentationChangeIncluded() {
+    void shouldPersistOrgPolicies_withFinremCaseData() {
+        FinremCaseData originalData = FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("App ORG ID")
+                    .organisationName("App ORG NAME")
+                    .build())
+                .build()
+            ).respondentOrganisationPolicy(
+                OrganisationPolicy
+                    .builder()
+                    .organisation(Organisation
+                        .builder()
+                        .organisationID("Resp ORG ID")
+                        .organisationName("Resp ORG NAME")
+                    .build())
+                .build()
+            )
+         .build();
+
+        FinremCaseData caseData = FinremCaseData.builder().build();
+
+
+        service.persistOrgPolicies(caseData, originalData);
+
+        assertEquals(caseData.getApplicantOrganisationPolicy(), originalData.getApplicantOrganisationPolicy());
+        assertEquals(caseData.getRespondentOrganisationPolicy(), originalData.getRespondentOrganisationPolicy());
+    }
+
+    @Test
+    void shouldReturnTrueIfRepresentationChangeIncluded() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATION_CHANGE, YES_VALUE);
 
@@ -166,6 +216,100 @@ public class UpdateContactDetailsServiceTest {
         }
     }
 
+    private static FinremCaseData getApplicantFinremContestedCaseData(){
+        return FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                        .organisationID("App ORG ID")
+                        .organisationName("App ORG NAME")
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .applicantRepresented(YesOrNo.NO)
+                .applicantSolicitorName("Sol name")
+                .applicantSolicitorFirm("sol firm")
+                .applicantSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .applicantSolicitorEmail("some@email.com")
+                .applicantSolicitorPhone("0123456789")
+                .applicantSolicitorConsentForEmails(YesOrNo.YES)
+                .solicitorReference("Sol ref")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getApplicantFinremConsentedCaseData(){
+        return FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("App ORG ID")
+                    .organisationName("App ORG NAME")
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .applicantRepresented(YesOrNo.NO)
+                .solicitorName("Sol name")
+                .solicitorFirm("sol firm")
+                .solicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .solicitorFirm("0123456789")
+                .solicitorEmail("some@email.com")
+                .solicitorAgreeToReceiveEmails(YesOrNo.YES)
+                .solicitorReference("Sol ref")
+                .build()
+            ).build();
+    }
+
+    public static Stream<Arguments> FinremCaseDataApplicantParameters() {
+        return Stream.of(
+            Arguments.of(
+                CaseType.CONTESTED,
+                getApplicantFinremContestedCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
+                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
+                    FinremCaseData::getApplicantOrganisationPolicy
+            ),
+            Arguments.of(
+                CONSENTED,
+                getApplicantFinremConsentedCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getSolicitorFirm(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails(),
+                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
+                    FinremCaseData::getApplicantOrganisationPolicy
+                )
+            )
+        ));
+    }
+
+    @ParameterizedTest
+    @MethodSource("FinremCaseDataApplicantParameters")
+    void shouldRemoveApplicantSolicitorDetails_withFinremCaseData(CaseType caseType,
+                                                                  FinremCaseData finremCaseData,
+                                                                  List<Function<FinremCaseData, Object>> propertiesToRemove) {
+
+        service.handleRepresentationChange(finremCaseData, caseType);
+
+        for (Function<FinremCaseData, Object> propertyGetter : propertiesToRemove) {
+            Object value = propertyGetter.apply(finremCaseData);
+            assertNull(value);
+        }
+    }
+
     private static Map<String, Object> getRespondentDataWhenRepresented() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(NOC_PARTY, RESPONDENT);
@@ -234,7 +378,8 @@ public class UpdateContactDetailsServiceTest {
         for (String property : propertiesToRemove) {
             assertFalse(caseData.containsKey(property), "Property should be removed: " + property);
         }
-
     }
+
+
 }
 

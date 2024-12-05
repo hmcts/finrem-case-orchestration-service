@@ -59,9 +59,9 @@ public class UpdateContactDetailsService {
         caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 
-    public void persistOrgPolicies(FinremCaseData finremCaseData, FinremCaseData originalDetails) {
-        finremCaseData.setApplicantOrganisationPolicy(originalDetails.getApplicantOrganisationPolicy());
-        finremCaseData.setRespondentOrganisationPolicy(originalDetails.getRespondentOrganisationPolicy());
+    public void persistOrgPolicies(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
+        finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
+        finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
     }
 
     public boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
@@ -88,15 +88,14 @@ public class UpdateContactDetailsService {
         }
     }
 
-    public void handleRepresentationChange(FinremCaseDetails caseDetails) {
-        CaseType caseTypeId = caseDetails.getCaseType();
-        String nocPart = caseDetails.getData().getContactDetailsWrapper().getNocParty().getValue();
+    public void handleRepresentationChange(FinremCaseData caseData, CaseType caseType) {
+        String nocPart = caseData.getContactDetailsWrapper().getNocParty().getValue();
         if (APPLICANT.equalsIgnoreCase(nocPart)) {
-            removeApplicantSolicitorDetails(caseDetails.getData(), caseTypeId);
+            removeApplicantSolicitorDetails(caseData, caseType);
         }
 
         if (RESPONDENT.equalsIgnoreCase(nocPart)) {
-            removeRespondentDetails(caseDetails.getData(), caseTypeId);
+            removeRespondentDetails(caseData, caseType);
         }
     }
 
