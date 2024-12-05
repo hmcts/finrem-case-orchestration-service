@@ -19,9 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -83,14 +83,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
 
-        // updates the tab version of applicantInRefuge with the question version, then removes question version.
-        Optional.ofNullable(caseData.getRefugeWrapper().getApplicantInRefugeQuestion())
-                .ifPresent(question -> {
-                    caseData.getRefugeWrapper().setApplicantInRefugeTab(question);
-                    log.info("Updating applicantInRefugeTab for case reference {}. Removing applicantInRefugeQuestion",
-                            caseDetails.getId());
-                    caseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
-                });
+        RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

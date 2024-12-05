@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -107,6 +111,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         expectedAdminResponseCaseData(responseCaseData);
 
+
+
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
@@ -142,34 +148,17 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenApplicantRefugeQuestionAnswered_thenApplicantRefugeTabUpdated() {
+    void testUpdateApplicantInRefugeTabCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        // imitate user answering YES to applicant in refuge question on create case journey.
-        caseDetails.getData().getRefugeWrapper().setApplicantInRefugeQuestion(YesOrNo.YES);
-        assertEquals(YesOrNo.YES, caseDetails.getData().getRefugeWrapper().getApplicantInRefugeQuestion());
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
 
-        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-
-        // Assert handler updated applicantInRefugeTab from applicantInRefugeQuestion, and latter then cleared.
-        assertEquals(YesOrNo.YES, responseCaseData.getRefugeWrapper().getApplicantInRefugeTab());
-        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeQuestion());
-    }
-
-    @Test
-    void givenCase_whenApplicantRefugeQuestionUnanswered_thenApplicantRefugeTabUnchanged() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        // imitate user not answering applicant in refuge question on create case journey.
-        assertNull(caseDetails.getData().getRefugeWrapper().getApplicantInRefugeQuestion());
-
-        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-
-        // Assert handler didn't update applicantInRefugeTab from applicantInRefugeQuestion, which remains null.
-        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeTab());
-        assertNull(responseCaseData.getRefugeWrapper().getApplicantInRefugeQuestion());
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateApplicantInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
+        }
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
