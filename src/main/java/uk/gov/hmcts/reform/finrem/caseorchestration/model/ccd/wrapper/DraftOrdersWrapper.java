@@ -74,7 +74,6 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("hearingInstruction")
     private HearingInstruction hearingInstruction;
 
-
     private String refusalOrderReason;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
