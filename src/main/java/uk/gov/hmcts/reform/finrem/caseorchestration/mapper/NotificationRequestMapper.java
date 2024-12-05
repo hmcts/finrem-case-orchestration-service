@@ -211,8 +211,7 @@ public class NotificationRequestMapper {
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
                                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
-        log.info("Built notificationRequest for case ID: {} with emailAddress: {}", notificationRequest.getCaseReferenceNumber(),
-            notificationRequest.getNotificationEmail());
+        log.info("Built notificationRequest for case ID: {}", notificationRequest.getCaseReferenceNumber());
         if (caseDataService.isContestedApplication(caseDetails)) {
             String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
             notificationRequest.setSelectedCourt(selectedCourt);
