@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
@@ -56,6 +57,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockBean
     private CaseFlagsService caseFlagsService;
+    @MockBean
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
 

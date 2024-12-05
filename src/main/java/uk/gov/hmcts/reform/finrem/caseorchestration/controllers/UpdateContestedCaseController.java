@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -72,6 +72,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final CaseFlagsService caseFlagsService;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,8 +117,24 @@ public class UpdateContestedCaseController extends BaseController {
         // Refactor this handler.
         // Copy the refuge question to tab.  Delete the refuge question.
         // Write the tests.
+        // New code start
+        // Refuge data is maintained as FinremCaseData
+        // In unit test, you'll need to mock what is returned here.
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        Optional.ofNullable(finremCaseData.getRefugeWrapper().getApplicantInRefugeQuestion())
+                .ifPresent(question -> {
+                    finremCaseData.getRefugeWrapper().setApplicantInRefugeTab(question);
+                    log.info("Updating applicantInRefugeTab for case reference {}. Removing applicantInRefugeQuestion",
+                            finremCaseDetails.getId());
+                    finremCaseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
+                });
+        finremCaseDetails.setData(finremCaseData);
+
+        CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
     }
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
