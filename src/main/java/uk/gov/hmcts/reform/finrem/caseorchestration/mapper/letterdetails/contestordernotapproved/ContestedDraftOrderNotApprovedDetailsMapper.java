@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedDraftOrderNotApprovedDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static java.util.Optional.ofNullable;
 
 
@@ -40,9 +43,12 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
     }
 
     private String getJudgeDetails(DraftOrdersWrapper draftOrdersWrapper) {
-        return StringUtils.joinWith(" ",
-            ofNullable(draftOrdersWrapper.getGeneratedOrderJudgeType()).map(JudgeType::getValue).orElse(""),
-            draftOrdersWrapper.getGeneratedOrderJudgeName());
+        return Stream.of(
+                ofNullable(draftOrdersWrapper.getGeneratedOrderJudgeType()).map(JudgeType::getValue).orElse(""),
+                draftOrdersWrapper.getGeneratedOrderJudgeName()
+            )
+            .filter(StringUtils::isNotBlank) // Exclude empty or blank strings
+            .collect(Collectors.joining(" "));
     }
 
 }

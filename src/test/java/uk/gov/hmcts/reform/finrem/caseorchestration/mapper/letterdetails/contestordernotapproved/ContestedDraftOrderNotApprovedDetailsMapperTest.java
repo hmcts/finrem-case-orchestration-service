@@ -69,6 +69,18 @@ class ContestedDraftOrderNotApprovedDetailsMapperTest {
         assertEquals(expected.getContestOrderNotApprovedRefusalReasons(), actualData.get("ContestOrderNotApprovedRefusalReasonsFormatted"));
     }
 
+    @Test
+    void shouldReturnValidJudgeDetailsWhenJudgeTypeIsMissing() {
+        FinremCaseDetails finremCaseDetails = readFinremCaseDetailsFromJson();
+        finremCaseDetails.getData().getDraftOrdersWrapper().setGeneratedOrderJudgeType(null);
+        stubCourtDetailsMapperGetCourtDetails(finremCaseDetails);
+
+        Map<String, Object> actualData = getCaseData(underTest.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+            finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList()));
+
+        assertEquals("Peter Chapman", actualData.get("JudgeDetails"));
+    }
+
     private FinremCaseDetails readFinremCaseDetailsFromJson() {
         return finremCaseDetailsMapper.mapToFinremCaseDetails(buildCaseDetailsFromJson(objectMapper, TEST_JSON));
     }
