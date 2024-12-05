@@ -29,7 +29,7 @@ public class JudgeApproval {
 
     private String title;
 
-    private String titleInJudgeDecisionMessage;
+    private String inlineDocType;
 
     private String hearingInfo;
 
