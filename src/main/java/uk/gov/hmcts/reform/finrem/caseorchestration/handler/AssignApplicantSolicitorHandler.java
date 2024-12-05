@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -29,18 +28,18 @@ public abstract class AssignApplicantSolicitorHandler extends FinremCallbackHand
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
-        try {
-            assignApplicantSolicitorService.setApplicantSolicitor(finremCaseDetails, userAuthorisation);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
-        } catch (AssignCaseAccessException e) {
-            log.info("Assigning case access failed for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        if (finremCaseDetails.getData().getContactDetailsWrapper().getApplicantRepresented().isYes()) {
+            try {
+                assignApplicantSolicitorService.setApplicantSolicitor(finremCaseDetails, userAuthorisation);
+            } catch (AssignCaseAccessException e) {
+                log.info("Assigning case access failed for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
-            List<String> err = new ArrayList<>();
-            err.add(e.getMessage());
-            err.add("Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case");
-
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(err).build();
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(List.of(
+                    e.getMessage(),
+                    "Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case"
+                )).build();
+            }
         }
-
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
     }
 }
