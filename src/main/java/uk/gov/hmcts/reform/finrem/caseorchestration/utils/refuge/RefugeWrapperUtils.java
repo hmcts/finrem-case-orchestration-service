@@ -16,7 +16,6 @@ public class RefugeWrapperUtils {
         // Private constructor to prevent instantiation
     }
 
-
     /**
      * Updates the `applicantInRefugeTab` field in the refuge wrapper with the value of
      * `applicantInRefugeQuestion`, logs the update, and then clears the `applicantInRefugeQuestion` field.
