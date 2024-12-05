@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
@@ -74,10 +75,14 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("hearingInstruction")
     private HearingInstruction hearingInstruction;
 
-    private String refusalOrderReason;
+    private String generatedOrderReason;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime refusalOrderRefusedDate;
+    private LocalDateTime generatedOrderRefusedDate;
+
+    private JudgeType generatedOrderJudgeType;
+
+    private String generatedOrderJudgeName;
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {

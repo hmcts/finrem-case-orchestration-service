@@ -31,18 +31,18 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
-            .judgeDetails(getJudgeDetails(caseDetails))
-            .contestOrderNotApprovedRefusalReasons(draftOrdersWrapper.getRefusalOrderReason())
+            .judgeDetails(getJudgeDetails(draftOrdersWrapper))
+            .contestOrderNotApprovedRefusalReasons(draftOrdersWrapper.getGeneratedOrderReason())
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
-            .refusalOrderDate(String.valueOf(draftOrdersWrapper.getRefusalOrderRefusedDate()))
+            .refusalOrderDate(String.valueOf(draftOrdersWrapper.getGeneratedOrderRefusedDate()))
             .build();
     }
 
-    private String getJudgeDetails(FinremCaseDetails caseDetails) {
+    private String getJudgeDetails(DraftOrdersWrapper draftOrdersWrapper) {
         return StringUtils.joinWith(" ",
-            ofNullable(caseDetails.getData().getRefusalOrderJudgeType()).map(JudgeType::getValue).orElse(""),
-            caseDetails.getData().getRefusalOrderJudgeName());
+            ofNullable(draftOrdersWrapper.getGeneratedOrderJudgeType()).map(JudgeType::getValue).orElse(""),
+            draftOrdersWrapper.getGeneratedOrderJudgeName());
     }
 
 }

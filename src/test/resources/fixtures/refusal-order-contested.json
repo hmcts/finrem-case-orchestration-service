@@ -176,8 +176,10 @@
           }
         }
       ],
-      "refusalOrderReason": "Refusal Reasons",
-      "refusalOrderRefusedDate": "2024-06-04T23:09:22.075Z"
+      "generatedOrderReason": "Refusal Reasons",
+      "generatedOrderRefusedDate": "2024-06-04T23:09:22.075Z",
+      "generatedOrderJudgeName": "Peter Chapman",
+      "generatedOrderJudgeType": "District Judge"
     }
   }
 }

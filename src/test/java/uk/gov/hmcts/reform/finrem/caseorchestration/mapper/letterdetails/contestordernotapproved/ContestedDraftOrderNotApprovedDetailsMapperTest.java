@@ -81,7 +81,7 @@ class ContestedDraftOrderNotApprovedDetailsMapperTest {
     private ContestedDraftOrderNotApprovedDetails getExpectedContestedDraftOrderNotApprovedDetails() {
         return ContestedDraftOrderNotApprovedDetails.builder()
             .caseNumber("1234567890")
-            .judgeDetails("Her Honour Judge Contested")
+            .judgeDetails("District Judge Peter Chapman")
             .court("Nottingham County Court And Family Court")
             .applicantName("Contested Applicant Name")
             .respondentName("Contested Respondent Name")

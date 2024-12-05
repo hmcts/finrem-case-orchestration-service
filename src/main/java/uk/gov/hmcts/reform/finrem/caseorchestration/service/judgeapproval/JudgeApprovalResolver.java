@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contest
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -108,10 +109,13 @@ class JudgeApprovalResolver {
     private final ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
 
     private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String refusalReason, LocalDateTime refusedDate,
-                                             String authorisationToken) {
+                                             String judgeName, JudgeType judgeType, String authorisationToken) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseDetails.getData().getDraftOrdersWrapper();
-        draftOrdersWrapper.setRefusalOrderReason(refusalReason);
-        draftOrdersWrapper.setRefusalOrderRefusedDate(refusedDate);
+        draftOrdersWrapper.setGeneratedOrderReason(refusalReason);
+        draftOrdersWrapper.setGeneratedOrderRefusedDate(refusedDate);
+        draftOrdersWrapper.setGeneratedOrderJudgeName(judgeName);
+        draftOrdersWrapper.setGeneratedOrderJudgeType(judgeType);
+
         try {
             return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,
                 contestedDraftOrderNotApprovedDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
@@ -122,8 +126,10 @@ class JudgeApprovalResolver {
                 finremCaseDetails.getId().toString());
         } finally {
             // Clear the temp values as they are for report generation purpose.
-            draftOrdersWrapper.setRefusalOrderReason(null);
-            draftOrdersWrapper.setRefusalOrderRefusedDate(null);
+            draftOrdersWrapper.setGeneratedOrderReason(null);
+            draftOrdersWrapper.setGeneratedOrderRefusedDate(null);
+            draftOrdersWrapper.setGeneratedOrderJudgeType(null);
+            draftOrdersWrapper.setGeneratedOrderJudgeName(null);
         }
     }
 
@@ -142,7 +148,7 @@ class JudgeApprovalResolver {
                         .value(RefusedOrder.builder()
                             .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
                             .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
-                                a.getValue().getRefusedDate(), userAuthorisation))
+                                a.getValue().getRefusedDate(), a.getValue().getApprovalJudge(), null, userAuthorisation))
                             .refusedDate(a.getValue().getRefusedDate())
                             .submittedDate(a.getValue().getSubmittedDate())
                             .submittedBy(a.getValue().getSubmittedBy())
@@ -169,6 +175,11 @@ class JudgeApprovalResolver {
                         draftOrdersReview.getValue().getDraftOrderDocReviewCollection(),
                         statusToRemove
                     );
+//                Map<Boolean, List<PsaDocReviewCollection>> psaPartitioneds =
+//                    partitionDraftOrderDocReviewCollection(
+//                        draftOrdersReview.getValue().getPsaDocReviewCollection(),
+//                        statusToRemove
+//                    );
 
                 // Keep the items not matching the status
                 updatedReviewBuilder.draftOrderDocReviewCollection(partitioned.get(false));
