@@ -1,13 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved.ContestedDraftOrderNotApprovedDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -28,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 
@@ -109,32 +102,29 @@ class JudgeApprovalResolver {
     }
 
     private final GenericDocumentService genericDocumentService;
+
     private final DocumentConfiguration documentConfiguration;
-    private final DocumentHelper documentHelper;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String reason, String refusedDateInString,
+    private final ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
+
+    private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String refusalReason, LocalDateTime refusedDate,
                                              String authorisationToken) {
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        return genericDocumentService.generateDocument(authorisationToken, applyAddExtraFields(finremCaseDetails, reason, refusedDateInString),
-            documentConfiguration.getContestedDraftOrderNotApprovedTemplate(caseDetails),
-            documentConfiguration.getContestedDraftOrderNotApprovedFileName());
-    }
-
-    private CaseDetails applyAddExtraFields(FinremCaseDetails finremCaseDetails, String refusalReason, String refusedDate) {
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-
-        caseDetails.getData().put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-        caseDetails.getData().put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
-        caseDetails.getData().put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
-        caseDetails.getData().put("JudgeDetails",
-            StringUtils.joinWith(" ",
-                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE),
-                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME)));
-        caseDetails.getData().put("ContestOrderNotApprovedRefusalReasonsFormatted", refusalReason);
-        caseDetails.getData().put("refusalOrderDate", refusedDate);
-
-        return caseDetails;
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseDetails.getData().getDraftOrdersWrapper();
+        draftOrdersWrapper.setRefusalOrderReason(refusalReason);
+        draftOrdersWrapper.setRefusalOrderRefusedDate(refusedDate);
+        try {
+            return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,
+                contestedDraftOrderNotApprovedDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+                    finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList()
+                ),
+                documentConfiguration.getContestedDraftOrderNotApprovedTemplate(finremCaseDetails),
+                documentConfiguration.getContestedDraftOrderNotApprovedFileName(),
+                finremCaseDetails.getId().toString());
+        } finally {
+            // Clear the temp values as they are for report generation purpose.
+            draftOrdersWrapper.setRefusalOrderReason(null);
+            draftOrdersWrapper.setRefusalOrderRefusedDate(null);
+        }
     }
 
     private void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
@@ -152,7 +142,7 @@ class JudgeApprovalResolver {
                         .value(RefusedOrder.builder()
                             .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
                             .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd").format(a.getValue().getRefusedDate()), userAuthorisation))
+                                a.getValue().getRefusedDate(), userAuthorisation))
                             .refusedDate(a.getValue().getRefusedDate())
                             .submittedDate(a.getValue().getSubmittedDate())
                             .submittedBy(a.getValue().getSubmittedBy())
@@ -182,6 +172,7 @@ class JudgeApprovalResolver {
 
                 // Keep the items not matching the status
                 updatedReviewBuilder.draftOrderDocReviewCollection(partitioned.get(false));
+                // TODO  PSA
 
                 // Collect the removed items
                 removedItems.addAll(partitioned.get(true));

@@ -182,6 +182,11 @@ public class DocumentConfiguration {
             : contestedDraftOrderNotApprovedTemplate;
     }
 
+    public String getContestedDraftOrderNotApprovedTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? contestedDraftOrderNotApprovedHighCourtTemplate
+            : contestedDraftOrderNotApprovedTemplate;
+    }
+
     public String getContestedOrderApprovedCoverLetterTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedOrderApprovedCoverLetterHighCourtTemplate
             : contestedOrderApprovedCoverLetterTemplate;

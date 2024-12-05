@@ -1,35 +1,52 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved;
 
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedDraftOrderNotApprovedDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils.buildCaseDetailsFromJson;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils.getCaseData;
 
-public class ContestedDraftOrderNotApprovedDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+@ExtendWith(MockitoExtension.class)
+class ContestedDraftOrderNotApprovedDetailsMapperTest {
 
     public static final String TEST_JSON = "/fixtures/refusal-order-contested.json";
 
-    @Autowired
-    private ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
+    @InjectMocks
+    private ContestedDraftOrderNotApprovedDetailsMapper underTest;
 
-    @Before
-    public void setUp() {
-        setCaseDetails(TEST_JSON);
-    }
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Spy
+    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+
+    @Mock
+    private CourtDetailsMapper courtDetailsMapper;
 
     @Test
-    public void givenValidCaseData_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {
-        DocumentTemplateDetails actual = contestedDraftOrderNotApprovedDetailsMapper.buildDocumentTemplateDetails(caseDetails,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+    void givenValidCaseData_whenBuildDocumentTemplateDetails_thenReturnExpectedDetails() {
+        FinremCaseDetails finremCaseDetails = readFinremCaseDetailsFromJson();
+        stubCourtDetailsMapperGetCourtDetails(finremCaseDetails);
+
+        DocumentTemplateDetails actual = underTest.buildDocumentTemplateDetails(finremCaseDetails,
+            finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList());
 
         DocumentTemplateDetails expected = getExpectedContestedDraftOrderNotApprovedDetails();
 
@@ -37,35 +54,41 @@ public class ContestedDraftOrderNotApprovedDetailsMapperTest extends AbstractLet
     }
 
     @Test
-    public void givenValidCaseData_whenGetDocumentTemplateDetailsAsMap_thenReturnExpectedMap() {
-        Map<String, Object> placeholdersMap = contestedDraftOrderNotApprovedDetailsMapper.getDocumentTemplateDetailsAsMap(caseDetails,
-            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+    void givenValidCaseData_whenGetDocumentTemplateDetailsAsMap_thenReturnExpectedMap() {
+        FinremCaseDetails finremCaseDetails = readFinremCaseDetailsFromJson();
+        stubCourtDetailsMapperGetCourtDetails(finremCaseDetails);
+
+        Map<String, Object> actualData = getCaseData(underTest.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+            finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList()));
 
         ContestedDraftOrderNotApprovedDetails expected = getExpectedContestedDraftOrderNotApprovedDetails();
 
-        Map<String, Object> actualData = getCaseData(placeholdersMap);
+        assertEquals(expected.getApplicantName(), actualData.get("ApplicantName"));
+        assertEquals(expected.getJudgeDetails(), actualData.get("JudgeDetails"));
+        assertEquals(expected.getRefusalOrderDate(), actualData.get("refusalOrderDate"));
+        assertEquals(expected.getContestOrderNotApprovedRefusalReasons(), actualData.get("ContestOrderNotApprovedRefusalReasonsFormatted"));
+    }
 
-        assertThat(actualData.get("ApplicantName"), is(expected.getApplicantName()));
-        assertThat(actualData.get("JudgeDetails"), is(expected.getJudgeDetails()));
-        assertThat(actualData.get("refusalOrderDate"), is(expected.getRefusalOrderDate()));
-        assertThat(actualData.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
-            is(expected.getContestOrderNotApprovedRefusalReasons()));
+    private FinremCaseDetails readFinremCaseDetailsFromJson() {
+        return finremCaseDetailsMapper.mapToFinremCaseDetails(buildCaseDetailsFromJson(objectMapper, TEST_JSON));
+    }
+
+    private void stubCourtDetailsMapperGetCourtDetails(FinremCaseDetails finremCaseDetails) {
+        when(courtDetailsMapper.getCourtDetails(finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList()))
+            .thenReturn(CourtDetailsTemplateFields.builder().courtName("Nottingham County Court And Family Court").build());
     }
 
     private ContestedDraftOrderNotApprovedDetails getExpectedContestedDraftOrderNotApprovedDetails() {
         return ContestedDraftOrderNotApprovedDetails.builder()
+            .caseNumber("1234567890")
             .judgeDetails("Her Honour Judge Contested")
             .court("Nottingham County Court And Family Court")
             .applicantName("Contested Applicant Name")
             .respondentName("Contested Respondent Name")
             .divorceCaseNumber("DD98D76543")
             .civilPartnership("No")
-            .refusalOrderDate("2020-06-01")
-            .contestOrderNotApprovedRefusalReasons(getRefusalReasons())
+            .refusalOrderDate("2024-06-04T23:09:22.075")
+            .contestOrderNotApprovedRefusalReasons("Refusal Reasons")
             .build();
-    }
-
-    private String getRefusalReasons() {
-        return "- Test Reason 1\n- Test Reason 2";
     }
 }
