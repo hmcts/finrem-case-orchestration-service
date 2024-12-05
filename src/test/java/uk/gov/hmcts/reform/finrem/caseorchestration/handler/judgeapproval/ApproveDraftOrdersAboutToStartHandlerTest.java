@@ -168,7 +168,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             var expected = expectedJudgeApproval.get(i).orElse(null);
             if (expected != null && actual != null) {
                 assertEquals(expected.getTitle(), actual.getTitle());
-                assertEquals(expected.getTitleInJudgeDecisionMessage(), actual.getTitleInJudgeDecisionMessage());
+                assertEquals(expected.getInlineDocType(), actual.getInlineDocType());
                 assertEquals(expected.getDocument(), actual.getDocument());
                 assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
                 if (expected.getHasAttachment() == YES) {
@@ -278,7 +278,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                                                     List<CaseDocumentCollection> attachments) {
         return JudgeApproval.builder().hearingInfo(hearingInfo)
             .title(docType.getTitle())
-            .titleInJudgeDecisionMessage(docType.getDescription())
+            .inlineDocType(docType.getDescription())
             .document(document)
             .attachments(attachments)
             .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
