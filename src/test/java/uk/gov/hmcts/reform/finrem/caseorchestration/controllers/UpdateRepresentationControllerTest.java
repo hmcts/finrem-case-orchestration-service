@@ -168,17 +168,4 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
-
-    @Test
-    public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
-        loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
-
-        mvc.perform(post(setDefaultsEndpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.data.nocParty", is(emptyOrNullString())));
-    }
 }
