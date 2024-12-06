@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetails;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -22,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHandler {
@@ -31,7 +30,11 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final UpdateRepresentationWorkflowService nocWorkflowService;
     private final FinremCaseDetailsMapper detailsMapper;
 
-    public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, UpdateContactDetailsService updateContactDetailsService, OnlineFormDocumentService onlineFormDocumentService, UpdateRepresentationWorkflowService nocWorkflowService, ObjectMapper objectMapper, FinremCaseDetailsMapper detailsMapper) {
+    public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    UpdateContactDetailsService updateContactDetailsService,
+                                                    OnlineFormDocumentService onlineFormDocumentService,
+                                                    UpdateRepresentationWorkflowService nocWorkflowService,
+                                                    FinremCaseDetailsMapper detailsMapper) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
@@ -74,10 +77,11 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             CaseDetails caseDetails = detailsMapper.mapToCaseDetails(finremCaseDetails);
             CaseDetails caseDetailsBefore = detailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore());
 
-            AboutToStartOrSubmitCallbackResponse response = nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation,
-                caseDetailsBefore);
+            Map<String, Object> updateCaseData = nocWorkflowService
+                .handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation, caseDetailsBefore)
+                .getData();
 
-            finremCaseData = detailsMapper.mapToFinremCaseData(response.getData(), caseDetails.getCaseTypeId());
+            finremCaseData = detailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
 
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
