@@ -86,15 +86,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
 
-        // updates the tab version of respondentInRefuge with the question version, then removes question version.
-        Optional.ofNullable(caseData.getRefugeWrapper().getRespondentInRefugeQuestion())
-                .ifPresent(question -> {
-                    caseData.getRefugeWrapper().setRespondentInRefugeTab(question);
-                    log.info("Updating respondentInRefugeTab for case reference {}. Removing respondentInRefugeQuestion",
-                            caseDetails.getId());
-                    caseData.getRefugeWrapper().setRespondentInRefugeQuestion(null);
-                });
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
     }
