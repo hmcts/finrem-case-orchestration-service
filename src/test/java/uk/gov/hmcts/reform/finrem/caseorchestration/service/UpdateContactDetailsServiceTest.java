@@ -8,11 +8,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NoticeOfChangeParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
@@ -33,7 +31,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -67,8 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateContactDetailsServiceTest {
@@ -216,100 +211,6 @@ class UpdateContactDetailsServiceTest {
         }
     }
 
-    private static FinremCaseData getApplicantFinremContestedCaseData(){
-        return FinremCaseData.builder()
-            .applicantOrganisationPolicy(OrganisationPolicy
-                .builder()
-                .organisation(Organisation
-                    .builder()
-                        .organisationID("App ORG ID")
-                        .organisationName("App ORG NAME")
-                    .build())
-                .build())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .nocParty(NoticeOfChangeParty.APPLICANT)
-                .applicantRepresented(YesOrNo.NO)
-                .applicantSolicitorName("Sol name")
-                .applicantSolicitorFirm("sol firm")
-                .applicantSolicitorAddress(Address.builder().addressLine1("Some Address").build())
-                .applicantSolicitorEmail("some@email.com")
-                .applicantSolicitorPhone("0123456789")
-                .applicantSolicitorConsentForEmails(YesOrNo.YES)
-                .solicitorReference("Sol ref")
-                .build()
-            ).build();
-    }
-
-    private static FinremCaseData getApplicantFinremConsentedCaseData(){
-        return FinremCaseData.builder()
-            .applicantOrganisationPolicy(OrganisationPolicy
-                .builder()
-                .organisation(Organisation
-                    .builder()
-                    .organisationID("App ORG ID")
-                    .organisationName("App ORG NAME")
-                    .build())
-                .build())
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .nocParty(NoticeOfChangeParty.APPLICANT)
-                .applicantRepresented(YesOrNo.NO)
-                .solicitorName("Sol name")
-                .solicitorFirm("sol firm")
-                .solicitorAddress(Address.builder().addressLine1("Some Address").build())
-                .solicitorFirm("0123456789")
-                .solicitorEmail("some@email.com")
-                .solicitorAgreeToReceiveEmails(YesOrNo.YES)
-                .solicitorReference("Sol ref")
-                .build()
-            ).build();
-    }
-
-    public static Stream<Arguments> FinremCaseDataApplicantParameters() {
-        return Stream.of(
-            Arguments.of(
-                CaseType.CONTESTED,
-                getApplicantFinremContestedCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
-                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
-                    FinremCaseData::getApplicantOrganisationPolicy
-            ),
-            Arguments.of(
-                CONSENTED,
-                getApplicantFinremConsentedCaseData(),
-                List.<Function<FinremCaseData, Object>>of(
-                    data -> data.getContactDetailsWrapper().getSolicitorName(),
-                    data -> data.getContactDetailsWrapper().getSolicitorFirm(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getSolicitorPhone(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
-                    data -> data.getContactDetailsWrapper().getSolicitorEmail(),
-                    data -> data.getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails(),
-                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
-                    FinremCaseData::getApplicantOrganisationPolicy
-                )
-            )
-        ));
-    }
-
-    @ParameterizedTest
-    @MethodSource("FinremCaseDataApplicantParameters")
-    void shouldRemoveApplicantSolicitorDetails_withFinremCaseData(CaseType caseType,
-                                                                  FinremCaseData finremCaseData,
-                                                                  List<Function<FinremCaseData, Object>> propertiesToRemove) {
-
-        service.handleRepresentationChange(finremCaseData, caseType);
-
-        for (Function<FinremCaseData, Object> propertyGetter : propertiesToRemove) {
-            Object value = propertyGetter.apply(finremCaseData);
-            assertNull(value);
-        }
-    }
-
     private static Map<String, Object> getRespondentDataWhenRepresented() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(NOC_PARTY, RESPONDENT);
@@ -380,6 +281,241 @@ class UpdateContactDetailsServiceTest {
         }
     }
 
+    private static FinremCaseData getContestedApplicantFinremCaseData(){
+        return FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("App ORG ID")
+                    .organisationName("App ORG NAME")
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .applicantRepresented(YesOrNo.NO)
+                .applicantSolicitorName("Sol name")
+                .applicantSolicitorFirm("sol firm")
+                .applicantSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .applicantSolicitorEmail("some@email.com")
+                .applicantSolicitorPhone("0123456789")
+                .applicantSolicitorConsentForEmails(YesOrNo.YES)
+                .solicitorReference("Sol ref")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getConsentedApplicantFinremCaseData(){
+        return FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("App ORG ID")
+                    .organisationName("App ORG NAME")
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .applicantRepresented(YesOrNo.NO)
+                .solicitorName("Sol name")
+                .solicitorFirm("sol firm")
+                .solicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .solicitorFirm("0123456789")
+                .solicitorEmail("some@email.com")
+                .solicitorAgreeToReceiveEmails(YesOrNo.YES)
+                .solicitorReference("Sol ref")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getContestedResponentRepresentedFinremCaseData() {
+        return FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("Resp ORG ID")
+                    .organisationName("Resp ORG NAME")
+                    .build())
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .contestedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorName("Sol name")
+                .respondentSolicitorFirm("sol firm")
+                .respondentSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .respondentSolicitorFirm("0123456789")
+                .respondentSolicitorEmail("some@email.com")
+                .respondentSolicitorDxNumber("DXnumber")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getConsentedResponentRepresentedFinremCaseData() {
+        return FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("Resp ORG ID")
+                    .organisationName("Resp ORG NAME")
+                    .build())
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .respondentSolicitorName("Sol name")
+                .respondentSolicitorFirm("sol firm")
+                .respondentSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .respondentSolicitorFirm("0123456789")
+                .respondentSolicitorEmail("some@email.com")
+                .respondentSolicitorDxNumber("DXnumber")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getContestedNotResponentRepresentedFinremCaseData() {
+        return FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("Resp ORG ID")
+                    .organisationName("Resp ORG NAME")
+                    .build())
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .contestedRespondentRepresented(YesOrNo.NO)
+                .respondentSolicitorName("Sol name")
+                .respondentSolicitorFirm("sol firm")
+                .respondentSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .respondentSolicitorFirm("0123456789")
+                .respondentSolicitorEmail("some@email.com")
+                .respondentSolicitorDxNumber("DXnumber")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getConsentedNotResponentRepresentedFinremCaseData() {
+        return FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("Resp ORG ID")
+                    .organisationName("Resp ORG NAME")
+                    .build())
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .consentedRespondentRepresented(YesOrNo.NO)
+                .respondentSolicitorName("Sol name")
+                .respondentSolicitorFirm("sol firm")
+                .respondentSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .respondentSolicitorFirm("0123456789")
+                .respondentSolicitorEmail("some@email.com")
+                .respondentSolicitorDxNumber("DXnumber")
+                .build()
+            ).build();
+    }
+
+
+    public static Stream<Arguments> FinremCaseDataParameters() {
+        return Stream.of(
+            Arguments.of(
+                CaseType.CONTESTED,
+                getContestedApplicantFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
+                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
+                    FinremCaseData::getApplicantOrganisationPolicy
+                )
+            ),
+            Arguments.of(
+                CaseType.CONSENTED,
+                getConsentedApplicantFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getSolicitorFirm(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails(),
+                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
+                    FinremCaseData::getApplicantOrganisationPolicy
+                )
+            ),
+            Arguments.of(
+                CaseType.CONTESTED,
+                getContestedResponentRepresentedFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
+                )
+            ),
+            Arguments.of(
+                CaseType.CONSENTED,
+                getConsentedResponentRepresentedFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
+                )
+            ),
+            Arguments.of(
+                CaseType.CONTESTED,
+                getContestedNotResponentRepresentedFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
+                    FinremCaseData::getRespSolNotificationsEmailConsent,
+                    FinremCaseData::getRespondentOrganisationPolicy
+                )
+            ),
+            Arguments.of(
+                CaseType.CONSENTED,
+                getConsentedNotResponentRepresentedFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
+                    FinremCaseData::getRespSolNotificationsEmailConsent,
+                    FinremCaseData::getRespondentOrganisationPolicy
+                )
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("FinremCaseDataParameters")
+    void shouldRemoveApplicantSolicitorDetails_withFinremCaseData(CaseType caseType,
+                                                                  FinremCaseData finremCaseData,
+                                                                  List<Function<FinremCaseData, Object>> propertiesToRemove) {
+
+        service.handleRepresentationChange(finremCaseData, caseType);
+
+        for (Function<FinremCaseData, Object> propertyGetter : propertiesToRemove) {
+            Object value = propertyGetter.apply(finremCaseData);
+            assertNull(value);
+        }
+    }
 
 }
 

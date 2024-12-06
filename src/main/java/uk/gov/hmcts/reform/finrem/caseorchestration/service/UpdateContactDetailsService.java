@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
@@ -175,9 +176,9 @@ public class UpdateContactDetailsService {
             : contactDetailsWrapper.getConsentedRespondentRepresented().isYes();
 
         if (respondentRepresented) {
-            contactDetailsWrapper.setRespondentAddress(null);
-            contactDetailsWrapper.setRespondentPhone(null);
-            contactDetailsWrapper.setRespondentResideOutsideUK(null);
+            contactDetailsWrapper.setRespondentSolicitorAddress(null);
+            contactDetailsWrapper.setRespondentSolicitorPhone(null);
+            contactDetailsWrapper.setRespondentResideOutsideUK(YesOrNo.NO);
         } else {
             contactDetailsWrapper.setRespondentSolicitorName(null);
             contactDetailsWrapper.setRespondentSolicitorFirm(null);
@@ -185,7 +186,7 @@ public class UpdateContactDetailsService {
             contactDetailsWrapper.setRespondentSolicitorPhone(null);
             contactDetailsWrapper.setRespondentSolicitorEmail(null);
             contactDetailsWrapper.setRespondentSolicitorDxNumber(null);
-            contactDetailsWrapper.setSolicitorAgreeToReceiveEmails(null);
+            caseData.setRespSolNotificationsEmailConsent(null);
             caseData.setRespondentOrganisationPolicy(null);
         }
     }
