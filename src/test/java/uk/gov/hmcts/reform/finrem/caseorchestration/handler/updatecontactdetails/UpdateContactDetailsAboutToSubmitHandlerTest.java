@@ -58,7 +58,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenNoRepresentationChangeAndNoHiddenAddresses_handle(){
+    void givenNoRepresentationChangeAndNoHiddenAddresses_handle() {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
@@ -78,7 +78,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenNoRepresentationChangeAndRespondentHasHiddenAddresses_handle(){
+    void givenNoRepresentationChangeAndRespondentHasHiddenAddresses_handle() {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
@@ -100,7 +100,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenNoRepresentationChangeAndApplicantHasHiddenAddresses_handle(){
+    void givenNoRepresentationChangeAndApplicantHasHiddenAddresses_handle() {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()

@@ -107,10 +107,10 @@ class UpdateContactDetailsServiceTest {
                         .builder()
                         .organisationID("Resp ORG ID")
                         .organisationName("Resp ORG NAME")
-                    .build())
-                .build()
+                        .build())
+                    .build()
             )
-         .build();
+            .build();
 
         FinremCaseData caseData = FinremCaseData.builder().build();
 
@@ -282,7 +282,7 @@ class UpdateContactDetailsServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("FinremCaseDataParameters")
+    @MethodSource("finremCaseDataParameters")
     void shouldRemoveApplicantSolicitorDetails_withFinremCaseData(CaseType caseType,
                                                                   FinremCaseData finremCaseData,
                                                                   List<Function<FinremCaseData, Object>> propertiesToRemove) {
@@ -295,7 +295,7 @@ class UpdateContactDetailsServiceTest {
         }
     }
 
-    public static Stream<Arguments> FinremCaseDataParameters() {
+    public static Stream<Arguments> finremCaseDataParameters() {
         return Stream.of(
             Arguments.of(
                 CaseType.CONTESTED,
@@ -372,7 +372,7 @@ class UpdateContactDetailsServiceTest {
         );
     }
 
-    private static FinremCaseData getContestedApplicantFinremCaseData(){
+    private static FinremCaseData getContestedApplicantFinremCaseData() {
         return FinremCaseData.builder()
             .applicantOrganisationPolicy(OrganisationPolicy
                 .builder()
@@ -396,7 +396,7 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
-    private static FinremCaseData getConsentedApplicantFinremCaseData(){
+    private static FinremCaseData getConsentedApplicantFinremCaseData() {
         return FinremCaseData.builder()
             .applicantOrganisationPolicy(OrganisationPolicy
                 .builder()
