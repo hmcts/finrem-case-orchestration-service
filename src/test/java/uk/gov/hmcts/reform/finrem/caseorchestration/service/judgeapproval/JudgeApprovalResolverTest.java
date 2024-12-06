@@ -141,30 +141,6 @@ class JudgeApprovalResolverTest {
         when(notApprovedJudgeApproval.getJudgeDecision()).thenReturn(null);
 
         return Stream.of(
-//            Arguments.of(
-//                DraftOrdersWrapper.builder()
-//                    .draftOrdersReviewCollection(List.of(
-//                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-//                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
-//                                .value(draftReviews.get(0)).build()))
-//                            .build()).build()))
-//                    .build(),
-//                draftReviews,
-//                approvedJudgeApproval,
-//                true // should call handleApprovable
-//            ),
-//            Arguments.of(
-//                DraftOrdersWrapper.builder()
-//                    .draftOrdersReviewCollection(List.of(
-//                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-//                            .psaDocReviewCollection(List.of(PsaDocReviewCollection.builder()
-//                                .value(psaReviews.get(0)).build()))
-//                            .build()).build()))
-//                    .build(),
-//                psaReviews,
-//                approvedJudgeApproval,
-//                true
-//                ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .agreedDraftOrderCollection(List.of(
