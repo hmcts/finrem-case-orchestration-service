@@ -199,7 +199,7 @@ public class IntervenerService {
 
     private void logError(Long caseId, List<String> errors) {
         String error = String.format("Could not find intervener with provided email for caseId %s", caseId);
-        log.error(error);
+        log.info(error);
         errors.add(error);
     }
 }
