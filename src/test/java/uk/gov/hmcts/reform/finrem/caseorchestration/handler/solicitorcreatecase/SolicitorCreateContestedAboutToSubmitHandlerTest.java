@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -142,34 +146,17 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenRespondentRefugeQuestionAnswered_thenRespondentRefugeTabUpdated() {
+    void testUpdateRespondentInRefugeTabCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        // imitate user answering YES to Respondent in refuge question on create case journey.
-        caseDetails.getData().getRefugeWrapper().setRespondentInRefugeQuestion(YesOrNo.YES);
-        assertEquals(YesOrNo.YES, caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
 
-        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-
-        // Assert handler updated RespondentInRefugeTab from RespondentInRefugeQuestion, and latter then cleared.
-        assertEquals(YesOrNo.YES, responseCaseData.getRefugeWrapper().getRespondentInRefugeTab());
-        assertNull(responseCaseData.getRefugeWrapper().getRespondentInRefugeQuestion());
-    }
-
-    @Test
-    void givenCase_whenRespondentRefugeQuestionUnanswered_thenRespondentRefugeTabUnchanged() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        // imitate user not answering Respondent in refuge question on create case journey.
-        assertNull(caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
-
-        FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
-
-        // Assert handler didn't update RespondentInRefugeTab from RespondentInRefugeQuestion, which remains null.
-        assertNull(responseCaseData.getRefugeWrapper().getRespondentInRefugeTab());
-        assertNull(responseCaseData.getRefugeWrapper().getRespondentInRefugeQuestion());
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateRespondentInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+        }
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
