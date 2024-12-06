@@ -18,5 +18,6 @@ public class RefugeWrapper {
 
     private YesOrNo respondentInRefugeQuestion;
     private YesOrNo respondentInRefugeTab;
+    private YesOrNo applicantInRefuge;
 
 }
