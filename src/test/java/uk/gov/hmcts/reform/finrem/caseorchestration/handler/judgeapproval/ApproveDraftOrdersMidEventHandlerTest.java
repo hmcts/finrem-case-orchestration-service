@@ -161,8 +161,6 @@ class ApproveDraftOrdersMidEventHandlerTest {
                 .build())
             .build();
 
-        DynamicList expectedDynamicList = DynamicList.builder().listItems(new ArrayList<>()).build();
-
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -178,6 +176,8 @@ class ApproveDraftOrdersMidEventHandlerTest {
         assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
         AnotherHearingRequest actualRequest = actualCollection.get(0).getValue();
         assertNotNull(actualRequest, "The AnotherHearingRequest object should not be null");
+
+        DynamicList expectedDynamicList = DynamicList.builder().listItems(new ArrayList<>()).build();
         assertEquals(actualRequest.getWhichOrder(), expectedDynamicList);
         assertNull(actualRequest.getTypeOfHearing(), "typeOfHearing should be null");
         assertNull(actualRequest.getTimeEstimate(), "timeEstimate should be null");
