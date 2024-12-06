@@ -22,14 +22,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
@@ -43,7 +46,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final ConsentOrderPrintService consentOrderPrintService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
-
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
@@ -77,7 +79,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                                              CaseDetails caseDetailsBefore, CaseDocument latestConsentOrder) {
         String caseId = caseDetails.getId().toString();
         log.info("Generating and preparing documents for latest consent order, Case ID: {}", caseId);
-
         Map<String, Object> caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
@@ -92,9 +93,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for Case ID: {}",
                 caseId);
-
+            LocalDate approvalDate = getApprovalDate(caseData);
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                documentHelper.getPensionDocuments(caseData), authToken, stampType, caseId);
+                documentHelper.getPensionDocuments(caseData), authToken, stampType, approvalDate, caseId);
             log.info("Generated StampedPensionDocs = {} for Case ID: {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
@@ -131,5 +132,26 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private Boolean isPensionDocumentsEmpty(Map<String, Object> caseData) {
         List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
         return pensionDocumentsData.isEmpty();
+    }
+
+    private LocalDate getApprovalDate(Map<String, Object> caseData) {
+        return Optional.ofNullable(caseData.get(CONTESTED_ORDER_DIRECTION_DATE))
+            .filter(value -> value instanceof LocalDate || value instanceof String)
+            .map(value -> {
+                if (value instanceof LocalDate) {
+                    return (LocalDate) value;
+                } else {
+                    try {
+                        return LocalDate.parse((String) value);
+                    } catch (Exception e) {
+                        log.info("Invalid Approved date of order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "': " + e.getMessage());
+                        return null;
+                    }
+                }
+            })
+            .orElseGet(() -> {
+                log.info("Approved Date of Order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "' is null or invalid");
+                return null;
+            });
     }
 }

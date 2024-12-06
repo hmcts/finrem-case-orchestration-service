@@ -141,7 +141,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCase_whenNoPendsion_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
+    void givenCase_whenNoPension_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());

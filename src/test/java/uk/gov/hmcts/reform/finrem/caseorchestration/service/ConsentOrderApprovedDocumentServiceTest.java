@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -318,7 +319,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
         List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService
-            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
+            .stampPensionDocuments(pensionDocuments, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, LocalDate.now(), caseId);
 
         assertThat(stampPensionDocuments, hasSize(1));
     }
