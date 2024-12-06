@@ -7,8 +7,8 @@ public enum JudgeDecision {
 
     REVIEW_LATER(false, false, false),
     LEGAL_REP_NEEDS_TO_MAKE_CHANGE(false, false, true),
-    JUDGE_NEEDS_TO_MAKE_CHANGES(true, true, true),
-    READY_TO_BE_SEALED(true, true, true);
+    JUDGE_NEEDS_TO_MAKE_CHANGES(true, true, false),
+    READY_TO_BE_SEALED(true, true, false);
     private final boolean hearingInstructionRequired;
     private final boolean approved;
     private final boolean refused;
