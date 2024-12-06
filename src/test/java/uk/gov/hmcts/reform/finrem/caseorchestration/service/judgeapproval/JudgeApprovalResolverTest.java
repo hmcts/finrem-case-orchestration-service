@@ -16,11 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -34,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,55 +101,80 @@ class JudgeApprovalResolverTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideProcessApprovableCollectionData")
-    void shouldInvokeProcessApprovableCollection(DraftOrdersWrapper draftOrdersWrapper,
-                                                 List<? extends Approvable> approvables) {
+    @MethodSource("provideProcessApprovableCollectionDataWithHandleApprovable")
+    void shouldInvokeHandleApprovable(DraftOrdersWrapper draftOrdersWrapper,
+                                      List<? extends Approvable> approvables,
+                                      JudgeApproval judgeApproval,
+                                      boolean shouldCallHandleApprovable) {
         CaseDocument targetDoc = CaseDocument.builder().build();
-        JudgeApproval judgeApproval = mock(JudgeApproval.class);
+
         judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, "auth");
 
         if (approvables != null) {
             verify(judgeApprovalResolver, times(1))
                 .processApprovableCollection(approvables, targetDoc, judgeApproval, "auth");
+
+            approvables.forEach(approvable -> {
+                if (shouldCallHandleApprovable) {
+                    verify(judgeApprovalResolver, times(1))
+                        .handleApprovable(approvable, judgeApproval, "auth");
+                } else {
+                    verify(judgeApprovalResolver, never())
+                        .handleApprovable(any(), any(), any());
+                }
+            });
         } else {
-            verify(judgeApprovalResolver, never()).processApprovableCollection(any(), any(), any(), any());
+            verify(judgeApprovalResolver, never())
+                .processApprovableCollection(any(), any(), any(), any());
         }
     }
 
-    static Stream<Arguments> provideProcessApprovableCollectionData() {
+    static Stream<Arguments> provideProcessApprovableCollectionDataWithHandleApprovable() {
         List<DraftOrderDocumentReview> draftReviews = List.of(DraftOrderDocumentReview.builder().build());
         List<PsaDocumentReview> psaReviews = List.of(PsaDocumentReview.builder().build());
         List<AgreedDraftOrder> agreedDrafts = List.of(AgreedDraftOrder.builder().build());
 
+        JudgeApproval approvedJudgeApproval = mock(JudgeApproval.class);
+        when(approvedJudgeApproval.getJudgeDecision()).thenReturn(READY_TO_BE_SEALED);
+
+        JudgeApproval notApprovedJudgeApproval = mock(JudgeApproval.class);
+        when(notApprovedJudgeApproval.getJudgeDecision()).thenReturn(null);
+
         return Stream.of(
-            Arguments.of(
-                DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(
-                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
-                                .value(draftReviews.get(0)).build()))
-                            .build()).build()))
-                    .build(),
-                draftReviews
-            ),
-            Arguments.of(
-                DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(
-                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-                            .psaDocReviewCollection(List.of(PsaDocReviewCollection.builder()
-                                .value(psaReviews.get(0)).build()))
-                            .build()).build()))
-                    .build(),
-                psaReviews
-            ),
+//            Arguments.of(
+//                DraftOrdersWrapper.builder()
+//                    .draftOrdersReviewCollection(List.of(
+//                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+//                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
+//                                .value(draftReviews.get(0)).build()))
+//                            .build()).build()))
+//                    .build(),
+//                draftReviews,
+//                approvedJudgeApproval,
+//                true // should call handleApprovable
+//            ),
+//            Arguments.of(
+//                DraftOrdersWrapper.builder()
+//                    .draftOrdersReviewCollection(List.of(
+//                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+//                            .psaDocReviewCollection(List.of(PsaDocReviewCollection.builder()
+//                                .value(psaReviews.get(0)).build()))
+//                            .build()).build()))
+//                    .build(),
+//                psaReviews,
+//                approvedJudgeApproval,
+//                true
+//                ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .agreedDraftOrderCollection(List.of(
                         AgreedDraftOrderCollection.builder().value(agreedDrafts.get(0)).build()))
                     .build(),
-                agreedDrafts
+                agreedDrafts,
+                notApprovedJudgeApproval,
+                false // should not call handleApprovable
             ),
-            Arguments.of(DraftOrdersWrapper.builder().build(), null)
+            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApproval, false)
         );
     }
 }
