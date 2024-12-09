@@ -68,7 +68,7 @@ class JudgeApprovalResolver {
                 .map(HearingInstruction::getAnotherHearingRequestCollection)
                 .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
         }
-        moveRefusedDraftOrdersAndPsaToRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
+        processRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
     }
 
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
@@ -136,15 +136,21 @@ class JudgeApprovalResolver {
         }
     }
 
-    private void moveRefusedDraftOrdersAndPsaToRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
-                                                             JudgeApproval judgeApproval, String userAuthorisation) {
+    private void processRefusedOrders(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
+                                      JudgeApproval judgeApproval, String userAuthorisation) {
         List<DraftOrderDocReviewCollection> removedItems = new ArrayList<>();
         List<PsaDocReviewCollection> removedPsaItems = new ArrayList<>();
+
+        // remove refused draft orders/PSAs from agreedDraftOrderCollection
+        filterAgreedDraftOrderCollections(draftOrdersWrapper, REFUSED);
+
+        // remove refused draft orders/PSAs from PsaDocReviewCollection and DraftOrderDocReviewCollection and collect them
         draftOrdersWrapper.setDraftOrdersReviewCollection(filterAndCollectRemovedItemsFromDraftOrderDocReviewCollection(removedItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
         draftOrdersWrapper.setDraftOrdersReviewCollection(filterAndCollectRemovedItemsFromPsaDocReviewCollection(removedPsaItems,
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
 
+        // create RefusedOrder from collected items.
         draftOrdersWrapper.setRefusedOrdersCollection(
             Stream.concat(
                 Stream.concat(
@@ -207,7 +213,7 @@ class JudgeApprovalResolver {
     }
 
     private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollectRemovedItemsFromReviewCollection(
-        List<T> removedItems,
+        List<T> removedItemsCollector,
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         OrderStatus statusToRemove,
         Function<DraftOrdersReview, List<T>> getReviewCollection,
@@ -228,7 +234,9 @@ class JudgeApprovalResolver {
                 setReviewCollection.accept(updatedReviewBuilder, partitioned.get(false));
 
                 // Collect the removed items
-                removedItems.addAll(partitioned.get(true));
+                if (removedItemsCollector != null) {
+                    removedItemsCollector.addAll(partitioned.get(true));
+                }
 
                 // Create a new DraftOrdersReviewCollection
                 DraftOrdersReviewCollection updatedCollection = new DraftOrdersReviewCollection();
@@ -237,6 +245,17 @@ class JudgeApprovalResolver {
             })
             .toList();
     }
+
+    private void filterAgreedDraftOrderCollections(DraftOrdersWrapper draftOrdersWrapper,
+        OrderStatus statusToRemove) {
+        Map<Boolean, List<AgreedDraftOrderCollection>> partitioned =
+            partitionDraftOrderDocReviewCollection(
+                draftOrdersWrapper.getAgreedDraftOrderCollection(),
+                statusToRemove
+            );
+        draftOrdersWrapper.setAgreedDraftOrderCollection(partitioned.get(false));
+    }
+
 
     private <T extends HasApprovable> Map<Boolean, List<T>> partitionDraftOrderDocReviewCollection(
         List<T> draftOrderDocReviewCollection,
