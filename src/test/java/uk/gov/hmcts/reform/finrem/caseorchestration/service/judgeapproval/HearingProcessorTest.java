@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -16,9 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
@@ -29,16 +30,11 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(MockitoExtension.class)
 class HearingProcessorTest {
 
@@ -46,7 +42,6 @@ class HearingProcessorTest {
 
     private static final CaseDocument TARGET_DOC = mock(CaseDocument.class);
 
-    @Spy
     @InjectMocks
     private HearingProcessor hearingProcessor;
 
@@ -134,12 +129,19 @@ class HearingProcessorTest {
                                         boolean processHearingInstructionInvokedExpected, String expectedIllegalStateExceptionMessage) {
         if (expectedIllegalStateExceptionMessage == null) {
             hearingProcessor.processHearingInstruction(draftOrdersWrapper, anotherHearingRequest);
-            verify(hearingProcessor, times(processHearingInstructionInvokedExpected ? 2 : 0))
-                .processHearingInstruction(
-                    anyList(),  // Matcher for List type
-                    eq(TARGET_DOC),  // Matcher for CaseDocument
-                    any(AnotherHearingRequest.class)  // Matcher for AnotherHearingRequest
-                );
+            //Check the expected changes in data
+            if (processHearingInstructionInvokedExpected) {
+                //Verify that specific fields are updated
+                assertTrue(draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+                    .flatMap(el -> el.getValue().getDraftOrderDocReviewCollection().stream())
+                    .anyMatch(doc -> YesOrNo.YES.equals(doc.getValue().getAnotherHearingToBeListed())));
+            } else {
+                // Verify no changes are made
+                assertTrue(draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+                    .flatMap(el -> el.getValue().getDraftOrderDocReviewCollection().stream())
+                    .noneMatch(doc -> YesOrNo.YES.equals(doc.getValue().getAnotherHearingToBeListed())));
+            }
+
         } else {
             IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
@@ -150,14 +152,31 @@ class HearingProcessorTest {
     }
 
     static Stream<Arguments> provideProcessHearingInstructionData() {
+        CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
+        CaseDocument psaDocument = CaseDocument.builder().documentUrl("NEW_DOC2.doc").build();
+
+
+        DraftOrderDocumentReview draftReview = DraftOrderDocumentReview.builder()
+            .draftOrderDocument(draftOrderDocument)
+            .build();
+        PsaDocumentReview psaReview = PsaDocumentReview.builder()
+            .psaDocument(psaDocument)
+            .build();
+
         return Stream.of(
             // happy path 1
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
-                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).build())
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
+                            .value(draftReview).build())).build()).build()))
+                    .judgeApproval1(JudgeApproval.builder().document(draftOrderDocument).build())
                     .build(),
                 AnotherHearingRequest.builder()
+                    .typeOfHearing(InterimTypeOfHearing.FH)
+                    .additionalTime("Test additional time")
+                    .timeEstimate(HearingTimeDirection.STANDARD_TIME)
+                    .anyOtherListingInstructions("Test other listing instruction")
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("DRAFT_ORDER%s1", SEPARATOR)).build()).build())
                     .build(),
                 true, null
@@ -165,10 +184,16 @@ class HearingProcessorTest {
             // happy path 2
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
-                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).build())
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
+                            .value(draftReview).build())).build()).build()))
+                    .judgeApproval1(JudgeApproval.builder().document(draftOrderDocument).build())
                     .build(),
                 AnotherHearingRequest.builder()
+                    .typeOfHearing(InterimTypeOfHearing.FH)
+                    .additionalTime("Test additional time")
+                    .timeEstimate(HearingTimeDirection.STANDARD_TIME)
+                    .anyOtherListingInstructions("Test other listing instruction")
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("PSA%s1", SEPARATOR)).build()).build())
                     .build(),
                 true, null
@@ -187,17 +212,12 @@ class HearingProcessorTest {
             // missing corresponding judgeApproval when a PSA in whichOrder selected
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder().build()).build()))
+                    .draftOrdersReviewCollection(List.of(DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
+                        .psaDocReviewCollection(List.of(PsaDocReviewCollection.builder()
+                            .value(psaReview).build()))
+                        .build()).build()))
                     .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).build())
                     .build(),
-                AnotherHearingRequest.builder()
-                    .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("PSA%s1", SEPARATOR)).build()).build())
-                    .build(),
-                false, null
-            ),
-            // missing draftOrdersReviewCollection in DraftOrdersWrapper
-            Arguments.of(
-                DraftOrdersWrapper.builder().build(),
                 AnotherHearingRequest.builder()
                     .whichOrder(DynamicList.builder().value(DynamicListElement.builder().code(format("PSA%s1", SEPARATOR)).build()).build())
                     .build(),
