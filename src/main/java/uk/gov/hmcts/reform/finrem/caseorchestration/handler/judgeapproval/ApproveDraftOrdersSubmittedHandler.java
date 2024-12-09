@@ -46,8 +46,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-
-//        notificationService.sendDraftOrderOrPsaRefused();
+        // TODO get refusal order by ids and send email to those refused order.
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
