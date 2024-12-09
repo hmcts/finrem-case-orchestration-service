@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -78,13 +79,17 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     public void givenValidData_whenUpdateCaseDetails_thenShouldPreserveOrgPolicies() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
+
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(updateContactDetailsService).persistOrgPolicies(any(), any());
+        verify(updateContactDetailsService).persistOrgPolicies(
+            anyMap(),
+            any(CaseDetails.class)
+        );
     }
 
     @Test
