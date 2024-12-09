@@ -38,6 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
 @ExtendWith(MockitoExtension.class)
@@ -155,6 +156,10 @@ class JudgeApprovalResolverTest {
             .judgeDecision(READY_TO_BE_SEALED)
             .build();
 
+        JudgeApproval approvedJudgeApprovalWithChanges = JudgeApproval.builder()
+            .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
+            .build();
+
         JudgeApproval notApprovedJudgeApproval = mock(JudgeApproval.class);
         when(notApprovedJudgeApproval.getJudgeDecision()).thenReturn(null);
 
@@ -168,7 +173,7 @@ class JudgeApprovalResolverTest {
                             .build()).build()))
                     .build(),
                 List.of(draftReview),
-                approvedJudgeApproval,
+                approvedJudgeApprovalWithChanges ,
                 true, // should call handleApprovable
                 draftOrderDocument
             ),
