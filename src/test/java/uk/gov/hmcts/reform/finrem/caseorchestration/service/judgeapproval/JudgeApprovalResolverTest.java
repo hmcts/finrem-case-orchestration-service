@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -109,11 +111,10 @@ class JudgeApprovalResolverTest {
     void shouldInvokeHandleApprovable(DraftOrdersWrapper draftOrdersWrapper,
                                       List<? extends Approvable> approvables,
                                       JudgeApproval judgeApproval,
-                                      boolean shouldCallHandleApprovable) {
-        CaseDocument targetDoc = CaseDocument.builder().build();
-        if (shouldCallHandleApprovable) {
-            approvables.forEach(approvable -> when(approvable.match(targetDoc)).thenReturn(true)); // Ensure approvables match the targetDoc
-        }
+                                      boolean shouldCallHandleApprovable,
+                                      CaseDocument targetDoc
+                                      ) {
+
         judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, "auth");
 
         if (approvables != null) {
@@ -124,6 +125,7 @@ class JudgeApprovalResolverTest {
                 if (shouldCallHandleApprovable) {
                     verify(judgeApprovalResolver, times(1))
                         .handleApprovable(approvable, judgeApproval, "auth");
+                    assertEquals(OrderStatus.APPROVED_BY_JUDGE, approvable.getOrderStatus());
                 } else {
                     verify(judgeApprovalResolver, never())
                         .handleApprovable(any(), any(), any());
@@ -137,11 +139,26 @@ class JudgeApprovalResolverTest {
 
     static Stream<Arguments> provideProcessApprovableCollectionDataWithHandleApprovable() {
         //Mock approvable objects to ensure they match the target document
-        DraftOrderDocumentReview draftReview = mock(DraftOrderDocumentReview.class);
-        PsaDocumentReview psaReview = mock(PsaDocumentReview.class);
+        CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
+        CaseDocument psaDocument = CaseDocument.builder().documentUrl("NEW_DOC2.doc").build();
+
+        DraftOrderDocumentReview draftReview = DraftOrderDocumentReview.builder()
+            .draftOrderDocument(draftOrderDocument)
+            .build();
+        PsaDocumentReview psaReview = PsaDocumentReview.builder()
+            .psaDocument(psaDocument)
+            .build();
+
+
         List<AgreedDraftOrder> agreedDrafts = List.of(AgreedDraftOrder.builder().build());
-        JudgeApproval approvedJudgeApproval = mock(JudgeApproval.class);
-        when(approvedJudgeApproval.getJudgeDecision()).thenReturn(JUDGE_NEEDS_TO_MAKE_CHANGES);
+
+        JudgeApproval approvedJudgeApproval = JudgeApproval.builder()
+            .judgeDecision(READY_TO_BE_SEALED)
+            .build();
+
+        JudgeApproval approvedJudgeApprovalWithChanges = JudgeApproval.builder()
+            .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
+            .build();
 
         JudgeApproval notApprovedJudgeApproval = mock(JudgeApproval.class);
         when(notApprovedJudgeApproval.getJudgeDecision()).thenReturn(null);
@@ -156,8 +173,9 @@ class JudgeApprovalResolverTest {
                             .build()).build()))
                     .build(),
                 List.of(draftReview),
-                approvedJudgeApproval,
-                true // should call handleApprovable
+                approvedJudgeApprovalWithChanges ,
+                true, // should call handleApprovable
+                draftOrderDocument
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -169,7 +187,8 @@ class JudgeApprovalResolverTest {
                     .build(),
                 List.of(psaReview),
                 approvedJudgeApproval,
-                true // should call handleApprovable
+                true, // should call handleApprovable
+                psaDocument
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -178,9 +197,10 @@ class JudgeApprovalResolverTest {
                     .build(),
                 agreedDrafts,
                 notApprovedJudgeApproval,
-                false // should not call handleApprovable
+                false, // should not call handleApprovable
+                CaseDocument.builder().build()
             ),
-            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApproval, false)
+            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApproval, false, CaseDocument.builder().build())
         );
     }
 }
