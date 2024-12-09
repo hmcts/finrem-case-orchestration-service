@@ -45,7 +45,7 @@ public class RestService {
     private Map restApiCall(String url, HttpEntity<Object> request, HttpMethod httpMethod) {
         URI uri = buildUri(url);
 
-        log.info("Making {} request to uri : {}, request : {}", httpMethod, uri, request);
+        log.info("Making {} request to uri : {}", httpMethod, uri);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -54,7 +54,7 @@ public class RestService {
                 request,
                 Map.class);
 
-            log.info("Received REST {} response: {} ", httpMethod, response);
+            log.info("Received REST {} response: {} ", httpMethod, response.getStatusCode());
 
             return response.getBody();
         } catch (Exception e) {
