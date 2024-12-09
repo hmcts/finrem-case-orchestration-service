@@ -40,8 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
-@ContextConfiguration(classes = {
-        UpdateContestedCaseControllerTest.TestConfig.class})
+@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
 @Import(MiamLegacyExemptionsService.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
@@ -467,6 +466,9 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
     }
+
+    // TODO - Add one if the test to assert that the callback includes a call to the
+    // static function for the refuge question for the applicant and the respondent.
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()

@@ -26,7 +26,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -114,15 +118,12 @@ public class UpdateContestedCaseController extends BaseController {
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
 
-        // Refactor this handler.
         // Copy the refuge question to tab.  Delete the refuge question.
-        // Write the tests.
-        // New code start
         // Refuge data is maintained as FinremCaseData
-        // In unit test, you'll need to mock what is returned here.
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
+        // In real code, replace the below with the static util call.
         Optional.ofNullable(finremCaseData.getRefugeWrapper().getApplicantInRefugeQuestion())
                 .ifPresent(question -> {
                     finremCaseData.getRefugeWrapper().setApplicantInRefugeTab(question);
@@ -130,6 +131,9 @@ public class UpdateContestedCaseController extends BaseController {
                             finremCaseDetails.getId());
                     finremCaseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
                 });
+
+        // And call the static util call, passing details for the refuge question;.
+
         finremCaseDetails.setData(finremCaseData);
 
         CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
