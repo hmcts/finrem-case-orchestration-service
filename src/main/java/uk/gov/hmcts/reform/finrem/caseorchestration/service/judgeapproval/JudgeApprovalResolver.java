@@ -256,7 +256,6 @@ class JudgeApprovalResolver {
         draftOrdersWrapper.setAgreedDraftOrderCollection(partitioned.get(false));
     }
 
-
     private <T extends HasApprovable> Map<Boolean, List<T>> partitionDraftOrderDocReviewCollection(
         List<T> draftOrderDocReviewCollection,
         OrderStatus statusToRemove) {
