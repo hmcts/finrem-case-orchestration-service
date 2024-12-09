@@ -311,6 +311,19 @@ class UpdateContactDetailsServiceTest {
                 )
             ),
             Arguments.of(
+                CaseType.CONTESTED,
+                getContestedApplicantNullRepresentationFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails(),
+                    data -> data.getContactDetailsWrapper().getSolicitorReference(),
+                    FinremCaseData::getApplicantOrganisationPolicy
+                )
+            ),
+            Arguments.of(
                 CaseType.CONSENTED,
                 getConsentedApplicantFinremCaseData(),
                 List.<Function<FinremCaseData, Object>>of(
@@ -327,7 +340,7 @@ class UpdateContactDetailsServiceTest {
             ),
             Arguments.of(
                 CaseType.CONTESTED,
-                getContestedResponentRepresentedFinremCaseData(),
+                getContestedRespondentRepresentedFinremCaseData(),
                 List.<Function<FinremCaseData, Object>>of(
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
@@ -335,7 +348,7 @@ class UpdateContactDetailsServiceTest {
             ),
             Arguments.of(
                 CaseType.CONSENTED,
-                getConsentedResponentRepresentedFinremCaseData(),
+                getConsentedRespondentRepresentedFinremCaseData(),
                 List.<Function<FinremCaseData, Object>>of(
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone()
@@ -343,7 +356,21 @@ class UpdateContactDetailsServiceTest {
             ),
             Arguments.of(
                 CaseType.CONTESTED,
-                getContestedNotResponentRepresentedFinremCaseData(),
+                getContestedNotRespondentRepresentedFinremCaseData(),
+                List.<Function<FinremCaseData, Object>>of(
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorPhone(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorEmail(),
+                    data -> data.getContactDetailsWrapper().getRespondentSolicitorDxNumber(),
+                    FinremCaseData::getRespSolNotificationsEmailConsent,
+                    FinremCaseData::getRespondentOrganisationPolicy
+                )
+            ),
+            Arguments.of(
+                CaseType.CONTESTED,
+                getContestedNullRespondentRepresentedFinremCaseData(),
                 List.<Function<FinremCaseData, Object>>of(
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
@@ -357,7 +384,7 @@ class UpdateContactDetailsServiceTest {
             ),
             Arguments.of(
                 CaseType.CONSENTED,
-                getConsentedNotResponentRepresentedFinremCaseData(),
+                getConsentedNotRespondentRepresentedFinremCaseData(),
                 List.<Function<FinremCaseData, Object>>of(
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorName(),
                     data -> data.getContactDetailsWrapper().getRespondentSolicitorFirm(),
@@ -396,6 +423,30 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
+    private static FinremCaseData getContestedApplicantNullRepresentationFinremCaseData() {
+        return FinremCaseData.builder()
+            .applicantOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("App ORG ID")
+                    .organisationName("App ORG NAME")
+                    .build())
+                .build())
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.APPLICANT)
+                .applicantRepresented(null)
+                .applicantSolicitorName("Sol name")
+                .applicantSolicitorFirm("sol firm")
+                .applicantSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .applicantSolicitorEmail("some@email.com")
+                .applicantSolicitorPhone("0123456789")
+                .applicantSolicitorConsentForEmails(YesOrNo.YES)
+                .solicitorReference("Sol ref")
+                .build()
+            ).build();
+    }
+
     private static FinremCaseData getConsentedApplicantFinremCaseData() {
         return FinremCaseData.builder()
             .applicantOrganisationPolicy(OrganisationPolicy
@@ -420,7 +471,7 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
-    private static FinremCaseData getContestedResponentRepresentedFinremCaseData() {
+    private static FinremCaseData getContestedRespondentRepresentedFinremCaseData() {
         return FinremCaseData.builder()
             .respondentOrganisationPolicy(OrganisationPolicy
                 .builder()
@@ -444,7 +495,7 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
-    private static FinremCaseData getConsentedResponentRepresentedFinremCaseData() {
+    private static FinremCaseData getConsentedRespondentRepresentedFinremCaseData() {
         return FinremCaseData.builder()
             .respondentOrganisationPolicy(OrganisationPolicy
                 .builder()
@@ -468,7 +519,7 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
-    private static FinremCaseData getContestedNotResponentRepresentedFinremCaseData() {
+    private static FinremCaseData getContestedNotRespondentRepresentedFinremCaseData() {
         return FinremCaseData.builder()
             .respondentOrganisationPolicy(OrganisationPolicy
                 .builder()
@@ -492,7 +543,31 @@ class UpdateContactDetailsServiceTest {
             ).build();
     }
 
-    private static FinremCaseData getConsentedNotResponentRepresentedFinremCaseData() {
+    private static FinremCaseData getContestedNullRespondentRepresentedFinremCaseData() {
+        return FinremCaseData.builder()
+            .respondentOrganisationPolicy(OrganisationPolicy
+                .builder()
+                .organisation(Organisation
+                    .builder()
+                    .organisationID("Resp ORG ID")
+                    .organisationName("Resp ORG NAME")
+                    .build())
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .nocParty(NoticeOfChangeParty.RESPONDENT)
+                .contestedRespondentRepresented(null)
+                .respondentSolicitorName("Sol name")
+                .respondentSolicitorFirm("sol firm")
+                .respondentSolicitorAddress(Address.builder().addressLine1("Some Address").build())
+                .respondentSolicitorFirm("0123456789")
+                .respondentSolicitorEmail("some@email.com")
+                .respondentSolicitorDxNumber("DXnumber")
+                .build()
+            ).build();
+    }
+
+    private static FinremCaseData getConsentedNotRespondentRepresentedFinremCaseData() {
         return FinremCaseData.builder()
             .respondentOrganisationPolicy(OrganisationPolicy
                 .builder()

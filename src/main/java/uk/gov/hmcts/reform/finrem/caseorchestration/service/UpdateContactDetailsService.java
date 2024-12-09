@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -134,11 +135,12 @@ public class UpdateContactDetailsService {
     }
 
     private void removeApplicantSolicitorDetails(FinremCaseData caseData, CaseType caseType) {
-        boolean isContested = CaseType.CONTESTED.equals(caseType);
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        Optional<YesOrNo> isApplicantRepresented = Optional.ofNullable(contactDetailsWrapper.getApplicantRepresented());
 
-        if (contactDetailsWrapper.getApplicantRepresented().isNoOrNull()) {
-            if (isContested) {
+        if (isApplicantRepresented.isEmpty()
+            || isApplicantRepresented.get() == YesOrNo.NO) {
+            if (CaseType.CONTESTED.equals(caseType)) {
                 contactDetailsWrapper.setApplicantSolicitorName(null);
                 contactDetailsWrapper.setApplicantSolicitorFirm(null);
                 contactDetailsWrapper.setApplicantSolicitorAddress(null);
@@ -187,12 +189,13 @@ public class UpdateContactDetailsService {
         boolean isContested = CaseType.CONTESTED.equals(caseType);
 
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
+        Optional<YesOrNo> isRespondentRepresented =
+            Optional.ofNullable(isContested
+                ? contactDetailsWrapper.getContestedRespondentRepresented()
+                : contactDetailsWrapper.getConsentedRespondentRepresented());
 
-        boolean respondentRepresented = isContested
-            ? !contactDetailsWrapper.getContestedRespondentRepresented().isNoOrNull()
-            : !contactDetailsWrapper.getConsentedRespondentRepresented().isNoOrNull();
-
-        if (respondentRepresented) {
+        if (isRespondentRepresented.isPresent()
+            && isRespondentRepresented.get() == YesOrNo.YES) {
             contactDetailsWrapper.setRespondentSolicitorAddress(null);
             contactDetailsWrapper.setRespondentSolicitorPhone(null);
             contactDetailsWrapper.setRespondentResideOutsideUK(YesOrNo.NO);
