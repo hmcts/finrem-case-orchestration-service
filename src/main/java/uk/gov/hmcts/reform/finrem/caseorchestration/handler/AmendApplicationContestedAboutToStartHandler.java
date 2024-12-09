@@ -8,9 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +50,8 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
         List<String> warnings = null;
 
         MiamWrapper miamWrapper = caseData.getMiamWrapper();
@@ -57,9 +60,8 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         }
         miamLegacyExemptionsService.convertLegacyExemptions(miamWrapper);
 
-        // populate applicant and respondent in refuge question from tab value.
-        // and write the test.
-        // Can you write this code as a util.
+        RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
+        // And do the same for Respondent in refuge
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
