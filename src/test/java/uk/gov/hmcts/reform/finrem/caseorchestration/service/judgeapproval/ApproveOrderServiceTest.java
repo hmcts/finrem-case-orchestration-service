@@ -6,7 +6,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -28,7 +27,6 @@ class ApproveOrderServiceTest {
 
     private static final CaseDocument TARGET_DOC = mock(CaseDocument.class);
 
-    @Spy
     @InjectMocks
     private ApproveOrderService underTest;
 
