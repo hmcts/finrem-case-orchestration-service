@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.insertTimestamp;
 
 @Component
 @RequiredArgsConstructor
@@ -124,7 +125,7 @@ class JudgeApprovalResolver {
                     finremCaseDetails.getData().getRegionWrapper().getDefaultCourtList()
                 ),
                 documentConfiguration.getContestedDraftOrderNotApprovedTemplate(finremCaseDetails),
-                documentConfiguration.getContestedDraftOrderNotApprovedFileName(),
+                insertTimestamp(documentConfiguration.getContestedDraftOrderNotApprovedFileName()),
                 finremCaseDetails.getId().toString());
         } finally {
             // Clear the temp values as they are for report generation purpose.
