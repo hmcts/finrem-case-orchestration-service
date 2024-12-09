@@ -8,4 +8,6 @@ public interface Reviewable {
     LocalDateTime getSubmittedDate();
 
     OrderStatus getOrderStatus();
+
+    LocalDateTime getNotificationSentDate();
 }

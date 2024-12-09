@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PsaDocumentReview implements HasCaseDocument, Reviewable {
@@ -38,4 +38,8 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable {
     private String hearingTimeEstimate;
     private String additionalTime;
     private String otherListingInstructions;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime reviewedDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime notificationSentDate;
 }
