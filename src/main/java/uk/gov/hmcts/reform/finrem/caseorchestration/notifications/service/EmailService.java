@@ -135,6 +135,10 @@ public class EmailService {
             addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
         }
 
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name().equals(templateName)) {
+            addRefusedDraftOrderOrPsaTemplateVars(notificationRequest, templateVars);
+        }
+
         templateVars.putAll(emailTemplateVars.get(templateName));
         return templateVars;
     }
@@ -153,6 +157,11 @@ public class EmailService {
         templateVars.put("hearingDate", notificationRequest.getHearingDate());
         templateVars.put("judgeName", notificationRequest.getJudgeName());
         templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
+    }
+
+    private void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
+                                                       Map<String, Object> templateVars) {
+        templateVars.put("judgeFeedback", notificationRequest.getJudgeFeedback());
     }
 
     private EmailToSend generateEmail(String destinationAddress,
