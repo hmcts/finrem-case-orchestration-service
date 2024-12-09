@@ -7,8 +7,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -21,6 +24,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -36,6 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
+@ContextConfiguration(classes = {
+        UpdateContestedCaseControllerTest.TestConfig.class})
 @Import(MiamLegacyExemptionsService.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
@@ -49,18 +55,22 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private JsonNode requestContent;
 
     @MockBean
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockBean
     private CaseFlagsService caseFlagsService;
-    @MockBean
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
+
+    @Configuration
+    static class TestConfig {
+        @Bean
+        public FinremCaseDetailsMapper finremCaseDetailsMapper(ObjectMapper objectMapper) {
+            return new FinremCaseDetailsMapper(objectMapper); // Provide a real FinremCaseDetailsMapper
+        }
+    }
 
     @Before
     public void setUp() {
@@ -70,6 +80,11 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void objectMapperShouldBeAvailable() {
+        assertNotNull(objectMapper, "ObjectMapper bean should not be null");
     }
 
     @Test
@@ -454,7 +469,6 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(FEE_LOOKUP_JSON).toURI()));
     }
