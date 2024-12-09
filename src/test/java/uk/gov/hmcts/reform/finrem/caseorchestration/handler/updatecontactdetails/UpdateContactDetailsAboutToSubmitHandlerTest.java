@@ -66,7 +66,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
         FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
         request.setCaseDetailsBefore(finremCaseDetailsBefore);
 
@@ -87,7 +87,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
         FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
         request.setCaseDetailsBefore(finremCaseDetailsBefore);
 
@@ -109,7 +109,7 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(finremCaseData);
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
         FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
         request.setCaseDetailsBefore(finremCaseDetailsBefore);
 
@@ -120,7 +120,6 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
         verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
     }
-
 
     @Test
     void shouldHandleRepresentationChangeWhenUpdateIncludesRepresentativeChange() {

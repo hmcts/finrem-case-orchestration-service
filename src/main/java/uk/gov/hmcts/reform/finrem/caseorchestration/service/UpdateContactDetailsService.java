@@ -54,20 +54,29 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public class UpdateContactDetailsService {
 
+    @Deprecated
     public void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
         caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
         caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 
+    /**
+     * Persists the organisation policies through the callback request.
+     *
+     * @param  finremCaseData  the case data to persist org policies against
+     * @param  originalFinremCaseData the case data prior to submit request to persist org policies from
+     */
     public void persistOrgPolicies(FinremCaseData finremCaseData, FinremCaseData originalFinremCaseData) {
         finremCaseData.setApplicantOrganisationPolicy(originalFinremCaseData.getApplicantOrganisationPolicy());
         finremCaseData.setRespondentOrganisationPolicy(originalFinremCaseData.getRespondentOrganisationPolicy());
     }
 
+    @Deprecated
     public boolean isIncludesRepresentationChange(Map<String, Object> caseData) {
         return YES_VALUE.equals(caseData.get(INCLUDES_REPRESENTATION_CHANGE));
     }
 
+    @Deprecated
     public void handleApplicantRepresentationChange(CaseDetails caseDetails) {
         String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
@@ -78,6 +87,7 @@ public class UpdateContactDetailsService {
         }
     }
 
+    @Deprecated
     public void handleRespondentRepresentationChange(CaseDetails caseDetails) {
         String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
@@ -88,6 +98,12 @@ public class UpdateContactDetailsService {
         }
     }
 
+    /**
+     * Orchestrates representation change for applicant and respondent.
+     *
+     * @param  caseData  FinremCaseData to apply representation change to
+     * @param  caseType CaseType of the case to change representation.
+     */
     public void handleRepresentationChange(FinremCaseData caseData, CaseType caseType) {
         String nocPart = caseData.getContactDetailsWrapper().getNocParty().getValue();
         if (APPLICANT.equalsIgnoreCase(nocPart)) {
@@ -99,6 +115,7 @@ public class UpdateContactDetailsService {
         }
     }
 
+    @Deprecated
     void removeApplicantSolicitorDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
@@ -116,7 +133,7 @@ public class UpdateContactDetailsService {
         }
     }
 
-    void removeApplicantSolicitorDetails(FinremCaseData caseData, CaseType caseType) {
+    private void removeApplicantSolicitorDetails(FinremCaseData caseData, CaseType caseType) {
         boolean isContested = CaseType.CONTESTED.equals(caseType);
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
 
@@ -141,6 +158,7 @@ public class UpdateContactDetailsService {
         }
     }
 
+    @Deprecated
     void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
         boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
 
@@ -165,14 +183,14 @@ public class UpdateContactDetailsService {
         }
     }
 
-    void removeRespondentDetails(FinremCaseData caseData, CaseType caseType) {
+    private void removeRespondentDetails(FinremCaseData caseData, CaseType caseType) {
         boolean isContested = CaseType.CONTESTED.equals(caseType);
 
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
 
         boolean respondentRepresented = isContested
-            ? contactDetailsWrapper.getContestedRespondentRepresented().isYes()
-            : contactDetailsWrapper.getConsentedRespondentRepresented().isYes();
+            ? !contactDetailsWrapper.getContestedRespondentRepresented().isNoOrNull()
+            : !contactDetailsWrapper.getConsentedRespondentRepresented().isNoOrNull();
 
         if (respondentRepresented) {
             contactDetailsWrapper.setRespondentSolicitorAddress(null);

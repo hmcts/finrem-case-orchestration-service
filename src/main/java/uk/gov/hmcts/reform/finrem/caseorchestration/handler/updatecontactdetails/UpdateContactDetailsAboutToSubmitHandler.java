@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetails
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,18 +29,16 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     private final UpdateContactDetailsService updateContactDetailsService;
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final UpdateRepresentationWorkflowService nocWorkflowService;
-    private final FinremCaseDetailsMapper detailsMapper;
 
     public UpdateContactDetailsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     UpdateContactDetailsService updateContactDetailsService,
                                                     OnlineFormDocumentService onlineFormDocumentService,
-                                                    UpdateRepresentationWorkflowService nocWorkflowService,
-                                                    FinremCaseDetailsMapper detailsMapper) {
+                                                    UpdateRepresentationWorkflowService nocWorkflowService
+    ) {
         super(finremCaseDetailsMapper);
         this.updateContactDetailsService = updateContactDetailsService;
         this.onlineFormDocumentService = onlineFormDocumentService;
         this.nocWorkflowService = nocWorkflowService;
-        this.detailsMapper = detailsMapper;
     }
 
     @Override
@@ -57,31 +56,38 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             callbackRequest.getEventType(), finremCaseDetails.getId());
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        ContactDetailsWrapper contactDetailsWrapper = finremCaseData.getContactDetailsWrapper();
-        boolean includeRepresentationChange = contactDetailsWrapper.getUpdateIncludesRepresentativeChange().isYes();
+        Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
+
+        boolean includeRepresentationChange = contactDetailsWrapper
+            .map(wrapper -> wrapper.getUpdateIncludesRepresentativeChange() == YesOrNo.YES)
+            .orElse(false);
+
+        YesOrNo isRespondentAddressHidden = contactDetailsWrapper
+            .map(ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
+            .orElse(YesOrNo.NO);
+
+        YesOrNo isApplicantAddressHidden = contactDetailsWrapper
+            .map(ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent)
+            .orElse(YesOrNo.NO);
 
         if (includeRepresentationChange) {
             updateContactDetailsService.handleRepresentationChange(finremCaseData, finremCaseDetails.getCaseType());
         }
 
-        YesOrNo isRespondentAddressHidden  = contactDetailsWrapper.getRespondentAddressHiddenFromApplicant();
-        YesOrNo isApplicantAddressHidden = contactDetailsWrapper.getApplicantAddressHiddenFromRespondent();
-
-        if ((isRespondentAddressHidden != null && isRespondentAddressHidden.isYes())
-            || (isApplicantAddressHidden != null && isApplicantAddressHidden.isYes())) {
+        if (isRespondentAddressHidden == YesOrNo.YES || isApplicantAddressHidden == YesOrNo.YES) {
             CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
             finremCaseData.setMiniFormA(document);
         }
 
         if (includeRepresentationChange) {
-            CaseDetails caseDetails = detailsMapper.mapToCaseDetails(finremCaseDetails);
-            CaseDetails caseDetailsBefore = detailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore());
+            CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+            CaseDetails caseDetailsBefore = finremCaseDetailsMapper.mapToCaseDetails(callbackRequest.getCaseDetailsBefore());
 
             Map<String, Object> updateCaseData = nocWorkflowService
                 .handleNoticeOfChangeWorkflow(caseDetails, userAuthorisation, caseDetailsBefore)
                 .getData();
 
-            finremCaseData = detailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
+            finremCaseData = finremCaseDetailsMapper.mapToFinremCaseData(updateCaseData, caseDetails.getCaseTypeId());
 
         } else {
             updateContactDetailsService.persistOrgPolicies(finremCaseData, callbackRequest.getCaseDetailsBefore().getData());
