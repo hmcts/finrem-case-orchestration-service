@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,9 +50,10 @@ public class DraftOrderService {
     private final HearingService hearingService;
 
     public <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
-        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
-        String submittedByName = userInfo.getName();
+        UserDetails userDetails = idamAuthService.getUserDetails(userAuthorisation);
+        String submittedByName = userDetails.getFullName();
         submittedInfo.setSubmittedBy(submittedByName);
+        submittedInfo.setSubmittedByEmail(userDetails.getEmail());
         submittedInfo.setSubmittedDate(LocalDateTime.now());
         return submittedInfo;
     }
@@ -210,6 +211,7 @@ public class DraftOrderService {
                     .orderStatus(ado.getOrderStatus())
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
+                    .submittedByEmail(ado.getSubmittedByEmail())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
@@ -231,6 +233,7 @@ public class DraftOrderService {
                     .orderStatus(ado.getOrderStatus())
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())
+                    .submittedByEmail(ado.getSubmittedByEmail())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())

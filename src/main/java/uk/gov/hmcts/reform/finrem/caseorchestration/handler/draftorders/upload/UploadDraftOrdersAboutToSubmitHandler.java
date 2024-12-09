@@ -31,7 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -244,9 +244,9 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
-        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
-        String submittedByName = userInfo.getName();
-        submittedInfo.setSubmittedBy(submittedByName);
+        UserDetails userDetails = idamAuthService.getUserDetails(userAuthorisation);
+        submittedInfo.setSubmittedBy(userDetails.getFullName());
+        submittedInfo.setSubmittedByEmail(userDetails.getEmail());
         submittedInfo.setSubmittedDate(LocalDateTime.now());
         return submittedInfo;
     }

@@ -29,6 +29,7 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;
     private String submittedBy;
+    private String submittedByEmail;
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
@@ -47,21 +48,6 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     }
 
     @Override
-    public void setApprovalDate(LocalDateTime approvalDate) {
-        //  no approval date; Ignore it.
-    }
-
-    @Override
-    public void setApprovalJudge(String approvalJudge) {
-        //  no approval judge; Ignore it.
-    }
-
-    @Override
-    public void setRefusedDate(LocalDateTime refusedDate) {
-        //  no refused date; Ignore it.
-    }
-
-    @Override
     public void replaceDocument(CaseDocument amendedDocument) {
         if (this.draftOrder != null) {
             this.draftOrder = amendedDocument;
@@ -73,6 +59,16 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
                     + "Ensure the document to be amended corresponds to a valid existing document."
             );
         }
+    }
+
+    @Override
+    public void setApprovalDate(LocalDateTime approvalDate) {
+        // ignore
+    }
+
+    @Override
+    public void setApprovalJudge(String approvalJudge) {
+        // ignore
     }
 
 }

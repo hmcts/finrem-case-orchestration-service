@@ -24,6 +24,7 @@ public class SuggestedDraftOrder implements HasCaseDocument, HasSubmittedInfo {
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;
     private String submittedBy;
+    private String submittedByEmail;
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;

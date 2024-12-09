@@ -16,5 +16,4 @@ public interface Approvable extends DocumentMatcher {
 
     void replaceDocument(CaseDocument amendedDocument);
 
-    void setRefusedDate(LocalDateTime refusedDate);
 }

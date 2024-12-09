@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RefusalOrderConvertible;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -24,10 +25,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -93,7 +96,9 @@ class JudgeApprovalResolver {
         }
         if (isJudgeRefused(judgeApproval)) {
             approvable.setOrderStatus(REFUSED);
-            approvable.setRefusedDate(LocalDateTime.now());
+            if (approvable instanceof RefusalOrderConvertible refusalOrderConvertible) {
+                refusalOrderConvertible.setRefusedDate(LocalDateTime.now());
+            }
         }
     }
 
@@ -151,38 +156,39 @@ class JudgeApprovalResolver {
             draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED));
 
         // create RefusedOrder from collected items.
+        String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
+        LocalDate hearingDate = judgeApproval.getSortKey().getHearingDate();
+
+        List<RefusedOrderCollection> existingRefusedOrders =
+            ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new);
+
+        Function<HasApprovable, RefusedOrderCollection> toRefusedOrderCollection = item -> {
+            if (item.getValue() instanceof RefusalOrderConvertible refusalOrderConvertible) {
+                RefusedOrder.RefusedOrderBuilder orderBuilder = RefusedOrder.builder()
+                    .draftOrderOrPsa(refusalOrderConvertible.getDraftOrderOrPsa())
+                    .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeFeedback, refusalOrderConvertible.getRefusedDate(),
+                        refusalOrderConvertible.getApprovalJudge(), null, userAuthorisation))
+                    .refusedDate(refusalOrderConvertible.getRefusedDate())
+                    .submittedDate(refusalOrderConvertible.getSubmittedDate())
+                    .submittedBy(refusalOrderConvertible.getSubmittedBy())
+                    .submittedByEmail(refusalOrderConvertible.getSubmittedByEmail())
+                    .refusalJudge(refusalOrderConvertible.getApprovalJudge())
+                    .judgeFeedback(judgeFeedback)
+                    .hearingDate(hearingDate);
+
+                return RefusedOrderCollection.builder().value(orderBuilder.build()).build();
+            } else {
+                return null;
+            }
+        };
+
+        List<RefusedOrderCollection> newRefusedOrders = Stream.concat(
+            removedItems.stream().filter(a -> a.getValue() != null).map(toRefusedOrderCollection).filter(Objects::nonNull),
+            removedPsaItems.stream().filter(a -> a.getValue() != null).map(toRefusedOrderCollection).filter(Objects::nonNull)
+        ).toList();
+
         draftOrdersWrapper.setRefusedOrdersCollection(
-            Stream.concat(
-                Stream.concat(
-                    ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new).stream(),
-                    removedItems.stream()
-                        .filter(a -> a.getValue() != null)
-                        .map(a -> RefusedOrderCollection.builder()
-                            .value(RefusedOrder.builder()
-                                .draftOrderOrPsa(a.getValue().getDraftOrderDocument())
-                                .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
-                                    a.getValue().getRefusedDate(), a.getValue().getApprovalJudge(), null, userAuthorisation))
-                                .refusedDate(a.getValue().getRefusedDate())
-                                .submittedDate(a.getValue().getSubmittedDate())
-                                .submittedBy(a.getValue().getSubmittedBy())
-                                .attachments(a.getValue().getAttachments())
-                                .refusalJudge(a.getValue().getApprovalJudge())
-                                .build())
-                            .build())),
-                removedPsaItems.stream()
-                    .filter(a -> a.getValue() != null)
-                    .map(a -> RefusedOrderCollection.builder()
-                        .value(RefusedOrder.builder()
-                            .draftOrderOrPsa(a.getValue().getPsaDocument())
-                            .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeApproval.getChangesRequestedByJudge(),
-                                a.getValue().getRefusedDate(), a.getValue().getApprovalJudge(), null, userAuthorisation))
-                            .refusedDate(a.getValue().getRefusedDate())
-                            .submittedDate(a.getValue().getSubmittedDate())
-                            .submittedBy(a.getValue().getSubmittedBy())
-                            .refusalJudge(a.getValue().getApprovalJudge())
-                            .build())
-                        .build())
-            ).toList()
+            Stream.concat(existingRefusedOrders.stream(), newRefusedOrders.stream()).toList()
         );
     }
 

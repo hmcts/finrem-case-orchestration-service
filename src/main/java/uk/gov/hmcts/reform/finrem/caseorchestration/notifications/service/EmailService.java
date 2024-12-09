@@ -162,6 +162,7 @@ public class EmailService {
     private void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
                                                        Map<String, Object> templateVars) {
         templateVars.put("judgeFeedback", notificationRequest.getJudgeFeedback());
+        templateVars.put("documentName", notificationRequest.getDocumentName());
     }
 
     private EmailToSend generateEmail(String destinationAddress,

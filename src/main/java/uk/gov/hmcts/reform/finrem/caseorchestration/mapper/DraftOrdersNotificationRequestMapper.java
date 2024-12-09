@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -51,6 +55,26 @@ public class DraftOrdersNotificationRequestMapper {
             .selectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails))
             .judgeName(draftOrdersReview.getHearingJudge())
             .oldestDraftOrderDate(dateFormatter.format(draftOrdersReview.getEarliestToBeReviewedOrderDate()))
+            .build();
+    }
+
+    public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
+        FinremCaseData caseData = caseDetails.getData();
+        String notificationEmail = refusedOrder.getSubmittedByEmail();
+        String documentName = ofNullable(refusedOrder.getDraftOrderOrPsa()).map(CaseDocument::getDocumentFilename)
+            .orElseThrow(IllegalArgumentException::new);
+
+        return NotificationRequest.builder()
+            .notificationEmail(notificationEmail)
+            .caseReferenceNumber(String.valueOf(caseDetails.getId()))
+            .caseType(EmailService.CONTESTED)
+            .applicantName(caseData.getFullApplicantName())
+            .respondentName(caseData.getRespondentFullName())
+            .hearingDate(dateFormatter.format(refusedOrder.getHearingDate()))
+            .selectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails))
+            .judgeName(refusedOrder.getRefusalJudge())
+            .judgeFeedback(refusedOrder.getJudgeFeedback())
+            .documentName(documentName)
             .build();
     }
 }

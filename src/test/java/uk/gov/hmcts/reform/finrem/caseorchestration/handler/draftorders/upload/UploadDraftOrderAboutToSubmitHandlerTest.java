@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDateTime;
@@ -122,9 +123,10 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
 
-        UserInfo mockUserInfo = mock(UserInfo.class);
-        when(idamAuthService.getUserInfo(AUTH_TOKEN)).thenReturn(mockUserInfo);
-        when(mockUserInfo.getName()).thenReturn("Hamzah");
+        UserDetails mockUserInfo = mock(UserDetails.class);
+        when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(mockUserInfo);
+        when(mockUserInfo.getFullName()).thenReturn("Hamzah");
+        when(mockUserInfo.getEmail()).thenReturn("Hamzah@hamzah.com");
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
 
@@ -141,6 +143,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult.getSubmittedBy()).isNotNull();
+        assertThat(draftOrderResult.getSubmittedByEmail()).isNotNull();
         assertThat(draftOrderResult.getPensionSharingAnnex()).isNull();
         assertThat(draftOrderResult.getDraftOrder()).isNotNull();
         assertThat(draftOrderResult.getAttachments()).isNotNull();
@@ -148,6 +151,7 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder psaResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(psaResult.getSubmittedBy()).isNotNull();
+        assertThat(psaResult.getSubmittedByEmail()).isNotNull();
         assertThat(psaResult.getPensionSharingAnnex()).isNotNull();
         assertThat(psaResult.getDraftOrder()).isNull();
         assertThat(psaResult.getAttachments()).isNull();

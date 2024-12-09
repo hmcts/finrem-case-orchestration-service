@@ -6,4 +6,6 @@ public interface HasSubmittedInfo {
     void setSubmittedDate(LocalDateTime localDate);
 
     void setSubmittedBy(String submittedBy);
+
+    void setSubmittedByEmail(String submittedByEmail);
 }
