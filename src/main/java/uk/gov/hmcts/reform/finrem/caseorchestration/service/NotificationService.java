@@ -1974,7 +1974,7 @@ public class NotificationService {
     }
 
     public void sendDraftOrderOrPsaRefused(NotificationRequest notificationRequest) {
-        log.info("{} - Sending draft order or PSA refused to caseworker", notificationRequest.getCaseReferenceNumber());
+        log.info("{} - Sending draft order or PSA refused", notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
     }
 }
