@@ -26,7 +26,6 @@ public class DraftOrdersNotificationRequestMapper {
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
-
     public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
 
         NotificationRequest judgeNotificationRequest = new NotificationRequest();

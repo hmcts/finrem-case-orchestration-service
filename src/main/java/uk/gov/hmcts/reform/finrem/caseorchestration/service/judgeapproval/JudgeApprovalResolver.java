@@ -157,7 +157,7 @@ class JudgeApprovalResolver {
 
         // create RefusedOrder from collected items.
         String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
-        LocalDate hearingDate = judgeApproval.getSortKey().getHearingDate();
+        LocalDate hearingDate = judgeApproval.getHearingDate();
 
         List<RefusedOrderCollection> existingRefusedOrders =
             ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new);

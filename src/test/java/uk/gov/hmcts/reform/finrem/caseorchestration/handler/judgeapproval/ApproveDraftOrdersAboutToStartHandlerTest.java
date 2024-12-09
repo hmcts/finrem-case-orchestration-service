@@ -144,7 +144,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                     .build())
                 .build())
             .build();
-        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 31), "09:00", "Mr. Judge"))
+        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 30), "09:00", "Mr. Judge"))
             .thenReturn("hearingServiceFormattedString1");
         lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 11, 30), "09:00", "Mr. Judge"))
             .thenReturn("hearingServiceFormattedString2");
@@ -171,6 +171,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                 assertEquals(expected.getInlineDocType(), actual.getInlineDocType());
                 assertEquals(expected.getDocument(), actual.getDocument());
                 assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
+                assertEquals(expected.getHearingDate(), actual.getHearingDate());
                 if (expected.getHasAttachment() == YES) {
                     assertEquals(expected.getAttachments(), actual.getAttachments());
                 }
@@ -199,7 +200,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         .value(CaseDocument.builder().documentFilename("attachment2").build()).build();
 
     private static DraftOrdersReview.DraftOrdersReviewBuilder applyHearingInfo1(DraftOrdersReview.DraftOrdersReviewBuilder builder) {
-        return builder.hearingDate(LocalDate.of(2024, 10, 31))
+        return builder.hearingDate(LocalDate.of(2024, 10, 30))
             .hearingTime("09:00")
             .hearingType("hearingType")
             .hearingJudge("Mr. Judge");
@@ -276,7 +277,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static JudgeApproval buildJudgeApproval(JudgeApprovalDocType docType,
                                                     String hearingInfo, CaseDocument document,
                                                     List<CaseDocumentCollection> attachments) {
-        return JudgeApproval.builder().hearingInfo(hearingInfo)
+        return JudgeApproval.builder()
+            .hearingInfo(hearingInfo)
+            .hearingDate(LocalDate.of(2024, "hearingServiceFormattedString1".equals(hearingInfo) ? 10: 11 , 30))
             .title(docType.getTitle())
             .inlineDocType(docType.getDescription())
             .document(document)
