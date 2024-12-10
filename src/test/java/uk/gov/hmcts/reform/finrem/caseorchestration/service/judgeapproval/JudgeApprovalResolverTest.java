@@ -131,7 +131,7 @@ class JudgeApprovalResolverTest {
                             assertEquals(fixedDateTime, approvable.getApprovalDate());
                             assertEquals("Judge Full Name", approvable.getApprovalJudge());
                             if (expectedAmendedDocument != null) {
-                                assertEquals(expectedAmendedDocument, approvable.getReplaceDocument());
+                                assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
                             }
                         } else {
                             assertNull(approvable.getOrderStatus());
