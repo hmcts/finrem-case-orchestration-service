@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
@@ -55,7 +56,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
         return approvalJudge;
     }
 
-    @Override
+    @JsonIgnore
     public CaseDocument getReplaceDocument() {
         return draftOrderDocument;
     }
