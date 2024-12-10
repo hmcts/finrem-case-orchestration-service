@@ -131,9 +131,10 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 ? judgeApproval.getAmendedDocument().getDocumentFilename()
                 : "Unknown Filename";
         } else if (READY_TO_BE_SEALED == judgeApproval.getJudgeDecision()) {
-            filename = judgeApproval.getDocument() != null
-                ? judgeApproval.getDocument().getDocumentFilename()
-                : "Unknown Filename";
+            if (judgeApproval.getDocument() == null) {
+                throw new IllegalStateException("No Document found.");
+            }
+            filename = judgeApproval.getDocument().getDocumentFilename();
         }
         return filename;
     }
