@@ -39,8 +39,7 @@ class JudgeApprovalResolver {
      * @param judgeApproval the judge's approval information containing the decision
      * @param userAuthorisation the user authorization string used to fetch the judge's full name
      */
-    void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                         String userAuthorisation) {
+    void populateJudgeDecision(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval, String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
