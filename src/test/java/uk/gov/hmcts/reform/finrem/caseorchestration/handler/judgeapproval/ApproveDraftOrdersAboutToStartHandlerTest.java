@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UUIDCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,6 +122,18 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         for (int i = 1; i <= NUMBER_OF_DOC_TO_BE_REVIEWED; i++) {
             assertThat(draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + i).invoke(draftOrdersWrapper)).isNull();
         }
+    }
+
+    @Test
+    void givenRefusalOrderIdsToBeSentWasSet_whenHandle_thenClearThem() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getDraftOrdersWrapper().setRefusalOrderIdsToBeSent(List.of(UUIDCollection.builder().value(UUID.randomUUID()).build()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
+            FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+
+        var draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
+        assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).isNull();
     }
 
     @SneakyThrows
