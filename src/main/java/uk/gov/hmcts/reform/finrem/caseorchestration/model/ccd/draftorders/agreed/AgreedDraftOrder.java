@@ -73,12 +73,12 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
 
     @Override
     public void setApprovalDate(LocalDateTime approvalDate) {
-        //  no approval date; Ignore it.
+        // no approval date; Ignore it.
     }
 
     @Override
     public void setApprovalJudge(String approvalJudge) {
-        //  no approval judge; Ignore it.
+        // no approval judge; Ignore it.
     }
 
     @Override
