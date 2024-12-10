@@ -8,6 +8,12 @@ public interface Approvable extends DocumentMatcher {
 
     OrderStatus getOrderStatus();
 
+    LocalDateTime getApprovalDate();
+
+    String getApprovalJudge();
+
+    CaseDocument getReplaceDocument();
+
     void setOrderStatus(OrderStatus orderStatus);
 
     void setApprovalDate(LocalDateTime approvalDate);

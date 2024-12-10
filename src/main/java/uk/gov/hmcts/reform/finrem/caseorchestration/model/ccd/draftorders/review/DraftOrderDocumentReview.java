@@ -46,6 +46,21 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
     private LocalDateTime notificationSentDate;
 
     @Override
+    public LocalDateTime getApprovalDate() {
+        return approvalDate;
+    }
+
+    @Override
+    public String getApprovalJudge() {
+        return approvalJudge;
+    }
+
+    @Override
+    public CaseDocument getReplaceDocument() {
+        return draftOrderDocument;
+    }
+
+    @Override
     public void replaceDocument(CaseDocument amendedDocument) {
         this.setDraftOrderDocument(amendedDocument);
     }

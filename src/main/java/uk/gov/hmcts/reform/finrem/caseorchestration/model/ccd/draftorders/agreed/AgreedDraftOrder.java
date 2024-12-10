@@ -47,6 +47,27 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     }
 
     @Override
+    public LocalDateTime getApprovalDate() {
+        return null;
+    }
+
+    @Override
+    public String getApprovalJudge() {
+        return null;
+    }
+
+    @Override
+    public CaseDocument getReplaceDocument() {
+        if (draftOrder != null) {
+            return draftOrder;
+        } else if (pensionSharingAnnex != null) {
+            return pensionSharingAnnex;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public void setApprovalDate(LocalDateTime approvalDate) {
         //  no approval date; Ignore it.
     }
