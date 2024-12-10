@@ -51,6 +51,17 @@ class JudgeApprovalResolver {
 
     private final HearingProcessor hearingProcessor;
 
+    /**
+     * Populates the judge's decision for the given draft orders and updates the status of approvable documents.
+     * This method processes the draft order review collection, PSA review collection, and agreed draft orders,
+     * and if the judge has approved, it processes the hearing instructions as well.
+     *
+     * @param finremCaseDetails the finrem case details
+     * @param draftOrdersWrapper the wrapper containing the draft orders to be processed
+     * @param targetDoc the target document to match against the approvable items
+     * @param judgeApproval the judge's approval information containing the decision
+     * @param userAuthorisation the user authorization string used to fetch the judge's full name
+     */
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
@@ -76,6 +87,15 @@ class JudgeApprovalResolver {
         processRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
     }
 
+    /**
+     * Processes a collection of approvable documents by matching them with the target document and handling
+     * the approval process based on the judge's decision.
+     *
+     * @param approvables a list of approvable items to be processed
+     * @param targetDoc the target document to match the approvable items against
+     * @param judgeApproval the judge's approval information containing the decision
+     * @param userAuthorisation the user authorization string to get the judge's full name
+     */
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                      String userAuthorisation) {
         ofNullable(approvables)
@@ -87,6 +107,15 @@ class JudgeApprovalResolver {
             );
     }
 
+    /**
+     * Handles the approval of an approvable item based on the judge's decision. If the judge has approved and
+     * requested changes, the document is replaced with the amended one. The status of the approvable item is updated
+     * and the approval date and judge's name are recorded.
+     *
+     * @param approvable the approvable item to be handled
+     * @param judgeApproval the judge's approval information containing the decision
+     * @param userAuthorisation the user authorization string to get the judge's full name
+     */
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
         approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
         if (isJudgeApproved(judgeApproval)) {
@@ -104,6 +133,12 @@ class JudgeApprovalResolver {
         }
     }
 
+    /**
+     * Checks whether the judge has approved the draft order or if changes are required by the judge.
+     *
+     * @param judgeApproval the judge's approval information
+     * @return true if the judge's decision is to approve or request changes, false otherwise
+     */
     private boolean isJudgeApproved(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isApproved).orElse(false);
     }

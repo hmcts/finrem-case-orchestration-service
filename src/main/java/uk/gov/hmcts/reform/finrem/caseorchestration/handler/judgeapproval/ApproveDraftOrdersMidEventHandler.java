@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tika.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -131,9 +131,10 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                 ? judgeApproval.getAmendedDocument().getDocumentFilename()
                 : "Unknown Filename";
         } else if (READY_TO_BE_SEALED == judgeApproval.getJudgeDecision()) {
-            filename = judgeApproval.getDocument() != null
-                ? judgeApproval.getDocument().getDocumentFilename()
-                : "Unknown Filename";
+            if (judgeApproval.getDocument() == null) {
+                throw new IllegalStateException("No Document found.");
+            }
+            filename = judgeApproval.getDocument().getDocumentFilename();
         }
         return filename;
     }

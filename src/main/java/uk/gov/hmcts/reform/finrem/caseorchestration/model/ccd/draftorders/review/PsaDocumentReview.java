@@ -45,6 +45,21 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOr
     private LocalDateTime notificationSentDate;
 
     @Override
+    public LocalDateTime getApprovalDate() {
+        return approvalDate;
+    }
+
+    @Override
+    public String getApprovalJudge() {
+        return approvalJudge;
+    }
+
+    @JsonIgnore
+    public CaseDocument getReplaceDocument() {
+        return psaDocument;
+    }
+
+    @Override
     public boolean match(CaseDocument targetDoc) {
         return Optional.ofNullable(targetDoc).map(CaseDocument::getDocumentUrl).equals(Optional.ofNullable(psaDocument)
             .map(CaseDocument::getDocumentUrl));

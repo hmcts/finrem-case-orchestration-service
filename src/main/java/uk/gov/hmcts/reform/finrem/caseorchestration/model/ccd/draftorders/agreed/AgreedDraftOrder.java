@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -45,6 +46,27 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
                     || documentUrl.equals(Optional.ofNullable(pensionSharingAnnex).map(CaseDocument::getDocumentUrl).orElse(null))
             )
             .isPresent();
+    }
+
+    @Override
+    public LocalDateTime getApprovalDate() {
+        return null;
+    }
+
+    @Override
+    public String getApprovalJudge() {
+        return null;
+    }
+
+    @JsonIgnore
+    public CaseDocument getReplaceDocument() {
+        if (draftOrder != null) {
+            return draftOrder;
+        } else if (pensionSharingAnnex != null) {
+            return pensionSharingAnnex;
+        } else {
+            return null;
+        }
     }
 
     @Override
