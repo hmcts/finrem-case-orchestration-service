@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UUIDCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -127,7 +127,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     @Test
     void givenRefusalOrderIdsToBeSentWasSet_whenHandle_thenClearThem() {
         FinremCaseData caseData = new FinremCaseData();
-        caseData.getDraftOrdersWrapper().setRefusalOrderIdsToBeSent(List.of(UUIDCollection.builder().value(UUID.randomUUID()).build()));
+        caseData.getDraftOrdersWrapper().setRefusalOrderIdsToBeSent(List.of(UuidCollection.builder().value(UUID.randomUUID()).build()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
             FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
@@ -293,7 +293,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                                                     List<CaseDocumentCollection> attachments) {
         return JudgeApproval.builder()
             .hearingInfo(hearingInfo)
-            .hearingDate(LocalDate.of(2024, "hearingServiceFormattedString1".equals(hearingInfo) ? 10: 11 , 30))
+            .hearingDate(LocalDate.of(2024, "hearingServiceFormattedString1".equals(hearingInfo) ? 10 : 11, 30))
             .title(docType.getTitle())
             .inlineDocType(docType.getDescription())
             .document(document)

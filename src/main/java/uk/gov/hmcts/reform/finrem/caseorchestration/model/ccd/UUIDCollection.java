@@ -13,6 +13,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UUIDCollection {
+public class UuidCollection {
     private UUID value;
 }

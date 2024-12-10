@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RefusalOrderConvertible;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UUIDCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -232,7 +232,7 @@ class JudgeApprovalResolver {
         draftOrdersWrapper.setRefusedOrdersCollection(
             Stream.concat(existingRefusedOrders.stream(), newRefusedOrders.stream()).toList()
         );
-        draftOrdersWrapper.setRefusalOrderIdsToBeSent(refusalOrderIds.stream().map(UUIDCollection::new).toList());
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(refusalOrderIds.stream().map(UuidCollection::new).toList());
     }
 
     private List<DraftOrdersReviewCollection> filterAndCollectRefusedItemsFromDraftOrderDocReviewCollection(
