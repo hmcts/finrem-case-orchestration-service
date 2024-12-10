@@ -6,9 +6,9 @@ plugins {
     id 'org.springframework.boot' version '3.3.5'
     id 'com.github.ben-manes.versions' version '0.51.0'
     id 'uk.gov.hmcts.java' version '0.12.63'
-    id 'au.com.dius.pact' version '4.6.15'
+    id 'au.com.dius.pact' version '4.6.16'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1488'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1492'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -24,7 +24,7 @@ def versions = [
         junit                : '4.13.2',
         lombok               : '1.18.36',
         mockito              : '3.12.4',
-        pact                 : '4.6.15',
+        pact                 : '4.6.16',
         pdfbox               : '3.0.3',
         reformLogging        : '6.1.7',
         serenity             : '4.2.9',
