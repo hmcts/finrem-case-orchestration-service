@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
@@ -34,10 +37,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -80,13 +84,32 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
     @Mock
     private DraftOrderService draftOrderService;
 
+    @Mock
+    private HearingService hearingService;
+
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
     }
 
-    @Test
-    void givenValidPsaAndOrderDetailsWithAttachments_whenHandle_thenMapCorrectly() {
+    @BeforeEach
+    void setup() {
+
+        UserDetails mockedUserDetails = mock(UserDetails.class);
+        lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(mockedUserDetails);
+        lenient().when(mockedUserDetails.getFullName()).thenReturn("Hamzah");
+        lenient().when(mockedUserDetails.getEmail()).thenReturn("Hamzah@hamzah.com");
+
+        lenient().doAnswer(invocation -> {
+            String input = invocation.getArgument(0);
+            HasSubmittedInfo secondArg = invocation.getArgument(1);
+            return new DraftOrderService(idamAuthService, hearingService).applySubmittedInfo(input, secondArg);
+        }).when(draftOrderService).applySubmittedInfo(anyString(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenValidPsaAndOrderDetailsWithAttachments_whenHandle_thenMapCorrectly(boolean withUploadParty) {
         // Given
         final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
@@ -114,19 +137,14 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setSuggestedPsaCollection((List.of(psaCollection)));
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(orderCollection)));
 
-        DynamicRadioList uploadParty = DynamicRadioList.builder().value(
-            DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build()
-        ).build();
+        DynamicRadioList uploadParty = withUploadParty
+            ? DynamicRadioList.builder().value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build()).build()
+            : null;
 
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
-
-        UserDetails mockUserInfo = mock(UserDetails.class);
-        when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(mockUserInfo);
-        when(mockUserInfo.getFullName()).thenReturn("Hamzah");
-        when(mockUserInfo.getEmail()).thenReturn("Hamzah@hamzah.com");
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
 
@@ -143,19 +161,19 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult.getSubmittedBy()).isNotNull();
-        assertThat(draftOrderResult.getSubmittedByEmail()).isNotNull();
+        assertThat(draftOrderResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
         assertThat(draftOrderResult.getPensionSharingAnnex()).isNull();
         assertThat(draftOrderResult.getDraftOrder()).isNotNull();
         assertThat(draftOrderResult.getAttachments()).isNotNull();
-        assertThat(draftOrderResult.getUploadedOnBehalfOf()).isEqualTo(UPLOAD_PARTY_APPLICANT);
+        assertThat(draftOrderResult.getUploadedOnBehalfOf()).isEqualTo(withUploadParty ? UPLOAD_PARTY_APPLICANT : null);
 
         SuggestedDraftOrder psaResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(psaResult.getSubmittedBy()).isNotNull();
-        assertThat(psaResult.getSubmittedByEmail()).isNotNull();
+        assertThat(psaResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
         assertThat(psaResult.getPensionSharingAnnex()).isNotNull();
         assertThat(psaResult.getDraftOrder()).isNull();
         assertThat(psaResult.getAttachments()).isNull();
-        assertThat(psaResult.getUploadedOnBehalfOf()).isEqualTo(UPLOAD_PARTY_APPLICANT);
+        assertThat(psaResult.getUploadedOnBehalfOf()).isEqualTo(withUploadParty ? UPLOAD_PARTY_APPLICANT : null);
     }
 
     @Test
@@ -207,10 +225,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
-
-        UserInfo mockUserInfo = mock(UserInfo.class);
-        when(idamAuthService.getUserInfo(AUTH_TOKEN)).thenReturn(mockUserInfo);
-        when(mockUserInfo.getName()).thenReturn("Hamzah");
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
 

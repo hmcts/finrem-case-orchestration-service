@@ -8,4 +8,6 @@ public interface HasSubmittedInfo {
     void setSubmittedBy(String submittedBy);
 
     void setSubmittedByEmail(String submittedByEmail);
+
+    String getUploadedOnBehalfOf();
 }

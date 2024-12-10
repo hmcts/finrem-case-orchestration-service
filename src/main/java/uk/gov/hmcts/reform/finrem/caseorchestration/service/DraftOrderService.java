@@ -37,6 +37,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
@@ -53,7 +54,10 @@ public class DraftOrderService {
         UserDetails userDetails = idamAuthService.getUserDetails(userAuthorisation);
         String submittedByName = userDetails.getFullName();
         submittedInfo.setSubmittedBy(submittedByName);
-        submittedInfo.setSubmittedByEmail(userDetails.getEmail());
+        // capture email address if it's not uploaded by caseworker.
+        if (isEmpty(submittedInfo.getUploadedOnBehalfOf())) {
+            submittedInfo.setSubmittedByEmail(userDetails.getEmail());
+        }
         submittedInfo.setSubmittedDate(LocalDateTime.now());
         return submittedInfo;
     }
@@ -101,10 +105,7 @@ public class DraftOrderService {
         ofNullable(uploadAgreedDraftOrder.getUploadParty())
             .map(DynamicRadioList::getValue)
             .map(DynamicRadioListElement::getCode)
-            .ifPresentOrElse(
-                builder::uploadedOnBehalfOf,
-                () -> log.error("Unexpected null 'uploadedParty' on upload agreed order journey.")
-            );
+            .ifPresent(builder::uploadedOnBehalfOf);
     }
 
     private AgreedDraftOrder mapToAgreedDraftOrder(
