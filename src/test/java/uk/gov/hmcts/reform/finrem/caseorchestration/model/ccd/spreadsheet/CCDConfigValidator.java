@@ -77,7 +77,8 @@ public class CCDConfigValidator {
         Map.entry("Flags", "CaseFlag"),
         Map.entry("FR_uploadAgreedDraftOrder", "UploadAgreedDraftOrder"),
         Map.entry("FR_uploadSuggestedDraftOrder", "UploadSuggestedDraftOrder"),
-        Map.entry("FR_judgeApproval", "JudgeApproval")
+        Map.entry("FR_judgeApproval", "JudgeApproval"),
+        Map.entry("FR_hearingInstruction", "HearingInstruction")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
