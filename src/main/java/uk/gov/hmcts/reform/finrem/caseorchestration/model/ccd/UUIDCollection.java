@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+
+/**
+ * Represents a collection containing a single UUID value.
+ * This class is used to encapsulate a UUID in a structured format.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
