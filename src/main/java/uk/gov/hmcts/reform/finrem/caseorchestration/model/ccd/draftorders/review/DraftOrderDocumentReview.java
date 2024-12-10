@@ -46,17 +46,20 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
 
+    @JsonIgnore
     @Override
     public LocalDateTime getApprovalDate() {
         return approvalDate;
     }
 
+    @JsonIgnore
     @Override
     public String getApprovalJudge() {
         return approvalJudge;
     }
 
     @JsonIgnore
+    @Override
     public CaseDocument getReplaceDocument() {
         return draftOrderDocument;
     }

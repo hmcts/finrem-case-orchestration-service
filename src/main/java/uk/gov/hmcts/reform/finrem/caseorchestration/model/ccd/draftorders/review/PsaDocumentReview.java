@@ -43,17 +43,20 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvabl
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
 
+    @JsonIgnore
     @Override
     public LocalDateTime getApprovalDate() {
         return approvalDate;
     }
 
+    @JsonIgnore
     @Override
     public String getApprovalJudge() {
         return approvalJudge;
     }
 
     @JsonIgnore
+    @Override
     public CaseDocument getReplaceDocument() {
         return psaDocument;
     }
