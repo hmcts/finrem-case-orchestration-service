@@ -57,6 +57,14 @@ public class DraftOrdersNotificationRequestMapper {
             .build();
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for a refused draft order or Pension Sharing Annex (PSA).
+     *
+     * @param caseDetails the case details containing case and party information.
+     * @param refusedOrder the refused order details, including the reason and associated document.
+     * @return a {@link NotificationRequest} containing all required notification details.
+     * @throws IllegalArgumentException if the draft order or PSA document filename is not available.
+     */
     public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
         FinremCaseData caseData = caseDetails.getData();
         String notificationEmail = refusedOrder.getSubmittedByEmail();
