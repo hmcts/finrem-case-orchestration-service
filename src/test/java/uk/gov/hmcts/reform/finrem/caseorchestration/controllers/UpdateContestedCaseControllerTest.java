@@ -4,15 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +28,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
+@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
 @Import(MiamLegacyExemptionsService.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
@@ -48,8 +58,6 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private JsonNode requestContent;
 
     @MockBean
@@ -58,6 +66,14 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private CaseFlagsService caseFlagsService;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
+
+    @Configuration
+    static class TestConfig {
+        @Bean
+        public FinremCaseDetailsMapper finremCaseDetailsMapper(ObjectMapper objectMapper) {
+            return new FinremCaseDetailsMapper(objectMapper); // Provide a real FinremCaseDetailsMapper
+        }
+    }
 
     @Before
     public void setUp() {
@@ -448,6 +464,28 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+    }
+
+    @Test
+    public void testPopulateInRefugeTabsCalled() throws Exception {
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            requestContent = objectMapper.readTree(new File(getClass()
+                    .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+            mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                            .content(requestContent.toString())
+                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+
+            // Check that methods to  is called by the controller
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(any()), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(any()), times(1));
+        }
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
