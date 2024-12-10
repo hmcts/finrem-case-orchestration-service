@@ -58,7 +58,7 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOr
 
     @JsonIgnore
     @Override
-    public CaseDocument getReplaceDocument() {
+    public CaseDocument getReplacedDocument() {
         return psaDocument;
     }
 

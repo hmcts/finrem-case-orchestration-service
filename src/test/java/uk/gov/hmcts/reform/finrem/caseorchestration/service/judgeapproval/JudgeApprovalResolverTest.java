@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -117,22 +119,27 @@ class JudgeApprovalResolverTest {
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Judge Full Name");
 
-        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(), draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
+        LocalDateTime fixedDateTime = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
+                draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
 
-        if (approvables != null) {
-            for (Approvable approvable : approvables) {
-                if (approvable.match(targetDoc)) {
-                    if (shouldBeApproved) {
-                        assertEquals(expectedOrderStatus, approvable.getOrderStatus());
-                        assertEquals(LocalDateTime.now().getDayOfYear(), approvable.getApprovalDate().getDayOfYear());
-                        assertEquals("Judge Full Name", approvable.getApprovalJudge());
-                        if (expectedAmendedDocument != null) {
-                            assertEquals(expectedAmendedDocument, approvable.getReplaceDocument());
+            if (approvables != null) {
+                for (Approvable approvable : approvables) {
+                    if (approvable.match(targetDoc)) {
+                        if (shouldBeApproved) {
+                            assertEquals(expectedOrderStatus, approvable.getOrderStatus());
+                            assertEquals(fixedDateTime, approvable.getApprovalDate());
+                            assertEquals("Judge Full Name", approvable.getApprovalJudge());
+                            if (expectedAmendedDocument != null) {
+                                assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
+                            }
+                        } else {
+                            assertNull(approvable.getOrderStatus());
+                            assertNull(approvable.getApprovalDate());
+                            assertNull(approvable.getApprovalJudge());
                         }
-                    } else {
-                        assertNull(approvable.getOrderStatus());
-                        assertNull(approvable.getApprovalDate());
-                        assertNull(approvable.getApprovalJudge());
                     }
                 }
             }

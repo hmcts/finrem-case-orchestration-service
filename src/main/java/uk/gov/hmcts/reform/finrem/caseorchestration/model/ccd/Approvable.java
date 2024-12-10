@@ -12,7 +12,7 @@ public interface Approvable extends DocumentMatcher {
 
     String getApprovalJudge();
 
-    CaseDocument getReplaceDocument();
+    CaseDocument getReplacedDocument();
 
     void setOrderStatus(OrderStatus orderStatus);
 
