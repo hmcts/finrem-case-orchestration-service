@@ -127,12 +127,13 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
     private String getDocumentFileName(JudgeApproval judgeApproval) {
         String filename = null;
         if (JUDGE_NEEDS_TO_MAKE_CHANGES == judgeApproval.getJudgeDecision()) {
-            filename = judgeApproval.getAmendedDocument() != null
-                ? judgeApproval.getAmendedDocument().getDocumentFilename()
-                : "Unknown Filename";
+            if (judgeApproval.getAmendedDocument() == null) {
+                throw new IllegalStateException("Expected amended document was not found.");
+            }
+            filename = judgeApproval.getAmendedDocument().getDocumentFilename();
         } else if (READY_TO_BE_SEALED == judgeApproval.getJudgeDecision()) {
             if (judgeApproval.getDocument() == null) {
-                throw new IllegalStateException("No Document found.");
+                throw new IllegalStateException("Expected document was not found.");
             }
             filename = judgeApproval.getDocument().getDocumentFilename();
         }
