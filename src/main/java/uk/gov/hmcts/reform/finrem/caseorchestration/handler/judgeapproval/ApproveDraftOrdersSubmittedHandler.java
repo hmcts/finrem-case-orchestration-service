@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Slf4j
 @Service
@@ -57,8 +58,14 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         draftOrdersWrapper.getRefusedOrdersCollection().stream()
             .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
-            .forEach(a -> notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
-                .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue())));
+            .forEach(a -> {
+                if (!isEmpty(a.getValue().getSubmittedByEmail())) {
+                    notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
+                        .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
+                } else {
+                    // TODO by post
+                }
+            });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
