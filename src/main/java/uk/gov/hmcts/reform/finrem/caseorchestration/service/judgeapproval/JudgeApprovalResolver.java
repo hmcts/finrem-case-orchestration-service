@@ -263,7 +263,7 @@ class JudgeApprovalResolver {
         Function<DraftOrdersReview, List<T>> getReviewCollection,
         BiConsumer<DraftOrdersReview.DraftOrdersReviewBuilder, List<T>> setReviewCollection) {
 
-        return draftOrdersReviewCollection.stream()
+        return ofNullable(draftOrdersReviewCollection).orElse(List.of()).stream()
             .map(draftOrdersReview -> {
                 DraftOrdersReview.DraftOrdersReviewBuilder updatedReviewBuilder = draftOrdersReview.getValue().toBuilder();
 
