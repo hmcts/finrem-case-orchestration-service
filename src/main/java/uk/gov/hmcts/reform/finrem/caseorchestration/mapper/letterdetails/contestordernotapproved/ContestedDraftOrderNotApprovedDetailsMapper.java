@@ -18,13 +18,31 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 
+
+/**
+ * Repurpose this mapper class to transform FinremCaseDetails and court list information
+ * into a document template details object specific to refusal order scenario.
+ */
 @Component
 public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterDetailsMapper {
 
+    /**
+     * Constructs an instance of ContestedDraftOrderNotApprovedDetailsMapper.
+     *
+     * @param courtDetailsMapper the mapper for court details
+     * @param objectMapper       the object mapper for handling JSON operations
+     */
     public ContestedDraftOrderNotApprovedDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
+    /**
+     * Builds a document template details object for a contested draft order not approved.
+     *
+     * @param caseDetails the case details containing the required data
+     * @param courtList   the court list wrapper containing court information
+     * @return a populated {@link DocumentTemplateDetails} object
+     */
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
