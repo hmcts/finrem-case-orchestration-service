@@ -48,6 +48,16 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     }
 
     @Override
+    public void setApprovalDate(LocalDateTime approvalDate) {
+        // ignore
+    }
+
+    @Override
+    public void setApprovalJudge(String approvalJudge) {
+        // ignore
+    }
+
+    @Override
     public void replaceDocument(CaseDocument amendedDocument) {
         if (this.draftOrder != null) {
             this.draftOrder = amendedDocument;
@@ -59,16 +69,6 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
                     + "Ensure the document to be amended corresponds to a valid existing document."
             );
         }
-    }
-
-    @Override
-    public void setApprovalDate(LocalDateTime approvalDate) {
-        // ignore
-    }
-
-    @Override
-    public void setApprovalJudge(String approvalJudge) {
-        // ignore
     }
 
 }
