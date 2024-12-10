@@ -10,6 +10,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
@@ -59,7 +60,7 @@ class JudgeApprovalResolverTest {
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
         // Execute the method being tested
-        judgeApprovalResolver.populateJudgeDecision(
+        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
             draftOrdersWrapper,
             CaseDocument.builder().build(),
             JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
@@ -115,7 +116,7 @@ class JudgeApprovalResolverTest {
                                       CaseDocument targetDoc
                                       ) {
 
-        judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, "auth");
+        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(), draftOrdersWrapper, targetDoc, judgeApproval, "auth");
 
         if (approvables != null) {
             verify(judgeApprovalResolver, times(1))

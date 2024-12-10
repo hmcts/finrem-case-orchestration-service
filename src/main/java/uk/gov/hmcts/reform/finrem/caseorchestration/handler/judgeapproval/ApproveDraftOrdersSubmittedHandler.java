@@ -12,8 +12,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UUIDCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -46,7 +52,13 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        // TODO get refusal order by ids and send email to those refused order.
+        List<UUID> refusalOrderIdsToBeSent =
+            ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream().map(UUIDCollection::getValue).toList();
+
+        draftOrdersWrapper.getRefusedOrdersCollection().stream()
+            .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
+            .forEach(a -> notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
+                .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue())));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
