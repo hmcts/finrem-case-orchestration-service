@@ -294,7 +294,7 @@ class JudgeApprovalResolver {
     }
 
     private <T extends HasApprovable> Map<Boolean, List<T>> partitionRefusedDraftOrderDocReviewCollection(List<T> draftOrderDocReviewCollection) {
-        return draftOrderDocReviewCollection.stream()
+        return ofNullable(draftOrderDocReviewCollection).orElse(List.of()).stream()
             .collect(Collectors.partitioningBy(
                 docReview -> ofNullable(docReview)
                     .map(HasApprovable::getValue)
