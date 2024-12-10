@@ -48,17 +48,20 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
             .isPresent();
     }
 
+    @JsonIgnore
     @Override
     public LocalDateTime getApprovalDate() {
         return null;
     }
 
+    @JsonIgnore
     @Override
     public String getApprovalJudge() {
         return null;
     }
 
     @JsonIgnore
+    @Override
     public CaseDocument getReplaceDocument() {
         if (draftOrder != null) {
             return draftOrder;
