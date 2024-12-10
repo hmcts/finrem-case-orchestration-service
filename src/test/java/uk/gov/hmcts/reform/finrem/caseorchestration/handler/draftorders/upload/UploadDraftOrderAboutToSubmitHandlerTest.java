@@ -94,7 +94,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
     @BeforeEach
     void setup() {
-
         UserDetails mockedUserDetails = mock(UserDetails.class);
         lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(mockedUserDetails);
         lenient().when(mockedUserDetails.getFullName()).thenReturn("Hamzah");
