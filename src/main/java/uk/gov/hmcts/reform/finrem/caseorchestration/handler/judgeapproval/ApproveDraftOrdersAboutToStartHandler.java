@@ -66,6 +66,9 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
+        // clear a temporary field which was used on submitted event.
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
+
         List<String> errors = validateDraftOrdersWrapper(draftOrdersWrapper);
         if (errors.isEmpty()) {
             List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
@@ -132,6 +135,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .title(DRAFT_ORDER.getTitle())
                         .inlineDocType(DRAFT_ORDER.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")
@@ -153,6 +157,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .title(PSA.getTitle())
                         .inlineDocType(PSA.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")

@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,6 +37,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
@@ -50,9 +51,13 @@ public class DraftOrderService {
     private final HearingService hearingService;
 
     public <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
-        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
-        String submittedByName = userInfo.getName();
+        UserDetails userDetails = idamAuthService.getUserDetails(userAuthorisation);
+        String submittedByName = userDetails.getFullName();
         submittedInfo.setSubmittedBy(submittedByName);
+        // capture email address if it's not uploaded by caseworker.
+        if (isEmpty(submittedInfo.getUploadedOnBehalfOf())) {
+            submittedInfo.setSubmittedByEmail(userDetails.getEmail());
+        }
         submittedInfo.setSubmittedDate(LocalDateTime.now());
         return submittedInfo;
     }
@@ -100,10 +105,7 @@ public class DraftOrderService {
         ofNullable(uploadAgreedDraftOrder.getUploadParty())
             .map(DynamicRadioList::getValue)
             .map(DynamicRadioListElement::getCode)
-            .ifPresentOrElse(
-                builder::uploadedOnBehalfOf,
-                () -> log.error("Unexpected null 'uploadedParty' on upload agreed order journey.")
-            );
+            .ifPresent(builder::uploadedOnBehalfOf);
     }
 
     private AgreedDraftOrder mapToAgreedDraftOrder(
@@ -210,6 +212,7 @@ public class DraftOrderService {
                     .orderStatus(ado.getOrderStatus())
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
+                    .submittedByEmail(ado.getSubmittedByEmail())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
@@ -231,6 +234,7 @@ public class DraftOrderService {
                     .orderStatus(ado.getOrderStatus())
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())
+                    .submittedByEmail(ado.getSubmittedByEmail())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())

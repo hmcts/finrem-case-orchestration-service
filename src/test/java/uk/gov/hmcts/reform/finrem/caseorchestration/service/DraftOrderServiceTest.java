@@ -42,7 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -122,7 +122,8 @@ class DraftOrderServiceTest {
                                       List<AgreedDraftOrder> expectedOrders,
                                       boolean havingMissingUploadPartyLog) {
         // Mock dependencies
-        lenient().when(idamAuthService.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().name("<SUBMITTED_BY>").build());
+        lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().forename("James").surname("Bond")
+            .email("jamesbond@fake.com").build());
 
         LocalDateTime fixedDateTime = LocalDateTime.of(2024, 10, 18, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
@@ -167,7 +168,8 @@ class DraftOrderServiceTest {
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.YES)
-            .submittedBy("<SUBMITTED_BY>")
+            .submittedBy("James Bond")
+            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(CaseDocumentCollection.builder().value(attachment1).build()))
@@ -201,7 +203,8 @@ class DraftOrderServiceTest {
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.YES)
-            .submittedBy("<SUBMITTED_BY>")
+            .submittedBy("James Bond")
+            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
@@ -235,14 +238,16 @@ class DraftOrderServiceTest {
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.NO)
-            .submittedBy("<SUBMITTED_BY>")
+            .submittedBy("James Bond")
+            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .build();
 
         AgreedDraftOrder expectedOrder5 = AgreedDraftOrder.builder()
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
-            .submittedBy("<SUBMITTED_BY>")
+            .submittedBy("James Bond")
+            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .pensionSharingAnnex(psa1)

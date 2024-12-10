@@ -5,61 +5,67 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedDraftOrderNotApprovedDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
 
 
+/**
+ * Repurpose this mapper class to transform FinremCaseDetails and court list information
+ * into a document template details object specific to refusal order scenario.
+ */
 @Component
 public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterDetailsMapper {
 
+    /**
+     * Constructs an instance of ContestedDraftOrderNotApprovedDetailsMapper.
+     *
+     * @param courtDetailsMapper the mapper for court details
+     * @param objectMapper       the object mapper for handling JSON operations
+     */
     public ContestedDraftOrderNotApprovedDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
     }
 
+    /**
+     * Builds a document template details object for a contested draft order not approved.
+     *
+     * @param caseDetails the case details containing the required data
+     * @param courtList   the court list wrapper containing court information
+     * @return a populated {@link DocumentTemplateDetails} object
+     */
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+        DraftOrdersWrapper draftOrdersWrapper = caseDetails.getData().getDraftOrdersWrapper();
         return ContestedDraftOrderNotApprovedDetails.builder()
+            .caseNumber(caseDetails.getId().toString())
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
-            .judgeDetails(getJudgeDetails(caseDetails))
-            .contestOrderNotApprovedRefusalReasons(getFormattedRefusalReasons(caseDetails))
+            .judgeDetails(getJudgeDetails(draftOrdersWrapper))
+            .contestOrderNotApprovedRefusalReasons(draftOrdersWrapper.getGeneratedOrderReason())
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
-            .refusalOrderDate(String.valueOf(caseDetails.getData().getRefusalOrderDate()))
+            .refusalOrderDate(String.valueOf(draftOrdersWrapper.getGeneratedOrderRefusedDate()))
             .build();
     }
 
-    private String getJudgeDetails(FinremCaseDetails caseDetails) {
-        return StringUtils.joinWith(" ",
-            caseDetails.getData().getRefusalOrderJudgeType().getValue(),
-            caseDetails.getData().getRefusalOrderJudgeName());
+    private String getJudgeDetails(DraftOrdersWrapper draftOrdersWrapper) {
+        return Stream.of(
+                ofNullable(draftOrdersWrapper.getGeneratedOrderJudgeType()).map(JudgeType::getValue).orElse(""),
+                draftOrdersWrapper.getGeneratedOrderJudgeName()
+            )
+            .filter(StringUtils::isNotBlank) // Exclude empty or blank strings
+            .collect(Collectors.joining(" "));
     }
 
-    private String getFormattedRefusalReasons(FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
-        List<String> refusalReasons = Optional.ofNullable(caseData.getJudgeNotApprovedReasons())
-            .orElse(new ArrayList<>())
-            .stream()
-            .map(reason -> reason.getValue().getJudgeNotApprovedReasons())
-            .toList();
-
-        StringBuilder formattedRefusalReasons = new StringBuilder();
-        refusalReasons.forEach(reason -> {
-            if (formattedRefusalReasons.length() > 0) {
-                formattedRefusalReasons.append('\n');
-            }
-            formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append(reason);
-        });
-        return formattedRefusalReasons.toString();
-    }
 }

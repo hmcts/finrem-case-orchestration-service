@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
@@ -58,7 +59,7 @@ class JudgeApprovalResolverTest {
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
         // Execute the method being tested
-        judgeApprovalResolver.populateJudgeDecision(
+        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
             draftOrdersWrapper,
             CaseDocument.builder().build(),
             JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
@@ -121,7 +122,8 @@ class JudgeApprovalResolverTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
-            judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
+            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
+                draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
 
             if (approvables != null) {
                 for (Approvable approvable : approvables) {

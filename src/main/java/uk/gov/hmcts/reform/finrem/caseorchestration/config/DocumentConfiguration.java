@@ -182,6 +182,20 @@ public class DocumentConfiguration {
             : contestedDraftOrderNotApprovedTemplate;
     }
 
+    /**
+     * Retrieves the appropriate contested refusal order template filename based on the selected court type in the provided case details.
+     *
+     * @param caseDetails the details of the financial remedy case, which determine the court type and corresponding template.
+     * @return the contested refusal order template filename.
+     *         Returns {@code contestedDraftOrderNotApprovedHighCourtTemplate} if
+     *         the High Court is selected; otherwise, returns
+     *         {@code contestedDraftOrderNotApprovedTemplate}.
+     */
+    public String getContestedDraftOrderNotApprovedTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? contestedDraftOrderNotApprovedHighCourtTemplate
+            : contestedDraftOrderNotApprovedTemplate;
+    }
+
     public String getContestedOrderApprovedCoverLetterTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedOrderApprovedCoverLetterHighCourtTemplate
             : contestedOrderApprovedCoverLetterTemplate;

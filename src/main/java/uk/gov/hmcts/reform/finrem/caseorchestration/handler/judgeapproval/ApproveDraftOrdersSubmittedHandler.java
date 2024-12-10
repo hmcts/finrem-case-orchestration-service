@@ -6,28 +6,40 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Slf4j
 @Service
-public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler {
+public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
-    private final ApproveOrderService approveOrderService;
+    private final NotificationService notificationService;
 
-    public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService) {
+    private final DraftOrdersNotificationRequestMapper notificationRequestMapper;
+
+    public ApproveDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService,
+                                              DraftOrdersNotificationRequestMapper notificationRequestMapper) {
         super(finremCaseDetailsMapper);
-        this.approveOrderService = approveOrderService;
+        this.notificationService = notificationService;
+        this.notificationRequestMapper = notificationRequestMapper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.APPROVE_ORDERS.equals(eventType);
     }
@@ -37,23 +49,24 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested {} about-to-submit event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
+        log.info("Invoking contested {} submitted event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
-        clearInputFields(draftOrdersWrapper);
+        List<UUID> refusalOrderIdsToBeSent =
+            ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream().map(UuidCollection::getValue).toList();
+
+        draftOrdersWrapper.getRefusedOrdersCollection().stream()
+            .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
+            .forEach(a -> {
+                if (!isEmpty(a.getValue().getSubmittedByEmail())) {
+                    notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
+                        .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
+                } else {
+                    // TODO by post
+                }
+            });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
-    }
-
-    private void clearInputFields(DraftOrdersWrapper draftOrdersWrapper) {
-        draftOrdersWrapper.setJudgeApproval1(null);
-        draftOrdersWrapper.setJudgeApproval2(null);
-        draftOrdersWrapper.setJudgeApproval3(null);
-        draftOrdersWrapper.setJudgeApproval4(null);
-        draftOrdersWrapper.setJudgeApproval5(null);
-        draftOrdersWrapper.setHearingInstruction(null);
-        draftOrdersWrapper.setShowWarningMessageToJudge(null);
     }
 }

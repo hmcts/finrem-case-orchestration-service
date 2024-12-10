@@ -5,14 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftOrderDocReviewCollection implements HasCaseDocument, HasApprovable {
-    private DraftOrderDocumentReview value;
+public class RefusedOrderCollection implements HasCaseDocument {
+
+    private UUID id;
+
+    private RefusedOrder value;
 }

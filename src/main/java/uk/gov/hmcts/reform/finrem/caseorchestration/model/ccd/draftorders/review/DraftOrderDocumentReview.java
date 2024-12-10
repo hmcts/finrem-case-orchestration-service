@@ -7,10 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RefusalOrderConvertible;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
@@ -23,13 +23,14 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Approvable, HearingInstructionProcessable {
+public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, RefusalOrderConvertible, HearingInstructionProcessable {
     private CaseDocument draftOrderDocument;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
     private YesOrNo resubmission;
     private String submittedBy;
+    private String submittedByEmail;
     private String uploadedOnBehalfOf;
     private List<CaseDocumentCollection> attachments;
     private String approvalJudge;
@@ -42,7 +43,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
     private String additionalTime;
     private String otherListingInstructions;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime reviewedDate;
+    private LocalDateTime refusedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
 
@@ -73,5 +74,11 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Ap
     public boolean match(CaseDocument targetDoc) {
         return Optional.ofNullable(targetDoc).map(CaseDocument::getDocumentUrl).equals(Optional.ofNullable(draftOrderDocument)
             .map(CaseDocument::getDocumentUrl));
+    }
+
+    @Override
+    @JsonIgnore
+    public CaseDocument getDraftOrderOrPsa() {
+        return getDraftOrderDocument();
     }
 }
