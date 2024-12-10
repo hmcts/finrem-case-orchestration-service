@@ -34,4 +34,23 @@ public class RefugeWrapperUtils {
                     caseData.getRefugeWrapper().setRespondentInRefugeQuestion(null);
                 });
     }
+
+    /**
+     * Updates the `applicantInRefugeTab` field in the refuge wrapper with the value of
+     * `applicantInRefugeQuestion`, logs the update, and then clears the `applicantInRefugeQuestion` field.
+     *
+     * @param caseDetails the {@code CaseDetails} object containing case-specific details like the case ID.
+     *
+     * @throws NullPointerException if {@code caseDetails} is null.
+     */
+    public static void updateApplicantInRefugeTab(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        Optional.ofNullable(caseData.getRefugeWrapper().getApplicantInRefugeQuestion())
+                .ifPresent(question -> {
+                    caseData.getRefugeWrapper().setApplicantInRefugeTab(question);
+                    log.info("Updating applicantInRefugeTab for case reference {}. Removing applicantInRefugeQuestion",
+                            caseDetails.getId());
+                    caseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
+                });
+    }
 }

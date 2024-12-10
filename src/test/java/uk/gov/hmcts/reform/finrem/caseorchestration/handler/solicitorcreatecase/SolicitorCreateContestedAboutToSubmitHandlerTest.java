@@ -101,6 +101,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         expectedAdminResponseCaseData(responseCaseData);
 
+
+
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
@@ -146,6 +148,20 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             handler.handle(callbackRequest, AUTH_TOKEN);
             // Check that updateRespondentInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+        }
+    }
+
+    @Test
+    void testUpdateApplicantInRefugeTabCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateApplicantInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
     }
 

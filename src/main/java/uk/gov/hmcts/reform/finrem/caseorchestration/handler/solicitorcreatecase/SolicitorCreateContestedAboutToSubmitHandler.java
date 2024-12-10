@@ -84,6 +84,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         representationWorkflowService.persistDefaultOrganisationPolicy(caseData);
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
+        RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
