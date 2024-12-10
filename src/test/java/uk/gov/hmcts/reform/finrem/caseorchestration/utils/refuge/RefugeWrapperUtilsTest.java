@@ -20,6 +20,33 @@ class RefugeWrapperUtilsTest {
     }
 
     @Test
+    void givenCase_whenRespondentRefugeQuestionAnswered_thenRespondentRefugeTabUpdated() {
+
+        // imitate user answering YES to respondent in refuge question on create case journey.
+        caseDetails.getData().getRefugeWrapper().setRespondentInRefugeQuestion(YesOrNo.YES);
+        assertEquals(YesOrNo.YES, caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
+
+        RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
+
+        // Assert handler updated respondentInRefugeTab from respondentInRefugeQuestion, and latter then cleared.
+        assertEquals(YesOrNo.YES, caseDetails.getData().getRefugeWrapper().getRespondentInRefugeTab());
+        assertNull(caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
+    }
+
+    @Test
+    void givenCase_whenRespondentRefugeQuestionUnanswered_thenRespondentInRefugeTabUnchanged() {
+
+        // imitate user not answering Respondent in refuge question on create case journey.
+        assertNull(caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
+
+        RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
+
+        // Assert handler didn't update respondentInRefugeTab from respondentInRefugeQuestion, which remains null.
+        assertNull(caseDetails.getData().getRefugeWrapper().getRespondentInRefugeTab());
+        assertNull(caseDetails.getData().getRefugeWrapper().getRespondentInRefugeQuestion());
+    }
+
+    @Test
     void givenCase_whenApplicantRefugeQuestionAnswered_thenApplicantRefugeTabUpdated() {
 
         // imitate user answering YES to applicant in refuge question on create case journey.

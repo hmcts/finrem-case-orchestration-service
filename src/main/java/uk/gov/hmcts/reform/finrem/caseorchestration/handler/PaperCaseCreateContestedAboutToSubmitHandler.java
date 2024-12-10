@@ -78,6 +78,7 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
             caseData.setRespondentOrganisationPolicy(respondentOrganisationPolicy);
         }
 
+        RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
