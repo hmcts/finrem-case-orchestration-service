@@ -61,8 +61,8 @@ public class PaperNotificationService {
      * @param caseDetails the case details
      * @return true if the case should print for the applicant, otherwise false
      * @deprecated Use {@link #shouldPrintForApplicant(FinremCaseDetails)} instead.
-     * This method is deprecated due to the introduction of the {@code FinremCaseDetails} class,
-     * which provides better encapsulation and alignment with the updated data model.
+     *             This method is deprecated due to the introduction of the {@code FinremCaseDetails} class,
+     *             which provides better encapsulation and alignment with the updated data model.
      */
     @Deprecated(since = "11-December-2024")
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
