@@ -119,8 +119,7 @@ class DraftOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideAgreedDraftOrderTestCases")
     void testProcessAgreedDraftOrders(UploadAgreedDraftOrder uploadAgreedDraftOrder,
-                                      List<AgreedDraftOrder> expectedOrders,
-                                      boolean havingMissingUploadPartyLog) {
+                                      List<AgreedDraftOrder> expectedOrders) {
         // Mock dependencies
         lenient().when(idamAuthService.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().forename("James").surname("Bond")
             .email("jamesbond@fake.com").build());
@@ -151,10 +150,6 @@ class DraftOrderServiceTest {
                 );
 
                 assertTrue(matches, "No matching expected order found for: " + actualOrder);
-            }
-
-            if (havingMissingUploadPartyLog) {
-                assertThat(logs.getErrors()).containsExactly("Unexpected null 'uploadedParty' on upload agreed order journey.");
             }
         }
     }
@@ -288,31 +283,28 @@ class DraftOrderServiceTest {
 
         return Stream.of(
             // Case 1: One draft order with one attachment
-            Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder1),
-                false),
-            Arguments.of(uploadOrder1.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of(), false),
-            Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(), false),
+            Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder1)),
+            Arguments.of(uploadOrder1.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of()),
+            Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of()),
             // Case 2: No documents provided
-            Arguments.of(uploadOrder2.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(), false),
-            Arguments.of(uploadOrder2.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of(), false),
-            Arguments.of(uploadOrder2.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(), false),
+            Arguments.of(uploadOrder2.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of()),
+            Arguments.of(uploadOrder2.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of()),
+            Arguments.of(uploadOrder2.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of()),
             // Case 3: One draft order with multiple attachments
-            Arguments.of(uploadOrder3.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder3),
-                false),
-            Arguments.of(uploadOrder3.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of(), false),
-            Arguments.of(uploadOrder3.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(), false),
+            Arguments.of(uploadOrder3.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder3)),
+            Arguments.of(uploadOrder3.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of()),
+            Arguments.of(uploadOrder3.toBuilder().uploadOrdersOrPsas(List.of(PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of()),
             // Case 4: One draft order with a pension sharing annex
-            Arguments.of(uploadOrder4.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder4),
-                false),
-            Arguments.of(uploadOrder4.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of(), false),
+            Arguments.of(uploadOrder4.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(UPLOAD_PARTY).build(), List.of(expectedOrder4)),
+            Arguments.of(uploadOrder4.toBuilder().uploadParty(UPLOAD_PARTY).build(), List.of()),
             Arguments.of(uploadOrder4.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(),
-                List.of(expectedOrder4, expectedOrder5), false),
+                List.of(expectedOrder4, expectedOrder5)),
             // Case 5: resubmission = YES
             Arguments.of(uploadOrder5.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE)).uploadParty(UPLOAD_PARTY).build(),
-                List.of(expectedOrder4.toBuilder().resubmission(YesOrNo.YES).build(), expectedOrder5), false),
+                List.of(expectedOrder4.toBuilder().resubmission(YesOrNo.YES).build(), expectedOrder5)),
             // Case 6:
             Arguments.of(uploadOrder1.toBuilder().uploadOrdersOrPsas(List.of(ORDER_TYPE)).uploadParty(null).build(),
-                List.of(expectedOrder1.toBuilder().uploadedOnBehalfOf(null).build()), true)
+                List.of(expectedOrder1.toBuilder().uploadedOnBehalfOf(null).build()))
         );
     }
 
