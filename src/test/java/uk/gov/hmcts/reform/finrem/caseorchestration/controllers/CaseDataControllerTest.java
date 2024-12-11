@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
@@ -184,7 +185,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressContested() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -195,7 +196,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressContested_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -204,7 +205,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressConsented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -215,7 +216,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressConsented_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -233,8 +234,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
         createRequest(PATH + "no-org-policies.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -251,8 +252,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicies() throws Exception {
         createRequest(PATH + "no-orgs-is-represented.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

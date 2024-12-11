@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,7 +62,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     private void setUpLitigantMockContext() {
         when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
@@ -73,7 +74,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     private void setUpSolicitorMockContext() {
         when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
@@ -84,7 +85,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     }
 
     private void setUpNoLetterMockContext() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
     }
 }

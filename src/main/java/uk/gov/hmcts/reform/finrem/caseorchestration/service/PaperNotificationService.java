@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -53,15 +55,65 @@ public class PaperNotificationService {
         }
     }
 
+    /**
+     * Determines if a case should print for the applicant.
+     *
+     * @param caseDetails the case details
+     * @return true if the case should print for the applicant, otherwise false
+     * @deprecated Use {@link #shouldPrintForApplicant(FinremCaseDetails)} instead.
+     * This method is deprecated due to the introduction of the {@code FinremCaseDetails} class,
+     * which provides better encapsulation and alignment with the updated data model.
+     */
+    @Deprecated(since = "11-December-2024")
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
         return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
             || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             || caseDataService.isPaperApplication(caseDetails.getData());
     }
 
+    /**
+     * Determines if a case should print for the applicant.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing the case data
+     * @return true if the case should print for the applicant, otherwise false
+     *
+     */
+    public boolean shouldPrintForApplicant(FinremCaseDetails caseDetails) {
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+            || caseDataService.isPaperApplication(caseDetails.getData());
+    }
+
+    /**
+     * Determines if a case should print for the respondent.
+     *
+     * <p>This method evaluates if the respondent requires a printed version of the case information
+     * based on their legal representation status and consent to email notifications.</p>
+     *
+     * @param caseDetails the {@link CaseDetails} containing the case data
+     * @return true if the case should print for the respondent, otherwise false
+     * @deprecated since 11-December-2024. Use {@link #shouldPrintForRespondent(FinremCaseDetails)} instead.
+     *             This method is deprecated due to the migration to the {@code FinremCaseDetails} class, which aligns
+     *             with the updated data model and improves type safety.
+     */
+    @Deprecated(since = "11-December-2024")
     public boolean shouldPrintForRespondent(CaseDetails caseDetails) {
         return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
             || !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    }
+
+    /**
+     * Determines if a case should print for the respondent.
+     *
+     * <p>This method evaluates if the respondent requires a printed version of the case information
+     * based on their legal representation status and consent to email notifications.</p>
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing the case data
+     * @return true if the case should print for the respondent, otherwise false
+     */
+    public boolean shouldPrintForRespondent(FinremCaseDetails caseDetails) {
+        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            || YES != caseDetails.getData().getRespSolNotificationsEmailConsent();
     }
 
     private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
