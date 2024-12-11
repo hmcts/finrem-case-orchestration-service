@@ -68,7 +68,7 @@ public class DraftOrdersNotificationRequestMapper {
     public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
         FinremCaseData caseData = caseDetails.getData();
         String notificationEmail = refusedOrder.getSubmittedByEmail();
-        String documentName = ofNullable(refusedOrder.getDraftOrderOrPsa()).map(CaseDocument::getDocumentFilename)
+        String documentName = ofNullable(refusedOrder.getRefusedDocument()).map(CaseDocument::getDocumentFilename)
             .orElseThrow(IllegalArgumentException::new);
 
         return NotificationRequest.builder()

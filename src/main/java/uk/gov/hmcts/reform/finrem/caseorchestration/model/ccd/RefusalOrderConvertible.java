@@ -10,7 +10,7 @@ public interface RefusalOrderConvertible extends Approvable {
 
     String getApprovalJudge();
 
-    CaseDocument getDraftOrderOrPsa();
+    CaseDocument getRefusedDocument();
 
     LocalDateTime getRefusedDate();
 

@@ -78,7 +78,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
 
     @Override
     @JsonIgnore
-    public CaseDocument getDraftOrderOrPsa() {
+    public CaseDocument getRefusedDocument() {
         return getDraftOrderDocument();
     }
 }

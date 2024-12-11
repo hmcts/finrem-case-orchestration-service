@@ -207,7 +207,7 @@ class JudgeApprovalResolver {
                 refusalOrderIds.add(uuid);
 
                 RefusedOrder.RefusedOrderBuilder orderBuilder = RefusedOrder.builder()
-                    .draftOrderOrPsa(refusalOrderConvertible.getDraftOrderOrPsa())
+                    .refusedDocument(refusalOrderConvertible.getRefusedDocument())
                     .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeFeedback, refusalOrderConvertible.getRefusedDate(),
                         refusalOrderConvertible.getApprovalJudge(), null, userAuthorisation))
                     .refusedDate(refusalOrderConvertible.getRefusedDate())

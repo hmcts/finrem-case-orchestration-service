@@ -25,7 +25,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class RefusedOrder implements HasCaseDocument {
 
-    private CaseDocument draftOrderOrPsa;
+    private CaseDocument refusedDocument;
 
     private CaseDocument refusalOrder;
 
