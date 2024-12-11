@@ -98,6 +98,7 @@ class BarristerLetterServiceTest {
 
         verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any(), any());
     }
+    
     @Test
     void givenRespondentIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
         when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
