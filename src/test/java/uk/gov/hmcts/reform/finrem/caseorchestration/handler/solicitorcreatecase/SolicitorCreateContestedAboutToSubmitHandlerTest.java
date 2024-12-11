@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +43,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedAboutToSubmitHandlerTest {
@@ -79,17 +78,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(false));
-    }
-
-    @Test
-    void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(true));
+    void testHandlerCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE);
     }
 
     @Test
@@ -145,6 +135,20 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         Assertions.assertThat(response.getErrors()).hasSize(1);
         Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
         Assertions.assertThat(response.getData()).isNotNull();
+    }
+
+    @Test
+    void testUpdateRespondentInRefugeTabCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateRespondentInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+        }
     }
 
     @Test
