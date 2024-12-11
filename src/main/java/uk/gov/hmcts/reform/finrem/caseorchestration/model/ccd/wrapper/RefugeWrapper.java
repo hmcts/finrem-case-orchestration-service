@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RefugeWrapper {
 
-    private YesOrNo applicantInRefuge;
-    private YesOrNo respondentInRefuge;
+    private YesOrNo respondentInRefugeQuestion;
+    private YesOrNo respondentInRefugeTab;
+    private YesOrNo applicantInRefugeQuestion;
+    private YesOrNo applicantInRefugeTab;
 
 }
