@@ -102,6 +102,7 @@ public class DraftOrderService {
 
     private void setUploadedOnBehalfOf(UploadAgreedDraftOrder uploadAgreedDraftOrder,
                                        AgreedDraftOrder.AgreedDraftOrderBuilder builder) {
+        // The `uploadParty` could be null if the draft order is uploaded by external parties.
         ofNullable(uploadAgreedDraftOrder.getUploadParty())
             .map(DynamicRadioList::getValue)
             .map(DynamicRadioListElement::getCode)
