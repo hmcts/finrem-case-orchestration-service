@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -213,7 +213,7 @@ public class NotificationRequestMapper {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
         log.info("Built notificationRequest for case ID: {}", notificationRequest.getCaseReferenceNumber());
         if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
+            String selectedCourt = CourtHelper.getSelectedFrc(caseDetails);
             notificationRequest.setSelectedCourt(selectedCourt);
             log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
         }
@@ -238,11 +238,11 @@ public class NotificationRequestMapper {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(interimHearingData));
         }
 
         if (caseDataService.isContestedApplication(caseDetails)) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(CourtHelper.getSelectedInterimHearingFrc(interimHearingData));
         }
 
         return notificationRequest;
@@ -253,12 +253,13 @@ public class NotificationRequestMapper {
                                                                        Map<String, Object> interimHearingData) {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
+        //TODO: Error here
         if (caseDetails.isConsentedApplication()) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(interimHearingData));
         }
 
         if (caseDetails.isContestedApplication()) {
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
+            notificationRequest.setSelectedCourt(CourtHelper.getSelectedInterimHearingFrc(interimHearingData));
         }
 
         return notificationRequest;

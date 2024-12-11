@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc;
@@ -88,7 +88,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
-public class ContestedCourtHelperTest {
+public class CourtHelperTest {
 
     @Test
     public void newportCourts() {
@@ -464,7 +464,7 @@ public class ContestedCourtHelperTest {
                                             String courtListName, String court, String expectedValue) {
         CaseDetails details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
-        String selectedCourt = ContestedCourtHelper.getSelectedCourt(details);
+        String selectedCourt = CourtHelper.getSelectedCourt(details);
         MatcherAssert.assertThat(selectedCourt, is(expectedValue));
     }
 
@@ -523,7 +523,7 @@ public class ContestedCourtHelperTest {
 
     private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
         Map<String, Object> interimCaseData = getCaseDetailsWithAllocatedValuesForInterimHearing(region, subRegionListName, subRegion);
-        String selectedInterimHearingFrc = ContestedCourtHelper.getSelectedInterimHearingFrc(interimCaseData);
+        String selectedInterimHearingFrc = CourtHelper.getSelectedInterimHearingFrc(interimCaseData);
         MatcherAssert.assertThat(selectedInterimHearingFrc, is(subRegion));
     }
 
@@ -547,11 +547,11 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.WALES);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.NORTH_WALES);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NORTHWALES));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(NORTHWALES));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.NEWPORT);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NEWPORT));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(NEWPORT));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.SWANSEA);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(SWANSEA));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(SWANSEA));
     }
 
     @Test
@@ -566,11 +566,11 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHWEST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DEVON);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(DEVON));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(DEVON));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DORSET);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(DORSET));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(DORSET));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.BRISTOL);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BRISTOLFRC));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(BRISTOLFRC));
     }
 
     @Test
@@ -585,11 +585,11 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHEAST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.KENT_FRC);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(KENT));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(KENT));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.BEDFORDSHIRE);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BEDFORDSHIRE));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(BEDFORDSHIRE));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.THAMES_VALLEY);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(THAMESVALLEY));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(THAMESVALLEY));
     }
 
     @Test
@@ -604,11 +604,11 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHEAST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEAVELAND);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(CLEAVELAND));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(CLEAVELAND));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.NW_YORKSHIRE);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NWYORKSHIRE));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(NWYORKSHIRE));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.HS_YORKSHIRE);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(HSYORKSHIRE));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(HSYORKSHIRE));
     }
 
     @Test
@@ -623,11 +623,11 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHWEST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LANCASHIRE);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(LANCASHIRE));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(LANCASHIRE));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.MANCHESTER);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(MANCHESTER));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(MANCHESTER));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LIVERPOOL);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(LIVERPOOL));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(LIVERPOOL));
     }
 
     @Test
@@ -640,7 +640,7 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(CFC));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(CFC));
     }
 
     @Test
@@ -654,9 +654,9 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(NOTTINGHAM));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(NOTTINGHAM));
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.BIRMINGHAM);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(BIRMINGHAM));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(BIRMINGHAM));
     }
 
     @Test
@@ -671,13 +671,13 @@ public class ContestedCourtHelperTest {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedFrc(finremCaseDetails), is(HIGHCOURT));
+        MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(HIGHCOURT));
     }
 
 
     private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
         Map<String, Object> caseData = getCaseDetailsWithAllocatedValuesForHearing(region, subRegionListName, subRegion);
-        String selectedHearingFrc = ContestedCourtHelper.getSelectedHearingFrc(caseData);
+        String selectedHearingFrc = CourtHelper.getSelectedHearingFrc(caseData);
         MatcherAssert.assertThat(selectedHearingFrc, is(subRegion));
     }
 
