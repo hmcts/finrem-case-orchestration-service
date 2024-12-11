@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -35,7 +36,9 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
@@ -717,4 +720,44 @@ class CaseDataServiceTest {
 
         return data;
     }
+
+    @Test
+    void testIsApplicantRepresentedByASolicitor_True() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.YES)
+            .build()).build();
+
+        // Act
+        boolean result = caseDataService.isApplicantRepresentedByASolicitor(caseData);
+
+        // Assert
+        assertTrue(result, "Applicant should be represented by a solicitor");
+    }
+
+    @Test
+    void testIsApplicantRepresentedByASolicitor_False() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(ContactDetailsWrapper.builder()
+            .applicantRepresented(YesOrNo.NO)
+            .build()).build();
+
+        // Act
+        boolean result = caseDataService.isApplicantRepresentedByASolicitor(caseData);
+
+        // Assert
+        assertFalse(result, "Applicant should not be represented by a solicitor");
+    }
+
+    @Test
+    void testIsApplicantRepresentedByASolicitor_NullCaseData() {
+        // Arrange
+        FinremCaseData caseData = null;
+
+        // Act & Assert
+        assertThrows(NullPointerException.class,
+            () -> caseDataService.isApplicantRepresentedByASolicitor(caseData),
+            "Method should throw NullPointerException when caseData is null");
+    }
+
 }
