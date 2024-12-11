@@ -75,6 +75,22 @@ class PensionAnnexDateStampServiceTest {
     }
 
     @Test
+    void shouldAddApprovalDateToPensionOrderDocumentWithNoEmbeddedFonts() throws Exception {
+        byte[] docInBytes = loadResource("/fixtures/P1_pension_sharing_annex_no_embedded_font.pdf");
+        when(emDownloadService.download(document.getDocumentBinaryUrl(), AUTH_TOKEN))
+            .thenReturn(docInBytes);
+        when(emUploadService.upload(any(), anyString(), any()))
+            .thenReturn(fileUploadResponse());
+        when(genericDocumentService.toCaseDocument(any(Document.class))).thenCallRealMethod();
+        service.appendApprovedDateToDocument(document, AUTH_TOKEN, approvalDate, caseId);
+
+        verify(emUploadService).upload(filesCaptor.capture(), anyString(), anyString());
+        List<MultipartFile> uploadedMultipartFiles = filesCaptor.getValue();
+        byte[] bytes = uploadedMultipartFiles.get(0).getBytes();
+        verifyDateOfOrderField(bytes);
+    }
+
+    @Test
     void shouldNotAddApprovalDateToPensionOrderDocumentIfApprovalDateIsMissing() {
         Exception exception = assertThrows(Exception.class, () -> service.appendApprovedDateToDocument(document, AUTH_TOKEN, null, caseId));
         assertEquals("Missing or Invalid Approved Date of Order for Case id: " + caseId, exception.getMessage());

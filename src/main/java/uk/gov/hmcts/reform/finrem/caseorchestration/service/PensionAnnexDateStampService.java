@@ -40,7 +40,7 @@ public class PensionAnnexDateStampService {
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    private static final String DEFAULT_PDTYPE_FONT_HELV = "/Helv 10 Tf 0 g";
+    private static final String DEFAULT_PDTYPE_FONT_HELV = "/Helv 12 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
@@ -74,9 +74,7 @@ public class PensionAnnexDateStampService {
             && (acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME) instanceof PDTextField)) {
             PDField field = acroForm.get().getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
-            if (textBox.getDefaultAppearance().isBlank()) {
-                textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELV);
-            }
+            textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELV);
             textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);

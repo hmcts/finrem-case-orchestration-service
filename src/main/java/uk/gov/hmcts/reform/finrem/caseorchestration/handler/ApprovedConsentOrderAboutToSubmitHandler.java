@@ -32,6 +32,7 @@ import static java.util.Collections.singletonList;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -60,7 +61,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        String caseId =  String.valueOf(caseDetails.getId());
+        String caseId = String.valueOf(caseDetails.getId());
         log.info("ConsentOrderApprovedAboutToSubmitHandle handle Case ID {}", caseId);
 
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
@@ -135,7 +136,13 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     }
 
     private LocalDate getApprovalDate(Map<String, Object> caseData) {
-        return Optional.ofNullable(caseData.get(CONTESTED_ORDER_DIRECTION_DATE))
+        return (caseData.get(CONTESTED_ORDER_DIRECTION_DATE) != null)
+            ? parseLocalDate(caseData, CONTESTED_ORDER_DIRECTION_DATE)
+            : parseLocalDate(caseData, CONSENTED_ORDER_DIRECTION_DATE);
+    }
+
+    static LocalDate parseLocalDate(Map<String, Object> caseData, String orderDirectionDateKey) {
+        return Optional.ofNullable(caseData.get(orderDirectionDateKey))
             .filter(value -> value instanceof LocalDate || value instanceof String)
             .map(value -> {
                 if (value instanceof LocalDate) {
@@ -144,14 +151,10 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                     try {
                         return LocalDate.parse((String) value);
                     } catch (Exception e) {
-                        log.info("Invalid Approved date of order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "': " + e.getMessage());
+                        log.info("Invalid Approved date of order for key: '" + orderDirectionDateKey + "': " + e.getMessage());
                         return null;
                     }
                 }
-            })
-            .orElseGet(() -> {
-                log.info("Approved Date of Order for key: '" + CONTESTED_ORDER_DIRECTION_DATE + "' is null or invalid");
-                return null;
-            });
+            }).get();
     }
 }

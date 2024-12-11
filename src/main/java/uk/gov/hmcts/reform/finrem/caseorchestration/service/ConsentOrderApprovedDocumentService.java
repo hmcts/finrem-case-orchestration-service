@@ -346,7 +346,8 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument consentOrderAnnexStamped =
             genericDocumentService.annexStampDocument(finremCaseData.getLatestConsentOrder(),
                 userAuthorisation, stampType, caseId);
-        LocalDate approvalDate = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder();
+        LocalDate consentDateOfOrder = finremCaseData.getConsentOrderWrapper().getConsentDateOfOrder();
+        LocalDate approvalDate = (consentDateOfOrder == null) ? finremCaseData.getOrderDirectionDate() : consentDateOfOrder;
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
