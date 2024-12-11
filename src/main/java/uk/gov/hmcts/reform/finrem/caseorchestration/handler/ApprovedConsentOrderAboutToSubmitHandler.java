@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -142,19 +141,15 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     }
 
     static LocalDate parseLocalDate(Map<String, Object> caseData, String orderDirectionDateKey) {
-        return Optional.ofNullable(caseData.get(orderDirectionDateKey))
-            .filter(value -> value instanceof LocalDate || value instanceof String)
-            .map(value -> {
-                if (value instanceof LocalDate) {
-                    return (LocalDate) value;
-                } else {
-                    try {
-                        return LocalDate.parse((String) value);
-                    } catch (Exception e) {
-                        log.info("Invalid Approved date of order for key: '" + orderDirectionDateKey + "': " + e.getMessage());
-                        return null;
-                    }
-                }
-            }).get();
+        if (caseData.get(orderDirectionDateKey) instanceof LocalDate) {
+            return (LocalDate) caseData.get(orderDirectionDateKey);
+        } else {
+            try {
+                return LocalDate.parse((String) caseData.get(orderDirectionDateKey));
+            } catch (Exception e) {
+                log.info("Invalid Approved date of order for key: '" + orderDirectionDateKey + "': " + e.getMessage());
+                return null;
+            }
+        }
     }
 }
