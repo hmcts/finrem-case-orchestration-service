@@ -41,7 +41,8 @@ class ApproveOrderServiceTest {
         underTest.populateJudgeDecisions(FinremCaseDetails.builder().build(), draftOrdersWrapper, AUTH_TOKEN);
 
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
-            .populateJudgeDecision(any(), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class), eq(AUTH_TOKEN));
+            .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
+                eq(AUTH_TOKEN));
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {
