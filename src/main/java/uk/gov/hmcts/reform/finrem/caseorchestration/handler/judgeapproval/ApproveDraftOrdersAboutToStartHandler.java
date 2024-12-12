@@ -114,7 +114,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
 
     private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
         return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
-            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
+            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime());
     }
 
     private List<JudgeApproval> getReviewableItems(List<DraftOrdersReviewCollection> outstanding) {
@@ -132,6 +132,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .title(DRAFT_ORDER.getTitle())
                         .inlineDocType(DRAFT_ORDER.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingJudge(draftOrdersReview.getHearingJudge())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")
@@ -153,6 +154,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .title(PSA.getTitle())
                         .inlineDocType(PSA.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingJudge(draftOrdersReview.getHearingJudge())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")

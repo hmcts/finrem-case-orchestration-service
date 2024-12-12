@@ -33,6 +33,8 @@ public class JudgeApproval {
 
     private String hearingInfo;
 
+    private String hearingJudge;
+
     private YesOrNo hasAttachment;
 
     @JsonProperty("document")
