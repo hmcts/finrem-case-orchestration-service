@@ -14,6 +14,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +65,7 @@ class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumen
     private void setUpLitigantMockContext() {
         when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
@@ -76,7 +77,7 @@ class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumen
     private void setUpSolicitorMockContext() {
         when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
@@ -87,7 +88,7 @@ class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumen
     }
 
     private void setUpNoLetterMockContext() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
     }
 }
