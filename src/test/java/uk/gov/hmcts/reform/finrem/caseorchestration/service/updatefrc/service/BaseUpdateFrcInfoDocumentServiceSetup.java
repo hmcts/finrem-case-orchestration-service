@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -66,7 +66,7 @@ public class BaseUpdateFrcInfoDocumentServiceSetup {
 
     private String letterDate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
             "solicitorReference");
