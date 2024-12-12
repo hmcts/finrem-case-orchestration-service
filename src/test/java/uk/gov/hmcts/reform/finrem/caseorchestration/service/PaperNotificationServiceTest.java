@@ -183,11 +183,37 @@ class PaperNotificationServiceTest {
         FinremCaseData caseData = mock(FinremCaseData.class);
 
         lenient().when(caseDetails.getData()).thenReturn(caseData);
-        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(isRespRepresented);
+        when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(isRespRepresented);
         lenient().when(caseData.getRespSolNotificationsEmailConsent()).thenReturn(YesOrNo.forValue(respSolConsent));
 
         // Act
         boolean result = paperNotificationService.shouldPrintForRespondent(caseDetails);
+
+        // Assert
+        assertEquals(expected, result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true, false, false",  // Applicant represented, agrees to email, not paper application, should not print
+        "true, false, false, true",  // Applicant represented, does not agree to email, not paper application, should print
+        "false, true, false, true",  // Applicant not represented, agrees to email, not paper application, should print
+        "false, false, false, true", // Applicant not represented, does not agree to email, not paper application, should print
+        "true, true, true, true",    // Applicant represented, agrees to email, paper application, should print
+        "false, true, true, true"    // Applicant not represented, agrees to email, paper application, should print
+    })
+    void testShouldPrintForApplicant(boolean isApplicantRepresented, boolean agreesToEmails, boolean isPaperApplication, boolean expected) {
+        // Arrange
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseDataService.isApplicantRepresentedByASolicitor(caseData)).thenReturn(isApplicantRepresented);
+        lenient().when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(agreesToEmails);
+        lenient().when(caseDataService.isPaperApplication(caseData)).thenReturn(isPaperApplication);
+
+        // Act
+        boolean result = paperNotificationService.shouldPrintForApplicant(caseDetails);
 
         // Assert
         assertEquals(expected, result);
