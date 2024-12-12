@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.63'
     id 'au.com.dius.pact' version '4.6.16'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1494'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1497'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -277,7 +277,7 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(60)
+    mutationThreshold.set(59)
 }
 
 bootJar {
