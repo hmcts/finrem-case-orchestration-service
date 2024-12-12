@@ -477,7 +477,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertFalse(caseDataService.isConsentedApplication(caseDetails)));
+        assertFalse(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
@@ -525,7 +525,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
 
-        assertFalse(caseDataService.isContestedPaperApplication(caseDetails)));
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
@@ -565,7 +565,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertFalse(caseDataService.isApplicantAddressConfidential(data)));
+        assertFalse(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
