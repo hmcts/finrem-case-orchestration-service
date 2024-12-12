@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -60,7 +57,8 @@ class PaperNotificationServiceTest {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
 
-        paperNotificationService.printAssignToJudgeNotification(buildCaseDetails(), AUTH_TOKEN);
+        paperNotificationService.printAssignToJudgeNotification(
+            CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(Map.of()).build(), AUTH_TOKEN);
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
@@ -142,19 +140,5 @@ class PaperNotificationServiceTest {
         paperNotificationService.printIntervenerRejectionGeneralApplication(caseDetails, intervenerWrapper, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails,
             intervenerWrapper.getIntervenerType().getTypeValue(), AUTH_TOKEN);
-    }
-
-    protected CaseDetails buildCaseDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 }
