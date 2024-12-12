@@ -81,18 +81,17 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                         .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
                 } else {
                     // cloned the logic from ContestedDraftOrderNotApprovedController.sendRefusalReason
-                    // TODO uncomment below
-//                    CaseDocument refusalOrder = a.getValue().getRefusalOrder();
-//
-//                    if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
-//                        bulkPrintService.printApplicantDocuments(caseDetails, userAuthorisation,
-//                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
-//                    }
-//
-//                    if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
-//                        bulkPrintService.printRespondentDocuments(caseDetails, userAuthorisation,
-//                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
-//                    }
+                    CaseDocument refusalOrder = a.getValue().getRefusalOrder();
+
+                    if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
+                        bulkPrintService.printApplicantDocuments(caseDetails, userAuthorisation,
+                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
+                    }
+
+                    if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                        bulkPrintService.printRespondentDocuments(caseDetails, userAuthorisation,
+                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
+                    }
 
                 }
             });
