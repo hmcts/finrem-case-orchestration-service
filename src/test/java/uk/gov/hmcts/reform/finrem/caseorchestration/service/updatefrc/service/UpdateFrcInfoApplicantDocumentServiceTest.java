@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
@@ -16,8 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceSetup {
+@ExtendWith(MockitoExtension.class)
+class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfoDocumentServiceSetup {
 
     private static final String APP_LITIGANT_URL = "appLitigantUrl";
     private static final String APP_SOLICITOR_URL = "appSolicitorUrl";
@@ -26,7 +27,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
     UpdateFrcInfoApplicantDocumentService updateFrcInfoApplicantDocumentService;
 
     @Test
-    public void givenApplicantRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnApplicantLetter() {
+   void givenApplicantRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnApplicantLetter() {
         setUpLitigantMockContext();
         Optional<CaseDocument> applicantLetter = updateFrcInfoApplicantDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
@@ -39,7 +40,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
     }
 
     @Test
-    public void givenAppSolicitorRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnAppSolLetter() {
+   void givenAppSolicitorRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnAppSolLetter() {
         setUpSolicitorMockContext();
         Optional<CaseDocument> appSolLetter = updateFrcInfoApplicantDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
@@ -52,7 +53,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
     }
 
     @Test
-    public void givenNoLetterNotificationsRequired_whenGetUpdateFrcInfoLetter_thenReturnEmptyOptional() {
+   void givenNoLetterNotificationsRequired_whenGetUpdateFrcInfoLetter_thenReturnEmptyOptional() {
         setUpNoLetterMockContext();
         Optional<CaseDocument> shouldBeEmpty = updateFrcInfoApplicantDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);

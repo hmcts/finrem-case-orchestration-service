@@ -1,16 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,25 +33,32 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
-public class PaperNotificationServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PaperNotificationServiceTest {
 
-    @Autowired
+    @InjectMocks
     private PaperNotificationService paperNotificationService;
 
-    @MockBean
+    @Mock
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @MockBean
+    @Mock
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @Mock
     private CaseDataService caseDataService;
-    @MockBean
+    @Mock
     private RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
 
+    private ObjectMapper mapper;
+
+    @BeforeEach
+    void setup() {
+        mapper = new ObjectMapper();
+    }
+
     @Test
-    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+    void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         paperNotificationService.printAssignToJudgeNotification(buildCaseDetails(), AUTH_TOKEN);
 
@@ -54,7 +68,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintForApplicantIfNotRepresented() {
+    void shouldPrintForApplicantIfNotRepresented() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -66,7 +80,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
+    void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -78,7 +92,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintForApplicantIfPaperCase() {
+    void shouldPrintForApplicantIfPaperCase() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -88,7 +102,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenPrintApplicantRejection_thenCallBulkPrintService() {
+    void givenValidCaseData_whenPrintApplicantRejection_thenCallBulkPrintService() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -102,7 +116,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenPrintRespondentRejection_thenCallBulkPrintService() {
+    void givenValidCaseData_whenPrintRespondentRejection_thenCallBulkPrintService() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -116,7 +130,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenPrintIntervenerRejection_thenCallBulkPrintService() {
+    void givenValidCaseData_whenPrintIntervenerRejection_thenCallBulkPrintService() {
         final String json
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
@@ -128,5 +142,19 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         paperNotificationService.printIntervenerRejectionGeneralApplication(caseDetails, intervenerWrapper, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails,
             intervenerWrapper.getIntervenerType().getTypeValue(), AUTH_TOKEN);
+    }
+
+    protected CaseDetails buildCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
+        return CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 }
