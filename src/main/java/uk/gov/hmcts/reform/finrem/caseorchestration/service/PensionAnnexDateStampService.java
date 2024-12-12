@@ -134,7 +134,7 @@ public class PensionAnnexDateStampService {
     }
 
     private String getFontNameFromDA(String defaultAppearance) {
-        if (defaultAppearance != null || !defaultAppearance.isEmpty()) {
+        if (defaultAppearance != null && !defaultAppearance.isEmpty()) {
             String[] parts = defaultAppearance.split("\\s+");
             for (int i = 0; i < parts.length; i++) {
                 if (parts[i].startsWith("/")) {
