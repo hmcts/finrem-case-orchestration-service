@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -40,6 +42,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @ExtendWith(MockitoExtension.class)
@@ -181,6 +185,44 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(CaseDetails.class),
             any(CaseDetails.class),
             any(EventType.class),
+            any());
+    }
+
+    @Test
+    void shouldDateStampPensionSharingAnnexContested() {
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
+        LocalDate approvedDate = LocalDate.of(2024, 12, 01);
+
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_DIRECTION_DATE, approvedDate);
+        callbackRequest.getCaseDetails().getData().put(CONSENTED_ORDER_DIRECTION_DATE, null);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(consentOrderApprovedDocumentService).stampPensionDocuments(anyList(),
+            any(),
+            any(),
+            any(),
+            any());
+    }
+
+    @Test
+    void shouldDateStampPensionSharingAnnexConsented() {
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
+        LocalDate approvedDate = LocalDate.of(2024, 12, 01);
+
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_DIRECTION_DATE, null);
+        callbackRequest.getCaseDetails().getData().put(CONSENTED_ORDER_DIRECTION_DATE, approvedDate);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(consentOrderApprovedDocumentService).stampPensionDocuments(anyList(),
+            any(),
+            any(),
+            any(),
             any());
     }
 
