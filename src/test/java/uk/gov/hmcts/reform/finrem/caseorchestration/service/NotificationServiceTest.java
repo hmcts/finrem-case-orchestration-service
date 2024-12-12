@@ -699,7 +699,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
         assertTrue(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
@@ -708,7 +708,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldNotEmailRespondentSolicitor() {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any()));
     }
@@ -716,7 +716,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailRespondentSolicitorWhenNullEmailConsent() {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
@@ -734,7 +734,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
         assertTrue(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
@@ -743,7 +743,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldNotEmailContestedAppSolicitor() {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any()));
     }
@@ -1328,7 +1328,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
         when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
@@ -1339,7 +1339,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void isContestedAndRespondentSolicitorIsNotRegisteredOrAcceptingEmails() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         Map<String, Object> caseData = new HashMap<>();
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(false);
