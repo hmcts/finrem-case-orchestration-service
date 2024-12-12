@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,7 +91,7 @@ class BarristerLetterServiceTest {
 
     @Test
     void givenApplicantIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         barristerLetterTuple = BarristerLetterTuple.of(APPLICANT, AUTH_TOKEN, ADDED);
         barrister = applicantBarrister();
 
@@ -101,7 +102,7 @@ class BarristerLetterServiceTest {
     
     @Test
     void givenRespondentIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         barristerLetterTuple = BarristerLetterTuple.of(RESPONDENT, AUTH_TOKEN, ADDED);
         barrister = respondentBarrister();
 
@@ -116,7 +117,7 @@ class BarristerLetterServiceTest {
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString()))
             .thenReturn(CCDConfigConstant.APPLICANT);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
@@ -143,7 +144,7 @@ class BarristerLetterServiceTest {
         CaseDocument removed = removedCaseDocument();
         when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString()))
             .thenReturn(CCDConfigConstant.APPLICANT);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
@@ -170,7 +171,7 @@ class BarristerLetterServiceTest {
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(bulkPrintService.getRecipient(RESPONDENT.toString()))
             .thenReturn(CCDConfigConstant.RESPONDENT);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
@@ -197,7 +198,7 @@ class BarristerLetterServiceTest {
         CaseDocument removed = removedCaseDocument();
         when(bulkPrintService.getRecipient(RESPONDENT.toString()))
             .thenReturn(CCDConfigConstant.RESPONDENT);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
