@@ -45,7 +45,7 @@ public class PensionAnnexDateStampService {
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    private static final String DEFAULT_PDTYPE_FONT_HELV = "/Helv 12 Tf 0 g";
+    private static final String DEFAULT_PDFTYPE_FONT_HELV = "/Helv 12 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
@@ -93,7 +93,7 @@ public class PensionAnnexDateStampService {
                 // Resolve and embed the font if missing
                 PDFont font = resolveFont(acroForm, fontName, doc, new File(getClass().getClassLoader().getResource("Helvetica.ttf").getFile()));
                 log.info("Finally resolve font and retrying with font {}: ", font.getName());
-                textBox.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELV);
+                textBox.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
                 textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
             }
 
@@ -129,7 +129,7 @@ public class PensionAnnexDateStampService {
         }
         resources.put(COSName.getPDFName("Helvetica"), fallbackFont);
         // Update Default Appearance String
-        acroForm.setDefaultAppearance(DEFAULT_PDTYPE_FONT_HELV);
+        acroForm.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
         return fallbackFont;
     }
 

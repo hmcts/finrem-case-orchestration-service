@@ -211,7 +211,7 @@ class ApprovedConsentOrderAboutToSubmitHandlerTest {
     void shouldDateStampPensionSharingAnnexConsented() {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         when(documentHelper.getPensionDocumentsData(any(Map.class))).thenReturn(singletonList(caseDocument()));
-        LocalDate approvedDate = LocalDate.of(2024, 12, 01);
+        LocalDate approvedDate = LocalDate.of(2024, 12, 1);
 
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
