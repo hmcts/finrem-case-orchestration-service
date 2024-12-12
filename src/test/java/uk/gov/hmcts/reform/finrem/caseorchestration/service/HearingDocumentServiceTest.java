@@ -436,10 +436,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
                 .listForHearingWrapper(ListForHearingWrapper.builder()
                     .hearingDate(LocalDate.parse(DATE_OF_HEARING, FinremDateUtils.getDateFormatter()))
                     .additionalListOfHearingDocuments(caseDocument())
+                    .formC(caseDocument())
+                    .formG(caseDocument())
                     .build())
                 .copyOfPaperFormA(singletonList(paymentDocumentCollection()))
-                .formC(caseDocument())
-                .formG(caseDocument())
                 .outOfFamilyCourtResolution(caseDocument())
                 .build())
             .build();
