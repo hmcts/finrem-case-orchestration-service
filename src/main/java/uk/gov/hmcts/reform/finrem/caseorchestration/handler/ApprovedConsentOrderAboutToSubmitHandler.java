@@ -135,8 +135,12 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     }
 
     private LocalDate getApprovalDate(Map<String, Object> caseData) {
-        return (caseData.get(CONTESTED_ORDER_DIRECTION_DATE) != null)
-            ? (LocalDate) caseData.get(CONTESTED_ORDER_DIRECTION_DATE)
-            : (LocalDate) caseData.get(CONSENTED_ORDER_DIRECTION_DATE);
+        if (caseData.get(CONTESTED_ORDER_DIRECTION_DATE) != null) {
+            return LocalDate.parse((String) caseData.get(CONTESTED_ORDER_DIRECTION_DATE));
+        }
+        if (caseData.get(CONSENTED_ORDER_DIRECTION_DATE) != null) {
+            return  LocalDate.parse((String) caseData.get(CONSENTED_ORDER_DIRECTION_DATE));
+        }
+        return null;
     }
 }

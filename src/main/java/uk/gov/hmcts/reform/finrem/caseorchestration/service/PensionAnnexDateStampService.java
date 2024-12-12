@@ -40,6 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @RequiredArgsConstructor
 @Slf4j
 public class PensionAnnexDateStampService {
+    public static final String HELVETICA = "Helvetica";
+    public static final String HELVETICA_TTF = "Helvetica.ttf";
     private final EvidenceManagementUploadService emUploadService;
     private final EvidenceManagementDownloadService emDownloadService;
     private final GenericDocumentService genericDocumentService;
@@ -82,7 +84,6 @@ public class PensionAnnexDateStampService {
             PDField field = acroForm.getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
             String defaultAppearance = textBox.getDefaultAppearance();
-            String fontName = getFontNameFromDA(defaultAppearance);
 
             try {
                 textBox.setDefaultAppearance(defaultAppearance);
@@ -91,7 +92,8 @@ public class PensionAnnexDateStampService {
                 log.error("Failed to update PDF when attempting to use font 'Helvetica' that isn't embedded, Exception: " + ioException);
             } finally {
                 // Resolve and embed the font if missing
-                PDFont font = resolveFont(acroForm, fontName, doc, new File(getClass().getClassLoader().getResource("Helvetica.ttf").getFile()));
+                String fontName = getFontNameFromDA(defaultAppearance);
+                PDFont font = resolveFont(acroForm, fontName, doc, new File(getClass().getClassLoader().getResource(HELVETICA_TTF).getFile()));
                 log.info("Finally resolve font and retrying with font {}: ", font.getName());
                 textBox.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
                 textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
@@ -127,7 +129,7 @@ public class PensionAnnexDateStampService {
             resources = new PDResources();
             acroForm.setDefaultResources(resources);
         }
-        resources.put(COSName.getPDFName("Helvetica"), fallbackFont);
+        resources.put(COSName.getPDFName(HELVETICA), fallbackFont);
         // Update Default Appearance String
         acroForm.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
         return fallbackFont;
