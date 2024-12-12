@@ -141,7 +141,7 @@ class CaseDataServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(2);
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION)).isEqualTo("nonarrayValue");
+        assertEquals("nonarrayValue", caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
