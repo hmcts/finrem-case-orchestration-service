@@ -886,10 +886,14 @@ class DuplicateFilenameDocumentCheckerTest {
                 .uploadMediatorDocumentPaperCase(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .formC(DUPLICATED_CASE_DOCUMENT)
+                .listForHearingWrapper(ListForHearingWrapper.builder()
+                    .formC(DUPLICATED_CASE_DOCUMENT)
+                    .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .formG(DUPLICATED_CASE_DOCUMENT)
+                .listForHearingWrapper(ListForHearingWrapper.builder()
+                    .formG(DUPLICATED_CASE_DOCUMENT)
+                    .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .refusalOrderPreviewDocument(DUPLICATED_CASE_DOCUMENT)

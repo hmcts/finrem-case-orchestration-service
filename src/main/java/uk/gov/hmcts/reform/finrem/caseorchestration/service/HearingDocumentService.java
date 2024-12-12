@@ -116,6 +116,6 @@ public class HearingDocumentService {
      * additionally form G populated.</p>
      */
     public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getFormC() != null;
+        return caseDetails.getData().getListForHearingWrapper().getFormC() != null;
     }
 }

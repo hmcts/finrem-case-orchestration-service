@@ -38,7 +38,7 @@ public class ContestedListForHearingCorrespondenceService {
 
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(caseDetails.getData());
 
-        if (caseDetailsBefore != null && caseDetailsBefore.getData().getFormC() != null) {
+        if (caseDetailsBefore != null && caseDetailsBefore.getData().getListForHearingWrapper().getFormC() != null) {
             log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation, caseDetails);
             log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());

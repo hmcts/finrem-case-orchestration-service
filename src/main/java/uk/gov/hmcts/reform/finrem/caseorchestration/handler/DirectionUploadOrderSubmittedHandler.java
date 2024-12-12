@@ -48,7 +48,8 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
             if (caseDetails.getData().getDirectionDetailsCollection().stream()
                 .anyMatch(dd -> dd.getValue().getIsAnotherHearingYN().equals(YesOrNo.YES))) {
 
-                if (caseDetailsBefore != null && caseDetailsBefore.getData() != null && caseDetailsBefore.getData().getFormC() != null) {
+                if (caseDetailsBefore != null && caseDetailsBefore.getData() != null
+                    && caseDetailsBefore.getData().getListForHearingWrapper().getFormC() != null) {
                     log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                     additionalHearingDocumentService.sendAdditionalHearingDocuments(userAuthorisation, caseDetails);
                     log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
