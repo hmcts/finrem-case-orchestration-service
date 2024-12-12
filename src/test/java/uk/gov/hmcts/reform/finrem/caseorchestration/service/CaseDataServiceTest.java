@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -36,9 +35,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
@@ -280,6 +277,7 @@ class CaseDataServiceTest {
     @Test
     void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
         assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE))).isTrue();
+        assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, YES_VALUE))).isTrue();
     }
 
     @Test
@@ -289,7 +287,19 @@ class CaseDataServiceTest {
             "",
             null,
             "this is some random string, that doesn't make any sense"
-        ).forEach(value -> assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value))).isFalse());
+        ).forEach(value -> {
+            assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value))).isFalse();
+        });
+    }
+
+    @Test
+    void isApplicantRepresentedByASolicitorShouldReturnFalseAfterRefactoring() {
+        asList(
+            NO_VALUE,
+            null
+        ).forEach(value -> {
+            assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, value))).isFalse();
+        });
     }
 
     @Test
@@ -299,6 +309,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isTrue();
+        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isTrue();
     }
 
     @Test
@@ -307,7 +318,7 @@ class CaseDataServiceTest {
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isFalse();
+        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isFalse();
     }
 
     @Test
@@ -317,6 +328,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isTrue();
+        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isTrue();
     }
 
     @Test
@@ -331,21 +343,29 @@ class CaseDataServiceTest {
     @Test
     void isConsentedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
         assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE))).isTrue();
+        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            YES_VALUE))).isTrue();
     }
 
     @Test
     void isContestedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
         assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE))).isTrue();
+        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            YES_VALUE))).isTrue();
     }
 
     @Test
     void isConsentedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
         assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE))).isFalse();
+        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            NO_VALUE))).isFalse();
     }
 
     @Test
     void isContestedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
         assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE))).isFalse();
+        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            NO_VALUE))).isFalse();
     }
 
     @Test
@@ -707,11 +727,19 @@ class CaseDataServiceTest {
         return data;
     }
 
+    private static FinremCaseData createCaseDataApplRepresented(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataApplRepresented(value));
+    }
+
     private static Map<String, Object> createCaseDataRespRepresentedConsented(String value) {
         Map<String, Object> data = new HashMap<>();
         data.put(CONSENTED_RESPONDENT_REPRESENTED, value);
 
         return data;
+    }
+
+    private static FinremCaseData createCaseDataRespRepresentedConsented(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataRespRepresentedConsented(value));
     }
 
     private static Map<String, Object> createCaseDataRespRepresentedContested(String value) {
@@ -721,43 +749,8 @@ class CaseDataServiceTest {
         return data;
     }
 
-    @Test
-    void testIsApplicantRepresentedByASolicitor_True() {
-        // Arrange
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.YES)
-            .build()).build();
-
-        // Act
-        boolean result = caseDataService.isApplicantRepresentedByASolicitor(caseData);
-
-        // Assert
-        assertTrue(result, "Applicant should be represented by a solicitor");
-    }
-
-    @Test
-    void testIsApplicantRepresentedByASolicitor_False() {
-        // Arrange
-        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(ContactDetailsWrapper.builder()
-            .applicantRepresented(YesOrNo.NO)
-            .build()).build();
-
-        // Act
-        boolean result = caseDataService.isApplicantRepresentedByASolicitor(caseData);
-
-        // Assert
-        assertFalse(result, "Applicant should not be represented by a solicitor");
-    }
-
-    @Test
-    void testIsApplicantRepresentedByASolicitor_NullCaseData() {
-        // Arrange
-        FinremCaseData caseData = null;
-
-        // Act & Assert
-        assertThrows(NullPointerException.class,
-            () -> caseDataService.isApplicantRepresentedByASolicitor(caseData),
-            "Method should throw NullPointerException when caseData is null");
+    private static FinremCaseData createCaseDataRespRepresentedContested(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataRespRepresentedContested(value));
     }
 
 }
