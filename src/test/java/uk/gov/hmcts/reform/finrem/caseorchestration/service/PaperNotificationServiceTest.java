@@ -17,8 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.s
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,7 +73,7 @@ class PaperNotificationServiceTest {
         caseDetails.getData().remove("applicantSolicitorConsentForEmails");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+        assertTrue(paperNotificationService.shouldPrintForApplicant(caseDetails));
     }
 
     @Test
@@ -86,7 +85,7 @@ class PaperNotificationServiceTest {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+        assertTrue(paperNotificationService.shouldPrintForApplicant(caseDetails));
     }
 
     @Test
@@ -96,7 +95,7 @@ class PaperNotificationServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("paperApplication", "YES");
 
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+        assertTrue(paperNotificationService.shouldPrintForApplicant(caseDetails));
     }
 
     @Test
