@@ -12,12 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.InputStream;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -185,7 +185,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressContested() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -196,7 +196,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressContested_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -205,7 +205,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressConsented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -216,7 +216,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressConsented_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -234,8 +234,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
         createRequest(PATH + "no-org-policies.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -252,8 +252,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicies() throws Exception {
         createRequest(PATH + "no-orgs-is-represented.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

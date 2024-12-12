@@ -296,8 +296,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void shouldUpdateRepresentationUpdateHistoryRespondent() throws Exception {
         setUpCaseDetails("change-of-representatives-respondent.json");
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
-        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
             ChangedRepresentative.builder()
@@ -385,8 +385,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("John Smith");
         when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
-        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any(Map.class))).thenReturn(true);
-        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any(Map.class))).thenReturn(true);
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
