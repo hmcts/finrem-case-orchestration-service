@@ -35,7 +35,10 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
@@ -95,20 +98,20 @@ class CaseDataServiceTest {
     void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
-        assertThat(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).isTrue();
+        assertTrue(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
     void isRespondentSolicitorResponsibleToDraftOrder_appSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
-        assertThat(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).isFalse();
+        assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
     void isRespondentSolicitorResponsibleToDraftOrder_fieldNotExist() {
         Map<String, Object> caseData = new HashMap<>();
-        assertThat(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)).isFalse();
+        assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
@@ -118,7 +121,7 @@ class CaseDataServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(3);
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION)).isNull();
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
@@ -128,7 +131,7 @@ class CaseDataServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(1);
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION)).isNull();
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
@@ -147,7 +150,7 @@ class CaseDataServiceTest {
         caseData.put("uploadHearingOrderRO", "nonarrayValue");
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(caseData.get("uploadHearingOrderRO")).isEqualTo("nonarrayValue");
+        assertEquals("nonarrayValue", caseData.get("uploadHearingOrderRO"));
         assertThat((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)).hasSize(1);
     }
 
@@ -158,7 +161,7 @@ class CaseDataServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(2);
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION)).isNull();
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
@@ -174,17 +177,17 @@ class CaseDataServiceTest {
 
     @Test
     void nullToEmptyShouldReturnEmptyWhenNull() {
-        assertThat(caseDataService.nullToEmpty(null)).isEqualTo("");
+        assertEquals("", caseDataService.nullToEmpty(null));
     }
 
     @Test
     void nullToEmptyShouldReturnEmptyWhenEmpty() {
-        assertThat(caseDataService.nullToEmpty("")).isEqualTo("");
+        assertEquals("", caseDataService.nullToEmpty(""));
     }
 
     @Test
     void nullToEmptyShouldReturnStringWhenString() {
-        assertThat(caseDataService.nullToEmpty("this is my value")).isEqualTo("this is my value");
+        assertEquals("this is my value", caseDataService.nullToEmpty("this is my value"));
     }
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -193,21 +196,17 @@ class CaseDataServiceTest {
 
     @Test
     void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
-        assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf")))
-        ).isTrue();
+        assertTrue(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))));
     }
 
     @Test
     void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
-        assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null)
-        ).isFalse();
+        assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null));
     }
 
     @Test
     void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalseWhenNull() {
-        assertThat(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null)).isFalse();
+        assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null));
     }
 
     @Test
@@ -219,24 +218,22 @@ class CaseDataServiceTest {
             asList("London Road", null),
             asList(null, null),
             asList(null, "Sw8 7ty")
-        ).forEach(data -> assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data))).isFalse()
-        );
+        ).forEach(data -> assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data))));
     }
 
     @Test
     void buildFullNameShouldBuildFullName() {
-        assertThat(caseDataService.buildFullName(fullName("Pit", "Smith"), F_NAME, L_NAME)).isEqualTo("Pit Smith");
-        assertThat(caseDataService.buildFullName(fullName("", "Smith"), F_NAME, L_NAME)).isEqualTo("Smith");
-        assertThat(caseDataService.buildFullName(fullName("Pit Adam", "Smith"), F_NAME, L_NAME)).isEqualTo("Pit Adam Smith");
-        assertThat(caseDataService.buildFullName(fullName("Pit", "Smith-Johnson"), F_NAME, L_NAME)).isEqualTo("Pit Smith-Johnson");
-        assertThat(caseDataService.buildFullName(fullName("Pit JK", "Smith"), F_NAME, L_NAME)).isEqualTo("Pit JK Smith");
-        assertThat(caseDataService.buildFullName(fullName("Pit", ""), F_NAME, L_NAME)).isEqualTo("Pit");
-        assertThat(caseDataService.buildFullName(fullName("", ""), F_NAME, L_NAME)).isEmpty();
-        assertThat(caseDataService.buildFullName(fullName(null, ""), F_NAME, L_NAME)).isEmpty();
-        assertThat(caseDataService.buildFullName(fullName("", null), F_NAME, L_NAME)).isEmpty();
-        assertThat(caseDataService.buildFullName(fullName("     ", "    "), F_NAME, L_NAME)).isEmpty();
-        assertThat(caseDataService.buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME)).isEqualTo("Pit Smith");
+        assertEquals("Pit Smith", caseDataService.buildFullName(fullName("Pit", "Smith"), F_NAME, L_NAME));
+        assertEquals("Smith", caseDataService.buildFullName(fullName("", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit Adam Smith", caseDataService.buildFullName(fullName("Pit Adam", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit Smith-Johnson", caseDataService.buildFullName(fullName("Pit", "Smith-Johnson"), F_NAME, L_NAME));
+        assertEquals("Pit JK Smith", caseDataService.buildFullName(fullName("Pit JK", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit", caseDataService.buildFullName(fullName("Pit", ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("", ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName(null, ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("", null), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("     ", "    "), F_NAME, L_NAME));
+        assertEquals("Pit Smith", caseDataService.buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME));
     }
 
     private static Map<String, String> createAddressObject(List<?> data) {
@@ -276,8 +273,8 @@ class CaseDataServiceTest {
 
     @Test
     void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
-        assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE))).isTrue();
-        assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, YES_VALUE))).isTrue();
+        assertTrue(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE)));
+        assertTrue(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, YES_VALUE)));
     }
 
     @Test
@@ -287,9 +284,9 @@ class CaseDataServiceTest {
             "",
             null,
             "this is some random string, that doesn't make any sense"
-        ).forEach(value -> {
-            assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value))).isFalse();
-        });
+        ).forEach(value ->
+            assertFalse(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value)))
+        );
     }
 
     @Test
@@ -297,9 +294,9 @@ class CaseDataServiceTest {
         asList(
             NO_VALUE,
             null
-        ).forEach(value -> {
-            assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, value))).isFalse();
-        });
+        ).forEach(value ->
+            assertFalse(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, value)))
+        );
     }
 
     @Test
@@ -308,8 +305,8 @@ class CaseDataServiceTest {
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isTrue();
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isTrue();
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
@@ -318,7 +315,7 @@ class CaseDataServiceTest {
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isFalse();
+        assertFalse(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
@@ -327,8 +324,8 @@ class CaseDataServiceTest {
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isTrue();
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails))).isTrue();
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
@@ -337,35 +334,35 @@ class CaseDataServiceTest {
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).isFalse();
+        assertFalse(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
     }
 
     @Test
     void isConsentedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE))).isTrue();
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
-            YES_VALUE))).isTrue();
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE)));
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            YES_VALUE)));
     }
 
     @Test
     void isContestedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE))).isTrue();
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
-            YES_VALUE))).isTrue();
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE)));
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            YES_VALUE)));
     }
 
     @Test
     void isConsentedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE))).isFalse();
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
-            NO_VALUE))).isFalse();
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE)));
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            NO_VALUE)));
     }
 
     @Test
     void isContestedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE))).isFalse();
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
-            NO_VALUE))).isFalse();
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE)));
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            NO_VALUE)));
     }
 
     @Test
@@ -373,7 +370,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-consented-in-contested.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails)).isTrue();
+        assertTrue(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
@@ -381,7 +378,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-contested.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails)).isFalse();
+        assertFalse(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
@@ -389,7 +386,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-consented.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails)).isFalse();
+        assertFalse(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
@@ -400,19 +397,17 @@ class CaseDataServiceTest {
             "any value makes it not empty",
             "1234",
             "@#$R@#F@$T"
-        ).forEach(value -> assertThat(
-            caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(value))).isTrue()
-        );
+        ).forEach(value -> assertTrue(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(value))));
     }
 
     @Test
     void isNotEmptyShouldReturnFalseWhenEmptyMap() {
-        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, Map.of())).isFalse();
+        assertFalse(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, Map.of()));
     }
 
     @Test
     void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
-        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(""))).isFalse();
+        assertFalse(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented("")));
     }
 
     @Test
@@ -426,12 +421,12 @@ class CaseDataServiceTest {
         RespondToOrderData data = new RespondToOrderData();
         data.setRespondToOrder(new RespondToOrder());
 
-        assertThat(caseDataService.isAmendedConsentOrderType(data)).isFalse();
+        assertFalse(caseDataService.isAmendedConsentOrderType(data));
     }
 
     @Test
     void isAmendedConsentOrderTypeShouldReturnFalseWhenDocumentTypeIsNotAmendedConsentOrder() {
-        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData("ble ble ble"))).isFalse();
+        assertFalse(caseDataService.isAmendedConsentOrderType(getRespondToOrderData("ble ble ble")));
     }
 
     @Test
@@ -442,7 +437,7 @@ class CaseDataServiceTest {
 
     @Test
     void isAmendedConsentOrderTypeShouldReturnTrueWhenDocumentTypeIsAmendedConsentOrder() {
-        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMEND_CONSENT_ORDER))).isTrue();
+        assertTrue(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMEND_CONSENT_ORDER)));
     }
 
     @Test
@@ -450,7 +445,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data)).isTrue();
+        assertTrue(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
@@ -458,7 +453,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data)).isFalse();
+        assertFalse(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
@@ -466,7 +461,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, null);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data)).isFalse();
+        assertFalse(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
@@ -474,7 +469,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails)).isTrue();
+        assertTrue(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
@@ -482,7 +477,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isConsentedApplication(caseDetails)));
     }
 
     @Test
@@ -490,7 +485,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
@@ -498,7 +493,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails)).isTrue();
+        assertTrue(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
@@ -506,7 +501,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
@@ -514,7 +509,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
@@ -522,7 +517,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails)).isTrue();
+        assertTrue(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
@@ -530,7 +525,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails)));
     }
 
     @Test
@@ -538,7 +533,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
@@ -546,7 +541,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
@@ -554,7 +549,7 @@ class CaseDataServiceTest {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails)).isFalse();
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
@@ -562,7 +557,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data)).isTrue();
+        assertTrue(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
@@ -570,14 +565,14 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data)).isFalse();
+        assertFalse(caseDataService.isApplicantAddressConfidential(data)));
     }
 
     @Test
     void isApplicantAddressConfidentialFalseWhenApplicantAddressConfidentialFieldIsNotPresent() {
         Map<String, Object> data = new HashMap<>();
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data)).isFalse();
+        assertFalse(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
@@ -585,7 +580,7 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data)).isTrue();
+        assertTrue(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
@@ -593,14 +588,14 @@ class CaseDataServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data)).isFalse();
+        assertFalse(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
     void isRespondentAddressConfidentialFalseWhenRespondentAddressConfidentialFieldIsNotPresent() {
         Map<String, Object> data = new HashMap<>();
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data)).isFalse();
+        assertFalse(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
@@ -616,7 +611,7 @@ class CaseDataServiceTest {
     void isContestedFinremCaseDetailsApplication() {
         FinremCaseDetails finremCaseDetails
             = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).build();
-        assertThat(caseDataService.isContestedApplication(finremCaseDetails)).isTrue();
+        assertTrue(caseDataService.isContestedApplication(finremCaseDetails));
     }
 
     @Test
@@ -660,17 +655,17 @@ class CaseDataServiceTest {
             .consentOrderWrapper(consentOrderWrapper)
             .build();
 
-        assertThat(caseDataService.hasConsentOrder(caseData)).isTrue();
+        assertTrue(caseDataService.hasConsentOrder(caseData));
     }
 
     @Test
     void testHasConsentOrderIsFalse() {
-        assertThat(caseDataService.hasConsentOrder(new FinremCaseData())).isFalse();
+        assertFalse(caseDataService.hasConsentOrder(new FinremCaseData()));
     }
 
     @Test
     void shouldReturnTrueIfConsentInContestedEvent() {
-        assertThat(caseDataService.isConsentInContestedGeneralOrderEvent(GENERAL_ORDER_CONSENT_IN_CONTESTED)).isTrue();
+        assertTrue(caseDataService.isConsentInContestedGeneralOrderEvent(GENERAL_ORDER_CONSENT_IN_CONTESTED));
     }
 
     @Test
@@ -680,9 +675,7 @@ class CaseDataServiceTest {
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, true);
-
-        assertThat(result).isTrue();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, true));
     }
 
     @Test
@@ -693,9 +686,7 @@ class CaseDataServiceTest {
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
-
-        assertThat(result).isTrue();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, false));
     }
 
     @Test
@@ -706,9 +697,7 @@ class CaseDataServiceTest {
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONSENTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
-
-        assertThat(result).isTrue();
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {
