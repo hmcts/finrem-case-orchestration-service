@@ -3,11 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
@@ -24,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -40,14 +35,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @RequiredArgsConstructor
 @Slf4j
 public class PensionAnnexDateStampService {
-    public static final String HELVETICA = "Helvetica";
-    public static final String HELVETICA_TTF = "Helvetica.ttf";
     private final EvidenceManagementUploadService emUploadService;
     private final EvidenceManagementDownloadService emDownloadService;
     private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
-    private static final String DEFAULT_PDFTYPE_FONT_HELV = "/Helv 12 Tf 0 g";
 
     public CaseDocument appendApprovedDateToDocument(CaseDocument document,
                                                      String authToken,
@@ -83,21 +75,10 @@ public class PensionAnnexDateStampService {
             // Update the default appearance string
             PDField field = acroForm.getField(FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME);
             PDTextField textBox = (PDTextField) field;
-            String defaultAppearance = textBox.getDefaultAppearance();
+            String defaultAppearance = textBox.getAcroForm().getDefaultAppearance();
 
-            try {
-                textBox.setDefaultAppearance(defaultAppearance);
-                textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
-            } catch (IOException ioException) {
-                log.error("Failed to update PDF when attempting to use font 'Helvetica' that isn't embedded, Exception: " + ioException);
-            } finally {
-                // Resolve and embed the font if missing
-                String fontName = getFontNameFromDA(defaultAppearance);
-                PDFont font = resolveFont(acroForm, fontName, doc, new File(getClass().getClassLoader().getResource(HELVETICA_TTF).getFile()));
-                log.info("Finally resolve font and retrying with font {}: ", font.getName());
-                textBox.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
-                textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
-            }
+            textBox.setDefaultAppearance(defaultAppearance);
+            textBox.setValue(approvalDate.format(DateTimeFormatter.ofPattern(DATE_STAMP_PATTERN).withLocale(Locale.UK)));
 
             ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
             doc.save(outputBytes);
@@ -106,44 +87,5 @@ public class PensionAnnexDateStampService {
         } else {
             throw new StampDocumentException("Pension Order document PDF is flattened / not editable.");
         }
-    }
-
-    private PDFont resolveFont(PDAcroForm acroForm, String fontName, PDDocument document, File fontFilePath) throws IOException {
-        if (fontName == null) {
-            return null;
-        }
-        // Check if the font exists in the default resources
-        PDResources resources = acroForm.getDefaultResources();
-        if (resources != null) {
-            PDFont font = resources.getFont(COSName.getPDFName(fontName));
-            if (font != null) {
-                log.info("Font found in resources: " + fontName);
-                return font;
-            }
-        }
-        // Load and embed the fallback font if not found
-        log.info("Font not found in resources. Embedding fallback font...");
-        PDType0Font fallbackFont = PDType0Font.load(document, fontFilePath);
-        // Add fallback font to default resources
-        if (resources == null) {
-            resources = new PDResources();
-            acroForm.setDefaultResources(resources);
-        }
-        resources.put(COSName.getPDFName(HELVETICA), fallbackFont);
-        // Update Default Appearance String
-        acroForm.setDefaultAppearance(DEFAULT_PDFTYPE_FONT_HELV);
-        return fallbackFont;
-    }
-
-    private String getFontNameFromDA(String defaultAppearance) {
-        if (defaultAppearance != null && !defaultAppearance.isEmpty()) {
-            String[] parts = defaultAppearance.split("\\s+");
-            for (int i = 0; i < parts.length; i++) {
-                if (parts[i].startsWith("/")) {
-                    return parts[i].substring(1); // Strip leading '/'
-                }
-            }
-        }
-        return null;
     }
 }
