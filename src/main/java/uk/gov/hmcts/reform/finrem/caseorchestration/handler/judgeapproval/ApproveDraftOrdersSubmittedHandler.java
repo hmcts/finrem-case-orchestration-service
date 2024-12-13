@@ -56,7 +56,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         List<UUID> refusalOrderIdsToBeSent =
             ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream().map(UuidCollection::getValue).toList();
 
-        draftOrdersWrapper.getRefusedOrdersCollection().stream()
+        ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElse(List.of()).stream()
             .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
             .forEach(a -> {
                 if (!isEmpty(a.getValue().getSubmittedByEmail())) {
