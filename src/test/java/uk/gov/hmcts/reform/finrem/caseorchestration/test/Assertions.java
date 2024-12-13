@@ -34,13 +34,4 @@ public class Assertions {
             }
         }
     }
-
-    public static void assertEqualsWithNullOrEmptyHandling(List<?> expected, List<?> actual) {
-        boolean areBothNullOrEmpty =
-            (expected == null || expected.isEmpty()) && (actual == null || actual.isEmpty());
-
-        if (!areBothNullOrEmpty) {
-            assertEquals(expected, actual, "Lists do not match");
-        }
-    }
 }

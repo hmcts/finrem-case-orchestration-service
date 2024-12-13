@@ -53,7 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertEqualsWithNullOrEmptyHandling;
 
 @ExtendWith(MockitoExtension.class)
 class ApproveDraftOrdersAboutToStartHandlerTest {
@@ -170,9 +169,10 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             if (expected != null && actual != null) {
                 assertThat(actual)
                     .usingRecursiveComparison()
-                    .ignoringFields("sortKey", "isFinalOrder", "attachments")
+                    .ignoringFields(actual.getDocType() == DRAFT_ORDER
+                        ? new String[] {"sortKey", "isFinalOrder"}
+                        : new String[] {"sortKey", "isFinalOrder", "attachments"})
                     .isEqualTo(expected);
-                assertEqualsWithNullOrEmptyHandling(expected.getAttachments(), actual.getAttachments());
             } else {
                 assertEquals(expected, actual);
             }
@@ -282,7 +282,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .title(docType.getTitle())
             .inlineDocType(docType.getDescription())
             .document(document)
-            .attachments(ofNullable(attachments).filter(a -> !a.isEmpty()).orElse(null))
+            .attachments(ofNullable(attachments).filter(a -> !a.isEmpty()).orElse(List.of()))
             .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
             .build();
     }
@@ -312,7 +312,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                 ))
                 .build(),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, List.of()),
             null, null, null,
             NO);
     }
@@ -360,7 +360,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                 ))
                 .build(),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, List.of()),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null,
             NO);
