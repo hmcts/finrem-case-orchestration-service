@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -172,5 +174,59 @@ class DraftOrdersNotificationRequestMapperTest {
                 draftOrderDocReviewCollection
             ))
             .build();
+    }
+
+    @Test
+    void testBuildRefusedDraftOrderOrPsaNotificationRequest() {
+        DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .applicantFmName("Charlie")
+                .applicantLname("Hull")
+                .respondentFmName("Stella")
+                .respondentLname("Hull")
+                .build())
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
+                    .courtListWrapper(DefaultCourtListWrapper.builder()
+                        .liverpoolCourtList(LIVERPOOL_CIVIL_FAMILY_COURT).build())
+                    .regionList(Region.NORTHWEST)
+                    .northWestFrcList(RegionNorthWestFrc.LIVERPOOL)
+                    .build())
+                .build())
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(draftOrdersReview)
+                        .build()
+                ))
+                .build())
+            .build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(45347643533535L)
+            .data(caseData)
+            .build();
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedByEmail("hello@world.com")
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
+        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("45347643533535");
+        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
+        assertThat(notificationRequest.getApplicantName()).isEqualTo("Charlie Hull");
+        assertThat(notificationRequest.getRespondentName()).isEqualTo("Stella Hull");
+        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
+        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
+        assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
+        assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
+        assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
     }
 }
