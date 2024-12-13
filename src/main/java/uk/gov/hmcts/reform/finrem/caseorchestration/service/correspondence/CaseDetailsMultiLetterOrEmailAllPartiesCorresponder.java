@@ -34,8 +34,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-                documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+            printApplicantDocuments(authorisationToken, caseDetails);
         }
     }
 
@@ -46,11 +45,9 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+            printRespondentDocuments(authorisationToken, caseDetails);
         }
     }
-
 
     @SuppressWarnings("java:S1874")
     public void sendIntervenerCorrespondence(String authorisationToken, CaseDetails caseDetails) {
@@ -90,13 +87,11 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         return caseDocuments;
     }
 
-
     private IntervenerHearingNoticeCollection getHearingNoticesDocumentCollection(CaseDocument hearingNotice) {
         return IntervenerHearingNoticeCollection.builder()
             .value(IntervenerHearingNotice.builder().caseDocument(hearingNotice)
                 .noticeReceivedAt(LocalDateTime.now()).build()).build();
     }
-
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
@@ -110,4 +105,13 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
+    protected void printApplicantDocuments(String authorisationToken, CaseDetails caseDetails) {
+        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+    }
+
+    protected void printRespondentDocuments(String authorisationToken, CaseDetails caseDetails) {
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+    }
 }
