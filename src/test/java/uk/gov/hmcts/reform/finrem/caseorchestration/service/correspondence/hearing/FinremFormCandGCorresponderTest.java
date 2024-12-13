@@ -63,10 +63,10 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
             .listForHearingWrapper(ListForHearingWrapper.builder()
                 .hearingDate(LocalDate.parse(DATE_OF_HEARING))
                 .additionalListOfHearingDocuments(caseDocument())
+                .formC(caseDocument())
+                .formG(caseDocument())
                 .build())
             .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
-            .formC(caseDocument())
-            .formG(caseDocument())
             .copyOfPaperFormA(List.of(
                 PaymentDocumentCollection.builder()
                     .value(PaymentDocument.builder()

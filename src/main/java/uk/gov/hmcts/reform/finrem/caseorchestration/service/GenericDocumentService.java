@@ -41,7 +41,7 @@ public class GenericDocumentService {
                                                             String template, String fileName, String caseId) {
         Document generatedPdf = documentManagementService
             .storeDocument(template, fileName, placeholders, authorisationToken, caseId);
-        return toCaseDocument(generatedPdf);
+        return CaseDocument.from(generatedPdf);
     }
 
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest, String recipient, boolean isInternational, String auth) {
@@ -63,7 +63,7 @@ public class GenericDocumentService {
             .build();
         Document stampedDocument = pdfStampingService.stampDocument(
             documentWithUrl, authorisationToken, true, stampType, caseId);
-        return toCaseDocument(stampedDocument);
+        return CaseDocument.from(stampedDocument);
     }
 
     public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document,
@@ -80,7 +80,7 @@ public class GenericDocumentService {
         String filename = documentConversionService.getConvertedFilename(requestDocument.getFileName());
         Document storedDocument =
             documentManagementService.storeDocument(convertedDocContent, filename, authorisationToken, caseId);
-        return toCaseDocument(storedDocument);
+        return CaseDocument.from(storedDocument);
     }
 
     public CaseDocument stampDocument(CaseDocument document,
@@ -95,15 +95,7 @@ public class GenericDocumentService {
                 .binaryUrl(pdfCaseDocument.getDocumentBinaryUrl())
                 .fileName(pdfCaseDocument.getDocumentFilename())
                 .build(), authorisationToken, false, stampType, caseId);
-        return toCaseDocument(stampedDocument);
-    }
-
-    public CaseDocument toCaseDocument(Document document) {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentBinaryUrl(document.getBinaryUrl());
-        caseDocument.setDocumentFilename(document.getFileName());
-        caseDocument.setDocumentUrl(document.getUrl());
-        return caseDocument;
+        return CaseDocument.from(stampedDocument);
     }
 
     public Document toDocument(CaseDocument caseDocument) {
