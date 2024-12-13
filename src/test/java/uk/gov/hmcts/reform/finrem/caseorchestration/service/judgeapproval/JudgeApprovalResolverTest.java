@@ -9,8 +9,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved.ContestedDraftOrderNotApprovedDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -25,22 +28,35 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +70,15 @@ class JudgeApprovalResolverTest {
 
     @Mock
     private HearingProcessor hearingProcessor;
+
+    @Mock
+    private GenericDocumentService genericDocumentService;
+
+    @Mock
+    private DocumentConfiguration documentConfiguration;
+
+    @Mock
+    private ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
 
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
@@ -218,5 +243,215 @@ class JudgeApprovalResolverTest {
             ),
             Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApproval, false, null, null, null)
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideProcessRefusedDocumentsAndUpdateTheirState")
+    void shouldProcessRefusedDocumentsAndUpdateTheirState(JudgeApproval judgeApproval,
+                                                          List<AgreedDraftOrderCollection> agreedDraftOrderCollections,
+                                                          List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
+                                                          List<RefusedOrderCollection> existingRefusedOrders,
+                                                          RefusedOrderCollection refusedOrderCollection,
+                                                          AgreedDraftOrderCollection targetAgreedDraftOrderCollection,
+                                                          DraftOrderDocReviewCollection targetDraftOrderDocReviewCollection,
+                                                          PsaDocReviewCollection targetPsaDocReviewCollection) {
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(agreedDraftOrderCollections)
+            .draftOrdersReviewCollection(draftOrdersReviewCollection)
+            .refusedOrdersCollection(existingRefusedOrders)
+            .build();
+
+        // Mocking IDAM service for getting judge's full name
+        CaseDocument generatedDocument = CaseDocument.builder().build();
+        lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Approved Judge");
+        lenient().when(documentConfiguration.getContestedDraftOrderNotApprovedFileName()).thenReturn("RefusalOrder.doc");
+        lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), anyMap(), anyString(), anyString(), anyString()))
+            .thenReturn(generatedDocument);
+
+        LocalDateTime fixedDateTime = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder()
+                    .id(Long.valueOf(CASE_ID))
+                    .data(FinremCaseData.builder()
+                        .draftOrdersWrapper(draftOrdersWrapper)
+                        .build())
+                    .build(),
+                draftOrdersWrapper, judgeApproval.getDocument(), judgeApproval, AUTH_TOKEN);
+
+            //
+            assertNull(draftOrdersWrapper.getGeneratedOrderReason());
+            assertNull(draftOrdersWrapper.getGeneratedOrderRefusedDate());
+            assertNull(draftOrdersWrapper.getGeneratedOrderJudgeName());
+            assertNull(draftOrdersWrapper.getGeneratedOrderJudgeType());
+
+            // expected refusal order count
+            int result = Stream.of(
+                    Optional.ofNullable(targetAgreedDraftOrderCollection),
+                    Optional.ofNullable(targetDraftOrderDocReviewCollection),
+                    Optional.ofNullable(targetPsaDocReviewCollection)
+                ).allMatch(Optional::isEmpty) ? 0 : 1;
+
+            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(existingRefusedOrders.size() + result);
+
+            if (refusedOrderCollection != null) {
+                assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(1);
+                assertEquals(OrderStatus.REFUSED, targetAgreedDraftOrderCollection.getValue().getOrderStatus());
+                // verify agreedDraftOrderToBeExamined is removed
+                assertTrue(isAgreedDraftOrderAbsent(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetAgreedDraftOrderCollection));
+
+                List<DraftOrdersReviewCollection> newDraftOrdersReviewCollections = draftOrdersWrapper.getDraftOrdersReviewCollection();
+                if (targetDraftOrderDocReviewCollection != null) {
+                    assertTrue(isDraftOrderDocumentReviewAbsent(newDraftOrdersReviewCollections, targetDraftOrderDocReviewCollection));
+                }
+                if (targetPsaDocReviewCollection != null) {
+                    assertTrue(isPsaDocumentReviewAbsent(newDraftOrdersReviewCollections, targetPsaDocReviewCollection));
+                }
+                // TODO verify refusedDate
+                draftOrdersWrapper.getRefusedOrdersCollection().stream().findFirst().ifPresentOrElse(r -> {
+                    assertEquals(fixedDateTime, r.getValue().getRefusedDate());
+                    assertEquals(ofNullable(targetAgreedDraftOrderCollection.getValue().getDraftOrder())
+                            .orElse(targetAgreedDraftOrderCollection.getValue().getPensionSharingAnnex()),
+                        r.getValue().getRefusedDocument());
+                }, () -> fail("Unexpected missing refused order"));
+            }
+
+        }
+    }
+
+    static Stream<Arguments> provideProcessRefusedDocumentsAndUpdateTheirState() {
+        CaseDocument targetDoc = CaseDocument.builder().documentUrl("targetUrl").build();
+        JudgeApproval judgeApproval = JudgeApproval.builder()
+            .hearingDate(LocalDate.of(2024, 1, 1))
+            .judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
+            .changesRequestedByJudge("Refusal reason")
+            .document(targetDoc)
+            .build();
+        return Stream.of(
+            targetDocNotFound(judgeApproval),
+            refuseTargetedDraftOrder(judgeApproval, targetDoc),
+            refuseTargetedPsa(judgeApproval, targetDoc)
+        );
+    }
+
+    static Arguments targetDocNotFound(JudgeApproval judgeApproval) {
+        return Arguments.of(judgeApproval,
+            List.of(),
+            List.of(
+                DraftOrdersReviewCollection.builder()
+                    .value(
+                        DraftOrdersReview.builder()
+                            .hearingJudge("Peter Chapman")
+                            .hearingType("Hearing 1")
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(PsaDocumentReview.builder().build()).build())
+                            )
+                            .draftOrderDocReviewCollection(List.of(
+                                DraftOrderDocReviewCollection.builder().value(DraftOrderDocumentReview.builder().build()).build()
+                            ))
+                            .build()
+                    )
+                    .build()
+            ),
+            List.of(),
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    static Arguments refuseTargetedDraftOrder(JudgeApproval judgeApproval, CaseDocument targetDoc) {
+        AgreedDraftOrderCollection agreedDraftOrderCollectionToBeExamined =
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(targetDoc).build()).build();
+        DraftOrderDocReviewCollection draftOrderDocReviewCollectionToBeExamined =
+            DraftOrderDocReviewCollection.builder().value(DraftOrderDocumentReview.builder()
+                .draftOrderDocument(targetDoc)
+                .build()).build();
+
+        return Arguments.of(judgeApproval,
+            List.of(agreedDraftOrderCollectionToBeExamined),
+            List.of(
+                DraftOrdersReviewCollection.builder()
+                    .value(
+                        DraftOrdersReview.builder()
+                            .hearingJudge("Peter Chapman")
+                            .hearingType("First Directions Appointment (FDA)")
+                            .psaDocReviewCollection(List.of(
+                                PsaDocReviewCollection.builder().value(PsaDocumentReview.builder()
+                                    .psaDocument(CaseDocument.builder().build()).build())
+                                    .build()
+                            ))
+                            .draftOrderDocReviewCollection(List.of(
+                                draftOrderDocReviewCollectionToBeExamined
+                            ))
+                            .build()
+                    )
+                    .build()
+            ),
+            List.of(),
+            RefusedOrderCollection.builder().value(RefusedOrder.builder()
+                .refusalJudge("Approved Judge")
+                .refusalOrder(targetDoc)
+                .build()).build(),
+            agreedDraftOrderCollectionToBeExamined,
+            draftOrderDocReviewCollectionToBeExamined,
+            null
+        );
+    }
+
+    static Arguments refuseTargetedPsa(JudgeApproval judgeApproval, CaseDocument targetDoc) {
+        AgreedDraftOrderCollection agreedDraftOrderCollectionToBeExamined =
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(targetDoc).build()).build();
+        PsaDocReviewCollection psaDocReviewCollection =
+            PsaDocReviewCollection.builder().value(PsaDocumentReview.builder()
+                    .psaDocument(targetDoc).build())
+                .build();
+
+        return Arguments.of(judgeApproval,
+            List.of(agreedDraftOrderCollectionToBeExamined),
+            List.of(
+                DraftOrdersReviewCollection.builder()
+                    .value(
+                        DraftOrdersReview.builder()
+                            .hearingJudge("Peter Chapman")
+                            .hearingType("First Directions Appointment (FDA)")
+                            .psaDocReviewCollection(List.of(
+                                psaDocReviewCollection
+                            ))
+                            .build()
+                    )
+                    .build()
+            ),
+            List.of(),
+            RefusedOrderCollection.builder().value(RefusedOrder.builder()
+                .refusalJudge("Approved Judge")
+                .refusalOrder(targetDoc)
+                .build()).build(),
+            agreedDraftOrderCollectionToBeExamined,
+            null,
+            psaDocReviewCollection
+        );
+    }
+
+    public boolean isAgreedDraftOrderAbsent(List<AgreedDraftOrderCollection> agreedDraftOrderCollections, AgreedDraftOrderCollection targetObject) {
+        return agreedDraftOrderCollections.stream().noneMatch(order -> order.equals(targetObject));
+    }
+
+    public boolean isPsaDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections, PsaDocReviewCollection targetObject) {
+        return draftOrdersReviewCollections.stream()
+            .map(DraftOrdersReviewCollection::getValue) // Extract DraftOrdersReview
+            .filter(draftOrdersReview -> draftOrdersReview.getPsaDocReviewCollection() != null) // Filter non-null collections
+            .flatMap(draftOrdersReview -> draftOrdersReview.getPsaDocReviewCollection().stream()) // Flatten to PsaDocReviewCollection
+            .noneMatch(order -> order.equals(targetObject));
+    }
+
+    public boolean isDraftOrderDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections,
+                                                    DraftOrderDocReviewCollection targetObject) {
+        return draftOrdersReviewCollections.stream()
+            .map(DraftOrdersReviewCollection::getValue) // Extract DraftOrdersReview
+            .filter(draftOrdersReview -> draftOrdersReview.getDraftOrderDocReviewCollection() != null) // Filter non-null collections
+            .flatMap(draftOrdersReview -> draftOrdersReview.getDraftOrderDocReviewCollection().stream()) // Flatten to DraftOrderDocReviewCollection
+            .noneMatch(order -> order.equals(targetObject));
     }
 }

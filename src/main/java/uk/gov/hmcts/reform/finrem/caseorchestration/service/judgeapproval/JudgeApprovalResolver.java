@@ -51,6 +51,12 @@ class JudgeApprovalResolver {
 
     private final HearingProcessor hearingProcessor;
 
+    private final GenericDocumentService genericDocumentService;
+
+    private final DocumentConfiguration documentConfiguration;
+
+    private final ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
+
     /**
      * Populates the judge's decision for the given draft orders and updates the status of approvable documents.
      * This method processes the draft order review collection, PSA review collection, and agreed draft orders,
@@ -146,12 +152,6 @@ class JudgeApprovalResolver {
     private boolean isJudgeRefused(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
     }
-
-    private final GenericDocumentService genericDocumentService;
-
-    private final DocumentConfiguration documentConfiguration;
-
-    private final ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
 
     private CaseDocument generateRefuseOrder(FinremCaseDetails finremCaseDetails, String refusalReason, LocalDateTime refusedDate,
                                              String judgeName, JudgeType judgeType, String authorisationToken) {
