@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -36,13 +37,18 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
         List<CaseDocument> caseDocuments = new ArrayList<>();
 
         log.info("Fetching Contested Paper Case bulk print document for Case ID: {}", caseId);
-        Optional.ofNullable(caseData.getListForHearingWrapper().getFormC()).ifPresent(caseDocuments::add);
-        Optional.ofNullable(caseData.getListForHearingWrapper().getFormG()).ifPresent(caseDocuments::add);
+        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
+        Optional.ofNullable(listForHearingWrapper.getFormC()).ifPresent(caseDocuments::add);
+        Optional.ofNullable(listForHearingWrapper.getFormG()).ifPresent(caseDocuments::add);
         Optional.ofNullable(caseData.getMiniFormA())
             .ifPresent(caseDocuments::add);
         Optional.ofNullable(caseData.getOutOfFamilyCourtResolution()).ifPresent(
             caseDocuments::add);
-        Optional.ofNullable(caseData.getListForHearingWrapper().getAdditionalListOfHearingDocuments())
+        Optional.ofNullable(listForHearingWrapper.getAdditionalListOfHearingDocuments())
+            .ifPresent(caseDocuments::add);
+        Optional.ofNullable(listForHearingWrapper.getPfdNcdrComplianceLetter())
+            .ifPresent(caseDocuments::add);
+        Optional.ofNullable(listForHearingWrapper.getPfdNcdrCoverLetter())
             .ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);

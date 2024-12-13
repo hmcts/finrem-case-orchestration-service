@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
@@ -25,7 +28,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +50,11 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
     @Mock
     private InternationalPostalService postalService;
 
+    @Captor
+    private ArgumentCaptor<List<BulkPrintDocument>> applicantBulkPrintDocumentsCaptor;
+    @Captor
+    private ArgumentCaptor<List<BulkPrintDocument>> respondentBulkPrintDocumentsCaptor;
+
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @BeforeEach
@@ -55,7 +69,36 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
     @Test
     void getDocumentsToPrint() {
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
-        assertEquals(5, documentsToPrint.size());
+        assertEquals(7, documentsToPrint.size());
+    }
+
+    @Test
+    void shouldSendPfdNcdrDocuments() {
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        // Verify applicant
+        verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN),
+            applicantBulkPrintDocumentsCaptor.capture());
+        verifyPfdNcdrDocuments(applicantBulkPrintDocumentsCaptor.getValue());
+        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(caseDetails);
+
+        // Verify respondent
+        verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN),
+            respondentBulkPrintDocumentsCaptor.capture());
+        verifyPfdNcdrDocuments(respondentBulkPrintDocumentsCaptor.getValue());
+        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(caseDetails);
+    }
+
+    private void verifyPfdNcdrDocuments(List<BulkPrintDocument> documents) {
+        assertEquals(7, documents.size());
+
+        assertTrue(documents.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-compliance-letter")
+            && doc.getBinaryFileUrl().equals("http://localhost/compliance/binary")));
+        assertTrue(documents.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-cover-letter")
+            && doc.getBinaryFileUrl().equals("http://localhost/cover/binary")));
     }
 
     private FinremCaseDetails caseDetails() {
@@ -65,6 +108,10 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
                 .additionalListOfHearingDocuments(caseDocument())
                 .formC(caseDocument())
                 .formG(caseDocument())
+                .pfdNcdrComplianceLetter(caseDocument("http://localhost/compliance", "pfd-ncdr-compliance-letter",
+                    "http://localhost/compliance/binary"))
+                .pfdNcdrCoverLetter(caseDocument("http://localhost/cover", "pfd-ncdr-cover-letter",
+                    "http://localhost/cover/binary"))
                 .build())
             .fastTrackDecision(YesOrNo.forValue(NO_VALUE))
             .copyOfPaperFormA(List.of(
