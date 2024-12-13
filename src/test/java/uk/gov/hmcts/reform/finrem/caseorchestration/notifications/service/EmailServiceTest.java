@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
@@ -707,6 +708,41 @@ public class EmailServiceTest {
 
         verify(mockClient).sendEmail(
             eq(emailTemplates.get(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name())),
+            eq("recipient@test.com"),
+            templateFieldsArgumentCaptor.capture(),
+            anyString());
+
+        Map<String, Object> actualTemplateFields = templateFieldsArgumentCaptor.getValue();
+        expectedTemplateFields.forEach((k, v) -> assertEquals(v, actualTemplateFields.get(k)));
+    }
+
+    @Test
+    public void testSendRefusedDraftOrderOrPsa() throws NotificationClientException {
+        NotificationRequest nr = NotificationRequest.builder()
+            .notificationEmail("recipient@test.com")
+            .caseReferenceNumber("5457543354")
+            .caseType(EmailService.CONTESTED)
+            .applicantName(APPLICANT_NAME)
+            .respondentName(RESPONDENT_NAME)
+            .selectedCourt("liverpool")
+            .documentName("TEST.doc")
+            .judgeFeedback("Feedback")
+            .build();
+
+        emailService.sendConfirmationEmail(nr, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
+
+        Map<String, Object> expectedTemplateFields = Map.of(
+            "caseReferenceNumber", "5457543354",
+            "applicantName", APPLICANT_NAME,
+            "respondentName", RESPONDENT_NAME,
+            "courtName", "Liverpool FRC",
+            "courtEmail", "FRCLiverpool@Justice.gov.uk",
+            "documentName", "TEST.doc",
+            "judgeFeedback", "Feedback"
+        );
+
+        verify(mockClient).sendEmail(
+            eq(emailTemplates.get(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED.name())),
             eq("recipient@test.com"),
             templateFieldsArgumentCaptor.capture(),
             anyString());
