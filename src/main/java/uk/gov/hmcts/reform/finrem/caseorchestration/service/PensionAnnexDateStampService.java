@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 public class PensionAnnexDateStampService {
     private final EvidenceManagementUploadService emUploadService;
     private final EvidenceManagementDownloadService emDownloadService;
-    private final GenericDocumentService genericDocumentService;
     static final String FORM_P1_DATE_OF_ORDER_TEXTBOX_NAME = "Date the court made/varied/discharged an order";
     static final String DATE_STAMP_PATTERN = "dd MMMM yyyy";
 
