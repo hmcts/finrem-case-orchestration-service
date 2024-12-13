@@ -75,8 +75,8 @@ class ApproveDraftOrdersSubmittedHandlerTest {
     }
 
     private static Stream<Arguments> invokeNotificationServiceForRefusalOrdersData() {
-        UUID randomUUID = UUID.randomUUID();
-        UUID randomUUID2 = UUID.randomUUID();
+        UUID uuidOne = UUID.randomUUID();
+        UUID uuidTwo = UUID.randomUUID();
         return Stream.of(
             Arguments.of(DraftOrdersWrapper.builder().build(), 0),
             Arguments.of(DraftOrdersWrapper.builder().refusedOrdersCollection(List.of()).build(), 0),
@@ -84,63 +84,63 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID)
+                        .id(uuidOne)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                     .build()
                 )).build(), 0), // without refusalOrderIdsToBeSent
             Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
-                    UuidCollection.builder().value(randomUUID).build()
+                    UuidCollection.builder().value(uuidOne).build()
                 ))
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID)
+                        .id(uuidOne)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
                 )).build(), 1), // happy path
             Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
-                    UuidCollection.builder().value(randomUUID).build()
+                    UuidCollection.builder().value(uuidOne).build()
                 ))
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID)
+                        .id(uuidOne)
                         .value(RefusedOrder.builder().build())
                         .build()
                 )).build(), 0), // missing submittedByEmail
             Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
-                    UuidCollection.builder().value(randomUUID).build(),
-                    UuidCollection.builder().value(randomUUID2).build()
+                    UuidCollection.builder().value(uuidOne).build(),
+                    UuidCollection.builder().value(uuidTwo).build()
                 ))
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID)
+                        .id(uuidOne)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build(),
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID2)
+                        .id(uuidTwo)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
                 )).build(), 2), // two ids with two refusal orders
             Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
-                    UuidCollection.builder().value(randomUUID).build()
+                    UuidCollection.builder().value(uuidOne).build()
                 ))
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
-                        .id(randomUUID2)
+                        .id(uuidTwo)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
                 )).build(), 0), // with ID and a refusal order, but it does not match
             Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
-                    UuidCollection.builder().value(randomUUID).build()
+                    UuidCollection.builder().value(uuidOne).build()
                 ))
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
