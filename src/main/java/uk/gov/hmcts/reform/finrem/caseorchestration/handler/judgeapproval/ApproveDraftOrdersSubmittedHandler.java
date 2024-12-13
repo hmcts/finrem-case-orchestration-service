@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -80,19 +78,8 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                     notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
                         .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
                 } else {
+                    // TODO send refusal order by post.
                     // cloned the logic from ContestedDraftOrderNotApprovedController.sendRefusalReason
-                    CaseDocument refusalOrder = a.getValue().getRefusalOrder();
-
-                    if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
-                        bulkPrintService.printApplicantDocuments(caseDetails, userAuthorisation,
-                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
-                    }
-
-                    if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
-                        bulkPrintService.printRespondentDocuments(caseDetails, userAuthorisation,
-                            singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalOrder)));
-                    }
-
                 }
             });
 
