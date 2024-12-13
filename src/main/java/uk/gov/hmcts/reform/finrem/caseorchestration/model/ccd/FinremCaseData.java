@@ -240,8 +240,6 @@ public class FinremCaseData implements HasCaseDocument {
     private YesOrNo caseAllocatedTo;
     private JudgeTimeEstimate judgeTimeEstimate;
     private String judgeTimeEstimateTextArea;
-    private CaseDocument formC;
-    private CaseDocument formG;
     private List<UploadGeneralDocumentCollection> uploadGeneralDocuments;
     private AssignToJudgeReason assignToJudgeReason;
     private String assignToJudgeText;

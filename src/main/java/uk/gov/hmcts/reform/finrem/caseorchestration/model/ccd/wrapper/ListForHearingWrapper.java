@@ -41,5 +41,7 @@ public class ListForHearingWrapper implements HasCaseDocument {
     private YesOrNo additionalHearingDocumentsOption;
     private CaseDocument additionalListOfHearingDocuments;
 
+    private CaseDocument formC;
+    private CaseDocument formG;
     private List<AdditionalHearingDocumentCollection> additionalHearingDocuments;
 }
