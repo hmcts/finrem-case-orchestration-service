@@ -59,7 +59,7 @@ public class PensionAnnexDateStampService {
                 .filter(response -> response.getStatus() == HttpStatus.OK)
                 .orElseThrow(() -> new DocumentStorageException("Failed to store document Case id: " + caseId));
             Document dateStampedDocument = CONVERTER.apply(fileSaved);
-            return genericDocumentService.toCaseDocument(dateStampedDocument);
+            return CaseDocument.from(dateStampedDocument);
         } else {
             throw new StampDocumentException("Missing or Invalid Approved Date of Order for Case id: " + caseId);
         }
