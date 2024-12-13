@@ -87,6 +87,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
@@ -114,6 +116,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
     @MockBean
     private NotificationService notificationService;
+    @MockBean
+    private PfdNcdrDocumentService pfdNcdrDocumentService;
 
     @Before
     public void setUp() {
@@ -128,30 +132,38 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateFastTrackFormCAndOutOfFamilyCourtResolution() {
+        mockPfdNcdrDocuments();
+
         Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result);
         verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateJudiciaryBasedFastTrackFormCAndOutOfFamilyCourtResolution() {
+        mockPfdNcdrDocuments();
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
             makeItJudiciaryFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result);
         verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
+        mockPfdNcdrDocuments();
+
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(FORM_G));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result);
         verifyAdditionalNonFastTrackFields();
     }
 
@@ -187,6 +199,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifySwanseaCourtDetails() {
+
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             WALES, HEARING_WALES_FRC_LIST, SWANSEA, HEARING_SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
 
@@ -418,7 +431,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData =
             Map.of(FAST_TRACK_DECISION, NO_VALUE,
                 CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
-        return CaseDetails.builder().data(caseData).build();
+        return CaseDetails.builder()
+            .id(12345L)
+            .data(caseData)
+            .build();
     }
 
     private CaseDetails caseDetailsWithHearingCourtDetails(String region, String frcList, String frc, String courtList, String court) {
@@ -426,7 +442,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
             Map.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, HEARING_REGION_LIST,
                 region, frcList, frc, courtList, court, REGION, WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURT_LIST,
                 "FR_swansea_hc_list_1");
-        return CaseDetails.builder().data(caseData).build();
+        return CaseDetails.builder()
+            .id(12345L)
+            .data(caseData)
+            .build();
     }
 
     private FinremCaseDetails finremCaseDetails(YesOrNo fastTrackDecision) {
@@ -457,6 +476,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseData.put(HEARING_ADDITIONAL_DOC, caseDocument());
 
         return CaseDetails.builder()
+            .id(12345L)
             .caseTypeId(CaseType.CONTESTED.getCcdType())
             .state(State.PREPARE_FOR_HEARING.getStateId())
             .data(caseData).build();
@@ -506,5 +526,23 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
+    }
+
+    private void mockPfdNcdrDocuments() {
+        CaseDocument pfdNcdrComplianceLetter = createDocument("pfdNcdrComplianceLetter.pdf");
+        when(pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
+        CaseDocument pfdNcdrCoverLetter = createDocument("pfdNcdrCoverLetter.pdf");
+        when(pfdNcdrDocumentService.uploadPfdNcdrCoverLetter(any(), any())).thenReturn(pfdNcdrCoverLetter);
+    }
+
+    private CaseDocument createDocument(String filename) {
+        CaseDocument caseDocument = new CaseDocument();
+        caseDocument.setDocumentFilename(filename);
+        return caseDocument;
+    }
+
+    private void verifyPfdNcdrDocuments(Map<String, CaseDocument> result) {
+        assertThat(result.get(PFD_NCDR_COMPLIANCE_LETTER).getDocumentFilename(), is("pfdNcdrComplianceLetter.pdf"));
+        assertThat(result.get(PFD_NCDR_COVER_LETTER).getDocumentFilename(), is("pfdNcdrCoverLetter.pdf"));
     }
 }

@@ -19,6 +19,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -36,6 +38,7 @@ public class HearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
+    private final PfdNcdrDocumentService pfdNcdrDocumentService;
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -52,7 +55,10 @@ public class HearingDocumentService {
             .filter(this::isFastTrackApplication)
             .map(this::generateFastTrackFormC)
             .orElseGet(() -> generateFormCAndG(pair));
+
         objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generatOutOfFamilyCourtResolutionDocument(pair));
+        objectMap.putAll(generatePfdNcdrDocuments(pair));
+
         return objectMap;
     }
 
@@ -86,6 +92,19 @@ public class HearingDocumentService {
         return genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
             documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
             documentConfiguration.getOutOfFamilyCourtResolutionName());
+    }
+
+    private Map<String, CaseDocument> generatePfdNcdrDocuments(Pair<CaseDetails, String> pair) {
+        String caseId = pair.getLeft().getId().toString();
+        String authToken = pair.getRight();
+
+        CaseDocument pfdNcdrComplianceLetter = pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
+        CaseDocument pfdNcdrCoverLetter = pfdNcdrDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
+
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, pfdNcdrComplianceLetter);
+        documentMap.put(PFD_NCDR_COVER_LETTER, pfdNcdrCoverLetter);
+        return documentMap;
     }
 
     private boolean isFastTrackApplication(Pair<CaseDetails, String> pair) {
