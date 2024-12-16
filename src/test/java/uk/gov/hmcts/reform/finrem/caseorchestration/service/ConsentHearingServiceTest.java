@@ -129,7 +129,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class));
         verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, never())
             .sendConsentHearingNotificationEmailToApplicantSolicitor(any(FinremCaseDetails.class), anyMap());
