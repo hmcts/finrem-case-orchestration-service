@@ -65,6 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 
 @Service
 @Slf4j
@@ -182,15 +183,67 @@ public class CaseDataService {
         caseDetails.getData().put(CONSENT_ORDER_FRC_PHONE, courtDetails.get(COURT_DETAILS_PHONE_KEY));
     }
 
+    /**
+     * Checks if the applicant is represented by a solicitor.
+     *
+     * @param caseData the case data as a {@code Map<String, Object>}
+     * @return true if the applicant is represented by a solicitor, otherwise false
+     * @deprecated since 11-December-2024. Use {@link #isApplicantRepresentedByASolicitor(FinremCaseData)}
+     *             instead. This method is deprecated due to the transition to the {@code FinremCaseData} class,
+     *             which provides a strongly typed representation of case data.
+     */
+    @Deprecated(since = "11-December-2024")
     public boolean isApplicantRepresentedByASolicitor(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
+    /**
+     * Checks if the applicant is represented by a solicitor.
+     *
+     * <p>This method uses the {@link FinremCaseData} object to determine whether
+     * the applicant has legal representation.</p>
+     *
+     * @param caseData the {@link FinremCaseData} containing the case details
+     * @return true if the applicant is represented by a solicitor, otherwise false
+     */
+    public boolean isApplicantRepresentedByASolicitor(FinremCaseData caseData) {
+        return caseData.isApplicantRepresentedByASolicitor();
+    }
+
+    /**
+     * Checks if the applicant's solicitor agrees to receive emails.
+     *
+     * <p>This method determines the solicitor's agreement based on the type of application
+     * (contested or consented) and the respective case data fields.</p>
+     *
+     * @param caseDetails the {@link CaseDetails} containing the case data
+     * @return true if the applicant's solicitor agrees to receive emails, otherwise false
+     * @deprecated since 11-December-2024. Use {@link #isApplicantSolicitorAgreeToReceiveEmails(FinremCaseDetails)}
+     *             instead. This method is deprecated due to the migration to the {@code FinremCaseDetails} class,
+     *             which provides enhanced type safety and consistency with the updated data model.
+     */
+    @Deprecated(since = "11-December-2024")
     public boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
         boolean isContestedApplication = isContestedApplication(caseDetails);
         Map<String, Object> caseData = caseDetails.getData();
         return (isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))))
             || (!isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED))));
+    }
+
+    /**
+     * Checks if the applicant's solicitor agrees to receive emails.
+     *
+     * <p>This method determines the solicitor's agreement based on the type of application
+     * (contested or consented) and the respective case data fields.</p>
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing the case data
+     * @return true if the applicant's solicitor agrees to receive emails, otherwise false
+     */
+    public boolean isApplicantSolicitorAgreeToReceiveEmails(FinremCaseDetails caseDetails) {
+        boolean isContestedApplication = isContestedApplication(caseDetails);
+        FinremCaseData caseData = caseDetails.getData();
+        return (isContestedApplication && YES == caseData.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails())
+            || (!isContestedApplication && YES == caseData.getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails());
     }
 
     public boolean isApplicantSolicitorEmailPopulated(CaseDetails caseDetails) {
@@ -205,11 +258,37 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
+    /**
+     * Checks if the respondent is represented by a solicitor.
+     *
+     * <p>This method evaluates the representation status of the respondent by checking
+     * both consented and contested application fields in the case data map.</p>
+     *
+     * @param caseData the case data as a {@code Map<String, Object>}
+     * @return true if the respondent is represented by a solicitor, otherwise false
+     * @deprecated since 11-December-2024. Use {@link #isRespondentRepresentedByASolicitor(FinremCaseData)} instead.
+     *             This method is deprecated due to the transition to the {@code FinremCaseData} class, which provides a
+     *             strongly typed data structure for better consistency and maintainability.
+     */
+    @Deprecated(since = "11-December-2024")
     public boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
             || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
     }
 
+    /**
+     * Checks if the respondent is represented by a solicitor.
+     *
+     * <p>This method evaluates the representation status of the respondent by checking
+     * both consented and contested application fields in the {@link FinremCaseData}.</p>
+     *
+     * @param caseData the {@link FinremCaseData} containing the case details
+     * @return true if the respondent is represented by a solicitor, otherwise false
+     */
+    public boolean isRespondentRepresentedByASolicitor(FinremCaseData caseData) {
+        return YES == caseData.getContactDetailsWrapper().getConsentedRespondentRepresented()
+            || YES == caseData.getContactDetailsWrapper().getContestedRespondentRepresented();
+    }
 
     public boolean isPaperApplication(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
