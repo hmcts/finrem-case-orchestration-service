@@ -324,7 +324,7 @@ class JudgeApprovalResolverTest {
                         assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(1);
                         draftOrdersWrapper.getRefusalOrderIdsToBeSent().stream().findFirst()
                             .ifPresentOrElse(u -> assertEquals(r.getId(), u.getValue()), () -> fail("Unexpected missing refused order id"));
-                }, () -> fail("Unexpected missing refused order"));
+                    }, () -> fail("Unexpected missing refused order"));
             }
         }
     }
