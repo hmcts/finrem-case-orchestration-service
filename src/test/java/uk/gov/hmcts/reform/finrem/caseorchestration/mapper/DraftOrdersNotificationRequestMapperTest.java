@@ -183,6 +183,7 @@ class DraftOrdersNotificationRequestMapperTest {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorReference("A_RANDOM_STRING")
                 .applicantFmName("Charlie")
                 .applicantLname("Hull")
                 .respondentFmName("Stella")
@@ -214,6 +215,7 @@ class DraftOrdersNotificationRequestMapperTest {
                 .hearingDate(LocalDate.of(2024, 1, 5))
                 .refusalJudge("Peter Chapman")
                 .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
                 .submittedByEmail("hello@world.com")
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
@@ -228,5 +230,7 @@ class DraftOrdersNotificationRequestMapperTest {
         assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
         assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
         assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
+        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
+        assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
     }
 }
