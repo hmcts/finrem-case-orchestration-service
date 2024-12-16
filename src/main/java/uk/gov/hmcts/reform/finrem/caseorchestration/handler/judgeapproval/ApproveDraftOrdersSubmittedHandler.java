@@ -63,8 +63,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                     notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
                         .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
                 } else {
-                    // TODO send refusal order by post.
-                    // cloned the logic from ContestedDraftOrderNotApprovedController.sendRefusalReason
+                    // TODO DFR-3497 send refusal order by post. Take a look on ContestedDraftOrderNotApprovedController.sendRefusalReason
                 }
             });
 
