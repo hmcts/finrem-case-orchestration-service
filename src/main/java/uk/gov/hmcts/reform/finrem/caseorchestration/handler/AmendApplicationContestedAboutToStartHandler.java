@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -27,12 +28,16 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     private final OnStartDefaultValueService onStartDefaultValueService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
+    private final AssignCaseAccessService assignCaseAccessService;
+
     public AmendApplicationContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnStartDefaultValueService onStartDefaultValueService,
-                                                        MiamLegacyExemptionsService miamLegacyExemptionsService) {
+                                                        MiamLegacyExemptionsService miamLegacyExemptionsService,
+                                                        AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.onStartDefaultValueService = onStartDefaultValueService;
         this.miamLegacyExemptionsService = miamLegacyExemptionsService;
+        this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
@@ -53,6 +58,7 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         List<String> warnings = null;
+        String caseId = caseDetails.getId().toString();
 
         MiamWrapper miamWrapper = caseData.getMiamWrapper();
         if (miamLegacyExemptionsService.isLegacyExemptionsInvalid(miamWrapper)) {
@@ -62,6 +68,11 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
 
         RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
         RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
+
+        // required so that applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
