@@ -36,24 +36,10 @@ public class FinremCaseDetailsMapper {
             .build();
     }
 
-    /**
-     * Maps the provided case data to a {@link FinremCaseData} object.
-     *
-     * @param caseData a {@link Map} containing the case data to be mapped
-     * @return a {@link FinremCaseData} object populated with the provided case data
-     */
     public FinremCaseData mapToFinremCaseData(Map<String, Object> caseData) {
         return mapToFinremCaseData(caseData, null);
     }
 
-    /**
-     * Maps the provided case data to a {@link FinremCaseData} object, with an optional case type ID.
-     *
-     * @param caseData   a {@link Map} containing the case data to be mapped
-     * @param caseTypeId an optional case type ID to set the {@code ccdCaseType} field of the {@link FinremCaseData} object;
-     *                   if {@code null}, the {@code ccdCaseType} field will not be set
-     * @return a {@link FinremCaseData} object populated with the provided case data and the optional case type ID
-     */
     public FinremCaseData mapToFinremCaseData(Map<String, Object> caseData, String caseTypeId) {
         FinremCaseData data = objectMapper.convertValue(caseData, FinremCaseData.class);
         if (caseTypeId != null) {
