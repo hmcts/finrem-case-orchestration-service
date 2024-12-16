@@ -69,9 +69,9 @@ class JudgeApprovalResolverTest {
     private static final String APPROVED_JUDGE_NAME = "Mary Chapman";
     private static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
     private static final LocalDate HEARING_DATE = LocalDate.of(2024, 1, 1);
-    private static final String SUBMITTEDED_BY = "Claire";
+    private static final String SUBMITTED_BY = "Claire";
     private static final String SUBMITTED_BY_EMAIL = "claire@solicitor.com";
-    private static final LocalDateTime SUBMITTEDED_DATE = LocalDateTime.of(1989, 6, 4, 0, 0);
+    private static final LocalDateTime SUBMITTED_DATE = LocalDateTime.of(1989, 6, 4, 0, 0);
     private static final List<CaseDocumentCollection> ATTACHMENTS = List.of(
         CaseDocumentCollection.builder().value(CaseDocument.builder().documentUrl("randomDoc.pdf").build()).build()
     );
@@ -380,9 +380,9 @@ class JudgeApprovalResolverTest {
         DraftOrderDocReviewCollection draftOrderDocReviewCollectionToBeExamined =
             DraftOrderDocReviewCollection.builder().value(DraftOrderDocumentReview.builder()
                 .draftOrderDocument(TARGET_DOCUMENT)
-                .submittedBy(SUBMITTEDED_BY)
+                .submittedBy(SUBMITTED_BY)
                 .submittedByEmail(SUBMITTED_BY_EMAIL)
-                .submittedDate(SUBMITTEDED_DATE)
+                .submittedDate(SUBMITTED_DATE)
                 .attachments(withAttachment ? ATTACHMENTS : null)
                 .build()).build();
 
@@ -417,8 +417,8 @@ class JudgeApprovalResolverTest {
                 .judgeFeedback(JUDGE_FEEDBACK)
                 .refusalJudge(APPROVED_JUDGE_NAME)
                 .submittedByEmail(SUBMITTED_BY_EMAIL)
-                .submittedDate(SUBMITTEDED_DATE)
-                .submittedBy(SUBMITTEDED_BY)
+                .submittedDate(SUBMITTED_DATE)
+                .submittedBy(SUBMITTED_BY)
                 .attachments(withAttachment ? ATTACHMENTS : null)
                 .hearingDate(HEARING_DATE)
                 .build()
@@ -430,8 +430,8 @@ class JudgeApprovalResolverTest {
             AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT).build()).build();
         PsaDocReviewCollection psaDocReviewCollection =
             PsaDocReviewCollection.builder().value(PsaDocumentReview.builder()
-                    .submittedDate(SUBMITTEDED_DATE)
-                    .submittedBy(SUBMITTEDED_BY)
+                    .submittedDate(SUBMITTED_DATE)
+                    .submittedBy(SUBMITTED_BY)
                     .submittedByEmail(withSubmittedByEmail ? SUBMITTED_BY_EMAIL : null)
                     .psaDocument(TARGET_DOCUMENT)
                     .build())
@@ -459,7 +459,7 @@ class JudgeApprovalResolverTest {
             RefusedOrder.builder()
                 .refusedDate(FIXED_DATE_TIME).refusedDocument(TARGET_DOCUMENT).refusalOrder(GENERATED_REFUSED_ORDER).refusalJudge(APPROVED_JUDGE_NAME)
                 .judgeFeedback(JUDGE_FEEDBACK)
-                .submittedByEmail(withSubmittedByEmail ? SUBMITTED_BY_EMAIL : null).submittedDate(SUBMITTEDED_DATE).submittedBy(SUBMITTEDED_BY)
+                .submittedByEmail(withSubmittedByEmail ? SUBMITTED_BY_EMAIL : null).submittedDate(SUBMITTED_DATE).submittedBy(SUBMITTED_BY)
                 .hearingDate(HEARING_DATE)
                 .build()
         );
@@ -471,8 +471,8 @@ class JudgeApprovalResolverTest {
         PsaDocReviewCollection psaDocReviewCollection =
             PsaDocReviewCollection.builder().value(PsaDocumentReview.builder()
                     .psaDocument(TARGET_DOCUMENT)
-                    .submittedDate(SUBMITTEDED_DATE)
-                    .submittedBy(SUBMITTEDED_BY)
+                    .submittedDate(SUBMITTED_DATE)
+                    .submittedBy(SUBMITTED_BY)
                     .submittedByEmail(SUBMITTED_BY_EMAIL)
                     .build())
                 .build();
@@ -513,7 +513,7 @@ class JudgeApprovalResolverTest {
             RefusedOrder.builder()
                 .refusedDate(FIXED_DATE_TIME).refusedDocument(TARGET_DOCUMENT).refusalOrder(GENERATED_REFUSED_ORDER).refusalJudge(APPROVED_JUDGE_NAME)
                 .judgeFeedback(JUDGE_FEEDBACK)
-                .submittedByEmail(SUBMITTED_BY_EMAIL).submittedDate(SUBMITTEDED_DATE).submittedBy(SUBMITTEDED_BY)
+                .submittedByEmail(SUBMITTED_BY_EMAIL).submittedDate(SUBMITTED_DATE).submittedBy(SUBMITTED_BY)
                 .hearingDate(HEARING_DATE)
                 .build()
         );
