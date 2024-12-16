@@ -7,14 +7,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -33,12 +33,12 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GENERAL_ORDER_CONSENT_IN_CONTESTED;
@@ -72,14 +72,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
-public class CaseDataServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaseDataServiceTest {
 
-    @Autowired
+    @InjectMocks
     CaseDataService caseDataService;
+    
+    @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         ObjectMapper objectMapper = JsonMapper
             .builder()
             .addModule(new JavaTimeModule())
@@ -91,101 +94,100 @@ public class CaseDataServiceTest extends BaseServiceTest {
         finremCaseDetailsMapper =  new FinremCaseDetailsMapper(objectMapper);
     }
 
-
     @Test
-    public void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
+    void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
         assertTrue(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
-    public void isRespondentSolicitorResponsibleToDraftOrder_appSolicitor() {
+    void isRespondentSolicitorResponsibleToDraftOrder_appSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
         assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
-    public void isRespondentSolicitorResponsibleToDraftOrder_fieldNotExist() {
+    void isRespondentSolicitorResponsibleToDraftOrder_fieldNotExist() {
         Map<String, Object> caseData = new HashMap<>();
         assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
-    public void shouldSuccessfullyMoveValues() {
+    void shouldSuccessfullyMoveValues() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
 
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(3));
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
+        assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(3);
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
-    public void shouldSuccessfullyMoveValuesToNewCollections() {
+    void shouldSuccessfullyMoveValuesToNewCollections() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
         caseData.put("uploadHearingOrderRO", null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
+        assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(1);
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
-    public void shouldDoNothingWithNonArraySourceValueMove() {
+    void shouldDoNothingWithNonArraySourceValueMove() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
         caseData.put(HEARING_ORDER_COLLECTION, "nonarrayValue");
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.is("nonarrayValue"));
+        assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(2);
+        assertEquals("nonarrayValue", caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
-    public void shouldDoNothingWithNonArrayDestinationValueMove() {
+    void shouldDoNothingWithNonArrayDestinationValueMove() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
         caseData.put("uploadHearingOrderRO", "nonarrayValue");
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(caseData.get("uploadHearingOrderRO"), Matchers.is("nonarrayValue"));
-        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertEquals("nonarrayValue", caseData.get("uploadHearingOrderRO"));
+        assertThat((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)).hasSize(1);
     }
 
     @Test
-    public void shouldDoNothingWhenSourceIsEmptyMove() {
+    void shouldDoNothingWhenSourceIsEmptyMove() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
         caseData.put(HEARING_ORDER_COLLECTION, null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
-        assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
+        assertThat((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")).hasSize(2);
+        assertNull(caseData.get(HEARING_ORDER_COLLECTION));
     }
 
     @Test
-    public void shouldOverwriteTargetCollection() {
+    void shouldOverwriteTargetCollection() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
-        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)).hasSize(1);
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO"))).hasSize(2);
 
         caseDataService.overwriteCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO"))).hasSize(1);
     }
 
     @Test
-    public void nullToEmptyShouldReturnEmptyWhenNull() {
-        assertThat(caseDataService.nullToEmpty(null), is(""));
+    void nullToEmptyShouldReturnEmptyWhenNull() {
+        assertEquals("", caseDataService.nullToEmpty(null));
     }
 
     @Test
-    public void nullToEmptyShouldReturnEmptyWhenEmpty() {
-        assertThat(caseDataService.nullToEmpty(""), is(""));
+    void nullToEmptyShouldReturnEmptyWhenEmpty() {
+        assertEquals("", caseDataService.nullToEmpty(""));
     }
 
     @Test
-    public void nullToEmptyShouldReturnStringWhenString() {
-        assertThat(caseDataService.nullToEmpty("this is my value"), is("this is my value"));
+    void nullToEmptyShouldReturnStringWhenString() {
+        assertEquals("this is my value", caseDataService.nullToEmpty("this is my value"));
     }
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -193,26 +195,22 @@ public class CaseDataServiceTest extends BaseServiceTest {
     private static final String L_NAME = "l";
 
     @Test
-    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
-        assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))), is(true)
-        );
+    void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
+        assertTrue(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))));
     }
 
     @Test
-    public void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
-        assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null), is(false)
-        );
+    void addressLineOneAndPostCodeAreBothEmptyShouldReturnFalse() {
+        assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null));
     }
 
     @Test
-    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalseWhenNull() {
-        assertThat(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null), is(false));
+    void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalseWhenNull() {
+        assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(null));
     }
 
     @Test
-    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalse() {
+    void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalse() {
         asList(
             asList("", "sw2 3rf"),
             asList("", ""),
@@ -220,25 +218,22 @@ public class CaseDataServiceTest extends BaseServiceTest {
             asList("London Road", null),
             asList(null, null),
             asList(null, "Sw8 7ty")
-        ).forEach(data -> assertThat(
-            caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data)),
-            is(false))
-        );
+        ).forEach(data -> assertFalse(caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data))));
     }
 
     @Test
-    public void buildFullNameShouldBuildFullName() {
-        assertThat(caseDataService.buildFullName(fullName("Pit", "Smith"), F_NAME, L_NAME), is("Pit Smith"));
-        assertThat(caseDataService.buildFullName(fullName("", "Smith"), F_NAME, L_NAME), is("Smith"));
-        assertThat(caseDataService.buildFullName(fullName("Pit Adam", "Smith"), F_NAME, L_NAME), is("Pit Adam Smith"));
-        assertThat(caseDataService.buildFullName(fullName("Pit", "Smith-Johnson"), F_NAME, L_NAME), is("Pit Smith-Johnson"));
-        assertThat(caseDataService.buildFullName(fullName("Pit JK", "Smith"), F_NAME, L_NAME), is("Pit JK Smith"));
-        assertThat(caseDataService.buildFullName(fullName("Pit", ""), F_NAME, L_NAME), is("Pit"));
-        assertThat(caseDataService.buildFullName(fullName("", ""), F_NAME, L_NAME), is(""));
-        assertThat(caseDataService.buildFullName(fullName(null, ""), F_NAME, L_NAME), is(""));
-        assertThat(caseDataService.buildFullName(fullName("", null), F_NAME, L_NAME), is(""));
-        assertThat(caseDataService.buildFullName(fullName("     ", "    "), F_NAME, L_NAME), is(""));
-        assertThat(caseDataService.buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME), is("Pit Smith"));
+    void buildFullNameShouldBuildFullName() {
+        assertEquals("Pit Smith", caseDataService.buildFullName(fullName("Pit", "Smith"), F_NAME, L_NAME));
+        assertEquals("Smith", caseDataService.buildFullName(fullName("", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit Adam Smith", caseDataService.buildFullName(fullName("Pit Adam", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit Smith-Johnson", caseDataService.buildFullName(fullName("Pit", "Smith-Johnson"), F_NAME, L_NAME));
+        assertEquals("Pit JK Smith", caseDataService.buildFullName(fullName("Pit JK", "Smith"), F_NAME, L_NAME));
+        assertEquals("Pit", caseDataService.buildFullName(fullName("Pit", ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("", ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName(null, ""), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("", null), F_NAME, L_NAME));
+        assertEquals("", caseDataService.buildFullName(fullName("     ", "    "), F_NAME, L_NAME));
+        assertEquals("Pit Smith", caseDataService.buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME));
     }
 
     private static Map<String, String> createAddressObject(List<?> data) {
@@ -259,7 +254,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPopulateFinancialRemediesCourtDetails() {
+    void shouldPopulateFinancialRemediesCourtDetails() {
         Map<String, Object> data = new HashMap<>();
         data.put(REGION, LONDON);
         data.put(LONDON_FRC_LIST, LONDON_CFC);
@@ -268,337 +263,359 @@ public class CaseDataServiceTest extends BaseServiceTest {
 
         caseDataService.setFinancialRemediesCourtDetails(caseDetails);
 
-        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_NAME), is("East London Family Court"));
-        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_ADDRESS),
-            is("East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD"));
-        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_EMAIL), is("FRCLondon@justice.gov.uk"));
-        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_PHONE), is("0300 123 5577"));
+        assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_NAME,
+            "East London Family Court");
+        assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_ADDRESS,
+            "East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD");
+        assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_EMAIL, "FRCLondon@justice.gov.uk");
+        assertThat(caseDetails.getData()).containsEntry(CONSENT_ORDER_FRC_PHONE, "0300 123 5577");
     }
 
     @Test
-    public void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
-        assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE)), is(true));
+    void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
+        assertTrue(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE)));
+        assertTrue(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, YES_VALUE)));
     }
 
     @Test
-    public void isApplicantRepresentedByASolicitorShouldReturnFalse() {
+    void isApplicantRepresentedByASolicitorShouldReturnFalse() {
         asList(
             NO_VALUE,
             "",
             null,
             "this is some random string, that doesn't make any sense"
-        ).forEach(value -> assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value)), is(false)));
+        ).forEach(value ->
+            assertFalse(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value)))
+        );
     }
 
     @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForConsented() {
+    void isApplicantRepresentedByASolicitorShouldReturnFalseAfterRefactoring() {
+        asList(
+            NO_VALUE,
+            null
+        ).forEach(value ->
+            assertFalse(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(finremCaseDetailsMapper, value)))
+        );
+    }
+
+    @Test
+    void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForConsented() {
+    void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
+        assertFalse(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForContested() {
+    void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForContested() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
+        assertTrue(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)));
     }
 
     @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForContested() {
+    void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForContested() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
-        assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
+        assertFalse(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails));
     }
 
     @Test
-    public void isConsentedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE)), is(true));
+    void isConsentedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE)));
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            YES_VALUE)));
     }
 
     @Test
-    public void isContestedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE)), is(true));
+    void isContestedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE)));
+        assertTrue(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            YES_VALUE)));
     }
 
     @Test
-    public void isConsentedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE)), is(false));
+    void isConsentedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE)));
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(finremCaseDetailsMapper,
+            NO_VALUE)));
     }
 
     @Test
-    public void isContestedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
-        assertThat(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE)), is(false));
+    void isContestedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE)));
+        assertFalse(caseDataService.isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(finremCaseDetailsMapper,
+            NO_VALUE)));
     }
 
     @Test
-    public void isConsentedInContestedCaseShouldReturnTrueWhenIsContestedCaseAndConsentD81QuestionIsPopulated() throws IOException {
+    void isConsentedInContestedCaseShouldReturnTrueWhenIsContestedCaseAndConsentD81QuestionIsPopulated() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-consented-in-contested.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(true));
+        assertTrue(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
-    public void isConsentedInContestedCaseShouldReturnFalseWhenIsContestedCaseAndConsentD81QuestionIsNull() throws IOException {
+    void isConsentedInContestedCaseShouldReturnFalseWhenIsContestedCaseAndConsentD81QuestionIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-contested.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(false));
+        assertFalse(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
-    public void isConsentedInContestedCaseShouldReturnFalseWhenIsConsentedCaseAndConsentD81QuestionIsNull() throws IOException {
+    void isConsentedInContestedCaseShouldReturnFalseWhenIsConsentedCaseAndConsentD81QuestionIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/general-order-consented.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(false));
+        assertFalse(caseDataService.isConsentedInContestedCase(caseDetails));
     }
 
     @Test
-    public void isNotEmptyShouldReturnTrueWhenPopulated() {
+    void isNotEmptyShouldReturnTrueWhenPopulated() {
         asList(
             YES_VALUE,
             "    ",
             "any value makes it not empty",
             "1234",
             "@#$R@#F@$T"
-        ).forEach(value -> assertThat(
-            caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(value)), is(true))
-        );
+        ).forEach(value -> assertTrue(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(value))));
     }
 
     @Test
-    public void isNotEmptyShouldReturnFalseWhenEmptyMap() {
-        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, ImmutableMap.of()), is(false));
+    void isNotEmptyShouldReturnFalseWhenEmptyMap() {
+        assertFalse(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, Map.of()));
     }
 
     @Test
-    public void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
-        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented("")), is(false));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void isNotEmptyShouldThrowNullPointerException() {
-        caseDataService.isNotEmpty(APPLICANT_REPRESENTED, null);
+    void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
+        assertFalse(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented("")));
     }
 
     @Test
-    public void isAmendedConsentOrderTypeShouldReturnFalseForDefaultEmptyObject() {
+    void isNotEmptyShouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> caseDataService.isNotEmpty(APPLICANT_REPRESENTED, null));
+    }
+
+    @Test
+    void isAmendedConsentOrderTypeShouldReturnFalseForDefaultEmptyObject() {
         RespondToOrderData data = new RespondToOrderData();
         data.setRespondToOrder(new RespondToOrder());
 
-        assertThat(caseDataService.isAmendedConsentOrderType(data), is(false));
+        assertFalse(caseDataService.isAmendedConsentOrderType(data));
     }
 
     @Test
-    public void isAmendedConsentOrderTypeShouldReturnFalseWhenDocumentTypeIsNotAmendedConsentOrder() {
-        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData("ble ble ble")), is(false));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void isAmendedConsentOrderTypeShouldThrowNullPointerException() {
-        caseDataService.isAmendedConsentOrderType(null);
+    void isAmendedConsentOrderTypeShouldReturnFalseWhenDocumentTypeIsNotAmendedConsentOrder() {
+        assertFalse(caseDataService.isAmendedConsentOrderType(getRespondToOrderData("ble ble ble")));
     }
 
     @Test
-    public void isAmendedConsentOrderTypeShouldReturnTrueWhenDocumentTypeIsAmendedConsentOrder() {
-        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMEND_CONSENT_ORDER)), is(true));
+    void isAmendedConsentOrderTypeShouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> caseDataService.isAmendedConsentOrderType(null));
     }
 
     @Test
-    public void isApplicantSolicitorResponsibleToDraftOrderTrueWhenTheyHaveBeenNominated() {
+    void isAmendedConsentOrderTypeShouldReturnTrueWhenDocumentTypeIsAmendedConsentOrder() {
+        assertTrue(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMEND_CONSENT_ORDER)));
+    }
+
+    @Test
+    void isApplicantSolicitorResponsibleToDraftOrderTrueWhenTheyHaveBeenNominated() {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(true));
+        assertTrue(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
-    public void isApplicantSolicitorResponsibleToDraftOrderFalseWhenRespondentSolicitorIsNominated() {
+    void isApplicantSolicitorResponsibleToDraftOrderFalseWhenRespondentSolicitorIsNominated() {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
+        assertFalse(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
-    public void isApplicantSolicitorResponsibleToDraftOrderFalseWhenNull() {
+    void isApplicantSolicitorResponsibleToDraftOrderFalseWhenNull() {
         Map<String, Object> data = new HashMap<>();
         data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, null);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
+        assertFalse(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data));
     }
 
     @Test
-    public void isConsentedApplicationShouldReturnTrueWheCaseTypeIsSetToConsentedCaseType() throws IOException {
+    void isConsentedApplicationShouldReturnTrueWheCaseTypeIsSetToConsentedCaseType() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails), is(true));
+        assertTrue(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
-    public void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsSetToContested() throws IOException {
+    void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsSetToContested() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
-    public void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsNull() throws IOException {
+    void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isConsentedApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isConsentedApplication(caseDetails));
     }
 
     @Test
-    public void isContestedApplicationShouldReturnTrueWheCaseTypeIsSetToContested() throws IOException {
+    void isContestedApplicationShouldReturnTrueWheCaseTypeIsSetToContested() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails), is(true));
+        assertTrue(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
-    public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToConsented() throws IOException {
+    void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToConsented() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
-    public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToNull() throws IOException {
+    void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedApplication(caseDetails));
     }
 
     @Test
-    public void isContestedPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
+    void isContestedPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(true));
+        assertTrue(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
-    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
+    void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
-    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToContestedAndNotPaperCase() throws IOException {
+    void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToContestedAndNotPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
-    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsented() throws IOException {
+    void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsented() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
-    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToNull() throws IOException {
+    void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
-        assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
+        assertFalse(caseDataService.isContestedPaperApplication(caseDetails));
     }
 
     @Test
-    public void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
+    void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
         data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(true));
+        assertTrue(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
-    public void isApplicantAddressConfidentialFalseWhenApplicantAddressIsNotMarkedAsConfidential() {
+    void isApplicantAddressConfidentialFalseWhenApplicantAddressIsNotMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
         data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(false));
+        assertFalse(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
-    public void isApplicantAddressConfidentialFalseWhenApplicantAddressConfidentialFieldIsNotPresent() {
+    void isApplicantAddressConfidentialFalseWhenApplicantAddressConfidentialFieldIsNotPresent() {
         Map<String, Object> data = new HashMap<>();
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(false));
+        assertFalse(caseDataService.isApplicantAddressConfidential(data));
     }
 
     @Test
-    public void isRespondentAddressConfidentialTrueWhenRespondentAddressIsMarkedAsConfidential() {
+    void isRespondentAddressConfidentialTrueWhenRespondentAddressIsMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
         data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(true));
+        assertTrue(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
-    public void isRespondentAddressConfidentialFalseWhenRespondentAddressIsNotMarkedAsConfidential() {
+    void isRespondentAddressConfidentialFalseWhenRespondentAddressIsNotMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
         data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
+        assertFalse(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
-    public void isRespondentAddressConfidentialFalseWhenRespondentAddressConfidentialFieldIsNotPresent() {
+    void isRespondentAddressConfidentialFalseWhenRespondentAddressConfidentialFieldIsNotPresent() {
         Map<String, Object> data = new HashMap<>();
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
+        assertFalse(caseDataService.isRespondentAddressConfidential(data));
     }
 
     @Test
-    public void shouldBuildFullIntervener1Name() {
+    void shouldBuildFullIntervener1Name() {
         Map<String, Object> data = new HashMap<>();
         data.put(INTERVENER1_FIRST_MIDDLE_NAME, "Sarah John");
         data.put(INTERVENER1_LAST_NAME, "Smith");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
-        assertEquals(
-            "Sarah John Smith", caseDataService.buildFullIntervener1Name(caseDetails)
-        );
+        assertEquals("Sarah John Smith", caseDataService.buildFullIntervener1Name(caseDetails));
     }
 
     @Test
-    public void isContestedFinremCaseDetailsApplication() {
+    void isContestedFinremCaseDetailsApplication() {
         FinremCaseDetails finremCaseDetails
             = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).build();
         assertTrue(caseDataService.isContestedApplication(finremCaseDetails));
     }
 
     @Test
-    public void shouldBuildFullIntervener2Name() {
+    void shouldBuildFullIntervener2Name() {
         Map<String, Object> data = new HashMap<>();
         data.put(INTERVENER2_FIRST_MIDDLE_NAME, "John Taylor");
         data.put(INTERVENER2_LAST_NAME, "Fitzgerald");
@@ -609,7 +626,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldBuildFullIntervener3Name() {
+    void shouldBuildFullIntervener3Name() {
         Map<String, Object> data = new HashMap<>();
         data.put(INTERVENER3_FIRST_MIDDLE_NAME, "Sam Tyler");
         data.put(INTERVENER3_LAST_NAME, "Peters");
@@ -620,7 +637,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldBuildFullIntervener4Name() {
+    void shouldBuildFullIntervener4Name() {
         Map<String, Object> data = new HashMap<>();
         data.put(INTERVENER4_FIRST_MIDDLE_NAME, "Yousef Luke");
         data.put(INTERVENER4_LAST_NAME, "Brown");
@@ -631,7 +648,7 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testHasConsentOrderIsTrue() {
+    void testHasConsentOrderIsTrue() {
         ConsentOrderWrapper consentOrderWrapper = new ConsentOrderWrapper();
         consentOrderWrapper.setConsentD81Question(YesOrNo.YES);
         FinremCaseData caseData = FinremCaseData.builder()
@@ -642,50 +659,45 @@ public class CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testHasConsentOrderIsFalse() {
+    void testHasConsentOrderIsFalse() {
         assertFalse(caseDataService.hasConsentOrder(new FinremCaseData()));
     }
 
     @Test
-    public void shouldReturnTrueIfConsentInContestedEvent() {
+    void shouldReturnTrueIfConsentInContestedEvent() {
         assertTrue(caseDataService.isConsentInContestedGeneralOrderEvent(GENERAL_ORDER_CONSENT_IN_CONTESTED));
     }
 
-    public void givenRepresentedFlagOnApplicant_whenIsLitigantRepresented_thenTrue() {
+    @Test
+    void givenRepresentedFlagOnApplicant_whenIsLitigantRepresented_thenTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_REPRESENTED, "Yes");
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, true);
-
-        assertThat(result, is(true));
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, true));
     }
 
     @Test
-    public void givenContestedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+    void givenContestedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_REPRESENTED, "No");
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, "Yes");
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
-
-        assertThat(result, is(true));
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, false));
     }
 
     @Test
-    public void givenConsentedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
+    void givenConsentedRepresentedFlagOnRespondent_whenIsLitigantRepresented_thenTrue() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_REPRESENTED, "No");
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, "Yes");
         CaseDetails finremCaseDetails
             = CaseDetails.builder().data(caseData).caseTypeId(CaseType.CONSENTED.getCcdType()).id(123L).build();
 
-        boolean result = caseDataService.isLitigantRepresented(finremCaseDetails, false);
-
-        assertThat(result, is(true));
+        assertTrue(caseDataService.isLitigantRepresented(finremCaseDetails, false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {
@@ -704,11 +716,19 @@ public class CaseDataServiceTest extends BaseServiceTest {
         return data;
     }
 
+    private static FinremCaseData createCaseDataApplRepresented(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataApplRepresented(value));
+    }
+
     private static Map<String, Object> createCaseDataRespRepresentedConsented(String value) {
         Map<String, Object> data = new HashMap<>();
         data.put(CONSENTED_RESPONDENT_REPRESENTED, value);
 
         return data;
+    }
+
+    private static FinremCaseData createCaseDataRespRepresentedConsented(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataRespRepresentedConsented(value));
     }
 
     private static Map<String, Object> createCaseDataRespRepresentedContested(String value) {
@@ -717,4 +737,9 @@ public class CaseDataServiceTest extends BaseServiceTest {
 
         return data;
     }
+
+    private static FinremCaseData createCaseDataRespRepresentedContested(FinremCaseDetailsMapper objectMapper, String value) {
+        return objectMapper.mapToFinremCaseData(createCaseDataRespRepresentedContested(value));
+    }
+
 }
