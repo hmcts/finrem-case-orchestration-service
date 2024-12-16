@@ -727,6 +727,8 @@ public class EmailServiceTest {
             .selectedCourt("liverpool")
             .documentName("TEST.doc")
             .judgeFeedback("Feedback")
+            .hearingDate("30 December 2024")
+            .name("Mary")
             .build();
 
         emailService.sendConfirmationEmail(nr, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
@@ -738,7 +740,9 @@ public class EmailServiceTest {
             "courtName", "Liverpool FRC",
             "courtEmail", "FRCLiverpool@Justice.gov.uk",
             "documentName", "TEST.doc",
-            "judgeFeedback", "Feedback"
+            "judgeFeedback", "Feedback",
+            "hearingDate", "30 December 2024",
+            "name", "Mary"
         );
 
         verify(mockClient).sendEmail(
