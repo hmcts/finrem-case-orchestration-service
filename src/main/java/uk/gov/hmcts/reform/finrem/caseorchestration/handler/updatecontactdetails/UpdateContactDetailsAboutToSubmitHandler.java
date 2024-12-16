@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -78,6 +79,9 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
             finremCaseData.setMiniFormA(document);
         }
+
+        RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
+        RefugeWrapperUtils.updateRespondentInRefugeTab(finremCaseDetails);
 
         if (includeRepresentationChange) {
             CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
