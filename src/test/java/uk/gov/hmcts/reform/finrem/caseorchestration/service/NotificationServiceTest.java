@@ -1637,7 +1637,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("test@test.com")
             .build();
-        notificationService.sendDraftOrderOrPsaRefused(nr);
+        notificationService.sendRefusedDraftOrderOrPsa(nr);
 
         ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
         verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),

@@ -1973,8 +1973,8 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE);
     }
 
-    public void sendDraftOrderOrPsaRefused(NotificationRequest notificationRequest) {
-        log.info("{} - Sending draft order or PSA refused", notificationRequest.getCaseReferenceNumber());
+    public void sendRefusedDraftOrderOrPsa(NotificationRequest notificationRequest) {
+        log.info("{} - Sending refused draft order or PSA", notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
     }
 }

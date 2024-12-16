@@ -69,7 +69,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
-        verify(notificationService, times(expectedInvocationCount)).sendDraftOrderOrPsaRefused(expectedNotificationRequest);
+        verify(notificationService, times(expectedInvocationCount)).sendRefusedDraftOrderOrPsa(expectedNotificationRequest);
         verify(notificationRequestMapper, times(expectedInvocationCount)).buildRefusedDraftOrderOrPsaNotificationRequest(any(FinremCaseDetails.class),
             any(RefusedOrder.class));
     }

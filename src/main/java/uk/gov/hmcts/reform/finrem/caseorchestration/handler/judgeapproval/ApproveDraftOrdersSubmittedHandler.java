@@ -60,7 +60,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
             .forEach(a -> {
                 if (!isEmpty(a.getValue().getSubmittedByEmail())) {
-                    notificationService.sendDraftOrderOrPsaRefused(notificationRequestMapper
+                    notificationService.sendRefusedDraftOrderOrPsa(notificationRequestMapper
                         .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
                 } else {
                     // TODO DFR-3497 send refusal order by post. Take a look on ContestedDraftOrderNotApprovedController.sendRefusalReason
