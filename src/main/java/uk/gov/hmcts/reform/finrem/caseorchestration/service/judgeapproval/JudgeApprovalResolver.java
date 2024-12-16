@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
@@ -215,6 +216,7 @@ class JudgeApprovalResolver {
                     .submittedBy(refusalOrderConvertible.getSubmittedBy())
                     .submittedByEmail(refusalOrderConvertible.getSubmittedByEmail())
                     .refusalJudge(refusalOrderConvertible.getApprovalJudge())
+                    .attachments(item.getValue() instanceof DraftOrderDocumentReview d ? d.getAttachments() : null)
                     .judgeFeedback(judgeFeedback)
                     .hearingDate(hearingDate);
 
