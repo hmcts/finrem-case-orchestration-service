@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
 @Slf4j
@@ -82,6 +83,8 @@ public class DraftOrdersNotificationRequestMapper {
             .judgeName(refusedOrder.getRefusalJudge())
             .judgeFeedback(refusedOrder.getJudgeFeedback())
             .documentName(documentName)
+            .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
+            .name(refusedOrder.getSubmittedBy())
             .build();
     }
 }
