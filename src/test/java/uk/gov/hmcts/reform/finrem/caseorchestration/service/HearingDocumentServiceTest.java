@@ -199,7 +199,6 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifySwanseaCourtDetails() {
-
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             WALES, HEARING_WALES_FRC_LIST, SWANSEA, HEARING_SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
 
