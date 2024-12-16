@@ -26,6 +26,13 @@ public class PfdNcdrDocumentService {
 
     private final EvidenceManagementUploadService uploadService;
 
+    /**
+     * Uploads PFD NCDR Compliance Letter document to document store and returns the document.
+     *
+     * @param caseId case ID
+     * @param authToken user authorization token
+     * @return uploaded document
+     */
     public CaseDocument uploadPfdNcdrComplianceLetter(String caseId, String authToken) {
         byte[] bytes = getPfdNcdrComplianceLetter();
 
@@ -34,6 +41,13 @@ public class PfdNcdrDocumentService {
         return uploadDocument(caseId, authToken, multipartFile, "PFD NCDR Compliance Letter");
     }
 
+    /**
+     * Uploads PFD NCDR Cover Letter document to document store and returns the document.
+     *
+     * @param caseId case ID
+     * @param authToken user authorization token
+     * @return uploaded document
+     */
     public CaseDocument uploadPfdNcdrCoverLetter(String caseId, String authToken) {
         byte[] bytes = getPfdNcdrCoverLetter();
 
