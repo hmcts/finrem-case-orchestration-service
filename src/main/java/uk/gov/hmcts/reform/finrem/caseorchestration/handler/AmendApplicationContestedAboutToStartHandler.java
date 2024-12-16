@@ -58,7 +58,6 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
         List<String> warnings = null;
-        String caseId = caseDetails.getId().toString();
 
         MiamWrapper miamWrapper = caseData.getMiamWrapper();
         if (miamLegacyExemptionsService.isLegacyExemptionsInvalid(miamWrapper)) {
@@ -69,8 +68,9 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
         RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
 
-        // required so that applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
-        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
+        // setCurrentUserCaseRoleType so applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getId().toString(),
+                userAuthorisation);
         caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
 
 
