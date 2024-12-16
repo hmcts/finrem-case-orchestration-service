@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -26,9 +26,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,8 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DETAILS;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BarristerLetterServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BarristerLetterServiceTest {
 
     private static final String APP_BARR_NAME = "app_Barr_name";
     private static final String APP_BARR_EMAIL = "app_Barr_email";
@@ -82,15 +83,15 @@ public class BarristerLetterServiceTest {
     @Captor
     ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(Long.valueOf(CASE_ID)).data(caseData).build();
     }
 
     @Test
-    public void givenApplicantIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+    void givenApplicantIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         barristerLetterTuple = BarristerLetterTuple.of(APPLICANT, AUTH_TOKEN, ADDED);
         barrister = applicantBarrister();
 
@@ -98,10 +99,10 @@ public class BarristerLetterServiceTest {
 
         verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any(), any());
     }
-
+    
     @Test
-    public void givenRespondentIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+    void givenRespondentIsRepresentedBySolicitor_whenSendBarristerLetter_thenNoLetterSent() {
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         barristerLetterTuple = BarristerLetterTuple.of(RESPONDENT, AUTH_TOKEN, ADDED);
         barrister = respondentBarrister();
 
@@ -111,12 +112,12 @@ public class BarristerLetterServiceTest {
     }
 
     @Test
-    public void givenApplicantUnrepresentedAndAddedBarrister_whenSendBarristerLetter_thenSendLetter() {
+    void givenApplicantUnrepresentedAndAddedBarrister_whenSendBarristerLetter_thenSendLetter() {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString()))
             .thenReturn(CCDConfigConstant.APPLICANT);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
@@ -133,17 +134,17 @@ public class BarristerLetterServiceTest {
         verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
-        assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
-        assertThat(caseData.get("caseNumber"), is(CASE_NUMBER));
+        assertThat(caseData.get("barristerFirmName")).isEqualTo(BARR_FIRM_NAME);
+        assertThat(caseData.get("caseNumber")).isEqualTo(CASE_NUMBER);
     }
 
     @Test
-    public void givenApplicantUnrepresentedAndRemovedBarrister_whenSendBarristerLetter_thenSendLetter() {
+    void givenApplicantUnrepresentedAndRemovedBarrister_whenSendBarristerLetter_thenSendLetter() {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument removed = removedCaseDocument();
         when(bulkPrintService.getRecipient(DocumentHelper.PaperNotificationRecipient.APPLICANT.toString()))
             .thenReturn(CCDConfigConstant.APPLICANT);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
@@ -160,17 +161,17 @@ public class BarristerLetterServiceTest {
         verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
-        assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
-        assertThat(caseData.get("caseNumber"), is(CASE_NUMBER));
+        assertThat(caseData.get("barristerFirmName")).isEqualTo(BARR_FIRM_NAME);
+        assertThat(caseData.get("caseNumber")).isEqualTo(CASE_NUMBER);
     }
 
     @Test
-    public void givenRespondentUnrepresentedAndAddedBarrister_whenSendBarristerLetter_thenSendLetter() {
+    void givenRespondentUnrepresentedAndAddedBarrister_whenSendBarristerLetter_thenSendLetter() {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(bulkPrintService.getRecipient(RESPONDENT.toString()))
             .thenReturn(CCDConfigConstant.RESPONDENT);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
@@ -187,17 +188,17 @@ public class BarristerLetterServiceTest {
         verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
-        assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
-        assertThat(caseData.get("caseNumber"), is(CASE_NUMBER));
+        assertThat(caseData.get("barristerFirmName")).isEqualTo(BARR_FIRM_NAME);
+        assertThat(caseData.get("caseNumber")).isEqualTo(CASE_NUMBER);
     }
 
     @Test
-    public void givenRespondentUnrepresentedAndRemovedBarrister_whenSendBarristerLetter_thenSendLetter() {
+    void givenRespondentUnrepresentedAndRemovedBarrister_whenSendBarristerLetter_thenSendLetter() {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument removed = removedCaseDocument();
         when(bulkPrintService.getRecipient(RESPONDENT.toString()))
             .thenReturn(CCDConfigConstant.RESPONDENT);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
         when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
@@ -214,10 +215,9 @@ public class BarristerLetterServiceTest {
         verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
-        assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
-        assertThat(caseData.get("caseNumber"), is(CASE_NUMBER));
+        assertThat(caseData.get("barristerFirmName")).isEqualTo(BARR_FIRM_NAME);
+        assertThat(caseData.get("caseNumber")).isEqualTo(CASE_NUMBER);
     }
-
 
     private Barrister applicantBarrister() {
         return Barrister.builder()

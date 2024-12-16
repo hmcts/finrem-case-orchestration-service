@@ -32,10 +32,8 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                 log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
                 this.emailApplicantSolicitor(caseDetails);
             } else {
-
                 log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+                printApplicantDocuments(authorisationToken, caseDetails);
             }
         }
     }
@@ -47,8 +45,7 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                 this.emailRespondentSolicitor(caseDetails);
             } else {
                 log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                    documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+                printRespondentDocuments(authorisationToken, caseDetails);
             }
         }
     }
@@ -107,4 +104,13 @@ public abstract class FinremMultiLetterOrEmailAllPartiesCorresponder extends Mul
                 .noticeReceivedAt(LocalDateTime.now()).build()).build();
     }
 
+    protected void printApplicantDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+    }
+
+    protected void printRespondentDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(getCaseDocuments(caseDetails)));
+    }
 }
