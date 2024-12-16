@@ -1633,7 +1633,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testSendDraftOrderOrPsaRefused() {
+    public void testSendRefusedDraftOrderOrPsa() {
         NotificationRequest nr = NotificationRequest.builder()
             .notificationEmail("test@test.com")
             .build();
