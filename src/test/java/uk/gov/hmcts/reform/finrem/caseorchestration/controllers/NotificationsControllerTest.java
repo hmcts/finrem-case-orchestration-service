@@ -214,7 +214,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendConsentOrderNotApprovedEmail() {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
 
@@ -266,7 +266,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
 
         notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
@@ -360,7 +360,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void sendContestedGeneralApplicationOutcomeEmail() throws IOException {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
 
         notificationsController.sendGeneralApplicationOutcomeEmail(buildCallbackRequest());
 
