@@ -134,5 +134,4 @@ class JudgeApprovalResolver {
     private boolean isJudgeRefused(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
     }
-
 }
