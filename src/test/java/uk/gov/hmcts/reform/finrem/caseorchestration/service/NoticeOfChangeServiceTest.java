@@ -26,6 +26,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -60,7 +61,6 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
         this::convertToUpdateHistory;
-
 
     @Before
     public void setUp() {
@@ -297,8 +297,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void shouldUpdateRepresentationUpdateHistoryRespondent() throws Exception {
         setUpCaseDetails("change-of-representatives-respondent.json");
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
         when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
             ChangedRepresentative.builder()
@@ -386,10 +386,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.buildFullApplicantName((CaseDetails) any())).thenReturn("John Smith");
         when(mockCaseDataService.buildFullRespondentName((CaseDetails) any())).thenReturn("Jane Smith");
-        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
     }
 
 }
-
