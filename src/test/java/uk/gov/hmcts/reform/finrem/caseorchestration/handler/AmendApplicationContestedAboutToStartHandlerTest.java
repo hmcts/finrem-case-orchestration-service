@@ -68,8 +68,6 @@ public class AmendApplicationContestedAboutToStartHandlerTest {
     void handle() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        when(assignCaseAccessService.getActiveUser(callbackRequest.getCaseDetails().getId().toString(), AUTH_TOKEN)).thenReturn("case");
-
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals(NO_VALUE, response.getData().getCivilPartnership().getYesOrNo());
