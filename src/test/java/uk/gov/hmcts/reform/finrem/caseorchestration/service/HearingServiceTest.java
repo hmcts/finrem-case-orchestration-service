@@ -480,22 +480,20 @@ class HearingServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "'Civil', '2024-11-10', '10:30 AM', 'Judge Smith', 'Civil on 10 November 2024 10:30 AM by Judge Smith'",
-        "NULL, '2024-11-10', '10:30 AM', 'Judge Smith', 'N/A on 10 November 2024 10:30 AM by Judge Smith'",
-        "'Civil', NULL, '10:30 AM', 'Judge Smith', 'Civil on N/A 10:30 AM by Judge Smith'",
-        "'Civil', '2024-11-10', NULL, 'Judge Smith', 'Civil on 10 November 2024 N/A by Judge Smith'",
-        "'Civil', '2024-11-10', '10:30 AM', NULL, 'Civil on 10 November 2024 10:30 AM by N/A'",
-        "NULL, NULL, NULL, NULL, 'N/A on N/A N/A by N/A'",
-        "'', '2024-11-10', '', '', ' on 10 November 2024  by '"
+        "'Civil', '2024-11-10', '10:30 AM', 'Civil on 10 November 2024 10:30 AM'",
+        "NULL, '2024-11-10', '10:30 AM', 'N/A on 10 November 2024 10:30 AM'",
+        "'Civil', NULL, '10:30 AM', 'Civil on N/A 10:30 AM'",
+        "'Civil', '2024-11-10', NULL, 'Civil on 10 November 2024 N/A'",
+        "'Civil', '2024-11-10', '10:30 AM', 'Civil on 10 November 2024 10:30 AM'",
+        "NULL, NULL, NULL, 'N/A on N/A N/A'",
+        "'', '2024-11-10', '', ' on 10 November 2024 '"
     })
-    void formatHearingInfo_shouldReturnExpectedOutput(String hearingType, String hearingDate, String hearingTime, String hearingJudge,
-                                                      String expectedOutput) {
+    void formatHearingInfo_shouldReturnExpectedOutput(String hearingType, String hearingDate, String hearingTime, String expectedOutput) {
         LocalDate parsedHearingDate = "NULL".equals(hearingDate) ? null : LocalDate.parse(hearingDate);
         String parsedHearingType = "NULL".equals(hearingType) ? null : hearingType;
         String parsedHearingTime = "NULL".equals(hearingTime) ? null : hearingTime;
-        String parsedHearingJudge = "NULL".equals(hearingJudge) ? null : hearingJudge;
 
-        String actualOutput = hearingService.formatHearingInfo(parsedHearingType, parsedHearingDate, parsedHearingTime, parsedHearingJudge);
+        String actualOutput = hearingService.formatHearingInfo(parsedHearingType, parsedHearingDate, parsedHearingTime);
         assertEquals(expectedOutput, actualOutput);
     }
 }

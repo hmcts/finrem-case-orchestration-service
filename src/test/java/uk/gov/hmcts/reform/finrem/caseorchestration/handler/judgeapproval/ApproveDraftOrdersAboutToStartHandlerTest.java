@@ -37,9 +37,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -144,9 +144,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                     .build())
                 .build())
             .build();
-        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 31), "09:00", "Mr. Judge"))
+        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 31), "09:00"))
             .thenReturn("hearingServiceFormattedString1");
-        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 11, 30), "09:00", "Mr. Judge"))
+        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 11, 30), "09:00"))
             .thenReturn("hearingServiceFormattedString2");
 
         // Act
@@ -158,22 +158,21 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         draftOrdersWrapper = responseData.getDraftOrdersWrapper();
 
         var expectedJudgeApproval = List.of(
-            Optional.ofNullable(expectedJudgeApproval1), Optional.ofNullable(expectedJudgeApproval2),
-            Optional.ofNullable(expectedJudgeApproval3), Optional.ofNullable(expectedJudgeApproval4),
-            Optional.ofNullable(expectedJudgeApproval5)
+            ofNullable(expectedJudgeApproval1), ofNullable(expectedJudgeApproval2),
+            ofNullable(expectedJudgeApproval3), ofNullable(expectedJudgeApproval4),
+            ofNullable(expectedJudgeApproval5)
         );
 
         for (int i = 0; i < NUMBER_OF_DOC_TO_BE_REVIEWED; i++) {
             var actual = (JudgeApproval) draftOrdersWrapper.getClass().getMethod("getJudgeApproval" + (i + 1)).invoke(draftOrdersWrapper);
             var expected = expectedJudgeApproval.get(i).orElse(null);
             if (expected != null && actual != null) {
-                assertEquals(expected.getTitle(), actual.getTitle());
-                assertEquals(expected.getInlineDocType(), actual.getInlineDocType());
-                assertEquals(expected.getDocument(), actual.getDocument());
-                assertEquals(expected.getHearingInfo(), actual.getHearingInfo());
-                if (expected.getHasAttachment() == YES) {
-                    assertEquals(expected.getAttachments(), actual.getAttachments());
-                }
+                assertThat(actual)
+                    .usingRecursiveComparison()
+                    .ignoringFields(actual.getDocType() == DRAFT_ORDER
+                        ? new String[] {"sortKey", "isFinalOrder"}
+                        : new String[] {"sortKey", "isFinalOrder", "attachments"})
+                    .isEqualTo(expected);
             } else {
                 assertEquals(expected, actual);
             }
@@ -202,14 +201,14 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         return builder.hearingDate(LocalDate.of(2024, 10, 31))
             .hearingTime("09:00")
             .hearingType("hearingType")
-            .hearingJudge("Mr. Judge");
+            .hearingJudge("Mr Judge");
     }
 
     private static DraftOrdersReview.DraftOrdersReviewBuilder applyHearingInfo2(DraftOrdersReview.DraftOrdersReviewBuilder builder) {
         return builder.hearingDate(LocalDate.of(2024, 11, 30))
             .hearingTime("09:00")
             .hearingType("hearingType")
-            .hearingJudge("Mr. Judge");
+            .hearingJudge("Mr Judge");
     }
 
     private static CaseDocument randomCaseDocument() {
@@ -276,11 +275,14 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static JudgeApproval buildJudgeApproval(JudgeApprovalDocType docType,
                                                     String hearingInfo, CaseDocument document,
                                                     List<CaseDocumentCollection> attachments) {
-        return JudgeApproval.builder().hearingInfo(hearingInfo)
+        return JudgeApproval.builder()
+            .hearingInfo(hearingInfo)
+            .hearingJudge("Mr Judge")
+            .docType(docType)
             .title(docType.getTitle())
             .inlineDocType(docType.getDescription())
             .document(document)
-            .attachments(attachments)
+            .attachments(ofNullable(attachments).filter(a -> !a.isEmpty()).orElse(List.of()))
             .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
             .build();
     }
@@ -310,7 +312,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                 ))
                 .build(),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, List.of()),
             null, null, null,
             NO);
     }
@@ -358,7 +360,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                 ))
                 .build(),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString1", DO_DOC_1, List.of(DO_ATTACHMENT_1)),
-            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, null),
+            buildJudgeApproval(PSA, "hearingServiceFormattedString1", PSA_DOC_1, List.of()),
             buildJudgeApproval(DRAFT_ORDER, "hearingServiceFormattedString2", DO_DOC_2, List.of(DO_ATTACHMENT_2)),
             null, null,
             NO);
