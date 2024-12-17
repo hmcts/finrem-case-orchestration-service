@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -69,7 +70,7 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
     @Test
     void getDocumentsToPrint() {
         List<CaseDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getCaseDocuments(caseDetails);
-        assertEquals(7, documentsToPrint.size());
+        assertEquals(6, documentsToPrint.size());
     }
 
     @Test
@@ -79,26 +80,28 @@ class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTes
 
         applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-        // Verify applicant
+        // Verify applicant receives the compliance letter but not the cover sheet
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN),
             applicantBulkPrintDocumentsCaptor.capture());
-        verifyPfdNcdrDocuments(applicantBulkPrintDocumentsCaptor.getValue());
+        List<BulkPrintDocument> applicantDocuments = applicantBulkPrintDocumentsCaptor.getValue();
+        assertEquals(6, applicantDocuments.size());
+        assertTrue(applicantDocuments.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-compliance-letter")
+            && doc.getBinaryFileUrl().equals("http://localhost/compliance/binary")));
+        assertFalse(applicantDocuments.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-cover-letter")
+            && doc.getBinaryFileUrl().equals("http://localhost/cover/binary")));
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(caseDetails);
 
-        // Verify respondent
+        // Verify respondent receives both the compliance letter and cover sheet
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN),
             respondentBulkPrintDocumentsCaptor.capture());
-        verifyPfdNcdrDocuments(respondentBulkPrintDocumentsCaptor.getValue());
-        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(caseDetails);
-    }
+        List<BulkPrintDocument> respondentDocuments = respondentBulkPrintDocumentsCaptor.getValue();
+        assertEquals(7, respondentDocuments.size());
 
-    private void verifyPfdNcdrDocuments(List<BulkPrintDocument> documents) {
-        assertEquals(7, documents.size());
-
-        assertTrue(documents.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-compliance-letter")
+        assertTrue(respondentDocuments.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-compliance-letter")
             && doc.getBinaryFileUrl().equals("http://localhost/compliance/binary")));
-        assertTrue(documents.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-cover-letter")
+        assertTrue(respondentDocuments.stream().anyMatch(doc -> doc.getFileName().equals("pfd-ncdr-cover-letter")
             && doc.getBinaryFileUrl().equals("http://localhost/cover/binary")));
+        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     private FinremCaseDetails caseDetails() {

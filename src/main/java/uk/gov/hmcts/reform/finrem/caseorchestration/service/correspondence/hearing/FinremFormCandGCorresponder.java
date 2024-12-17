@@ -33,6 +33,16 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }
 
+    @Override
+    protected void printRespondentDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        List<CaseDocument> caseDocuments = getCaseDocuments(caseDetails);
+        Optional.ofNullable(caseDetails.getData().getListForHearingWrapper().getPfdNcdrCoverLetter())
+            .ifPresent(caseDocuments::add);
+
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(caseDocuments));
+    }
+
     private List<CaseDocument> getHearingCaseDocuments(FinremCaseData caseData, String caseId) {
         List<CaseDocument> caseDocuments = new ArrayList<>();
 
@@ -47,8 +57,6 @@ public class FinremFormCandGCorresponder extends FinremHearingCorresponder {
         Optional.ofNullable(listForHearingWrapper.getAdditionalListOfHearingDocuments())
             .ifPresent(caseDocuments::add);
         Optional.ofNullable(listForHearingWrapper.getPfdNcdrComplianceLetter())
-            .ifPresent(caseDocuments::add);
-        Optional.ofNullable(listForHearingWrapper.getPfdNcdrCoverLetter())
             .ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
