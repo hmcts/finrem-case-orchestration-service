@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -11,17 +13,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence.FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1;
@@ -33,43 +39,33 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviou
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendanceV2.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason.FR_MS_MIAM_URGENCY_REASON_CHECKLIST_VALUE_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
+@ExtendWith(MockitoExtension.class)
 public class AmendApplicationContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private AmendApplicationContestedAboutToStartHandler handler;
 
-    @Before
-    public void setup() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = Mockito.mock(FinremCaseDetailsMapper.class);
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
+
+    @BeforeEach
+    void setup() {
+        FinremCaseDetailsMapper finremCaseDetailsMapper = mock(FinremCaseDetailsMapper.class);
         handler = new AmendApplicationContestedAboutToStartHandler(finremCaseDetailsMapper,
             new OnStartDefaultValueService(),
-            new MiamLegacyExemptionsService());
+            new MiamLegacyExemptionsService(),
+            assignCaseAccessService);
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
-            is(false));
+    void testHandlerCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS);
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
-            is(false));
-    }
-
-    @Test
-    public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
-            is(true));
-    }
-
-    @Test
-    public void handle() {
+    void handle() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -81,7 +77,7 @@ public class AmendApplicationContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenCaseWithInvalidLegacyMiamExemptions_whenHandle_thenReturnsWarnings() {
+    void givenCaseWithInvalidLegacyMiamExemptions_whenHandle_thenReturnsWarnings() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         MiamWrapper miamWrapper = callbackRequest.getCaseDetails().getData().getMiamWrapper();
         miamWrapper.setMiamDomesticViolenceChecklist(List.of(FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1));
@@ -111,7 +107,7 @@ public class AmendApplicationContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenCaseWithValidLegacyMiamExemptions_whenHandle_thenConvertsExemptionsToV2() {
+    void givenCaseWithValidLegacyMiamExemptions_whenHandle_thenConvertsExemptionsToV2() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         MiamWrapper miamWrapper = callbackRequest.getCaseDetails().getData().getMiamWrapper();
         miamWrapper.setMiamDomesticViolenceChecklist(List.of(FR_MS_MIAM_DOMESTIC_VIOLENCE_CHECKLIST_VALUE_1));
@@ -133,6 +129,33 @@ public class AmendApplicationContestedAboutToStartHandlerTest {
         assertNull(miamWrapper.getMiamOtherGroundsChecklist());
         assertEquals(FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_V2_VALUE_1, miamWrapper.getMiamPreviousAttendanceChecklistV2());
         assertEquals(FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_V2_VALUE_5, miamWrapper.getMiamOtherGroundsChecklistV2());
+    }
+
+    @Test
+    void testPopulateInRefugeQuestionsCalled() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateRespondentInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails), times(1));
+        }
+    }
+
+    @Test
+    void testCurrentUserCaseRoleTypeCorrectlySet() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        when(assignCaseAccessService.getActiveUser(caseDetails.getId().toString(),
+                AUTH_TOKEN)).thenReturn("an appropriate value");
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        assertEquals("an appropriate value", caseDetails.getData().getCurrentUserCaseRoleType());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
