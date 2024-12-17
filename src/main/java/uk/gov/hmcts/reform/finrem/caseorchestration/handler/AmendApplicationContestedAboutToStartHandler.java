@@ -8,9 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +28,16 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
     private final OnStartDefaultValueService onStartDefaultValueService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
+    private final AssignCaseAccessService assignCaseAccessService;
+
     public AmendApplicationContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnStartDefaultValueService onStartDefaultValueService,
-                                                        MiamLegacyExemptionsService miamLegacyExemptionsService) {
+                                                        MiamLegacyExemptionsService miamLegacyExemptionsService,
+                                                        AssignCaseAccessService assignCaseAccessService) {
         super(finremCaseDetailsMapper);
         this.onStartDefaultValueService = onStartDefaultValueService;
         this.miamLegacyExemptionsService = miamLegacyExemptionsService;
+        this.assignCaseAccessService = assignCaseAccessService;
     }
 
     @Override
@@ -48,7 +55,8 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
         onStartDefaultValueService.defaultCivilPartnershipField(callbackRequest);
         onStartDefaultValueService.defaultTypeOfApplication(callbackRequest);
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
         List<String> warnings = null;
 
         MiamWrapper miamWrapper = caseData.getMiamWrapper();
@@ -56,6 +64,15 @@ public class AmendApplicationContestedAboutToStartHandler extends FinremCallback
             warnings = getMiamInvalidLegacyExemptionWarnings(miamWrapper);
         }
         miamLegacyExemptionsService.convertLegacyExemptions(miamWrapper);
+
+        RefugeWrapperUtils.populateApplicantInRefugeQuestion(caseDetails);
+        RefugeWrapperUtils.populateRespondentInRefugeQuestion(caseDetails);
+
+        // setCurrentUserCaseRoleType so applicantInRefugeQuestion and respondentInRefugeQuestion labels show correctly.
+        String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseDetails.getId().toString(),
+                userAuthorisation);
+        caseData.setCurrentUserCaseRoleType(loggedInUserCaseRole);
+
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())
