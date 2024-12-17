@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved.ContestedDraftOrderNotApprovedDetailsMapper;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -39,6 +41,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils.insertTimestamp;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RefusedOrderProcessor {
@@ -94,10 +97,17 @@ public class RefusedOrderProcessor {
                 UUID uuid = UUID.randomUUID();
                 refusalOrderIds.add(uuid);
 
+                JudgeType judgeTitle = ofNullable(draftOrdersWrapper.getRefusalOrderInstruction()).map(RefusalOrderInstruction::getJudgeType)
+                    .orElse(null);
+                if (judgeTitle == null) {
+                    log.warn("{} - Judge title was not captured and an empty string will be shown in the refusal order.",
+                        finremCaseDetails.getId());
+                }
+
                 RefusedOrder.RefusedOrderBuilder orderBuilder = RefusedOrder.builder()
                     .refusedDocument(refusalOrderConvertible.getRefusedDocument())
                     .refusalOrder(generateRefuseOrder(finremCaseDetails, judgeFeedback, refusalOrderConvertible.getRefusedDate(),
-                        refusalOrderConvertible.getApprovalJudge(), null, userAuthorisation))
+                        refusalOrderConvertible.getApprovalJudge(), judgeTitle, userAuthorisation))
                     .refusedDate(refusalOrderConvertible.getRefusedDate())
                     .submittedDate(refusalOrderConvertible.getSubmittedDate())
                     .submittedBy(refusalOrderConvertible.getSubmittedBy())
