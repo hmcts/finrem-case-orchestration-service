@@ -63,6 +63,13 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
+        setupHearingInstruction(draftOrdersWrapper);
+        setupRefusalOrderInstruction(draftOrdersWrapper);
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    }
+
+    private void setupHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
         boolean isHearingInstructionRequired = IntStream.rangeClosed(1, 5)
             .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
             .filter(Objects::nonNull)
@@ -79,7 +86,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                     .build()
             ))
             .build());
+    }
 
+    private void setupRefusalOrderInstruction(DraftOrdersWrapper draftOrdersWrapper) {
         boolean isRefusalOrderInstructionRequired = IntStream.rangeClosed(1, 5)
             .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
             .filter(Objects::nonNull)
@@ -89,8 +98,6 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         draftOrdersWrapper.setRefusalOrderInstruction(RefusalOrderInstruction.builder()
             .showRequireRefusalOrderInstructionQuestion(YesOrNo.forValue(isRefusalOrderInstructionRequired))
             .build());
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
     /**
