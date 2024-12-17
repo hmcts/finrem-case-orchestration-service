@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -31,6 +32,22 @@ class PfdNcdrDocumentServiceTest {
     private PfdNcdrDocumentService pfdNcdrDocumentService;
     @Mock
     private EvidenceManagementUploadService uploadService;
+    @Mock
+    private NotificationService notificationService;
+
+    @Test
+    void whenRespondentDigital_thenPfdNcdrCoverSheetNotRequired() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        assertThat(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)).isFalse();
+    }
+
+    @Test
+    void whenRespondentNonDigital_thenPfdNcdrCoverSheetRequired() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
+        assertThat(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)).isTrue();
+    }
 
     @Test
     void whenUploadPfdNcdrComplianceLetter_thenReturnCaseDocument() {

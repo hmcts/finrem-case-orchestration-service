@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -25,6 +26,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 public class PfdNcdrDocumentService {
 
     private final EvidenceManagementUploadService uploadService;
+    private final NotificationService notificationService;
+
+    /**
+     * Checks if a PFD NCDR Cover Letter is required on a case. It is required if the respondent solicitor is not digital
+     * or the respondent is a LiP.
+     *
+     * @param caseDetails case details
+     * @return true if PFD NCDR Cover Letter is required, false otherwise
+     */
+    public boolean isPdfNcdrCoverSheetRequired(CaseDetails caseDetails) {
+        return !notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
+    }
 
     /**
      * Uploads PFD NCDR Compliance Letter document to document store and returns the document.

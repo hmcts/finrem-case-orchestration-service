@@ -29,6 +29,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -132,38 +133,55 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateFastTrackFormCAndOutOfFamilyCourtResolution() {
-        mockPfdNcdrDocuments();
+        boolean respondentDigital = false;
+        mockPfdNcdrDocuments(respondentDigital);
 
         Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
-        verifyPfdNcdrDocuments(result);
+        verifyPfdNcdrDocuments(result, respondentDigital);
         verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateJudiciaryBasedFastTrackFormCAndOutOfFamilyCourtResolution() {
-        mockPfdNcdrDocuments();
+        boolean respondentDigital = false;
+        mockPfdNcdrDocuments(respondentDigital);
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
             makeItJudiciaryFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
-        verifyPfdNcdrDocuments(result);
+        verifyPfdNcdrDocuments(result, respondentDigital);
         verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
-        mockPfdNcdrDocuments();
+        boolean respondentDigital = false;
+        mockPfdNcdrDocuments(respondentDigital);
 
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(FORM_G));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
-        verifyPfdNcdrDocuments(result);
+        verifyPfdNcdrDocuments(result, respondentDigital);
+        verifyAdditionalNonFastTrackFields();
+    }
+
+    @Test
+    public void givenRespondentDigital_thenPfdNcdrCoverLetterNotGenerated() {
+        boolean respondentDigital = true;
+        mockPfdNcdrDocuments(respondentDigital);
+
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(FORM_G));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result, respondentDigital);
         verifyAdditionalNonFastTrackFields();
     }
 
@@ -527,7 +545,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
     }
 
-    private void mockPfdNcdrDocuments() {
+    private void mockPfdNcdrDocuments(boolean respondentDigital) {
+        when(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(any(CaseDetails.class))).thenReturn(!respondentDigital);
+
         CaseDocument pfdNcdrComplianceLetter = createDocument("pfdNcdrComplianceLetter.pdf");
         when(pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
         CaseDocument pfdNcdrCoverLetter = createDocument("pfdNcdrCoverLetter.pdf");
@@ -540,8 +560,13 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         return caseDocument;
     }
 
-    private void verifyPfdNcdrDocuments(Map<String, CaseDocument> result) {
+    private void verifyPfdNcdrDocuments(Map<String, CaseDocument> result, boolean respondentDigital) {
         assertThat(result.get(PFD_NCDR_COMPLIANCE_LETTER).getDocumentFilename(), is("pfdNcdrComplianceLetter.pdf"));
-        assertThat(result.get(PFD_NCDR_COVER_LETTER).getDocumentFilename(), is("pfdNcdrCoverLetter.pdf"));
+        if (respondentDigital) {
+            verify(pfdNcdrDocumentService, never()).uploadPfdNcdrCoverLetter(any(), any());
+            assertThat(result.get(PFD_NCDR_COVER_LETTER), is(nullValue()));
+        } else {
+            assertThat(result.get(PFD_NCDR_COVER_LETTER).getDocumentFilename(), is("pfdNcdrCoverLetter.pdf"));
+        }
     }
 }
