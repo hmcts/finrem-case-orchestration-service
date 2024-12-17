@@ -9,15 +9,15 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved.ContestedDraftOrderNotApprovedDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,8 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -70,17 +69,12 @@ class RefusedOrderProcessorTest {
     private RefusedOrderProcessor underTest;
 
     @Mock
-    private GenericDocumentService genericDocumentService;
-
-    @Mock
-    private DocumentConfiguration documentConfiguration;
-
-    @Mock
-    private ContestedDraftOrderNotApprovedDetailsMapper contestedDraftOrderNotApprovedDetailsMapper;
+    private RefusedOrderGenerator refusedOrderGenerator;
 
     @ParameterizedTest
     @MethodSource("provideProcessRefusedDocumentsAndUpdateTheirState")
     void shouldProcessRefusedDocumentsAndUpdateTheirState(JudgeApproval judgeApproval,
+                                                          RefusalOrderInstruction refusalOrderInstruction,
                                                           List<AgreedDraftOrderCollection> agreedDraftOrderCollections,
                                                           List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
                                                           List<RefusedOrderCollection> existingRefusedOrders,
@@ -92,11 +86,11 @@ class RefusedOrderProcessorTest {
             .agreedDraftOrderCollection(agreedDraftOrderCollections)
             .draftOrdersReviewCollection(draftOrdersReviewCollection)
             .refusedOrdersCollection(existingRefusedOrders)
+            .refusalOrderInstruction(refusalOrderInstruction)
             .build();
 
-        lenient().when(documentConfiguration.getContestedDraftOrderNotApprovedFileName()).thenReturn("RefusalOrder.doc");
-        lenient().when(documentConfiguration.getContestedDraftOrderNotApprovedTemplate(any(FinremCaseDetails.class))).thenReturn("TemplateName");
-        lenient().when(genericDocumentService.generateDocumentFromPlaceholdersMap(anyString(), anyMap(), anyString(), anyString(), anyString()))
+        lenient().when(refusedOrderGenerator.generateRefuseOrder(any(FinremCaseDetails.class), eq(JUDGE_FEEDBACK), eq(FIXED_DATE_TIME),
+            eq(APPROVED_JUDGE_NAME), refusalOrderInstruction == null ? isNull() : eq(refusalOrderInstruction.getJudgeType()), eq(AUTH_TOKEN)))
             .thenReturn(GENERATED_REFUSED_ORDER);
 
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
@@ -166,7 +160,7 @@ class RefusedOrderProcessorTest {
     }
 
     static Arguments targetDocNotFound(JudgeApproval judgeApproval) {
-        return Arguments.of(judgeApproval,
+        return Arguments.of(judgeApproval, null,
             List.of(),
             List.of(
                 DraftOrdersReviewCollection.builder()
@@ -212,7 +206,7 @@ class RefusedOrderProcessorTest {
                 .approvalJudge("Mary Chapman")
                 .build()).build();
 
-        return Arguments.of(judgeApproval,
+        return Arguments.of(judgeApproval, null,
             List.of(agreedDraftOrderCollectionToBeExamined),
             List.of(
                 DraftOrdersReviewCollection.builder()
@@ -270,7 +264,7 @@ class RefusedOrderProcessorTest {
                     .build())
                 .build();
 
-        return Arguments.of(judgeApproval,
+        return Arguments.of(judgeApproval, null,
             List.of(agreedDraftOrderCollectionToBeExamined),
             List.of(
                 DraftOrdersReviewCollection.builder()
@@ -317,7 +311,7 @@ class RefusedOrderProcessorTest {
                     .build())
                 .build();
 
-        return Arguments.of(judgeApproval,
+        return Arguments.of(judgeApproval, RefusalOrderInstruction.builder().judgeType(JudgeType.DEPUTY_DISTRICT_JUDGE).build(),
             List.of(agreedDraftOrderCollectionToBeExamined),
             List.of(
                 DraftOrdersReviewCollection.builder()
@@ -355,6 +349,7 @@ class RefusedOrderProcessorTest {
                 .judgeFeedback(JUDGE_FEEDBACK)
                 .submittedByEmail(SUBMITTED_BY_EMAIL).submittedDate(SUBMITTED_DATE).submittedBy(SUBMITTED_BY)
                 .hearingDate(HEARING_DATE)
+                .judgeType(JudgeType.DEPUTY_DISTRICT_JUDGE)
                 .build()
         );
     }
