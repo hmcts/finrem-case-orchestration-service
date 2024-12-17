@@ -1,4 +1,6 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders;
+
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.time.LocalDateTime;
 
