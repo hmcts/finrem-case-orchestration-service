@@ -81,6 +81,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IPSWICH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISLE_OF_WIGHT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
@@ -383,7 +384,7 @@ public class CourtHelperTest {
             "FR_newport_hc_list_5", "Blackwood Civil and Family Court");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, "invalid", NEWPORT_COURTLIST,
-            "FR_newport_hc_list_5", "");
+            "FR_newport_hc_list_5", EMPTY);
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
             "invalid", EMPTY);
@@ -413,7 +414,7 @@ public class CourtHelperTest {
             "FR_swansea_hc_list_6", "Port Talbot Justice Centre");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, "invalid", SWANSEA_COURTLIST,
-            "FR_swansea_hc_list_6", "");
+            "FR_swansea_hc_list_6", EMPTY);
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST,
             "invalid", EMPTY);
@@ -424,6 +425,9 @@ public class CourtHelperTest {
 
     @Test
     public void kentCourts() {
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+            "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
+
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
 
@@ -455,7 +459,7 @@ public class CourtHelperTest {
             "FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, "invalid", KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_10", "");
+            "FR_kent_surrey_hc_list_10", EMPTY);
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre");
@@ -497,7 +501,7 @@ public class CourtHelperTest {
             "FR_cleaveland_hc_list_8", "Darlington County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
-            "FR_cleaveland_hc_list_8", "");
+            "FR_cleaveland_hc_list_8", EMPTY);
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "invalid", EMPTY);
