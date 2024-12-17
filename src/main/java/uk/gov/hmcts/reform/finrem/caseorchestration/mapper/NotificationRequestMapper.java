@@ -253,7 +253,6 @@ public class NotificationRequestMapper {
                                                                        Map<String, Object> interimHearingData) {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
 
-        //TODO: Error here
         if (caseDetails.isConsentedApplication()) {
             notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(interimHearingData));
         }

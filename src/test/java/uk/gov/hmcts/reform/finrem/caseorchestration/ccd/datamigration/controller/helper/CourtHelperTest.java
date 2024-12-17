@@ -167,8 +167,10 @@ public class CourtHelperTest {
             MOLD, "Mold County");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -186,8 +188,10 @@ public class CourtHelperTest {
             SLOUGH, "Slough County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -211,8 +215,10 @@ public class CourtHelperTest {
             WESTON, "Weston Super Mare County and Family Court");
 
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -242,8 +248,10 @@ public class CourtHelperTest {
             BODMIN, "Bodmin County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -273,8 +281,10 @@ public class CourtHelperTest {
             ISLE_OF_WIGHT, "Newport (Isle of Wight) Combined Court");
 
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -313,8 +323,10 @@ public class CourtHelperTest {
             WATFORD, "Watford County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -347,7 +359,10 @@ public class CourtHelperTest {
             WEST_CUMBRIA, "West Cumbria Courthouse");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -372,6 +387,9 @@ public class CourtHelperTest {
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
             "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -398,8 +416,10 @@ public class CourtHelperTest {
             "FR_swansea_hc_list_6", "");
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -441,7 +461,10 @@ public class CourtHelperTest {
             "FR_kent_surrey_hc_list_11", "Thanet Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -476,9 +499,11 @@ public class CourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", "");
 
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "invalid", EMPTY);
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "invalid", "");
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -507,11 +532,14 @@ public class CourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST,
             "FR_nw_yorkshire_hc_list_8", "Leeds Combined Court Centre");
 
-        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", "",
-            "", "");
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST,
+            EMPTY, EMPTY);
 
-        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, "",
-            "invalid", "");
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", EMPTY,
+            EMPTY, EMPTY);
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, EMPTY,
+            "invalid", EMPTY);
     }
 
     @Test
@@ -532,10 +560,13 @@ public class CourtHelperTest {
             "FR_humber_hc_list_5", "Barnsley Law Courts");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", HSYORKSHIRE_COURTLIST,
-            "FR_humber_hc_list_5", "");
+            "FR_humber_hc_list_5", EMPTY);
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -556,10 +587,13 @@ public class CourtHelperTest {
             "FR_liverpool_hc_list_5", "Birkenhead County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, "invalid", LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_1", "");
+            "FR_liverpool_hc_list_1", EMPTY);
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -574,10 +608,13 @@ public class CourtHelperTest {
             "FR_manchester_hc_list_3", "Wigan County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, "invalid", MANCHESTER_COURTLIST,
-            "FR_manchester_hc_list_3", "");
+            "FR_manchester_hc_list_3", EMPTY);
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -619,10 +656,13 @@ public class CourtHelperTest {
             "FR_s_CFCList_17", "The Royal Courts of Justice");
 
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, "invalid", CFC_COURTLIST,
-            "FR_s_CFCList_1", "");
+            "FR_s_CFCList_1", EMPTY);
 
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -658,11 +698,13 @@ public class CourtHelperTest {
             "FR_birmingham_hc_list_10", "Hereford County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_10", "");
+            "FR_birmingham_hc_list_10", EMPTY);
 
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -693,10 +735,13 @@ public class CourtHelperTest {
             "FR_s_NottinghamList_8", "Boston County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "INVALID", "");
+            "INVALID", EMPTY);
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_8", "");
+            "FR_s_NottinghamList_8", EMPTY);
+
+        verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     @Test
@@ -705,10 +750,13 @@ public class CourtHelperTest {
             "FR_highCourtList_1", "High Court Family Division");
 
         verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, "invalid", HIGHCOURT_COURTLIST,
-            "FR_highCourtList_1", "");
+            "FR_highCourtList_1", EMPTY);
 
         verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
-            "invalid", "");
+            "invalid", EMPTY);
+
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
+            EMPTY, EMPTY);
     }
 
     private CaseDetails getCaseDetailsWithAllocatedValues(String region, String subRegionListName, String subRegion,
@@ -778,7 +826,7 @@ public class CourtHelperTest {
     public void interim_highCourtFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(HIGHCOURT, INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectInterimHearingCourtReturned("highCourt", INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
-        verifyCorrectInterimHearingCourtReturned("invalid", INTERIM_HIGHCOURT_FRC_LIST, "");
+        verifyCorrectInterimHearingCourtReturned("invalid", INTERIM_HIGHCOURT_FRC_LIST, EMPTY);
     }
 
     private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
@@ -923,7 +971,7 @@ public class CourtHelperTest {
     public void highCourtFRCCourts() {
         verifyCorrectHearingCourtReturned(HIGHCOURT, HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectHearingCourtReturned("highCourt", HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
-        verifyCorrectHearingCourtReturned("invalid", HEARING_HIGHCOURT_FRC_LIST, "");
+        verifyCorrectHearingCourtReturned("invalid", HEARING_HIGHCOURT_FRC_LIST, EMPTY);
     }
 
     @Test
