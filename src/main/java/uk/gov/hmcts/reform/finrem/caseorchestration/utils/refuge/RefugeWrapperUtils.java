@@ -53,4 +53,35 @@ public class RefugeWrapperUtils {
                     caseData.getRefugeWrapper().setApplicantInRefugeQuestion(null);
                 });
     }
+
+    /**
+     * Populates the `applicantInRefugeQuestion` field in the refuge wrapper with the value of
+     * `applicantInRefugeTab`, This is used for events that will update the value for applicantInRefugeTab
+     * when submitted. This method simply pre-populates the question with what was answered previously.
+     *
+     * @param caseDetails the {@code CaseDetails} object containing case-specific details including refuge info.
+     *
+     * @throws NullPointerException if {@code caseDetails} is null.
+     */
+    public static void populateApplicantInRefugeQuestion(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        Optional.ofNullable(caseData.getRefugeWrapper().getApplicantInRefugeTab())
+                .ifPresent(tab -> caseData.getRefugeWrapper().setApplicantInRefugeQuestion(tab));
+    }
+
+    /**
+     * Populates the `respondentInRefugeQuestion` field in the refuge wrapper with the value of
+     * `respondentInRefugeTab`, This is used for events that will update the value for respondentInRefugeTab
+     * when submitted. This method simply pre-populates the question with what was answered previously.
+     *
+     * @param caseDetails the {@code CaseDetails} object containing case-specific details including refuge info.
+     *
+     * @throws NullPointerException if {@code caseDetails} is null.
+     */
+    public static void populateRespondentInRefugeQuestion(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        Optional.ofNullable(caseData.getRefugeWrapper().getRespondentInRefugeTab())
+                .ifPresent(tab -> caseData.getRefugeWrapper().setRespondentInRefugeQuestion(tab));
+    }
+
 }
