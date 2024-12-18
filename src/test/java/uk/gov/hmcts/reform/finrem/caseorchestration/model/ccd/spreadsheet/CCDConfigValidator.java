@@ -259,23 +259,30 @@ public class CCDConfigValidator {
         return errors;
     }
 
-    private String tryToGetSimpleNameAutomatically(String fieldType) {
-        if (fieldType != null && fieldType.startsWith(FR_CCD_FIELD_TYPE_PREFIX)) {
-            return fieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length());
+    private String resolveSimpleNameFromCCDFieldType(String ccdFieldType) {
+        if (fieldTypesMap.containsKey(ccdFieldType)) {
+            return fieldTypesMap.get(ccdFieldType);
         } else {
-            return fieldType;
+            return resolveSimpleNameFromPattern(ccdFieldType);
+        }
+    }
+
+    private boolean doesNotMatchFieldSimpleName(String ccdFieldType, Class clazz) {
+        return !resolveSimpleNameFromCCDFieldType(ccdFieldType).equals(clazz.getSimpleName());
+    }
+
+    private String resolveSimpleNameFromPattern(String ccdFieldType) {
+        if (ccdFieldType != null && ccdFieldType.startsWith(FR_CCD_FIELD_TYPE_PREFIX)) {
+            return ccdFieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length());
+        } else {
+            return null;
         }
     }
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        String fieldType = ccdFieldAttributes.getFieldType();
-        boolean result = fieldTypesMap.get(fieldType) == null
-            || !fieldTypesMap.get(fieldType).equals(field.getType().getSimpleName());
-        if (result) {
-            // trying on automatically if the fieldType is prefixed with "FR_"
-            result = !tryToGetSimpleNameAutomatically(fieldType).equals(field.getType().getSimpleName());
-        }
-        return result;
+        String ccdFieldType = ccdFieldAttributes.getFieldType();
+        String resolvedSimpleName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
+        return resolvedSimpleName == null || doesNotMatchFieldSimpleName(resolvedSimpleName, field.getType());
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
