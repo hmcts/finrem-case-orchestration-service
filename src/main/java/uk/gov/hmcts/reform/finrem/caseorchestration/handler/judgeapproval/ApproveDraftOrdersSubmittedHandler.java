@@ -53,28 +53,39 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested {} submitted event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
-        FinremCaseData finremCaseData = caseDetails.getData();
-        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        List<UUID> refusalOrderIdsToBeSent =
-            ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream().map(UuidCollection::getValue).toList();
+        sendRefusalOrderToParties(caseDetails);
 
+      
+        //Build confirmation body
+        String confirmationBody = draftOrdersWrapper.getApproveOrdersConfirmationBody();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .confirmationHeader(CONFIRMATION_HEADER)
+            .confirmationBody(confirmationBody)
+            .build();
+    }
+
+    private List<UUID> readLatestRefusalOrderIds(DraftOrdersWrapper draftOrdersWrapper) {
+        return ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream().map(UuidCollection::getValue).toList();
+    }
+
+    private void sendRefusalOrderToParties(FinremCaseDetails finremCaseDetails) {
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        List<UUID> refusalOrderIdsToBeSent = readLatestRefusalOrderIds(draftOrdersWrapper);
+
+        // Process the refused orders collection from the draftOrdersWrapper.
+        // Filter the orders whose IDs are present in the refusalOrderIdsToBeSent list.
         ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElse(List.of()).stream()
             .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
             .forEach(a -> {
                 if (!isEmpty(a.getValue().getSubmittedByEmail())) {
+                    //  - If the 'submittedByEmail' field is not empty, send a refusal notification via Gov Notify
                     notificationService.sendRefusedDraftOrderOrPsa(notificationRequestMapper
-                        .buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, a.getValue()));
+                        .buildRefusedDraftOrderOrPsaNotificationRequest(finremCaseDetails, a.getValue()));
                 } else {
                     // TODO DFR-3497 send refusal order by post. Take a look on ContestedDraftOrderNotApprovedController.sendRefusalReason
                 }
             });
-
-        //Build confirmation body
-        String confirmationBody = draftOrdersWrapper.getApproveOrdersConfirmationBody();
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .confirmationHeader(CONFIRMATION_HEADER)
-            .confirmationBody(confirmationBody)
-            .build();
     }
 }
