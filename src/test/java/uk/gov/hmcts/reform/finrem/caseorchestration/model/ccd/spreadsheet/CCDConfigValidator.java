@@ -137,7 +137,6 @@ public class CCDConfigValidator {
         return validationErrors;
     }
 
-
     private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet,
                                                                  Sheet fixedListSheet,
                                                                  List<CcdFieldAttributes> caseFields) {
