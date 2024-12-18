@@ -16,6 +16,8 @@ public class ApproveOrderService {
 
     private final JudgeApprovalResolver judgeApprovalResolver;
 
+    private final JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
+
     /**
      * Populates judge decisions for draft orders by iterating through a predefined range of indexes (1 to 5),
      * resolving judge approvals, and updating the corresponding draft orders and PSA documents statuses and hearing instructions.
@@ -37,6 +39,7 @@ public class ApproveOrderService {
                 .ifPresent(targetDoc -> judgeApprovalResolver.populateJudgeDecision(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval,
                     userAuthorisation));
         }
+        judgeApprovalInfoCapturer.buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
     }
 
     /**

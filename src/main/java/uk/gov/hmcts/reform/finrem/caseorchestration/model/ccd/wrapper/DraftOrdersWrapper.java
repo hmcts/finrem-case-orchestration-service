@@ -87,17 +87,9 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     private List<UuidCollection> refusalOrderIdsToBeSent;
 
-    @JsonProperty("ordersApproved")
-    private final List<String> ordersApproved = new ArrayList<>();
+    @JsonProperty("approveOrdersConfirmationBody")
+    private String approveOrdersConfirmationBody;
 
-    @JsonProperty("ordersRepresentativeChanges")
-    private final List<String> ordersRepresentativeChanges = new ArrayList<>();
-
-    @JsonProperty("ordersChanged")
-    private final List<String> ordersChanged = new ArrayList<>();
-
-    @JsonProperty("ordersReviewLater")
-    private final List<String> ordersReviewLater = new ArrayList<>();
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
