@@ -65,9 +65,6 @@ class JudgeApprovalResolverTest {
     @Mock
     private RefusedOrderProcessor refusedOrderProcessor;
 
-    @Mock
-    private JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
-
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
@@ -81,8 +78,6 @@ class JudgeApprovalResolverTest {
             judgeApproval,
             AUTH_TOKEN
         );
-
-        verify(judgeApprovalInfoCapturer).fileNameCaptors(judgeApproval);
 
         // Verify the expected number of invocations to processHearingInstruction
         verify(hearingProcessor, times(expectHearingInvocationCount))
@@ -282,7 +277,6 @@ class JudgeApprovalResolverTest {
             assertNull(sample2.getApprovalDate());
             assertNull(sample1.getApprovalJudge()); // AgreedDraftOrder doesn't store approvalJudge
             assertEquals(APPROVED_JUDGE_NAME, sample2.getApprovalJudge());
-            verify(judgeApprovalInfoCapturer).fileNameCaptors(ja);
             verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
             verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
         }

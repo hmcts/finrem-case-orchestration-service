@@ -14,28 +14,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.REVIEW_LATER;
 
 @ExtendWith(MockitoExtension.class)
 class ApproveOrderServiceTest {
 
-    private static final CaseDocument TARGET_DOC = mock(CaseDocument.class);
-
     @InjectMocks
     private ApproveOrderService underTest;
 
     @Mock
     private JudgeApprovalResolver judgeApprovalResolver;
-
-    @Mock
-    private JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
 
     @ParameterizedTest
     @MethodSource("providePopulateJudgeDecisionsData")
@@ -47,38 +44,41 @@ class ApproveOrderServiceTest {
             .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
                 eq(AUTH_TOKEN));
 
-        verify(judgeApprovalInfoCapturer).buildConfirmationBody(any(FinremCaseDetails.class), eq(draftOrdersWrapper));
-
+        assertNotNull(draftOrdersWrapper.getApproveOrdersConfirmationBody());
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {
+        CaseDocument targetDoc = CaseDocument.builder()
+            .documentFilename("Document.docx")
+            .build();
 
         return Stream.of(
             // All judge approvals are valid
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
-                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
-                    .judgeApproval3(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
-                    .judgeApproval4(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
-                    .judgeApproval5(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval1(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval2(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval3(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval4(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval5(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
                     .build(),
                 5
             ),
             // Some approvals are valid
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
-                    .judgeApproval2(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
-                    .judgeApproval4(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval1(JudgeApproval.builder().document(targetDoc).judgeDecision(READY_TO_BE_SEALED).build())
+                    .judgeApproval2(JudgeApproval.builder().document(targetDoc).judgeDecision(REVIEW_LATER).build())
+                    .judgeApproval4(JudgeApproval.builder().document(targetDoc).judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE).build())
+                    .judgeApproval5(JudgeApproval.builder().document(targetDoc).judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES).build())
                     .build(),
-                3
+                4
             ),
             // Approvals exist but have no valid decision
             Arguments.of(
                 DraftOrdersWrapper.builder()
-                    .judgeApproval1(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
-                    .judgeApproval5(JudgeApproval.builder().document(TARGET_DOC).judgeDecision(REVIEW_LATER).build())
+                    .judgeApproval1(JudgeApproval.builder().document(targetDoc).judgeDecision(REVIEW_LATER).build())
+                    .judgeApproval5(JudgeApproval.builder().document(targetDoc).judgeDecision(REVIEW_LATER).build())
                     .build(),
                 2
             ),
