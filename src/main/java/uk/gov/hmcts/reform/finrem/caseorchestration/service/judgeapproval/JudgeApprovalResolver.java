@@ -33,8 +33,6 @@ class JudgeApprovalResolver {
 
     private final RefusedOrderProcessor refusedOrderProcessor;
 
-    private final JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
-
     /**
      * Populates the judge's decision for the given draft orders and updates the status of approvable documents.
      * This method processes the draft order review collection, PSA review collection, and agreed draft orders,
@@ -48,8 +46,6 @@ class JudgeApprovalResolver {
      */
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
-
-        judgeApprovalInfoCapturer.fileNameCaptors(judgeApproval);
 
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> processApprovableCollection(collection.stream()
