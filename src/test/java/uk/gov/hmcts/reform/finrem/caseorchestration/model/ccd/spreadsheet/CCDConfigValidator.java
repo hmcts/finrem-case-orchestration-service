@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
@@ -270,7 +272,7 @@ public class CCDConfigValidator {
 
     private boolean doesNotMatchFieldSimpleName(String ccdFieldType, Class clazz) {
         return !Objects.equals(
-            resolveSimpleNameFromCCDFieldType(ccdFieldType).toLowerCase(),
+            ofNullable(resolveSimpleNameFromCCDFieldType(ccdFieldType)).orElse("").toLowerCase(),
             clazz.getSimpleName().toLowerCase()
         );
     }
