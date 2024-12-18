@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,8 @@ public class CCDConfigValidator {
         Map.entry("FR_uploadAgreedDraftOrder", "UploadAgreedDraftOrder"),
         Map.entry("FR_uploadSuggestedDraftOrder", "UploadSuggestedDraftOrder"),
         Map.entry("FR_judgeApproval", "JudgeApproval"),
-        Map.entry("FR_hearingInstruction", "HearingInstruction")
+        Map.entry("FR_hearingInstruction", "HearingInstruction"),
+        Map.entry("FR_fl_RefusalOrderJudgeType", RefusalOrderInstruction.class.getSimpleName())
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
