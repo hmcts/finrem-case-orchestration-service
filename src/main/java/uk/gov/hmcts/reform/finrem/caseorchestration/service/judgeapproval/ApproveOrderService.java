@@ -98,13 +98,16 @@ public class ApproveOrderService {
 
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
-            String fileName = judgeApproval.getDocument().getDocumentFilename();
-            switch (judgeApproval.getJudgeDecision()) {
-                case READY_TO_BE_SEALED -> ordersApproved.add(fileName);
-                case LEGAL_REP_NEEDS_TO_MAKE_CHANGE -> ordersRepresentativeChanges.add(fileName);
-                case JUDGE_NEEDS_TO_MAKE_CHANGES -> ordersChanged.add(fileName);
-                case REVIEW_LATER -> ordersReviewLater.add(fileName);
-                default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
+
+            if (judgeApproval != null) {
+                String fileName = judgeApproval.getDocument().getDocumentFilename();
+                switch (judgeApproval.getJudgeDecision()) {
+                    case READY_TO_BE_SEALED -> ordersApproved.add(fileName);
+                    case LEGAL_REP_NEEDS_TO_MAKE_CHANGE -> ordersRepresentativeChanges.add(fileName);
+                    case JUDGE_NEEDS_TO_MAKE_CHANGES -> ordersChanged.add(fileName);
+                    case REVIEW_LATER -> ordersReviewLater.add(fileName);
+                    default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
+                }
             }
         }
 
