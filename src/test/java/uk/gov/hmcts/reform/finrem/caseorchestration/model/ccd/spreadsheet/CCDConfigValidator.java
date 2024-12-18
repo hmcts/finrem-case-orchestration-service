@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
 
+    private static final String FR_CCD_FIELD_TYPE_PREFIX = "FR_";
     protected static final String CASE_FIELD_SHEET = "CaseField";
     protected static final String COMPLEX_TYPES_SHEET = "ComplexTypes";
     protected static final String FIXED_LISTS_SHEET = "FixedLists";
@@ -74,9 +75,7 @@ public class CCDConfigValidator {
         Map.entry(DYNAMIC_LIST, "DynamicList"),
         Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList"),
         Map.entry("FR_ct_draftDirectionOrder", "DraftDirectionOrder"),
-        Map.entry("Flags", "CaseFlag"),
-        Map.entry("FR_uploadAgreedDraftOrder", "UploadAgreedDraftOrder"),
-        Map.entry("FR_uploadSuggestedDraftOrder", "UploadSuggestedDraftOrder")
+        Map.entry("Flags", "CaseFlag")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
@@ -128,7 +127,6 @@ public class CCDConfigValidator {
         }
         return validationErrors;
     }
-
 
     private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet,
                                                                  Sheet fixedListSheet,
@@ -261,9 +259,30 @@ public class CCDConfigValidator {
         return errors;
     }
 
+    private String resolveSimpleNameFromCCDFieldType(String ccdFieldType) {
+        if (fieldTypesMap.containsKey(ccdFieldType)) {
+            return fieldTypesMap.get(ccdFieldType);
+        } else {
+            return resolveSimpleNameFromPattern(ccdFieldType);
+        }
+    }
+
+    private boolean doesNotMatchFieldSimpleName(String ccdFieldType, Class clazz) {
+        return !resolveSimpleNameFromCCDFieldType(ccdFieldType.toLowerCase()).equals(clazz.getSimpleName().toLowerCase());
+    }
+
+    private String resolveSimpleNameFromPattern(String ccdFieldType) {
+        if (ccdFieldType != null && ccdFieldType.startsWith(FR_CCD_FIELD_TYPE_PREFIX)) {
+            return ccdFieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length());
+        } else {
+            return null;
+        }
+    }
+
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        return fieldTypesMap.get(ccdFieldAttributes.getFieldType()) == null
-            || !fieldTypesMap.get(ccdFieldAttributes.getFieldType()).equals(field.getType().getSimpleName());
+        String ccdFieldType = ccdFieldAttributes.getFieldType();
+        String resolvedSimpleName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
+        return resolvedSimpleName == null || doesNotMatchFieldSimpleName(resolvedSimpleName, field.getType());
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
