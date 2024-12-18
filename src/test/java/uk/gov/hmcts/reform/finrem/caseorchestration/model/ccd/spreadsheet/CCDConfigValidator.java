@@ -268,7 +268,7 @@ public class CCDConfigValidator {
     }
 
     private boolean doesNotMatchFieldSimpleName(String ccdFieldType, Class clazz) {
-        return !resolveSimpleNameFromCCDFieldType(ccdFieldType).equals(clazz.getSimpleName());
+        return !resolveSimpleNameFromCCDFieldType(ccdFieldType.toLowerCase()).equals(clazz.getSimpleName().toLowerCase());
     }
 
     private String resolveSimpleNameFromPattern(String ccdFieldType) {
