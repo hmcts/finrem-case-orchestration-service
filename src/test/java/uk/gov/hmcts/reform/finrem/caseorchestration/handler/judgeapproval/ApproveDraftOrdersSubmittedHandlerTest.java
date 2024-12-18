@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -66,9 +67,10 @@ class ApproveDraftOrdersSubmittedHandlerTest {
             .thenReturn(expectedNotificationRequest);
 
         // Act
-        handler.handle(callbackRequest, AUTH_TOKEN);
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         // Assert
+        assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders reviewed");
         verify(notificationService, times(expectedInvocationCount)).sendRefusedDraftOrderOrPsa(expectedNotificationRequest);
         verify(notificationRequestMapper, times(expectedInvocationCount)).buildRefusedDraftOrderOrPsaNotificationRequest(any(FinremCaseDetails.class),
             any(RefusedOrder.class));
