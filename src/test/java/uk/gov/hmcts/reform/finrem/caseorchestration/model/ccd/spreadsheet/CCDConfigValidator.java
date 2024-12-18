@@ -11,7 +11,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,10 +80,10 @@ public class CCDConfigValidator {
         Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList"),
         Map.entry("FR_ct_draftDirectionOrder", "DraftDirectionOrder"),
         Map.entry("Flags", "CaseFlag"),
-        Map.entry("FR_uploadAgreedDraftOrder", "UploadAgreedDraftOrder"),
-        Map.entry("FR_uploadSuggestedDraftOrder", "UploadSuggestedDraftOrder"),
-        Map.entry("FR_judgeApproval", "JudgeApproval"),
-        Map.entry("FR_hearingInstruction", "HearingInstruction"),
+        Map.entry("FR_uploadAgreedDraftOrder", UploadAgreedDraftOrder.class.getSimpleName()),
+        Map.entry("FR_uploadSuggestedDraftOrder", UploadSuggestedDraftOrder.class.getSimpleName()),
+        Map.entry("FR_judgeApproval", JudgeApproval.class.getSimpleName()),
+        Map.entry("FR_hearingInstruction", HearingInstruction.class.getSimpleName()),
         Map.entry("FR_fl_RefusalOrderJudgeType", RefusalOrderInstruction.class.getSimpleName())
     );
 
