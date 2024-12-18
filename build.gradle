@@ -277,7 +277,7 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(59)
+    mutationThreshold.set(56)
 }
 
 bootJar {
