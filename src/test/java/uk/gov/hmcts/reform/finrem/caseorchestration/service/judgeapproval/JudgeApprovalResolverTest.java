@@ -65,20 +65,30 @@ class JudgeApprovalResolverTest {
     @Mock
     private RefusedOrderProcessor refusedOrderProcessor;
 
+    @Mock
+    private JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
+
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
+
+        JudgeApproval judgeApproval = JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build();
+
         // Execute the method being tested
         judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
             draftOrdersWrapper,
             CaseDocument.builder().build(),
-            JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
+            judgeApproval,
             AUTH_TOKEN
         );
+
+        verify(judgeApprovalInfoCapturer).fileNameCaptors(judgeApproval);
 
         // Verify the expected number of invocations to processHearingInstruction
         verify(hearingProcessor, times(expectHearingInvocationCount))
             .processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+
+
     }
 
     static Stream<Arguments> provideShouldInvokeProcessHearingInstructionData() {
@@ -272,6 +282,7 @@ class JudgeApprovalResolverTest {
             assertNull(sample2.getApprovalDate());
             assertNull(sample1.getApprovalJudge()); // AgreedDraftOrder doesn't store approvalJudge
             assertEquals(APPROVED_JUDGE_NAME, sample2.getApprovalJudge());
+            verify(judgeApprovalInfoCapturer).fileNameCaptors(ja);
             verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
             verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
         }
