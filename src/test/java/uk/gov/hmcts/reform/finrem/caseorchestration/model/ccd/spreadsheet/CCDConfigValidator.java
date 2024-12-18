@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
 
-    private static final String FR_CCD_FIELD_TYPE_PREFIX = "FR_";
     protected static final String CASE_FIELD_SHEET = "CaseField";
     protected static final String COMPLEX_TYPES_SHEET = "ComplexTypes";
     protected static final String FIXED_LISTS_SHEET = "FixedLists";
@@ -75,7 +74,9 @@ public class CCDConfigValidator {
         Map.entry(DYNAMIC_LIST, "DynamicList"),
         Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList"),
         Map.entry("FR_ct_draftDirectionOrder", "DraftDirectionOrder"),
-        Map.entry("Flags", "CaseFlag")
+        Map.entry("Flags", "CaseFlag"),
+        Map.entry("FR_uploadAgreedDraftOrder", "UploadAgreedDraftOrder"),
+        Map.entry("FR_uploadSuggestedDraftOrder", "UploadSuggestedDraftOrder")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
@@ -127,6 +128,7 @@ public class CCDConfigValidator {
         }
         return validationErrors;
     }
+
 
     private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet,
                                                                  Sheet fixedListSheet,
@@ -259,23 +261,9 @@ public class CCDConfigValidator {
         return errors;
     }
 
-    private String tryToGetSimpleNameAutomatically(String fieldType) {
-        if (fieldType != null && fieldType.startsWith(FR_CCD_FIELD_TYPE_PREFIX)) {
-            return fieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length());
-        } else {
-            return fieldType;
-        }
-    }
-
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        String fieldType = ccdFieldAttributes.getFieldType();
-        boolean result = fieldTypesMap.get(fieldType) == null
-            || !fieldTypesMap.get(fieldType).equals(field.getType().getSimpleName());
-        if (result) {
-            // trying on automatically if the fieldType is prefixed with "FR_"
-            result = !tryToGetSimpleNameAutomatically(fieldType).equals(field.getType().getSimpleName());
-        }
-        return result;
+        return fieldTypesMap.get(ccdFieldAttributes.getFieldType()) == null
+            || !fieldTypesMap.get(ccdFieldAttributes.getFieldType()).equals(field.getType().getSimpleName());
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
