@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-
 @Slf4j
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
@@ -270,9 +268,9 @@ public class CCDConfigValidator {
         }
     }
 
-    private boolean doesNotMatchFieldSimpleName(String ccdFieldType, Class clazz) {
+    private boolean doesNotMatchFieldSimpleName(String expectedClassSimpleName, Class clazz) {
         return !Objects.equals(
-            ofNullable(resolveSimpleNameFromCCDFieldType(ccdFieldType)).orElse("").toLowerCase(),
+            expectedClassSimpleName.toLowerCase(),
             clazz.getSimpleName().toLowerCase()
         );
     }
@@ -287,8 +285,8 @@ public class CCDConfigValidator {
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
         String ccdFieldType = ccdFieldAttributes.getFieldType();
-        String resolvedSimpleName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
-        return resolvedSimpleName == null || doesNotMatchFieldSimpleName(resolvedSimpleName, field.getType());
+        String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
+        return expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
