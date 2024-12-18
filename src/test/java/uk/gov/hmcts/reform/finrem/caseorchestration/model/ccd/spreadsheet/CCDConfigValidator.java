@@ -84,7 +84,7 @@ public class CCDConfigValidator {
         Map.entry("FR_uploadSuggestedDraftOrder", UploadSuggestedDraftOrder.class.getSimpleName()),
         Map.entry("FR_judgeApproval", JudgeApproval.class.getSimpleName()),
         Map.entry("FR_hearingInstruction", HearingInstruction.class.getSimpleName()),
-        Map.entry("FR_fl_RefusalOrderJudgeType", RefusalOrderInstruction.class.getSimpleName())
+        Map.entry("FR_refusalOrderInstruction", RefusalOrderInstruction.class.getSimpleName())
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
