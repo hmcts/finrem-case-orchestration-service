@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -269,10 +268,7 @@ public class CCDConfigValidator {
     }
 
     private boolean doesNotMatchFieldSimpleName(String expectedClassSimpleName, Class clazz) {
-        return !Objects.equals(
-            expectedClassSimpleName.toLowerCase(),
-            clazz.getSimpleName().toLowerCase()
-        );
+        return !expectedClassSimpleName.toLowerCase().equals(clazz.getSimpleName().toLowerCase());
     }
 
     private String resolveSimpleNameFromPattern(String ccdFieldType) {
