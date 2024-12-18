@@ -47,7 +47,8 @@ public class CourtDetailsMapper {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
         if (initialisedCourtField.size() != 1) {
-            throw new IllegalStateException("There must be exactly one court selected in case data");
+            throw new IllegalStateException("There must be exactly one court selected in case data, "
+                + "current initialisedCourtField size is " + initialisedCourtField.size());
         }
 
         try {
