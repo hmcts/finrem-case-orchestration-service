@@ -73,7 +73,8 @@ class FileUtilsTest {
     @CsvSource({
         "'ABC.pdf', 'ABC', '.pdf'",
         "'document.docx', 'document', '.docx'",
-        "'example.txt', 'example', '.txt'"
+        "'example.txt', 'example', '.txt'",
+        "'example.txt.txt', 'example.txt', '.txt'"
     })
     void testInsertTimestamp(String originalFilename, String expectedBaseName, String expectedExtension) {
         // Call the method under test
