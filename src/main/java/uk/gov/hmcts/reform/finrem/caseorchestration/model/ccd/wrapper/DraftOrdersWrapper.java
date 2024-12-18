@@ -76,6 +76,9 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("hearingInstruction")
     private HearingInstruction hearingInstruction;
 
+    @JsonProperty("approveOrdersConfirmationBody")
+    private String approveOrdersConfirmationBody;
+
     private String generatedOrderReason;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -86,10 +89,6 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private String generatedOrderJudgeName;
 
     private List<UuidCollection> refusalOrderIdsToBeSent;
-
-    @JsonProperty("approveOrdersConfirmationBody")
-    private String approveOrdersConfirmationBody;
-
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
