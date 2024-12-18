@@ -11,11 +11,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -40,6 +34,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
 
+    private static final String FR_CCD_FIELD_TYPE_PREFIX = "FR_";
     protected static final String CASE_FIELD_SHEET = "CaseField";
     protected static final String COMPLEX_TYPES_SHEET = "ComplexTypes";
     protected static final String FIXED_LISTS_SHEET = "FixedLists";
@@ -264,11 +259,9 @@ public class CCDConfigValidator {
         return errors;
     }
 
-    private static final String FR_CCD_FIELD_TYPE_PREFIX = "FR_";
-
     private String tryToGetSimpleNameAutomatically(String fieldType) {
         if (fieldType != null && fieldType.startsWith(FR_CCD_FIELD_TYPE_PREFIX)) {
-            return fieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length())
+            return fieldType.substring(FR_CCD_FIELD_TYPE_PREFIX.length());
         } else {
             return fieldType;
         }
