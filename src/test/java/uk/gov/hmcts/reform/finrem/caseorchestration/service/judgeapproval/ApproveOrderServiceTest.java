@@ -34,6 +34,9 @@ class ApproveOrderServiceTest {
     @Mock
     private JudgeApprovalResolver judgeApprovalResolver;
 
+    @Mock
+    private JudgeApprovalInfoCapturer judgeApprovalInfoCapturer;
+
     @ParameterizedTest
     @MethodSource("providePopulateJudgeDecisionsData")
     void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked) {
@@ -43,6 +46,9 @@ class ApproveOrderServiceTest {
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
             .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
                 eq(AUTH_TOKEN));
+
+        verify(judgeApprovalInfoCapturer).buildConfirmationBody(any(FinremCaseDetails.class), eq(draftOrdersWrapper));
+
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {
