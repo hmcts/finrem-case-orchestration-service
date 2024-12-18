@@ -57,7 +57,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
       
         //Build confirmation body
-        String confirmationBody = draftOrdersWrapper.getApproveOrdersConfirmationBody();
+        String confirmationBody = caseDetails.getData().getDraftOrdersWrapper().getApproveOrdersConfirmationBody();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())
             .confirmationHeader(CONFIRMATION_HEADER)
