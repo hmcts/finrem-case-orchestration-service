@@ -15,6 +15,8 @@ public interface Approvable extends DocumentMatcher {
 
     String getApprovalJudge();
 
+    YesOrNo getFinalOrder();
+
     CaseDocument getReplacedDocument();
 
     void setOrderStatus(OrderStatus orderStatus);
@@ -25,8 +27,8 @@ public interface Approvable extends DocumentMatcher {
     default void setApprovalJudge(String approvalJudge) {
     }
 
-    void replaceDocument(CaseDocument amendedDocument);
-
     default void setFinalOrder(YesOrNo finalOrder) {
     }
+
+    void replaceDocument(CaseDocument amendedDocument);
 }

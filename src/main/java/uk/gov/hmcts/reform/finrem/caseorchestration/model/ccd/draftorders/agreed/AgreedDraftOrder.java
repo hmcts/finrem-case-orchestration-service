@@ -62,6 +62,12 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
 
     @JsonIgnore
     @Override
+    public YesOrNo getFinalOrder() {
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
     public CaseDocument getReplacedDocument() {
         if (draftOrder != null) {
             return draftOrder;
