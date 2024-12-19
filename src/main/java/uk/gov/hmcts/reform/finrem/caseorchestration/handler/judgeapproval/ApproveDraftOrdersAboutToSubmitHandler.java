@@ -41,7 +41,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
+        approveOrderService.populateJudgeDecisions(draftOrdersWrapper, userAuthorisation);
         clearInputFields(draftOrdersWrapper);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();

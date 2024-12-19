@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
@@ -38,11 +37,10 @@ class ApproveOrderServiceTest {
     @MethodSource("providePopulateJudgeDecisionsData")
     void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked) {
 
-        underTest.populateJudgeDecisions(FinremCaseDetails.builder().build(), draftOrdersWrapper, AUTH_TOKEN);
+        underTest.populateJudgeDecisions(draftOrdersWrapper, AUTH_TOKEN);
 
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
-            .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
-                eq(AUTH_TOKEN));
+            .populateJudgeDecision(eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class), eq(AUTH_TOKEN));
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {

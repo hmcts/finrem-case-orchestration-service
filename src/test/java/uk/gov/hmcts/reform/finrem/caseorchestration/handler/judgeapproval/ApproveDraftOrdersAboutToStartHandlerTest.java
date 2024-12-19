@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -38,7 +37,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -124,18 +122,6 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         }
     }
 
-    @Test
-    void givenRefusalOrderIdsToBeSentWasSet_whenHandle_thenClearThem() {
-        FinremCaseData caseData = new FinremCaseData();
-        caseData.getDraftOrdersWrapper().setRefusalOrderIdsToBeSent(List.of(UuidCollection.builder().value(UUID.randomUUID()).build()));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
-            FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-
-        var draftOrdersWrapper = response.getData().getDraftOrdersWrapper();
-        assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).isNull();
-    }
-
     @SneakyThrows
     @ParameterizedTest(name = "{index} => draftOrdersWrapper={0}, expectedJudgeApproval1={1}, expectedJudgeApproval2={2},"
         + "expectedJudgeApproval3={3}, expectedJudgeApproval4={4}, expectedJudgeApproval5={5},"
@@ -158,7 +144,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                     .build())
                 .build())
             .build();
-        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 30), "09:00"))
+        lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 10, 31), "09:00"))
             .thenReturn("hearingServiceFormattedString1");
         lenient().when(hearingService.formatHearingInfo("hearingType", LocalDate.of(2024, 11, 30), "09:00"))
             .thenReturn("hearingServiceFormattedString2");
@@ -212,7 +198,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         .value(CaseDocument.builder().documentFilename("attachment2").build()).build();
 
     private static DraftOrdersReview.DraftOrdersReviewBuilder applyHearingInfo1(DraftOrdersReview.DraftOrdersReviewBuilder builder) {
-        return builder.hearingDate(LocalDate.of(2024, 10, 30))
+        return builder.hearingDate(LocalDate.of(2024, 10, 31))
             .hearingTime("09:00")
             .hearingType("hearingType")
             .hearingJudge("Mr Judge");
@@ -293,7 +279,6 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .hearingInfo(hearingInfo)
             .hearingJudge("Mr Judge")
             .docType(docType)
-            .hearingDate(LocalDate.of(2024, "hearingServiceFormattedString1".equals(hearingInfo) ? 10 : 11, 30))
             .title(docType.getTitle())
             .inlineDocType(docType.getDescription())
             .document(document)

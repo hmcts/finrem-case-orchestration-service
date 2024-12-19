@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -76,12 +75,9 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
                 .judgeApproval5(JudgeApproval.builder().build())
                 .build())
             .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .data(caseData)
-            .build();
 
-        handler.handle(FinremCallbackRequestFactory.from(caseDetails), AUTH_TOKEN);
+        handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
 
-        verify(approveOrderService).populateJudgeDecisions(caseDetails, draftOrdersWrapper, AUTH_TOKEN);
+        verify(approveOrderService).populateJudgeDecisions(draftOrdersWrapper, AUTH_TOKEN);
     }
 }
