@@ -74,12 +74,10 @@ public class ConsentHearingService {
             if (caseDetails.isApplicantSolicitorAgreeToReceiveEmails()) {
                 log.info("Sending email notification to Applicant Solicitor about hearing for Case ID: {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
-                log.info("Email notification to Applicant Solicitor about hearing for Case ID: {} sent.", caseDetails.getId());
             }
             if (caseDetails.getData().isRespondentSolicitorEmailCommunicationEnabled()) {
                 log.info("Sending email notification to Respondent Solicitor about hearing for Case ID: {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
-                log.info("Email notification to Respondent Solicitor about hearing for Case ID: {} sent", caseDetails.getId());
             }
         }
     }
