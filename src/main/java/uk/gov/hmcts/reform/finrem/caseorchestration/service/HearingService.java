@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.String.format;
@@ -154,6 +155,17 @@ public class HearingService {
             .map(extractor)
             .findFirst()
             .orElse(null); // Return null if no match is found
+    }
+
+    public String formatHearingInfo(String hearingType, LocalDate hearingDate, String hearingTime) {
+        return format(
+            "%s on %s %s",
+            Optional.ofNullable(hearingType).orElse("N/A"),
+            Optional.ofNullable(hearingDate)
+                .map(date -> hearingDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
+                .orElse("N/A"),
+            Optional.ofNullable(hearingTime).orElse("N/A")
+        );
     }
 
 }
