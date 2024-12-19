@@ -282,11 +282,12 @@ public class CCDConfigValidator {
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
         String ccdFieldType = ccdFieldAttributes.getFieldType();
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
-        if (expectedClassName == null) {
-            log.info("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
+        boolean result = expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
+        if (result) {
+            log.warn("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
                 + "or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
         }
-        return expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
+        return result;
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
@@ -332,7 +333,7 @@ public class CCDConfigValidator {
         } else {
             alreadyProcessedCcdFields.add(frClass.getName());
         }
-        complexTypeFields.stream().forEach(c -> {
+        complexTypeFields.forEach(c -> {
             log.info("Matching on field in complex type: {} with type: {}", c.getListElementCode(), c.getFieldType());
             Arrays.stream(getAllDeclaredFields(frClass))
                 .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
