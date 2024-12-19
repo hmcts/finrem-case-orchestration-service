@@ -46,25 +46,16 @@ class JudgeApprovalResolver {
      */
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
-        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> processApprovableCollection(collection.stream()
-                .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
-                .toList(), targetDoc, judgeApproval, userAuthorisation));
+        // Process objects under Draft Order Tab
+        processDraftOrderDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
+        processPsaDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
 
-        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> processApprovableCollection(collection.stream()
-                .flatMap(c -> c.getValue().getPsaDocReviewCollection().stream().map(PsaDocReviewCollection::getValue))
-                .toList(), targetDoc, judgeApproval, userAuthorisation));
-
-        ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
-            .ifPresent(agreedDraftOrderCollections ->
-                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
-                    judgeApproval, userAuthorisation));
+        // Process objects under Case Documents Tab
+        processAgreedDraftOrderCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
 
         if (isJudgeApproved(judgeApproval)) {
-            ofNullable(draftOrdersWrapper.getHearingInstruction())
-                .map(HearingInstruction::getAnotherHearingRequestCollection)
-                .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
+            processHearingInstruction(draftOrdersWrapper);
+
         }
         refusedOrderProcessor.processRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
     }
@@ -134,5 +125,35 @@ class JudgeApprovalResolver {
      */
     private boolean isJudgeRefused(JudgeApproval judgeApproval) {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
+    }
+
+    private void processDraftOrderDocReviewCollection(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                                      String userAuthorisation) {
+        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
+                .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
+                .toList(), targetDoc, judgeApproval, userAuthorisation));
+    }
+
+    private void processPsaDocReviewCollection(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                               String userAuthorisation) {
+        ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
+                .flatMap(c -> c.getValue().getPsaDocReviewCollection().stream().map(PsaDocReviewCollection::getValue))
+                .toList(), targetDoc, judgeApproval, userAuthorisation));
+    }
+
+    private void processAgreedDraftOrderCollection(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                                   String userAuthorisation) {
+        ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
+            .ifPresent(agreedDraftOrderCollections ->
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
+                    judgeApproval, userAuthorisation));
+    }
+
+    private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
+        ofNullable(draftOrdersWrapper.getHearingInstruction())
+            .map(HearingInstruction::getAnotherHearingRequestCollection)
+            .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
     }
 }
