@@ -147,6 +147,7 @@ class JudgeApprovalResolverTest {
                             assertEquals(expectedOrderStatus, approvable.getOrderStatus());
                             assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
                             assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
+                            assertEquals(expectedFinalOrder, approvable.getFinalOrder());
                             if (expectedAmendedDocument != null) {
                                 assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
                             }
