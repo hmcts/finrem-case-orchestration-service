@@ -46,18 +46,6 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOr
 
     @JsonIgnore
     @Override
-    public LocalDateTime getApprovalDate() {
-        return approvalDate;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getApprovalJudge() {
-        return approvalJudge;
-    }
-
-    @JsonIgnore
-    @Override
     public CaseDocument getReplacedDocument() {
         return psaDocument;
     }

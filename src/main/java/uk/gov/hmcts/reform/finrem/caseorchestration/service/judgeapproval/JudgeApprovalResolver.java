@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -92,6 +93,7 @@ class JudgeApprovalResolver {
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
         approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
         if (isJudgeApproved(judgeApproval)) {
+            approvable.setFinalOrder(YesOrNo.forValue(isFinalOrderSelected(judgeApproval)));
             if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
                 approvable.replaceDocument(judgeApproval.getAmendedDocument());
             }
@@ -154,5 +156,9 @@ class JudgeApprovalResolver {
         ofNullable(draftOrdersWrapper.getHearingInstruction())
             .map(HearingInstruction::getAnotherHearingRequestCollection)
             .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
+    }
+
+    private boolean isFinalOrderSelected(JudgeApproval judgeApproval) {
+        return judgeApproval.getIsFinalOrder().getValue().stream().anyMatch(d -> YesOrNo.isYes(d.getCode()));
     }
 }
