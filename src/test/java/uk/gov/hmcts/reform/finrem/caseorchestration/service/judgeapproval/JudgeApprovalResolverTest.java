@@ -48,6 +48,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
@@ -241,7 +242,7 @@ class JudgeApprovalResolverTest {
                 psaDocument,
                 OrderStatus.APPROVED_BY_JUDGE,
                 null,
-                null
+                NO
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
