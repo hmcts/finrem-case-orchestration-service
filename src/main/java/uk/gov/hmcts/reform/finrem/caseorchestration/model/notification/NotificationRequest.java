@@ -61,4 +61,8 @@ public class NotificationRequest {
     private String judgeName;
     @JsonProperty("oldestDraftOrderDate")
     private String oldestDraftOrderDate;
+    @JsonProperty("judgeFeedback")
+    private String judgeFeedback;
+    @JsonProperty("documentName")
+    private String documentName;
 }

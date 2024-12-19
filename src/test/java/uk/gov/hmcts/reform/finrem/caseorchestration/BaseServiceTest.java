@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -463,6 +464,19 @@ public abstract class BaseServiceTest extends BaseTest {
         return data;
     }
 
+    /**
+     * Builds a {@link CaseDetails} object from a JSON resource file.
+     *
+     * <p><b>Deprecated:</b> This method is no longer recommended for use. Developers should use
+     * {@link TestUtils#buildCaseDetailsFromJson(ObjectMapper, String)} instead, as it allows
+     * the {@link ObjectMapper} to be explicitly provided, improving configurability and test reliability.
+     *
+     * @param testJson the path to the JSON resource file on the classpath
+     * @return the {@link CaseDetails} object deserialized from the JSON content
+     * @throws RuntimeException if an error occurs while reading or deserializing the JSON resource
+     * @deprecated Use {@link TestUtils#buildCaseDetailsFromJson(ObjectMapper, String)} for enhanced configurability.
+     */
+    @Deprecated
     protected CaseDetails buildCaseDetailsFromJson(String testJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
             CaseDetails caseDetails =

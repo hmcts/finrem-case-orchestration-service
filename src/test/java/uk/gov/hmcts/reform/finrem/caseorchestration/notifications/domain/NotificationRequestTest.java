@@ -1,25 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.NotificationConstants.PHONE_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestConstants.CONTESTED;
 
-public class NotificationRequestTest {
+class NotificationRequestTest {
 
     private NotificationRequest underTest;
 
     @Test
-    public void shouldGetHwfNotificationRequestData() {
+    void shouldGetHwfNotificationRequestData() {
         underTest = new NotificationRequest("123456",
             "45623", "D123", "Padmaja", "test@test.com",
             "nottingham", CONTESTED, "body", PHONE_OPENING_HOURS, "consent",
             "Consent",
             "rejectedReason", "app", "res", "1234567890", "", "", "", "", null, null,
-            "2024-01-01", "judgeName", "2024-01-01");
+            "2024-01-01", "judgeName", "2024-01-01", "Feedback by Mr. judge", "ABC.doc");
         assertEquals("123456", underTest.getCaseReferenceNumber());
         assertEquals("45623", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -36,10 +36,12 @@ public class NotificationRequestTest {
         assertEquals("judgeName", underTest.getJudgeName());
         assertEquals("2024-01-01", underTest.getHearingDate());
         assertEquals("2024-01-01", underTest.getOldestDraftOrderDate());
+        assertEquals("Feedback by Mr. judge", underTest.getJudgeFeedback());
+        assertEquals("ABC.doc", underTest.getDocumentName());
     }
 
     @Test
-    public void shouldNotGetHwfNotificationRequestData() {
+    void shouldNotGetHwfNotificationRequestData() {
         underTest = new NotificationRequest();
         assertNull(underTest.getCaseReferenceNumber());
         assertNull(underTest.getSolicitorReferenceNumber());
@@ -52,7 +54,7 @@ public class NotificationRequestTest {
     }
 
     @Test
-    public void shouldSetAndGetHwfNotificationRequestData() {
+    void shouldSetAndGetHwfNotificationRequestData() {
         underTest = new NotificationRequest();
         setNotificationData();
         assertNotificationData();
@@ -68,7 +70,7 @@ public class NotificationRequestTest {
     }
 
     @Test
-    public void shouldSetAndGetHwfNotificationRequestDataForContested() {
+    void shouldSetAndGetHwfNotificationRequestDataForContested() {
         underTest = new NotificationRequest();
         setNotificationData();
         underTest.setSelectedCourt("nottingham");

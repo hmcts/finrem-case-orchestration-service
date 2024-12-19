@@ -86,6 +86,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
@@ -1629,5 +1630,19 @@ public class NotificationServiceTest extends BaseServiceTest {
             eq(FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE));
         NotificationRequest actual = argumentCaptor.getValue();
         assertEquals("fr_applicant_solicitor1@mailinator.com", actual.getNotificationEmail());
+    }
+
+    @Test
+    public void testSendRefusedDraftOrderOrPsa() {
+        NotificationRequest nr = NotificationRequest.builder()
+            .notificationEmail("test@test.com")
+            .build();
+        notificationService.sendRefusedDraftOrderOrPsa(nr);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("test@test.com", actual.getNotificationEmail());
     }
 }
