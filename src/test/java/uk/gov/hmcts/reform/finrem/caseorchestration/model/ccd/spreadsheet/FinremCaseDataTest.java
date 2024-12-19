@@ -69,7 +69,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        //assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
             getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
         validateConfig(configFiles);
@@ -92,7 +92,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
-        //assumeTrue(testEnabled);
+        assumeTrue(testEnabled);
         File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
         validateState(configFile);
     }

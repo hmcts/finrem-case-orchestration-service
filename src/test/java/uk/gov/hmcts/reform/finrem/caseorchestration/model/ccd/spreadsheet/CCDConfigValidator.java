@@ -238,11 +238,11 @@ public class CCDConfigValidator {
                                           boolean found, Field field) {
 
         List<String> errors = new ArrayList<>();
+
         if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheets, ccdFieldAttributes)
             && fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
             errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType()
-                + " does not match " + field.getType().getSimpleName() + ". It seems you either missed defining an entry in "
-                + "`CCDConfigValidator.fieldTypesMap` or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
+                + " does not match " + field.getType().getSimpleName());
         } else {
             if (isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())) {
                 log.info("Complex Type: {}", ccdFieldAttributes.getFieldType());
@@ -282,7 +282,12 @@ public class CCDConfigValidator {
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
         String ccdFieldType = ccdFieldAttributes.getFieldType();
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
-        return expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
+        boolean result = expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
+        if (result) {
+            log.warn("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
+                + "or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
+        }
+        return result;
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
