@@ -283,7 +283,7 @@ public class CCDConfigValidator {
         String ccdFieldType = ccdFieldAttributes.getFieldType();
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
         if (expectedClassName == null) {
-            log.warn("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
+            log.info("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
                 + "or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
         }
         return expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
