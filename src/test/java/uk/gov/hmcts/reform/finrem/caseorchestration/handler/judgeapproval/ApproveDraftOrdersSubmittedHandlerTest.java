@@ -71,26 +71,31 @@ class ApproveDraftOrdersSubmittedHandlerTest {
 
         // Assert
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders reviewed");
+        assertThat(response.getConfirmationBody()).isEqualTo(draftOrdersWrapper.getApproveOrdersConfirmationBody());
         verify(notificationService, times(expectedInvocationCount)).sendRefusedDraftOrderOrPsa(expectedNotificationRequest);
         verify(notificationRequestMapper, times(expectedInvocationCount)).buildRefusedDraftOrderOrPsaNotificationRequest(any(FinremCaseDetails.class),
             any(RefusedOrder.class));
     }
 
+
     private static Stream<Arguments> invokeNotificationServiceForRefusalOrdersData() {
         UUID uuidOne = UUID.randomUUID();
         UUID uuidTwo = UUID.randomUUID();
         return Stream.of(
-            Arguments.of(DraftOrdersWrapper.builder().build(), 0),
-            Arguments.of(DraftOrdersWrapper.builder().refusedOrdersCollection(List.of()).build(), 0),
+            Arguments.of(DraftOrdersWrapper.builder().approveOrdersConfirmationBody("Confirmation body 1").build(), 0),
+            Arguments.of(DraftOrdersWrapper.builder().approveOrdersConfirmationBody("Confirmation body 2")
+                .refusedOrdersCollection(List.of()).build(), 0),
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 3")
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
                         .id(uuidOne)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
-                    .build()
+                        .build()
                 )).build(), 0), // without refusalOrderIdsToBeSent
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 4")
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))
@@ -102,6 +107,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .build()
                 )).build(), 1), // happy path
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 5")
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))
@@ -113,6 +119,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .build()
                 )).build(), 0), // missing submittedByEmail
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 6")
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build(),
                     UuidCollection.builder().value(uuidTwo).build()
@@ -130,6 +137,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .build()
                 )).build(), 2), // two ids with two refusal orders
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 7")
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))
@@ -141,6 +149,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .build()
                 )).build(), 0), // with ID and a refusal order, but it does not match
             Arguments.of(DraftOrdersWrapper.builder()
+                .approveOrdersConfirmationBody("Confirmation body 8")
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))
