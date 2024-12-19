@@ -71,7 +71,6 @@ class JudgeApprovalResolver {
      */
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
                                      String userAuthorisation) {
-
         ofNullable(approvables)
             .ifPresent(list ->
                 list.forEach(el -> ofNullable(el)
