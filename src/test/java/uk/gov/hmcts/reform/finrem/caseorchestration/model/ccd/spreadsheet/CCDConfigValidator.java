@@ -280,10 +280,8 @@ public class CCDConfigValidator {
     }
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        if ("refusalOrderInstruction".equals(ccdFieldAttributes.getFieldId())) {
-            log.info("fieldDoesNotHaveAValidMapping");
-        }
         String ccdFieldType = ccdFieldAttributes.getFieldType();
+        log.info("fieldDoesNotHaveAValidMapping = {}", ccdFieldType);
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
         boolean result = expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
         if (result) {
@@ -294,13 +292,13 @@ public class CCDConfigValidator {
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
-        log.info("isaHighLevelCaseField");
+        log.info("isaHighLevelCaseField {}", ccdFieldAttributes.getFieldType());
         return isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())
             && !fixedListValues.contains(ccdFieldAttributes.getFieldType());
     }
 
     private boolean isNotASpecialFieldType(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        log.info("isNotASpecialFieldType");
+        log.info("isNotASpecialFieldType {}", ccdFieldAttributes.getFieldType());
         return !(specialFieldTypes.get(ccdFieldAttributes.getFieldId()) != null
             && specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
     }
