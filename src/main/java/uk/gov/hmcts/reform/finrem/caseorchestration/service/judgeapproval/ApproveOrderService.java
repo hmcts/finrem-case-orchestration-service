@@ -35,6 +35,12 @@ public class ApproveOrderService {
             + "['Draft Orders' tab](/cases/case-details/%s#Draft%%20orders).";
 
 
+    private final List<String> ordersApproved = new ArrayList<>();
+    private final List<String> ordersRepresentativeChanges = new ArrayList<>();
+    private final List<String> ordersChanged = new ArrayList<>();
+    private final List<String> ordersReviewLater = new ArrayList<>();
+
+
     /**
      * Populates judge decisions for draft orders by iterating through a predefined range of indexes (1 to 5),
      * resolving judge approvals, and updating the corresponding draft orders and PSA documents statuses and hearing instructions.
@@ -58,7 +64,6 @@ public class ApproveOrderService {
         }
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
     }
-
 
     /**
      * Resolves the {@link JudgeApproval} object from the provided {@link DraftOrdersWrapper}
@@ -89,26 +94,31 @@ public class ApproveOrderService {
         };
     }
 
+    /**
+     * Builds the confirmation body for approved, changed, and reviewed draft orders and sets it in the {@link DraftOrdersWrapper}.
+     *
+     * <p>This method evaluates the judge's decision for up to five draft orders associated with the given case
+     * and groups them into different categories based on the decision. These categories include:
+     * <ul>
+     *     <li>Orders ready to be sealed</li>
+     *     <li>Orders requiring changes by the legal representative</li>
+     *     <li>Orders requiring changes by the judge</li>
+     *     <li>Orders marked for review later</li>
+     * </ul>
+     * After categorizing the orders, the method constructs a confirmation body with appropriate messages
+     * and updates the {@link DraftOrdersWrapper} with this information.
+     *
+     * @param caseDetails        the case details containing information about the case
+     * @param draftOrdersWrapper the wrapper object containing the draft orders and related data
+     * @throws IllegalStateException if an unhandled judge decision is encountered
+     */
     void buildConfirmationBody(FinremCaseDetails caseDetails, DraftOrdersWrapper draftOrdersWrapper) {
-
-        final List<String> ordersApproved = new ArrayList<>();
-        final List<String> ordersRepresentativeChanges = new ArrayList<>();
-        final List<String> ordersChanged = new ArrayList<>();
-        final List<String> ordersReviewLater = new ArrayList<>();
 
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
 
-            if (judgeApproval != null) {
-                String fileName = judgeApproval.getDocument().getDocumentFilename();
-                switch (judgeApproval.getJudgeDecision()) {
-                    case READY_TO_BE_SEALED -> ordersApproved.add(fileName);
-                    case LEGAL_REP_NEEDS_TO_MAKE_CHANGE -> ordersRepresentativeChanges.add(fileName);
-                    case JUDGE_NEEDS_TO_MAKE_CHANGES -> ordersChanged.add(fileName);
-                    case REVIEW_LATER -> ordersReviewLater.add(fileName);
-                    default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
-                }
-            }
+            ofNullable(judgeApproval).map(JudgeApproval::getDocument)
+                .ifPresent(targetDoc -> captureFilenames(judgeApproval));
         }
 
         StringBuilder body = new StringBuilder();
@@ -133,5 +143,17 @@ public class ApproveOrderService {
         }
 
         draftOrdersWrapper.setApproveOrdersConfirmationBody(body.toString());
+    }
+
+    void captureFilenames(JudgeApproval judgeApproval) {
+        String fileName = judgeApproval.getDocument().getDocumentFilename();
+
+        switch (judgeApproval.getJudgeDecision()) {
+            case READY_TO_BE_SEALED -> ordersApproved.add(fileName);
+            case LEGAL_REP_NEEDS_TO_MAKE_CHANGE -> ordersRepresentativeChanges.add(fileName);
+            case JUDGE_NEEDS_TO_MAKE_CHANGES -> ordersChanged.add(fileName);
+            case REVIEW_LATER -> ordersReviewLater.add(fileName);
+            default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
+        }
     }
 }
