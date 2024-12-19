@@ -72,7 +72,7 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOr
     public void replaceDocument(CaseDocument amendedDocument) {
         this.setPsaDocument(amendedDocument);
     }
-
+    
     @Override
     @JsonIgnore
     public CaseDocument getRefusedDocument() {
