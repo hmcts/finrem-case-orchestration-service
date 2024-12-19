@@ -34,13 +34,6 @@ public class ApproveOrderService {
         "<br>You have said you will review draft orders (%s) later. These will remain on the "
             + "['Draft Orders' tab](/cases/case-details/%s#Draft%%20orders).";
 
-
-    private final List<String> ordersApproved = new ArrayList<>();
-    private final List<String> ordersRepresentativeChanges = new ArrayList<>();
-    private final List<String> ordersChanged = new ArrayList<>();
-    private final List<String> ordersReviewLater = new ArrayList<>();
-
-
     /**
      * Populates judge decisions for draft orders by iterating through a predefined range of indexes (1 to 5),
      * resolving judge approvals, and updating the corresponding draft orders and PSA documents statuses and hearing instructions.
@@ -114,11 +107,17 @@ public class ApproveOrderService {
      */
     void buildConfirmationBody(FinremCaseDetails caseDetails, DraftOrdersWrapper draftOrdersWrapper) {
 
+        final List<String> ordersApproved = new ArrayList<>();
+        final List<String> ordersRepresentativeChanges = new ArrayList<>();
+        final List<String> ordersChanged = new ArrayList<>();
+        final List<String> ordersReviewLater = new ArrayList<>();
+
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
 
             ofNullable(judgeApproval).map(JudgeApproval::getDocument)
-                .ifPresent(targetDoc -> captureFilenames(judgeApproval));
+                .ifPresent(targetDoc -> captureFilenames(judgeApproval, ordersApproved, ordersRepresentativeChanges,
+                        ordersChanged, ordersReviewLater));
         }
 
         StringBuilder body = new StringBuilder();
@@ -145,7 +144,19 @@ public class ApproveOrderService {
         draftOrdersWrapper.setApproveOrdersConfirmationBody(body.toString());
     }
 
-    void captureFilenames(JudgeApproval judgeApproval) {
+    /**
+     * Categorizes the filename of a document based on the judge's decision and adds it to the appropriate list.
+     *
+     * @param judgeApproval             the {@link JudgeApproval} object containing the document and the judge's decision.
+     * @param ordersApproved            the list to which filenames of documents marked as "Ready to be sealed" will be added.
+     * @param ordersRepresentativeChanges the list to which filenames of documents requiring changes by the legal representative will be added.
+     * @param ordersChanged             the list to which filenames of documents requiring changes by the judge will be added.
+     * @param ordersReviewLater         the list to which filenames of documents marked for review later will be added.
+     *
+     * @throws IllegalStateException if the judge's decision is not handled.
+     */
+    void captureFilenames(JudgeApproval judgeApproval, List<String> ordersApproved, List<String> ordersRepresentativeChanges,
+                          List<String> ordersChanged, List<String> ordersReviewLater) {
         String fileName = judgeApproval.getDocument().getDocumentFilename();
 
         switch (judgeApproval.getJudgeDecision()) {
