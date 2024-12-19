@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -48,7 +48,7 @@ public class DraftOrdersNotificationRequestMapper {
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
             .hearingDate(dateFormatter.format(draftOrdersReview.getHearingDate()))
-            .selectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails))
+            .selectedCourt(CourtHelper.getSelectedFrc(caseDetails))
             .judgeName(draftOrdersReview.getHearingJudge())
             .oldestDraftOrderDate(dateFormatter.format(draftOrdersReview.getEarliestToBeReviewedOrderDate()))
             .build();

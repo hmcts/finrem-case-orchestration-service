@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -130,7 +130,7 @@ public class FinremNotificationRequestMapper {
         }
         if (caseData.isContestedApplication()) {
             notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameContested()));
-            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedFrc(caseDetails));
+            notificationRequest.setSelectedCourt(CourtHelper.getSelectedFrc(caseDetails));
             log.info("selectedCourt is {} for case ID: {}", notificationRequest.getSelectedCourt(),
                 notificationRequest.getCaseReferenceNumber());
         }
