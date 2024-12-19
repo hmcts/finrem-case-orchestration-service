@@ -72,7 +72,7 @@ class JudgeApprovalResolver {
      * @param userAuthorisation the user authorization string to get the judge's full name
      */
     void processApprovableCollection(List<? extends Approvable> approvables, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                               String userAuthorisation) {
+                                     String userAuthorisation) {
         ofNullable(approvables)
             .ifPresent(list ->
                 list.forEach(el -> ofNullable(el)
