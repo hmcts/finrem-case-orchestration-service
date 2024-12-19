@@ -242,7 +242,8 @@ public class CCDConfigValidator {
         if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheets, ccdFieldAttributes)
             && fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
             errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType()
-                + " does not match " + field.getType().getSimpleName());
+                + " does not match " + field.getType().getSimpleName() + ". It seems you either missed defining an entry in "
+                + "`CCDConfigValidator.fieldTypesMap` or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
         } else {
             if (isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())) {
                 log.info("Complex Type: {}", ccdFieldAttributes.getFieldType());
@@ -328,7 +329,7 @@ public class CCDConfigValidator {
         } else {
             alreadyProcessedCcdFields.add(frClass.getName());
         }
-        complexTypeFields.stream().forEach(c -> {
+        complexTypeFields.forEach(c -> {
             log.info("Matching on field in complex type: {} with type: {}", c.getListElementCode(), c.getFieldType());
             Arrays.stream(getAllDeclaredFields(frClass))
                 .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
