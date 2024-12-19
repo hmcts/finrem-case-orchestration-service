@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -159,6 +161,8 @@ class JudgeApprovalResolver {
     }
 
     private boolean isFinalOrderSelected(JudgeApproval judgeApproval) {
-        return judgeApproval.getIsFinalOrder().getValue().stream().anyMatch(d -> YesOrNo.isYes(d.getCode()));
+        return ofNullable(judgeApproval.getIsFinalOrder())
+            .map(DynamicMultiSelectList::getValue).stream().flatMap(Collection::stream)
+            .anyMatch(d -> YesOrNo.isYes(d.getCode()));
     }
 }
