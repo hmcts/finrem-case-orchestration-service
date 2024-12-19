@@ -280,6 +280,8 @@ public class CCDConfigValidator {
     }
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
+        log.warn("AAAA");
+        log.info("BBBB");
         String ccdFieldType = ccdFieldAttributes.getFieldType();
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
         boolean result = expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
