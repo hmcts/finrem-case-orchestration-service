@@ -65,7 +65,6 @@ class JudgeApprovalResolverTest {
     @Mock
     private RefusedOrderProcessor refusedOrderProcessor;
 
-
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
