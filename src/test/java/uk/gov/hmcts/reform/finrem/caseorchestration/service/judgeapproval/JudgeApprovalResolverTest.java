@@ -69,14 +69,11 @@ class JudgeApprovalResolverTest {
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
-
-        JudgeApproval judgeApproval = JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build();
-
         // Execute the method being tested
         judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
             draftOrdersWrapper,
             CaseDocument.builder().build(),
-            judgeApproval,
+            JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
             AUTH_TOKEN
         );
 
