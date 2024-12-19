@@ -11,7 +11,10 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -34,6 +37,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +48,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
@@ -124,7 +130,8 @@ class JudgeApprovalResolverTest {
                                                      boolean shouldBeApproved,
                                                      CaseDocument targetDoc,
                                                      OrderStatus expectedOrderStatus,
-                                                     CaseDocument expectedAmendedDocument) {
+                                                     CaseDocument expectedAmendedDocument,
+                                                     YesOrNo expectedFinalOrder) {
 
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
@@ -141,6 +148,7 @@ class JudgeApprovalResolverTest {
                             assertEquals(expectedOrderStatus, approvable.getOrderStatus());
                             assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
                             assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
+                            assertEquals(expectedFinalOrder, approvable.getFinalOrder());
                             if (expectedAmendedDocument != null) {
                                 assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
                             }
@@ -155,12 +163,50 @@ class JudgeApprovalResolverTest {
         }
     }
 
-    static Stream<Arguments> provideProcessApprovableCollectionDataWithHandleApprovable() {
+    static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview,
+                                                  Boolean isFinalOrder) {
+        CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
+        CaseDocument amendedDocument = CaseDocument.builder().documentUrl("AMENDED_DOC.doc").build();
 
+        JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
+            .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
+            .amendedDocument(amendedDocument);
+
+        JudgeApproval judgeApproval = null;
+        if (isFinalOrder == null) {
+            judgeApproval = judgeApprovalBuilder.build();
+        } else {
+            judgeApproval = judgeApprovalBuilder
+                .isFinalOrder(DynamicMultiSelectList.builder().value(List.of(
+                    DynamicMultiSelectListElement.builder()
+                        .code(YesOrNo.getYesOrNo(isFinalOrder))
+                        .build())
+                ).build())
+                .build();
+        }
+        return Arguments.of(
+            DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder()
+                        .value(DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder().value(draftReview).build()))
+                            .build())
+                        .build()))
+                .build(),
+            List.of(draftReview),
+            judgeApproval,
+            true, // should be approved
+            draftOrderDocument,
+            OrderStatus.APPROVED_BY_JUDGE,
+            amendedDocument,
+            YesOrNo.forValue(isFinalOrder)
+        );
+    }
+
+    static Stream<Arguments> provideProcessApprovableCollectionDataWithHandleApprovable() {
         // Mock approvable objects
         CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
         CaseDocument psaDocument = CaseDocument.builder().documentUrl("NEW_DOC2.doc").build();
-        CaseDocument amendedDocument = CaseDocument.builder().documentUrl("AMENDED_DOC.doc").build();
 
         DraftOrderDocumentReview draftReview = DraftOrderDocumentReview.builder()
             .draftOrderDocument(draftOrderDocument)
@@ -171,33 +217,17 @@ class JudgeApprovalResolverTest {
 
         List<AgreedDraftOrder> agreedDrafts = List.of(AgreedDraftOrder.builder().build());
 
-        JudgeApproval approvedJudgeApproval = JudgeApproval.builder()
-            .judgeDecision(READY_TO_BE_SEALED)
-            .build();
-
-        JudgeApproval approvedJudgeApprovalWithChanges = JudgeApproval.builder()
-            .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
-            .amendedDocument(amendedDocument)
-            .build();
+        JudgeApproval.JudgeApprovalBuilder approvedJudgeApprovalBuilder = JudgeApproval.builder()
+            .judgeDecision(READY_TO_BE_SEALED);
 
         JudgeApproval notApprovedJudgeApproval = JudgeApproval.builder().judgeDecision(null).build();
 
         return Stream.of(
-            Arguments.of(
-                DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(
-                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder()
-                                .value(draftReview).build()))
-                            .build()).build()))
-                    .build(),
-                List.of(draftReview),
-                approvedJudgeApprovalWithChanges,
-                true, // should be approved
-                draftOrderDocument,
-                OrderStatus.APPROVED_BY_JUDGE,
-                amendedDocument
-            ),
+            //
+            checkJudgeNeedsToMakeChanges(draftReview, TRUE),
+            checkJudgeNeedsToMakeChanges(draftReview, FALSE),
+            checkJudgeNeedsToMakeChanges(draftReview, null),
+            //
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .draftOrdersReviewCollection(List.of(
@@ -207,11 +237,12 @@ class JudgeApprovalResolverTest {
                             .build()).build()))
                     .build(),
                 List.of(psaReview),
-                approvedJudgeApproval,
+                approvedJudgeApprovalBuilder.build(),
                 true, // should be approved
                 psaDocument,
                 OrderStatus.APPROVED_BY_JUDGE,
-                null
+                null,
+                NO
             ),
             Arguments.of(
                 DraftOrdersWrapper.builder()
@@ -223,9 +254,10 @@ class JudgeApprovalResolverTest {
                 false, // should not be approved
                 CaseDocument.builder().build(),
                 null,
+                null,
                 null
             ),
-            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApproval, false, null, null, null)
+            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApprovalBuilder.build(), false, null, null, null, null)
         );
     }
 

@@ -62,6 +62,12 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
 
     @JsonIgnore
     @Override
+    public YesOrNo getFinalOrder() {
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
     public CaseDocument getReplacedDocument() {
         if (draftOrder != null) {
             return draftOrder;
@@ -70,16 +76,6 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
         } else {
             return null;
         }
-    }
-
-    @Override
-    public void setApprovalDate(LocalDateTime approvalDate) {
-        // no approval date; Ignore it.
-    }
-
-    @Override
-    public void setApprovalJudge(String approvalJudge) {
-        // no approval judge; Ignore it.
     }
 
     @Override
