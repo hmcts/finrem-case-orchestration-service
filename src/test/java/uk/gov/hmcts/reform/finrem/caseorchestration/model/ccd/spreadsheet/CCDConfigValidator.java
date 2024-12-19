@@ -238,11 +238,11 @@ public class CCDConfigValidator {
                                           boolean found, Field field) {
 
         List<String> errors = new ArrayList<>();
-        log.info("Invoking validateCCDField");
         if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheets, ccdFieldAttributes)
             && fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
             errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType()
-                + " does not match " + field.getType().getSimpleName());
+                + " does not match " + field.getType().getSimpleName() + ". It seems you either missed defining an entry in "
+                + "`CCDConfigValidator.fieldTypesMap` or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
         } else {
             if (isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())) {
                 log.info("Complex Type: {}", ccdFieldAttributes.getFieldType());
@@ -281,24 +281,16 @@ public class CCDConfigValidator {
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
         String ccdFieldType = ccdFieldAttributes.getFieldType();
-        log.info("fieldDoesNotHaveAValidMapping = {}", ccdFieldType);
         String expectedClassName = resolveSimpleNameFromCCDFieldType(ccdFieldType);
-        boolean result = expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
-        if (result) {
-            log.warn("It seems you either missed defining an entry in `CCDConfigValidator.fieldTypesMap` "
-                + "or forgot to prefix your complex type with \"FR_\" for auto-mapping.");
-        }
-        return result;
+        return expectedClassName == null || doesNotMatchFieldSimpleName(expectedClassName, field.getType());
     }
 
     private boolean isaHighLevelCaseField(List<Sheet> complexTypeSheets, CcdFieldAttributes ccdFieldAttributes) {
-        log.info("isaHighLevelCaseField {}", ccdFieldAttributes.getFieldType());
         return isComplexType(complexTypeSheets, ccdFieldAttributes.getFieldType())
             && !fixedListValues.contains(ccdFieldAttributes.getFieldType());
     }
 
     private boolean isNotASpecialFieldType(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        log.info("isNotASpecialFieldType {}", ccdFieldAttributes.getFieldType());
         return !(specialFieldTypes.get(ccdFieldAttributes.getFieldId()) != null
             && specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
     }
