@@ -82,8 +82,6 @@ class JudgeApprovalResolverTest {
         // Verify the expected number of invocations to processHearingInstruction
         verify(hearingProcessor, times(expectHearingInvocationCount))
             .processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
-
-
     }
 
     static Stream<Arguments> provideShouldInvokeProcessHearingInstructionData() {
