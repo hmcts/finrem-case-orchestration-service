@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.isJudgeReviewable;
 
 @Slf4j
@@ -112,7 +114,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
 
     private String buildHearingInfoFromDraftOrdersReview(DraftOrdersReview draftOrdersReview) {
         return hearingService.formatHearingInfo(draftOrdersReview.getHearingType(),
-            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime(), draftOrdersReview.getHearingJudge());
+            draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime());
     }
 
     private List<JudgeApproval> getReviewableItems(List<DraftOrdersReviewCollection> outstanding) {
@@ -126,8 +128,11 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(DraftOrderDocReviewCollection::getValue)
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> JudgeApproval.builder()
-                        .title("Draft Order")
+                        .docType(DRAFT_ORDER)
+                        .title(DRAFT_ORDER.getTitle())
+                        .inlineDocType(DRAFT_ORDER.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingJudge(draftOrdersReview.getHearingJudge())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")
@@ -145,8 +150,11 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                     .map(PsaDocReviewCollection::getValue)
                     .filter(a -> OrderStatus.isJudgeReviewable(a.getOrderStatus()))
                     .map(a -> JudgeApproval.builder()
-                        .title("PSA")
+                        .docType(PSA)
+                        .title(PSA.getTitle())
+                        .inlineDocType(PSA.getDescription())
                         .hearingInfo(hearingInfo)
+                        .hearingJudge(draftOrdersReview.getHearingJudge())
                         .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
                             .code("Yes")
                             .label("This is a final order")

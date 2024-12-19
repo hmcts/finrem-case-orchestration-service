@@ -157,15 +157,14 @@ public class HearingService {
             .orElse(null); // Return null if no match is found
     }
 
-    public String formatHearingInfo(String hearingType, LocalDate hearingDate, String hearingTime, String hearingJudge) {
+    public String formatHearingInfo(String hearingType, LocalDate hearingDate, String hearingTime) {
         return format(
-            "%s on %s %s by %s",
+            "%s on %s %s",
             Optional.ofNullable(hearingType).orElse("N/A"),
             Optional.ofNullable(hearingDate)
                 .map(date -> hearingDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
                 .orElse("N/A"),
-            Optional.ofNullable(hearingTime).orElse("N/A"),
-            Optional.ofNullable(hearingJudge).orElse("N/A")
+            Optional.ofNullable(hearingTime).orElse("N/A")
         );
     }
 
