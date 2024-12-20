@@ -93,19 +93,22 @@ class JudgeApprovalResolver {
      * @param userAuthorisation the user authorization string to get the judge's full name
      */
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
-        approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
-        if (isJudgeApproved(judgeApproval)) {
-            approvable.setFinalOrder(YesOrNo.forValue(isFinalOrderSelected(judgeApproval)));
-            if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
-                approvable.replaceDocument(judgeApproval.getAmendedDocument());
+        if (isJudgeApproved(judgeApproval) || isJudgeRefused(judgeApproval)) {
+            approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
+
+            if (isJudgeApproved(judgeApproval)) {
+                approvable.setFinalOrder(YesOrNo.forValue(isFinalOrderSelected(judgeApproval)));
+                if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
+                    approvable.replaceDocument(judgeApproval.getAmendedDocument());
+                }
+                approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
+                approvable.setApprovalDate(LocalDateTime.now());
             }
-            approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
-            approvable.setApprovalDate(LocalDateTime.now());
-        }
-        if (isJudgeRefused(judgeApproval)) {
-            approvable.setOrderStatus(REFUSED);
-            if (approvable instanceof RefusalOrderConvertible refusalOrderConvertible) {
-                refusalOrderConvertible.setRefusedDate(LocalDateTime.now());
+            if (isJudgeRefused(judgeApproval)) {
+                approvable.setOrderStatus(REFUSED);
+                if (approvable instanceof RefusalOrderConvertible refusalOrderConvertible) {
+                    refusalOrderConvertible.setRefusedDate(LocalDateTime.now());
+                }
             }
         }
     }

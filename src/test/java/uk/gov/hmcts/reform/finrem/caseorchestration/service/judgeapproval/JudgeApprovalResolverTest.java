@@ -52,6 +52,8 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
 @ExtendWith(MockitoExtension.class)
 class JudgeApprovalResolverTest {
@@ -124,9 +126,47 @@ class JudgeApprovalResolverTest {
     }
 
     @ParameterizedTest
+    @MethodSource("provideNotPopulateAnythingForReviewLaterDecisionArguments")
+    void shouldNotPopulateAnythingForReviewLaterDecision(DraftOrdersWrapper draftOrdersWrapper,
+                                                         List<? extends Approvable> approvablesToBeExamined) {
+        JudgeApproval judgeApproval = JudgeApproval.builder().judgeDecision(JudgeDecision.REVIEW_LATER).build();
+
+        // Mocking IDAM service for getting judge's full name
+        lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
+
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
+            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(), draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval,
+                AUTH_TOKEN);
+
+            if (approvablesToBeExamined != null) {
+                for (Approvable approvable : approvablesToBeExamined) {
+                    assertEquals(TO_BE_REVIEWED, approvable.getOrderStatus());
+                    assertNull(approvable.getApprovalDate());
+                    assertNull(approvable.getApprovalJudge());
+                    assertNull(approvable.getFinalOrder());
+                }
+            }
+        }
+    }
+
+    static Stream<Arguments> provideNotPopulateAnythingForReviewLaterDecisionArguments() {
+        DraftOrderDocumentReview draftOrderDocumentReview = createDraftOrderDocumentReview();
+        PsaDocumentReview psaDocumentReview = createPsaDocumentReview();
+        AgreedDraftOrder agreedDraftOrder = createAgreedDraftOrder(true);
+        AgreedDraftOrder agreedPsa = createAgreedDraftOrder(false);
+        return Stream.of(
+            Arguments.of(createDraftOrdersWrapper(draftOrderDocumentReview, null, null), List.of(draftOrderDocumentReview)),
+            Arguments.of(createDraftOrdersWrapper(null, psaDocumentReview, null), List.of(psaDocumentReview)),
+            Arguments.of(createDraftOrdersWrapper(null, null, agreedDraftOrder), List.of(agreedDraftOrder)),
+            Arguments.of(createDraftOrdersWrapper(null, null, agreedPsa), List.of(agreedPsa))
+        );
+    }
+
+    @ParameterizedTest
     @MethodSource("providePopulateJudgeDecisionForApprovedDocumentsArguments")
     void shouldPopulateJudgeDecisionForApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper,
-                                                         List<? extends Approvable> approvables,
+                                                         List<? extends Approvable> approvablesToBeExamined,
                                                          JudgeApproval judgeApproval,
                                                          CaseDocument expectedAmendedDocument,
                                                          YesOrNo expectedFinalOrder) {
@@ -140,10 +180,10 @@ class JudgeApprovalResolverTest {
                 draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
 
             boolean approvedDocument = false;
-            if (approvables != null) {
-                for (Approvable approvable : approvables) {
+            if (approvablesToBeExamined != null) {
+                for (Approvable approvable : approvablesToBeExamined) {
                     if (approvable.match(expectedAmendedDocument != null ? expectedAmendedDocument : TARGET_DOCUMENT)) {
-                        assertEquals(OrderStatus.APPROVED_BY_JUDGE, approvable.getOrderStatus());
+                        assertEquals(APPROVED_BY_JUDGE, approvable.getOrderStatus());
                         if (!(approvable instanceof AgreedDraftOrder)) {
                             assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
                             assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
@@ -164,20 +204,44 @@ class JudgeApprovalResolverTest {
         }
     }
 
-    static DraftOrderDocumentReview createDraftOrderReview() {
-        return DraftOrderDocumentReview.builder().draftOrderDocument(TARGET_DOCUMENT).build();
+    static DraftOrderDocumentReview createDraftOrderDocumentReview() {
+        return DraftOrderDocumentReview.builder().draftOrderDocument(TARGET_DOCUMENT).orderStatus(TO_BE_REVIEWED).build();
     }
 
-    static PsaDocumentReview createPsaReview() {
-        return PsaDocumentReview.builder().psaDocument(TARGET_DOCUMENT).build();
+    static PsaDocumentReview createPsaDocumentReview() {
+        return PsaDocumentReview.builder().psaDocument(TARGET_DOCUMENT).orderStatus(TO_BE_REVIEWED).build();
     }
 
     static AgreedDraftOrder createAgreedDraftOrder(boolean draftOrderOrPsa) {
         if (draftOrderOrPsa) {
-            return AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT).build();
+            return AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT).orderStatus(TO_BE_REVIEWED).build();
         } else {
-            return AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT).build();
+            return AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT).orderStatus(TO_BE_REVIEWED).build();
         }
+    }
+
+    static DraftOrdersWrapper createDraftOrdersWrapper(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview,
+                                                       AgreedDraftOrder agreedDraftOrder) {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder draftOrdersWrapperBuilder = DraftOrdersWrapper.builder();
+        if (draftReview != null || psaReview != null) {
+            DraftOrdersReview.DraftOrdersReviewBuilder b = DraftOrdersReview.builder();
+            if (draftReview != null) {
+                b.draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder().value(draftReview).build()));
+            }
+            if (psaReview != null) {
+                b.psaDocReviewCollection(List.of(PsaDocReviewCollection.builder().value(psaReview).build()));
+            }
+            draftOrdersWrapperBuilder.draftOrdersReviewCollection(List.of(
+                DraftOrdersReviewCollection.builder()
+                    .value(b.build())
+                    .build()));
+        }
+        if (agreedDraftOrder != null) {
+            draftOrdersWrapperBuilder.agreedDraftOrderCollection(List.of(
+                AgreedDraftOrderCollection.builder().value(agreedDraftOrder).build()
+            ));
+        }
+        return draftOrdersWrapperBuilder.build();
     }
 
     static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview,
@@ -216,28 +280,8 @@ class JudgeApprovalResolverTest {
                     .build())
                 .build();
         }
-
-        DraftOrdersWrapper.DraftOrdersWrapperBuilder draftOrdersWrapperBuilder = DraftOrdersWrapper.builder();
-        if (draftReview != null || psaReview != null) {
-            DraftOrdersReview.DraftOrdersReviewBuilder b = DraftOrdersReview.builder();
-            if (draftReview != null) {
-                b.draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder().value(draftReview).build()));
-            }
-            if (psaReview != null) {
-                b.psaDocReviewCollection(List.of(PsaDocReviewCollection.builder().value(psaReview).build()));
-            }
-            draftOrdersWrapperBuilder.draftOrdersReviewCollection(List.of(
-                DraftOrdersReviewCollection.builder()
-                    .value(b.build())
-                    .build()));
-        }
-        if (agreedDraftOrder != null) {
-            draftOrdersWrapperBuilder.agreedDraftOrderCollection(List.of(
-                AgreedDraftOrderCollection.builder().value(agreedDraftOrder).build()
-            ));
-        }
         return Arguments.of(
-            draftOrdersWrapperBuilder.build(),
+            createDraftOrdersWrapper(draftReview, psaReview, agreedDraftOrder),
             Stream.of(draftReview, psaReview, agreedDraftOrder).filter(Objects::nonNull).toList(),
             judgeApproval,
             amendedDocument,
@@ -247,12 +291,12 @@ class JudgeApprovalResolverTest {
 
     static Stream<Arguments> providePopulateJudgeDecisionForApprovedDocumentsArguments() {
         return Stream.of(
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, TRUE),
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, FALSE),
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, null),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, TRUE),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, FALSE),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, null),
+            checkJudgeNeedsToMakeChanges(createDraftOrderDocumentReview(), null, null, TRUE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderDocumentReview(), null, null, FALSE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderDocumentReview(), null, null, null),
+            checkJudgeNeedsToMakeChanges(null, createPsaDocumentReview(), null, TRUE),
+            checkJudgeNeedsToMakeChanges(null, createPsaDocumentReview(), null, FALSE),
+            checkJudgeNeedsToMakeChanges(null, createPsaDocumentReview(), null, null),
             checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), TRUE),
             checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), FALSE),
             checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), null),
@@ -260,12 +304,12 @@ class JudgeApprovalResolverTest {
             checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(false), FALSE),
             checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(false), null),
 
-            checkReadyToBeSealed(createDraftOrderReview(), null, null, TRUE),
-            checkReadyToBeSealed(createDraftOrderReview(), null, null, FALSE),
-            checkReadyToBeSealed(createDraftOrderReview(), null, null, null),
-            checkReadyToBeSealed(null, createPsaReview(), null, TRUE),
-            checkReadyToBeSealed(null, createPsaReview(), null, FALSE),
-            checkReadyToBeSealed(null, createPsaReview(),null, null),
+            checkReadyToBeSealed(createDraftOrderDocumentReview(), null, null, TRUE),
+            checkReadyToBeSealed(createDraftOrderDocumentReview(), null, null, FALSE),
+            checkReadyToBeSealed(createDraftOrderDocumentReview(), null, null, null),
+            checkReadyToBeSealed(null, createPsaDocumentReview(), null, TRUE),
+            checkReadyToBeSealed(null, createPsaDocumentReview(), null, FALSE),
+            checkReadyToBeSealed(null, createPsaDocumentReview(),null, null),
             checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), TRUE),
             checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), FALSE),
             checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), null),
