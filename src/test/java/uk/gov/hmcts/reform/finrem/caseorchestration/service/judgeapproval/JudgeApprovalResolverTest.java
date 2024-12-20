@@ -179,17 +179,17 @@ class JudgeApprovalResolverTest {
         JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
             .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
             .amendedDocument(amendedDocument);
-        return buildArguments(judgeApprovalBuilder, draftReview, psaReview, amendedDocument, isFinalOrder);
+        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, amendedDocument, isFinalOrder);
     }
 
     static Arguments checkReadyToBeSealed(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, Boolean isFinalOrder) {
         JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
             .judgeDecision(READY_TO_BE_SEALED);
-        return buildArguments(judgeApprovalBuilder, draftReview, psaReview, null, isFinalOrder);
+        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, null, isFinalOrder);
     }
 
-    static Arguments buildArguments(JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder , DraftOrderDocumentReview draftReview,
-                                    PsaDocumentReview psaReview, CaseDocument amendedDocument, Boolean isFinalOrder) {
+    static Arguments buildArgumentsForApprovingDocument(JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder, DraftOrderDocumentReview draftReview,
+                                                        PsaDocumentReview psaReview, CaseDocument amendedDocument, Boolean isFinalOrder) {
         JudgeApproval judgeApproval = null;
         if (isFinalOrder == null) {
             judgeApproval = judgeApprovalBuilder.build();
