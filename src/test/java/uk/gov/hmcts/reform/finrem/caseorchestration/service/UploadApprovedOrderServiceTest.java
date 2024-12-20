@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -51,13 +50,11 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     @MockBean
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
-
     @Test
-    public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnCollectionWithExistingOrder() throws JsonProcessingException {
+    public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnCollectionWithExistingOrder() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
-
 
         finremCaseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         finremCaseData.setOrderApprovedJudgeName(JUDGE_NAME);
@@ -88,7 +85,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         latestHearingDirections.add(detailsCollection);
         finremCaseData.setHearingDirectionDetailsCollection(latestHearingDirections);
 
-
         when(additionalHearingDocumentService
             .getApprovedHearingOrders(finremCaseDetailsBefore, AUTH_TOKEN)).thenReturn(new ArrayList<>());
 
@@ -98,7 +94,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         uploadApprovedOrderService.processApprovedOrders(callbackRequest, errors, AUTH_TOKEN);
 
         assertEquals(1, finremCaseData.getUploadHearingOrder().size());
-        assertEquals(2, finremCaseData.getUploadAdditionalDocument().size());
+        assertEquals(1, finremCaseData.getUploadAdditionalDocument().size());
         assertEquals(1, finremCaseData.getFinalOrderCollection().size());
 
         verify(additionalHearingDocumentService)
@@ -108,7 +104,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         verify(additionalHearingDocumentService).getApprovedHearingOrders(finremCaseDetailsBefore, AUTH_TOKEN);
         verify(additionalHearingDocumentService).addToFinalOrderCollection(finremCaseDetails, AUTH_TOKEN);
     }
-
 
     @Test
     public void givenNoExceptions_whenHandleAboutToSubmitAndNoNextHearing_thenDoNotGenerateDocumentPack() {

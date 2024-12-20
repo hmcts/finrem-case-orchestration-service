@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
@@ -19,12 +18,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class UploadApprovedOrderService {
-
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService letterService;
     private final AdditionalHearingDocumentService documentService;
     private final ApprovedOrderNoticeOfHearingService noticeService;
-
 
     public void processApprovedOrders(FinremCallbackRequest callbackRequest,
                                       List<String> errors,
@@ -52,18 +49,6 @@ public class UploadApprovedOrderService {
         hearingOrderCollectionBefore.addAll(uploadHearingOrders);
         caseData.setUploadHearingOrder(hearingOrderCollectionBefore);
         documentService.addToFinalOrderCollection(caseDetails, authorisationToken);
-
-
-        List<UploadAdditionalDocumentCollection> uploadAdditionalDocumentBefore
-            = caseDetailsBefore.getData().getUploadAdditionalDocument();
-
-        if (uploadAdditionalDocumentBefore != null && !uploadAdditionalDocumentBefore.isEmpty()) {
-            List<UploadAdditionalDocumentCollection> uploadAdditionalDocument = caseData.getUploadAdditionalDocument();
-            if (uploadAdditionalDocument != null && !uploadAdditionalDocument.isEmpty()) {
-                uploadAdditionalDocumentBefore.addAll(uploadAdditionalDocument);
-                caseData.setUploadAdditionalDocument(uploadAdditionalDocumentBefore);
-            }
-        }
     }
 
     private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
