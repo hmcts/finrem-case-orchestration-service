@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -62,6 +63,13 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
+        setupHearingInstruction(draftOrdersWrapper);
+        setupRefusalOrderInstruction(draftOrdersWrapper);
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    }
+
+    private void setupHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
         boolean isHearingInstructionRequired = IntStream.rangeClosed(1, 5)
             .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
             .filter(Objects::nonNull)
@@ -78,8 +86,18 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
                     .build()
             ))
             .build());
+    }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    private void setupRefusalOrderInstruction(DraftOrdersWrapper draftOrdersWrapper) {
+        boolean isRefusalOrderInstructionRequired = IntStream.rangeClosed(1, 5)
+            .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
+            .filter(Objects::nonNull)
+            .map(JudgeApproval::getJudgeDecision)
+            .anyMatch(decision -> decision != null && decision.isRefusalOrderInstructionRequired());
+
+        draftOrdersWrapper.setRefusalOrderInstruction(RefusalOrderInstruction.builder()
+            .showRequireRefusalOrderInstructionQuestion(YesOrNo.forValue(isRefusalOrderInstructionRequired))
+            .build());
     }
 
     /**

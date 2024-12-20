@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -28,9 +30,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.REVIEW_LATER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -43,6 +50,11 @@ class ApproveDraftOrdersMidEventHandlerTest {
 
     @Mock
     private ApproveOrderService approveOrderService;
+
+    @BeforeEach
+    void setup() {
+        lenient().when(approveOrderService.resolveJudgeApproval(any(), anyInt())).thenCallRealMethod();
+    }
 
     @Test
     void canHandle() {
@@ -92,7 +104,21 @@ class ApproveDraftOrdersMidEventHandlerTest {
     @Test
     void shouldPopulateWhichOrder() {
         // Arrange
-        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder().build();
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .judgeApproval1(
+                JudgeApproval.builder()
+                    .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
+                    .docType(JudgeApprovalDocType.DRAFT_ORDER)
+                    .amendedDocument(CaseDocument.builder().documentFilename("AMENDED_DOC.doc").build())
+                    .build()
+            )
+            .judgeApproval2(
+                JudgeApproval.builder()
+                    .judgeDecision(READY_TO_BE_SEALED)
+                    .docType(JudgeApprovalDocType.PSA)
+                    .document(CaseDocument.builder().documentFilename("PSA.doc").build())
+                    .build())
+            .build();
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
@@ -102,19 +128,6 @@ class ApproveDraftOrdersMidEventHandlerTest {
                     .build())
                 .build())
             .build();
-
-        when(approveOrderService.resolveJudgeApproval(draftOrdersWrapper, 1)).thenReturn(
-            JudgeApproval.builder()
-                .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
-                .docType(JudgeApprovalDocType.DRAFT_ORDER)
-                .amendedDocument(CaseDocument.builder().documentFilename("AMENDED_DOC.doc").build())
-                .build());
-        when(approveOrderService.resolveJudgeApproval(draftOrdersWrapper, 2)).thenReturn(
-            JudgeApproval.builder()
-                .judgeDecision(READY_TO_BE_SEALED)
-                .docType(JudgeApprovalDocType.PSA)
-                .document(CaseDocument.builder().documentFilename("PSA.doc").build())
-                .build());
 
         // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -126,6 +139,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
 
         List<AnotherHearingRequestCollection> actualCollection =
             responseDraftOrdersWrapper.getHearingInstruction().getAnotherHearingRequestCollection();
+        assertEquals(YES, responseDraftOrdersWrapper.getHearingInstruction().getShowRequireAnotherHearingQuestion());
 
         assertNotNull(actualCollection, "anotherHearingRequestCollection should not be null");
         assertEquals(1, actualCollection.size(), "anotherHearingRequestCollection should contain exactly one element");
@@ -137,5 +151,35 @@ class ApproveDraftOrdersMidEventHandlerTest {
             DynamicListElement.builder().code("PSA#2").label("PSA.doc").build()
         )).build();
         assertEquals(actualRequest.getWhichOrder(), expectedDynamicList);
+    }
+
+    @Test
+    void shouldPopulateRefusalOrderInstruction() {
+        // Arrange
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(12345L)
+                .data(FinremCaseData.builder()
+                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .judgeApproval1(JudgeApproval.builder()
+                            .judgeDecision(LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
+                            .build())
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertNotNull(response);
+        FinremCaseData responseData = response.getData();
+        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
+
+        RefusalOrderInstruction refusalOrderInstruction = responseDraftOrdersWrapper.getRefusalOrderInstruction();
+        assertEquals(NO, responseDraftOrdersWrapper.getHearingInstruction().getShowRequireAnotherHearingQuestion());
+        assertNotNull(refusalOrderInstruction, "refusalOrderInstruction should not be null");
+        assertEquals(YES, refusalOrderInstruction.getShowRequireRefusalOrderInstructionQuestion());
     }
 }
