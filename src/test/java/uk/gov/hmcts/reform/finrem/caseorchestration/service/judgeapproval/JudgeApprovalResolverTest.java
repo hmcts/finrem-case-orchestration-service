@@ -144,9 +144,15 @@ class JudgeApprovalResolverTest {
                 for (Approvable approvable : approvables) {
                     if (approvable.match(expectedAmendedDocument != null ? expectedAmendedDocument : TARGET_DOCUMENT)) {
                         assertEquals(OrderStatus.APPROVED_BY_JUDGE, approvable.getOrderStatus());
-                        assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
-                        assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
-                        assertEquals(expectedFinalOrder, approvable.getFinalOrder());
+                        if (!(approvable instanceof AgreedDraftOrder)) {
+                            assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
+                            assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
+                            assertEquals(expectedFinalOrder, approvable.getFinalOrder());
+                        } else {
+                            assertNull(approvable.getApprovalDate());
+                            assertNull(approvable.getApprovalJudge());
+                            assertNull(approvable.getFinalOrder());
+                        }
                         if (expectedAmendedDocument != null) {
                             assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
                         }
@@ -174,22 +180,26 @@ class JudgeApprovalResolverTest {
         }
     }
 
-    static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, Boolean isFinalOrder) {
+    static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview,
+                                                  AgreedDraftOrder agreedDraftOrder, Boolean isFinalOrder) {
         CaseDocument amendedDocument = CaseDocument.builder().documentUrl("AMENDED_DOC.doc").build();
         JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
             .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
             .amendedDocument(amendedDocument);
-        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, amendedDocument, isFinalOrder);
+        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, agreedDraftOrder, amendedDocument, isFinalOrder);
     }
 
-    static Arguments checkReadyToBeSealed(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, Boolean isFinalOrder) {
+    static Arguments checkReadyToBeSealed(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, AgreedDraftOrder agreedDraftOrder,
+                                          Boolean isFinalOrder) {
         JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
             .judgeDecision(READY_TO_BE_SEALED);
-        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, null, isFinalOrder);
+        return buildArgumentsForApprovingDocument(judgeApprovalBuilder, draftReview, psaReview, agreedDraftOrder, null, isFinalOrder);
     }
 
-    static Arguments buildArgumentsForApprovingDocument(JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder, DraftOrderDocumentReview draftReview,
-                                                        PsaDocumentReview psaReview, CaseDocument amendedDocument, Boolean isFinalOrder) {
+    static Arguments buildArgumentsForApprovingDocument(JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder,
+                                                        DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview,
+                                                        AgreedDraftOrder agreedDraftOrder,
+                                                        CaseDocument amendedDocument, Boolean isFinalOrder) {
         JudgeApproval judgeApproval = null;
         if (isFinalOrder == null) {
             judgeApproval = judgeApprovalBuilder.build();
@@ -216,15 +226,19 @@ class JudgeApprovalResolverTest {
             if (psaReview != null) {
                 b.psaDocReviewCollection(List.of(PsaDocReviewCollection.builder().value(psaReview).build()));
             }
-
             draftOrdersWrapperBuilder.draftOrdersReviewCollection(List.of(
                 DraftOrdersReviewCollection.builder()
                     .value(b.build())
                     .build()));
         }
+        if (agreedDraftOrder != null) {
+            draftOrdersWrapperBuilder.agreedDraftOrderCollection(List.of(
+               AgreedDraftOrderCollection.builder().value(agreedDraftOrder).build()
+            ));
+        }
         return Arguments.of(
             draftOrdersWrapperBuilder.build(),
-            Stream.of(draftReview, psaReview).filter(Objects::nonNull).toList(),
+            Stream.of(draftReview, psaReview, agreedDraftOrder).filter(Objects::nonNull).toList(),
             judgeApproval,
             amendedDocument,
             YesOrNo.forValue(isFinalOrder == null ? FALSE : isFinalOrder)
@@ -233,18 +247,31 @@ class JudgeApprovalResolverTest {
 
     static Stream<Arguments> providePopulateJudgeDecisionForApprovedDocumentsArguments() {
         return Stream.of(
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, TRUE),
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, FALSE),
-            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), TRUE),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), FALSE),
-            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null),
-            checkReadyToBeSealed(createDraftOrderReview(), null, TRUE),
-            checkReadyToBeSealed(createDraftOrderReview(), null, FALSE),
-            checkReadyToBeSealed(createDraftOrderReview(), null, null),
-            checkReadyToBeSealed(null, createPsaReview(), TRUE),
-            checkReadyToBeSealed(null, createPsaReview(), FALSE),
-            checkReadyToBeSealed(null, createPsaReview(),null)
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, TRUE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, FALSE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null, null),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, TRUE),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, FALSE),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null, null),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), TRUE),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), FALSE),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(true), null),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(false), TRUE),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(false), FALSE),
+            checkJudgeNeedsToMakeChanges(null, null, createAgreedDraftOrder(false), null),
+
+            checkReadyToBeSealed(createDraftOrderReview(), null, null, TRUE),
+            checkReadyToBeSealed(createDraftOrderReview(), null, null, FALSE),
+            checkReadyToBeSealed(createDraftOrderReview(), null, null, null),
+            checkReadyToBeSealed(null, createPsaReview(), null, TRUE),
+            checkReadyToBeSealed(null, createPsaReview(), null, FALSE),
+            checkReadyToBeSealed(null, createPsaReview(),null, null),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), TRUE),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), FALSE),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(true), null),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(false), TRUE),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(false), FALSE),
+            checkReadyToBeSealed(null, null, createAgreedDraftOrder(false), null)
         );
     }
 
