@@ -21,8 +21,7 @@ import static java.util.stream.Collectors.partitioningBy;
 @Component
 public class HasApprovableCollectionReader {
 
-    public <T extends HasApprovable> Map<Boolean, List<T>> partitionHasApprovablesByStatus(List<T> hasApprovables,
-                                                                                           Predicate<OrderStatus> statusPredicate) {
+    public <T extends HasApprovable> Map<Boolean, List<T>> partitionByOrderStatus(List<T> hasApprovables, Predicate<OrderStatus> statusPredicate) {
         return ofNullable(hasApprovables).orElse(List.of()).stream()
             .collect(partitioningBy(
                 hasApprovable -> ofNullable(hasApprovable)
@@ -33,38 +32,34 @@ public class HasApprovableCollectionReader {
             ));
     }
 
-    public List<DraftOrdersReviewCollection> filterAndCollectFromDraftOrderDocReviewCollection(
+    public List<DraftOrdersReviewCollection> filterAndCollectDraftOrderDocs(
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         List<DraftOrderDocReviewCollection> collector,
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         Predicate<OrderStatus> statusPredicate) {
-        return filterAndCollectFromDraftOrdersReviewCollection(
-            collector,
-            draftOrdersReviewCollection,
+        return filterAndCollect(
+            draftOrdersReviewCollection, collector, statusPredicate,
             DraftOrdersReview::getDraftOrderDocReviewCollection,
-            DraftOrdersReview.DraftOrdersReviewBuilder::draftOrderDocReviewCollection,
-            statusPredicate
+            DraftOrdersReview.DraftOrdersReviewBuilder::draftOrderDocReviewCollection
         );
     }
 
-    public List<DraftOrdersReviewCollection> filterAndCollectFromPsaDocReviewCollection(
+    public List<DraftOrdersReviewCollection> filterAndCollectPsaDocs(
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         List<PsaDocReviewCollection> collector,
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         Predicate<OrderStatus> statusPredicate) {
-        return filterAndCollectFromDraftOrdersReviewCollection(
-            collector,
-            draftOrdersReviewCollection,
+        return filterAndCollect(
+            draftOrdersReviewCollection, collector, statusPredicate,
             DraftOrdersReview::getPsaDocReviewCollection,
-            DraftOrdersReview.DraftOrdersReviewBuilder::psaDocReviewCollection,
-            statusPredicate
+            DraftOrdersReview.DraftOrdersReviewBuilder::psaDocReviewCollection
         );
     }
 
-    private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollectFromDraftOrdersReviewCollection(
-        List<T> removedItemsCollector,
+    private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollect(
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
+        List<T> collector,
+        Predicate<OrderStatus> statusPredicate,
         Function<DraftOrdersReview, List<T>> getReviewCollection,
-        BiConsumer<DraftOrdersReview.DraftOrdersReviewBuilder, List<T>> setReviewCollection,
-        Predicate<OrderStatus> statusPredicate) {
+        BiConsumer<DraftOrdersReview.DraftOrdersReviewBuilder, List<T>> setReviewCollection) {
 
         return ofNullable(draftOrdersReviewCollection).orElse(List.of()).stream()
             .map(draftOrdersReview -> {
@@ -72,14 +67,14 @@ public class HasApprovableCollectionReader {
 
                 // Partition items into kept and removed
                 Map<Boolean, List<T>> partitioned =
-                    partitionHasApprovablesByStatus(getReviewCollection.apply(draftOrdersReview.getValue()), statusPredicate);
+                    partitionByOrderStatus(getReviewCollection.apply(draftOrdersReview.getValue()), statusPredicate);
 
                 // Keep the items not matching the status
                 setReviewCollection.accept(updatedReviewBuilder, partitioned.get(false));
 
                 // Collect the removed items
-                if (removedItemsCollector != null) {
-                    removedItemsCollector.addAll(partitioned.get(true));
+                if (collector != null) {
+                    collector.addAll(partitioned.get(true));
                 }
 
                 // Create a new DraftOrdersReviewCollection

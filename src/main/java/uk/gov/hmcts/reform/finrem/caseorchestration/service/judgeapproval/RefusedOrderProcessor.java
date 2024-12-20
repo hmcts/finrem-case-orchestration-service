@@ -67,9 +67,9 @@ public class RefusedOrderProcessor {
 
         // remove refused draft orders/PSAs from PsaDocReviewCollection and DraftOrderDocReviewCollection and collect them
         draftOrdersWrapper.setDraftOrdersReviewCollection(hasApprovableCollectionReader
-            .filterAndCollectFromDraftOrderDocReviewCollection(removedItems, draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED::equals));
+            .filterAndCollectDraftOrderDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(), removedItems, REFUSED::equals));
         draftOrdersWrapper.setDraftOrdersReviewCollection(hasApprovableCollectionReader
-            .filterAndCollectFromPsaDocReviewCollection(removedPsaItems, draftOrdersWrapper.getDraftOrdersReviewCollection(), REFUSED::equals));
+            .filterAndCollectPsaDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(), removedPsaItems, REFUSED::equals));
 
         // create RefusedOrder from collected items.
         String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
@@ -125,7 +125,7 @@ public class RefusedOrderProcessor {
 
     private void filterRefusedDraftOrderCollections(DraftOrdersWrapper draftOrdersWrapper) {
         Map<Boolean, List<AgreedDraftOrderCollection>> partitioned =
-            hasApprovableCollectionReader.partitionHasApprovablesByStatus(draftOrdersWrapper.getAgreedDraftOrderCollection(),
+            hasApprovableCollectionReader.partitionByOrderStatus(draftOrdersWrapper.getAgreedDraftOrderCollection(),
                 REFUSED::equals);
         draftOrdersWrapper.setAgreedDraftOrderCollection(partitioned.get(false));
     }
