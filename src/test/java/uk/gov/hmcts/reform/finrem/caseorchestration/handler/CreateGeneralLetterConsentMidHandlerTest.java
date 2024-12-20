@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import java.util.Collections;
@@ -41,15 +40,13 @@ public class CreateGeneralLetterConsentMidHandlerTest {
     @Mock
     private GeneralLetterService generalLetterService;
     @Mock
-    private BulkPrintDocumentService service;
-    @Mock
     private FinremCaseDetailsMapper mapper;
 
     private CreateGeneralLetterConsentMidHandler handler;
 
     @Before
     public void setup() {
-        handler = new CreateGeneralLetterConsentMidHandler(mapper, generalLetterService, service);
+        handler = new CreateGeneralLetterConsentMidHandler(mapper, generalLetterService);
     }
 
     @Test

@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import java.util.ArrayList;
@@ -22,15 +21,12 @@ import java.util.Optional;
 public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler {
 
     private final GeneralLetterService generalLetterService;
-    private final BulkPrintDocumentService service;
 
     @Autowired
     public CreateGeneralLetterConsentMidHandler(FinremCaseDetailsMapper mapper,
-                                                GeneralLetterService generalLetterService,
-                                                BulkPrintDocumentService service) {
+                                                GeneralLetterService generalLetterService) {
         super(mapper);
         this.generalLetterService = generalLetterService;
-        this.service = service;
     }
 
     @Override
@@ -59,7 +55,7 @@ public class CreateGeneralLetterConsentMidHandler extends FinremCallbackHandler 
 
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
         } else {
-            log.error("Errors occurred while handling callback request: {} on case id {}", errors, caseDetails.getId());
+            log.info("Errors occurred while handling callback request: {} on case id {}", errors, caseDetails.getId());
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .errors(errors)
                 .build();
