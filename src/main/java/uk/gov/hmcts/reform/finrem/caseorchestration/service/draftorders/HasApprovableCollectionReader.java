@@ -21,6 +21,15 @@ import static java.util.stream.Collectors.partitioningBy;
 @Component
 public class HasApprovableCollectionReader {
 
+    /**
+     * Partitions a list of elements implementing {@code HasApprovable} into two groups based on their {@link OrderStatus}.
+     * The partitioning is determined by the provided {@link Predicate} applied to the {@code OrderStatus}.
+     *
+     * @param <T>             the type of elements in the list, which must implement {@link HasApprovable}
+     * @param hasApprovables  the list of elements to be partitioned; may be {@code null}, in which case an empty map is returned
+     * @param statusPredicate the {@link Predicate} used to test the {@code OrderStatus} of each element
+     * @return a map where the key {@code true} contains elements matching the predicate, and {@code false} contains those that do not
+     */
     public <T extends HasApprovable> Map<Boolean, List<T>> partitionByOrderStatus(List<T> hasApprovables, Predicate<OrderStatus> statusPredicate) {
         return ofNullable(hasApprovables).orElse(List.of()).stream()
             .collect(partitioningBy(
@@ -32,6 +41,17 @@ public class HasApprovableCollectionReader {
             ));
     }
 
+    /**
+     * Filters and collects {@link DraftOrderDocReviewCollection} from a list of {@link DraftOrdersReviewCollection}
+     * based on a given {@link Predicate} applied to their {@link OrderStatus}.
+     * The filtered results are collected into the provided {@code collector}.
+     *
+     * @param draftOrdersReviewCollection the list of {@link DraftOrdersReviewCollection} to filter; may be {@code null},
+     *                                    in which case an empty list is returned
+     * @param collector                   the list where filtered {@link DraftOrderDocReviewCollection} will be collected
+     * @param statusPredicate             the {@link Predicate} used to filter {@link DraftOrderDocReviewCollection} by their {@link OrderStatus}
+     * @return a list of filtered {@link DraftOrdersReviewCollection}, each containing the filtered {@link DraftOrderDocReviewCollection}
+     */
     public List<DraftOrdersReviewCollection> filterAndCollectDraftOrderDocs(
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         List<DraftOrderDocReviewCollection> collector,
@@ -43,6 +63,17 @@ public class HasApprovableCollectionReader {
         );
     }
 
+    /**
+     * Filters and collects {@link PsaDocReviewCollection} from a list of {@link DraftOrdersReviewCollection}
+     * based on a given {@link Predicate} applied to their {@link OrderStatus}.
+     * The filtered results are collected into the provided {@code collector}.
+     *
+     * @param draftOrdersReviewCollection the list of {@link DraftOrdersReviewCollection} to filter; may be {@code null},
+     *                                    in which case an empty list is returned
+     * @param collector                   the list where filtered {@link PsaDocReviewCollection} will be collected
+     * @param statusPredicate             the {@link Predicate} used to filter {@link PsaDocReviewCollection} by their {@link OrderStatus}
+     * @return a list of filtered {@link DraftOrdersReviewCollection}, each containing the filtered {@link PsaDocReviewCollection}
+     */
     public List<DraftOrdersReviewCollection> filterAndCollectPsaDocs(
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
         List<PsaDocReviewCollection> collector,
