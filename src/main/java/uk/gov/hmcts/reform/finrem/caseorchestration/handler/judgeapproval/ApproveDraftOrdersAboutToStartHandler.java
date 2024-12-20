@@ -120,6 +120,13 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime());
     }
 
+    private DynamicMultiSelectList buildIsFinalOrderDynamicMultiSelectList() {
+        return DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+            .code(YesOrNo.YES.getYesOrNo())
+            .label("This is a final order")
+            .build())).build();
+    }
+
     private List<JudgeApproval> getReviewableItems(List<DraftOrdersReviewCollection> outstanding) {
         return outstanding.stream()
             .map(DraftOrdersReviewCollection::getValue)
@@ -137,10 +144,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingInfo(hearingInfo)
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
-                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                            .code("Yes")
-                            .label("This is a final order")
-                            .build())).build())
+                        .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -160,10 +164,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingInfo(hearingInfo)
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
-                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                            .code("Yes")
-                            .label("This is a final order")
-                            .build())).build())
+                        .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),

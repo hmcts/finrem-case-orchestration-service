@@ -25,6 +25,10 @@ public enum YesOrNo {
             : YesOrNo.NO.getYesOrNo();
     }
 
+    public static String getYesOrNo(boolean answer) {
+        return forValue(answer).value;
+    }
+
     public boolean isYes() {
         return YES.getYesOrNo().equalsIgnoreCase(value);
     }
@@ -64,7 +68,10 @@ public enum YesOrNo {
             .orElseThrow(IllegalArgumentException::new);
     }
 
-    public static YesOrNo forValue(boolean b) {
+    public static YesOrNo forValue(Boolean b) {
+        if (b == null) {
+            return null;
+        }
         return forValue(b ? YES.value : NO.value);
     }
 }
