@@ -51,18 +51,21 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     @JsonIgnore
     @Override
     public LocalDateTime getApprovalDate() {
+        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
         return null;
     }
 
     @JsonIgnore
     @Override
     public String getApprovalJudge() {
+        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
         return null;
     }
 
     @JsonIgnore
     @Override
     public YesOrNo getFinalOrder() {
+        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
         return null;
     }
 
