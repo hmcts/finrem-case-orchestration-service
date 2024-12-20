@@ -35,12 +35,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -48,7 +50,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.JUDGE_NEEDS_TO_MAKE_CHANGES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision.READY_TO_BE_SEALED;
 
@@ -123,15 +124,12 @@ class JudgeApprovalResolverTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideProcessApprovableCollectionDataWithHandleApprovable")
-    void shouldProcessApprovablesAndUpdateTheirState(DraftOrdersWrapper draftOrdersWrapper,
-                                                     List<? extends Approvable> approvables,
-                                                     JudgeApproval judgeApproval,
-                                                     boolean shouldBeApproved,
-                                                     CaseDocument targetDoc,
-                                                     OrderStatus expectedOrderStatus,
-                                                     CaseDocument expectedAmendedDocument,
-                                                     YesOrNo expectedFinalOrder) {
+    @MethodSource("providePopulateJudgeDecisionForApprovedDocumentsArguments")
+    void shouldPopulateJudgeDecisionForApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper,
+                                                         List<? extends Approvable> approvables,
+                                                         JudgeApproval judgeApproval,
+                                                         CaseDocument expectedAmendedDocument,
+                                                         YesOrNo expectedFinalOrder) {
 
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
@@ -139,125 +137,114 @@ class JudgeApprovalResolverTest {
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
             judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
-                draftOrdersWrapper, targetDoc, judgeApproval, AUTH_TOKEN);
+                draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
 
+            boolean approvedDocument = false;
             if (approvables != null) {
                 for (Approvable approvable : approvables) {
-                    if (approvable.match(targetDoc)) {
-                        if (shouldBeApproved) {
-                            assertEquals(expectedOrderStatus, approvable.getOrderStatus());
-                            assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
-                            assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
-                            assertEquals(expectedFinalOrder, approvable.getFinalOrder());
-                            if (expectedAmendedDocument != null) {
-                                assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
-                            }
-                        } else {
-                            assertNull(approvable.getOrderStatus());
-                            assertNull(approvable.getApprovalDate());
-                            assertNull(approvable.getApprovalJudge());
+                    if (approvable.match(expectedAmendedDocument != null ? expectedAmendedDocument : TARGET_DOCUMENT)) {
+                        assertEquals(OrderStatus.APPROVED_BY_JUDGE, approvable.getOrderStatus());
+                        assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
+                        assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
+                        assertEquals(expectedFinalOrder, approvable.getFinalOrder());
+                        if (expectedAmendedDocument != null) {
+                            assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
                         }
+                        approvedDocument = true;
                     }
                 }
             }
+            assertTrue(approvedDocument, "One of the approvables should be got approved");
         }
     }
 
-    static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview,
-                                                  Boolean isFinalOrder) {
-        CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
-        CaseDocument amendedDocument = CaseDocument.builder().documentUrl("AMENDED_DOC.doc").build();
+    static DraftOrderDocumentReview createDraftOrderReview() {
+        return DraftOrderDocumentReview.builder().draftOrderDocument(TARGET_DOCUMENT).build();
+    }
 
+    static PsaDocumentReview createPsaReview() {
+        return PsaDocumentReview.builder().psaDocument(TARGET_DOCUMENT).build();
+    }
+
+    static AgreedDraftOrder createAgreedDraftOrder(boolean draftOrderOrPsa) {
+        if (draftOrderOrPsa) {
+            return AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT).build();
+        } else {
+            return AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT).build();
+        }
+    }
+
+    static Arguments checkJudgeNeedsToMakeChanges(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, Boolean isFinalOrder) {
+        CaseDocument amendedDocument = CaseDocument.builder().documentUrl("AMENDED_DOC.doc").build();
         JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
             .judgeDecision(JUDGE_NEEDS_TO_MAKE_CHANGES)
             .amendedDocument(amendedDocument);
+        return buildArguments(judgeApprovalBuilder, draftReview, psaReview, amendedDocument, isFinalOrder);
+    }
 
+    static Arguments checkReadyToBeSealed(DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview, Boolean isFinalOrder) {
+        JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder = JudgeApproval.builder()
+            .judgeDecision(READY_TO_BE_SEALED);
+        return buildArguments(judgeApprovalBuilder, draftReview, psaReview, null, isFinalOrder);
+    }
+
+    static Arguments buildArguments(JudgeApproval.JudgeApprovalBuilder judgeApprovalBuilder , DraftOrderDocumentReview draftReview,
+                                    PsaDocumentReview psaReview, CaseDocument amendedDocument, Boolean isFinalOrder) {
         JudgeApproval judgeApproval = null;
         if (isFinalOrder == null) {
             judgeApproval = judgeApprovalBuilder.build();
         } else {
             judgeApproval = judgeApprovalBuilder
-                .isFinalOrder(DynamicMultiSelectList.builder().value(List.of(
-                    DynamicMultiSelectListElement.builder()
-                        .code(YesOrNo.getYesOrNo(isFinalOrder))
-                        .build())
-                ).build())
+                .isFinalOrder(DynamicMultiSelectList.builder()
+                    .value(TRUE.equals(isFinalOrder) ?
+                        List.of(
+                            DynamicMultiSelectListElement.builder()
+                                .code(YesOrNo.YES.getYesOrNo())
+                                .build()
+                        ) : List.of()
+                    )
+                    .build())
                 .build();
         }
+
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder draftOrdersWrapperBuilder = DraftOrdersWrapper.builder();
+        if (draftReview != null || psaReview != null) {
+            DraftOrdersReview.DraftOrdersReviewBuilder b = DraftOrdersReview.builder();
+            if (draftReview != null) {
+                b.draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder().value(draftReview).build()));
+            }
+            if (psaReview != null) {
+                b.psaDocReviewCollection(List.of(PsaDocReviewCollection.builder().value(psaReview).build()));
+            }
+
+            draftOrdersWrapperBuilder.draftOrdersReviewCollection(List.of(
+                DraftOrdersReviewCollection.builder()
+                    .value(b.build())
+                    .build()));
+        }
         return Arguments.of(
-            DraftOrdersWrapper.builder()
-                .draftOrdersReviewCollection(List.of(
-                    DraftOrdersReviewCollection.builder()
-                        .value(DraftOrdersReview.builder()
-                            .draftOrderDocReviewCollection(List.of(DraftOrderDocReviewCollection.builder().value(draftReview).build()))
-                            .build())
-                        .build()))
-                .build(),
-            List.of(draftReview),
+            draftOrdersWrapperBuilder.build(),
+            Stream.of(draftReview, psaReview).filter(Objects::nonNull).toList(),
             judgeApproval,
-            true, // should be approved
-            draftOrderDocument,
-            OrderStatus.APPROVED_BY_JUDGE,
             amendedDocument,
-            YesOrNo.forValue(isFinalOrder)
+            YesOrNo.forValue(isFinalOrder == null ? FALSE : isFinalOrder)
         );
     }
 
-    static Stream<Arguments> provideProcessApprovableCollectionDataWithHandleApprovable() {
-        // Mock approvable objects
-        CaseDocument draftOrderDocument = CaseDocument.builder().documentUrl("NEW_DOC1.doc").build();
-        CaseDocument psaDocument = CaseDocument.builder().documentUrl("NEW_DOC2.doc").build();
-
-        DraftOrderDocumentReview draftReview = DraftOrderDocumentReview.builder()
-            .draftOrderDocument(draftOrderDocument)
-            .build();
-        PsaDocumentReview psaReview = PsaDocumentReview.builder()
-            .psaDocument(psaDocument)
-            .build();
-
-        List<AgreedDraftOrder> agreedDrafts = List.of(AgreedDraftOrder.builder().build());
-
-        JudgeApproval.JudgeApprovalBuilder approvedJudgeApprovalBuilder = JudgeApproval.builder()
-            .judgeDecision(READY_TO_BE_SEALED);
-
-        JudgeApproval notApprovedJudgeApproval = JudgeApproval.builder().judgeDecision(null).build();
-
+    static Stream<Arguments> providePopulateJudgeDecisionForApprovedDocumentsArguments() {
         return Stream.of(
-            //
-            checkJudgeNeedsToMakeChanges(draftReview, TRUE),
-            checkJudgeNeedsToMakeChanges(draftReview, FALSE),
-            checkJudgeNeedsToMakeChanges(draftReview, null),
-            //
-            Arguments.of(
-                DraftOrdersWrapper.builder()
-                    .draftOrdersReviewCollection(List.of(
-                        DraftOrdersReviewCollection.builder().value(DraftOrdersReview.builder()
-                            .psaDocReviewCollection(List.of(PsaDocReviewCollection.builder()
-                                .value(psaReview).build()))
-                            .build()).build()))
-                    .build(),
-                List.of(psaReview),
-                approvedJudgeApprovalBuilder.build(),
-                true, // should be approved
-                psaDocument,
-                OrderStatus.APPROVED_BY_JUDGE,
-                null,
-                NO
-            ),
-            Arguments.of(
-                DraftOrdersWrapper.builder()
-                    .agreedDraftOrderCollection(List.of(
-                        AgreedDraftOrderCollection.builder().value(agreedDrafts.get(0)).build()))
-                    .build(),
-                agreedDrafts,
-                notApprovedJudgeApproval,
-                false, // should not be approved
-                CaseDocument.builder().build(),
-                null,
-                null,
-                null
-            ),
-            Arguments.of(DraftOrdersWrapper.builder().build(), null, approvedJudgeApprovalBuilder.build(), false, null, null, null, null)
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, TRUE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, FALSE),
+            checkJudgeNeedsToMakeChanges(createDraftOrderReview(), null, null),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), TRUE),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), FALSE),
+            checkJudgeNeedsToMakeChanges(null, createPsaReview(), null),
+            checkReadyToBeSealed(createDraftOrderReview(), null, TRUE),
+            checkReadyToBeSealed(createDraftOrderReview(), null, FALSE),
+            checkReadyToBeSealed(createDraftOrderReview(), null, null),
+            checkReadyToBeSealed(null, createPsaReview(), TRUE),
+            checkReadyToBeSealed(null, createPsaReview(), FALSE),
+            checkReadyToBeSealed(null, createPsaReview(),null)
         );
     }
 
