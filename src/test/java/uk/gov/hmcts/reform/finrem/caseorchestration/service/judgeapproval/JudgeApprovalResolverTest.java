@@ -206,12 +206,12 @@ class JudgeApprovalResolverTest {
         } else {
             judgeApproval = judgeApprovalBuilder
                 .isFinalOrder(DynamicMultiSelectList.builder()
-                    .value(TRUE.equals(isFinalOrder) ?
-                        List.of(
+                    .value(TRUE.equals(isFinalOrder)
+                        ? List.of(
                             DynamicMultiSelectListElement.builder()
                                 .code(YesOrNo.YES.getYesOrNo())
-                                .build()
-                        ) : List.of()
+                                .build())
+                        : List.of()
                     )
                     .build())
                 .build();
@@ -233,7 +233,7 @@ class JudgeApprovalResolverTest {
         }
         if (agreedDraftOrder != null) {
             draftOrdersWrapperBuilder.agreedDraftOrderCollection(List.of(
-               AgreedDraftOrderCollection.builder().value(agreedDraftOrder).build()
+                AgreedDraftOrderCollection.builder().value(agreedDraftOrder).build()
             ));
         }
         return Arguments.of(
