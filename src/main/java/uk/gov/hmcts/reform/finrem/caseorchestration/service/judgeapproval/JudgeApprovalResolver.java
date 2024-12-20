@@ -93,10 +93,11 @@ class JudgeApprovalResolver {
      * @param userAuthorisation the user authorization string to get the judge's full name
      */
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
-        if (isJudgeApproved(judgeApproval) || isJudgeRefused(judgeApproval)) {
+        boolean approved = isJudgeApproved(judgeApproval);
+        boolean refused = isJudgeRefused(judgeApproval);
+        if (approved || refused) {
             approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
-
-            if (isJudgeApproved(judgeApproval)) {
+            if (approved) {
                 approvable.setFinalOrder(YesOrNo.forValue(isFinalOrderSelected(judgeApproval)));
                 if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
                     approvable.replaceDocument(judgeApproval.getAmendedDocument());
@@ -104,7 +105,7 @@ class JudgeApprovalResolver {
                 approvable.setOrderStatus(OrderStatus.APPROVED_BY_JUDGE);
                 approvable.setApprovalDate(LocalDateTime.now());
             }
-            if (isJudgeRefused(judgeApproval)) {
+            if (refused) {
                 approvable.setOrderStatus(REFUSED);
                 if (approvable instanceof RefusalOrderConvertible refusalOrderConvertible) {
                     refusalOrderConvertible.setRefusedDate(LocalDateTime.now());
