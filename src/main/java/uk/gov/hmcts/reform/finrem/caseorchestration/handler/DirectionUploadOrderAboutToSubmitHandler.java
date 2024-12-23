@@ -56,6 +56,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
         // to clear the temp fields
         clearUnprocessedApprovedDocuments(caseData.getDraftOrdersWrapper());
+        clearMetaDataFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
@@ -63,5 +64,10 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private void clearUnprocessedApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper) {
         draftOrdersWrapper.setUnprocessedApprovedDocuments(List.of());
+    }
+
+    private void clearMetaDataFields(FinremCaseData caseData) {
+        caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(null);
+        caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(null);
     }
 }

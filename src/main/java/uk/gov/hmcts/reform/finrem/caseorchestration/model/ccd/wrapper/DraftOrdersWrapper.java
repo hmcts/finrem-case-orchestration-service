@@ -94,6 +94,10 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     private List<DirectionOrderCollection> unprocessedApprovedDocuments;
 
+    private YesOrNo isLegacyApprovedOrderPresent;
+
+    private YesOrNo isUnprocessedApprovedDocumentPresent;
+
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
             agreedDraftOrderCollection = new ArrayList<>();

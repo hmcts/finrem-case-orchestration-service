@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -70,6 +71,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
             .build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isEmpty();
+        assertNull(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent());
+        assertNull(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

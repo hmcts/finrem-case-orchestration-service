@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @Slf4j
@@ -54,8 +55,16 @@ public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
 
         populateUnprocessedApprovedDocuments(caseData);
+        populateMetaDataFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+    }
+
+    private void populateMetaDataFields(FinremCaseData caseData) {
+        caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!ofNullable(caseData.getUploadHearingOrder())
+            .orElse(List.of()).isEmpty()));
+        caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
+            .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
     }
 
     private void populateUnprocessedApprovedDocuments(FinremCaseData caseData) {
