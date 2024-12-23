@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,8 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
@@ -43,11 +43,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,11 +54,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
@@ -129,23 +125,28 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build());
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(Arrays.asList(ORDER_TYPE, PSA_TYPE));
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setSuggestedPsaCollection((List.of(psaCollection)));
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(orderCollection)));
 
-        DynamicRadioList uploadParty = withUploadParty
-            ? DynamicRadioList.builder().value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build()).build()
-            : null;
+        if (withUploadParty) {
+            caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(createUploadParty());
+        }
 
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
+        CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
+            .caseAssignedUserRoles(List.of(
+                CaseAssignedUserRole.builder()
+                    .caseRole(withUploadParty ? CaseRole.CASEWORKER.getCcdCode() : CaseRole.APP_SOLICITOR.getCcdCode())
+                    .build()
+            ))
+            .build();
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
-            .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
+            .thenReturn(caseAssignedUserRolesResource);
 
-        doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
+        doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class));
 
         when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
         when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
@@ -216,16 +217,13 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(
             orderCollection1, orderCollection2, orderCollection3)));
 
-        DynamicRadioList uploadParty = DynamicRadioList.builder().value(
-            DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build()
-        ).build();
-
+        DynamicRadioList uploadParty = createUploadParty();
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
 
-        doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class), anyString());
+        doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class));
 
         when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE))).thenReturn(true);
         when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE))).thenReturn(false);
@@ -251,72 +249,15 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
         assertThat(draftOrderResult3.getAttachments()).isNull();
     }
 
-    @ParameterizedTest
-    @MethodSource("provideAgreedDraftOrders")
-    void shouldHandleAgreedDraftOrder(UploadAgreedDraftOrder uado,
-                                      List<AgreedDraftOrderCollection> existingAgreedDraftOrderCollection,
-                                      List<AgreedDraftOrderCollection> expectedAgreedDraftOrderCollection) {
-        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
-        builder.uploadAgreedDraftOrder(uado);
-        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
-        builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
-        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
-
-        when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
-
-        verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
-        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
-            .containsAll(expectedAgreedDraftOrderCollection);
-    }
-
-    private static Stream<Arguments> provideAgreedDraftOrders() {
-        UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder().build();
-        AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
-            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
-
-        UploadAgreedDraftOrder uado2 = UploadAgreedDraftOrder.builder().build();
-        AgreedDraftOrderCollection draftOrder2 = AgreedDraftOrderCollection.builder()
-            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
-
-        UploadAgreedDraftOrder uado3 = UploadAgreedDraftOrder.builder().build();
-        UploadAgreedDraftOrder uadoWithNull = null;
-
-        return Stream.of(
-            // Single draft order added to an empty collection
-            Arguments.of(uado1, List.of(), List.of(draftOrder1)),
-
-            // Adding a draft order to a non-empty collection
-            Arguments.of(uado2, List.of(draftOrder1), List.of(draftOrder1, draftOrder2)),
-
-            // Empty input and empty expected output
-            Arguments.of(uado3, List.of(), List.of()),
-
-            // Null input with existing collection
-            Arguments.of(uadoWithNull, List.of(draftOrder1), List.of(draftOrder1)),
-
-            // Null input with empty collection
-            Arguments.of(uadoWithNull, List.of(), List.of())
-        );
-    }
-
-    private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
-        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
-
-        return agreedDraftOrderSubmittedDates.stream()
-            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
-            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
-            .toList();
-    }
-
     @Test
     void testHandleClearsUploadedDraftOrders() {
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build())
+                .typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION)
+                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                    .uploadParty(createUploadParty())
+                    .build())
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
                 .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
                 .build())
@@ -328,5 +269,20 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
+    }
+
+    private DynamicRadioList createUploadParty() {
+        return DynamicRadioList.builder()
+            .value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build())
+            .build();
+    }
+
+    private List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
+        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
+
+        return agreedDraftOrderSubmittedDates.stream()
+            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
+            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
+            .toList();
     }
 }

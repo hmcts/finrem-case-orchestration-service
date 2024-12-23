@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -34,9 +35,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.CASE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -73,16 +74,14 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        String userRole = checkRole(caseDetails.getId().toString(), userAuthorisation);
+        OrderParty orderParty = getOrderParty(caseDetails, userAuthorisation);
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            handleSuggestedDraftOrders(finremCaseData, userAuthorisation);
+            handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderParty);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            handleAgreedDraftOrder(finremCaseData, userAuthorisation);
+            handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderParty);
         }
-
-        draftOrdersCategoriser.categoriseDocuments(finremCaseData, userRole);
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
@@ -91,8 +90,37 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .data(finremCaseData).build();
     }
 
-    private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation) {
+    private OrderParty getOrderParty(FinremCaseDetails caseDetails, String userAuthorisation) {
+        CaseRole userCaseRole = getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
+
+        switch (userCaseRole) {
+            case APP_SOLICITOR -> {
+                return OrderParty.APPLICANT;
+            }
+            case RESP_SOLICITOR -> {
+                return OrderParty.RESPONDENT;
+            }
+            case CASEWORKER -> {
+                return OrderParty.forUploadParty(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
+            }
+            default -> throw new IllegalArgumentException("Unexpected case role " + userCaseRole);
+        }
+    }
+
+    private String getUploadParty(DraftOrdersWrapper draftOrdersWrapper) {
+        String typeOfDraftOrder = draftOrdersWrapper.getTypeOfDraftOrder();
+        if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
+            return draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
+        } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
+            return draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadParty().getValue().getCode();
+        } else {
+            throw new IllegalArgumentException("Invalid type of draft order");
+        }
+    }
+
+    private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation, OrderParty orderParty) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        draftOrdersWrapper.getUploadAgreedDraftOrder().setOrderParty(orderParty);
 
         List<AgreedDraftOrderCollection> newAgreedDraftOrderCollections = draftOrderService
             .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
@@ -102,20 +130,21 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
     }
 
-    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation) {
+    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation, OrderParty orderParty) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         UploadSuggestedDraftOrder uploadSuggestedDraftOrder = draftOrdersWrapper.getUploadSuggestedDraftOrder();
+        uploadSuggestedDraftOrder.setOrderParty(orderParty);
 
-        if (uploadSuggestedDraftOrder != null) {
-            List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = processSuggestedDraftOrders(uploadSuggestedDraftOrder,
-                userAuthorisation);
+        List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = processSuggestedDraftOrders(uploadSuggestedDraftOrder,
+            userAuthorisation);
 
-            List<SuggestedDraftOrderCollection> existingSuggestedDraftOrderCollections =
-                getExistingSuggestedDraftOrderCollections(draftOrdersWrapper);
+        List<SuggestedDraftOrderCollection> existingSuggestedDraftOrderCollections =
+            getExistingSuggestedDraftOrderCollections(draftOrdersWrapper);
 
-            existingSuggestedDraftOrderCollections.addAll(newSuggestedDraftOrderCollections);
-            draftOrdersWrapper.setSuggestedDraftOrderCollection(existingSuggestedDraftOrderCollections);
-        }
+        existingSuggestedDraftOrderCollections.addAll(newSuggestedDraftOrderCollections);
+        draftOrdersWrapper.setSuggestedDraftOrderCollection(existingSuggestedDraftOrderCollections);
+
+        draftOrdersCategoriser.categoriseDocuments(finremCaseData);
     }
 
     private List<SuggestedDraftOrderCollection> processSuggestedDraftOrders(UploadSuggestedDraftOrder uploadSuggestedDraftOrder,
@@ -215,8 +244,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         return existingSuggestedDraftOrderCollections;
     }
 
-    private String checkRole(String id, String auth) {
-
+    private CaseRole getUserCaseRole(String id, String auth) {
         CaseAssignedUserRolesResource caseAssignedUserRole =
             caseAssignedRoleService.getCaseAssignedUserRole(id, auth);
 
@@ -225,15 +253,15 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             if (!caseAssignedUserRoleList.isEmpty()) {
                 String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
 
-                if (loggedInUserCaseRole.contains(CaseRole.APP_SOLICITOR.getCcdCode())) {
-                    return APPLICANT.getValue();
-                } else if (loggedInUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getCcdCode())) {
-                    return RESPONDENT.getValue();
+                if (APP_SOLICITOR.getCcdCode().equals(loggedInUserCaseRole)) {
+                    return APP_SOLICITOR;
+                } else if (RESP_SOLICITOR.getCcdCode().equals(loggedInUserCaseRole)) {
+                    return RESP_SOLICITOR;
                 }
             }
         }
 
-        return CASE.getValue();
+        return CASEWORKER;
     }
 
     private <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
