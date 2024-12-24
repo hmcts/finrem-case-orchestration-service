@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -83,9 +84,8 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
         Function<HasApprovable, DirectionOrderCollection> directionOrderCollectionConvertor = d -> DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .isOrderStamped(YesOrNo.NO) // It's not stamped in the new draft order flow
-                .isFromNewDraftOrderFlow(YesOrNo.YES)
                 .orderDateTime(d.getValue().getApprovalDate())
-                .uploadDraftDocument(d.getValue().getReplacedDocument())
+                .uploadDraftDocument(d.getValue().getTargetDocument())
                 .build())
             .build();
 

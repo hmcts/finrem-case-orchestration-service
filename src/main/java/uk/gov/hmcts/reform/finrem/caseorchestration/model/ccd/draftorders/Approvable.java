@@ -17,7 +17,7 @@ public interface Approvable extends DocumentMatcher {
 
     YesOrNo getFinalOrder();
 
-    CaseDocument getReplacedDocument();
+    CaseDocument getTargetDocument();
 
     void setOrderStatus(OrderStatus orderStatus);
 
