@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 
 import java.util.ArrayList;
@@ -54,20 +53,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             errors.add(e.getMessage());
         }
 
-        // to clear the temp fields
-        clearUnprocessedApprovedDocuments(caseData.getDraftOrdersWrapper());
-        clearMetaDataFields(caseData);
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
-    }
-
-    private void clearUnprocessedApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper) {
-        draftOrdersWrapper.setUnprocessedApprovedDocuments(List.of());
-    }
-
-    private void clearMetaDataFields(FinremCaseData caseData) {
-        caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(null);
-        caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(null);
     }
 }

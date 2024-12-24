@@ -11,17 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -55,6 +49,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         verify(service).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
+
     @Test
     void createAndStoreAdditionalHearingDocuments() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
@@ -62,29 +57,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         verify(service).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
-    @Test
-    void shouldClearTemporaryFields() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(FinremCaseData.builder()
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .unprocessedApprovedDocuments(List.of(DirectionOrderCollection.builder().build()))
-                .build())
-            .build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isEmpty();
-        assertNull(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent());
-        assertNull(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent());
-    }
-
     private FinremCallbackRequest buildCallbackRequest() {
-        return buildCallbackRequest(FinremCaseData.builder().build());
-    }
-
-    private FinremCallbackRequest buildCallbackRequest(FinremCaseData finremCaseData) {
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.DIRECTION_UPLOAD_ORDER)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(finremCaseData).build())
+                .data(new FinremCaseData()).build())
             .build();
     }
 }
