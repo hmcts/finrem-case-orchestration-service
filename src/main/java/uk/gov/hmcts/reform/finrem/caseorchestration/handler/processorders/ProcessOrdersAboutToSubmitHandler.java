@@ -15,6 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDoc
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
 @Slf4j
 @Service
 public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAboutToSubmitHandler {
@@ -26,9 +30,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && (EventType.PROCESS_ORDER.equals(eventType));
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && PROCESS_ORDER.equals(eventType);
     }
 
     @Override

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @Slf4j
@@ -41,9 +44,7 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && (EventType.PROCESS_ORDER.equals(eventType));
+        return ABOUT_TO_START.equals(callbackType) && CONTESTED.equals(caseType) && PROCESS_ORDER.equals(eventType);
     }
 
     @Override
