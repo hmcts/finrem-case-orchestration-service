@@ -1,9 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -27,12 +29,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @Slf4j
 @Service
-public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandler {
+public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
 
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
 
-    public DirectionUploadOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   HasApprovableCollectionReader hasApprovableCollectionReader) {
+    public ProcessOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                            HasApprovableCollectionReader hasApprovableCollectionReader) {
         super(finremCaseDetailsMapper);
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
     }
@@ -41,7 +43,7 @@ public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandl
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType));
+            && (EventType.PROCESS_ORDER.equals(eventType));
     }
 
     @Override

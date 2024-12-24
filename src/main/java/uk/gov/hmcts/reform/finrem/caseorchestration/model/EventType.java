@@ -73,6 +73,7 @@ public enum EventType {
     SOLICITOR_CW_DRAFT_ORDER("FR_solicitorDraftDirectionOrder"),
     JUDGE_DRAFT_ORDER("FR_judgeDraftDirectionOrder"),
     DIRECTION_UPLOAD_ORDER("FR_directionOrder"),
+    PROCESS_ORDER("FR_directionOrderNew"),
     CONSENT_ORDER("FR_consentOrder"),
     ASSIGN_DOCUMENT_CATEGORIES("FR_assignDocumentCategories"),
     GIVE_ALLOCATION_DIRECTIONS("FR_giveAllocationDirections"),
