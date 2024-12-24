@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +38,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class ProcessOrdersAboutToStartHandlerTest {
+
+    private static final CaseDocument TARGET_DOCUMENT_1 = CaseDocument.builder().documentUrl("targetDoc1.docx").build();
+
+    private static final LocalDateTime APPROVAL_DATE = LocalDateTime.of(2024, 12, 24,  23, 0, 0);
 
     @InjectMocks
     private ProcessOrdersAboutToStartHandler underTest;
@@ -71,7 +78,7 @@ class ProcessOrdersAboutToStartHandlerTest {
                     DraftOrdersReviewCollection.builder().value(
                         DraftOrdersReview.builder()
                             .draftOrderDocReviewCollection(List.of(
-                               buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE),
+                               buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_1, APPROVAL_DATE),
                                 buildDraftOrderDocReviewCollection(TO_BE_REVIEWED)
                             ))
                         .build()).build(),
@@ -87,12 +94,29 @@ class ProcessOrdersAboutToStartHandlerTest {
             .build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).hasSize(1);
+        assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).contains(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.NO)
+                .uploadDraftDocument(TARGET_DOCUMENT_1)
+                .originalDocument(TARGET_DOCUMENT_1)
+                    .orderDateTime(APPROVAL_DATE)
+                .build()).build()
+        );
         assertTrue(YesOrNo.isYes(result.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()));
     }
 
     private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {
+        return buildDraftOrderDocReviewCollection(orderStatus, null, null);
+    }
+
+    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus, CaseDocument caseDocument,
+                                                                             LocalDateTime approvalDate) {
         return DraftOrderDocReviewCollection.builder()
-            .value(DraftOrderDocumentReview.builder().orderStatus(orderStatus).build())
+            .value(DraftOrderDocumentReview.builder()
+                .orderStatus(orderStatus)
+                .draftOrderDocument(caseDocument)
+                .approvalDate(approvalDate)
+                .build())
             .build();
     }
 }

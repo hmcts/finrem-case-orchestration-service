@@ -85,6 +85,7 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
                 .isOrderStamped(YesOrNo.NO) // It's not stamped in the new draft order flow
                 .orderDateTime(d.getValue().getApprovalDate())
                 .uploadDraftDocument(d.getValue().getTargetDocument())
+                .originalDocument(d.getValue().getTargetDocument())
                 .build())
             .build();
 

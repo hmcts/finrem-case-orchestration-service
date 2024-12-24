@@ -55,7 +55,7 @@ class ProcessOrdersAboutToSubmitHandlerTest {
     private HasApprovableCollectionReader hasApprovableCollectionReader;
 
     @Mock
-    private AdditionalHearingDocumentService service;
+    private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @Test
     void testCanHandle() {
@@ -74,8 +74,10 @@ class ProcessOrdersAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
                 ))
                 .agreedDraftOrderCollection(List.of(
                     test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT_1)
@@ -127,8 +129,12 @@ class ProcessOrdersAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
                 ))
                 .agreedDraftOrderCollection(List.of(
                     test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT_1)
@@ -164,6 +170,56 @@ class ProcessOrdersAboutToSubmitHandlerTest {
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
         assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
+    }
+
+    @Test
+    void shouldReplaceApprovedDocumentAndMarkAsProcessed() {
+        PsaDocReviewCollection test1 = null;
+        PsaDocReviewCollection test2 = null;
+        AgreedDraftOrderCollection test3 = null;
+        AgreedDraftOrderCollection test4 = null;
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
+                ))
+                .agreedDraftOrderCollection(List.of(
+                    test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT_1)
+                        .orderStatus(APPROVED_BY_JUDGE).build()).build(),
+                    test4 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT_2)
+                        .orderStatus(APPROVED_BY_JUDGE).build()).build()
+                ))
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder().value(
+                        DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                test1 = buildPsaDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_1),
+                                buildPsaDocReviewCollection(TO_BE_REVIEWED)
+                            ))
+                            .build()).build(),
+                    DraftOrdersReviewCollection.builder().value(
+                        DraftOrdersReview.builder()
+                            .psaDocReviewCollection(List.of(
+                                buildPsaDocReviewCollection(PROCESSED),
+                                test2 = buildPsaDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_2)
+                            ))
+                            .build()).build()
+                ))
+                .build())
+            .build());
+
+        underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(TARGET_DOCUMENT_3, test1.getValue().getPsaDocument());
+        assertEquals(PROCESSED, test2.getValue().getOrderStatus());
+        assertEquals(TARGET_DOCUMENT_4, test2.getValue().getPsaDocument());
+        assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(PROCESSED, test4.getValue().getOrderStatus());
     }
 
     private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {

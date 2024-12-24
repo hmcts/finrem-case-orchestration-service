@@ -76,15 +76,34 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
         caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(d -> {
+            if (d.getValue().getOriginalDocument() == null) {
+                throw new IllegalStateException("original document must be supplied in about-to-start event.");
+            }
             // mark draft order
             collector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getUploadDraftDocument())).forEach(draftOrder -> draftOrder.getValue().setOrderStatus(PROCESSED));
+                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                    toBeUpdated.getValue().setOrderStatus(PROCESSED);
+                    // replace the document by the new uploaded approved document
+                    toBeUpdated.getValue().setDraftOrderDocument(d.getValue().getUploadDraftDocument());
+                });
             // mark PSA
             psaCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getUploadDraftDocument())).forEach(draftOrder -> draftOrder.getValue().setOrderStatus(PROCESSED));
+                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                    toBeUpdated.getValue().setOrderStatus(PROCESSED);
+                    // replace the document by the new uploaded approved document
+                    toBeUpdated.getValue().setPsaDocument(d.getValue().getUploadDraftDocument());
+                });
             // mark AgreedDraftOrder
             agreedOrderCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getUploadDraftDocument())).forEach(draftOrder -> draftOrder.getValue().setOrderStatus(PROCESSED));
+                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                    toBeUpdated.getValue().setOrderStatus(PROCESSED);
+                    // replace the document by the new uploaded approved document
+                    if (toBeUpdated.getValue().getPensionSharingAnnex() != null) {
+                        toBeUpdated.getValue().setPensionSharingAnnex(d.getValue().getUploadDraftDocument());
+                    } else if (toBeUpdated.getValue().getDraftOrder() != null) {
+                        toBeUpdated.getValue().setDraftOrder(d.getValue().getUploadDraftDocument());
+                    }
+                });
             }
         );
     }
