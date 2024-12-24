@@ -101,12 +101,8 @@ public class HasApprovableCollectionReader {
         List<AgreedDraftOrderCollection> agreedDraftOrderCollections,
         List<AgreedDraftOrderCollection> collector,
         Predicate<OrderStatus> statusPredicate) {
-
-        ofNullable(agreedDraftOrderCollections).orElse(List.of())
-            .forEach(draftOrdersReview -> {
-                Map<Boolean, List<AgreedDraftOrderCollection>> partitioned = partitionByOrderStatus(agreedDraftOrderCollections, statusPredicate);
-                collector.addAll(partitioned.getOrDefault(true, List.of()));
-            });
+        Map<Boolean, List<AgreedDraftOrderCollection>> partitioned = partitionByOrderStatus(agreedDraftOrderCollections, statusPredicate);
+        collector.addAll(partitioned.getOrDefault(true, List.of()));
     }
 
     private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollect(
