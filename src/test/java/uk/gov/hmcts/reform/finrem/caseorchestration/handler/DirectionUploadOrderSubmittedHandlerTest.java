@@ -29,12 +29,12 @@ import static java.util.List.of;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class DirectionUploadOrderSubmittedHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @Mock
     private HearingDocumentService hearingDocumentService;
     @Mock
