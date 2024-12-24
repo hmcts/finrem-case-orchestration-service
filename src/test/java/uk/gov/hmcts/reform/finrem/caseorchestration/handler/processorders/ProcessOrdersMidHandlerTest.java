@@ -49,7 +49,7 @@ class ProcessOrdersMidHandlerTest {
     }
 
     @Test
-    void shouldNotCreateEmptyEntryWhenDirectionDetailsCollectionIsEmptyOrNull() {
+    void shouldNotCreateEmptyEntryWhenDirectionDetailsCollectionIsNotEmpty() {
         List<DirectionDetailCollection> notExpected = List.of(
             DirectionDetailCollection.builder().value(DirectionDetail.builder().build()).build()
         );
