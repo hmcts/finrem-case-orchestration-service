@@ -32,7 +32,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType));
+            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
