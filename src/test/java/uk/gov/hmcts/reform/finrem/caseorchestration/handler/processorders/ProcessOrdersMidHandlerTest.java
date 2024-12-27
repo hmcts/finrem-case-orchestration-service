@@ -5,14 +5,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -73,4 +77,21 @@ class ProcessOrdersMidHandlerTest {
         result = underTest.handle(finremCallbackRequest, AUTH_TOKEN).getData();
         assertNotEquals(notExpected, result.getDirectionDetailsCollection());
     }
+
+    @Test
+    void shouldShowErrorMessageIfLegacyUploadHearingOrderIsEmpty() {
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(
+            FinremCaseDetails.builder().data(
+                FinremCaseData.builder()
+                    .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
+                    .build()),
+            FinremCaseDetails.builder().data(
+                FinremCaseData.builder()
+                    .build())
+        );
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(res.getErrors()).hasSize(1);
+        assertThat(res.getErrors()).contains("Upload Approved Order is required.");
+    }
+
 }

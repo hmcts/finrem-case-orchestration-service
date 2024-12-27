@@ -37,8 +37,15 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        if (!isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
+        }
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = super.handle(callbackRequest, userAuthorisation);
-        FinremCaseData caseData = res.getData();
 
         // Create an empty entry if it is empty to save a click on add new button
         if (ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).isEmpty()) {
@@ -47,5 +54,9 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
             ));
         }
         return res;
+    }
+
+    private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {
+        return ofNullable(caseData.getUploadHearingOrder()).orElse(List.of()).isEmpty();
     }
 }
