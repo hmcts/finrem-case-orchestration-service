@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.List;
 
@@ -25,9 +26,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @Service
 public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
 
-    public ProcessOrdersMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                   BulkPrintDocumentService service) {
+    private final ProcessOrderService processOrderService;
+
+    public ProcessOrdersMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, BulkPrintDocumentService service,
+                                   ProcessOrderService processOrderService) {
         super(finremCaseDetailsMapper, service);
+        this.processOrderService = processOrderService;
     }
 
     @Override
@@ -40,9 +44,13 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        if (!isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData)) {
+        if (processOrderService.isAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
+        }
+        if (!processOrderService.isAllNewUploadedOrdersArePdfDocuments(caseDataBefore, caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("You must upload a PDF file for new documents.")).build();
         }
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = super.handle(callbackRequest, userAuthorisation);
@@ -54,9 +62,5 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
             ));
         }
         return res;
-    }
-
-    private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {
-        return ofNullable(caseData.getUploadHearingOrder()).orElse(List.of()).isEmpty();
     }
 }

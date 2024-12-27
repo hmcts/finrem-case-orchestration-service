@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -13,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.List;
 
@@ -30,6 +33,12 @@ class ProcessOrdersMidHandlerTest {
 
     @InjectMocks
     private ProcessOrdersMidHandler underTest;
+
+    @Spy
+    private HasApprovableCollectionReader hasApprovableCollectionReader;
+
+    @Spy
+    private ProcessOrderService processOrderService = new ProcessOrderService(hasApprovableCollectionReader);
 
     @Test
     void testCanHandle() {
