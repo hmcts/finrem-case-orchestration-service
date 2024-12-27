@@ -46,8 +46,7 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Handling contested event {}/{} submit callback for case id: {}",
-            DIRECTION_UPLOAD_ORDER, PROCESS_ORDER, caseDetails.getId());
+        log.info("Handling contested event {} submit callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         if (CollectionUtils.isNotEmpty(caseDetails.getData().getDirectionDetailsCollection())) {
