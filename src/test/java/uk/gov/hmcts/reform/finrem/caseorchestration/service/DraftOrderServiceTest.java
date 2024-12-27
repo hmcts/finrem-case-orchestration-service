@@ -654,7 +654,7 @@ class DraftOrderServiceTest {
                     .submittedBy("Existing User")
                     .submittedDate(LocalDateTime.of(2024, 10, 10, 12, 0))
                     .approvalJudge("Approved Judge")
-                    .approvalDate(LocalDate.of(2023, 10, 10))
+                    .approvalDate(LocalDateTime.of(2024, 10, 10, 12, 0))
                     .build())
                 .build();
         DraftOrdersReview existingDraftOrderReview = DraftOrdersReview.builder()
@@ -770,7 +770,7 @@ class DraftOrderServiceTest {
                     .submittedBy("Existing User")
                     .submittedDate(LocalDateTime.of(2024, 10, 10, 12, 0))
                     .approvalJudge("Approved Judge")
-                    .approvalDate(LocalDate.of(2023, 10, 10))
+                    .approvalDate(LocalDateTime.of(2024, 10, 10, 12, 0))
                     .build())
                 .build();
         DraftOrdersReview existingDraftOrderReview = DraftOrdersReview.builder()
