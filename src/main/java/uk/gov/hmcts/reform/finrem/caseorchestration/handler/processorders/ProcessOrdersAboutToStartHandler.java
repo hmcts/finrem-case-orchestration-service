@@ -52,7 +52,7 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} about to start callback for Case ID: {}", PROCESS_ORDER, caseId);
+        log.info("Invoking contested event {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
