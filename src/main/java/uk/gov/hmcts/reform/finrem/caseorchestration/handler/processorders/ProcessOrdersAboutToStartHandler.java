@@ -9,37 +9,29 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @Slf4j
 @Service
 public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
 
-    private final HasApprovableCollectionReader hasApprovableCollectionReader;
+    private final ProcessOrderService processOrderService;
 
     public ProcessOrdersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                            HasApprovableCollectionReader hasApprovableCollectionReader) {
+                                            ProcessOrderService processOrderService) {
         super(finremCaseDetailsMapper);
-        this.hasApprovableCollectionReader = hasApprovableCollectionReader;
+        this.processOrderService = processOrderService;
     }
 
     @Override
@@ -57,7 +49,7 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
 
-        populateUnprocessedApprovedDocuments(caseData);
+        processOrderService.populateUnprocessedApprovedDocuments(caseData);
         populateMetaDataFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
@@ -68,32 +60,6 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
             .orElse(List.of()).isEmpty()));
         caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
             .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
-    }
-
-    private void populateUnprocessedApprovedDocuments(FinremCaseData caseData) {
-        DraftOrdersWrapper draftOrdersWrapper = caseData.getDraftOrdersWrapper();
-
-        List<DraftOrderDocReviewCollection> draftOrderCollector = new ArrayList<>();
-        hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(),
-            draftOrderCollector, APPROVED_BY_JUDGE::equals);
-        List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
-        hasApprovableCollectionReader.filterAndCollectPsaDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(),
-            psaCollector, APPROVED_BY_JUDGE::equals);
-
-        Function<HasApprovable, DirectionOrderCollection> directionOrderCollectionConvertor = d -> DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder()
-                .isOrderStamped(YesOrNo.NO) // It's not stamped in the new draft order flow
-                .orderDateTime(d.getValue().getApprovalDate())
-                .uploadDraftDocument(d.getValue().getTargetDocument())
-                .originalDocument(d.getValue().getTargetDocument())
-                .build())
-            .build();
-
-        List<DirectionOrderCollection> result = new ArrayList<>(draftOrderCollector.stream()
-            .map(directionOrderCollectionConvertor).toList());
-        result.addAll(psaCollector.stream()
-            .map(directionOrderCollectionConvertor).toList());
-        caseData.getDraftOrdersWrapper().setUnprocessedApprovedDocuments(result);
     }
 
 }

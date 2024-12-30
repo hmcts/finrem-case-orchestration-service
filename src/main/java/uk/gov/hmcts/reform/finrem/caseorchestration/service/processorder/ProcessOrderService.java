@@ -7,14 +7,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 
 @Service
 @Slf4j
@@ -25,6 +33,32 @@ public class ProcessOrderService {
 
     private static <T> List<T> nullSafeList(List<T> t) {
         return ofNullable(t).orElse(List.of());
+    }
+
+    public void populateUnprocessedApprovedDocuments(FinremCaseData caseData) {
+        DraftOrdersWrapper draftOrdersWrapper = caseData.getDraftOrdersWrapper();
+
+        List<DraftOrderDocReviewCollection> draftOrderCollector = new ArrayList<>();
+        hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(),
+            draftOrderCollector, APPROVED_BY_JUDGE::equals);
+        List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
+        hasApprovableCollectionReader.filterAndCollectPsaDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(),
+            psaCollector, APPROVED_BY_JUDGE::equals);
+
+        Function<HasApprovable, DirectionOrderCollection> directionOrderCollectionConvertor = d -> DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .isOrderStamped(YesOrNo.NO) // It's not stamped in the new draft order flow
+                .orderDateTime(d.getValue().getApprovalDate())
+                .uploadDraftDocument(d.getValue().getTargetDocument())
+                .originalDocument(d.getValue().getTargetDocument())
+                .build())
+            .build();
+
+        List<DirectionOrderCollection> result = new ArrayList<>(draftOrderCollector.stream()
+            .map(directionOrderCollectionConvertor).toList());
+        result.addAll(psaCollector.stream()
+            .map(directionOrderCollectionConvertor).toList());
+        caseData.getDraftOrdersWrapper().setUnprocessedApprovedDocuments(result);
     }
 
     /**
@@ -72,10 +106,8 @@ public class ProcessOrderService {
 
         return nullSafeList(afterList).stream()
             .filter(doc -> !beforeUrls.contains(doc.getValue().getUploadDraftDocument().getDocumentUrl()))
-            .allMatch(doc -> {
-                String url = urlExtractor.apply(doc);
-                return url != null && url.toLowerCase().matches(".*\\.(pdf)$");
-            });
+            .allMatch(doc -> of(doc).map(DirectionOrderCollection::getValue).map(DirectionOrder::getUploadDraftDocument)
+                .map(CaseDocument::getDocumentFilename).orElse("").matches("(?i).*\\.(pdf)$"));
     }
 
     private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {

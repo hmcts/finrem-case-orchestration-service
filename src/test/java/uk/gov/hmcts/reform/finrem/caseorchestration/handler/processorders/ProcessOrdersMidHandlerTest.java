@@ -35,7 +35,7 @@ class ProcessOrdersMidHandlerTest {
     private ProcessOrdersMidHandler underTest;
 
     @Spy
-    private HasApprovableCollectionReader hasApprovableCollectionReader;
+    private HasApprovableCollectionReader hasApprovableCollectionReader = new HasApprovableCollectionReader();
 
     @Spy
     private ProcessOrderService processOrderService = new ProcessOrderService(hasApprovableCollectionReader);

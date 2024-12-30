@@ -105,6 +105,20 @@ class ProcessOrderServiceTest {
         );
     }
 
+    private static String extractFileName(String url) {
+        if (url == null || url.isEmpty()) {
+            return null; // or throw an exception if you prefer
+        }
+
+        // Find the last '/' and extract the substring after it
+        int lastSlashIndex = url.lastIndexOf('/');
+        if (lastSlashIndex != -1 && lastSlashIndex < url.length() - 1) {
+            return url.substring(lastSlashIndex + 1);
+        }
+
+        return null; // No file name found
+    }
+
     private static DirectionOrderCollection createDirectionOrder(String documentUrl) {
         return createDirectionOrder(documentUrl, false);
     }
@@ -112,8 +126,9 @@ class ProcessOrderServiceTest {
     private static DirectionOrderCollection createDirectionOrder(String documentUrl, boolean markOriginalDocument) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
-                .uploadDraftDocument(CaseDocument.builder().documentUrl(documentUrl).build())
-                .originalDocument(markOriginalDocument ? CaseDocument.builder().documentUrl(documentUrl).build() : null)
+                .uploadDraftDocument(CaseDocument.builder().documentUrl(documentUrl).documentFilename(extractFileName(documentUrl)).build())
+                .originalDocument(markOriginalDocument
+                    ? CaseDocument.builder().documentUrl(documentUrl).documentFilename(extractFileName(documentUrl)).build() : null)
                 .build())
             .build();
     }
