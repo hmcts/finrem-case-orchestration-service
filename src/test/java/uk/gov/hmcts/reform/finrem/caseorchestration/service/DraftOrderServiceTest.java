@@ -40,8 +40,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDate;
@@ -84,9 +82,6 @@ class DraftOrderServiceTest {
 
     @Mock
     private HearingService hearingService;
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(DraftOrderService.class);
 
     @ParameterizedTest
     @CsvSource({
@@ -164,7 +159,6 @@ class DraftOrderServiceTest {
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.YES)
             .submittedBy("James Bond")
-            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(CaseDocumentCollection.builder().value(attachment1).build()))
@@ -199,7 +193,6 @@ class DraftOrderServiceTest {
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.YES)
             .submittedBy("James Bond")
-            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
@@ -234,7 +227,6 @@ class DraftOrderServiceTest {
             .draftOrder(draftOrder1)
             .resubmission(YesOrNo.NO)
             .submittedBy("James Bond")
-            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .build();
@@ -242,7 +234,6 @@ class DraftOrderServiceTest {
         AgreedDraftOrder expectedOrder5 = AgreedDraftOrder.builder()
             .orderStatus(OrderStatus.TO_BE_REVIEWED)
             .submittedBy("James Bond")
-            .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .pensionSharingAnnex(psa1)

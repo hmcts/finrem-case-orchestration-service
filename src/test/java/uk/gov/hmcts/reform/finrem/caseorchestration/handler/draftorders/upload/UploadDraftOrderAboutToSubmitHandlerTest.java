@@ -161,7 +161,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult.getSubmittedBy()).isNotNull();
-        assertThat(draftOrderResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
         assertThat(draftOrderResult.getPensionSharingAnnex()).isNull();
         assertThat(draftOrderResult.getDraftOrder()).isNotNull();
         assertThat(draftOrderResult.getAttachments()).isNotNull();
@@ -169,7 +168,6 @@ class UploadDraftOrderAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder psaResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(psaResult.getSubmittedBy()).isNotNull();
-        assertThat(psaResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
         assertThat(psaResult.getPensionSharingAnnex()).isNotNull();
         assertThat(psaResult.getDraftOrder()).isNull();
         assertThat(psaResult.getAttachments()).isNull();

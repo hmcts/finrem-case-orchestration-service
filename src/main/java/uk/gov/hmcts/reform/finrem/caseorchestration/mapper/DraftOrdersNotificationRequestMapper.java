@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -68,7 +70,7 @@ public class DraftOrdersNotificationRequestMapper {
      */
     public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
         FinremCaseData caseData = caseDetails.getData();
-        String notificationEmail = refusedOrder.getSubmittedByEmail();
+        String notificationEmail = getRefusedOrderRecipientEmail(caseDetails.getData(), refusedOrder);
         String documentName = ofNullable(refusedOrder.getRefusedDocument()).map(CaseDocument::getDocumentFilename)
             .orElseThrow(IllegalArgumentException::new);
 
@@ -86,5 +88,15 @@ public class DraftOrdersNotificationRequestMapper {
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .name(refusedOrder.getSubmittedBy())
             .build();
+    }
+
+    private String getRefusedOrderRecipientEmail(FinremCaseData caseData, RefusedOrder refusedOrder) {
+        if (APPLICANT.equals(refusedOrder.getOrderParty())) {
+            return caseData.getContactDetailsWrapper().getApplicantSolicitorEmail();
+        } else if (RESPONDENT.equals(refusedOrder.getOrderParty())) {
+            return caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+        } else {
+            throw new IllegalArgumentException("Invalid order party: " + refusedOrder.getOrderParty());
+        }
     }
 }

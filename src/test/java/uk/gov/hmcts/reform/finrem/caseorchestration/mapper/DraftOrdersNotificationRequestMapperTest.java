@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -34,8 +38,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -176,16 +182,67 @@ class DraftOrdersNotificationRequestMapperTest {
             .build();
     }
 
+    @ParameterizedTest
+    @MethodSource("buildRefusedDraftOrderOrPsaNotificationRequest")
+    void testBuildRefusedDraftOrderOrPsaNotificationRequest(OrderParty orderParty, String expectedEmail) {
+        FinremCaseDetails caseDetails = createCaseDetailsForRefusedOrderNotificationRequest();
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            createRefusedOrder(orderParty));
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(expectedEmail);
+        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("45347643533535");
+        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
+        assertThat(notificationRequest.getApplicantName()).isEqualTo("Charlie Hull");
+        assertThat(notificationRequest.getRespondentName()).isEqualTo("Stella Hull");
+        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
+        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
+        assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
+        assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
+        assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
+        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
+        assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
+    }
+
+    private static Stream<Arguments> buildRefusedDraftOrderOrPsaNotificationRequest() {
+        return Stream.of(
+            Arguments.of(OrderParty.APPLICANT, "applicant@solicitor.com"),
+            Arguments.of(OrderParty.RESPONDENT, "respondent@solicitor.com")
+        );
+    }
+
     @Test
-    void testBuildRefusedDraftOrderOrPsaNotificationRequest() {
+    void testBuildRefusedDraftOrderOrPsaNotificationRequestThrowsExceptionForMissingOrderParty() {
+        FinremCaseDetails caseDetails = createCaseDetailsForRefusedOrderNotificationRequest();
+        RefusedOrder refusedOrder = createRefusedOrder(null);
+
+        assertThatThrownBy(() -> mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, refusedOrder)
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid order party: null");
+    }
+
+    private RefusedOrder createRefusedOrder(OrderParty orderParty) {
+        return RefusedOrder.builder()
+            .hearingDate(LocalDate.of(2024, 1, 5))
+            .refusalJudge("Peter Chapman")
+            .judgeFeedback("Judge Feedback")
+            .submittedBy("Mr. Uploader")
+            .orderParty(orderParty)
+            .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+            .build();
+    }
+
+    private FinremCaseDetails createCaseDetailsForRefusedOrderNotificationRequest() {
         DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
                 .solicitorReference("A_RANDOM_STRING")
+                .applicantSolicitorEmail("applicant@solicitor.com")
                 .applicantFmName("Charlie")
                 .applicantLname("Hull")
+                .respondentSolicitorEmail("respondent@solicitor.com")
                 .respondentFmName("Stella")
                 .respondentLname("Hull")
                 .build())
@@ -205,32 +262,9 @@ class DraftOrdersNotificationRequestMapperTest {
                 ))
                 .build())
             .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+        return FinremCaseDetails.builder()
             .id(45347643533535L)
             .data(caseData)
             .build();
-
-        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
-            RefusedOrder.builder()
-                .hearingDate(LocalDate.of(2024, 1, 5))
-                .refusalJudge("Peter Chapman")
-                .judgeFeedback("Judge Feedback")
-                .submittedBy("Mr. Uploader")
-                .submittedByEmail("hello@world.com")
-                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
-                .build());
-
-        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
-        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("45347643533535");
-        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
-        assertThat(notificationRequest.getApplicantName()).isEqualTo("Charlie Hull");
-        assertThat(notificationRequest.getRespondentName()).isEqualTo("Stella Hull");
-        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
-        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
-        assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
-        assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
-        assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
-        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
-        assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
     }
 }
