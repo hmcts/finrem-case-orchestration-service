@@ -60,7 +60,7 @@ class ProcessOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases")
     void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.areAllNewUploadedOrdersPdfDocumentsPresent(caseDataBefore, caseData);
+        boolean result = underTest.areAllNewOrdersPdfFiles(caseDataBefore, caseData);
         assertEquals(expectedResult, result);
     }
 

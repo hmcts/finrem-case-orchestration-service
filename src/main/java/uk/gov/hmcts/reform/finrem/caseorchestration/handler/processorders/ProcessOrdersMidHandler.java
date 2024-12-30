@@ -50,9 +50,20 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
         }
-        if (!processOrderService.areAllNewUploadedOrdersPdfDocumentsPresent(caseDataBefore, caseData)) {
+        if (!processOrderService.areAllNewOrdersPdfFiles(caseDataBefore, caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("You must upload a PDF file for new documents.")).build();
+        }
+        // Validate the modifying legacy approved orders
+        if (!processOrderService.areAllLegacyApprovedOrdersPdf(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("You must upload a PDF file for modifying legacy approved documents.")).build();
+        }
+        // Validate the modifying unprocessed approved orders are word documents
+        if (!processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("You must upload a Microsoft Word file for modifying an unprocessed approved documents."))
+                .build();
         }
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = super.handle(callbackRequest, userAuthorisation);
