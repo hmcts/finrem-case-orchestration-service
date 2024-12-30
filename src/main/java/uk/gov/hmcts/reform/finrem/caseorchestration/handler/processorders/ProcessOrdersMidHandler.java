@@ -48,7 +48,7 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
         }
-        if (!processOrderService.isAllNewUploadedOrdersArePdfDocuments(caseDataBefore, caseData)) {
+        if (!processOrderService.areAllNewUploadedOrdersPdfDocumentsPresent(caseDataBefore, caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("You must upload a PDF file for new documents.")).build();
         }

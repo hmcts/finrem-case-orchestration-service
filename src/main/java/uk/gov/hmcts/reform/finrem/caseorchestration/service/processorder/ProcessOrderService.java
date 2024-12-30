@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -38,32 +39,31 @@ public class ProcessOrderService {
     }
 
     /**
-     * Checks if all newly uploaded orders have PDF document extensions.
+     * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
-     * <p>This method compares the list of previously uploaded approved documents with the current ones and filters out the new documents.
-     * It then verifies if all these new documents have a PDF extension (case-insensitive).</p>
-     *
-     * @param caseDataBefore The case data before any new documents were uploaded.
-     * @param caseData The current case data containing newly uploaded documents.
-     * @return {@code true} if all new documents have PDF extensions; {@code false} otherwise.
+     * @param caseDataBefore the case data before the operation.
+     * @param caseData       the case data after the operation.
+     * @return true if all newly uploaded orders are PDF documents; false otherwise.
      */
-    public boolean isAllNewUploadedOrdersArePdfDocuments(FinremCaseData caseDataBefore, FinremCaseData caseData) {
-        List<DirectionOrderCollection> before = nullSafeList(caseDataBefore.getDraftOrdersWrapper().getUnprocessedApprovedDocuments());
-        List<DirectionOrderCollection> after = nullSafeList(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments());
+    public boolean areAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+        return areAllNewDocumentsPdf(caseDataBefore.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
+                caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
+                doc -> doc.getValue().getOriginalDocument().getDocumentUrl())
+            && areAllNewDocumentsPdf(caseDataBefore.getUploadHearingOrder(), caseData.getUploadHearingOrder(),
+                doc -> doc.getValue().getUploadDraftDocument().getDocumentUrl());
+    }
 
-        Set<String> beforeUrls = before.stream()
-            .map(doc -> doc.getValue().getOriginalDocument().getDocumentUrl())
+    private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> beforeList,
+                                          List<DirectionOrderCollection> afterList,
+                                          Function<DirectionOrderCollection, String> urlExtractor) {
+        Set<String> beforeUrls = nullSafeList(beforeList).stream()
+            .map(urlExtractor)
             .collect(Collectors.toSet());
 
-        // Filter "after" list for new documents
-        List<DirectionOrderCollection> newOrders = after.stream()
-            .filter(doc -> !beforeUrls.contains(doc.getValue().getOriginalDocument().getDocumentUrl()))
-            .toList();
-
-        // Check if all new documents have the required extensions
-        return newOrders.stream()
+        return nullSafeList(afterList).stream()
+            .filter(doc -> !beforeUrls.contains(urlExtractor.apply(doc)))
             .allMatch(doc -> {
-                String url = doc.getValue().getOriginalDocument().getDocumentUrl();
+                String url = urlExtractor.apply(doc);
                 return url != null && url.toLowerCase().matches(".*\\.(pdf)$");
             });
     }

@@ -58,56 +58,59 @@ class ProcessOrderServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideIsAllNewUploadedOrdersArePdfDocumentsTestCases")
-    void testIsAllNewUploadedOrdersArePdfDocuments(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.isAllNewUploadedOrdersArePdfDocuments(caseDataBefore, caseData);
+    @MethodSource("provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases")
+    void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
+        boolean result = underTest.areAllNewUploadedOrdersPdfDocumentsPresent(caseDataBefore, caseData);
         assertEquals(expectedResult, result);
     }
 
-    private static Stream<Arguments> provideIsAllNewUploadedOrdersArePdfDocumentsTestCases() {
+    private static Stream<Arguments> provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases() {
         DirectionOrderCollection existingOrder = createDirectionOrder("http://example.com/document1.DOCX");
         DirectionOrderCollection newNonWordOrder1 = createDirectionOrder("http://example.com/document2.PDF");
         DirectionOrderCollection newNonWordOrder2 = createDirectionOrder("http://example.com/document3.pdf");
         DirectionOrderCollection newWordOrder = createDirectionOrder("http://example.com/document4.doc");
-        DirectionOrderCollection newMixedCaseOrder = createDirectionOrder("http://example.com/document5.Pdf");
-
-        FinremCaseData caseDataBefore1 = createCaseData(List.of(existingOrder));
-        FinremCaseData caseDataAfter1 = createCaseData(List.of(existingOrder, newNonWordOrder1, newNonWordOrder2));
-
-        FinremCaseData caseDataBefore2 = createCaseData(List.of(existingOrder));
-        FinremCaseData caseDataAfter2 = createCaseData(List.of(existingOrder, newNonWordOrder1, newWordOrder));
-
-        FinremCaseData caseDataBefore3 = createCaseData(List.of(existingOrder));
-        FinremCaseData caseDataAfter3 = createCaseData(List.of(existingOrder));
-
-        FinremCaseData caseDataBefore4 = createCaseData(List.of(existingOrder));
-        FinremCaseData caseDataAfter4 = createCaseData(List.of(existingOrder, newMixedCaseOrder));
-
-        FinremCaseData caseDataBefore5 = createCaseData(List.of());
-        FinremCaseData caseDataAfter5 = createCaseData(List.of());
+        DirectionOrderCollection newMixedCaseNonWordOrder = createDirectionOrder("http://example.com/document5.Pdf");
 
         return Stream.of(
-            Arguments.of(caseDataBefore1, caseDataAfter1, true),  // All new documents are valid Word documents
-            Arguments.of(caseDataBefore2, caseDataAfter2, false), // One new document is not a PDF document
-            Arguments.of(caseDataBefore3, caseDataAfter3, true),  // No new documents
-            Arguments.of(caseDataBefore4, caseDataAfter4, true),   // Mixed-case Word document extensions are valid
-            Arguments.of(caseDataBefore5, caseDataAfter5, true)   //
+            // All new documents are valid Word documents
+            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newNonWordOrder1, newNonWordOrder2)), true),
+            Arguments.of(createCaseData(List.of(existingOrder), true),
+                createCaseData(List.of(existingOrder, newNonWordOrder1, newNonWordOrder2), true), true),
+            // One new document is not a PDF document
+            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newNonWordOrder1, newWordOrder)), false),
+            Arguments.of(createCaseData(List.of(existingOrder), true),
+                createCaseData(List.of(existingOrder, newNonWordOrder1, newWordOrder), true), false),
+            // No new documents
+            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder)), true),
+            Arguments.of(createCaseData(List.of(existingOrder), true), createCaseData(List.of(existingOrder), true), true),
+            // Mixed-case Word document extensions are valid
+            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newMixedCaseNonWordOrder)), true),
+            Arguments.of(createCaseData(List.of(existingOrder), true), createCaseData(List.of(existingOrder, newMixedCaseNonWordOrder), true), true),
+            // no documents
+            Arguments.of(createCaseData(List.of()), createCaseData(List.of()), true),
+            Arguments.of(createCaseData(List.of(), true), createCaseData(List.of(), true), true)
         );
     }
 
     private static DirectionOrderCollection createDirectionOrder(String documentUrl) {
+        return createDirectionOrder(documentUrl, false);
+    }
+
+    private static DirectionOrderCollection createDirectionOrder(String documentUrl, boolean legacy) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
-                .originalDocument(CaseDocument.builder().documentUrl(documentUrl).build())
+                .uploadDraftDocument(CaseDocument.builder().documentUrl(documentUrl).build())
+                .originalDocument(legacy ? null : CaseDocument.builder().documentUrl(documentUrl).build())
                 .build())
             .build();
     }
 
-    private static FinremCaseData createCaseData(List<DirectionOrderCollection> unprocessedApprovedDocuments) {
-        return FinremCaseData.builder()
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .unprocessedApprovedDocuments(unprocessedApprovedDocuments)
-                .build())
-            .build();
+    private static FinremCaseData createCaseData(List<DirectionOrderCollection> target) {
+        return createCaseData(target, false);
+    }
+
+    private static FinremCaseData createCaseData(List<DirectionOrderCollection> target, boolean legacy) {
+        return legacy ? FinremCaseData.builder().uploadHearingOrder(target).build()
+            : FinremCaseData.builder().draftOrdersWrapper(DraftOrdersWrapper.builder().unprocessedApprovedDocuments(target).build()).build();
     }
 }
