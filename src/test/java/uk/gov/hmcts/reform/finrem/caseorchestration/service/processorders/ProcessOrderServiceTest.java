@@ -65,30 +65,43 @@ class ProcessOrderServiceTest {
     }
 
     private static Stream<Arguments> provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases() {
-        DirectionOrderCollection existingOrder = createDirectionOrder("http://example.com/document1.DOCX");
-        DirectionOrderCollection newNonWordOrder1 = createDirectionOrder("http://example.com/document2.PDF");
-        DirectionOrderCollection newNonWordOrder2 = createDirectionOrder("http://example.com/document3.pdf");
-        DirectionOrderCollection newWordOrder = createDirectionOrder("http://example.com/document4.doc");
-        DirectionOrderCollection newMixedCaseNonWordOrder = createDirectionOrder("http://example.com/document5.Pdf");
+        DirectionOrderCollection existingWordOrder = createDirectionOrder("http://example.com/document1.DOCX", true);
+        DirectionOrderCollection legacyExistingPdfOrder = createDirectionOrder("http://example.com/document1.pdf");
+
+        DirectionOrderCollection newPdfOrder1 = createDirectionOrder("http://example.com/document2.PDF");
+        DirectionOrderCollection newPdfOrder2 = createDirectionOrder("http://example.com/document3.pdf");
+        DirectionOrderCollection newWordOrder2 = createDirectionOrder("http://example.com/document4.doc");
+        DirectionOrderCollection newWordOrder3 = createDirectionOrder("http://example.com/document5.docx");
 
         return Stream.of(
-            // All new documents are valid Word documents
-            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newNonWordOrder1, newNonWordOrder2)), true),
-            Arguments.of(createCaseData(List.of(existingOrder), true),
-                createCaseData(List.of(existingOrder, newNonWordOrder1, newNonWordOrder2), true), true),
-            // One new document is not a PDF document
-            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newNonWordOrder1, newWordOrder)), false),
-            Arguments.of(createCaseData(List.of(existingOrder), true),
-                createCaseData(List.of(existingOrder, newNonWordOrder1, newWordOrder), true), false),
-            // No new documents
-            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder)), true),
-            Arguments.of(createCaseData(List.of(existingOrder), true), createCaseData(List.of(existingOrder), true), true),
-            // Mixed-case Word document extensions are valid
-            Arguments.of(createCaseData(List.of(existingOrder)), createCaseData(List.of(existingOrder, newMixedCaseNonWordOrder)), true),
-            Arguments.of(createCaseData(List.of(existingOrder), true), createCaseData(List.of(existingOrder, newMixedCaseNonWordOrder), true), true),
-            // no documents
-            Arguments.of(createCaseData(List.of()), createCaseData(List.of()), true),
-            Arguments.of(createCaseData(List.of(), true), createCaseData(List.of(), true), true)
+            // Valid Cases:
+            // 1. All new documents are valid PDFs
+            Arguments.of(createCaseData(List.of(existingWordOrder), false),
+                createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
+                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
+                createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
+                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
+            // 2. No new documents
+            Arguments.of(createCaseData(List.of(existingWordOrder), false), createCaseData(List.of(existingWordOrder), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), createCaseData(List.of(legacyExistingPdfOrder), true), true),
+
+            // Invalid cases:
+            // New document(s) is/are not a PDF document
+            Arguments.of(createCaseData(List.of(existingWordOrder), false),
+                createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
+                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder), false),
+                createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
+                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder), false),
+                createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
+                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
         );
     }
 
@@ -96,17 +109,20 @@ class ProcessOrderServiceTest {
         return createDirectionOrder(documentUrl, false);
     }
 
-    private static DirectionOrderCollection createDirectionOrder(String documentUrl, boolean legacy) {
+    private static DirectionOrderCollection createDirectionOrder(String documentUrl, boolean markOriginalDocument) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(CaseDocument.builder().documentUrl(documentUrl).build())
-                .originalDocument(legacy ? null : CaseDocument.builder().documentUrl(documentUrl).build())
+                .originalDocument(markOriginalDocument ? CaseDocument.builder().documentUrl(documentUrl).build() : null)
                 .build())
             .build();
     }
 
-    private static FinremCaseData createCaseData(List<DirectionOrderCollection> target) {
-        return createCaseData(target, false);
+    private static FinremCaseData createCaseData(List<DirectionOrderCollection> legacyTarget, List<DirectionOrderCollection> target) {
+        return FinremCaseData.builder()
+            .uploadHearingOrder(legacyTarget)
+            .draftOrdersWrapper(DraftOrdersWrapper.builder().unprocessedApprovedDocuments(target).build())
+            .build();
     }
 
     private static FinremCaseData createCaseData(List<DirectionOrderCollection> target, boolean legacy) {

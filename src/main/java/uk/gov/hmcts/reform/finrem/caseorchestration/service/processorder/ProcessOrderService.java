@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
@@ -48,9 +50,17 @@ public class ProcessOrderService {
     public boolean areAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData) {
         return areAllNewDocumentsPdf(caseDataBefore.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
                 caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
-                doc -> doc.getValue().getOriginalDocument().getDocumentUrl())
+                doc -> ofNullable(doc)
+                    .map(DirectionOrderCollection::getValue)
+                    .map(DirectionOrder::getOriginalDocument)
+                    .map(CaseDocument::getDocumentUrl)
+                    .orElse(""))
             && areAllNewDocumentsPdf(caseDataBefore.getUploadHearingOrder(), caseData.getUploadHearingOrder(),
-                doc -> doc.getValue().getUploadDraftDocument().getDocumentUrl());
+                doc -> ofNullable(doc)
+                    .map(DirectionOrderCollection::getValue)
+                    .map(DirectionOrder::getUploadDraftDocument)
+                    .map(CaseDocument::getDocumentUrl)
+                    .orElse(""));
     }
 
     private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> beforeList,
@@ -61,7 +71,7 @@ public class ProcessOrderService {
             .collect(Collectors.toSet());
 
         return nullSafeList(afterList).stream()
-            .filter(doc -> !beforeUrls.contains(urlExtractor.apply(doc)))
+            .filter(doc -> !beforeUrls.contains(doc.getValue().getUploadDraftDocument().getDocumentUrl()))
             .allMatch(doc -> {
                 String url = urlExtractor.apply(doc);
                 return url != null && url.toLowerCase().matches(".*\\.(pdf)$");
