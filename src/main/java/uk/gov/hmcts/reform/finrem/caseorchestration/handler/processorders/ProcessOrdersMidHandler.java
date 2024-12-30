@@ -46,7 +46,7 @@ public class ProcessOrdersMidHandler extends DirectionUploadOrderMidHandler {
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
 
-        if (processOrderService.isAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
+        if (processOrderService.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
         }

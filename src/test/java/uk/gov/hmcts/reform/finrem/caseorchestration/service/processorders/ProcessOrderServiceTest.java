@@ -27,7 +27,7 @@ class ProcessOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideIsAllLegacyApprovedOrdersRemovedTestCases")
     void testIsAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.isAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData);
+        boolean result = underTest.areAllLegacyApprovedOrdersRemoved(caseDataBefore, caseData);
         assertEquals(expectedResult, result);
     }
 

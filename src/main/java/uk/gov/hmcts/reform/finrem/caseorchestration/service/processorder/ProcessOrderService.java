@@ -82,7 +82,7 @@ public class ProcessOrderService {
      * @return {@code true} if the "upload hearing order" was not empty in {@code caseDataBefore}
      *         and is empty in {@code caseData}, otherwise {@code false}
      */
-    public boolean isAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+    public boolean areAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
         return !isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData);
     }
 
