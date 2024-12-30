@@ -36,8 +36,8 @@ public class EmailService {
     @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
     private Map<String, Map<String, String>> contestedContactEmails;
 
-    private static final String CONTESTED = "contested";
-    private static final String CONSENTED = "consented";
+    public static final String CONTESTED = "contested";
+    public static final String CONSENTED = "consented";
     private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
     private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
     private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
@@ -91,11 +91,11 @@ public class EmailService {
 
         //general emails and transfer to local court emails are the only templates that require the generalEmailBody
         if (CONSENT_GENERAL_EMAIL.equals(templateName)
-                || CONTESTED_GENERAL_EMAIL.equals(templateName)
-                || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-                || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
-                || TRANSFER_TO_LOCAL_COURT.equals(templateName)
-                || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
+            || CONTESTED_GENERAL_EMAIL.equals(templateName)
+            || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+            || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+            || TRANSFER_TO_LOCAL_COURT.equals(templateName)
+            || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
         }
         if (CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
@@ -125,8 +125,15 @@ public class EmailService {
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)) {
+            addJudgeReadyToReviewTemplateVars(notificationRequest, templateVars);
+        }
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
+
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE.name().equals(templateName)) {
+            addDraftOrderReviewOverdueTemplateVars(notificationRequest, templateVars);
+        }
 
         templateVars.putAll(emailTemplateVars.get(templateName));
         return templateVars;
@@ -139,6 +146,13 @@ public class EmailService {
             templateVars.put("intervenerSolicitorFirm", notificationRequest.getIntervenerSolicitorFirm());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
+    }
+
+    private void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
+                                                        Map<String, Object> templateVars) {
+        templateVars.put("hearingDate", notificationRequest.getHearingDate());
+        templateVars.put("judgeName", notificationRequest.getJudgeName());
+        templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
     }
 
     private EmailToSend generateEmail(String destinationAddress,
@@ -175,6 +189,11 @@ public class EmailService {
             log.warn("Failed to attach document to email", e);
         }
         return null;
+    }
+
+    private void addJudgeReadyToReviewTemplateVars(NotificationRequest notificationRequest,
+                                                   Map<String, Object> templateVars) {
+        templateVars.put("hearingDate", notificationRequest.getHearingDate());
     }
 
 }

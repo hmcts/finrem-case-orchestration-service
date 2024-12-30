@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
@@ -73,11 +74,12 @@ public class ListForHearingContestedAboutToSubmitHandler extends FinremCallbackH
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).build();
         }
 
-        if (finremCaseData.getAdditionalListOfHearingDocuments() != null) {
-            CaseDocument caseDocument = objectMapper.convertValue(finremCaseData.getAdditionalListOfHearingDocuments(),
+        ListForHearingWrapper listForHearingWrapper = finremCaseData.getListForHearingWrapper();
+        if (listForHearingWrapper.getAdditionalListOfHearingDocuments() != null) {
+            CaseDocument caseDocument = objectMapper.convertValue(listForHearingWrapper.getAdditionalListOfHearingDocuments(),
                 CaseDocument.class);
             CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, userAuthorisation, caseId);
-            finremCaseData.setAdditionalListOfHearingDocuments(pdfDocument);
+            listForHearingWrapper.setAdditionalListOfHearingDocuments(pdfDocument);
         }
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         if (hearingDocumentService.alreadyHadFirstHearing(finremCaseDetails)) {

@@ -186,8 +186,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(true);
+        when(paperNotificationService.shouldPrintForRespondent(any(CaseDetails.class))).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -202,8 +202,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     public void submitSendRefusalReasonWithRefusalAndShouldNotPrintForParties() throws Exception {
         doValidRefusalOrder();
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(false);
+        when(paperNotificationService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(false);
+        when(paperNotificationService.shouldPrintForRespondent(any(CaseDetails.class))).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

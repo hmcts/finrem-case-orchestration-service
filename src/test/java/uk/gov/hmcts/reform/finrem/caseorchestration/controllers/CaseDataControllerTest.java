@@ -7,19 +7,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.InputStream;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -53,8 +51,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private UpdateSolicitorDetailsService updateSolicitorDetailsService;
     @MockBean
     private IdamService idamService;
-    @MockBean
-    private FeatureToggleService featureToggleService;
     @MockBean
     private CaseDataService caseDataService;
 
@@ -159,73 +155,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullyReturnAsAdminConsentedPaperCase() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_HWF_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.APP_SOLICITOR.getCcdCode())))
-            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole", is(CaseRole.RESP_SOLICITOR.getCcdCode())))
-            .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
-    }
-
-    @Test
-    public void shouldSuccessfullyReturnNotAsAdminConsentedPaperCase() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(false);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
-            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
-    }
-
-    @Test
-    public void shouldSuccessfullyReturnAsAdminContestedPaperCase() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
-        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_HWF_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
-    }
-
-    @Test
-    public void shouldSuccessfullyReturnNotAsAdminContestedPaperCase() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
-            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
-    }
-
-    @Test
     public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
@@ -256,7 +185,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressContested() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -267,7 +196,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressContested_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -276,7 +205,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressConsented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -287,7 +216,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressConsented_notRepresented() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
@@ -305,8 +234,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
         createRequest(PATH + "no-org-policies.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -323,8 +252,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicies() throws Exception {
         createRequest(PATH + "no-orgs-is-represented.json");
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(true);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

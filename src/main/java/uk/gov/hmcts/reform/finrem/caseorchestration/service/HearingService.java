@@ -11,26 +11,33 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.TOP_LEVEL_HEARING_ID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class HearingService {
 
+    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy");
+
+    static final String TOP_LEVEL_HEARING_ID = "00000000-0000-0000-0000-000000000000";
+
     // Helper class to handle sorting by date, time, and type.
-    private record HearingSortingKey(LocalDate hearingDate, String hearingTime, String hearingType) implements Comparable<HearingSortingKey> {
+    private record HearingSortingKey(LocalDate hearingDate, String hearingTime,
+                                     String hearingType) implements Comparable<HearingSortingKey> {
 
         @Override
         public int compareTo(HearingSortingKey other) {
@@ -50,7 +57,7 @@ public class HearingService {
 
     String formatDynamicListElementLabel(String hearingTypeInString, LocalDate hearingDate, String hearingTime) {
         return format("%s %s - %s",
-            hearingDate == null ? toUnknownDisplayText() : FinremDateUtils.getDateFormatter().format(hearingDate),
+            hearingDate == null ? toUnknownDisplayText() : dateFormatter.format(hearingDate),
             StringUtils.isEmpty(hearingTime) ? toUnknownDisplayText() : hearingTime,
             StringUtils.isEmpty(hearingTypeInString) ? toUnknownDisplayText() : hearingTypeInString);
     }
@@ -80,9 +87,9 @@ public class HearingService {
         Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap = new HashMap<>();
 
         FinremCaseData caseData = caseDetails.getData();
-        HearingTypeDirection hearingType = caseData.getHearingType();
-        LocalDate hearingDate = caseData.getHearingDate();
-        String hearingTime = caseData.getHearingTime();
+        HearingTypeDirection hearingType = caseData.getListForHearingWrapper().getHearingType();
+        LocalDate hearingDate = caseData.getListForHearingWrapper().getHearingDate();
+        String hearingTime = caseData.getListForHearingWrapper().getHearingTime();
 
         DynamicListElement topLevelDynamicListElement = buildTopLevelHearingDynamicListElement(hearingType, hearingDate, hearingTime);
         if (topLevelDynamicListElement != null) {
@@ -115,4 +122,50 @@ public class HearingService {
             .listItems(dynamicListElement)
             .build();
     }
+
+    public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate, ihc -> ihc.getValue().getInterimHearingDate());
+    }
+
+    public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected, d -> d.getHearingType() == null ? "" : d.getHearingType().getId(),
+            ihc -> ihc.getValue().getInterimHearingType().getId());
+    }
+
+    public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
+    }
+
+    // Helper method to get hearing information
+    private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
+                                 Function<ListForHearingWrapper, T> hearingExtractor,
+                                 Function<InterimHearingCollection, T> extractor) {
+        if (StringUtils.isEmpty(selected.getCode())) {
+            return null;
+        }
+
+        // Return time estimate for top-level hearing
+        if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
+            return hearingExtractor.apply(caseData.getListForHearingWrapper()); // Use hearingExtractor to get the value
+        }
+
+        // Search for the matching InterimHearingCollection
+        return ofNullable(caseData.getInterimWrapper().getInterimHearings()).orElse(List.of()).stream()
+            .filter(ihc -> ihc.getId().toString().equals(selected.getCode()) && ihc.getValue() != null)
+            .map(extractor)
+            .findFirst()
+            .orElse(null); // Return null if no match is found
+    }
+
+    public String formatHearingInfo(String hearingType, LocalDate hearingDate, String hearingTime) {
+        return format(
+            "%s on %s %s",
+            Optional.ofNullable(hearingType).orElse("N/A"),
+            Optional.ofNullable(hearingDate)
+                .map(date -> hearingDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
+                .orElse("N/A"),
+            Optional.ofNullable(hearingTime).orElse("N/A")
+        );
+    }
+
 }

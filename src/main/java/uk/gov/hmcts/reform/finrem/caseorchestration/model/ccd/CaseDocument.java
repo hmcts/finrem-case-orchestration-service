@@ -42,6 +42,14 @@ public class CaseDocument implements DocumentFileNameProvider {
         this.uploadTimestamp = caseDocuments.getUploadTimestamp();
     }
 
+    public static CaseDocument from(uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document document) {
+        return CaseDocument.builder()
+            .documentBinaryUrl(document.getBinaryUrl())
+            .documentFilename(document.getFileName())
+            .documentUrl(document.getUrl())
+            .build();
+    }
+
     public String getDocumentUrl() {
         return this.documentUrl == null ? "" : this.documentUrl;
     }

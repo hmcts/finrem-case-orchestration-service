@@ -199,6 +199,7 @@ public class DocumentHelper {
 
     /**
      * Return List Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #getVariationOrderDocumentsData(Map)}</p>
      * @param caseData instance of Map
      * @return List Object
@@ -220,6 +221,7 @@ public class DocumentHelper {
 
     /**
      * Return List Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #getConsentOrderOtherDocumentsData(Map)}</p>
      * @param caseData instance of Map
      * @return List Object
@@ -240,6 +242,7 @@ public class DocumentHelper {
 
     /**
      * Return List Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #getFormADocumentsData(FinremCaseData)}</p>
      * @param caseData instance of Map
      * @return List Object
@@ -426,7 +429,8 @@ public class DocumentHelper {
     }
 
     public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getListForHearingWrapper()
+            .getAdditionalHearingDocuments();
         Optional<AdditionalHearingDocumentCollection> documentCollection
             = ofNullable(additionalHearingDocuments)
             .orElse(emptyList())
@@ -441,6 +445,7 @@ public class DocumentHelper {
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, PaperNotificationRecipient)}</p>
      * @param caseDetails the casedetails
      * @param recipient instance of PaperNotificationRecipient
@@ -470,6 +475,7 @@ public class DocumentHelper {
 
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
+     *
      * <p>Please use @{@link #prepareLetterTemplateData(FinremCaseDetails, String, String, Address, boolean)}</p>
      *
      * @param caseDetailsCopy the casedetails

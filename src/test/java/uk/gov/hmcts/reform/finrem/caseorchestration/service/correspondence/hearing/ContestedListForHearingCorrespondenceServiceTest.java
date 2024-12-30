@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
@@ -57,7 +58,11 @@ public class ContestedListForHearingCorrespondenceServiceTest {
     void givenCase_whenSchedulingSecondTime_thenSendAdditionalHearingDocuments() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetailsBefore =
-            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().formC(CaseDocument.builder().build()).build()).build();
+            FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder()
+                .listForHearingWrapper(ListForHearingWrapper.builder()
+                    .formC(CaseDocument.builder().build())
+                    .build())
+                .build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
 
         contestedListForHearingCorrespondenceService.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);

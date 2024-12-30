@@ -30,7 +30,7 @@ public class FormGLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
     private FormGLetterDetailsMapper formGLetterDetailsMapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         setCaseDetails();
     }
 
@@ -83,10 +83,10 @@ public class FormGLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
         caseData.getContactDetailsWrapper().setRespondentLname("Respondent");
         caseData.setDivorceCaseNumber("DD12D12345");
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
-        caseData.setHearingDate(HEARING_DATE);
+        caseData.getListForHearingWrapper().setHearingDate(HEARING_DATE);
         caseData.getContactDetailsWrapper().setSolicitorReference("Test Sol Reference");
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference("Test Resp Sol Ref");
-        caseData.setHearingTime("1pm");
+        caseData.getListForHearingWrapper().setHearingTime("1pm");
 
         caseDetails = FinremCaseDetails.builder().id(12343L).caseType(CaseType.CONTESTED).data(caseData).build();
     }

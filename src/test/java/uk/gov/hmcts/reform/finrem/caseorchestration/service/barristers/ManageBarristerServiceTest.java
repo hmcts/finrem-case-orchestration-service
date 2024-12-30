@@ -401,7 +401,7 @@ class ManageBarristerServiceTest {
                     List.of(DEFAULT_BARRISTER),
                     Collections.emptyList(), AUTH_TOKEN);
         } catch (NoSuchUserException nue) {
-            String expectedMessage = "Could not find the user with email " + APP_BARRISTER_EMAIL_ONE;
+            String expectedMessage = "Could not find barrister with provided email";
             assertEquals(expectedMessage, nue.getMessage());
         }
     }

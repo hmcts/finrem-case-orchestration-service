@@ -59,7 +59,8 @@ public class NotificationRequestMapper {
     private final ObjectMapper objectMapper;
 
     /**
-     * Return NotificationRequest .
+     * Return NotificationRequest.
+     *
      * <p>Please use @{@link #getNotificationRequestForRespondentSolicitor(FinremCaseDetails, Map)}</p>
      *
      * @param caseDetails        instance of CaseDetails
@@ -94,7 +95,8 @@ public class NotificationRequestMapper {
     }
 
     /**
-     * Return NotificationRequest .
+     * Return NotificationRequest.
+     *
      * <p>Please use @{@link #getNotificationRequestForConsentApplicantSolicitor(FinremCaseDetails, Map)}</p>
      *
      * @param caseDetails instance of CaseDetails
@@ -209,8 +211,7 @@ public class NotificationRequestMapper {
     private NotificationRequest buildInterimHearingNotificationRequest(CaseDetails caseDetails,
                                                                        SolicitorCaseDataKeysWrapper caseDataKeysWrapper) {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, caseDataKeysWrapper);
-        log.info("Built notificationRequest for case ID: {} with emailAddress: {}", notificationRequest.getCaseReferenceNumber(),
-            notificationRequest.getNotificationEmail());
+        log.info("Built notificationRequest for case ID: {}", notificationRequest.getCaseReferenceNumber());
         if (caseDataService.isContestedApplication(caseDetails)) {
             String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
             notificationRequest.setSelectedCourt(selectedCourt);
@@ -220,7 +221,8 @@ public class NotificationRequestMapper {
     }
 
     /**
-     * Return NotificationRequest .
+     * Return NotificationRequest.
+     *
      * <p>Please use @{@link #buildInterimHearingNotificationRequest(FinremCaseDetails, SolicitorCaseDataKeysWrapper, Map)}</p>
      *
      * @param caseDetails         instance of CaseDetails
@@ -278,6 +280,7 @@ public class NotificationRequestMapper {
 
     /**
      * No Return.
+     *
      * <p>Please use @{@link #getNotificationCoreData(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
      *
      * @param caseDetails         instance of CaseDetails

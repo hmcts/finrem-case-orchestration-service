@@ -137,7 +137,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getListForHearingWrapper()
+            .getAdditionalHearingDocuments();
         assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
         assertEquals("size of Notice Pack",1, data.getHearingNoticeDocumentPack().size());
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
@@ -198,7 +199,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
-        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getAdditionalHearingDocuments();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = data.getListForHearingWrapper()
+            .getAdditionalHearingDocuments();
         assertEquals("Not null", caseDocument(), additionalHearingDocuments.get(0).getValue().getDocument());
         assertEquals("size of Notice Pack",2, data.getHearingNoticeDocumentPack().size());
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(

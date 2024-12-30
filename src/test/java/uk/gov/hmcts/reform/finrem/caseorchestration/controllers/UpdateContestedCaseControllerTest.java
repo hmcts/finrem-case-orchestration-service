@@ -2,26 +2,35 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,8 +44,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
+@ContextConfiguration(classes = {UpdateContestedCaseControllerTest.TestConfig.class})
 @Import(MiamLegacyExemptionsService.class)
-public class UpdateContestedCaseControllerTest extends BaseControllerTest {
+class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
     private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_1 = "$.data.divorceUploadEvidence1";
@@ -48,8 +58,6 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private JsonNode requestContent;
 
     @MockBean
@@ -59,7 +67,15 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
-    @Before
+    @Configuration
+    static class TestConfig {
+        @Bean
+        public FinremCaseDetailsMapper finremCaseDetailsMapper(ObjectMapper objectMapper) {
+            return new FinremCaseDetailsMapper(objectMapper); // Provide a real FinremCaseDetailsMapper
+        }
+    }
+
+    @BeforeEach
     public void setUp() {
         super.setUp();
         try {
@@ -70,7 +86,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldDeleteNoDecreeAbsoluteWhenDecreeNisiSelectedBySolicitor() throws Exception {
+    void shouldDeleteNoDecreeAbsoluteWhenDecreeNisiSelectedBySolicitor() throws Exception {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(caseDocument());
 
@@ -94,7 +110,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
+    void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -110,7 +126,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested() throws Exception {
+    void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-petition-issued.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -128,7 +144,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
+    void shouldRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -143,7 +159,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdatePropertyAdjustmentOrderDecisionDetailForContested() throws Exception {
+    void shouldUpdatePropertyAdjustmentOrderDecisionDetailForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -158,7 +174,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveAdditionalPropertyDetailsForContested() throws Exception {
+    void shouldRemoveAdditionalPropertyDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-additional-property-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -171,7 +187,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
+    void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-periodic-payment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -186,7 +202,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForSchedule1Contested() throws Exception {
+    void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForSchedule1Contested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-periodic-payment-order-details-schedule1.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -201,7 +217,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() throws Exception {
+    void shouldUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-periodic-payment-details-for-no-payment-for-children.json").toURI()));
@@ -216,7 +232,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() throws Exception {
+    void shouldUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-periodic-payment-details-with-benefits-for-children.json").toURI()));
@@ -230,7 +246,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() throws Exception {
+    void shouldRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -249,7 +265,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() throws Exception {
+    void shouldRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -264,7 +280,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdateFastTrackDetailsForContested() throws Exception {
+    void shouldUpdateFastTrackDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -277,7 +293,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotUpdateFastTrackDetailsForContested() throws Exception {
+    void shouldNotUpdateFastTrackDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -290,7 +306,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdateComplexityDetailsForContested() throws Exception {
+    void shouldUpdateComplexityDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-complexity-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -309,7 +325,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveAdditionalReasonForComplexityForContested() throws Exception {
+    void shouldRemoveAdditionalReasonForComplexityForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-other-reason-for-complexity.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -322,7 +338,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveReasonForLocalCourtForContested() throws Exception {
+    void shouldRemoveReasonForLocalCourtForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -335,7 +351,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() throws Exception {
+    void shouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-exceptions-when-applicant-attended-miam.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -354,7 +370,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldOnlyRemoveLegacyMiamCheckListForContested() throws Exception {
+    void shouldOnlyRemoveLegacyMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/do-not-remove-checklists.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -373,7 +389,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveMiamCertificationDetailsWhenApplicantIsNotAttendedMiamForContested() throws Exception {
+    void shouldRemoveMiamCertificationDetailsWhenApplicantIsNotAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-miam-certification-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -391,7 +407,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldCleanupMiamCertificationWhenApplicantAttendedMiamForContested() throws Exception {
+    void shouldCleanupMiamCertificationWhenApplicantAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
@@ -410,7 +426,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldCleanupAdditionalDocumentsForContested() throws Exception {
+    void shouldCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/cleanup-addtional-documents.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -424,7 +440,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
+    void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -438,7 +454,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemoveAllocatedToBeHeardAtHighCourtJudgeLevelText() throws Exception {
+    void shouldRemoveAllocatedToBeHeardAtHighCourtJudgeLevelText() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
@@ -448,6 +464,28 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+    }
+
+    @Test
+    void testPopulateInRefugeTabsCalled() throws Exception {
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            requestContent = objectMapper.readTree(new File(getClass()
+                    .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+            mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                            .content(requestContent.toString())
+                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+
+            // Check that methods to  is called by the controller
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(any()), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(any()), times(1));
+        }
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

@@ -135,9 +135,8 @@ public class FinremCaseDataTest {
     }
 
     private File getFile(String name, String fileNameWithPath) {
-        File configFile = localMode ? new File(classLoader.getResource(name).getFile())
+        return localMode ? new File(classLoader.getResource(name).getFile())
             : new File(fileNameWithPath);
-        return configFile;
     }
 
     private List<Field> getAllFields(Class<?> clazz) {

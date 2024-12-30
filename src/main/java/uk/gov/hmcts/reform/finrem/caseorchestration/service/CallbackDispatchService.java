@@ -56,6 +56,10 @@ public class CallbackDispatchService {
                 callbackResponse.getWarnings().addAll(warnings);
                 callbackResponse.setState(handlerCallbackResponse.getState());
 
+                // Only for 'submitted' callbacks
+                callbackResponse.setConfirmationHeader(handlerCallbackResponse.getConfirmationHeader());
+                callbackResponse.setConfirmationBody(handlerCallbackResponse.getConfirmationBody());
+
                 handled = true;
             }
         }

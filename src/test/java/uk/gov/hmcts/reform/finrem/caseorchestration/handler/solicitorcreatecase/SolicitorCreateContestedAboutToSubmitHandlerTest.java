@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -26,24 +27,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolicitorCreateContestedAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private SolicitorCreateContestedAboutToSubmitHandler handler;
@@ -63,8 +66,8 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    public void init() {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
@@ -75,21 +78,12 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(false));
+    void testHandlerCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE);
     }
 
     @Test
-    public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
-            is(true));
-    }
-
-    @Test
-    public void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
+    void givenContestedCase_whenHandledAndUserIsAdminAndCaseFileViewEnabled_thenReturnExpectedResponseCaseData() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         finremCallbackRequest.getCaseDetails().getData().getUploadAdditionalDocument().forEach(ad ->
@@ -107,11 +101,13 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         expectedAdminResponseCaseData(responseCaseData);
 
+
+
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
     @Test
-    public void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
+    void givenContestedCase_whenHandledAndUserIsNotAdminAndCaseFileViewDisabled_thenReturnExpectedResponseCaseData() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
@@ -130,7 +126,7 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
+    void givenCase_whenMandatoryDataValidationFails_thenReturnsErrors() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         when(createCaseMandatoryDataValidator.validate(callbackRequest.getCaseDetails().getData()))
             .thenReturn(List.of("Validation failed"));
@@ -139,6 +135,34 @@ public class SolicitorCreateContestedAboutToSubmitHandlerTest {
         Assertions.assertThat(response.getErrors()).hasSize(1);
         Assertions.assertThat(response.getErrors().get(0)).isEqualTo("Validation failed");
         Assertions.assertThat(response.getData()).isNotNull();
+    }
+
+    @Test
+    void testUpdateRespondentInRefugeTabCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateRespondentInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+        }
+    }
+
+    @Test
+    void testUpdateApplicantInRefugeTabCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateApplicantInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
+        }
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {

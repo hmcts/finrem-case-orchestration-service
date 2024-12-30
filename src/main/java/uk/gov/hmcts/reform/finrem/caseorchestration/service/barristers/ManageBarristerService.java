@@ -189,7 +189,7 @@ public class ManageBarristerService {
         organisationService.findUserByEmail(userToBeAdded.getEmail(), getAuthTokenToUse(caseDetails, authToken))
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
-                throwNoSuchUserException(userToBeAdded)
+                throwNoSuchUserException()
             );
     }
 
@@ -198,7 +198,7 @@ public class ManageBarristerService {
         organisationService.findUserByEmail(userToBeRemoved.getEmail(), getAuthTokenToUse(caseDetails, authToken))
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.removeCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
-                throwNoSuchUserException(userToBeRemoved)
+                throwNoSuchUserException()
             );
     }
 
@@ -318,10 +318,9 @@ public class ManageBarristerService {
             .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
     }
 
-    private Runnable throwNoSuchUserException(Barrister userToBeAdded) {
+    private Runnable throwNoSuchUserException() {
         return () -> {
-            throw new NoSuchUserException(String.format("Could not find the user with email %s",
-                userToBeAdded.getEmail()));
+            throw new NoSuchUserException("Could not find barrister with provided email");
         };
     }
 }
