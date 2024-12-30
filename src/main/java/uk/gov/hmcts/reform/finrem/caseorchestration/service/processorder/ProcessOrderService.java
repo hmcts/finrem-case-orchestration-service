@@ -35,6 +35,18 @@ public class ProcessOrderService {
         return ofNullable(t).orElse(List.of());
     }
 
+    /**
+     * Populates the `unprocessedApprovedDocuments` collection in the `DraftOrdersWrapper`
+     * with approved draft orders and PSA documents that have not been processed yet.
+     *
+     * <p>The method collects documents marked as approved by the judge from the
+     * `draftOrdersReviewCollection` within the `DraftOrdersWrapper`. It then converts
+     * these documents into `DirectionOrderCollection` objects and sets them in the
+     * `unprocessedApprovedDocuments` field.
+     *
+     * @param caseData the case data containing the draft orders and PSA documents
+     *                 to process.
+     */
     public void populateUnprocessedApprovedDocuments(FinremCaseData caseData) {
         DraftOrdersWrapper draftOrdersWrapper = caseData.getDraftOrdersWrapper();
 
