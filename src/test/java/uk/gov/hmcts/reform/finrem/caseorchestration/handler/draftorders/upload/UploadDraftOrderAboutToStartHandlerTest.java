@@ -170,8 +170,8 @@ class UploadDraftOrderAboutToStartHandlerTest {
         return Stream.of(
             Arguments.of(CaseRole.APP_SOLICITOR, true),
             Arguments.of(CaseRole.RESP_SOLICITOR, true),
-            Arguments.of(CaseRole.APP_SOLICITOR, true),
-            Arguments.of(CaseRole.RESP_SOLICITOR, true),
+            Arguments.of(CaseRole.APP_BARRISTER, true),
+            Arguments.of(CaseRole.RESP_BARRISTER, true),
             Arguments.of(CaseRole.INTVR_BARRISTER_1, true),
             Arguments.of(CaseRole.INTVR_BARRISTER_2, true),
             Arguments.of(CaseRole.INTVR_BARRISTER_3, true),
