@@ -149,8 +149,7 @@ class ProcessOrderServiceTest {
         // Assert the expected result
         if (testCase == 0) {
             assertTrue(result, "Expected all documents to have .doc or .docx extensions");
-        }
-        else {
+        } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
         }
     }
