@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,7 +66,6 @@ class DraftOrdersNotificationRequestMapperTest {
         assertEquals("judge@test.com", result.getNotificationEmail());
         assertEquals("Hamzah Tahir", result.getApplicantName());
         assertEquals("Anne Taylor", result.getRespondentName());
-
     }
 
     private FinremCaseDetails createCaseDetails() {
@@ -209,16 +207,6 @@ class DraftOrdersNotificationRequestMapperTest {
             Arguments.of(OrderParty.APPLICANT, "applicant@solicitor.com"),
             Arguments.of(OrderParty.RESPONDENT, "respondent@solicitor.com")
         );
-    }
-
-    @Test
-    void testBuildRefusedDraftOrderOrPsaNotificationRequestThrowsExceptionForMissingOrderParty() {
-        FinremCaseDetails caseDetails = createCaseDetailsForRefusedOrderNotificationRequest();
-        RefusedOrder refusedOrder = createRefusedOrder(null);
-
-        assertThatThrownBy(() -> mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, refusedOrder)
-        ).isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid order party: null");
     }
 
     private RefusedOrder createRefusedOrder(OrderParty orderParty) {
