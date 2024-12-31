@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -53,7 +55,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         FinremCaseData caseData = resp.getData();
 
         // to clear the temp fields
-        markOrderStatusToProcessed(caseData);
+        markOrderStatusToProcessedAndHandleNewDocuments(caseData);
         clearTemporaryFields(caseData);
 
         return resp;
@@ -64,7 +66,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
             .equals(doc2.getDocumentUrl());
     }
 
-    private void markOrderStatusToProcessed(FinremCaseData caseData) {
+    private void markOrderStatusToProcessedAndHandleNewDocuments(FinremCaseData caseData) {
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
         List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
@@ -77,7 +79,15 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
 
         caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(d -> {
             if (d.getValue().getOriginalDocument() == null) {
-                throw new IllegalStateException("original document must be supplied in about-to-start event.");
+                if (!(caseData.getUploadHearingOrder() instanceof ArrayList<DirectionOrderCollection>)) {
+                    caseData.setUploadHearingOrder(new ArrayList<>(ofNullable(caseData.getUploadHearingOrder()).orElse(List.of())));
+                }
+                caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
+                    .value(DirectionOrder.builder()
+                        .uploadDraftDocument(d.getValue().getUploadDraftDocument())
+                        .build())
+                    .build());
+                return;
             }
             // mark draft order
             collector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
