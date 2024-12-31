@@ -259,6 +259,8 @@ class ProcessOrderServiceTest {
             );
         } else {
             if (scenario == 1) {
+                // It is a new pdf document is uploaded and added to the unprocessed approved order collection
+                // It isn't modifying the existing document.
                 when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
                     List.of(
                         createDirectionOrder("http://example.xyz/document.pdf")
@@ -277,7 +279,7 @@ class ProcessOrderServiceTest {
         boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
 
         // Assert the expected result
-        if (scenario == 0) {
+        if (scenario == 0 || scenario == 1) {
             assertTrue(result, "Expected all documents to have .doc or .docx extensions");
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");

@@ -148,12 +148,10 @@ public class ProcessOrderService {
     private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> beforeList,
                                           List<DirectionOrderCollection> afterList,
                                           Function<DirectionOrderCollection, String> urlExtractor) {
-        Set<String> beforeUrls = nullSafeList(beforeList).stream()
-            .map(urlExtractor)
-            .collect(Collectors.toSet());
+        Set<String> beforeUrls = nullSafeList(beforeList).stream().map(urlExtractor).collect(Collectors.toSet());
 
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
-                .filter(doc -> !beforeUrls.contains(doc.getValue().getOriginalDocument().getDocumentUrl())).toList(), List.of("pdf"));
+                .filter(doc -> !beforeUrls.contains(doc.getValue().getUploadDraftDocument().getDocumentUrl())).toList(), List.of("pdf"));
     }
 
     private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {

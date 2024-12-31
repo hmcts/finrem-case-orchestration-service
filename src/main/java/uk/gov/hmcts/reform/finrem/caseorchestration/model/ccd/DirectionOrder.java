@@ -26,12 +26,4 @@ public class DirectionOrder implements HasCaseDocument {
     YesOrNo isOrderStamped;
     @JsonProperty("originalDocument")
     CaseDocument originalDocument;
-
-    public CaseDocument getOriginalDocument() {
-        if (originalDocument == null) {
-            return uploadDraftDocument;
-        } else {
-            return originalDocument;
-        }
-    }
 }
