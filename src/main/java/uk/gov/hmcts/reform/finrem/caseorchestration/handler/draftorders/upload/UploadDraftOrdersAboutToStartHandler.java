@@ -113,8 +113,8 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
     }
 
     private String getConsentApplicationGuidanceText(String caseId, String authToken) {
-        boolean showConsentOrderLink = isShowConsentOrderEventLink(caseId, authToken);
-        return showConsentOrderLink
+        boolean showConsentOrderEventLink = isShowConsentOrderEventLink(caseId, authToken);
+        return showConsentOrderEventLink
             ? "Use the '<a href=\"/cases/case-details/${[CASE_REFERENCE]}/trigger/FR_consentOrder/FR_consentOrder1\">"
             + "consent order</a>' event if you need to upload a consent order to finalise the contested proceedings."
             : "Use the 'consent order' event if you need to upload a consent order to finalise the contested proceedings.";
