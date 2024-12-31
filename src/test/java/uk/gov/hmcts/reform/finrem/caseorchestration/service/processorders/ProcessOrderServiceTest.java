@@ -112,14 +112,14 @@ class ProcessOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2})
-    void testAreAllModifyingUnprocessedOrdersWordDocuments(int testCase) {
+    void testAreAllModifyingUnprocessedOrdersWordDocuments(int scenario) {
         // Mocking the unprocessed approved documents
         DraftOrdersWrapper draftOrdersWrapper = mock(DraftOrdersWrapper.class);
         FinremCaseData caseData = mock(FinremCaseData.class);
         when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
 
         // Conditionally set up the mock data based on expectedResult
-        if (testCase == 0) {
+        if (scenario == 0) {
             when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
                 List.of(
                     createDirectionOrder("http://example.xyz/document.docx"),
@@ -128,7 +128,7 @@ class ProcessOrderServiceTest {
                 )
             );
         } else {
-            if (testCase == 1) {
+            if (scenario == 1) {
                 when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
                     List.of(
                         createDirectionOrder("http://example.xyz/document.pdf")
@@ -147,7 +147,7 @@ class ProcessOrderServiceTest {
         boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
 
         // Assert the expected result
-        if (testCase == 0) {
+        if (scenario == 0) {
             assertTrue(result, "Expected all documents to have .doc or .docx extensions");
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
