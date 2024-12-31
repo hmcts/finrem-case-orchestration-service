@@ -4,6 +4,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -17,6 +18,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessOrderServiceTest {
@@ -105,6 +110,51 @@ class ProcessOrderServiceTest {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void testAreAllModifyingUnprocessedOrdersWordDocuments(int testCase) {
+        // Mocking the unprocessed approved documents
+        DraftOrdersWrapper draftOrdersWrapper = mock(DraftOrdersWrapper.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
+
+        // Conditionally set up the mock data based on expectedResult
+        if (testCase == 0) {
+            when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
+                List.of(
+                    createDirectionOrder("http://example.xyz/document.docx"),
+                    createDirectionOrder("http://example.xyz/document.docx", true),
+                    createDirectionOrder("http://example.xyz/document.docx", "http://example.xyz/document.doc")
+                )
+            );
+        } else {
+            if (testCase == 1) {
+                when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
+                    List.of(
+                        createDirectionOrder("http://example.xyz/document.pdf")
+                    )
+                );
+            } else {
+                when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
+                    List.of(
+                        createDirectionOrder("http://example.xyz/documentX.docx", "http://example.xyz/document.txt")
+                    )
+                );
+            }
+        }
+
+        // Call the method to test
+        boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
+
+        // Assert the expected result
+        if (testCase == 0) {
+            assertTrue(result, "Expected all documents to have .doc or .docx extensions");
+        }
+        else {
+            assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
+        }
+    }
+
     private static String extractFileName(String url) {
         if (url == null || url.isEmpty()) {
             return null; // or throw an exception if you prefer
@@ -129,6 +179,21 @@ class ProcessOrderServiceTest {
                 .uploadDraftDocument(CaseDocument.builder().documentUrl(documentUrl).documentFilename(extractFileName(documentUrl)).build())
                 .originalDocument(markOriginalDocument
                     ? CaseDocument.builder().documentUrl(documentUrl).documentFilename(extractFileName(documentUrl)).build() : null)
+                .build())
+            .build();
+    }
+
+    private static DirectionOrderCollection createDirectionOrder(String originalDocumentUrl, String newDocumentUrl) {
+        return DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(CaseDocument.builder()
+                    .documentUrl(originalDocumentUrl)
+                    .documentFilename(extractFileName(newDocumentUrl))
+                    .build())
+                .originalDocument(CaseDocument.builder()
+                    .documentUrl(originalDocumentUrl)
+                    .documentFilename(extractFileName(originalDocumentUrl))
+                    .build())
                 .build())
             .build();
     }
