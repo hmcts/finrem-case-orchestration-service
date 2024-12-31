@@ -77,45 +77,49 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(d -> {
-            if (d.getValue().getOriginalDocument() == null) {
-                if (!(caseData.getUploadHearingOrder() instanceof ArrayList<DirectionOrderCollection>)) {
-                    caseData.setUploadHearingOrder(new ArrayList<>(ofNullable(caseData.getUploadHearingOrder()).orElse(List.of())));
-                }
-                caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
-                    .value(DirectionOrder.builder()
-                        .uploadDraftDocument(d.getValue().getUploadDraftDocument())
-                        .build())
-                    .build());
+        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder -> {
+            if (unprocessedApprovedOrder.getValue().getOriginalDocument() == null) {
+                insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
                 return;
             }
             // mark draft order
             collector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
                     // replace the document by the new uploaded approved document
-                    toBeUpdated.getValue().setDraftOrderDocument(d.getValue().getUploadDraftDocument());
+                    toBeUpdated.getValue().setDraftOrderDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
                 });
             // mark PSA
             psaCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
                     // replace the document by the new uploaded approved document
-                    toBeUpdated.getValue().setPsaDocument(d.getValue().getUploadDraftDocument());
+                    toBeUpdated.getValue().setPsaDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
                 });
             // mark AgreedDraftOrder
             agreedOrderCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                d.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
                     // replace the document by the new uploaded approved document
                     if (toBeUpdated.getValue().getPensionSharingAnnex() != null) {
-                        toBeUpdated.getValue().setPensionSharingAnnex(d.getValue().getUploadDraftDocument());
+                        toBeUpdated.getValue().setPensionSharingAnnex(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
                     } else if (toBeUpdated.getValue().getDraftOrder() != null) {
-                        toBeUpdated.getValue().setDraftOrder(d.getValue().getUploadDraftDocument());
+                        toBeUpdated.getValue().setDraftOrder(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
                     }
                 });
             }
         );
+    }
+
+    private void insertNewDocumentToUploadHearingOrder(FinremCaseData caseData, DirectionOrderCollection unprocessedApprovedOrder) {
+        if (!(caseData.getUploadHearingOrder() instanceof ArrayList<DirectionOrderCollection>)) {
+            caseData.setUploadHearingOrder(new ArrayList<>(ofNullable(caseData.getUploadHearingOrder()).orElse(List.of())));
+        }
+        caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument())
+                .build())
+            .build());
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
