@@ -112,6 +112,47 @@ class ProcessOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2})
+    void testAreAllLegacyApprovedOrdersPdf(int scenario) {
+        // Mocking the unprocessed approved documents
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        // Conditionally set up the mock data based on expectedResult
+        if (scenario == 0) {
+            when(caseData.getUploadHearingOrder()).thenReturn(
+                List.of(
+                    createDirectionOrder("http://example.xyz/document.pdf"),
+                    createDirectionOrder("http://example.xyz/document.pdf", "http://example.xyz/document_new.pdf")
+                )
+            );
+        } else {
+            if (scenario == 1) {
+                when(caseData.getUploadHearingOrder()).thenReturn(
+                    List.of(
+                        createDirectionOrder("http://example.xyz/document.docx")
+                    )
+                );
+            } else {
+                when(caseData.getUploadHearingOrder()).thenReturn(
+                    List.of(
+                        createDirectionOrder("http://example.xyz/documentX.pdf", "http://example.xyz/document.doc")
+                    )
+                );
+            }
+        }
+
+        // Call the method to test
+        boolean result = underTest.areAllLegacyApprovedOrdersPdf(caseData);
+
+        // Assert the expected result
+        if (scenario == 0) {
+            assertTrue(result, "Expected all documents to have .pdf extensions");
+        } else {
+            assertFalse(result, "Expected not all documents to have .pdf extensions, but the method returned true.");
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
     void testAreAllModifyingUnprocessedOrdersWordDocuments(int scenario) {
         // Mocking the unprocessed approved documents
         DraftOrdersWrapper draftOrdersWrapper = mock(DraftOrdersWrapper.class);
