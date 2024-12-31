@@ -16,9 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -94,19 +92,9 @@ public class ProcessOrderService {
      * @return true if all newly uploaded orders are PDF documents; false otherwise.
      */
     public boolean areAllNewOrdersPdfFiles(FinremCaseData caseDataBefore, FinremCaseData caseData) {
-        return areAllNewDocumentsPdf(caseDataBefore.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
-                caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments(),
-                doc -> ofNullable(doc)
-                    .map(DirectionOrderCollection::getValue)
-                    .map(DirectionOrder::getOriginalDocument)
-                    .map(CaseDocument::getDocumentUrl)
-                    .orElse(""))
-            && areAllNewDocumentsPdf(caseDataBefore.getUploadHearingOrder(), caseData.getUploadHearingOrder(),
-                doc -> ofNullable(doc)
-                    .map(DirectionOrderCollection::getValue)
-                    .map(DirectionOrder::getUploadDraftDocument)
-                    .map(CaseDocument::getDocumentUrl)
-                    .orElse(""));
+        return areAllNewDocumentsPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            && areAllNewDocumentsPdf(caseData.getUploadHearingOrder()
+        );
     }
 
     /**
@@ -145,13 +133,10 @@ public class ProcessOrderService {
                 .matches(String.format("(?i).*\\.(%s)$", String.join("|", fileExtensions))));
     }
 
-    private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> beforeList,
-                                          List<DirectionOrderCollection> afterList,
-                                          Function<DirectionOrderCollection, String> urlExtractor) {
-        Set<String> beforeUrls = nullSafeList(beforeList).stream().map(urlExtractor).collect(Collectors.toSet());
+    private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> afterList) {
 
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
-                .filter(doc -> !beforeUrls.contains(doc.getValue().getUploadDraftDocument().getDocumentUrl())).toList(), List.of("pdf"));
+                .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf"));
     }
 
     private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {
