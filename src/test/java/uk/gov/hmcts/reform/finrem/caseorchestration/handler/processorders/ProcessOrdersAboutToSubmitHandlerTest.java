@@ -2,11 +2,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -26,7 +30,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDoc
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -60,6 +66,40 @@ class ProcessOrdersAboutToSubmitHandlerTest {
     @Test
     void testCanHandle() {
         assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, PROCESS_ORDER);
+    }
+
+    private static Stream<Arguments> provideInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrdersTestCase() {
+        return Stream.of(
+            Arguments.of(List.of()),
+            Arguments.of(List.of(
+                DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
+            ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrdersTestCase")
+    void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrders(List<DirectionOrderCollection> uploadHearingOrder) {
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+            .uploadHearingOrder(uploadHearingOrder)
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
+                ))
+                .build())
+            .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(res.getData().getUploadHearingOrder()).hasSize(uploadHearingOrder.size() + 1);
+        assertThat(res.getData().getUploadHearingOrder().get(uploadHearingOrder.size())).isEqualTo(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
+        );
     }
 
     @Test
