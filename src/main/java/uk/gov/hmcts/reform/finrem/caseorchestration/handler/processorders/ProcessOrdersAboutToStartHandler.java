@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -56,8 +57,8 @@ public class ProcessOrdersAboutToStartHandler extends FinremCallbackHandler {
     }
 
     private void populateMetaDataFields(FinremCaseData caseData) {
-        caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!ofNullable(caseData.getUploadHearingOrder())
-            .orElse(List.of()).isEmpty()));
+        caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(YesOrNo.forValue(!CollectionUtils
+            .isEmpty(caseData.getUploadHearingOrder())));
         caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(YesOrNo.forValue(!ofNullable(caseData.getDraftOrdersWrapper()
             .getUnprocessedApprovedDocuments()).orElse(List.of()).isEmpty()));
     }
