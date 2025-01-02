@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -29,11 +29,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.DraftOrdersCategoriser;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,18 +46,14 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final DraftOrdersCategoriser draftOrdersCategoriser;
 
-    private final IdamAuthService idamAuthService;
-
     private final CaseAssignedRoleService caseAssignedRoleService;
 
     private final DraftOrderService draftOrderService;
 
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
-                                                 IdamAuthService idamAuthService, CaseAssignedRoleService caseAssignedRoleService,
-                                                 DraftOrderService draftOrderService) {
+                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
-        this.idamAuthService = idamAuthService;
         this.caseAssignedRoleService = caseAssignedRoleService;
         this.draftOrderService = draftOrderService;
     }
@@ -244,11 +237,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     }
 
     private <T extends HasSubmittedInfo> T applySubmittedInfo(String userAuthorisation, T submittedInfo) {
-        UserInfo userInfo = idamAuthService.getUserInfo(userAuthorisation);
-        String submittedByName = userInfo.getName();
-        submittedInfo.setSubmittedBy(submittedByName);
-        submittedInfo.setSubmittedDate(LocalDateTime.now());
-        return submittedInfo;
+        return draftOrderService.applySubmittedInfo(userAuthorisation, submittedInfo);
     }
 
     private boolean isOrdersSelected(List<String> uploadOrdersOrPsas) {

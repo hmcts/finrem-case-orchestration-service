@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
@@ -29,11 +30,12 @@ public class ApproveOrderService {
      * @param draftOrdersWrapper the wrapper object containing draft orders and PSA document collections to be updated
      * @param userAuthorisation  the authorisation token of the user, used to fetch the approving judge's details
      */
-    public void populateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
+    public void populateJudgeDecisions(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
         for (int i = 1; i <= 5; i++) {
             JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
             ofNullable(judgeApproval).map(JudgeApproval::getDocument)
-                .ifPresent(targetDoc -> judgeApprovalResolver.populateJudgeDecision(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation));
+                .ifPresent(targetDoc -> judgeApprovalResolver.populateJudgeDecision(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval,
+                    userAuthorisation));
         }
     }
 
