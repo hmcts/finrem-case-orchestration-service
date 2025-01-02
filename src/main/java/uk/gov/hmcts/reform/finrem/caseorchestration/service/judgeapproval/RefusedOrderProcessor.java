@@ -129,5 +129,4 @@ public class RefusedOrderProcessor {
                 REFUSED::equals);
         draftOrdersWrapper.setAgreedDraftOrderCollection(partitioned.get(false));
     }
-
 }
