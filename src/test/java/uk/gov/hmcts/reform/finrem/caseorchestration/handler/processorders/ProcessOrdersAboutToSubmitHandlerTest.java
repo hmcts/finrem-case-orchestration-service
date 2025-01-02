@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrder
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,7 +70,7 @@ class ProcessOrdersAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrders(boolean nullExistingUploadHearingOrder) {
-        List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : List.of();
+        List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : new ArrayList<>();
         DirectionOrderCollection expectedNewDirectionOrderCollection = null;
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
@@ -94,9 +95,9 @@ class ProcessOrdersAboutToSubmitHandlerTest {
 
     @Test
     void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrdersWithExistingUploadHearingOrder() {
-        List<DirectionOrderCollection> uploadHearingOrder = List.of(
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
             DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
-        );
+        ));
         DirectionOrderCollection expectedNewDirectionOrderCollection = null;
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()

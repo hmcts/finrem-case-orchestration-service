@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -118,8 +117,8 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
     }
 
     private void insertNewDocumentToUploadHearingOrder(FinremCaseData caseData, DirectionOrderCollection unprocessedApprovedOrder) {
-        if (!(caseData.getUploadHearingOrder() instanceof ArrayList<DirectionOrderCollection>)) {
-            caseData.setUploadHearingOrder(new ArrayList<>(ofNullable(caseData.getUploadHearingOrder()).orElse(List.of())));
+        if (caseData.getUploadHearingOrder() == null) {
+            caseData.setUploadHearingOrder(new ArrayList<>());
         }
         caseData.getUploadHearingOrder().add(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder()
