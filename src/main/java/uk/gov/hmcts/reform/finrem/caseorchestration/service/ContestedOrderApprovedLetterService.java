@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -59,7 +59,7 @@ public class ContestedOrderApprovedLetterService {
 
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
-        caseData.put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
+        caseData.put("Court", CourtHelper.getSelectedCourt(caseDetails));
         caseData.put("JudgeDetails",
             StringUtils.joinWith(" ",
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_TYPE),

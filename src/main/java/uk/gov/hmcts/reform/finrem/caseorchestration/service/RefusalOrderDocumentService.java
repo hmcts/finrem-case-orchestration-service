@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
@@ -161,7 +161,7 @@ public class RefusalOrderDocumentService {
         } else {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("CourtName", "SITTING AT the Family Court at the "
-                + ContestedCourtHelper.getSelectedCourt(caseDetails));
+                + CourtHelper.getSelectedCourt(caseDetails));
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         }
         if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
