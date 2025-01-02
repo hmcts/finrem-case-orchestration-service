@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
@@ -66,8 +67,12 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         return resp;
     }
 
+    private List<DirectionOrderCollection> nullSafeUnprocessedApprovedDocuments(FinremCaseData caseData) {
+        return ofNullable(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).orElse(List.of());
+    }
+
     void handleNewDocument(FinremCaseData caseData) {
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder -> {
+        nullSafeUnprocessedApprovedDocuments(caseData).forEach(unprocessedApprovedOrder -> {
             if (isNewDocument(unprocessedApprovedOrder)) {
                 insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
             }
@@ -79,7 +84,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
 
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().stream().filter(not(this::isNewDocument))
+        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
             .forEach(unprocessedApprovedOrder ->
                 collector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
@@ -93,7 +98,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         hasApprovableCollectionReader.filterAndCollectPsaDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             psaCollector, APPROVED_BY_JUDGE::equals);
 
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().stream().filter(not(this::isNewDocument))
+        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
             .forEach(unprocessedApprovedOrder ->
                 psaCollector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
@@ -107,7 +112,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().stream().filter(not(this::isNewDocument))
+        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
             .forEach(unprocessedApprovedOrder ->
                 agreedOrderCollector.stream().filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
                     .forEach(toBeUpdated -> {
