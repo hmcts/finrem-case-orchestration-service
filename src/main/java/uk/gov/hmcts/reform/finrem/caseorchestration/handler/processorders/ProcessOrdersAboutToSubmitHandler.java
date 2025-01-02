@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
@@ -54,51 +55,57 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = super.handle(callbackRequest, userAuthorisation);
         FinremCaseData caseData = resp.getData();
 
-        // to clear the temp fields
-        markOrderStatusToProcessedAndHandleNewDocuments(caseData);
+        handleDraftOrderDocuments(caseData);
+        handlePsaDocuments(caseData);
+        handleAgreedDraftOrdersCollection(caseData);
+        handleNewDocument(caseData);
         clearTemporaryFields(caseData);
 
         return resp;
     }
 
-    private boolean doesDocumentMatch(CaseDocument doc1, CaseDocument doc2) {
-        return ofNullable(doc1).orElse(CaseDocument.builder().documentUrl("").build()).getDocumentUrl()
-            .equals(doc2.getDocumentUrl());
+    private void handleNewDocument(FinremCaseData caseData) {
+        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder -> {
+            if (isNewDocument(unprocessedApprovedOrder)) {
+                insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
+            }
+        });
     }
 
-    private void markOrderStatusToProcessedAndHandleNewDocuments(FinremCaseData caseData) {
+    private void handleDraftOrderDocuments(FinremCaseData caseData) {
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
-        List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
+
+        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder ->
+            collector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
+                toBeUpdated.getValue().setOrderStatus(PROCESSED);
+                toBeUpdated.getValue().setDraftOrderDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+            })
+        );
+    }
+
+    private void handlePsaDocuments(FinremCaseData caseData) {
+        List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectPsaDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             psaCollector, APPROVED_BY_JUDGE::equals);
+
+        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder ->
+            psaCollector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
+                toBeUpdated.getValue().setOrderStatus(PROCESSED);
+                toBeUpdated.getValue().setPsaDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+            })
+        );
+    }
+
+    private void handleAgreedDraftOrdersCollection(FinremCaseData caseData) {
         List<AgreedDraftOrderCollection> agreedOrderCollector = new ArrayList<>();
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
-        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder -> {
-            if (unprocessedApprovedOrder.getValue().getOriginalDocument() == null) {
-                insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
-                return;
-            }
-            // mark draft order
-            collector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
-                    toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                    // replace the document by the new uploaded approved document
-                    toBeUpdated.getValue().setDraftOrderDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
-                });
-            // mark PSA
-            psaCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
-                    toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                    // replace the document by the new uploaded approved document
-                    toBeUpdated.getValue().setPsaDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
-                });
-            // mark AgreedDraftOrder
-            agreedOrderCollector.stream().filter(draftOrder -> doesDocumentMatch(draftOrder.getValue().getTargetDocument(),
-                unprocessedApprovedOrder.getValue().getOriginalDocument())).forEach(toBeUpdated -> {
+        caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder ->
+            agreedOrderCollector.stream().filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
+                .forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
                     // replace the document by the new uploaded approved document
                     if (toBeUpdated.getValue().getPensionSharingAnnex() != null) {
@@ -106,8 +113,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
                     } else if (toBeUpdated.getValue().getDraftOrder() != null) {
                         toBeUpdated.getValue().setDraftOrder(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
                     }
-                });
-            }
+                })
         );
     }
 
@@ -134,5 +140,17 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
     private void clearMetaDataFields(FinremCaseData caseData) {
         caseData.getDraftOrdersWrapper().setIsLegacyApprovedOrderPresent(null);
         caseData.getDraftOrdersWrapper().setIsUnprocessedApprovedDocumentPresent(null);
+    }
+
+    private boolean doesDocumentMatch(HasApprovable hasApprovable, DirectionOrderCollection unprocessedApprovedOrder) {
+        return doesDocumentMatch(hasApprovable.getValue().getTargetDocument(), unprocessedApprovedOrder.getValue().getOriginalDocument());
+    }
+
+    private boolean doesDocumentMatch(CaseDocument doc1, CaseDocument doc2) {
+        return doc1.getDocumentUrl().equals(doc2.getDocumentUrl());
+    }
+
+    private boolean isNewDocument(DirectionOrderCollection unprocessedApprovedOrder) {
+        return unprocessedApprovedOrder.getValue().getOriginalDocument() == null;
     }
 }
