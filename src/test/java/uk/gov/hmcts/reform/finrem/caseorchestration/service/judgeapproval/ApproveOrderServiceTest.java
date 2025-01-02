@@ -43,7 +43,7 @@ class ApproveOrderServiceTest {
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
             .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
                 eq(AUTH_TOKEN));
-
+      
         assertNotNull(draftOrdersWrapper.getApproveOrdersConfirmationBody());
     }
 

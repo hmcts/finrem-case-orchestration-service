@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -72,11 +73,13 @@ class ApproveDraftOrdersSubmittedHandlerTest {
         // Assert
         assertThat(response.getConfirmationHeader()).isEqualTo("# Draft orders reviewed");
         assertThat(response.getConfirmationBody()).isEqualTo(draftOrdersWrapper.getApproveOrdersConfirmationBody());
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        // Assert
         verify(notificationService, times(expectedInvocationCount)).sendRefusedDraftOrderOrPsa(expectedNotificationRequest);
         verify(notificationRequestMapper, times(expectedInvocationCount)).buildRefusedDraftOrderOrPsaNotificationRequest(any(FinremCaseDetails.class),
             any(RefusedOrder.class));
     }
-
 
     private static Stream<Arguments> invokeNotificationServiceForRefusalOrdersData() {
         UUID uuidOne = UUID.randomUUID();
@@ -87,6 +90,9 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 .refusedOrdersCollection(List.of()).build(), 0),
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 3")
+            Arguments.of(DraftOrdersWrapper.builder().build(), 0),
+            Arguments.of(DraftOrdersWrapper.builder().refusedOrdersCollection(List.of()).build(), 0),
+            Arguments.of(DraftOrdersWrapper.builder()
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
@@ -96,6 +102,9 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 )).build(), 0), // without refusalOrderIdsToBeSent
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 4")
+                    .build()
+                )).build(), 0), // without refusalOrderIdsToBeSent
+            Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))

@@ -54,7 +54,6 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         log.info("Invoking contested {} submitted event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
         sendRefusalOrderToParties(caseDetails);
-
       
         //Build confirmation body
         String confirmationBody = caseDetails.getData().getDraftOrdersWrapper().getApproveOrdersConfirmationBody();
@@ -63,6 +62,8 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
             .build();
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
     private List<UUID> readLatestRefusalOrderIds(DraftOrdersWrapper draftOrdersWrapper) {
