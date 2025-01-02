@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -199,87 +198,86 @@ class ProcessOrderServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2})
-    void testAreAllLegacyApprovedOrdersPdf(int scenario) {
-        // Mocking the unprocessed approved documents
-        FinremCaseData caseData = mock(FinremCaseData.class);
-
-        // Conditionally set up the mock data based on expectedResult
-        if (scenario == 0) {
-            when(caseData.getUploadHearingOrder()).thenReturn(
+    private static Stream<Arguments> provideAreAllLegacyApprovedOrdersPdfData() {
+        return Stream.of(
+            Arguments.of(
                 List.of(
                     createDirectionOrder("http://example.xyz/document.pdf"),
                     createDirectionOrder("http://example.xyz/document.pdf", "http://example.xyz/document_new.pdf")
-                )
-            );
-        } else {
-            if (scenario == 1) {
-                when(caseData.getUploadHearingOrder()).thenReturn(
-                    List.of(
-                        createDirectionOrder("http://example.xyz/document.docx")
-                    )
-                );
-            } else {
-                when(caseData.getUploadHearingOrder()).thenReturn(
-                    List.of(
-                        createDirectionOrder("http://example.xyz/documentX.pdf", "http://example.xyz/document.doc")
-                    )
-                );
-            }
-        }
+                ), true
+            ),
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/document.docx")
+                ), false
+            ),
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/documentX.pdf", "http://example.xyz/document.doc")
+                ), false
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideAreAllLegacyApprovedOrdersPdfData")
+    void testAreAllLegacyApprovedOrdersPdf(List<DirectionOrderCollection> uploadHearingOrder, boolean expectedTrue) {
+        // Mocking the unprocessed approved documents
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        // Set up the mock data based on expectedResult
+        when(caseData.getUploadHearingOrder()).thenReturn(uploadHearingOrder);
 
         // Call the method to test
         boolean result = underTest.areAllLegacyApprovedOrdersPdf(caseData);
 
         // Assert the expected result
-        if (scenario == 0) {
+        if (expectedTrue) {
             assertTrue(result, "Expected all documents to have .pdf extensions");
         } else {
             assertFalse(result, "Expected not all documents to have .pdf extensions, but the method returned true.");
         }
     }
 
+    private static Stream<Arguments> provideAreAllModifyingUnprocessedOrdersWordDocumentsTestCases() {
+        return Stream.of(
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/document.docx"),
+                    createDirectionOrder("http://example.xyz/document.docx", true),
+                    createDirectionOrder("http://example.xyz/document.docx", "http://example.xyz/document.doc")
+                ), true
+            ),
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/document.pdf")
+                ), true
+            ),
+            Arguments.of(
+                List.of(
+                    createDirectionOrder("http://example.xyz/documentX.docx", "http://example.xyz/document.txt")
+                ), false
+            )
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2})
-    void testAreAllModifyingUnprocessedOrdersWordDocuments(int scenario) {
+    @MethodSource("provideAreAllModifyingUnprocessedOrdersWordDocumentsTestCases")
+    void testAreAllModifyingUnprocessedOrdersWordDocuments(List<DirectionOrderCollection> unprocessedApprovedDocuments, boolean expectedTrue) {
         // Mocking the unprocessed approved documents
         DraftOrdersWrapper draftOrdersWrapper = mock(DraftOrdersWrapper.class);
         FinremCaseData caseData = mock(FinremCaseData.class);
         when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
 
-        // Conditionally set up the mock data based on expectedResult
-        if (scenario == 0) {
-            when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
-                List.of(
-                    createDirectionOrder("http://example.xyz/document.docx"),
-                    createDirectionOrder("http://example.xyz/document.docx", true),
-                    createDirectionOrder("http://example.xyz/document.docx", "http://example.xyz/document.doc")
-                )
-            );
-        } else {
-            if (scenario == 1) {
-                // It is a new pdf document is uploaded and added to the unprocessed approved order collection
-                // It isn't modifying the existing document.
-                when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
-                    List.of(
-                        createDirectionOrder("http://example.xyz/document.pdf")
-                    )
-                );
-            } else {
-                when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(
-                    List.of(
-                        createDirectionOrder("http://example.xyz/documentX.docx", "http://example.xyz/document.txt")
-                    )
-                );
-            }
-        }
+        // Set up the mock data based on expectedResult
+        when(draftOrdersWrapper.getUnprocessedApprovedDocuments()).thenReturn(unprocessedApprovedDocuments);
+
 
         // Call the method to test
         boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
 
         // Assert the expected result
-        if (scenario == 0 || scenario == 1) {
+        if (expectedTrue) {
             assertTrue(result, "Expected all documents to have .doc or .docx extensions");
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
