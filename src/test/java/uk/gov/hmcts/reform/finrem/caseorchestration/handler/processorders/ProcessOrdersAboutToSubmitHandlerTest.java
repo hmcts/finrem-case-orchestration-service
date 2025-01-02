@@ -114,7 +114,7 @@ class ProcessOrdersAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(res.getData().getUploadHearingOrder()).hasSize(2);
         assertThat(res.getData().getUploadHearingOrder().get(1)).isEqualTo(expectedNewDirectionOrderCollection);
