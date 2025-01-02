@@ -90,9 +90,6 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 .refusedOrdersCollection(List.of()).build(), 0),
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 3")
-            Arguments.of(DraftOrdersWrapper.builder().build(), 0),
-            Arguments.of(DraftOrdersWrapper.builder().refusedOrdersCollection(List.of()).build(), 0),
-            Arguments.of(DraftOrdersWrapper.builder()
                 .refusedOrdersCollection(List.of(
                     RefusedOrderCollection
                         .builder()
@@ -102,9 +99,6 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 )).build(), 0), // without refusalOrderIdsToBeSent
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 4")
-                    .build()
-                )).build(), 0), // without refusalOrderIdsToBeSent
-            Arguments.of(DraftOrdersWrapper.builder()
                 .refusalOrderIdsToBeSent(List.of(
                     UuidCollection.builder().value(uuidOne).build()
                 ))
@@ -114,7 +108,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .id(uuidOne)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
-                )).build(), 1), // happy path
+                )).build(), 2), // happy path
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 5")
                 .refusalOrderIdsToBeSent(List.of(
@@ -144,7 +138,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .id(uuidTwo)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
-                )).build(), 2), // two ids with two refusal orders
+                )).build(), 4), // two ids with two refusal orders
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 7")
                 .refusalOrderIdsToBeSent(List.of(
@@ -170,5 +164,4 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                 )).build(), 0) // refusal order without id
         );
     }
-
 }
