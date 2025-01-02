@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -33,6 +37,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
@@ -53,6 +61,7 @@ class ProcessOrdersAboutToSubmitHandlerTest {
 
     private static final CaseDocument TARGET_DOCUMENT_4 = CaseDocument.builder().documentUrl("targetDoc4.docx").build();
 
+    @Spy
     @InjectMocks
     private ProcessOrdersAboutToSubmitHandler underTest;
 
@@ -118,6 +127,44 @@ class ProcessOrdersAboutToSubmitHandlerTest {
 
         assertThat(res.getData().getUploadHearingOrder()).hasSize(2);
         assertThat(res.getData().getUploadHearingOrder().get(1)).isEqualTo(expectedNewDirectionOrderCollection);
+    }
+
+    @Test
+    void shouldStampNewUploadedDocumentsFromUnprocessedApprovedDocuments() throws JsonProcessingException {
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
+        ));
+        DirectionOrderCollection expectedNewDirectionOrderCollection = null;
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+            .uploadHearingOrder(uploadHearingOrder)
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
+                    expectedNewDirectionOrderCollection = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
+                ))
+                .build())
+            .build());
+
+        // Captor to capture the argument passed to the service
+        ArgumentCaptor<FinremCaseDetails> caseDetailsCaptor = ArgumentCaptor.forClass(FinremCaseDetails.class);
+
+        // Use InOrder to verify the order of method calls
+        InOrder inOrder = inOrder(underTest, additionalHearingDocumentService);
+
+        // verify handleNewDocument should be invoked before createAndStoreAdditionalHearingDocuments which stamps the PDF file uploaded.
+        underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        inOrder.verify(underTest).handleNewDocument(any(FinremCaseData.class));
+        inOrder.verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(caseDetailsCaptor.capture(), eq(AUTH_TOKEN));
+
+        FinremCaseData capturedData = caseDetailsCaptor.getValue().getData();
+        assertTrue(capturedData.getUploadHearingOrder().contains(expectedNewDirectionOrderCollection));
+        assertTrue(capturedData.getUploadHearingOrder().containsAll(uploadHearingOrder));
     }
 
     @Test

@@ -53,6 +53,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        // handleNewDocument is required to be done before calling super method which stamps the uploading document.
         handleNewDocument(caseData);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = super.handle(callbackRequest, userAuthorisation);
         caseData = resp.getData();
@@ -65,7 +66,7 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
         return resp;
     }
 
-    private void handleNewDocument(FinremCaseData caseData) {
+    void handleNewDocument(FinremCaseData caseData) {
         caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments().forEach(unprocessedApprovedOrder -> {
             if (isNewDocument(unprocessedApprovedOrder)) {
                 insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
