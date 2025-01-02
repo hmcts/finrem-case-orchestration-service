@@ -52,13 +52,14 @@ public class ProcessOrdersAboutToSubmitHandler extends DirectionUploadOrderAbout
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        handleNewDocument(caseData);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = super.handle(callbackRequest, userAuthorisation);
-        FinremCaseData caseData = resp.getData();
+        caseData = resp.getData();
 
         handleDraftOrderDocuments(caseData);
         handlePsaDocuments(caseData);
         handleAgreedDraftOrdersCollection(caseData);
-        handleNewDocument(caseData);
         clearTemporaryFields(caseData);
 
         return resp;
