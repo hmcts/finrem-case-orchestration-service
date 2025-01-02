@@ -76,6 +76,21 @@ class ProcessOrdersAboutToSubmitHandlerTest {
         assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, PROCESS_ORDER);
     }
 
+    @Test
+    void shouldHandleUploadHearingOrdersWithoutUnprocessedDraftDocuments() {
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
+        ));
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+            .uploadHearingOrder(uploadHearingOrder)
+            .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(res.getData().getUploadHearingOrder()).hasSize(1);
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrders(boolean nullExistingUploadHearingOrder) {
