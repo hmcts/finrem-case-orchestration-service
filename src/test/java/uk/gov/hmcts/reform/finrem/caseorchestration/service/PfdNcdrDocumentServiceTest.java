@@ -36,21 +36,21 @@ class PfdNcdrDocumentServiceTest {
     private NotificationService notificationService;
 
     @Test
-    void whenRespondentDigital_thenPfdNcdrCoverSheetNotRequired() {
+    void givenRespondentDigital_whenIsPdfNcdrCoverSheetRequired_thenReturnsFalse() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         assertThat(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)).isFalse();
     }
 
     @Test
-    void whenRespondentNonDigital_thenPfdNcdrCoverSheetRequired() {
+    void givenRespondentNotDigital_whenIsPdfNcdrCoverSheetRequired_thenReturnsTrue() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         assertThat(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)).isTrue();
     }
 
     @Test
-    void whenUploadPfdNcdrComplianceLetter_thenReturnCaseDocument() {
+    void givenNoServerErrors_whenUploadPfdNcdrComplianceLetter_thenReturnCaseDocument() {
         mockUploadDocument(HttpStatus.OK, "http://localhost:1234/5646", "PfdNcdrComplianceLetter.pdf");
 
         CaseDocument expectedCaseDocument = CaseDocument.builder()
@@ -65,7 +65,7 @@ class PfdNcdrDocumentServiceTest {
     }
 
     @Test
-    void whenUploadPfdNcdrComplianceLetterReturnsError_thenThrowsException() {
+    void givenBadGateway_whenUploadPfdNcdrComplianceLetter_thenThrowsException() {
         mockUploadDocument(HttpStatus.BAD_GATEWAY, "http://localhost:1234/743543", "PfdNcdrComplianceLetter.pdf");
 
         assertThatThrownBy(() -> pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter("1234", AUTH_TOKEN))
@@ -74,7 +74,7 @@ class PfdNcdrDocumentServiceTest {
     }
 
     @Test
-    void whenPfdNcdrComplianceLetterResourceFileNotFound_thenThrowsException() {
+    void givenPdfResourceFileNotExists_whenUploadPfdNcdrComplianceLetter_thenThrowsException() {
         try (MockedStatic<FileUtils> fileUtilsMock = mockStatic(FileUtils.class)) {
             fileUtilsMock.when(() -> FileUtils.readResourceAsByteArray(anyString())).thenThrow(new IOException());
 
@@ -85,7 +85,7 @@ class PfdNcdrDocumentServiceTest {
     }
 
     @Test
-    void whenUploadPfdNcdrCoverLetter_thenReturnCaseDocument() {
+    void givenNoServerErrors_whenUploadPfdNcdrCoverLetter_thenReturnCaseDocument() {
         mockUploadDocument(HttpStatus.OK, "http://localhost:1234/23232", "PfdNcdrCoverLetter.pdf");
 
         CaseDocument expectedCaseDocument = CaseDocument.builder()
@@ -100,7 +100,7 @@ class PfdNcdrDocumentServiceTest {
     }
 
     @Test
-    void whenUploadPfdNcdrCoverLetterReturnsError_thenThrowsException() {
+    void givenBadGateway_whenUploadPfdNcdrCoverLetter_thenThrowsException() {
         mockUploadDocument(HttpStatus.BAD_GATEWAY, "http://localhost:1234/8766", "PfdNcdrCoverLetter.pdf");
 
         assertThatThrownBy(() -> pfdNcdrDocumentService.uploadPfdNcdrCoverLetter("1234", AUTH_TOKEN))
@@ -109,7 +109,7 @@ class PfdNcdrDocumentServiceTest {
     }
 
     @Test
-    void whenPfdNcdrCoverLetterResourceFileNotFound_thenThrowsException() {
+    void givenPdfResourceFileNotExists_whenUploadPfdNcdrCoverLetter_thenThrowsException() {
         try (MockedStatic<FileUtils> fileUtilsMock = mockStatic(FileUtils.class)) {
             fileUtilsMock.when(() -> FileUtils.readResourceAsByteArray(anyString())).thenThrow(new IOException());
 
