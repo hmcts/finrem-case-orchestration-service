@@ -62,8 +62,6 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
             .build();
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
     private List<UUID> readLatestRefusalOrderIds(DraftOrdersWrapper draftOrdersWrapper) {
