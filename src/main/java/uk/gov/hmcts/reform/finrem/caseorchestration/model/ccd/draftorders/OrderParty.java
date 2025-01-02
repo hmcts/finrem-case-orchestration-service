@@ -13,7 +13,7 @@ public enum OrderParty {
         } else if (UPLOAD_PARTY_RESPONDENT.equals(uploadParty)) {
             return RESPONDENT;
         } else {
-            return null;
+            throw new IllegalArgumentException("Unknown upload party: " + uploadParty);
         }
     }
 }
