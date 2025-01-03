@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadDraftOrderAboutToStartHandlerTest {
+class UploadDraftOrdersAboutToStartHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersAboutToStartHandler handler;

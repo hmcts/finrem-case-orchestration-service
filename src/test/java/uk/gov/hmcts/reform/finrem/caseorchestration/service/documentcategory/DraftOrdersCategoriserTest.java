@@ -2,13 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcategory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -26,16 +24,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
-@ExtendWith(MockitoExtension.class)
 class DraftOrdersCategoriserTest {
 
-    @InjectMocks
     private DraftOrdersCategoriser categoriser;
 
     private FinremCaseData caseData;
 
     @BeforeEach
     public void setUp() {
+        categoriser = new DraftOrdersCategoriser();
         caseData = new FinremCaseData();
         caseData.setDraftOrdersWrapper(new DraftOrdersWrapper());
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(new UploadSuggestedDraftOrder());
@@ -46,19 +43,19 @@ class DraftOrdersCategoriserTest {
         // Set up case data
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
-        DynamicRadioList uploadPartyRadioList;
-
         DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
             .code(UPLOAD_PARTY_APPLICANT)
             .label("The applicant")
             .build();
 
-        uploadPartyRadioList = DynamicRadioList.builder()
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
             .listItems(List.of(elementApplicant))
+            .value(elementApplicant)
             .build();
 
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadPartyRadioList);
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().setValue(elementApplicant);
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder();
+        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
+        uploadSuggestedDraftOrder.setOrderParty(OrderParty.APPLICANT);
 
         List<UploadSuggestedDraftOrderCollection> draftOrderCollection = new ArrayList<>();
         UploadedDraftOrder draftOrder = new UploadedDraftOrder();
@@ -68,7 +65,7 @@ class DraftOrdersCategoriserTest {
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection(draftOrderCollection);
 
         // Act
-        categoriser.categoriseDocuments(caseData, "applicant");
+        categoriser.categoriseDocuments(caseData);
 
         // Assert that the category has been set
         assertThat(draftOrder.getSuggestedDraftOrderDocument().getCategoryId())
@@ -79,17 +76,18 @@ class DraftOrdersCategoriserTest {
     void givenRespondentUploadsDraftOrder_whenCategoriseDocuments_thenCategoryIsSet() {
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
-        DynamicRadioList uploadPartyRadioList;
         DynamicRadioListElement elementRespondent = DynamicRadioListElement.builder()
             .code(UPLOAD_PARTY_RESPONDENT)
             .label("The respondent")
             .build();
-        uploadPartyRadioList = DynamicRadioList.builder()
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
             .listItems(List.of(elementRespondent))
+            .value(elementRespondent)
             .build();
 
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadPartyRadioList);
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().setValue(elementRespondent);
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder();
+        uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
+        uploadSuggestedDraftOrder.setOrderParty(OrderParty.RESPONDENT);
 
         List<UploadSuggestedDraftOrderCollection> draftOrderCollection = new ArrayList<>();
         UploadedDraftOrder draftOrder = new UploadedDraftOrder();
@@ -99,7 +97,7 @@ class DraftOrdersCategoriserTest {
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection(draftOrderCollection);
 
         // Act
-        categoriser.categoriseDocuments(caseData, "respondent");
+        categoriser.categoriseDocuments(caseData);
 
         assertThat(draftOrder.getSuggestedDraftOrderDocument().getCategoryId())
             .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId());
@@ -109,16 +107,18 @@ class DraftOrdersCategoriserTest {
     void givenBothDraftOrderAndPensionSharingAnnex_whenCategoriseDocuments_thenSetCategoriesForBoth() {
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
-        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder().build();
         DynamicRadioListElement elementApplicant = DynamicRadioListElement.builder()
             .code(UPLOAD_PARTY_APPLICANT)
             .label("The applicant")
             .build();
-        uploadPartyRadioList.setListItems(List.of(elementApplicant));
-        uploadPartyRadioList.setValue(elementApplicant);
+        DynamicRadioList uploadPartyRadioList = DynamicRadioList.builder()
+            .listItems(List.of(elementApplicant))
+            .value(elementApplicant)
+            .build();
 
         UploadSuggestedDraftOrder uploadSuggestedDraftOrder = new UploadSuggestedDraftOrder();
         uploadSuggestedDraftOrder.setUploadParty(uploadPartyRadioList);
+        uploadSuggestedDraftOrder.setOrderParty(OrderParty.APPLICANT);
 
         List<UploadSuggestedDraftOrderCollection> draftOrderCollection = new ArrayList<>();
         UploadedDraftOrder draftOrder = new UploadedDraftOrder();
@@ -136,7 +136,7 @@ class DraftOrdersCategoriserTest {
         uploadSuggestedDraftOrder.setSuggestedPsaCollection(psaCollection);
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(uploadSuggestedDraftOrder);
 
-        categoriser.categoriseDocuments(caseData, "applicant");
+        categoriser.categoriseDocuments(caseData);
 
         assertThat(draftOrder.getSuggestedDraftOrderDocument().getCategoryId())
             .isEqualTo(DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER.getDocumentCategoryId());

@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadDraftOrderMidEventHandlerTest {
+class UploadDraftOrdersMidEventHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersMidEventHandler handler;
