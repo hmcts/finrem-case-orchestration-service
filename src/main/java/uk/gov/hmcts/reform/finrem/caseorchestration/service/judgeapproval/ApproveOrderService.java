@@ -105,7 +105,7 @@ public class ApproveOrderService {
      * @param draftOrdersWrapper the wrapper object containing the draft orders and related data
      * @throws IllegalStateException if an unhandled judge decision is encountered
      */
-    void buildConfirmationBody(FinremCaseDetails caseDetails, DraftOrdersWrapper draftOrdersWrapper) {
+    private void buildConfirmationBody(FinremCaseDetails caseDetails, DraftOrdersWrapper draftOrdersWrapper) {
 
         final List<String> ordersApproved = new ArrayList<>();
         final List<String> ordersRepresentativeChanges = new ArrayList<>();
@@ -155,7 +155,7 @@ public class ApproveOrderService {
      *
      * @throws IllegalStateException if the judge's decision is not handled.
      */
-    void captureFilenames(JudgeApproval judgeApproval, List<String> ordersApproved, List<String> ordersRepresentativeChanges,
+    private void captureFilenames(JudgeApproval judgeApproval, List<String> ordersApproved, List<String> ordersRepresentativeChanges,
                           List<String> ordersChanged, List<String> ordersReviewLater) {
         String fileName = judgeApproval.getDocument().getDocumentFilename();
 
