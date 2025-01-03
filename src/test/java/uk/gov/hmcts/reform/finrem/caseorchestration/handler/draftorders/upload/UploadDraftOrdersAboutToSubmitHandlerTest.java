@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,9 +45,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,12 +58,15 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -249,6 +256,69 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         assertThat(draftOrderResult3.getAttachments()).isNull();
     }
 
+    @ParameterizedTest
+    @MethodSource("provideAgreedDraftOrders")
+    void shouldHandleAgreedDraftOrder(UploadAgreedDraftOrder uado,
+                                      List<AgreedDraftOrderCollection> existingAgreedDraftOrderCollection,
+                                      List<AgreedDraftOrderCollection> expectedAgreedDraftOrderCollection) {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.uploadAgreedDraftOrder(uado);
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.agreedDraftOrderCollection(new ArrayList<>(existingAgreedDraftOrderCollection));
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+                handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+
+        verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+                .containsAll(expectedAgreedDraftOrderCollection);
+    }
+
+    private static DynamicRadioList buildUploadParty(String code) {
+        return DynamicRadioList.builder()
+                .value(DynamicRadioListElement.builder().code(code).build())
+                .build();
+    }
+
+    private static Stream<Arguments> provideAgreedDraftOrders() {
+        UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
+                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+                .build();
+        AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+
+        UploadAgreedDraftOrder uado2 = UploadAgreedDraftOrder.builder()
+                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+                .build();
+        AgreedDraftOrderCollection draftOrder2 = AgreedDraftOrderCollection.builder()
+                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+
+        UploadAgreedDraftOrder uado3 = UploadAgreedDraftOrder.builder()
+                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+                .build();
+
+        UploadAgreedDraftOrder uado4 = UploadAgreedDraftOrder.builder()
+                .uploadParty(buildUploadParty(UPLOAD_PARTY_RESPONDENT))
+                .build();
+
+        return Stream.of(
+                // Single draft order on behalf of applicant added to an empty collection
+                Arguments.of(uado1, List.of(), List.of(draftOrder1)),
+
+                // Adding a draft order to a non-empty collection
+                Arguments.of(uado2, List.of(draftOrder1), List.of(draftOrder1, draftOrder2)),
+
+                // Empty input and empty expected output
+                Arguments.of(uado3, List.of(), List.of()),
+
+                // Single draft order on behalf of respondent added to an empty collection
+                Arguments.of(uado4, List.of(), List.of(draftOrder1))
+        );
+    }
+
     @Test
     void testHandleClearsUploadedDraftOrders() {
         String caseReference = "1727874196328932";
@@ -271,18 +341,18 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
     }
 
+    private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
+            List<LocalDateTime> agreedDraftOrderSubmittedDates) {
+
+        return agreedDraftOrderSubmittedDates.stream()
+                .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
+                .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
+                .toList();
+    }
+
     private DynamicRadioList createUploadParty() {
         return DynamicRadioList.builder()
             .value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build())
             .build();
-    }
-
-    private List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
-        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
-
-        return agreedDraftOrderSubmittedDates.stream()
-            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
-            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
-            .toList();
     }
 }
