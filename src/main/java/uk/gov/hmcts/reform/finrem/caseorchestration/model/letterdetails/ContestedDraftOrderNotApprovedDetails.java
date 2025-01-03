@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContestedDraftOrderNotApprovedDetails implements DocumentTemplateDetails {
+    @JsonProperty("caseNumber")
+    private String caseNumber;
     @JsonProperty("ApplicantName")
     private String applicantName;
     @JsonProperty("RespondentName")

@@ -8,12 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 
 import java.time.LocalDateTime;
@@ -30,6 +30,7 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;
     private String submittedBy;
+    private String submittedByEmail;
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;

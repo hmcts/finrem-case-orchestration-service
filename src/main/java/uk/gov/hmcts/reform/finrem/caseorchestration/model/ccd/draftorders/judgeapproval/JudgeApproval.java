@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -33,6 +35,9 @@ public class JudgeApproval {
 
     private String hearingInfo;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate hearingDate;
+
     private String hearingJudge;
 
     private YesOrNo hasAttachment;
@@ -51,6 +56,9 @@ public class JudgeApproval {
 
     @JsonProperty("isFinalOrder")
     private DynamicMultiSelectList isFinalOrder;
+
+    @JsonProperty("changesRequestedByJudge")
+    private String changesRequestedByJudge;
 
     @JsonIgnore
     private SortKey sortKey;
