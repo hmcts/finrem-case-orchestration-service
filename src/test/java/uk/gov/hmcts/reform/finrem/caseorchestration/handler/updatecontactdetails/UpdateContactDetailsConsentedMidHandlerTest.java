@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 
 import java.util.stream.Stream;
 
@@ -41,6 +42,9 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
     @Mock
     private InternationalPostalService postalService;
+
+    @Mock
+    private UpdateContactDetailsService updateContactDetailsService;
 
     @ParameterizedTest
     @MethodSource
@@ -67,7 +71,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
 
     @Test
-    void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
+    void givenConsentedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -78,7 +82,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setRespondentAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(0, handle.getErrors().size());
@@ -134,7 +138,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setRespondentAddress(addressBlank);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -156,7 +160,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setRespondentAddress(addressBlank);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -177,7 +181,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         addressBlank.setPostCode("");
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setApplicantSolicitorAddress(addressBlank);
+        data.getContactDetailsWrapper().setSolicitorAddress(addressBlank);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -198,7 +202,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         addressBlank.setPostCode(null);
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setApplicantSolicitorAddress(addressBlank);
+        data.getContactDetailsWrapper().setSolicitorAddress(addressBlank);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -220,7 +224,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setRespondentAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
         data.getContactDetailsWrapper().setRespondentSolicitorAddress(addressBlank);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
