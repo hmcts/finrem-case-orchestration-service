@@ -68,6 +68,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrderServiceTest {
@@ -994,7 +995,7 @@ class DraftOrderServiceTest {
         return Stream.of(
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2024, 5, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2024, 3, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
                 List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
@@ -1003,7 +1004,7 @@ class DraftOrderServiceTest {
             ),
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2024, 10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 6, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2024, 10, 18, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 20, 10, 0))),
                 List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 19, 10, 0))), // Notification dates
@@ -1012,9 +1013,9 @@ class DraftOrderServiceTest {
             ),
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2024, 1, 10, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 5, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2024, 1, 15, 10, 0)), Optional.of(LocalDateTime.of(2024, 1, 12, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 1, 4, 10, 0))), // Notification dates
                 List.of(Optional.empty(), Optional.empty()), // Notification dates
                 1, 1
@@ -1023,7 +1024,7 @@ class DraftOrderServiceTest {
                 List.of(Optional.of(LocalDateTime.of(2024, 2, 20, 10, 0))),
                 List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
                 List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 List.of(Optional.empty()), // Notification dates
                 List.of(Optional.of(LocalDateTime.of(2024, 2, 22, 10, 0)), Optional.of(LocalDateTime.of(2024, 2, 21, 10, 0))), // Notification dates
                 1, 1
@@ -1039,9 +1040,9 @@ class DraftOrderServiceTest {
             ),
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2024, 4, 1, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 4, 4, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 4, 3, 10, 0))), // Notification dates
                 List.of(Optional.of(LocalDateTime.of(2024, 4, 2, 10, 0)), Optional.empty()), // Notification dates
                 1, 1
@@ -1050,7 +1051,7 @@ class DraftOrderServiceTest {
                 List.of(Optional.empty()), // Empty DraftOrderDocumentReview
                 List.of(Optional.empty()), // No statuses
                 List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
                 1, 2
@@ -1059,7 +1060,7 @@ class DraftOrderServiceTest {
                 List.of(Optional.empty()), // Empty DraftOrderDocumentReview
                 List.of(Optional.empty()), // No statuses
                 List.of(Optional.of(LocalDateTime.of(2024, 5, 5, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.empty(), Optional.of(LocalDateTime.of(2024, 5, 1, 10, 0))), // Notification dates
                 List.of(Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0)), Optional.of(LocalDateTime.of(2024, 5, 2, 10, 0))), // Notification dates
                 0, 0
@@ -1203,7 +1204,7 @@ class DraftOrderServiceTest {
                 createDraftOrder(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1), null),
                 createDraftOrder(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 11, 1), null),
                 createDraftOrder(OrderStatus.APPROVED_BY_JUDGE, LocalDate.of(2024, 9, 1), null),
-                createDraftOrder(OrderStatus.PROCESSED_BY_ADMIN, LocalDate.of(2024, 9, 1), null)
+                createDraftOrder(PROCESSED, LocalDate.of(2024, 9, 1), null)
             ))
             .psaDocReviewCollection(List.of(
                 createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1),
@@ -1211,7 +1212,7 @@ class DraftOrderServiceTest {
                 createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 9, 1), null),
                 createPsa(OrderStatus.TO_BE_REVIEWED, LocalDate.of(2024, 11, 1), null),
                 createPsa(OrderStatus.APPROVED_BY_JUDGE, LocalDate.of(2024, 9, 1), null),
-                createPsa(OrderStatus.PROCESSED_BY_ADMIN, LocalDate.of(2024, 9, 1), null)
+                createPsa(PROCESSED, LocalDate.of(2024, 9, 1), null)
             ))
             .build();
     }

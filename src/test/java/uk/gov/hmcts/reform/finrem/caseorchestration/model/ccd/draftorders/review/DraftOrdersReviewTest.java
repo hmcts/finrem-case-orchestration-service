@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 
 
 class DraftOrdersReviewTest {
@@ -151,7 +152,7 @@ class DraftOrdersReviewTest {
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2023, 5, 10, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 6, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2023, 3, 15, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 4, 20, 10, 0))),
                 List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.APPROVED_BY_JUDGE)),
@@ -160,10 +161,10 @@ class DraftOrdersReviewTest {
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2023, 1, 10, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 1, 5, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2023, 1, 15, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 1, 12, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 LocalDateTime.of(2023, 1, 10, 10, 0)
             ),
             Arguments.of(
@@ -171,7 +172,7 @@ class DraftOrdersReviewTest {
                 List.of(Optional.of(OrderStatus.TO_BE_REVIEWED)),
                 List.of(Optional.of(LocalDateTime.of(2023, 2, 22, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 2, 21, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 LocalDateTime.of(2023, 2, 20, 10, 0)
             ),
             Arguments.of(
@@ -185,10 +186,10 @@ class DraftOrdersReviewTest {
             Arguments.of(
                 List.of(Optional.of(LocalDateTime.of(2023, 4, 1, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 4, 3, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 List.of(Optional.of(LocalDateTime.of(2023, 4, 2, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 4, 4, 10, 0))),
-                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.APPROVED_BY_JUDGE), Optional.of(PROCESSED)),
                 LocalDateTime.of(2023, 4, 1, 10, 0)
             ),
             Arguments.of(
@@ -196,7 +197,7 @@ class DraftOrdersReviewTest {
                 List.of(Optional.empty()), // No statuses
                 List.of(Optional.of(LocalDateTime.of(2023, 5, 5, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 5, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 LocalDateTime.of(2023, 5, 5, 10, 0)
             ),
             Arguments.of(
@@ -204,7 +205,7 @@ class DraftOrdersReviewTest {
                 List.of(Optional.empty()), // No statuses
                 List.of(Optional.of(LocalDateTime.of(2023, 5, 5, 10, 0)),
                     Optional.of(LocalDateTime.of(2023, 5, 1, 10, 0))),
-                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(OrderStatus.PROCESSED_BY_ADMIN)),
+                List.of(Optional.of(OrderStatus.TO_BE_REVIEWED), Optional.of(PROCESSED)),
                 LocalDateTime.of(2023, 5, 5, 10, 0)
             ),
             Arguments.of(

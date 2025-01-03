@@ -40,8 +40,14 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
+        return from(caseDetailsBuilder, caseDetailsBuilder);
+    }
+
+    public static FinremCallbackRequest from(FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBeforeBuilder,
+                                             FinremCaseDetails.FinremCaseDetailsBuilder caseDetailsBuilder) {
         return FinremCallbackRequest.builder()
             .caseDetails(caseDetailsBuilder.build())
+            .caseDetailsBefore(caseDetailsBeforeBuilder.build())
             .build();
     }
 

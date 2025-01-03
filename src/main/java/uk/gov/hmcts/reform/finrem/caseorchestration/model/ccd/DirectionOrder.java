@@ -24,4 +24,6 @@ public class DirectionOrder implements HasCaseDocument {
     LocalDateTime orderDateTime;
     @JsonProperty("isOrderStamped")
     YesOrNo isOrderStamped;
+    @JsonProperty("originalDocument")
+    CaseDocument originalDocument;
 }

@@ -52,7 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo.YES
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.PSA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED_BY_ADMIN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -81,7 +81,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
         DraftOrderDocumentReview document1 = DraftOrderDocumentReview.builder().orderStatus(APPROVED_BY_JUDGE)
             .build();
-        DraftOrderDocumentReview document2 = DraftOrderDocumentReview.builder().orderStatus(PROCESSED_BY_ADMIN)
+        DraftOrderDocumentReview document2 = DraftOrderDocumentReview.builder().orderStatus(PROCESSED)
             .build();
 
         DraftOrderDocReviewCollection collectionItem1 = new DraftOrderDocReviewCollection(document1);
@@ -470,12 +470,12 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         .value(applyHearingInfo1(DraftOrdersReview.builder()
                             .psaDocReviewCollection(List.of(
                                 buildPsaDocReviewCollection(APPROVED_BY_JUDGE),
-                                buildPsaDocReviewCollection(PROCESSED_BY_ADMIN),
+                                buildPsaDocReviewCollection(PROCESSED),
                                 buildPsaDocReviewCollection(PSA_DOC_2, TO_BE_REVIEWED)
                             ))
                             .draftOrderDocReviewCollection(List.of(
                                 buildDraftOrderDocumentReview(APPROVED_BY_JUDGE),
-                                buildDraftOrderDocumentReview(PROCESSED_BY_ADMIN),
+                                buildDraftOrderDocumentReview(PROCESSED),
                                 buildDraftOrderDocumentReview(DO_DOC_2, List.of(DO_ATTACHMENT_2), TO_BE_REVIEWED)
                             )))
                             .build())

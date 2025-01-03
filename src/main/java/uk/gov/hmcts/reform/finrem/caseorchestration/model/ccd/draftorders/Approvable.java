@@ -17,7 +17,21 @@ public interface Approvable extends DocumentMatcher {
 
     YesOrNo getFinalOrder();
 
-    CaseDocument getReplacedDocument();
+    /**
+     * Retrieves the target document from the available options.
+     *
+     * <p>
+     * It returns the target document. 
+     * In some cases, the method checks if the draft order is present and returns it.
+     * If the draft order is not available, it checks for the presence of
+     * the pension sharing annex and returns it. If neither is available,
+     * the method returns {@code null}.
+     * </p>
+     *
+     * @return the {@link CaseDocument} representing the target document,
+     *         or {@code null} if no document is available.
+     */
+    CaseDocument getTargetDocument();
 
     void setOrderStatus(OrderStatus orderStatus);
 

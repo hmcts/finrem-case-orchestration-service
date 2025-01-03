@@ -21,6 +21,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
@@ -128,5 +129,29 @@ class HasApprovableCollectionReaderTest {
         assertThat(collector).hasSize(2);
         assertEquals(psaDocument1, collector.get(0).getValue().getPsaDocument());
         assertEquals(psaDocument3, collector.get(1).getValue().getPsaDocument());
+    }
+
+    @Test
+    void shouldCollectAgreedDraftOrder() {
+        List<AgreedDraftOrderCollection> collector = new ArrayList<>();
+
+        CaseDocument psaDocument1 = CaseDocument.builder().documentUrl("psa1.doc").build();
+        CaseDocument draftOrderDocument1 = CaseDocument.builder().documentUrl("draftOrder1.doc").build();
+
+        List<AgreedDraftOrderCollection> sample = List.of(
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().orderStatus(PROCESSED).build())
+                .build(),
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().orderStatus(APPROVED_BY_JUDGE).build())
+                .build(),
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(psaDocument1).orderStatus(REFUSED).build())
+                .build(),
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(draftOrderDocument1).orderStatus(REFUSED).build())
+                .build()
+        );
+        underTest.collectAgreedDraftOrders(sample, collector, REFUSED::equals);
+
+        assertThat(collector).hasSize(2);
+        assertEquals(psaDocument1, collector.get(0).getValue().getTargetDocument());
+        assertEquals(draftOrderDocument1, collector.get(1).getValue().getTargetDocument());
     }
 }

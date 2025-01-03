@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.revie
 public enum OrderStatus {
     TO_BE_REVIEWED,
     APPROVED_BY_JUDGE,
-    PROCESSED_BY_ADMIN,
+    PROCESSED,
     REFUSED;
 
     public static boolean isJudgeReviewable(OrderStatus status) {

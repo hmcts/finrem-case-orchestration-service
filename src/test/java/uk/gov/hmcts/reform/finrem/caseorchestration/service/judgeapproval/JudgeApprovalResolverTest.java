@@ -194,7 +194,7 @@ class JudgeApprovalResolverTest {
                             assertNull(approvable.getFinalOrder());
                         }
                         if (expectedAmendedDocument != null) {
-                            assertEquals(expectedAmendedDocument, approvable.getReplacedDocument());
+                            assertEquals(expectedAmendedDocument, approvable.getTargetDocument());
                         }
                         approvedDocument = true;
                     }
