@@ -68,7 +68,7 @@ public class DraftOrdersNotificationRequestMapper {
      */
     public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
         FinremCaseData caseData = caseDetails.getData();
-        String notificationEmail = refusedOrder.getSubmittedByEmail();
+        String notificationEmail = getRefusedOrderRecipientEmail(caseDetails.getData(), refusedOrder);
         String documentName = ofNullable(refusedOrder.getRefusedDocument()).map(CaseDocument::getDocumentFilename)
             .orElseThrow(IllegalArgumentException::new);
 
@@ -86,5 +86,12 @@ public class DraftOrdersNotificationRequestMapper {
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .name(refusedOrder.getSubmittedBy())
             .build();
+    }
+
+    private String getRefusedOrderRecipientEmail(FinremCaseData caseData, RefusedOrder refusedOrder) {
+        return switch (refusedOrder.getOrderParty()) {
+            case APPLICANT -> caseData.getContactDetailsWrapper().getApplicantSolicitorEmail();
+            case RESPONDENT -> caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+        };
     }
 }

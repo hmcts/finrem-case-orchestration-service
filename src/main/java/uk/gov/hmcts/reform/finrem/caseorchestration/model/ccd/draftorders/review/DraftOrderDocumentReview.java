@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstruction
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
     private LocalDateTime submittedDate;
     private YesOrNo resubmission;
     private String submittedBy;
-    private String submittedByEmail;
+    private OrderParty orderParty;
     private String uploadedOnBehalfOf;
     private List<CaseDocumentCollection> attachments;
     private String approvalJudge;
