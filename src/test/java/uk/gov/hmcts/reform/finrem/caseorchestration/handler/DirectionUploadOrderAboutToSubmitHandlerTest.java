@@ -16,16 +16,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class DirectionUploadOrderAboutToSubmitHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @InjectMocks
     private DirectionUploadOrderAboutToSubmitHandler handler;
 
@@ -33,28 +32,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private AdditionalHearingDocumentService service;
 
     @Test
-    void handlerCanNotHandleWhenNonExpectedEventTypeReceived() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING));
-    }
-
-    @Test
-    void handlerCanNotHandleWhenNonExpectedCaseTypeReceived() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER));
-    }
-
-    @Test
-    void handlerCanNotHandleWhenNonExpectedCallbackTypeReceived() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
-    }
-
-    @Test
-    void handlerCanNotHandleWhenNonExpectedInputReceived() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE));
-    }
-
-    @Test
-    void handlerCanHandleWhenExpectedInputReceived() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER);
     }
 
     @Test

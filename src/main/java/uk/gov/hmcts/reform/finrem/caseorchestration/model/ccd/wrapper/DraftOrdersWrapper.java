@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
@@ -90,6 +91,12 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private String generatedOrderJudgeName;
 
     private List<UuidCollection> refusalOrderIdsToBeSent;
+
+    private List<DirectionOrderCollection> unprocessedApprovedDocuments;
+
+    private YesOrNo isLegacyApprovedOrderPresent;
+
+    private YesOrNo isUnprocessedApprovedDocumentPresent;
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {

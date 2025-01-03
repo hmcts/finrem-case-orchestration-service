@@ -23,12 +23,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
@@ -39,8 +40,6 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
-    public static final String AUTH_TOKEN = "tokien:)";
-
 
     @BeforeEach
     void setup() {
@@ -49,25 +48,9 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void canHandle() {
-        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER);
     }
-
-    @Test
-    void canNotHandle() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER));
-    }
-
-    @Test
-    void canNotHandleWrongEventType() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE));
-    }
-
-    @Test
-    void canNotHandleWrongCallbackType() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER));
-    }
-
 
     @Test
     void givenContestedCase_whenDirectionUploadOrderButNonEncryptedFileShouldNotGetError() {
@@ -114,7 +97,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         hearingOrderOtherDocuments.add(documentCollection);
         caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
-        finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);;
+        finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 

@@ -32,7 +32,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType));
+            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
@@ -40,8 +40,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-            EventType.DIRECTION_UPLOAD_ORDER, caseId);
+        log.info("Invoking contested event {} mid callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
