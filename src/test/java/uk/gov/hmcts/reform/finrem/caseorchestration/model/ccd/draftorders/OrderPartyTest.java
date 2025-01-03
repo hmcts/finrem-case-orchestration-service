@@ -18,7 +18,7 @@ class OrderPartyTest {
     @ParameterizedTest
     @MethodSource("testValidInputsForUploadParty")
     void givenValidInputs_whenForUploadParty_thenReturnsOrderParty(String uploadParty, OrderParty expectedOrderParty) {
-        assertThat(OrderParty.forUploadParty(uploadParty)).isEqualTo(expectedOrderParty);
+        assertThat(OrderParty.forUploadPartyValue(uploadParty)).isEqualTo(expectedOrderParty);
     }
 
     private static Stream<Arguments> testValidInputsForUploadParty() {
@@ -32,7 +32,7 @@ class OrderPartyTest {
     @ValueSource(strings = {"unknownparty", "", " "})
     @NullSource
     void givenInvalidInputs_whenForUploadParty_thenThrowsException(String uploadParty) {
-        assertThatThrownBy(() -> OrderParty.forUploadParty(uploadParty))
+        assertThatThrownBy(() -> OrderParty.forUploadPartyValue(uploadParty))
             .isInstanceOf(IllegalArgumentException.class);
     }
 }
