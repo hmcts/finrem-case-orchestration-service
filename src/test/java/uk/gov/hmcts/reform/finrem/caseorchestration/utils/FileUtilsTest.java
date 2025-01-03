@@ -5,10 +5,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -103,4 +105,14 @@ class FileUtilsTest {
             "Expected IllegalArgumentException for invalid filename: " + invalidFilename);
     }
 
+    @Test
+    void shouldReadResourceAsByteArray() throws IOException {
+        byte[] bytes = FileUtils.readResourceAsByteArray("documents/pfd-ncdr-compliance-letter.pdf");
+        assertNotNull(bytes);
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidResourcePath() {
+        assertThrows(IllegalArgumentException.class, () -> FileUtils.readResourceAsByteArray("invalid/path"));
+    }
 }

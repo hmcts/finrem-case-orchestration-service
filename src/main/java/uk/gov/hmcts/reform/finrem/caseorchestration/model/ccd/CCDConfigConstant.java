@@ -342,6 +342,8 @@ public class CCDConfigConstant {
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
+    public static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
+    public static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
 
     public static final String GENERAL_LETTER_UPLOADED_DOCUMENT = "generalLetterUploadedDocument";
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
