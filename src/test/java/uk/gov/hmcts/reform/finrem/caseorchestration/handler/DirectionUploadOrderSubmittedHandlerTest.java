@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,9 +44,7 @@ class DirectionUploadOrderSubmittedHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler,
-            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
-            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.PROCESS_ORDER));
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER);
     }
 
     @Test

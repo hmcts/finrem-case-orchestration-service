@@ -18,7 +18,6 @@ import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @Slf4j
@@ -38,7 +37,7 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return SUBMITTED.equals(callbackType) && CONTESTED.equals(caseType)
-            && List.of(DIRECTION_UPLOAD_ORDER, PROCESS_ORDER).contains(eventType);
+            && List.of(DIRECTION_UPLOAD_ORDER, DIRECTION_UPLOAD_ORDER).contains(eventType);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorders;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,6 +7,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.DirectionUploadOrderAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.PROCESS_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
@@ -38,14 +39,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class ProcessOrdersAboutToStartHandlerTest {
+class DirectionUploadOrderAboutToStartHandlerTest {
 
     private static final CaseDocument TARGET_DOCUMENT_1 = CaseDocument.builder().documentUrl("targetDoc1.docx").build();
 
     private static final LocalDateTime APPROVAL_DATE = LocalDateTime.of(2024, 12, 24,  23, 0, 0);
 
     @InjectMocks
-    private ProcessOrdersAboutToStartHandler underTest;
+    private DirectionUploadOrderAboutToStartHandler underTest;
 
     @Spy
     private HasApprovableCollectionReader hasApprovableCollectionReader = new HasApprovableCollectionReader();
@@ -55,7 +56,7 @@ class ProcessOrdersAboutToStartHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(underTest, ABOUT_TO_START, CONTESTED, PROCESS_ORDER);
+        assertCanHandle(underTest, ABOUT_TO_START, CONTESTED, DIRECTION_UPLOAD_ORDER);
     }
 
     @Test
