@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,6 +145,39 @@ class BulkPrintDocumentServiceTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPdf)) {
             assert resourceAsStream != null;
             return resourceAsStream.readAllBytes();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "test.doc",
+        "test.DOC",
+        "test.docx",
+        "test.DOCX",
+        "test.pdf",
+        "test.PDF"
+    })
+    void validateEncryptionOnUploadedDocumentGivenMixedFilenameExtensions(String filename) {
+
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, filename, FILE_BINARY_URL);
+        Document document = Document.builder().url(FILE_URL)
+            .binaryUrl(FILE_BINARY_URL)
+            .fileName(filename)
+            .build();
+
+        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
+            when(documentConversionService.convertDocumentToPdf(document, AUTH)).thenReturn(someBytes);
+        } else {
+            when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(someBytes);
+        }
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+
+        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
+            verify(documentConversionService).convertDocumentToPdf(document, AUTH);
+        } else {
+            verify(evidenceManagementService).download(caseDocument.getDocumentBinaryUrl(), AUTH);
         }
     }
 }
