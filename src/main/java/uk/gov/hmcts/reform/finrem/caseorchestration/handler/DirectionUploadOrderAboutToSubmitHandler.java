@@ -27,6 +27,9 @@ import java.util.List;
 
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 
@@ -34,23 +37,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @Service
 public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final AdditionalHearingDocumentService service;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
 
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                    AdditionalHearingDocumentService service,
+                                                    AdditionalHearingDocumentService additionalHearingDocumentService,
                                                     HasApprovableCollectionReader hasApprovableCollectionReader) {
         super(finremCaseDetailsMapper);
-        this.service = service;
+        this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
@@ -61,15 +62,17 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         log.info("Invoking contested event {} mid callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        handleNewDocument(caseData);
+        // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
+        handleNewDocumentInUnprocessedApprovedDocuments(caseData);
 
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
         try {
-            service.createAndStoreAdditionalHearingDocuments(caseDetails, userAuthorisation);
+            storeAdditionalHearingDocuments(callbackRequest.getCaseDetails(), userAuthorisation);
         } catch (CourtDetailsParseException | JsonProcessingException e) {
-            log.error(e.getMessage());
-            errors.add(e.getMessage());
+            log.error("Case ID: {} {}", callbackRequest.getCaseDetails().getId(), e.getMessage());
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(List.of("There was an unexpected error")).build();
         }
 
         handleDraftOrderDocuments(caseData);
@@ -77,18 +80,17 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         handleAgreedDraftOrdersCollection(caseData);
         clearTemporaryFields(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
-    private List<DirectionOrderCollection> nullSafeUnprocessedApprovedDocuments(FinremCaseData caseData) {
-        return ofNullable(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).orElse(List.of());
+    private void storeAdditionalHearingDocuments(FinremCaseDetails caseDetails, String userAuthorisation) throws JsonProcessingException {
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, userAuthorisation);
     }
 
-    private void handleNewDocument(FinremCaseData caseData) {
-        nullSafeUnprocessedApprovedDocuments(caseData).forEach(unprocessedApprovedOrder -> {
-            if (isNewDocument(unprocessedApprovedOrder)) {
-                insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedOrder);
+    private void handleNewDocumentInUnprocessedApprovedDocuments(FinremCaseData caseData) {
+        nullSafeUnprocessedApprovedDocuments(caseData).forEach(unprocessedApprovedDocuments -> {
+            if (isNewDocument(unprocessedApprovedDocuments)) {
+                insertNewDocumentToUploadHearingOrder(caseData, unprocessedApprovedDocuments);
             }
         });
     }
@@ -173,5 +175,9 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private boolean isNewDocument(DirectionOrderCollection unprocessedApprovedOrder) {
         return unprocessedApprovedOrder.getValue().getOriginalDocument() == null;
+    }
+
+    private List<DirectionOrderCollection> nullSafeUnprocessedApprovedDocuments(FinremCaseData caseData) {
+        return ofNullable(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).orElse(List.of());
     }
 }

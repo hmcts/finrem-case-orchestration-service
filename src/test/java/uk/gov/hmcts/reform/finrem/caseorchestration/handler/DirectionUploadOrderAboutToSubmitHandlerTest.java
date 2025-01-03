@@ -35,7 +35,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -64,7 +68,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private HasApprovableCollectionReader hasApprovableCollectionReader;
 
     @Mock
-    private AdditionalHearingDocumentService service;
+    private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @Test
     void testCanHandle() {
@@ -75,20 +79,20 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     void createAndStoreAdditionalHearingDocumentsHandleException() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(123L);
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
-        doThrow(new CourtDetailsParseException()).when(service)
+        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
             .createAndStoreAdditionalHearingDocuments(finremCaseDetails, AUTH_TOKEN);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(1, res.getErrors().size());
         assertEquals("Failed to parse court details.", res.getErrors().get(0));
-        verify(service).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
     void createAndStoreAdditionalHearingDocuments() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(123L);
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
@@ -337,5 +341,39 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         return PsaDocReviewCollection.builder()
             .value(PsaDocumentReview.builder().psaDocument(document).orderStatus(orderStatus).build())
             .build();
+    }
+
+    @Test
+    void shouldStampNewUploadedDocumentsFromUnprocessedApprovedDocuments() throws JsonProcessingException {
+        DirectionOrderCollection expectedNewDocument = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build();
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+            .uploadHearingOrder(new ArrayList<>(List.of(
+                DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
+            )))
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
+                    expectedNewDocument
+                ))
+                .build())
+            .build());
+
+        lenient().doThrow(new AssertionError("Expected two documents to be processed, but only one was found"))
+            .when(additionalHearingDocumentService)
+            .createAndStoreAdditionalHearingDocuments(
+                any(FinremCaseDetails.class),
+                eq(AUTH_TOKEN));
+        // mocking the valid invocation on createAndStoreAdditionalHearingDocuments
+        lenient().doNothing().when(additionalHearingDocumentService)
+            .createAndStoreAdditionalHearingDocuments(
+                argThat(a -> a.getData().getUploadHearingOrder().size() == 2 && a.getData().getUploadHearingOrder().contains(expectedNewDocument)),
+                eq(AUTH_TOKEN));
+
+        underTest.handle(finremCallbackRequest, AUTH_TOKEN);
     }
 }
