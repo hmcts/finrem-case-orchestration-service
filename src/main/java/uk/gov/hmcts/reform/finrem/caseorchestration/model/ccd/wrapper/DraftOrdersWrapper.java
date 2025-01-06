@@ -4,20 +4,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -43,7 +50,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     @JsonProperty("draftOrdersReviewCollection")
     private List<DraftOrdersReviewCollection> draftOrdersReviewCollection;
-
+    @JsonProperty("refusedOrdersCollection")
+    private List<RefusedOrderCollection> refusedOrdersCollection;
     @JsonProperty("agreedDraftOrderCollection")
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     @JsonProperty("suggestedDraftOrderCollection")
@@ -68,6 +76,20 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     @JsonProperty("hearingInstruction")
     private HearingInstruction hearingInstruction;
+
+    @JsonProperty("refusalOrderInstruction")
+    private RefusalOrderInstruction refusalOrderInstruction;
+
+    private String generatedOrderReason;
+
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime generatedOrderRefusedDate;
+
+    private JudgeType generatedOrderJudgeType;
+
+    private String generatedOrderJudgeName;
+
+    private List<UuidCollection> refusalOrderIdsToBeSent;
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {
