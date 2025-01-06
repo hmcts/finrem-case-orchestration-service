@@ -49,7 +49,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
+        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>(caseData.getUploadHearingOrder());
         if (uploadHearingOrders != null) {
             List<DirectionOrderCollection> uploadHearingOrdersBefore = caseDataBefore.getUploadHearingOrder();
             if (uploadHearingOrdersBefore != null && !uploadHearingOrdersBefore.isEmpty()) {
