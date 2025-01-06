@@ -115,7 +115,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         hearingOrderOtherDocuments.add(documentCollection);
         caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
-        finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);;
+        finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
