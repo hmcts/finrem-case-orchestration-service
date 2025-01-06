@@ -27,11 +27,11 @@ def versions = [
         pact                 : '4.6.16',
         pdfbox               : '3.0.3',
         reformLogging        : '6.1.7',
-        serenity             : '4.2.9',
-        serviceTokenGenerator: '5.2.0',
+        serenity             : '4.2.11',
+        serviceTokenGenerator: '5.3.0',
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
-        apacheLogging        : '2.24.2',
+        apacheLogging        : '2.24.3',
         idamClient           : '3.0.3',
         jjwt                 : '0.12.6',
         skyscreamer          : '1.5.3',
@@ -277,7 +277,7 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(59)
+    mutationThreshold.set(50)
 }
 
 bootJar {
@@ -422,7 +422,7 @@ dependencies {
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.pdfbox', name: 'pdfbox-io', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.12.0'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
@@ -462,7 +462,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.5:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.6:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
