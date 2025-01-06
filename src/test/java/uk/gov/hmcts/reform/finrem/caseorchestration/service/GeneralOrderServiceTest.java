@@ -77,7 +77,7 @@ class GeneralOrderServiceTest {
     @InjectMocks
     private GeneralOrderService generalOrderService;
     @Spy
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Mock
     private DocumentConfiguration documentConfiguration;
     @Mock
