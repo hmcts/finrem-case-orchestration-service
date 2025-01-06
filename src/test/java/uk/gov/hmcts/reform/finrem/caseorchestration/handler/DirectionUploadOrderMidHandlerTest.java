@@ -26,6 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -120,5 +121,38 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         assertTrue(response.getErrors().isEmpty());
         verify(service, never()).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+    }
+
+    @Test
+    void givenContestedCase_whenDirectionUploadOrderWithPreviousFiles_shouldOnlyValidateNewFiles() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+
+        //Create old and new documents
+        CaseDocument oldDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        CaseDocument newDocument = TestSetUpUtils.caseDocument("new-file-url", "new-file-name", "new-binary-url");
+
+        //Old document in 'before' case data
+        DirectionOrder oldOrder = DirectionOrder.builder().uploadDraftDocument(oldDocument).build();
+        DirectionOrderCollection oldOrderCollection = DirectionOrderCollection.builder().value(oldOrder).build();
+        caseDataBefore.setUploadHearingOrder(List.of(oldOrderCollection));
+
+        //New document in current case data
+        DirectionOrder newOrder = DirectionOrder.builder().uploadDraftDocument(newDocument).build();
+        DirectionOrderCollection newOrderCollection = DirectionOrderCollection.builder().value(newOrder).build();
+        caseData.setUploadHearingOrder(List.of(oldOrderCollection, newOrderCollection));
+
+        //Create similar setup for hearingOrderOtherDocuments
+        DocumentCollection oldDocCollection = DocumentCollection.builder().value(oldDocument).build();
+        DocumentCollection newDocCollection = DocumentCollection.builder().value(newDocument).build();
+        caseDataBefore.setHearingOrderOtherDocuments(List.of(oldDocCollection));
+        caseData.setHearingOrderOtherDocuments(List.of(oldDocCollection, newDocCollection));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertTrue(response.getErrors().isEmpty());
+        verify(service, times(2)).validateEncryptionOnUploadedDocument(eq(newDocument), any(), any(), any());
+        verify(service, never()).validateEncryptionOnUploadedDocument(eq(oldDocument), any(), any(), any());
     }
 }
