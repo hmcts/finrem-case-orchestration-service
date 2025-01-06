@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -51,7 +52,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
 
         List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>(caseData.getUploadHearingOrder());
         List<DirectionOrderCollection> uploadHearingOrdersBefore = caseDataBefore.getUploadHearingOrder();
-        if (uploadHearingOrdersBefore != null && !uploadHearingOrdersBefore.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(uploadHearingOrdersBefore)) {
             uploadHearingOrders.removeAll(uploadHearingOrdersBefore);
         }
         uploadHearingOrders.forEach(doc ->
