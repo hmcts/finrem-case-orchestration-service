@@ -66,8 +66,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
         hearingOrderOtherDocuments.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue(),
-                    caseId, errors, userAuthorisation)
-        );
+                    caseId, errors, userAuthorisation));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
