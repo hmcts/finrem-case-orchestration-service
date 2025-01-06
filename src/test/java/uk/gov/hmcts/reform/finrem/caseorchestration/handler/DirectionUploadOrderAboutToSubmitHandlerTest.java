@@ -84,7 +84,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(1, res.getErrors().size());
-        assertEquals("Failed to parse court details.", res.getErrors().get(0));
+        assertEquals("There was an unexpected error", res.getErrors().get(0));
         verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
