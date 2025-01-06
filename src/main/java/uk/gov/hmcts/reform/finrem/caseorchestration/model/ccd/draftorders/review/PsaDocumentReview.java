@@ -7,27 +7,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvable, HearingInstructionProcessable {
+public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOrderConvertible, HearingInstructionProcessable {
     private CaseDocument psaDocument;
     private OrderStatus orderStatus;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
     private YesOrNo resubmission;
     private String submittedBy;
+    private String submittedByEmail;
     private String uploadedOnBehalfOf;
     private String approvalJudge;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -39,21 +40,9 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvabl
     private String additionalTime;
     private String otherListingInstructions;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime reviewedDate;
+    private LocalDateTime refusedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
-
-    @JsonIgnore
-    @Override
-    public LocalDateTime getApprovalDate() {
-        return approvalDate;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getApprovalJudge() {
-        return approvalJudge;
-    }
 
     @JsonIgnore
     @Override
@@ -70,5 +59,11 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, Approvabl
     @Override
     public void replaceDocument(CaseDocument amendedDocument) {
         this.setPsaDocument(amendedDocument);
+    }
+    
+    @Override
+    @JsonIgnore
+    public CaseDocument getRefusedDocument() {
+        return getPsaDocument();
     }
 }

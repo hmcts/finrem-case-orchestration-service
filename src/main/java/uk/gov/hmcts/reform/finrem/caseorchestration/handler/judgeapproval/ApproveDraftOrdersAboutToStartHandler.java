@@ -66,6 +66,9 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
+        // clear a temporary field which was used on submitted event.
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
+
         List<String> errors = validateDraftOrdersWrapper(draftOrdersWrapper);
         if (errors.isEmpty()) {
             List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
@@ -117,6 +120,13 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             draftOrdersReview.getHearingDate(), draftOrdersReview.getHearingTime());
     }
 
+    private DynamicMultiSelectList buildIsFinalOrderDynamicMultiSelectList() {
+        return DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+            .code(YesOrNo.YES.getYesOrNo())
+            .label("This is a final order")
+            .build())).build();
+    }
+
     private List<JudgeApproval> getReviewableItems(List<DraftOrdersReviewCollection> outstanding) {
         return outstanding.stream()
             .map(DraftOrdersReviewCollection::getValue)
@@ -133,10 +143,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .inlineDocType(DRAFT_ORDER.getDescription())
                         .hearingInfo(hearingInfo)
                         .hearingJudge(draftOrdersReview.getHearingJudge())
-                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                            .code("Yes")
-                            .label("This is a final order")
-                            .build())).build())
+                        .hearingDate(draftOrdersReview.getHearingDate())
+                        .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -155,10 +163,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .inlineDocType(PSA.getDescription())
                         .hearingInfo(hearingInfo)
                         .hearingJudge(draftOrdersReview.getHearingJudge())
-                        .isFinalOrder(DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
-                            .code("Yes")
-                            .label("This is a final order")
-                            .build())).build())
+                        .hearingDate(draftOrdersReview.getHearingDate())
+                        .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
