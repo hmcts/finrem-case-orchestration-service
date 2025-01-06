@@ -33,6 +33,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -68,6 +72,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
@@ -250,9 +258,9 @@ class GeneralOrderServiceTest {
     void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(details.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
-        CaseDocument pdfDoc = buildCaseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
-            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
-            "test.pdf");
+        CaseDocument pdfDoc = caseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
+            "test.pdf",
+            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary");
         when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseId)).thenReturn(pdfDoc);
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
         assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
@@ -725,7 +733,40 @@ class GeneralOrderServiceTest {
         return collections;
     }
 
-    protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        return caseDocument(url, filename, binaryUrl);
+    @Test
+    void shouldPopulateProcessedApprovedDocuments() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .orderStatus(PROCESSED)
+                                .draftOrder(caseDocument("documentUrl", "processedFileName.pdf", "binaryUrl")).build())
+                            .build(),
+                        agreedDraftOrderCollection(TO_BE_REVIEWED),
+                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
+                        agreedDraftOrderCollection(REFUSED)
+                    ))
+                    .build())
+                .build())
+            .build();
+        DynamicMultiSelectListElement expectedDynamicListElement = DynamicMultiSelectListElement.builder().build();
+
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Approved order - processedFileName.pdf")))
+            .thenReturn(expectedDynamicListElement);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getOrdersToShare().getListItems())
+            .as("The processed order should appear in ordersToShare.")
+            .hasSize(1)
+            .containsExactly(expectedDynamicListElement);
+    }
+
+    private static AgreedDraftOrderCollection agreedDraftOrderCollection(OrderStatus orderStatus) {
+        return AgreedDraftOrderCollection.builder()
+            .value(AgreedDraftOrder.builder().orderStatus(orderStatus).draftOrder(caseDocument()).build())
+            .build();
     }
 }

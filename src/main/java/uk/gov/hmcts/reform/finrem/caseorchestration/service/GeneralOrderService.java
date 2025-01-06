@@ -39,6 +39,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
@@ -90,7 +92,6 @@ public class GeneralOrderService {
             documentConfiguration.getGeneralOrderTemplate(caseDetails),
             getGeneralOrderFileNameWithDateTimeStamp());
     }
-
 
     private String getGeneralOrderFileNameWithDateTimeStamp() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
@@ -155,7 +156,7 @@ public class GeneralOrderService {
         item.setGeneralOrder(generalOrder);
 
         List<GeneralOrderCollectionItem> generalOrders =
-            Optional.ofNullable(generalOrderWrapper.getGeneralOrderCollection())
+            ofNullable(generalOrderWrapper.getGeneralOrderCollection())
                 .orElse(new ArrayList<>());
         generalOrders.add(item);
         generalOrderWrapper.setGeneralOrderCollection(generalOrders);
@@ -164,7 +165,7 @@ public class GeneralOrderService {
     public void addContestedGeneralOrderToCollection(FinremCaseData caseData) {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders =
-            Optional.ofNullable(generalOrderWrapper.getGeneralOrders())
+            ofNullable(generalOrderWrapper.getGeneralOrders())
                 .orElse(new ArrayList<>());
         generalOrderWrapper.setGeneralOrders(generalOrders);
 
@@ -174,7 +175,7 @@ public class GeneralOrderService {
     public void addConsentedInContestedGeneralOrderToCollection(FinremCaseData caseData) {
         GeneralOrderWrapper generalOrderWrapper = caseData.getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders =
-            Optional.ofNullable(generalOrderWrapper.getGeneralOrdersConsent())
+            ofNullable(generalOrderWrapper.getGeneralOrdersConsent())
                 .orElse(new ArrayList<>());
         generalOrderWrapper.setGeneralOrdersConsent(generalOrders);
 
@@ -237,6 +238,14 @@ public class GeneralOrderService {
                     "Case documents tab [Approved Order]" + " - " + document.getDocumentFilename()));
             });
         }
+
+        ofNullable(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).orElse(List.of()).stream()
+            .filter(d -> PROCESSED == d.getValue().getOrderStatus())
+            .forEach(obj -> {
+                CaseDocument document = obj.getValue().getTargetDocument();
+                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
+                    "Approved order - " + document.getDocumentFilename()));
+            });
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
