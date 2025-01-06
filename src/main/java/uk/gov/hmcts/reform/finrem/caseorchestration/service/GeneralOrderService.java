@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -118,7 +118,7 @@ public class GeneralOrderService {
         } else {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("GeneralOrderCourtSitting", "SITTING AT the Family Court at the ");
-            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("GeneralOrderCourt", CourtHelper.getSelectedCourt(caseDetails));
             caseData.put("GeneralOrderHeaderOne", "In the Family Court");
             caseData.put("GeneralOrderHeaderTwo", "sitting in the");
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
