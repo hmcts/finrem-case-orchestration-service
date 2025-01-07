@@ -72,10 +72,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
 
+    private UUID uuid;
     protected String caseId = "123123123";
-
-    @InjectMocks
-    private GeneralOrderService generalOrderService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Mock
@@ -92,30 +90,29 @@ class GeneralOrderServiceTest {
     private PartyService partyService;
     @Spy
     private CaseDataService caseDataService = new CaseDataService(objectMapper);
-
+    @Spy
+    @InjectMocks
     private GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
-
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
-    private UUID uuid;
-
     @Spy
-    private DocumentHelper documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService, 
+    private DocumentHelper documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService,
         new FinremCaseDetailsMapper(objectMapper), letterAddresseeGeneratorMapper, postalService);
+
+    @InjectMocks
+    private GeneralOrderService generalOrderService;
 
     @BeforeEach
     void setUp() {
         uuid = UUID.fromString("2ec43a65-3614-4b53-ab89-18252855f399");
+
         lenient().when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        // Create the instance of GeneralOrderDocumentCategoriser with its dependencies
-        generalOrderDocumentCategoriser = new GeneralOrderDocumentCategoriser(featureToggleService);
-        // Inject the manually created instance into the service
-        ReflectionTestUtils.setField(generalOrderService, "generalOrderDocumentCategoriser", generalOrderDocumentCategoriser);
-
         lenient().when(documentConfiguration.getGeneralOrderFileName()).thenReturn("generalOrder.pdf");
         lenient().when(documentConfiguration.getGeneralOrderTemplate(any(CaseDetails.class))).thenReturn("FL-FRM-GOR-ENG-00484.docx");
+
+        // Inject the manually created instance into the service
+        ReflectionTestUtils.setField(generalOrderService, "generalOrderDocumentCategoriser", generalOrderDocumentCategoriser);
     }
 
     @Test
