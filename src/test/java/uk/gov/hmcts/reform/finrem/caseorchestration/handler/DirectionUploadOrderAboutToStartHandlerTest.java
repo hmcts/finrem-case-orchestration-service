@@ -7,8 +7,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.DirectionUploadOrderAboutToStartHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
@@ -98,15 +96,15 @@ class DirectionUploadOrderAboutToStartHandlerTest {
                 .build())
             .build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).hasSize(1);
-        assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).contains(
-            DirectionOrderCollection.builder().value(DirectionOrder.builder()
-                .isOrderStamped(YesOrNo.NO)
-                .uploadDraftDocument(TARGET_DOCUMENT_1)
-                .originalDocument(TARGET_DOCUMENT_1)
-                    .orderDateTime(APPROVAL_DATE)
-                .build()).build()
-        );
+        assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            .hasSize(1)
+            .containsOnly(
+                DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                    .isOrderStamped(YesOrNo.NO)
+                    .uploadDraftDocument(TARGET_DOCUMENT_1)
+                    .originalDocument(TARGET_DOCUMENT_1)
+                        .orderDateTime(APPROVAL_DATE)
+                    .build()).build());
         assertTrue(YesOrNo.isYes(result.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()));
     }
 
