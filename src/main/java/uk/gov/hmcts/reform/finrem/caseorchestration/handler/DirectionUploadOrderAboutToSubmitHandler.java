@@ -100,7 +100,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
 
-        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
+        getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 collector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
@@ -113,7 +113,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         hasApprovableCollectionReader.filterAndCollectPsaDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             psaCollector, APPROVED_BY_JUDGE::equals);
 
-        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
+        getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 psaCollector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
@@ -126,7 +126,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
-        nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument))
+        getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 agreedOrderCollector.stream().filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
                     .forEach(toBeUpdated -> {
@@ -179,5 +179,9 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private List<DirectionOrderCollection> nullSafeUnprocessedApprovedDocuments(FinremCaseData caseData) {
         return ofNullable(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).orElse(List.of());
+    }
+
+    private List<DirectionOrderCollection> getApprovedDocumentsToProcess(FinremCaseData caseData) {
+        return nullSafeUnprocessedApprovedDocuments(caseData).stream().filter(not(this::isNewDocument)).toList();
     }
 }
