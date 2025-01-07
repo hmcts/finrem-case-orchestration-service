@@ -59,14 +59,17 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                 service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                     caseId, errors, userAuthorisation)
         );
-        List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>(caseData.getHearingOrderOtherDocuments());
-        List<DocumentCollection> hearingOrderOtherDocumentsBefore = caseDataBefore.getHearingOrderOtherDocuments();
-        if (CollectionUtils.isNotEmpty(hearingOrderOtherDocumentsBefore)) {
-            hearingOrderOtherDocuments.removeAll(hearingOrderOtherDocumentsBefore);
-        }
-        hearingOrderOtherDocuments.forEach(doc ->
+
+        if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())){
+            List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>(caseData.getHearingOrderOtherDocuments());
+            List<DocumentCollection> hearingOrderOtherDocumentsBefore = caseDataBefore.getHearingOrderOtherDocuments();
+            if (CollectionUtils.isNotEmpty(hearingOrderOtherDocumentsBefore)) {
+                hearingOrderOtherDocuments.removeAll(hearingOrderOtherDocumentsBefore);
+            }
+            hearingOrderOtherDocuments.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue(),
                     caseId, errors, userAuthorisation));
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
