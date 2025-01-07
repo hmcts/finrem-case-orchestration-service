@@ -126,9 +126,10 @@ class HasApprovableCollectionReaderTest {
         assertEquals(psaDocument2, result.get(0).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument());
         assertEquals(psaDocument4, result.get(1).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument());
 
-        assertThat(collector).hasSize(2);
-        assertEquals(psaDocument1, collector.get(0).getValue().getPsaDocument());
-        assertEquals(psaDocument3, collector.get(1).getValue().getPsaDocument());
+        assertThat(collector).hasSize(2)
+            .extracting(PsaDocReviewCollection::getValue)
+            .extracting(PsaDocumentReview::getPsaDocument)
+            .containsExactly(psaDocument1, psaDocument3);
     }
 
     @Test
@@ -150,8 +151,9 @@ class HasApprovableCollectionReaderTest {
         );
         underTest.collectAgreedDraftOrders(sample, collector, REFUSED::equals);
 
-        assertThat(collector).hasSize(2);
-        assertEquals(psaDocument1, collector.get(0).getValue().getTargetDocument());
-        assertEquals(draftOrderDocument1, collector.get(1).getValue().getTargetDocument());
+        assertThat(collector).hasSize(2)
+            .extracting(AgreedDraftOrderCollection::getValue)
+            .extracting(AgreedDraftOrder::getTargetDocument)
+            .containsExactly(psaDocument1, draftOrderDocument1);
     }
 }
