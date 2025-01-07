@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -46,12 +45,10 @@ public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandl
         log.info("Invoking contested event {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<String> errors = new ArrayList<>();
-
         processOrderService.populateUnprocessedApprovedDocuments(caseData);
         populateMetaDataFields(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
     private void populateMetaDataFields(FinremCaseData caseData) {
