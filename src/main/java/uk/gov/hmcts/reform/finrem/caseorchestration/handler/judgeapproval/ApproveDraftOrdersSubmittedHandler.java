@@ -30,6 +30,8 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
     private final DraftOrdersNotificationRequestMapper notificationRequestMapper;
 
+    private static final String CONFIRMATION_HEADER = "# Draft orders reviewed";
+
     public ApproveDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, NotificationService notificationService,
                                               DraftOrdersNotificationRequestMapper notificationRequestMapper) {
         super(finremCaseDetailsMapper);
@@ -52,8 +54,13 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         log.info("Invoking contested {} submitted event callback for Case ID: {}", callbackRequest.getEventType(), caseId);
 
         sendRefusalOrderToParties(caseDetails);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+      
+        String confirmationBody = caseDetails.getData().getDraftOrdersWrapper().getApproveOrdersConfirmationBody();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .confirmationHeader(CONFIRMATION_HEADER)
+            .confirmationBody(confirmationBody)
+            .build();
     }
 
     private List<UUID> readLatestRefusalOrderIds(DraftOrdersWrapper draftOrdersWrapper) {
@@ -79,5 +86,4 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
                 }
             });
     }
-
 }
