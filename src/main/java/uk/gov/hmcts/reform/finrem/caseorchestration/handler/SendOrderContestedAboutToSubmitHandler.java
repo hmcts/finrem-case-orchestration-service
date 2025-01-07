@@ -73,7 +73,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            EventType.SEND_ORDER, CallbackType.ABOUT_TO_SUBMIT, caseId);
+            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
 
         try {
             FinremCaseData caseData = caseDetails.getData();
@@ -94,7 +94,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             log.info("Share and print general with for Case ID: {}", caseDetails.getId());
             shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
-
 
             log.info("Share and print hearing order for Case ID: {}", caseDetails.getId());
             List<CaseDocument> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
