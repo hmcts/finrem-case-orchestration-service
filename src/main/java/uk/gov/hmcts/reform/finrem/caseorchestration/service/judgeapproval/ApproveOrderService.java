@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
@@ -121,22 +122,22 @@ public class ApproveOrderService {
         }
 
         StringBuilder body = new StringBuilder();
-        if (!ordersApproved.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(ordersApproved)) {
             body.append(String.format(ORDERS_APPROVED_CONFIRMATION_BODY_FORMAT,
                     String.join(", ", ordersApproved)))
                 .append("\n\n");
         }
-        if (!ordersRepresentativeChanges.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(ordersRepresentativeChanges)) {
             body.append(String.format(ORDERS_REQUIRE_REPRESENTATIVE_CHANGE_CONFIRMATION_BODY_FORMAT,
                     String.join(", ", ordersRepresentativeChanges)))
                 .append("\n\n");
         }
-        if (!ordersChanged.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(ordersChanged)) {
             body.append(String.format(ORDERS_AMENDED_CHANGE_CONFIRMATION_BODY_FORMAT,
                     String.join(", ", ordersChanged)))
                 .append("\n\n");
         }
-        if (!ordersReviewLater.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(ordersReviewLater)) {
             body.append(String.format(ORDERS_REVIEW_LATER_CONFIRMATION_BODY_FORMAT,
                 String.join(", ", ordersReviewLater), caseDetails.getId()));
         }
