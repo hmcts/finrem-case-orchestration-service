@@ -234,6 +234,7 @@ public class GeneralOrderService {
         }
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, dynamicListElements);
+        populateFinalisedOrderToOrdersToShare(data, dynamicListElements);
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
@@ -243,6 +244,11 @@ public class GeneralOrderService {
         ofNullable(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).orElse(List.of()).stream()
             .filter(d -> PROCESSED == d.getValue().getOrderStatus())
             .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getTargetDocument(), "Approved order - %s"));
+    }
+
+    private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
+        ofNullable(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of())
+            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getFinalisedDocument(), "Finalised order - %s"));
     }
 
     private void appendDynamicListElement(List<DynamicMultiSelectListElement> dynamicListElements,

@@ -33,6 +33,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
@@ -734,7 +736,7 @@ class GeneralOrderServiceTest {
     }
 
     @Test
-    void shouldPopulateProcessedApprovedDocuments() {
+    void shouldPopulateProcessedApprovedDocumentsToOrdersToShareList() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
                 .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -768,5 +770,41 @@ class GeneralOrderServiceTest {
         return AgreedDraftOrderCollection.builder()
             .value(AgreedDraftOrder.builder().orderStatus(orderStatus).draftOrder(caseDocument()).build())
             .build();
+    }
+
+    @Test
+    void shouldPopulateFinalisedOrderToOrdersToShareList() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(List.of(
+                        FinalisedOrderCollection.builder()
+                            .value(FinalisedOrder.builder()
+                                .finalisedDocument(caseDocument("documentUrl1", "finalisedOrderOne.pdf", "binaryUrl1"))
+                                .build())
+                            .build(),
+                        FinalisedOrderCollection.builder()
+                            .value(FinalisedOrder.builder()
+                                .finalisedDocument(caseDocument("documentUrl2", "finalisedOrderTwo.pdf", "binaryUrl2"))
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build())
+            .build();
+        DynamicMultiSelectListElement expectedDynamicListElementA = DynamicMultiSelectListElement.builder().build();
+        DynamicMultiSelectListElement expectedDynamicListElementB = DynamicMultiSelectListElement.builder().build();
+
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderOne.pdf")))
+            .thenReturn(expectedDynamicListElementA);
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderTwo.pdf")))
+            .thenReturn(expectedDynamicListElementB);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getOrdersToShare().getListItems())
+            .as("The finalised orders should appear in ordersToShare.")
+            .hasSize(2)
+            .containsExactly(expectedDynamicListElementA, expectedDynamicListElementB);
     }
 }
