@@ -55,7 +55,6 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         sendRefusalOrderToParties(caseDetails);
       
-        //Build confirmation body
         String confirmationBody = caseDetails.getData().getDraftOrdersWrapper().getApproveOrdersConfirmationBody();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData())
