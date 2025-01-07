@@ -60,7 +60,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                     caseId, errors, userAuthorisation)
         );
 
-        if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())){
+        if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
             List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>(caseData.getHearingOrderOtherDocuments());
             List<DocumentCollection> hearingOrderOtherDocumentsBefore = caseDataBefore.getHearingOrderOtherDocuments();
             if (CollectionUtils.isNotEmpty(hearingOrderOtherDocumentsBefore)) {
