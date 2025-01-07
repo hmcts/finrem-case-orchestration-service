@@ -80,6 +80,23 @@ class ApproveDraftOrdersSubmittedHandlerTest {
             any(RefusedOrder.class));
     }
 
+    /**
+     * Provides test data for the parameterized test {@code shouldInvokeNotificationServiceForRefusalOrders}.
+     *
+     * <p>This method returns a stream of {@link Arguments} with {@link DraftOrdersWrapper} and expected
+     * notification service invocation count for various test scenarios:</p>
+     *
+     * <ul>
+     *     <li><strong>Scenario 1:</strong> No refusal orders - expected invocation count: 0.</li>
+     *     <li><strong>Scenario 2:</strong> Empty refusal orders collection - expected invocation count: 0.</li>
+     *     <li><strong>Scenario 3:</strong> Refusal orders without IDs to be sent - expected invocation count: 0.</li>
+     *     <li><strong>Scenario 4:</strong> Happy path with matching refusal order IDs - expected invocation count: 2.</li>
+     *     <li><strong>Scenario 5:</strong> Missing required attributes in refusal orders (e.g., email) - expected invocation count: 0.</li>
+     *     <li><strong>Scenario 6:</strong> Multiple refusal orders with matching IDs - expected invocation count: 4.</li>
+     *     <li><strong>Scenario 7:</strong> Mismatched refusal order IDs and refusal orders - expected invocation count: 0.</li>
+     *     <li><strong>Scenario 8:</strong> Refusal order without ID - expected invocation count: 0.</li>
+     * </ul>
+     */
     private static Stream<Arguments> invokeNotificationServiceForRefusalOrdersData() {
         UUID uuidOne = UUID.randomUUID();
         UUID uuidTwo = UUID.randomUUID();
@@ -137,7 +154,7 @@ class ApproveDraftOrdersSubmittedHandlerTest {
                         .id(uuidTwo)
                         .value(RefusedOrder.builder().submittedByEmail("abc@abc.com").build())
                         .build()
-                )).build(), 4), // two ids with two refusal orders
+                )).build(), 4), // four ids with two refusal orders
             Arguments.of(DraftOrdersWrapper.builder()
                 .approveOrdersConfirmationBody("Confirmation body 7")
                 .refusalOrderIdsToBeSent(List.of(
