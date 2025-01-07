@@ -221,10 +221,7 @@ public class GeneralOrderService {
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 if (order != null && order.getAdditionalDocument() != null) {
-                    String filename = order.getAdditionalDocument().getDocumentFilename();
-                    String documentId = getDocumentId(order.getAdditionalDocument());
-                    dynamicListElements.add(partyService.getDynamicMultiSelectListElement(documentId,
-                        "Judiciary Outcome tab" + " - " + filename));
+                    appendDynamicListElement(dynamicListElements, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
                 }
             });
         }
@@ -232,23 +229,26 @@ public class GeneralOrderService {
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
-            hearingOrderDocuments.forEach(obj -> {
-                CaseDocument document = obj.getValue().getUploadDraftDocument();
-                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
-                    "Case documents tab [Approved Order]" + " - " + document.getDocumentFilename()));
-            });
+            hearingOrderDocuments.forEach(obj ->
+                appendDynamicListElement(dynamicListElements, obj.getValue().getUploadDraftDocument(), "Case documents tab [Approved Order] - %s"));
         }
 
-        ofNullable(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).orElse(List.of()).stream()
-            .filter(d -> PROCESSED == d.getValue().getOrderStatus())
-            .forEach(obj -> {
-                CaseDocument document = obj.getValue().getTargetDocument();
-                dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
-                    "Approved order - " + document.getDocumentFilename()));
-            });
+        populateProcessedAgreedDraftOrderToOrdersToShare(data, dynamicListElements);
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
         data.setOrdersToShare(dynamicOrderList);
+    }
+
+    private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
+        ofNullable(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).orElse(List.of()).stream()
+            .filter(d -> PROCESSED == d.getValue().getOrderStatus())
+            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getTargetDocument(), "Approved order - %s"));
+    }
+
+    private void appendDynamicListElement(List<DynamicMultiSelectListElement> dynamicListElements,
+                                          CaseDocument document, String format) {
+        dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
+            String.format(format, document.getDocumentFilename())));
     }
 
     private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
