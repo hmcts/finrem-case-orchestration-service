@@ -129,7 +129,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
 
-
     private void shareAndSendHearingDocuments(FinremCaseDetails caseDetails,
                                               List<CaseDocument> hearingOrders,
                                               List<String> partyList,
@@ -147,7 +146,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
                                                          List<CaseDocument> hearingOrders,
                                                          String authorisationToken) {
-
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Creating hearing document pack for caseId {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
@@ -168,12 +166,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         return orders;
     }
 
-
     private void shareAndSendGeneralOrderWithSelectedParties(FinremCaseDetails caseDetails,
                                                              List<String> partyList,
                                                              DynamicMultiSelectList selectedOrders,
                                                              List<OrderSentToPartiesCollection> printOrderCollection) {
-
         Long caseId = caseDetails.getId();
         log.info("Share selected 'GeneralOrder' With selected parties for caseId {}", caseId);
 
@@ -195,7 +191,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             });
         }
     }
-
 
     private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder,
                                          String authToken) {
