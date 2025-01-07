@@ -3,18 +3,23 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -31,28 +36,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,34 +69,54 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-public class GeneralOrderServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class GeneralOrderServiceTest {
 
-    @Autowired
-    private GeneralOrderService generalOrderService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private DocumentHelper documentHelper;
-    @Autowired
+    private UUID uuid;
+    protected String caseId = "123123123";
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Mock
     private DocumentConfiguration documentConfiguration;
-    @MockBean
+    @Mock
     private FeatureToggleService featureToggleService;
-    @MockBean
+    @Mock
     private GenericDocumentService genericDocumentService;
-
+    @Mock
+    private LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
+    @Mock
+    private InternationalPostalService postalService;
+    @Mock
+    private PartyService partyService;
+    @Spy
+    private CaseDataService caseDataService = new CaseDataService(objectMapper);
+    @Spy
+    @InjectMocks
+    private GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
-    private UUID uuid;
+    @Spy
+    private DocumentHelper documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService,
+        new FinremCaseDetailsMapper(objectMapper), letterAddresseeGeneratorMapper, postalService);
 
-    @Before
-    public void setUp() {
+    @InjectMocks
+    private GeneralOrderService generalOrderService;
+
+    @BeforeEach
+    void setUp() {
         uuid = UUID.fromString("2ec43a65-3614-4b53-ab89-18252855f399");
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+
+        lenient().when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        lenient().when(documentConfiguration.getGeneralOrderFileName()).thenReturn("generalOrder.pdf");
+        lenient().when(documentConfiguration.getGeneralOrderTemplate(any(CaseDetails.class))).thenReturn("FL-FRM-GOR-ENG-00484.docx");
+
+        // Inject the manually created instance into the service
+        ReflectionTestUtils.setField(generalOrderService, "generalOrderDocumentCategoriser", generalOrderDocumentCategoriser);
     }
 
     @Test
-    public void generateGeneralOrderConsented() throws Exception {
+    void generateGeneralOrderConsented() throws Exception {
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
@@ -102,7 +126,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateGeneralOrderContested() throws Exception {
+    void generateGeneralOrderContested() throws Exception {
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, contestedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
@@ -112,7 +136,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testAddContestedGeneralOrderToCollection() throws Exception {
+    void testAddContestedGeneralOrderToCollection() throws Exception {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = contestedFinremCaseDetails();
 
@@ -120,34 +144,30 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrders();
-        assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename(),
-            is("generalOrder.pdf"));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
+        assertThat(generalOrders).hasSize(2);
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("generalOrder.pdf", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl());
 
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is("Applicant"));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            generalOrders.get(1).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg", generalOrders.get(1).getValue().getAdditionalDocument().getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            generalOrders.get(1).getValue().getAdditionalDocument().getDocumentBinaryUrl());
+        assertEquals("Applicant", generalOrders.get(1).getValue().getGeneralOrderAddressTo());
 
         CaseDocument latestGeneralOrder = generalOrderWrapper.getGeneralOrderLatestDocument();
-        assertThat(latestGeneralOrder.getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        generalOrders.forEach(order -> assertThat(order.getValue().getAdditionalDocument().getCategoryId(),
-            is(DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId())));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            latestGeneralOrder.getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg", latestGeneralOrder.getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            latestGeneralOrder.getDocumentBinaryUrl());
+        generalOrders.forEach(order -> assertEquals(DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId(),
+            order.getValue().getAdditionalDocument().getCategoryId()));
     }
 
     @Test
-    public void testAddConsentedInContestedGeneralOrderInCollection() throws Exception {
+    void testAddConsentedInContestedGeneralOrderInCollection() throws Exception {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCaseDetails caseDetails = consentedInContestedFinremCaseDetails();
 
@@ -156,70 +176,68 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrdersConsent();
 
-        assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename(),
-            is("app_docs.pdf"));
-        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
+        assertThat(generalOrders).hasSize(2);
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("app_docs.pdf", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary",
+            generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl());
 
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is("Applicant"));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            generalOrders.get(1).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+            generalOrders.get(1).getValue().getAdditionalDocument().getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            generalOrders.get(1).getValue().getAdditionalDocument().getDocumentBinaryUrl());
+        assertEquals("Applicant", generalOrders.get(1).getValue().getGeneralOrderAddressTo());
 
         CaseDocument latestGeneralOrder = generalOrderWrapper.getGeneralOrderLatestDocument();
-        assertThat(latestGeneralOrder.getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        generalOrders.forEach(order -> assertThat(order.getValue().getAdditionalDocument().getCategoryId(),
-            is(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId())));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            latestGeneralOrder.getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+            latestGeneralOrder.getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            latestGeneralOrder.getDocumentBinaryUrl());
+        generalOrders.forEach(order -> assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
+            order.getValue().getAdditionalDocument().getCategoryId()));
     }
 
     @Test
-    public void testAddConsentedGeneralOrderToCollection() throws Exception {
+    void testAddConsentedGeneralOrderToCollection() throws Exception {
         FinremCaseDetails caseDetails = consentedFinremCaseDetails();
 
         generalOrderService.addConsentedGeneralOrderToCollection(caseDetails.getData());
 
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<GeneralOrderCollectionItem> generalOrders = generalOrderWrapper.getGeneralOrderCollection();
-        assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getId(), is("1234"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentFilename(),
-            is("app_docs.pdf"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentBinaryUrl(),
-            is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
+        assertThat(generalOrders).hasSize(2);
+        assertEquals("1234", generalOrders.get(0).getId());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb",
+            generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl());
+        assertEquals("app_docs.pdf",
+            generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentFilename());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary",
+            generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentBinaryUrl());
 
-        assertThat(generalOrders.get(1).getId(), notNullValue());
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrderAddressTo(), is("Applicant"));
+        assertNotNull(generalOrders.get(1).getId());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+            generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            generalOrders.get(1).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentBinaryUrl());
+        assertEquals("Applicant", generalOrders.get(1).getGeneralOrder().getGeneralOrderAddressTo());
 
         CaseDocument latestGeneralOrder = generalOrderWrapper.getGeneralOrderLatestDocument();
-        assertThat(latestGeneralOrder.getDocumentUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
-            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+            latestGeneralOrder.getDocumentUrl());
+        assertEquals("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+            latestGeneralOrder.getDocumentFilename());
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            latestGeneralOrder.getDocumentBinaryUrl());
     }
 
     @Test
-    public void generateGeneralOrderConsentedInContested() throws Exception {
+    void generateGeneralOrderConsentedInContested() throws Exception {
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedInContestedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
@@ -229,7 +247,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
+    void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(details.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
         CaseDocument pdfDoc = buildCaseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
@@ -237,12 +255,12 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             "test.pdf");
         when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseId)).thenReturn(pdfDoc);
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
-        assertThat(latestGeneralOrder.getBinaryFileUrl(),
-            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            latestGeneralOrder.getBinaryFileUrl());
     }
 
     @Test
-    public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
+    void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
@@ -250,7 +268,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenRequestedOrderList_and_notshared_before_returnList() {
+    void whenRequestedOrderList_and_notshared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -264,12 +282,12 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         data.setUploadHearingOrder(hearingOrderDocuments);
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("One document available to share with other parties", 1, data.getOrdersToShare().getListItems().size());
+        assertThat(data.getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(1);
     }
 
 
     @Test
-    public void whenRequestedGeneralOrderListPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
+    void whenRequestedGeneralOrderListPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -288,12 +306,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("Not document available to share with other parties", 0,
-            data.getOrdersToShare().getListItems().size());
+        assertThat(data.getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
     }
 
     @Test
-    public void whenRequestedGeneralOrderListIsEmptyPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
+    void whenRequestedGeneralOrderListIsEmptyPresentButGeneralOrderIsNotThere_and_shared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -316,12 +333,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("Not document available to share with other parties", 0,
-            data.getOrdersToShare().getListItems().size());
+        assertThat(data.getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
     }
 
     @Test
-    public void whenRequestedOrderList_and_shared_before_returnList() {
+    void whenRequestedOrderList_and_shared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -345,14 +361,14 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         data.setOrdersToShare(selectList);
 
+        when(partyService.getDynamicMultiSelectListElement(anyString(), anyString())).thenReturn(DynamicMultiSelectListElement.builder().build());
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("One document available to share with other parties", 2,
-            data.getOrdersToShare().getListItems().size());
+        assertThat(data.getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(2);
     }
 
     @Test
-    public void givenContestedCase_whenRequestedParies_thenReturnParties() {
+    void givenContestedCase_whenRequestedParies_thenReturnParties() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -372,12 +388,12 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         data.setPartiesOnCase(parties);
 
         List<String> partyList = generalOrderService.getParties(caseDetails);
-        assertEquals("6 parties availablle ", 6, partyList.size());
+        assertThat(partyList).as("6 parties available ").hasSize(6);
     }
 
 
     @Test
-    public void isOrderSharedWithApplicant() {
+    void isOrderSharedWithApplicant() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -407,7 +423,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenContestedCaseWhenRequestedHearingOrderToProcess_thenReturnList() {
+    void givenContestedCaseWhenRequestedHearingOrderToProcess_thenReturnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -433,7 +449,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
-        assertEquals("One document available to share with other parties", 1, documentList.size());
+        assertThat(documentList).as("One document available to share with other parties").hasSize(1);
     }
 
 
@@ -509,9 +525,9 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+        assertEquals(FILE_NAME, result.getDocumentFilename());
+        assertEquals(DOC_URL, result.getDocumentUrl());
+        assertEquals(BINARY_URL, result.getDocumentBinaryUrl());
     }
 
     private CaseDetails consentedInContestedCaseDetails() throws Exception {
@@ -523,57 +539,51 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     void verifyAdditionalFieldsConsented() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
-                eq(getGeneralOrderFileNameWithDateTimeStamp()));
+                eq("FL-FRM-GOR-ENG-00484.docx"),
+                argThat(fileName -> fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf")));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
-        assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
-        assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
-        assertThat(data.get("GeneralOrderCourt"), is("SITTING in private"));
-        assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
-        assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("2020-01-01"));
-        assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
-        assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
-    }
-
-    private String getGeneralOrderFileNameWithDateTimeStamp() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        LocalDateTime now = LocalDateTime.now();
-        String dateTimeString = now.format(formatter);
-        String str = documentConfiguration.getGeneralOrderFileName();
-        return new StringBuilder(str).insert(str.length() - 4, "-" + dateTimeString).toString();
+        assertEquals("DD12D12345", data.get("DivorceCaseNumber"));
+        assertEquals("Consented Applicant Name", data.get("ApplicantName"));
+        assertEquals("Consented Respondent Name", data.get("RespondentName"));
+        assertEquals("SITTING in private", data.get("GeneralOrderCourt"));
+        assertEquals("His Honour Judge Consented", data.get("GeneralOrderJudgeDetails"));
+        assertEquals("Consented Recitals", data.get("GeneralOrderRecitals"));
+        assertEquals("2020-01-01", data.get("GeneralOrderDate"));
+        assertEquals("Test is dummy text for consented", data.get("GeneralOrderBodyText"));
+        assertEquals("Sitting in the Family Court", data.get("GeneralOrderHeaderOne"));
     }
 
     void verifyAdditionalFieldsContested() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
-                eq(getGeneralOrderFileNameWithDateTimeStamp()));
+                eq("FL-FRM-GOR-ENG-00484.docx"),
+                argThat(fileName ->
+                    fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf"))
+            );
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
-        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
-        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(data.get("GeneralOrderCourt"), is("Nottingham County Court and Family Court"));
-        assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
-        assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("2020-06-01"));
-        assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
-        assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
-        assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
-        assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+        assertEquals("DD98D76543", data.get("DivorceCaseNumber"));
+        assertEquals("Contested Applicant Name", data.get("ApplicantName"));
+        assertEquals("Contested Respondent Name", data.get("RespondentName"));
+        assertEquals("Nottingham County Court and Family Court", data.get("GeneralOrderCourt"));
+        assertEquals("Her Honour Judge Contested", data.get("GeneralOrderJudgeDetails"));
+        assertEquals("Contested Recitals", data.get("GeneralOrderRecitals"));
+        assertEquals("2020-06-01", data.get("GeneralOrderDate"));
+        assertEquals("Test is dummy text for contested", data.get("GeneralOrderBodyText"));
+        assertEquals("In the Family Court", data.get("GeneralOrderHeaderOne"));
+        assertEquals("sitting in the", data.get("GeneralOrderHeaderTwo"));
+        assertEquals("SITTING AT the Family Court at the ", data.get("GeneralOrderCourtSitting"));
         Map<String, Object> court = convertToMap(data.get("courtDetails"));
 
-        assertThat(court.get("courtName"), is("Nottingham County Court And Family Court"));
-        assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
-        assertThat(court.get("phoneNumber"), is("0115 910 3504"));
-        assertThat(court.get("email"), is("FRCNottingham@justice.gov.uk"));
+        assertEquals("Nottingham County Court And Family Court", court.get("courtName"));
+        assertEquals("60 Canal Street, Nottingham NG1 7EJ", court.get("courtAddress"));
+        assertEquals("0115 910 3504", court.get("phoneNumber"));
+        assertEquals("FRCNottingham@justice.gov.uk", court.get("email"));
     }
 
     @Test
-    public void isSelectedGeneralOrderMatchesReturnTrue() {
+    void isSelectedGeneralOrderMatchesReturnTrue() {
         DynamicMultiSelectListElement listElement
             = DynamicMultiSelectListElement.builder().code(getDocumentId(caseDocument()))
             .label(caseDocument().getDocumentFilename()).build();
@@ -593,9 +603,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
     }
 
-
     @Test
-    public void isSelectedGeneralOrderNotMatchesReturnFalse() {
+    void isSelectedGeneralOrderNotMatchesReturnFalse() {
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(caseDocument()));
 
         DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
@@ -610,7 +619,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void isSelectedGeneralOrderNotMatchesSelectedDocumentIsNullReturnFalse() {
+    void isSelectedGeneralOrderNotMatchesSelectedDocumentIsNullReturnFalse() {
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(caseDocument()));
 
         DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
@@ -621,7 +630,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void isCommunicationEnabledCorrectlyForSelectedParties() {
+    void isCommunicationEnabledCorrectlyForSelectedParties() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -630,18 +639,18 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             CaseRole.RESP_SOLICITOR.getCcdCode(), CaseRole.INTVR_SOLICITOR_1.getCcdCode(),
             CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_SOLICITOR_3.getCcdCode(),
             CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
-        assertThat(data.isApplicantCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithApplicant(caseDetails)));
-        assertThat(data.isRespondentCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithRespondent(caseDetails)));
-        assertThat(data.getIntervenerOne().getIntervenerCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithIntervener1(caseDetails)));
-        assertThat(data.getIntervenerTwo().getIntervenerCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithIntervener2(caseDetails)));
-        assertThat(data.getIntervenerThree().getIntervenerCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithIntervener3(caseDetails)));
-        assertThat(data.getIntervenerFour().getIntervenerCorrespondenceEnabled(),
-            equalTo(generalOrderService.isOrderSharedWithIntervener4(caseDetails)));
+        assertEquals(data.isApplicantCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithApplicant(caseDetails));
+        assertEquals(data.isRespondentCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithRespondent(caseDetails));
+        assertEquals(data.getIntervenerOne().getIntervenerCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithIntervener1(caseDetails));
+        assertEquals(data.getIntervenerTwo().getIntervenerCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithIntervener2(caseDetails));
+        assertEquals(data.getIntervenerThree().getIntervenerCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithIntervener3(caseDetails));
+        assertEquals(data.getIntervenerFour().getIntervenerCorrespondenceEnabled(),
+            generalOrderService.isOrderSharedWithIntervener4(caseDetails));
     }
 
     private DynamicMultiSelectList buildDynamicSelectableParties() {
@@ -716,4 +725,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         return collections;
     }
 
+    protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
+        return caseDocument(url, filename, binaryUrl);
+    }
 }
