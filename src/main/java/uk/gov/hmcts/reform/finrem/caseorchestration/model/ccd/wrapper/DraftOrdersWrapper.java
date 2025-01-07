@@ -42,6 +42,7 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     private String typeOfDraftOrder;
     private YesOrNo showUploadPartyQuestion;
+    private String consentApplicationGuidanceText;
 
     @JsonProperty("uploadSuggestedDraftOrder")
     private UploadSuggestedDraftOrder uploadSuggestedDraftOrder;
