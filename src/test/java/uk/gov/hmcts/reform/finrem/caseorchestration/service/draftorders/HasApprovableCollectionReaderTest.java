@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
@@ -76,12 +75,22 @@ class HasApprovableCollectionReaderTest {
         );
         List<DraftOrdersReviewCollection> result = underTest.filterAndCollectDraftOrderDocs(sample, collector, REFUSED::equals);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getValue().getDraftOrderDocReviewCollection()).hasSize(1);
-        assertEquals(draftOrderDocument2, result.get(0).getValue().getDraftOrderDocReviewCollection().get(0).getValue().getDraftOrderDocument());
+        assertThat(result)
+            .hasSize(1)
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .extracting(DraftOrdersReview::getDraftOrderDocReviewCollection)
+            .allSatisfy(draftOrderDocReviewCollection ->
+                assertThat(draftOrderDocReviewCollection)
+                    .hasSize(1)
+                    .extracting(DraftOrderDocReviewCollection::getValue)
+                    .extracting(DraftOrderDocumentReview::getDraftOrderDocument)
+                    .containsExactly(draftOrderDocument2));
 
-        assertThat(collector).hasSize(1);
-        assertEquals(draftOrderDocument1, collector.get(0).getValue().getDraftOrderDocument());
+        assertThat(collector)
+            .hasSize(1)
+            .extracting(DraftOrderDocReviewCollection::getValue)
+            .extracting(DraftOrderDocumentReview::getDraftOrderDocument)
+            .containsExactly(draftOrderDocument1);
     }
 
     @Test
@@ -120,11 +129,16 @@ class HasApprovableCollectionReaderTest {
         );
         List<DraftOrdersReviewCollection> result = underTest.filterAndCollectPsaDocs(sample, collector, REFUSED::equals);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getValue().getPsaDocReviewCollection()).hasSize(1);
-        assertThat(result.get(1).getValue().getPsaDocReviewCollection()).hasSize(1);
-        assertEquals(psaDocument2, result.get(0).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument());
-        assertEquals(psaDocument4, result.get(1).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument());
+        assertThat(result)
+            .hasSize(2)
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .extracting(DraftOrdersReview::getPsaDocReviewCollection)
+            .allSatisfy(psaDocReviewCollection -> assertThat(psaDocReviewCollection).hasSize(1));
+
+        assertThat(result.get(0).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument())
+            .isEqualTo(psaDocument2);
+        assertThat(result.get(1).getValue().getPsaDocReviewCollection().get(0).getValue().getPsaDocument())
+            .isEqualTo(psaDocument4);
 
         assertThat(collector).hasSize(2)
             .extracting(PsaDocReviewCollection::getValue)
