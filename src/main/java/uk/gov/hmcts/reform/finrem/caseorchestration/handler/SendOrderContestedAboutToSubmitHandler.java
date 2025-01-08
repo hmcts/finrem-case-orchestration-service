@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-
 @Slf4j
 @Service
 public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
