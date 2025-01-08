@@ -139,7 +139,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
         sendOrderPartyDocumentList.forEach(
             handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
-
     }
 
     private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
