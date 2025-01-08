@@ -429,7 +429,6 @@ class GeneralOrderServiceTest {
         assertTrue(generalOrderService.isOrderSharedWithIntervener2(caseDetails));
         assertTrue(generalOrderService.isOrderSharedWithIntervener3(caseDetails));
         assertTrue(generalOrderService.isOrderSharedWithIntervener4(caseDetails));
-
     }
 
     @Test
@@ -461,7 +460,6 @@ class GeneralOrderServiceTest {
 
         assertThat(documentList).as("One document available to share with other parties").hasSize(1);
     }
-
 
     private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
         return DynamicMultiSelectListElement.builder()
@@ -806,5 +804,35 @@ class GeneralOrderServiceTest {
             .as("The finalised orders should appear in ordersToShare.")
             .hasSize(2)
             .containsExactly(expectedDynamicListElementA, expectedDynamicListElementB);
+    }
+
+    @Test
+    void givenContestedCaseWhenRequestedHearingOrderToProcess_thenReturnListFromFinalisedOrder() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionOrderCollection> hearingOrderDocuments = List.of(
+            DirectionOrderCollection.builder()
+                .id(uuid.toString())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .build());
+
+        data.setUploadHearingOrder(hearingOrderDocuments);
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
+            caseDocument()));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setOrdersToShare(selectList);
+
+        List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
+
+        assertThat(documentList).as("One document available to share with other parties").hasSize(1);
     }
 }

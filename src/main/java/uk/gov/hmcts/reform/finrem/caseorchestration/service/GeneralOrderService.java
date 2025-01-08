@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
@@ -33,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -326,22 +329,28 @@ public class GeneralOrderService {
 
     public List<CaseDocument> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
         FinremCaseData caseData = caseDetails.getData();
-        List<CaseDocument> orders = new ArrayList<>();
+        final List<CaseDocument> orders = new ArrayList<>();
+
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
-        if (selectedDocs != null && hearingOrders != null) {
-            List<DynamicMultiSelectListElement> docs = selectedDocs.getValue();
-            docs.forEach(doc -> hearingOrders.forEach(obj -> addToList(doc, obj, orders, caseDetails.getId())));
+        List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
+        List<AgreedDraftOrderCollection> agreedDraftOrderCollection = ofNullable(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .orElse(List.of())
+            .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
+
+        if (selectedDocs != null) {
+            List<DynamicMultiSelectListElement> selected = selectedDocs.getValue();
+            selected.forEach(checkboxSelected -> {
+                boolean addedToOrders = populateSelectedUploadHearingOrder(orders, hearingOrders, checkboxSelected);
+                if (!addedToOrders) { // if addedToOrders equals to true then break the loop
+                    addedToOrders = populateSelectedFinalisedOrders(orders, finalisedOrders, checkboxSelected);
+                }
+                if (!addedToOrders) {
+                    populateSelectedProcessedOrders(orders, agreedDraftOrderCollection, checkboxSelected);
+                }
+            });
+
         }
         return orders;
-    }
-
-    private void addToList(DynamicMultiSelectListElement doc, DirectionOrderCollection obj,
-                           List<CaseDocument> orders, Long caseId) {
-        if (getDocumentId(obj.getValue().getUploadDraftDocument()).equals(doc.getCode())) {
-            CaseDocument caseDocument = obj.getValue().getUploadDraftDocument();
-            log.info("Adding document to orders {} for Case ID: {}", caseDocument, caseId);
-            orders.add(caseDocument);
-        }
     }
 
     public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, ContestedGeneralOrder order) {
@@ -367,5 +376,31 @@ public class GeneralOrderService {
             data.getIntervenerFour()
                 .setIntervenerCorrespondenceEnabled(isOrderSharedWithIntervener4(caseDetails));
         });
+    }
+
+    private boolean populateSelectedUploadHearingOrder(List<CaseDocument> orders, List<DirectionOrderCollection> hearingOrders,
+                                                       DynamicMultiSelectListElement checkboxSelected) {
+        return addToOrders(checkboxSelected, hearingOrders, obj -> obj.getValue().getUploadDraftDocument(), orders);
+    }
+
+    private boolean populateSelectedFinalisedOrders(List<CaseDocument> orders, List<FinalisedOrderCollection> finalisedOrders,
+                                                    DynamicMultiSelectListElement checkboxSelected) {
+        return addToOrders(checkboxSelected, finalisedOrders, obj -> obj.getValue().getFinalisedDocument(), orders);
+    }
+
+    private void populateSelectedProcessedOrders(List<CaseDocument> orders, List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
+                                                 DynamicMultiSelectListElement checkboxSelected) {
+        addToOrders(checkboxSelected, agreedDraftOrderCollection, obj -> obj.getValue().getTargetDocument(), orders);
+    }
+
+    private <T> boolean addToOrders(DynamicMultiSelectListElement doc, List<T> collection, Function<T, CaseDocument> documentExtractor,
+                                    List<CaseDocument> orders) {
+        return ofNullable(collection).orElse(List.of()).stream()
+            .map(documentExtractor)
+            .filter(Objects::nonNull)
+            .filter(caseDocument -> getDocumentId(caseDocument).equals(doc.getCode()))
+            .findFirst()
+            .map(orders::add)
+            .orElse(false);
     }
 }
