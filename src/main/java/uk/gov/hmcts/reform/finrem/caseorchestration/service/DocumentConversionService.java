@@ -102,7 +102,9 @@ public class DocumentConversionService {
                     float appearanceHeight = (float) appearanceStream.getBBox().getHeight();
 
                     if (appearanceWidth > 0 && appearanceHeight > 0) {
-                        try (PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                        try (PDPageContentStream contentStream =
+                                 new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND,
+                                     true, true)) {
                             contentStream.saveGraphicsState();
                             float x = (float) annotation.getRectangle().getLowerLeftX();
                             float y = (float) annotation.getRectangle().getLowerLeftY();
