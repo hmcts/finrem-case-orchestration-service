@@ -14,8 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
-import java.util.List;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -37,7 +35,7 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return SUBMITTED.equals(callbackType) && CONTESTED.equals(caseType)
-            && List.of(DIRECTION_UPLOAD_ORDER, DIRECTION_UPLOAD_ORDER).contains(eventType);
+            && DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
