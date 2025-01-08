@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -81,6 +84,44 @@ public class DocumentConversionServiceTest {
 
         // Flatten the PDF using the method under test
         byte[] flattenedPdfBytes = documentConversionService.flattenPdfDocument(editedPdfBytes);
+
+        // Load the flattened PDF and check that form fields have been removed/flattened
+        try (PDDocument flattenedDoc = Loader.loadPDF(flattenedPdfBytes)) {
+            PDAcroForm flattenedAcroForm = flattenedDoc.getDocumentCatalog().getAcroForm();
+            assertTrue("AcroForm should be flattened", ObjectUtils.isEmpty(flattenedAcroForm.getFields()));
+        }
+    }
+
+    @Test
+    public void testFlattenAnnotations() throws IOException {
+
+        byte[] editedPdfBytes = loadResource("/fixtures/D11Annotations.pdf");
+
+        // Ensure the original PDF has an AcroForm and at least one form field
+        try (PDDocument originalDoc = Loader.loadPDF(editedPdfBytes)) {
+            PDAcroForm originalAcroForm = originalDoc.getDocumentCatalog().getAcroForm();
+            assertNotNull("Document should have an AcroForm", originalAcroForm);
+            for (PDPage page : originalDoc.getPages()) {
+                List<PDAnnotation> annotations = page.getAnnotations();
+                assertFalse("Document should have Annotations", annotations.isEmpty());
+            }
+        }
+
+        // Flatten the PDF using the method under test
+        byte[] flattenedPdfBytes = documentConversionService.flattenPdfDocument(editedPdfBytes);
+
+        // Load the flattened PDF for validation
+        try (PDDocument document = Loader.loadPDF(flattenedPdfBytes)) {
+            for (PDPage page : document.getPages()) {
+                List<PDAnnotation> annotations = page.getAnnotations();
+                assertTrue("Annotations were not removed after flattening.", annotations.isEmpty());
+            }
+        }
+
+
+
+
+
 
         // Load the flattened PDF and check that form fields have been removed/flattened
         try (PDDocument flattenedDoc = Loader.loadPDF(flattenedPdfBytes)) {
