@@ -105,9 +105,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 });
             }
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
-            caseData.setAdditionalDocument(null);
             setConsolidateView(caseDetails, parties);
-            caseData.setOrdersToShare(new DynamicMultiSelectList());
+
+            clearTemporaryFields(caseData);
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
@@ -117,6 +117,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseDetails.getData()).build();
+    }
+
+    private void clearTemporaryFields(FinremCaseData caseData) {
+        caseData.setAdditionalDocument(null);
+        caseData.setOrdersToShare(new DynamicMultiSelectList());
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,
