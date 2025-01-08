@@ -128,8 +128,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                     List<String> partyList) {
         Long caseId = caseDetails.getId();
         log.info("Setting Documents for Case ID: {}", caseId);
-        sendOrderPartyDocumentList.forEach(
-            handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
+        sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnPartiesTab(caseDetails, partyList));
     }
 
     private void shareAndSendHearingDocuments(FinremCaseDetails caseDetails,
@@ -141,8 +140,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Share Hearing Documents for Case ID: {}", caseId);
         List<CaseDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, userAuthorisation);
         hearingDocumentPack.forEach(doc -> printOrderCollection.add(addToPrintOrderCollection(doc)));
-        sendOrderPartyDocumentList.forEach(
-            handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
+        sendOrderPartyDocumentList.forEach(handler -> handler.setUpOrderDocumentsOnCase(caseDetails, partyList, hearingDocumentPack));
     }
 
     private List<CaseDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
