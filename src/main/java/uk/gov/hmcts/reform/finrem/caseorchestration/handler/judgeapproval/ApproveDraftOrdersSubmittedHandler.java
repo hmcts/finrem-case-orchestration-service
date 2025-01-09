@@ -28,6 +28,8 @@ import static java.util.Optional.ofNullable;
 public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
     private final RefusedOrderCorresponder refusedOrderCorresponder;
 
+    private static final String CONFIRMATION_HEADER = "# Draft orders reviewed";
+
     public ApproveDraftOrdersSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               RefusedOrderCorresponder refusedOrderCorresponder) {
         super(finremCaseDetailsMapper);
@@ -50,7 +52,12 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         sendRefusalOrderToParties(caseDetails, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        String confirmationBody = caseDetails.getData().getDraftOrdersWrapper().getApproveOrdersConfirmationBody();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .confirmationHeader(CONFIRMATION_HEADER)
+            .confirmationBody(confirmationBody)
+            .build();
     }
 
     private void sendRefusalOrderToParties(FinremCaseDetails finremCaseDetails, String userAuthorisation) {

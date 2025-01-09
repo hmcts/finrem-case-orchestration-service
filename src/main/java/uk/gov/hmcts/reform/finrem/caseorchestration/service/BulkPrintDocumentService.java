@@ -44,7 +44,7 @@ public class BulkPrintDocumentService {
             String documentFilename = caseDocument.getDocumentFilename();
             log.info("checking encryption for file {} for Case ID: {}", documentFilename, caseId);
             byte[] pdfBytes;
-            if (documentFilename.endsWith(".doc") || documentFilename.endsWith(".docx")) {
+            if (documentFilename.toLowerCase().endsWith(".doc") || documentFilename.toLowerCase().endsWith(".docx")) {
                 Document document = Document.builder().url(caseDocument.getDocumentUrl())
                     .binaryUrl(caseDocument.getDocumentBinaryUrl())
                     .fileName(caseDocument.getDocumentFilename())

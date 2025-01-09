@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadDraftOrderAboutToStartHandlerTest {
+class UploadDraftOrdersAboutToStartHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersAboutToStartHandler handler;
@@ -136,5 +140,46 @@ class UploadDraftOrderAboutToStartHandlerTest {
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
+    }
+
+    @ParameterizedTest
+    @MethodSource("testConsentApplicationGuidanceText")
+    void testConsentApplicationGuidanceText(CaseRole caseRole, boolean textContainsLink) {
+        long caseID = 1727874196328932L;
+        CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
+            .caseRole(caseRole.getCcdCode())
+            .build();
+        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
+            CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(List.of(caseAssignedUserRole))
+                .build());
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
+        var response = handler.handle(request, AUTH_TOKEN);
+        String guidanceText = response.getData().getDraftOrdersWrapper().getConsentApplicationGuidanceText();
+
+        String expectedGuidanceText = textContainsLink
+            ? "Use the '<a href=\"/cases/case-details/${[CASE_REFERENCE]}/trigger/FR_consentOrder/FR_consentOrder1\">"
+            + "consent order</a>' event if you need to upload a consent order to finalise the contested proceedings."
+            : "Use the 'consent order' event if you need to upload a consent order to finalise the contested proceedings.";
+
+        assertThat(guidanceText).isEqualTo(expectedGuidanceText);
+    }
+
+    private static Stream<Arguments> testConsentApplicationGuidanceText() {
+        return Stream.of(
+            Arguments.of(CaseRole.APP_SOLICITOR, true),
+            Arguments.of(CaseRole.RESP_SOLICITOR, true),
+            Arguments.of(CaseRole.APP_BARRISTER, true),
+            Arguments.of(CaseRole.RESP_BARRISTER, true),
+            Arguments.of(CaseRole.INTVR_BARRISTER_1, true),
+            Arguments.of(CaseRole.INTVR_BARRISTER_2, true),
+            Arguments.of(CaseRole.INTVR_BARRISTER_3, true),
+            Arguments.of(CaseRole.INTVR_BARRISTER_4, true),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1, false),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2, false),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3, false),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4, false)
+        );
     }
 }
