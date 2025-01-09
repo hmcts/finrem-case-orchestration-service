@@ -118,11 +118,6 @@ public class DocumentConversionServiceTest {
             }
         }
 
-
-
-
-
-
         // Load the flattened PDF and check that form fields have been removed/flattened
         try (PDDocument flattenedDoc = Loader.loadPDF(flattenedPdfBytes)) {
             PDAcroForm flattenedAcroForm = flattenedDoc.getDocumentCatalog().getAcroForm();
