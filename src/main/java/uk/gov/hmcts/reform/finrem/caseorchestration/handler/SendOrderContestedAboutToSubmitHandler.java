@@ -158,8 +158,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
         if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-            latestAdditionalHearingDocument.ifPresent(
-                orders::add);
+            latestAdditionalHearingDocument.ifPresent(orders::add);
         }
 
         List<CaseDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, authorisationToken);
