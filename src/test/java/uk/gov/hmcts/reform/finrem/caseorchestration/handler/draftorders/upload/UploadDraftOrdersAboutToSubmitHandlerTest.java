@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -110,8 +109,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenValidPsaAndOrderDetailsWithAttachments_whenHandle_thenMapCorrectly(boolean withUploadParty) {
+    @MethodSource("provideSuggestedDraftOrders")
+    void givenValidPsaAndOrderDetailsWithAttachments_whenHandle_thenMapCorrectly(CaseRole userCaseRole,
+                                                                                 String uploadOnBehalfOf,
+                                                                                 String submittedByEmail) {
         // Given
         final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
@@ -134,18 +135,18 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build());
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(Arrays.asList(ORDER_TYPE, PSA_TYPE));
-        caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setSuggestedPsaCollection((List.of(psaCollection)));
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(orderCollection)));
 
-        if (withUploadParty) {
-            caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(createUploadParty());
-        }
+        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(createUploadParty(uploadOnBehalfOf));
+
+        caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
         CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(List.of(
                 CaseAssignedUserRole.builder()
-                    .caseRole(withUploadParty ? CaseRole.CASEWORKER.getCcdCode() : CaseRole.APP_SOLICITOR.getCcdCode())
+                    .caseRole(userCaseRole.getCcdCode())
                     .build()
             ))
             .build();
@@ -168,19 +169,28 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult.getSubmittedBy()).isNotNull();
-        assertThat(draftOrderResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
+        assertThat(draftOrderResult.getSubmittedByEmail()).isEqualTo(submittedByEmail);
         assertThat(draftOrderResult.getPensionSharingAnnex()).isNull();
         assertThat(draftOrderResult.getDraftOrder()).isNotNull();
         assertThat(draftOrderResult.getAttachments()).isNotNull();
-        assertThat(draftOrderResult.getUploadedOnBehalfOf()).isEqualTo(withUploadParty ? UPLOAD_PARTY_APPLICANT : null);
+        assertThat(draftOrderResult.getUploadedOnBehalfOf()).isEqualTo(uploadOnBehalfOf);
 
         SuggestedDraftOrder psaResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(psaResult.getSubmittedBy()).isNotNull();
-        assertThat(psaResult.getSubmittedByEmail()).isEqualTo(withUploadParty ? null : "Hamzah@hamzah.com");
+        assertThat(psaResult.getSubmittedByEmail()).isEqualTo(submittedByEmail);
         assertThat(psaResult.getPensionSharingAnnex()).isNotNull();
         assertThat(psaResult.getDraftOrder()).isNull();
         assertThat(psaResult.getAttachments()).isNull();
-        assertThat(psaResult.getUploadedOnBehalfOf()).isEqualTo(withUploadParty ? UPLOAD_PARTY_APPLICANT : null);
+        assertThat(psaResult.getUploadedOnBehalfOf()).isEqualTo(uploadOnBehalfOf);
+    }
+
+    private static Stream<Arguments> provideSuggestedDraftOrders() {
+        return Stream.of(
+            Arguments.of(CaseRole.APP_SOLICITOR, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.RESP_SOLICITOR, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_RESPONDENT, null)
+        );
     }
 
     @Test
@@ -224,7 +234,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(
             orderCollection1, orderCollection2, orderCollection3)));
 
-        DynamicRadioList uploadParty = createUploadParty();
+        DynamicRadioList uploadParty = createUploadParty(UPLOAD_PARTY_APPLICANT);
         caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
@@ -326,7 +336,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION)
                 .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
-                    .uploadParty(createUploadParty())
+                    .uploadParty(createUploadParty(UPLOAD_PARTY_APPLICANT))
                     .build())
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
                 .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
@@ -350,9 +360,9 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .toList();
     }
 
-    private DynamicRadioList createUploadParty() {
+    private DynamicRadioList createUploadParty(String uploadPartyCode) {
         return DynamicRadioList.builder()
-            .value(DynamicRadioListElement.builder().code(UPLOAD_PARTY_APPLICANT).build())
+            .value(DynamicRadioListElement.builder().code(uploadPartyCode).build())
             .build();
     }
 }
