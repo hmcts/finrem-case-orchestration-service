@@ -34,6 +34,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.IN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_BARRISTER_4;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE;
@@ -53,6 +57,17 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         INTVR_BARRISTER_2,
         INTVR_BARRISTER_3,
         INTVR_BARRISTER_4);
+
+    private static final List<CaseRole> SHOW_UPLOAD_PARTY_QUESTION_ROLES = List.of(
+        INTVR_SOLICITOR_1,
+        INTVR_SOLICITOR_2,
+        INTVR_SOLICITOR_3,
+        INTVR_SOLICITOR_4,
+        INTVR_BARRISTER_1,
+        INTVR_BARRISTER_2,
+        INTVR_BARRISTER_3,
+        INTVR_BARRISTER_4
+    );
 
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final HearingService hearingService;
@@ -153,7 +168,16 @@ public class UploadDraftOrdersAboutToStartHandler extends FinremCallbackHandler 
         CaseAssignedUserRolesResource caseAssignedUserRolesResource =
             caseAssignedRoleService.getCaseAssignedUserRole(caseId, authToken);
 
-        return caseAssignedUserRolesResource.getCaseAssignedUserRoles().isEmpty();
+        List<CaseAssignedUserRole> userRoles = caseAssignedUserRolesResource.getCaseAssignedUserRoles();
+        if (userRoles.isEmpty()) {
+            // caseworker
+            return true;
+        } else {
+            return userRoles.stream().anyMatch(userRole -> {
+                CaseRole caseRole = CaseRole.forValue(userRole.getCaseRole());
+                return SHOW_UPLOAD_PARTY_QUESTION_ROLES.contains(caseRole);
+            });
+        }
     }
 
     private DynamicRadioList createUploadParty(FinremCaseData finremCaseData) {

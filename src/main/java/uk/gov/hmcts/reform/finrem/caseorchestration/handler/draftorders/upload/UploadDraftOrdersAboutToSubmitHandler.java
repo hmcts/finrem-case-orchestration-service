@@ -98,7 +98,9 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             case RESP_SOLICITOR, RESP_BARRISTER -> {
                 return OrderParty.RESPONDENT;
             }
-            case CASEWORKER, INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4 -> {
+            case CASEWORKER,
+                 INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4,
+                 INTVR_BARRISTER_1, INTVR_BARRISTER_2, INTVR_BARRISTER_3, INTVR_BARRISTER_4 -> {
                 return OrderParty.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
             }
             default -> throw new IllegalArgumentException("Unexpected case role " + userCaseRole);

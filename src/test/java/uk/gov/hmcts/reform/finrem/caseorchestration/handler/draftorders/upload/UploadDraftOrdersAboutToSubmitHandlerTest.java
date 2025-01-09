@@ -175,10 +175,13 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
     private static Stream<Arguments> provideSuggestedDraftOrders() {
         return Stream.of(
+            // Applicant/respondent solicitors and barristers
             Arguments.of(CaseRole.APP_SOLICITOR, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.APP_BARRISTER, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.RESP_SOLICITOR, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.RESP_BARRISTER, null, "Hamzah@hamzah.com"),
+
+            // Interveners
             Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_APPLICANT, null),
             Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_RESPONDENT, null),
             Arguments.of(CaseRole.INTVR_SOLICITOR_2, UPLOAD_PARTY_APPLICANT, null),
@@ -187,6 +190,16 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             Arguments.of(CaseRole.INTVR_SOLICITOR_3, UPLOAD_PARTY_RESPONDENT, null),
             Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_APPLICANT, null),
             Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_1, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_1, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_2, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_2, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_3, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_3, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_4, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_BARRISTER_4, UPLOAD_PARTY_RESPONDENT, null),
+
+            // Caseworkers
             Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_APPLICANT, null),
             Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_RESPONDENT, null)
         );

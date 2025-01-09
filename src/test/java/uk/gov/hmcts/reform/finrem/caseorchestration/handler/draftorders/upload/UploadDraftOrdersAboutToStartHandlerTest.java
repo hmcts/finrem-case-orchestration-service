@@ -125,12 +125,13 @@ class UploadDraftOrdersAboutToStartHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.YES);
     }
 
-    @Test
-    void givenUserIsNotCaseWorkerWhenHandleThenShowUploadQuestionIsNo() {
+    @ParameterizedTest
+    @MethodSource("testShowUploadPartyQuestionForCaseRole")
+    void testShowUploadPartyQuestionForCaseRole(CaseRole caseRole, YesOrNo expected) {
         long caseID = 1727874196328932L;
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
         CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
-            .caseRole(CaseRole.APP_SOLICITOR.getCcdCode())
+            .caseRole(caseRole.getCcdCode())
             .build();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
             CaseAssignedUserRolesResource.builder()
@@ -139,7 +140,24 @@ class UploadDraftOrdersAboutToStartHandlerTest {
 
         var response = handler.handle(request, AUTH_TOKEN);
 
-        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
+        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> testShowUploadPartyQuestionForCaseRole() {
+        return Stream.of(
+            Arguments.of(CaseRole.APP_SOLICITOR, YesOrNo.NO),
+            Arguments.of(CaseRole.RESP_SOLICITOR, YesOrNo.NO),
+            Arguments.of(CaseRole.APP_BARRISTER, YesOrNo.NO),
+            Arguments.of(CaseRole.RESP_BARRISTER, YesOrNo.NO),
+            Arguments.of(CaseRole.INTVR_BARRISTER_1, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_BARRISTER_2, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_BARRISTER_3, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_BARRISTER_4, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3, YesOrNo.YES),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4, YesOrNo.YES)
+        );
     }
 
     @ParameterizedTest
