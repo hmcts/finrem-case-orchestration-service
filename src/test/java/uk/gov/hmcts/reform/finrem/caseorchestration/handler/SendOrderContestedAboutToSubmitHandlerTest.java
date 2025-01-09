@@ -51,6 +51,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -143,7 +144,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper, never()).getStampType(caseData);
     }
 
-
     @Test
     void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
 
@@ -186,7 +186,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
-
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
@@ -205,7 +204,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
-
     }
 
     @Test
@@ -366,6 +364,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
+        data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -397,7 +396,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
-
     }
 
     @Test
@@ -443,7 +441,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper, never()).getStampType(caseData);
-
     }
 
     @Test
@@ -455,8 +452,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
 
-        String previousOrderDocumentUrl = "http://dm-store:8080/documents/929756-654321-123456-654381";
-        String previousOrderDocumentFilename = "PreviousOrder.pdf";
         data.setPartiesOnCase(getParties());
         ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
                 LocalDateTime.of(LocalDate.of(2019, 12, 31),
@@ -584,5 +579,30 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).build())
             .build();
+    }
+
+    @Test
+    void shouldGetAnErrorMessageWhenTheRequiredCoverSheetIsMissing() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument("http://abc/docurl", "abc.pdf", "http://abc/binaryurl"))
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
+        data.setOrdersToShare(DynamicMultiSelectList.builder().build());
+        data.setOrderApprovedCoverLetter(null);
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(of(caseDocument()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .hasSize(1)
+            .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
     }
 }
