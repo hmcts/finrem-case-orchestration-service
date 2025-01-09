@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -140,16 +141,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .build());
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
-        CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
-            .caseAssignedUserRoles(List.of(
-                CaseAssignedUserRole.builder()
-                    .caseRole(userCaseRole.getCcdCode())
-                    .build()
-            ))
-            .build();
-
-        when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
-            .thenReturn(caseAssignedUserRolesResource);
+        mockCaseRole(String.valueOf(caseID), userCaseRole);
 
         doNothing().when(draftOrdersCategoriser).categoriseDocuments(any(FinremCaseData.class));
 
@@ -184,7 +176,17 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     private static Stream<Arguments> provideSuggestedDraftOrders() {
         return Stream.of(
             Arguments.of(CaseRole.APP_SOLICITOR, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.APP_BARRISTER, null, "Hamzah@hamzah.com"),
             Arguments.of(CaseRole.RESP_SOLICITOR, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.RESP_BARRISTER, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_APPLICANT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_RESPONDENT, null),
             Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_APPLICANT, null),
             Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_RESPONDENT, null)
         );
@@ -338,6 +340,42 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
+    }
+
+    @Test
+    void givenUserDoesNotHaveAValidCaseRole_whenHandle_thenThrowsException() {
+        String caseReference = "1727874196328932";
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION)
+                .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                    .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+                    .build())
+                .build())
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData);
+
+        mockCaseRole(caseReference, CaseRole.CREATOR);
+
+        assertThatThrownBy(() -> handler.handle(request, AUTH_TOKEN))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Unexpected case role CREATOR");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> handler.handle(request, AUTH_TOKEN));
+    }
+
+    private void mockCaseRole(String caseId, CaseRole userCaseRole) {
+        CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
+            .caseAssignedUserRoles(List.of(
+                CaseAssignedUserRole.builder()
+                    .caseRole(userCaseRole.getCcdCode())
+                    .build()
+            ))
+            .build();
+
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseId, AUTH_TOKEN))
+            .thenReturn(caseAssignedUserRolesResource);
     }
 
     private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(

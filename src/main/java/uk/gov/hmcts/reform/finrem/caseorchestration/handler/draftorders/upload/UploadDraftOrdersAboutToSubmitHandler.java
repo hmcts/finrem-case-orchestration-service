@@ -35,9 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.APP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -94,13 +92,13 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         CaseRole userCaseRole = getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
 
         switch (userCaseRole) {
-            case APP_SOLICITOR -> {
+            case APP_SOLICITOR, APP_BARRISTER -> {
                 return OrderParty.APPLICANT;
             }
-            case RESP_SOLICITOR -> {
+            case RESP_SOLICITOR, RESP_BARRISTER -> {
                 return OrderParty.RESPONDENT;
             }
-            case CASEWORKER -> {
+            case CASEWORKER, INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4 -> {
                 return OrderParty.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
             }
             default -> throw new IllegalArgumentException("Unexpected case role " + userCaseRole);
@@ -250,14 +248,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         if (caseAssignedUserRole != null) {
             List<CaseAssignedUserRole> caseAssignedUserRoleList = caseAssignedUserRole.getCaseAssignedUserRoles();
+
             if (!caseAssignedUserRoleList.isEmpty()) {
                 String loggedInUserCaseRole = caseAssignedUserRoleList.get(0).getCaseRole();
-
-                if (APP_SOLICITOR.getCcdCode().equals(loggedInUserCaseRole)) {
-                    return APP_SOLICITOR;
-                } else if (RESP_SOLICITOR.getCcdCode().equals(loggedInUserCaseRole)) {
-                    return RESP_SOLICITOR;
-                }
+                return CaseRole.forValue(loggedInUserCaseRole);
             }
         }
 
