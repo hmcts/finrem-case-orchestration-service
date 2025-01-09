@@ -45,7 +45,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -133,13 +132,12 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build());
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(Arrays.asList(ORDER_TYPE, PSA_TYPE));
-
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setSuggestedPsaCollection((List.of(psaCollection)));
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(orderCollection)));
-
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(createUploadParty(uploadOnBehalfOf));
+        caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                .uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE))
+                .uploadParty(createUploadParty(uploadOnBehalfOf))
+                .uploadSuggestedDraftOrderCollection(List.of(orderCollection))
+                .suggestedPsaCollection(List.of(psaCollection))
+            .build());
 
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
