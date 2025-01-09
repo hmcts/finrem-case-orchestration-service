@@ -134,11 +134,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
                 .uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE))
-                .uploadParty(createUploadParty(uploadOnBehalfOf))
+                .uploadParty(buildUploadParty(uploadOnBehalfOf))
                 .uploadSuggestedDraftOrderCollection(List.of(orderCollection))
                 .suggestedPsaCollection(List.of(psaCollection))
             .build());
-
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
         CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
@@ -226,14 +225,12 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder().build());
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadOrdersOrPsas(List.of(ORDER_TYPE));
+        caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+            .uploadOrdersOrPsas(List.of(ORDER_TYPE))
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .uploadSuggestedDraftOrderCollection(List.of(orderCollection1, orderCollection2, orderCollection3))
+            .build());
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadSuggestedDraftOrderCollection((List.of(
-            orderCollection1, orderCollection2, orderCollection3)));
-
-        DynamicRadioList uploadParty = createUploadParty(UPLOAD_PARTY_APPLICANT);
-        caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().setUploadParty(uploadParty);
 
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().caseAssignedUserRoles(Collections.emptyList()).build());
@@ -285,12 +282,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .containsAll(expectedAgreedDraftOrderCollection);
     }
 
-    private static DynamicRadioList buildUploadParty(String code) {
-        return DynamicRadioList.builder()
-                .value(DynamicRadioListElement.builder().code(code).build())
-                .build();
-    }
-
     private static Stream<Arguments> provideAgreedDraftOrders() {
         UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
                 .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
@@ -334,7 +325,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION)
                 .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
-                    .uploadParty(createUploadParty(UPLOAD_PARTY_APPLICANT))
+                    .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
                     .build())
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
                 .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
@@ -358,9 +349,9 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .toList();
     }
 
-    private DynamicRadioList createUploadParty(String uploadPartyCode) {
+    private static DynamicRadioList buildUploadParty(String code) {
         return DynamicRadioList.builder()
-            .value(DynamicRadioListElement.builder().code(uploadPartyCode).build())
+            .value(DynamicRadioListElement.builder().code(code).build())
             .build();
     }
 }
