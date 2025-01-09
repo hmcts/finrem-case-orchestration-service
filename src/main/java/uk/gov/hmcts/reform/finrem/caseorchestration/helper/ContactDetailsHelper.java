@@ -22,8 +22,12 @@ public class ContactDetailsHelper {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        List<String> errors1 = getStrings(caseData, errors, wrapper);
-        if (errors1 != null) return errors1;
+        if (caseData.isApplicantRepresentedByASolicitor()
+            && wrapper.getSolicitorAddress() != null
+            && ObjectUtils.isEmpty(wrapper.getSolicitorAddress().getPostCode())) {
+            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            return errors;
+        }
 
         if (wrapper.getApplicantAddress() != null
             && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode())) {
@@ -43,20 +47,9 @@ public class ContactDetailsHelper {
             errors.add(RESPONDENT_POSTCODE_ERROR);
             return errors;
         }
-
-
         return errors;
     }
 
-    private static List<String> getStrings(FinremCaseData caseData, List<String> errors, ContactDetailsWrapper wrapper) {
-        if (caseData.isApplicantRepresentedByASolicitor()
-            && wrapper.getSolicitorAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getSolicitorAddress().getPostCode())) {
-            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-            return errors;
-        }
-        return null;
-    }
 
 
 }
