@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 
 import java.util.stream.Stream;
 
@@ -42,9 +41,6 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
     @Mock
     private InternationalPostalService postalService;
-
-    @Mock
-    private UpdateContactDetailsService updateContactDetailsService;
 
     @ParameterizedTest
     @MethodSource
