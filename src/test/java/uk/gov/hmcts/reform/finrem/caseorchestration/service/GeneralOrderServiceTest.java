@@ -807,32 +807,34 @@ class GeneralOrderServiceTest {
     }
 
     @Test
-    void givenContestedCaseWhenRequestedHearingOrderToProcess_thenReturnListFromFinalisedOrder() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
+    void testGeneralOrderServiceHearingOrdersToShare() {
+        CaseDocument expectedCaseDocument1 = null;
 
-        List<DirectionOrderCollection> hearingOrderDocuments = List.of(
-            DirectionOrderCollection.builder()
-                .id(uuid.toString())
-                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
-                .build());
-
-        data.setUploadHearingOrder(hearingOrderDocuments);
-        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
-
-        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
-            caseDocument()));
-
-        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
-            .value(dynamicElementList)
-            .listItems(dynamicElementList)
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(List.of(
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                                .finalisedDocument(expectedCaseDocument1 = CaseDocument.builder()
+                                    .documentUrl("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d")
+                                    .documentFilename("TEST1.pdf")
+                                    .build())
+                            .build()).build()
+                    ))
+                    .build())
+                .build())
             .build();
 
-        data.setOrdersToShare(selectList);
+        List<DynamicMultiSelectListElement> selectedElements = List.of(
+            DynamicMultiSelectListElement.builder()
+                .code("015500ba-c524-4614-86e5-c569f82c718d")
+                .label("TEST1.pdf")
+                .build()
+        );
 
-        List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
+        List<CaseDocument> actual = generalOrderService.hearingOrdersToShare(caseDetails,
+            DynamicMultiSelectList.builder().value(selectedElements).listItems(selectedElements).build());
 
-        assertThat(documentList).as("One document available to share with other parties").hasSize(1);
+        assertThat(actual).hasSize(1).containsExactly(expectedCaseDocument1);
     }
 }

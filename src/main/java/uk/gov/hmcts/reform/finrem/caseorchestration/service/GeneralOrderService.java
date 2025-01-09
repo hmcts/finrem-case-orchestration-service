@@ -348,7 +348,6 @@ public class GeneralOrderService {
                     populateSelectedProcessedOrders(orders, agreedDraftOrderCollection, checkboxSelected);
                 }
             });
-
         }
         return orders;
     }
