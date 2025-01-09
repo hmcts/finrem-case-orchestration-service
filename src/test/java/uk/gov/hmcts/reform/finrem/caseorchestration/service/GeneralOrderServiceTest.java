@@ -808,33 +808,73 @@ class GeneralOrderServiceTest {
 
     @Test
     void testGeneralOrderServiceHearingOrdersToShare() {
-        CaseDocument expectedCaseDocument1 = null;
+        CaseDocument expectedCaseDocument1 = caseDocument(
+            "http://document-management-store:8080/documents/00000000-c524-4614-86e5-c569f82c718d",
+            "TEST1.pdf");
+        CaseDocument expectedCaseDocument2 = caseDocument(
+            "http://document-management-store:8080/documents/11111111-c524-4614-86e5-c569f82c718d",
+            "TEST2.pdf");
+        CaseDocument expectedCaseDocument3 = caseDocument(
+            "http://document-management-store:8080/documents/22222222-c524-4614-86e5-c569f82c718d",
+            "TEST3.pdf");
+        CaseDocument expectedCaseDocument4 = caseDocument(
+            "http://document-management-store:8080/documents/33333333-c524-4614-86e5-c569f82c718d",
+            "TEST4.pdf");
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
                 .draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .finalisedOrdersCollection(List.of(
-                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
-                                .finalisedDocument(expectedCaseDocument1 = CaseDocument.builder()
-                                    .documentUrl("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d")
-                                    .documentFilename("TEST1.pdf")
-                                    .build())
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument1).build()).build(),
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2).build()).build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(expectedCaseDocument3)
+                                .orderStatus(PROCESSED)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/10000000-c524-4614-86e5-c569f82c718d",
+                                "APPROVED_BY_JUDGE.pdf"))
+                            .orderStatus(APPROVED_BY_JUDGE)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/20000000-c524-4614-86e5-c569f82c718d",
+                                "REFUSED.pdf"))
+                            .orderStatus(REFUSED)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/30000000-c524-4614-86e5-c569f82c718d",
+                                "TO_BE_REVIEWED.pdf"))
+                            .orderStatus(TO_BE_REVIEWED)
                             .build()).build()
                     ))
                     .build())
+                .uploadHearingOrder(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(expectedCaseDocument4).build()).build()
+                ))
                 .build())
             .build();
 
         List<DynamicMultiSelectListElement> selectedElements = List.of(
-            DynamicMultiSelectListElement.builder()
-                .code("015500ba-c524-4614-86e5-c569f82c718d")
-                .label("TEST1.pdf")
-                .build()
+            DynamicMultiSelectListElement.builder().code("00000000-c524-4614-86e5-c569f82c718d").label("TEST1.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("11111111-c524-4614-86e5-c569f82c718d").label("TEST2.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("22222222-c524-4614-86e5-c569f82c718d").label("TEST3.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("33333333-c524-4614-86e5-c569f82c718d").label("TEST4.pdf").build()
+        );
+        List<DynamicMultiSelectListElement> listItems = List.of(
+            DynamicMultiSelectListElement.builder().code("00000000-c524-4614-86e5-c569f82c718d").label("TEST1.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("11111111-c524-4614-86e5-c569f82c718d").label("TEST2.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("22222222-c524-4614-86e5-c569f82c718d").label("TEST3.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("33333333-c524-4614-86e5-c569f82c718d").label("TEST4.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("99999999-c524-4614-86e5-c569f82c718d").label("UNKNOWN.pdf").build()
         );
 
         List<CaseDocument> actual = generalOrderService.hearingOrdersToShare(caseDetails,
-            DynamicMultiSelectList.builder().value(selectedElements).listItems(selectedElements).build());
+            DynamicMultiSelectList.builder().value(selectedElements).listItems(listItems).build());
 
-        assertThat(actual).hasSize(1).containsExactly(expectedCaseDocument1);
+        assertThat(actual)
+            .hasSize(4)
+            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3, expectedCaseDocument4);
     }
 }
