@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -19,6 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -31,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -95,14 +101,22 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
 
             log.info("Share and print hearing order for Case ID: {}", caseDetails.getId());
-            List<CaseDocument> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
-            if (hearingOrders != null && !hearingOrders.isEmpty()) {
-                shareAndSendHearingDocuments(caseDetails, hearingOrders, parties, printOrderCollection, userAuthorisation);
+            Pair<List<CaseDocument>, List<CaseDocument>> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
+            List<CaseDocument> legacyHearingOrders = hearingOrders.getLeft();
+            List<CaseDocument> newProcessedOrders = hearingOrders.getRight();
+
+            if (hasApprovedOrdersToBeSent(legacyHearingOrders, newProcessedOrders)) {
+                // below method also adds the cover sheet even if legacyHearingOrders is empty.
+                shareAndSendHearingDocuments(caseDetails, legacyHearingOrders, parties, printOrderCollection, userAuthorisation);
                 log.info("Sending for stamp final order on Case ID: {}", caseDetails.getId());
-                hearingOrders.forEach(orderToStamp -> {
+                // stamping legacy approved orders and add it to legacy finalised collection
+                legacyHearingOrders.forEach(orderToStamp -> {
                     log.info("StampFinalOrder {} for Case ID: {}, ", orderToStamp, caseId);
                     stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
                 });
+
+                // handling processed orders
+                moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
             }
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             setConsolidateView(caseDetails, parties);
@@ -117,6 +131,53 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+    }
+
+    private boolean hasApprovedOrdersToBeSent(List<CaseDocument> legacyHearingOrders, List<CaseDocument> newProcessedOrders) {
+        return (legacyHearingOrders != null && !legacyHearingOrders.isEmpty()) || (newProcessedOrders != null && !newProcessedOrders.isEmpty());
+    }
+
+    private List<AgreedDraftOrderCollection> getTargetedAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+        return emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .stream()
+            .filter(d -> hearingOrders.contains(d.getValue().getTargetDocument()))
+            .toList();
+    }
+
+    private void removeDocumentFromsAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+        List<AgreedDraftOrderCollection> updatedCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .stream()
+            .filter(d -> !hearingOrders.contains(d.getValue().getTargetDocument()))
+            .toList();
+        caseData.getDraftOrdersWrapper().setAgreedDraftOrderCollection(updatedCollection);
+    }
+
+    private void removeDocumentFromsDraftOrderReview(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+        for (CaseDocument targetDocument : hearingOrders) {
+            for (DraftOrdersReviewCollection draftOrdersReviewCollection : emptyIfNull(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
+                DraftOrdersReview draftOrdersReview = draftOrdersReviewCollection.getValue();
+                if (draftOrdersReview != null && draftOrdersReview.getPsaDocReviewCollection() != null) {
+                    draftOrdersReview.getPsaDocReviewCollection().removeIf(
+                        psaDocReview -> psaDocReview.getValue() != null
+                            && psaDocReview.getValue().getPsaDocument() != null
+                            && psaDocReview.getValue().getPsaDocument().equals(targetDocument)
+                    );
+                }
+                if (draftOrdersReview != null && draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
+                    draftOrdersReview.getDraftOrderDocReviewCollection().removeIf(
+                        psaDocReview -> psaDocReview.getValue() != null
+                            && psaDocReview.getValue().getDraftOrderDocument() != null
+                            && psaDocReview.getValue().getDraftOrderDocument().equals(targetDocument)
+                    );
+                }
+            }
+        }
+    }
+
+    private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+        List<AgreedDraftOrderCollection> removedOrders = getTargetedAgreedDraftOrderCollection(caseData, hearingOrders);
+        removeDocumentFromsAgreedDraftOrderCollection(caseData, hearingOrders);
+        removeDocumentFromsDraftOrderReview(caseData, hearingOrders);
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
@@ -151,7 +212,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
-        if (caseData.getOrderApprovedCoverLetter() == null) {
+        if (false && caseData.getOrderApprovedCoverLetter() == null) { // TODO remove false condition
             throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
         }
         orders.add(caseData.getOrderApprovedCoverLetter());

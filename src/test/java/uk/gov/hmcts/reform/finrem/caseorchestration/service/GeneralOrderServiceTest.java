@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -456,9 +457,9 @@ class GeneralOrderServiceTest {
 
         data.setOrdersToShare(selectList);
 
-        List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
+        Pair<List<CaseDocument>, List<CaseDocument>> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
-        assertThat(documentList).as("One document available to share with other parties").hasSize(1);
+        assertThat(documentList.getLeft()).as("One document available to share with other parties").hasSize(1);
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
@@ -870,11 +871,14 @@ class GeneralOrderServiceTest {
             DynamicMultiSelectListElement.builder().code("99999999-c524-4614-86e5-c569f82c718d").label("UNKNOWN.pdf").build()
         );
 
-        List<CaseDocument> actual = generalOrderService.hearingOrdersToShare(caseDetails,
+        Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
             DynamicMultiSelectList.builder().value(selectedElements).listItems(listItems).build());
 
-        assertThat(actual)
-            .hasSize(4)
-            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3, expectedCaseDocument4);
+        assertThat(actual.getLeft())
+            .hasSize(1)
+            .containsExactly(expectedCaseDocument4);
+        assertThat(actual.getRight())
+            .hasSize(3)
+            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3);
     }
 }
