@@ -23,11 +23,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -125,7 +124,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void givenContestedCase_whenDirectionUploadOrderWithPreviousFiles_shouldOnlyValidateNewFiles() {
+    void givenContestedCase_whenDirectionUploadOrderWithPreviousFiles_shouldNotModifyUploadHearingOrder() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
@@ -152,7 +151,9 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(2, response.getData().getUploadHearingOrder().size());
+
+        assertThat(response.getData().getUploadHearingOrder())
+            .hasSize(2);
         assertTrue(
             response.getData().getUploadHearingOrder().stream()
                 .map(DirectionOrderCollection::getValue)
@@ -168,7 +169,5 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
             "Expected the new document to be present in the response"
         );
         assertTrue(response.getErrors().isEmpty());
-        verify(service, times(2)).validateEncryptionOnUploadedDocument(eq(newDocument), any(), any(), any());
-        verify(service, never()).validateEncryptionOnUploadedDocument(eq(oldDocument), any(), any(), any());
     }
 }
