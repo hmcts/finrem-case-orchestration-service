@@ -50,25 +50,24 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        List<DirectionOrderCollection> uploadHearingOrders = new ArrayList<>(caseData.getUploadHearingOrder());
-        List<DirectionOrderCollection> uploadHearingOrdersBefore = caseDataBefore.getUploadHearingOrder();
-        if (CollectionUtils.isNotEmpty(uploadHearingOrdersBefore)) {
-            uploadHearingOrders.removeAll(uploadHearingOrdersBefore);
-        }
-        uploadHearingOrders.forEach(doc ->
+        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder().stream().filter(order ->
+            caseDataBefore.getUploadHearingOrder().stream().noneMatch(beforeOrder -> beforeOrder.equals(order)))
+            .toList();
+        if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
+            uploadHearingOrders.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-                    caseId, errors, userAuthorisation)
-        );
+                    caseId, errors, userAuthorisation));
+        }
 
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
-            List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>(caseData.getHearingOrderOtherDocuments());
-            List<DocumentCollection> hearingOrderOtherDocumentsBefore = caseDataBefore.getHearingOrderOtherDocuments();
-            if (CollectionUtils.isNotEmpty(hearingOrderOtherDocumentsBefore)) {
-                hearingOrderOtherDocuments.removeAll(hearingOrderOtherDocumentsBefore);
+            List<DocumentCollection> hearingOrderOtherDocuments = caseData.getHearingOrderOtherDocuments().stream().filter(order ->
+                    caseDataBefore.getHearingOrderOtherDocuments().stream().noneMatch(beforeOrder -> beforeOrder.equals(order)))
+                .toList();
+            if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
+                hearingOrderOtherDocuments.forEach(doc ->
+                    service.validateEncryptionOnUploadedDocument(doc.getValue(),
+                        caseId, errors, userAuthorisation));
             }
-            hearingOrderOtherDocuments.forEach(doc ->
-                service.validateEncryptionOnUploadedDocument(doc.getValue(),
-                    caseId, errors, userAuthorisation));
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
