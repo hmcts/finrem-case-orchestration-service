@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -151,6 +152,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        assertEquals(2, response.getData().getUploadHearingOrder().size());
         assertTrue(response.getErrors().isEmpty());
         verify(service, times(2)).validateEncryptionOnUploadedDocument(eq(newDocument), any(), any(), any());
         verify(service, never()).validateEncryptionOnUploadedDocument(eq(oldDocument), any(), any(), any());
