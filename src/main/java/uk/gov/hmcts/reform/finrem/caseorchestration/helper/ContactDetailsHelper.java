@@ -14,7 +14,7 @@ public class ContactDetailsHelper {
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
-    public ContactDetailsHelper() {
+    private ContactDetailsHelper() {
     }
 
     public static List<String> validateCaseData(FinremCaseData caseData) {
@@ -49,7 +49,4 @@ public class ContactDetailsHelper {
         }
         return errors;
     }
-
-
-
 }

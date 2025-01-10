@@ -40,10 +40,10 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = finremCaseDetails.getData();
         log.info("Invoking consented event {} mid event callback for case id {}", EventType.UPDATE_CONTACT_DETAILS,
             finremCaseDetails.getId());
 
-        FinremCaseData caseData = finremCaseDetails.getData();
         List<String> errors = new ArrayList<>();
         errors.addAll(postalService.validate(caseData));
         errors.addAll(ContactDetailsHelper.validateCaseData(caseData));
