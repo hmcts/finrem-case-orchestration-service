@@ -153,6 +153,20 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getData().getUploadHearingOrder().size());
+        assertTrue(
+            response.getData().getUploadHearingOrder().stream()
+                .map(DirectionOrderCollection::getValue)
+                .map(DirectionOrder::getUploadDraftDocument)
+                .anyMatch(doc -> doc.equals(oldDocument)),
+            "Expected the old document to be present in the response"
+        );
+        assertTrue(
+            response.getData().getUploadHearingOrder().stream()
+                .map(DirectionOrderCollection::getValue)
+                .map(DirectionOrder::getUploadDraftDocument)
+                .anyMatch(doc -> doc.equals(newDocument)),
+            "Expected the new document to be present in the response"
+        );
         assertTrue(response.getErrors().isEmpty());
         verify(service, times(2)).validateEncryptionOnUploadedDocument(eq(newDocument), any(), any(), any());
         verify(service, never()).validateEncryptionOnUploadedDocument(eq(oldDocument), any(), any(), any());
