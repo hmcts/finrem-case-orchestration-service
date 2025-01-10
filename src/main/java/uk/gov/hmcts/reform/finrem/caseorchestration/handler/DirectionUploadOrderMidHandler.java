@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -50,8 +52,14 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder().stream().filter(order ->
-            caseDataBefore.getUploadHearingOrder().stream().noneMatch(beforeOrder -> beforeOrder.equals(order)))
+        List<DirectionOrderCollection> uploadHearingOrders = Optional.ofNullable(caseData.getUploadHearingOrder())
+            .orElse(Collections.emptyList())
+            .stream()
+            .filter(order ->
+                Optional.ofNullable(caseDataBefore.getUploadHearingOrder())
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .noneMatch(beforeOrder -> beforeOrder.equals(order)))
             .toList();
         if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
             uploadHearingOrders.forEach(doc ->
@@ -60,8 +68,14 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
-            List<DocumentCollection> hearingOrderOtherDocuments = caseData.getHearingOrderOtherDocuments().stream().filter(order ->
-                    caseDataBefore.getHearingOrderOtherDocuments().stream().noneMatch(beforeOrder -> beforeOrder.equals(order)))
+            List<DocumentCollection> hearingOrderOtherDocuments = Optional.ofNullable(caseData.getHearingOrderOtherDocuments())
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(order ->
+                    Optional.ofNullable(caseDataBefore.getHearingOrderOtherDocuments())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .noneMatch(beforeOrder -> beforeOrder.equals(order)))
                 .toList();
             if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
                 hearingOrderOtherDocuments.forEach(doc ->
