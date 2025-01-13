@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 
 import java.util.List;
 
@@ -44,5 +44,5 @@ public class UploadAgreedDraftOrder {
     private List<AgreedPensionSharingAnnexCollection> agreedPsaCollection;
 
     @JsonIgnore
-    private OrderParty orderParty;
+    private OrderFiledBy orderFiledBy;
 }

@@ -2,10 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -28,26 +29,28 @@ public class DraftOrdersCategoriser {
             return;
         }
 
-        OrderParty orderParty = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getOrderParty();
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = finremCaseData.getDraftOrdersWrapper()
+            .getUploadSuggestedDraftOrder();
+        OrderFiledBy orderParty = uploadSuggestedDraftOrder.getOrderFiledBy();
 
         DocumentCategory category = getDocumentCategory(orderParty);
-        categoriseOrders(finremCaseData.getDraftOrdersWrapper()
-            .getUploadSuggestedDraftOrder()
-            .getUploadSuggestedDraftOrderCollection(), category);
 
-        categorisePsas(finremCaseData.getDraftOrdersWrapper()
-            .getUploadSuggestedDraftOrder()
-            .getSuggestedPsaCollection(), category);
+        categoriseOrders(uploadSuggestedDraftOrder.getUploadSuggestedDraftOrderCollection(), category);
+        categorisePsas(uploadSuggestedDraftOrder.getSuggestedPsaCollection(), category);
     }
 
     private boolean isSuggestedDraftOrderPriorToHearing(FinremCaseData finremCaseData) {
         return SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder());
     }
 
-    private DocumentCategory getDocumentCategory(OrderParty orderParty) {
-        return switch (orderParty) {
-            case APPLICANT -> DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
-            case RESPONDENT -> DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+    private DocumentCategory getDocumentCategory(OrderFiledBy orderFiledBy) {
+        return switch (orderFiledBy) {
+            case APPLICANT, APPLICANT_BARRISTER -> DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+            case RESPONDENT, RESPONDENT_BARRISTER -> DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_1 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_2 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_3 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_4 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER;
         };
     }
 

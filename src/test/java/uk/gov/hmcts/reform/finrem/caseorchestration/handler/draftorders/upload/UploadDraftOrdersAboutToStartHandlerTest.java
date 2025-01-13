@@ -127,7 +127,7 @@ class UploadDraftOrdersAboutToStartHandlerTest {
 
     @ParameterizedTest
     @MethodSource("testShowUploadPartyQuestionForCaseRole")
-    void testShowUploadPartyQuestionForCaseRole(CaseRole caseRole, YesOrNo expected) {
+    void testShowUploadPartyQuestionForCaseRole(CaseRole caseRole) {
         long caseID = 1727874196328932L;
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
         CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
@@ -140,23 +140,19 @@ class UploadDraftOrdersAboutToStartHandlerTest {
 
         var response = handler.handle(request, AUTH_TOKEN);
 
-        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(expected);
+        assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
     }
 
     private static Stream<Arguments> testShowUploadPartyQuestionForCaseRole() {
         return Stream.of(
-            Arguments.of(CaseRole.APP_SOLICITOR, YesOrNo.NO),
-            Arguments.of(CaseRole.RESP_SOLICITOR, YesOrNo.NO),
-            Arguments.of(CaseRole.APP_BARRISTER, YesOrNo.NO),
-            Arguments.of(CaseRole.RESP_BARRISTER, YesOrNo.NO),
-            Arguments.of(CaseRole.INTVR_BARRISTER_1, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_BARRISTER_2, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_BARRISTER_3, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_BARRISTER_4, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_1, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_2, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_3, YesOrNo.YES),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_4, YesOrNo.YES)
+            Arguments.of(CaseRole.APP_SOLICITOR),
+            Arguments.of(CaseRole.RESP_SOLICITOR),
+            Arguments.of(CaseRole.APP_BARRISTER),
+            Arguments.of(CaseRole.RESP_BARRISTER),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4)
         );
     }
 

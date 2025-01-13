@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 
 import java.util.List;
 
@@ -37,5 +37,5 @@ public class UploadSuggestedDraftOrder {
     private List<SuggestedPensionSharingAnnexCollection> suggestedPsaCollection;
 
     @JsonIgnore
-    private OrderParty orderParty;
+    private OrderFiledBy orderFiledBy;
 }

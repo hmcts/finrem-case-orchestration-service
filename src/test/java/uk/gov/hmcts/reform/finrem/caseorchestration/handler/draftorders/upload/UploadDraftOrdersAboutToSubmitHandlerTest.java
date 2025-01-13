@@ -182,22 +182,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             Arguments.of(CaseRole.RESP_BARRISTER, null, "Hamzah@hamzah.com"),
 
             // Interveners
-            Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_1, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_2, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_2, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_3, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_3, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_SOLICITOR_4, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_1, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_1, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_2, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_2, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_3, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_3, UPLOAD_PARTY_RESPONDENT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_4, UPLOAD_PARTY_APPLICANT, null),
-            Arguments.of(CaseRole.INTVR_BARRISTER_4, UPLOAD_PARTY_RESPONDENT, null),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3, null, "Hamzah@hamzah.com"),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4, null, "Hamzah@hamzah.com"),
 
             // Caseworkers
             Arguments.of(CaseRole.CASEWORKER, UPLOAD_PARTY_APPLICANT, null),

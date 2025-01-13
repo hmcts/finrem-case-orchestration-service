@@ -10,16 +10,22 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @RequiredArgsConstructor
 @Getter
-public enum OrderParty {
+public enum OrderFiledBy {
     APPLICANT("Applicant"),
-    RESPONDENT("Respondent");
+    RESPONDENT("Respondent"),
+    APPLICANT_BARRISTER("Applicant"),
+    RESPONDENT_BARRISTER("Respondent"),
+    INTERVENER_1("Intervener 1"),
+    INTERVENER_2("Intervener 2"),
+    INTERVENER_3("Intervener 3"),
+    INTERVENER_4("Intervener 4");
 
     @Getter(onMethod_ = @JsonValue)
     private final String value;
 
     @JsonCreator
-    public static OrderParty forValue(String value) {
-        for (OrderParty party : values()) {
+    public static OrderFiledBy forValue(String value) {
+        for (OrderFiledBy party : values()) {
             if (party.value.equals(value)) {
                 return party;
             }
@@ -27,7 +33,7 @@ public enum OrderParty {
         throw new IllegalArgumentException("Unknown value: " + value);
     }
 
-    public static OrderParty forUploadPartyValue(String uploadParty) {
+    public static OrderFiledBy forUploadPartyValue(String uploadParty) {
         if (UPLOAD_PARTY_APPLICANT.equals(uploadParty)) {
             return APPLICANT;
         } else if (UPLOAD_PARTY_RESPONDENT.equals(uploadParty)) {

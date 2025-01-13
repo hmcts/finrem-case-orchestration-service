@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -72,13 +72,13 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        OrderParty orderParty = getOrderParty(caseDetails, userAuthorisation);
+        OrderFiledBy orderFiledBy = getOrderFiledBy(caseDetails, userAuthorisation);
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderParty);
+            handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderParty);
+            handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
         }
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
@@ -88,20 +88,36 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             .data(finremCaseData).build();
     }
 
-    private OrderParty getOrderParty(FinremCaseDetails caseDetails, String userAuthorisation) {
+    private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
         CaseRole userCaseRole = getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
 
         switch (userCaseRole) {
-            case APP_SOLICITOR, APP_BARRISTER -> {
-                return OrderParty.APPLICANT;
+            case APP_SOLICITOR -> {
+                return OrderFiledBy.APPLICANT;
             }
-            case RESP_SOLICITOR, RESP_BARRISTER -> {
-                return OrderParty.RESPONDENT;
+            case RESP_SOLICITOR -> {
+                return OrderFiledBy.RESPONDENT;
             }
-            case CASEWORKER,
-                 INTVR_SOLICITOR_1, INTVR_SOLICITOR_2, INTVR_SOLICITOR_3, INTVR_SOLICITOR_4,
-                 INTVR_BARRISTER_1, INTVR_BARRISTER_2, INTVR_BARRISTER_3, INTVR_BARRISTER_4 -> {
-                return OrderParty.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
+            case CASEWORKER -> {
+                return OrderFiledBy.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
+            }
+            case APP_BARRISTER -> {
+                return OrderFiledBy.APPLICANT_BARRISTER;
+            }
+            case RESP_BARRISTER -> {
+                return OrderFiledBy.RESPONDENT_BARRISTER;
+            }
+            case INTVR_SOLICITOR_1 -> {
+                return OrderFiledBy.INTERVENER_1;
+            }
+            case INTVR_SOLICITOR_2 -> {
+                return OrderFiledBy.INTERVENER_2;
+            }
+            case INTVR_SOLICITOR_3 -> {
+                return OrderFiledBy.INTERVENER_3;
+            }
+            case INTVR_SOLICITOR_4 -> {
+                return OrderFiledBy.INTERVENER_4;
             }
             default -> throw new IllegalArgumentException("Unexpected case role " + userCaseRole);
         }
@@ -118,9 +134,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
     }
 
-    private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation, OrderParty orderParty) {
+    private void handleAgreedDraftOrder(FinremCaseData finremCaseData, String userAuthorisation,
+                                        OrderFiledBy orderFiledBy) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        draftOrdersWrapper.getUploadAgreedDraftOrder().setOrderParty(orderParty);
+        draftOrdersWrapper.getUploadAgreedDraftOrder().setOrderFiledBy(orderFiledBy);
 
         List<AgreedDraftOrderCollection> newAgreedDraftOrderCollections = draftOrderService
             .processAgreedDraftOrders(draftOrdersWrapper.getUploadAgreedDraftOrder(), userAuthorisation);
@@ -130,10 +147,11 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
     }
 
-    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation, OrderParty orderParty) {
+    private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation,
+                                            OrderFiledBy orderFiledBy) {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
         UploadSuggestedDraftOrder uploadSuggestedDraftOrder = draftOrdersWrapper.getUploadSuggestedDraftOrder();
-        uploadSuggestedDraftOrder.setOrderParty(orderParty);
+        uploadSuggestedDraftOrder.setOrderFiledBy(orderFiledBy);
 
         List<SuggestedDraftOrderCollection> newSuggestedDraftOrderCollections = processSuggestedDraftOrders(uploadSuggestedDraftOrder,
             userAuthorisation);
