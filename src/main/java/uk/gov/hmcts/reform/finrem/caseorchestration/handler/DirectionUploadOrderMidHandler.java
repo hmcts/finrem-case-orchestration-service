@@ -16,9 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -80,8 +78,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
 
     private <T> List<T> filterNewItems(List<T> currentList, List<T> previousList) {
         List<T> safePreviousList = ListUtils.emptyIfNull(previousList);
-        return Optional.ofNullable(currentList)
-            .orElse(Collections.emptyList())
+        return ListUtils.emptyIfNull(currentList)
             .stream()
             .filter(item -> safePreviousList.stream().noneMatch(item::equals))
             .toList();
