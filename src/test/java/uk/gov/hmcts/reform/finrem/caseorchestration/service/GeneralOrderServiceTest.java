@@ -874,10 +874,8 @@ class GeneralOrderServiceTest {
             DynamicMultiSelectList.builder().value(selectedElements).listItems(listItems).build());
 
         assertThat(actual.getLeft())
-            .hasSize(1)
             .containsExactly(expectedCaseDocument4);
         assertThat(actual.getRight())
-            .hasSize(3)
             .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3);
     }
 }
