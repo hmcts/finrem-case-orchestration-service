@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
@@ -132,6 +132,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
+            e.printStackTrace();
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -146,39 +147,49 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromsDraftOrderReview(FinremCaseData caseData,
-                                                                                                                List<CaseDocument> hearingOrders) {
+                                                                                                              List<CaseDocument> hearingOrders) {
+
         List<PsaDocumentReview> removedPsaDocuments = new ArrayList<>();
         List<DraftOrderDocumentReview> removedDraftOrderDocuments = new ArrayList<>();
 
-        for (CaseDocument targetDocument : hearingOrders) {
-            for (DraftOrdersReviewCollection draftOrdersReviewCollection : emptyIfNull(caseData.getDraftOrdersWrapper()
-                .getDraftOrdersReviewCollection())) {
-                DraftOrdersReview draftOrdersReview = draftOrdersReviewCollection.getValue();
-
-                if (draftOrdersReview != null && draftOrdersReview.getPsaDocReviewCollection() != null) {
-                    List<PsaDocReviewCollection> toRemovePsa = draftOrdersReview.getPsaDocReviewCollection().stream()
-                        .filter(psaDocReview -> psaDocReview.getValue() != null
-                            && psaDocReview.getValue().getPsaDocument() != null
-                            && psaDocReview.getValue().getPsaDocument().equals(targetDocument))
-                        .toList();
-
-                    toRemovePsa.forEach(item -> removedPsaDocuments.add(item.getValue()));
-                    draftOrdersReview.getPsaDocReviewCollection().removeAll(toRemovePsa);
-                }
-
-                if (draftOrdersReview != null && draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
-                    List<DraftOrderDocReviewCollection> toRemoveDraft = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
-                        .filter(draftOrderReview -> draftOrderReview.getValue() != null
-                            && draftOrderReview.getValue().getDraftOrderDocument() != null
-                            && draftOrderReview.getValue().getDraftOrderDocument().equals(targetDocument))
-                        .toList();
-
-                    toRemoveDraft.forEach(item -> removedDraftOrderDocuments.add(item.getValue()));
-                    draftOrdersReview.getDraftOrderDocReviewCollection().removeAll(toRemoveDraft);
-                }
+        emptyIfNull(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).forEach(draftOrdersReviewCollection -> {
+            DraftOrdersReview draftReview = draftOrdersReviewCollection.getValue();
+            if (draftReview == null) {
+                return;
             }
-        }
+
+            hearingOrders.forEach(targetDocument -> {
+                removeMatchingDocuments(draftReview.getPsaDocReviewCollection(),
+                    PsaDocReviewCollection::getValue,
+                    PsaDocumentReview::getPsaDocument,
+                    targetDocument,
+                    removedPsaDocuments);
+
+                removeMatchingDocuments(draftReview.getDraftOrderDocReviewCollection(),
+                    DraftOrderDocReviewCollection::getValue,
+                    DraftOrderDocumentReview::getDraftOrderDocument,
+                    targetDocument,
+                    removedDraftOrderDocuments);
+            });
+        });
+
         return Pair.of(removedPsaDocuments, removedDraftOrderDocuments);
+    }
+
+    private <T, C> void removeMatchingDocuments(List<C> collection, Function<C, T> valueExtractor, Function<T, CaseDocument> docExtractor,
+                                                CaseDocument targetDocument, List<T> removedItems) {
+        if (collection == null) {
+            return;
+        }
+        List<C> toRemove = collection.stream()
+            .filter(item -> Optional.ofNullable(valueExtractor.apply(item))
+                .map(docExtractor)
+                .filter(doc -> doc.equals(targetDocument))
+                .isPresent())
+            .toList();
+
+        toRemove.forEach(item -> removedItems.add(valueExtractor.apply(item)));
+        collection.removeAll(toRemove);
     }
 
     private void removeDocumentFromsAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
@@ -197,34 +208,39 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void populateRemovedOrdersToFinalisedOrder(FinremCaseData caseData,
                                                        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed) {
-        caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(
+        caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(concat(
             concat(
-                concat(
-                    defaultIfNull(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection(), new ArrayList<>()).stream(),
-                    removed.getRight().stream()
-                        .map(d -> FinalisedOrderCollection.builder()
-                            .value(FinalisedOrder.builder()
-                                .submittedDate(d.getSubmittedDate())
-                                .submittedBy(d.getSubmittedBy())
-                                .finalisedDocument(d.getTargetDocument())
-                                .finalOrder(d.getFinalOrder())
-                                .approvalDate(d.getApprovalDate())
-                                .approvalJudge(d.getApprovalJudge())
-                                .attachments(d.getAttachments())
-                                .build())
-                            .build())),
-                removed.getLeft().stream()
-                    .map(d -> FinalisedOrderCollection.builder()
-                        .value(FinalisedOrder.builder()
-                            .submittedDate(d.getSubmittedDate())
-                            .submittedBy(d.getSubmittedBy())
-                            .finalisedDocument(d.getTargetDocument())
-                            .finalOrder(d.getFinalOrder())
-                            .approvalDate(d.getApprovalDate())
-                            .approvalJudge(d.getApprovalJudge())
-                            .build())
-                        .build())).toList()
-        );
+                defaultIfNull(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection(), new ArrayList<>()).stream(),
+                removed.getRight().stream().map(this::toFinalisedOrderCollection)
+            ),
+            removed.getLeft().stream().map(this::toFinalisedOrderCollection)).toList());
+    }
+
+    private FinalisedOrderCollection toFinalisedOrderCollection(PsaDocumentReview psaDocumentReview) {
+        return FinalisedOrderCollection.builder()
+            .value(FinalisedOrder.builder()
+                .submittedDate(psaDocumentReview.getSubmittedDate())
+                .submittedBy(psaDocumentReview.getSubmittedBy())
+                .finalisedDocument(psaDocumentReview.getTargetDocument())
+                .finalOrder(psaDocumentReview.getFinalOrder())
+                .approvalDate(psaDocumentReview.getApprovalDate())
+                .approvalJudge(psaDocumentReview.getApprovalJudge())
+                .build())
+            .build();
+    }
+
+    private FinalisedOrderCollection toFinalisedOrderCollection(DraftOrderDocumentReview draftOrderDocumentReview) {
+        return FinalisedOrderCollection.builder()
+            .value(FinalisedOrder.builder()
+                .attachments(draftOrderDocumentReview.getAttachments())
+                .submittedDate(draftOrderDocumentReview.getSubmittedDate())
+                .submittedBy(draftOrderDocumentReview.getSubmittedBy())
+                .finalisedDocument(draftOrderDocumentReview.getTargetDocument())
+                .finalOrder(draftOrderDocumentReview.getFinalOrder())
+                .approvalDate(draftOrderDocumentReview.getApprovalDate())
+                .approvalJudge(draftOrderDocumentReview.getApprovalJudge())
+                .build())
+            .build();
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {

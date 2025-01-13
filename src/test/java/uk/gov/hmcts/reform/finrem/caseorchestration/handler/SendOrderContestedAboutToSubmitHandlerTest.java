@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -28,6 +29,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -599,5 +611,135 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(response.getErrors())
             .hasSize(1)
             .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
+    }
+
+    @Test
+    void shouldPopulateFinalisedOrderCollectionFromDraftOrder() {
+        CaseDocument caseDocument = caseDocument();
+
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
+        finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(new ArrayList<>(of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().draftOrder(caseDocument).build())
+                    .build()
+            )))
+            .draftOrdersReviewCollection(new ArrayList<>(of(
+                DraftOrdersReviewCollection.builder()
+                    .value(DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(new ArrayList<>(of(
+                            DraftOrderDocReviewCollection.builder()
+                                .value(DraftOrderDocumentReview.builder()
+                                    .draftOrderDocument(caseDocument)
+                                    .submittedBy("SUBMITTED BY AAA")
+                                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge A")
+                                    .build())
+                                .build()))
+                        ).build())
+                    .build()
+            )))
+            .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument)));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .isEmpty();
+        assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .containsExactly(DraftOrdersReview.builder().draftOrderDocReviewCollection(List.of()).build());
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                    .finalisedDocument(caseDocument)
+                    .submittedBy("SUBMITTED BY AAA")
+                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                    .approvalJudge("Mr Judge A")
+                .build()).build());
+
+    }
+
+    @Test
+    void shouldPopulateFinalisedOrderCollectionFromPSA() {
+        CaseDocument caseDocument = caseDocument();
+        CaseDocument caseDocument2 = caseDocument("b", "b");
+
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
+        finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(new ArrayList<>(of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(caseDocument).build())
+                    .build()
+            )))
+            .draftOrdersReviewCollection(new ArrayList<>(of(
+                DraftOrdersReviewCollection.builder()
+                    .value(DraftOrdersReview.builder()
+                        .psaDocReviewCollection(new ArrayList<>(of(
+                            PsaDocReviewCollection.builder()
+                                .value(PsaDocumentReview.builder()
+                                    .psaDocument(caseDocument)
+                                    .submittedBy("SUBMITTED BY BBB")
+                                    .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge B")
+                                    .build())
+                                .build()
+                        )))
+                        .draftOrderDocReviewCollection(new ArrayList<>(of(
+                            DraftOrderDocReviewCollection.builder()
+                                .value(DraftOrderDocumentReview.builder()
+                                    .draftOrderDocument(caseDocument2)
+                                    .submittedBy("SUBMITTED BY AAA")
+                                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge A")
+                                    .build())
+                                .build()))
+                        ).build())
+                    .build()
+            )))
+            .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument)));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .isEmpty();
+        assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .containsExactly(DraftOrdersReview.builder()
+                .psaDocReviewCollection(List.of())
+                .draftOrderDocReviewCollection(List.of(
+                    DraftOrderDocReviewCollection.builder()
+                        .value(DraftOrderDocumentReview.builder()
+                            .draftOrderDocument(caseDocument2)
+                            .submittedBy("SUBMITTED BY AAA")
+                            .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                            .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                            .approvalJudge("Mr Judge A")
+                            .build())
+                        .build()
+                )).build());
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                .finalisedDocument(caseDocument)
+                .submittedBy("SUBMITTED BY BBB")
+                .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
+                .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
+                .approvalJudge("Mr Judge B")
+                .build()).build());
+
     }
 }
