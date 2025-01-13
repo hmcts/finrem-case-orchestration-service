@@ -610,7 +610,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors())
-            .hasSize(1)
             .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
     }
 
