@@ -64,7 +64,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
             List<DocumentCollection> hearingOrderOtherDocuments = filterNewItems(
                 caseData.getHearingOrderOtherDocuments(),
-                caseData.getHearingOrderOtherDocuments()
+                caseDataBefore.getHearingOrderOtherDocuments()
             );
             if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
                 hearingOrderOtherDocuments.forEach(doc ->

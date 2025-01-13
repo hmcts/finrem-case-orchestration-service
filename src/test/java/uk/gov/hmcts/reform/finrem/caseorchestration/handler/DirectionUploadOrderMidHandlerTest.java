@@ -91,7 +91,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
-        verify(service, times(1)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
