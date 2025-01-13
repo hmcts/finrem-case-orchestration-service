@@ -91,36 +91,19 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
         CaseRole userCaseRole = getUserCaseRole(caseDetails.getId().toString(), userAuthorisation);
 
-        switch (userCaseRole) {
-            case APP_SOLICITOR -> {
-                return OrderFiledBy.APPLICANT;
-            }
-            case RESP_SOLICITOR -> {
-                return OrderFiledBy.RESPONDENT;
-            }
-            case CASEWORKER -> {
-                return OrderFiledBy.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
-            }
-            case APP_BARRISTER -> {
-                return OrderFiledBy.APPLICANT_BARRISTER;
-            }
-            case RESP_BARRISTER -> {
-                return OrderFiledBy.RESPONDENT_BARRISTER;
-            }
-            case INTVR_SOLICITOR_1 -> {
-                return OrderFiledBy.INTERVENER_1;
-            }
-            case INTVR_SOLICITOR_2 -> {
-                return OrderFiledBy.INTERVENER_2;
-            }
-            case INTVR_SOLICITOR_3 -> {
-                return OrderFiledBy.INTERVENER_3;
-            }
-            case INTVR_SOLICITOR_4 -> {
-                return OrderFiledBy.INTERVENER_4;
-            }
+        return switch (userCaseRole) {
+            case APP_SOLICITOR -> OrderFiledBy.APPLICANT;
+            case RESP_SOLICITOR -> OrderFiledBy.RESPONDENT;
+            case CASEWORKER ->
+                OrderFiledBy.forUploadPartyValue(getUploadParty(caseDetails.getData().getDraftOrdersWrapper()));
+            case APP_BARRISTER -> OrderFiledBy.APPLICANT_BARRISTER;
+            case RESP_BARRISTER -> OrderFiledBy.RESPONDENT_BARRISTER;
+            case INTVR_SOLICITOR_1 -> OrderFiledBy.INTERVENER_1;
+            case INTVR_SOLICITOR_2 -> OrderFiledBy.INTERVENER_2;
+            case INTVR_SOLICITOR_3 -> OrderFiledBy.INTERVENER_3;
+            case INTVR_SOLICITOR_4 -> OrderFiledBy.INTERVENER_4;
             default -> throw new IllegalArgumentException("Unexpected case role " + userCaseRole);
-        }
+        };
     }
 
     private String getUploadParty(DraftOrdersWrapper draftOrdersWrapper) {
