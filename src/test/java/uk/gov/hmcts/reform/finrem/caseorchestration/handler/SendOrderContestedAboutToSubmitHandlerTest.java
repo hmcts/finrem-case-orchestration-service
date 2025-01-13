@@ -410,6 +410,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
+        data.setOrderApprovedCoverLetter(caseDocument("coversheet", "coversheet"));
         data.setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
@@ -615,14 +616,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void shouldPopulateFinalisedOrderCollectionFromDraftOrdersReviewCollection() {
-        CaseDocument caseDocument = caseDocument();
+        CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
         finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
-                    .value(AgreedDraftOrder.builder().draftOrder(caseDocument).build())
+                    .value(AgreedDraftOrder.builder().draftOrder(caseDocument1).build())
                     .build()
             )))
             .draftOrdersReviewCollection(new ArrayList<>(of(
@@ -631,7 +633,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                         .draftOrderDocReviewCollection(new ArrayList<>(of(
                             DraftOrderDocReviewCollection.builder()
                                 .value(DraftOrderDocumentReview.builder()
-                                    .draftOrderDocument(caseDocument)
+                                    .draftOrderDocument(caseDocument1)
                                     .submittedBy("SUBMITTED BY AAA")
                                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
@@ -646,7 +648,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
-            .thenReturn(Pair.of(List.of(), List.of(caseDocument)));
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -657,7 +659,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .containsExactly(DraftOrdersReview.builder().draftOrderDocReviewCollection(List.of()).build());
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
-                    .finalisedDocument(caseDocument)
+                    .finalisedDocument(caseDocument1)
                     .submittedBy("SUBMITTED BY AAA")
                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
@@ -668,15 +670,16 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void shouldPopulateFinalisedOrderCollectionFromPsaDocReviewCollection() {
-        CaseDocument caseDocument = caseDocument();
-        CaseDocument caseDocument2 = caseDocument("b", "b");
+        CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
+        CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
         finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
-                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(caseDocument).build())
+                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(caseDocument1).build())
                     .build()
             )))
             .draftOrdersReviewCollection(new ArrayList<>(of(
@@ -685,7 +688,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                         .psaDocReviewCollection(new ArrayList<>(of(
                             PsaDocReviewCollection.builder()
                                 .value(PsaDocumentReview.builder()
-                                    .psaDocument(caseDocument)
+                                    .psaDocument(caseDocument1)
                                     .submittedBy("SUBMITTED BY BBB")
                                     .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
@@ -711,7 +714,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
-            .thenReturn(Pair.of(List.of(), List.of(caseDocument)));
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -734,7 +737,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 )).build());
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
-                .finalisedDocument(caseDocument)
+                .finalisedDocument(caseDocument1)
                 .submittedBy("SUBMITTED BY BBB")
                 .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))

@@ -275,7 +275,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
-        if (false && caseData.getOrderApprovedCoverLetter() == null) { // TODO remove false condition
+        if (caseData.getOrderApprovedCoverLetter() == null) {
             throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
         }
         orders.add(caseData.getOrderApprovedCoverLetter());
