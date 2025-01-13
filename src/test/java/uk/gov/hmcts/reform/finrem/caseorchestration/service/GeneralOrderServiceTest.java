@@ -761,7 +761,6 @@ class GeneralOrderServiceTest {
 
         assertThat(caseDetails.getData().getOrdersToShare().getListItems())
             .as("The processed order should appear in ordersToShare.")
-            .hasSize(1)
             .containsExactly(expectedDynamicListElement);
     }
 
