@@ -75,7 +75,6 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
-
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
         DirectionOrder order = DirectionOrder.builder().uploadDraftDocument(caseDocument).build();
@@ -92,7 +91,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().isEmpty());
-        verify(service, times(2)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
+        verify(service, times(1)).validateEncryptionOnUploadedDocument(any(), any(), any(), any());
     }
 
     @Test
