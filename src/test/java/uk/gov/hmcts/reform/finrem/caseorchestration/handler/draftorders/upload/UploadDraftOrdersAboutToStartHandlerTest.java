@@ -126,8 +126,8 @@ class UploadDraftOrdersAboutToStartHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testShowUploadPartyQuestionForCaseRole")
-    void testShowUploadPartyQuestionForCaseRole(CaseRole caseRole) {
+    @MethodSource("provideCaseRoles")
+    void givenUserIsNotCaseWorkerWhenHandleThenShowUploadQuestionIsNo(CaseRole caseRole) {
         long caseID = 1727874196328932L;
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
         CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
@@ -143,7 +143,7 @@ class UploadDraftOrdersAboutToStartHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
     }
 
-    private static Stream<Arguments> testShowUploadPartyQuestionForCaseRole() {
+    private static Stream<Arguments> provideCaseRoles() {
         return Stream.of(
             Arguments.of(CaseRole.APP_SOLICITOR),
             Arguments.of(CaseRole.RESP_SOLICITOR),
