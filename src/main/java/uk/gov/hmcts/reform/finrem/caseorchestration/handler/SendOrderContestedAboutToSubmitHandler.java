@@ -197,29 +197,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void populateRemovedOrdersToFinalisedOrder(FinremCaseData caseData,
                                                        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed) {
-//        List<FinalisedOrderCollection> finalisedOrderFromDraftOrderDocumentReview = removed.getRight().stream()
-//            .map(d -> FinalisedOrderCollection.builder()
-//                .value(FinalisedOrder.builder()
-//                    .submittedDate(d.getSubmittedDate())
-//                    .submittedBy(d.getSubmittedBy())
-//                    .finalisedDocument(d.getTargetDocument())
-//                    .finalOrder(d.getFinalOrder())
-//                    .approvalDate(d.getApprovalDate())
-//                    .approvalJudge(d.getApprovalJudge())
-//                    .attachments(d.getAttachments())
-//                    .build())
-//                .build()).toList();
-//        List<FinalisedOrderCollection> finalisedOrderFromPsaDocumentReview = removed.getLeft().stream()
-//            .map(d -> FinalisedOrderCollection.builder()
-//                .value(FinalisedOrder.builder()
-//                    .submittedDate(d.getSubmittedDate())
-//                    .submittedBy(d.getSubmittedBy())
-//                    .finalisedDocument(d.getTargetDocument())
-//                    .finalOrder(d.getFinalOrder())
-//                    .approvalDate(d.getApprovalDate())
-//                    .approvalJudge(d.getApprovalJudge())
-//                    .build())
-//                .build()).toList();
         caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(
             concat(
                 concat(
