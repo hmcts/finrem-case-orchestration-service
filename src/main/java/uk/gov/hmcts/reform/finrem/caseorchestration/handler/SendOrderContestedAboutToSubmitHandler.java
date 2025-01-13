@@ -20,9 +20,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -36,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.stream.Stream.concat;
+import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -137,11 +145,40 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         return (legacyHearingOrders != null && !legacyHearingOrders.isEmpty()) || (newProcessedOrders != null && !newProcessedOrders.isEmpty());
     }
 
-    private List<AgreedDraftOrderCollection> getTargetedAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
-        return emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
-            .stream()
-            .filter(d -> hearingOrders.contains(d.getValue().getTargetDocument()))
-            .toList();
+    private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromsDraftOrderReview(FinremCaseData caseData,
+                                                                                                                List<CaseDocument> hearingOrders) {
+        List<PsaDocumentReview> removedPsaDocuments = new ArrayList<>();
+        List<DraftOrderDocumentReview> removedDraftOrderDocuments = new ArrayList<>();
+
+        for (CaseDocument targetDocument : hearingOrders) {
+            for (DraftOrdersReviewCollection draftOrdersReviewCollection : emptyIfNull(caseData.getDraftOrdersWrapper()
+                .getDraftOrdersReviewCollection())) {
+                DraftOrdersReview draftOrdersReview = draftOrdersReviewCollection.getValue();
+
+                if (draftOrdersReview != null && draftOrdersReview.getPsaDocReviewCollection() != null) {
+                    List<PsaDocReviewCollection> toRemovePsa = draftOrdersReview.getPsaDocReviewCollection().stream()
+                        .filter(psaDocReview -> psaDocReview.getValue() != null
+                            && psaDocReview.getValue().getPsaDocument() != null
+                            && psaDocReview.getValue().getPsaDocument().equals(targetDocument))
+                        .toList();
+
+                    toRemovePsa.forEach(item -> removedPsaDocuments.add(item.getValue()));
+                    draftOrdersReview.getPsaDocReviewCollection().removeAll(toRemovePsa);
+                }
+
+                if (draftOrdersReview != null && draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
+                    List<DraftOrderDocReviewCollection> toRemoveDraft = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
+                        .filter(draftOrderReview -> draftOrderReview.getValue() != null
+                            && draftOrderReview.getValue().getDraftOrderDocument() != null
+                            && draftOrderReview.getValue().getDraftOrderDocument().equals(targetDocument))
+                        .toList();
+
+                    toRemoveDraft.forEach(item -> removedDraftOrderDocuments.add(item.getValue()));
+                    draftOrdersReview.getDraftOrderDocReviewCollection().removeAll(toRemoveDraft);
+                }
+            }
+        }
+        return Pair.of(removedPsaDocuments, removedDraftOrderDocuments);
     }
 
     private void removeDocumentFromsAgreedDraftOrderCollection(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
@@ -152,37 +189,70 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         caseData.getDraftOrdersWrapper().setAgreedDraftOrderCollection(updatedCollection);
     }
 
-    private void removeDocumentFromsDraftOrderReview(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
-        for (CaseDocument targetDocument : hearingOrders) {
-            for (DraftOrdersReviewCollection draftOrdersReviewCollection : emptyIfNull(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
-                DraftOrdersReview draftOrdersReview = draftOrdersReviewCollection.getValue();
-                if (draftOrdersReview != null && draftOrdersReview.getPsaDocReviewCollection() != null) {
-                    draftOrdersReview.getPsaDocReviewCollection().removeIf(
-                        psaDocReview -> psaDocReview.getValue() != null
-                            && psaDocReview.getValue().getPsaDocument() != null
-                            && psaDocReview.getValue().getPsaDocument().equals(targetDocument)
-                    );
-                }
-                if (draftOrdersReview != null && draftOrdersReview.getDraftOrderDocReviewCollection() != null) {
-                    draftOrdersReview.getDraftOrderDocReviewCollection().removeIf(
-                        psaDocReview -> psaDocReview.getValue() != null
-                            && psaDocReview.getValue().getDraftOrderDocument() != null
-                            && psaDocReview.getValue().getDraftOrderDocument().equals(targetDocument)
-                    );
-                }
-            }
-        }
+    private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
+        removeDocumentFromsAgreedDraftOrderCollection(caseData, hearingOrders);
+        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed = removeDocumentFromsDraftOrderReview(caseData, hearingOrders);
+        populateRemovedOrdersToFinalisedOrder(caseData, removed);
     }
 
-    private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
-        List<AgreedDraftOrderCollection> removedOrders = getTargetedAgreedDraftOrderCollection(caseData, hearingOrders);
-        removeDocumentFromsAgreedDraftOrderCollection(caseData, hearingOrders);
-        removeDocumentFromsDraftOrderReview(caseData, hearingOrders);
+    private void populateRemovedOrdersToFinalisedOrder(FinremCaseData caseData,
+                                                       Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed) {
+//        List<FinalisedOrderCollection> finalisedOrderFromDraftOrderDocumentReview = removed.getRight().stream()
+//            .map(d -> FinalisedOrderCollection.builder()
+//                .value(FinalisedOrder.builder()
+//                    .submittedDate(d.getSubmittedDate())
+//                    .submittedBy(d.getSubmittedBy())
+//                    .finalisedDocument(d.getTargetDocument())
+//                    .finalOrder(d.getFinalOrder())
+//                    .approvalDate(d.getApprovalDate())
+//                    .approvalJudge(d.getApprovalJudge())
+//                    .attachments(d.getAttachments())
+//                    .build())
+//                .build()).toList();
+//        List<FinalisedOrderCollection> finalisedOrderFromPsaDocumentReview = removed.getLeft().stream()
+//            .map(d -> FinalisedOrderCollection.builder()
+//                .value(FinalisedOrder.builder()
+//                    .submittedDate(d.getSubmittedDate())
+//                    .submittedBy(d.getSubmittedBy())
+//                    .finalisedDocument(d.getTargetDocument())
+//                    .finalOrder(d.getFinalOrder())
+//                    .approvalDate(d.getApprovalDate())
+//                    .approvalJudge(d.getApprovalJudge())
+//                    .build())
+//                .build()).toList();
+        caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(
+            concat(
+                concat(
+                    defaultIfNull(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection(), new ArrayList<>()).stream(),
+                    removed.getRight().stream()
+                        .map(d -> FinalisedOrderCollection.builder()
+                            .value(FinalisedOrder.builder()
+                                .submittedDate(d.getSubmittedDate())
+                                .submittedBy(d.getSubmittedBy())
+                                .finalisedDocument(d.getTargetDocument())
+                                .finalOrder(d.getFinalOrder())
+                                .approvalDate(d.getApprovalDate())
+                                .approvalJudge(d.getApprovalJudge())
+                                .attachments(d.getAttachments())
+                                .build())
+                            .build())),
+                removed.getLeft().stream()
+                    .map(d -> FinalisedOrderCollection.builder()
+                        .value(FinalisedOrder.builder()
+                            .submittedDate(d.getSubmittedDate())
+                            .submittedBy(d.getSubmittedBy())
+                            .finalisedDocument(d.getTargetDocument())
+                            .finalOrder(d.getFinalOrder())
+                            .approvalDate(d.getApprovalDate())
+                            .approvalJudge(d.getApprovalJudge())
+                            .build())
+                        .build())).toList()
+        );
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
         caseData.setAdditionalDocument(null);
-        caseData.setOrdersToShare(new DynamicMultiSelectList());
+        caseData.setOrdersToShare(null);
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,
