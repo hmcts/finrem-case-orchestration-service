@@ -46,21 +46,15 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.DIRECTION_UPLOAD_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
-
         List<String> errors = new ArrayList<>();
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseDataBefore = caseDetailsBefore.getData();
 
-        List<DirectionOrderCollection> uploadHearingOrders = Optional.ofNullable(caseData.getUploadHearingOrder())
-            .orElse(Collections.emptyList())
-            .stream()
-            .filter(order ->
-                Optional.ofNullable(caseDataBefore.getUploadHearingOrder())
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .noneMatch(beforeOrder -> beforeOrder.equals(order)))
-            .toList();
+        List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
+            caseData.getUploadHearingOrder(),
+            caseDataBefore.getUploadHearingOrder()
+        );
         if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
             uploadHearingOrders.forEach(doc ->
                 service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
@@ -68,15 +62,10 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
-            List<DocumentCollection> hearingOrderOtherDocuments = Optional.ofNullable(caseData.getHearingOrderOtherDocuments())
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(order ->
-                    Optional.ofNullable(caseDataBefore.getHearingOrderOtherDocuments())
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .noneMatch(beforeOrder -> beforeOrder.equals(order)))
-                .toList();
+            List<DocumentCollection> hearingOrderOtherDocuments = filterNewItems(
+                caseData.getHearingOrderOtherDocuments(),
+                caseData.getHearingOrderOtherDocuments()
+            );
             if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
                 hearingOrderOtherDocuments.forEach(doc ->
                     service.validateEncryptionOnUploadedDocument(doc.getValue(),
@@ -86,5 +75,14 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
+    }
+
+    private <T> List<T> filterNewItems(List<T> currentList, List<T> previousList) {
+        List<T> safePreviousList = Optional.ofNullable(previousList).orElse(Collections.emptyList());
+        return Optional.ofNullable(currentList)
+            .orElse(Collections.emptyList())
+            .stream()
+            .filter(item -> safePreviousList.stream().noneMatch(item::equals))
+            .toList();
     }
 }
