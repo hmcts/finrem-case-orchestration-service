@@ -92,6 +92,11 @@ public class DocumentConversionService {
         return document;
     }
 
+    /**
+     * This method iterates over all pages in the document and removes all annotations from each page.
+     * @param doc
+     * @throws IOException
+     */
     private void flattenAnnotations(PDDocument doc) throws IOException {
         for (PDPage page : doc.getPages()) {
             List<PDAnnotation> annotations = page.getAnnotations();
@@ -105,6 +110,17 @@ public class DocumentConversionService {
         }
     }
 
+    /**
+     * The transformation matrix needs to be set correctly by considering both the position and the size of the
+     * annotation's bounding box, along with the appearance stream's bounding box. Once the transformation matrix
+     * is applied, the drawForm() method is used to draw the appearance stream directly onto the page at the
+     * correct position.
+     * @param doc
+     * @param page
+     * @param annotation
+     * @param appearanceStream
+     * @throws IOException
+     */
     private void transformAnnotationsToContentStream(PDDocument doc, PDPage page, PDAnnotation annotation,
                                                      PDAppearanceStream appearanceStream) throws IOException {
         float appearanceWidth = (float) appearanceStream.getBBox().getWidth();
