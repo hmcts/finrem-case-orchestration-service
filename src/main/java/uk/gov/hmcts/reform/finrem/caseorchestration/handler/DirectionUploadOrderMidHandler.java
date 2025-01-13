@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -78,7 +79,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
     }
 
     private <T> List<T> filterNewItems(List<T> currentList, List<T> previousList) {
-        List<T> safePreviousList = Optional.ofNullable(previousList).orElse(Collections.emptyList());
+        List<T> safePreviousList = ListUtils.emptyIfNull(previousList);
         return Optional.ofNullable(currentList)
             .orElse(Collections.emptyList())
             .stream()
