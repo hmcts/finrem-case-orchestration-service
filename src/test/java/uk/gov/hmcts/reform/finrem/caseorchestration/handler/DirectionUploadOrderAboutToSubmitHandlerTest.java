@@ -130,11 +130,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder())
-            .hasSize(1)
-            .contains(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getUploadHearingOrder()).containsExactly(expectedNewDirectionOrderCollection);
     }
 
     @Test
