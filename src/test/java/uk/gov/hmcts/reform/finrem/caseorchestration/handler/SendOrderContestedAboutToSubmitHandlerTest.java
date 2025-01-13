@@ -614,7 +614,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldPopulateFinalisedOrderCollectionFromDraftOrder() {
+    void shouldPopulateFinalisedOrderCollectionFromDraftOrdersReviewCollection() {
         CaseDocument caseDocument = caseDocument();
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
@@ -667,7 +667,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldPopulateFinalisedOrderCollectionFromPSA() {
+    void shouldPopulateFinalisedOrderCollectionFromPsaDocReviewCollection() {
         CaseDocument caseDocument = caseDocument();
         CaseDocument caseDocument2 = caseDocument("b", "b");
 
