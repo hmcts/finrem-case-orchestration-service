@@ -13,8 +13,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 public enum OrderFiledBy {
     APPLICANT("Applicant"),
     RESPONDENT("Respondent"),
-    APPLICANT_BARRISTER("Applicant"),
-    RESPONDENT_BARRISTER("Respondent"),
+    APPLICANT_BARRISTER("Applicant Barrister"),
+    RESPONDENT_BARRISTER("Respondent Barrister"),
     INTERVENER_1("Intervener 1"),
     INTERVENER_2("Intervener 2"),
     INTERVENER_3("Intervener 3"),
