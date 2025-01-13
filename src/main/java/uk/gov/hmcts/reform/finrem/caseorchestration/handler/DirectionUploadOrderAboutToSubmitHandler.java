@@ -157,7 +157,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
     }
 
     private void clearUnprocessedApprovedDocuments(DraftOrdersWrapper draftOrdersWrapper) {
-        draftOrdersWrapper.setUnprocessedApprovedDocuments(List.of());
+        draftOrdersWrapper.setUnprocessedApprovedDocuments(null);
     }
 
     private void clearMetaDataFields(FinremCaseData caseData) {

@@ -132,8 +132,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder()).hasSize(1);
-        assertThat(res.getData().getUploadHearingOrder().get(0)).isEqualTo(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getUploadHearingOrder())
+            .hasSize(1)
+            .contains(expectedNewDirectionOrderCollection);
     }
 
     @Test
@@ -159,8 +160,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder()).hasSize(2);
-        assertThat(res.getData().getUploadHearingOrder().get(1)).isEqualTo(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getUploadHearingOrder())
+            .hasSize(2)
+            .contains(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isNull();
+        assertThat(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent()).isNull();
+        assertThat(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()).isNull();
     }
 
     @Test
