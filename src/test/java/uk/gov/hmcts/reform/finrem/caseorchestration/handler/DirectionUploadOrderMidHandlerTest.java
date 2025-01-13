@@ -151,7 +151,6 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         assertThat(response.getData().getUploadHearingOrder())
             .hasSize(2);
         assertTrue(
