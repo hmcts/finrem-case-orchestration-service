@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,11 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateContactDetailsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -152,5 +155,31 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
 
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
         verify(nocWorkflowService, times(1)).handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetailsBefore);
+    }
+
+    @Test
+    void testPopulateInRefugeQuestionsCalled() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // MockedStatic is closed after the try resources block
+        try (MockedStatic<RefugeWrapperUtils> mockedStatic = mockStatic(RefugeWrapperUtils.class)) {
+
+            handler.handle(callbackRequest, AUTH_TOKEN);
+            // Check that updateRespondentInRefugeTab is called with our case details instance
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
+            mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails), times(1));
+        }
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+                .builder()
+                .eventType(EventType.UPDATE_CONTACT_DETAILS)
+                .caseDetails(FinremCaseDetails.builder().id(123L)
+                        .data(new FinremCaseData()).build())
+                .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
+                    .data(new FinremCaseData()).build())
+                .build();
     }
 }

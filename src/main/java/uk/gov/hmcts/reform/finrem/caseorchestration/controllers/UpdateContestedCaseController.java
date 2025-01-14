@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +75,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private final OnlineFormDocumentService onlineFormDocumentService;
     private final CaseFlagsService caseFlagsService;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -112,7 +116,15 @@ public class UpdateContestedCaseController extends BaseController {
 
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+
+        RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
+        RefugeWrapperUtils.updateRespondentInRefugeTab(finremCaseDetails);
+
+        CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
     }
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
