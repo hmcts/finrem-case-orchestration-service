@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
 @Slf4j
@@ -20,9 +22,13 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
     private final ApproveOrderService approveOrderService;
 
-    public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService) {
+    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+
+    public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService,
+                                                  ContestedOrderApprovedLetterService contestedOrderApprovedLetterService) {
         super(finremCaseDetailsMapper);
         this.approveOrderService = approveOrderService;
+        this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
     }
 
     @Override
@@ -41,10 +47,17 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
+        Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
+        if (containsApprovalStatus(statuses)) {
+            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
+        }
         clearInputFields(draftOrdersWrapper);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
+    }
+
+    private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
+        return Boolean.TRUE.equals(statuses.getLeft());
     }
 
     private void clearInputFields(DraftOrdersWrapper draftOrdersWrapper) {
