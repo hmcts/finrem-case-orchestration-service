@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import static java.lang.String.format;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -132,7 +133,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error(format(e.getMessage() + " on Case ID: %s",  caseDetails.getId()), e);
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
