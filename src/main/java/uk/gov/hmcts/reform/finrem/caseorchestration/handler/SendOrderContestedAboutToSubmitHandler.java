@@ -146,7 +146,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         return (legacyHearingOrders != null && !legacyHearingOrders.isEmpty()) || (newProcessedOrders != null && !newProcessedOrders.isEmpty());
     }
 
-    private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromsDraftOrderReview(FinremCaseData caseData,
+    private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromDraftOrderReview(FinremCaseData caseData,
                                                                                                               List<CaseDocument> hearingOrders) {
 
         List<PsaDocumentReview> removedPsaDocuments = new ArrayList<>();
@@ -202,7 +202,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {
         removeDocumentFromsAgreedDraftOrderCollection(caseData, hearingOrders);
-        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed = removeDocumentFromsDraftOrderReview(caseData, hearingOrders);
+        Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removed = removeDocumentFromDraftOrderReview(caseData, hearingOrders);
         populateRemovedOrdersToFinalisedOrder(caseData, removed);
     }
 
