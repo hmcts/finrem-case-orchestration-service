@@ -161,6 +161,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         assertThat(res.getData().getUploadHearingOrder()).hasSize(2);
         assertThat(res.getData().getUploadHearingOrder().get(1)).isEqualTo(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isNull();
     }
 
     @Test
