@@ -12,13 +12,13 @@ public enum JudgeDecision {
     private final boolean hearingInstructionRequired;
     private final boolean approved;
     private final boolean refused;
-    private final boolean refusalOrderInstructionRequired;
+    private final boolean extraReportFieldsInputRequired;
 
-    JudgeDecision(boolean hearingInstructionRequired, boolean approved, boolean refused, boolean refusalOrderInstructionRequired) {
+    JudgeDecision(boolean hearingInstructionRequired, boolean approved, boolean refused, boolean extraReportFieldsInputRequired) {
         this.hearingInstructionRequired = hearingInstructionRequired;
         this.approved = approved;
         this.refused = refused;
-        this.refusalOrderInstructionRequired = refusalOrderInstructionRequired;
+        this.extraReportFieldsInputRequired = extraReportFieldsInputRequired;
     }
 
 }
