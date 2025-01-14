@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.ArrayList;
@@ -46,17 +48,38 @@ public class ApproveOrderService {
      *   <li>Updates the draft orders and PSA documents in the provided {@link DraftOrdersWrapper} based on the judge's decision.</li>
      * </ol>
      *
+     * <p>After processing, the method builds a confirmation body reflecting the decisions made and returns a pair indicating
+     * whether any draft order was approved or refused.</p>
+     *
      * @param draftOrdersWrapper the wrapper object containing draft orders and PSA document collections to be updated
      * @param userAuthorisation  the authorisation token of the user, used to fetch the approving judge's details
+     * @return a {@link Pair} where the first value indicates if any draft order was approved, and the second value indicates if any was refused
      */
-    public void populateJudgeDecisions(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
+    public Pair<Boolean, Boolean> populateJudgeDecisions(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
+                                                         String userAuthorisation) {
+        boolean hasApprovedDecision = false;
+        boolean hasRefusedDecision = false;
+
         for (int i = 1; i <= 5; i++) {
-            JudgeApproval judgeApproval = resolveJudgeApproval(draftOrdersWrapper, i);
-            ofNullable(judgeApproval).map(JudgeApproval::getDocument)
-                .ifPresent(targetDoc -> judgeApprovalResolver.populateJudgeDecision(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval,
-                    userAuthorisation));
+            JudgeApproval approval = resolveJudgeApproval(draftOrdersWrapper, i);
+            if (approval == null) {
+                continue;
+            }
+            processJudgeDecision(finremCaseDetails, draftOrdersWrapper, approval, userAuthorisation);
+            JudgeDecision decision = approval.getJudgeDecision();
+            if (decision != null) {
+                hasApprovedDecision |= decision.isApproved();
+                hasRefusedDecision |= decision.isRefused();
+            }
         }
+
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
+        return Pair.of(hasApprovedDecision, hasRefusedDecision);
+    }
+
+    private void processJudgeDecision(FinremCaseDetails caseDetails, DraftOrdersWrapper wrapper, JudgeApproval approval, String authToken) {
+        ofNullable(approval.getDocument()).ifPresent(caseDocument -> judgeApprovalResolver.populateJudgeDecision(caseDetails, wrapper, caseDocument,
+            approval, authToken));
     }
 
     /**
