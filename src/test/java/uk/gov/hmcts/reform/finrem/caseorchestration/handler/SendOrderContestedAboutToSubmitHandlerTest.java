@@ -590,7 +590,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldGetAnErrorMessageWhenTheRequiredCoverSheetIsMissing() {
+    void givenContestedCase_whenCoversheetIsMissing_thenShowAnErrorMessage() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -614,7 +614,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldPopulateFinalisedOrderCollectionFromDraftOrdersReviewCollection() {
+    void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
@@ -668,7 +668,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldPopulateFinalisedOrderCollectionFromPsaDocReviewCollection() {
+    void givenContestedCase_whenSendingPsaDocumentReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
         CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
 
