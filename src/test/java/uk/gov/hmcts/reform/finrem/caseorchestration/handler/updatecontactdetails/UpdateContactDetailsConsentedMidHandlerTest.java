@@ -74,7 +74,6 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(1, handle.getErrors().size());
         assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
     }
 
@@ -92,7 +91,6 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertEquals(1, handle.getErrors().size());
         assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
     }
 
