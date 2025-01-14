@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -49,9 +49,8 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
 
         log.info("Invoking amend application mid event for caseId {}", finremCaseDetails.getId());
         List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
-        List<String> validate = postalService.validate(caseData);
-        errors.addAll(validate);
-        errors.addAll(ContactDetailsHelper.validateCaseData(caseData));
+        errors.addAll(postalService.validate(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseData(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

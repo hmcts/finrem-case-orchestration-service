@@ -7,14 +7,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactDetailsHelper {
+public class ContactDetailsValidator {
 
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
-    private ContactDetailsHelper() {
+    private ContactDetailsValidator() {
     }
 
     public static List<String> validateCaseData(FinremCaseData caseData) {

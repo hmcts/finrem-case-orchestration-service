@@ -75,7 +75,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for applicant address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
     }
 
     @Test
@@ -93,7 +93,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(1, handle.getErrors().size());
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for applicant address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant address.");
     }
 
     @Test
@@ -114,7 +114,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for respondent address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent address.");
     }
 
     @Test
@@ -135,7 +135,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for respondent address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent address.");
     }
 
     @Test
@@ -155,7 +155,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for applicant solicitor address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
     }
 
     @Test
@@ -175,7 +175,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for applicant solicitor address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
     }
 
     @Test
@@ -197,7 +197,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(handle.getErrors()).hasSize(1).containsExactly("Postcode field is required for respondent solicitor address.");
+        assertThat(handle.getErrors()).containsExactly("Postcode field is required for respondent solicitor address.");
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
