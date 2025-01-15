@@ -32,9 +32,14 @@ public class ContestedOrderApprovedLetterService {
     private final FinremCaseDetailsMapper mapper;
 
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
+        generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, null, authorisationToken);
+    }
+
+    public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        populateTemplateVariables(caseDetailsCopy);
+
+        populateTemplateVariables(caseDetailsCopy, judgeDetails);
 
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
@@ -45,7 +50,7 @@ public class ContestedOrderApprovedLetterService {
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        populateTemplateVariables(caseDetailsCopy);
+        populateTemplateVariables(caseDetailsCopy, null);
 
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
@@ -54,16 +59,17 @@ public class ContestedOrderApprovedLetterService {
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_COVER_LETTER, approvedOrderCoverLetter);
     }
 
-    private void populateTemplateVariables(CaseDetails caseDetails) {
+    private void populateTemplateVariables(CaseDetails caseDetails, String judgeDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
         caseData.put("Court", CourtHelper.getSelectedCourt(caseDetails));
-        caseData.put("JudgeDetails",
-            StringUtils.joinWith(" ",
+        caseData.put("JudgeDetails", judgeDetails == null
+            ? StringUtils.joinWith(" ",
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_TYPE),
-                caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME)));
+                caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
+            : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
     }
 }
