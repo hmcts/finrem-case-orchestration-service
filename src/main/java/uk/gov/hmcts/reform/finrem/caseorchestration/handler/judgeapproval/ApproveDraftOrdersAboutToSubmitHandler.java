@@ -83,7 +83,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private String buildJudgeDetails(String judgeType, String judgeName) {
-        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new)," ");
+        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new), " ");
     }
 
     private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
