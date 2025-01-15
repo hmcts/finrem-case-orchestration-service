@@ -123,18 +123,18 @@ public class DocumentConversionService {
      */
     private void transformAnnotationsToContentStream(PDDocument doc, PDPage page, PDAnnotation annotation,
                                                      PDAppearanceStream appearanceStream) throws IOException {
-        float appearanceWidth = (float) appearanceStream.getBBox().getWidth();
-        float appearanceHeight = (float) appearanceStream.getBBox().getHeight();
+        float appearanceWidth = appearanceStream.getBBox().getWidth();
+        float appearanceHeight = appearanceStream.getBBox().getHeight();
 
         if (appearanceWidth > 0 && appearanceHeight > 0) {
             try (PDPageContentStream contentStream =
                      new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND,
                          true, true)) {
                 contentStream.saveGraphicsState();
-                float x = (float) annotation.getRectangle().getLowerLeftX();
-                float y = (float) annotation.getRectangle().getLowerLeftY();
-                float width = (float) annotation.getRectangle().getWidth();
-                float height = (float) annotation.getRectangle().getHeight();
+                float x = annotation.getRectangle().getLowerLeftX();
+                float y =  annotation.getRectangle().getLowerLeftY();
+                float width = annotation.getRectangle().getWidth();
+                float height = annotation.getRectangle().getHeight();
                 Matrix transformation = new Matrix(width / appearanceWidth, 0, 0, height / appearanceHeight, x, y);
                 contentStream.transform(transformation);
                 contentStream.drawForm(appearanceStream);
