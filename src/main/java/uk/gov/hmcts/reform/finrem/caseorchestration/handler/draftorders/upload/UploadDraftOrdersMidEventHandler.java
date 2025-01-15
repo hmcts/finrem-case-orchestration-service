@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
@@ -81,33 +82,41 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
         return emptyIfNull(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
             .stream()
             .map(UploadSuggestedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
             .map(UploadedDraftOrder::getSuggestedDraftOrderDocument)
-            .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isWordDocument(document));
     }
 
     private boolean isAgreedDraftOrderHavingNonWordDocument(DraftOrdersWrapper draftOrdersWrapper) {
         return emptyIfNull(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
             .stream()
             .map(UploadAgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
             .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder::getAgreedDraftOrderDocument)
-            .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isWordDocument(document));
     }
 
     private boolean isSuggestedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
         return emptyIfNull(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
             .stream()
             .map(UploadSuggestedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
             .flatMap(order -> emptyIfNull(order.getSuggestedDraftOrderAdditionalDocumentsCollection()).stream())
             .map(SuggestedDraftOrderAdditionalDocumentsCollection::getValue)
-            .anyMatch(document -> document != null && !FileUtils.isPdf(document));
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isPdf(document));
     }
 
     private boolean isAgreedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
         return emptyIfNull(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
             .stream()
             .map(UploadAgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
             .flatMap(order -> emptyIfNull(order.getAgreedDraftOrderAdditionalDocumentsCollection()).stream())
             .map(AgreedDraftOrderAdditionalDocumentsCollection::getValue)
-            .anyMatch(document -> document != null && !FileUtils.isPdf(document));
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isPdf(document));
     }
 }
