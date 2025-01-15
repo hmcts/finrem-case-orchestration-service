@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -100,14 +99,13 @@ public class DocumentConversionService {
      */
     private void flattenAnnotations(PDDocument doc) throws IOException {
         for (PDPage page : doc.getPages()) {
-            List<PDAnnotation> annotations = page.getAnnotations();
-            for (PDAnnotation annotation : annotations) {
+            for (PDAnnotation annotation : page.getAnnotations()) {
                 PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
                 if (appearanceStream != null) {
                     transformAnnotationsToContentStream(doc, page, annotation, appearanceStream);
                 }
             }
-            annotations.clear();
+            page.getAnnotations().clear();
         }
     }
 
