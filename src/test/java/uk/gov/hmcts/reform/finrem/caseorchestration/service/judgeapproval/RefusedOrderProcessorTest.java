@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -79,7 +79,7 @@ class RefusedOrderProcessorTest {
     @ParameterizedTest
     @MethodSource("provideProcessRefusedDocumentsAndUpdateTheirState")
     void shouldProcessRefusedDocumentsAndUpdateTheirState(JudgeApproval judgeApproval,
-                                                          RefusalOrderInstruction refusalOrderInstruction,
+                                                          ExtraReportFieldsInput extraReportFieldsInput,
                                                           List<AgreedDraftOrderCollection> agreedDraftOrderCollections,
                                                           List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
                                                           List<RefusedOrderCollection> existingRefusedOrders,
@@ -91,11 +91,11 @@ class RefusedOrderProcessorTest {
             .agreedDraftOrderCollection(agreedDraftOrderCollections)
             .draftOrdersReviewCollection(draftOrdersReviewCollection)
             .refusedOrdersCollection(existingRefusedOrders)
-            .refusalOrderInstruction(refusalOrderInstruction)
+            .extraReportFieldsInput(extraReportFieldsInput)
             .build();
 
         lenient().when(refusedOrderGenerator.generateRefuseOrder(any(FinremCaseDetails.class), eq(JUDGE_FEEDBACK), eq(FIXED_DATE_TIME),
-            eq(APPROVED_JUDGE_NAME), refusalOrderInstruction == null ? isNull() : eq(refusalOrderInstruction.getJudgeType()), eq(AUTH_TOKEN)))
+            eq(APPROVED_JUDGE_NAME), extraReportFieldsInput == null ? isNull() : eq(extraReportFieldsInput.getJudgeType()), eq(AUTH_TOKEN)))
             .thenReturn(GENERATED_REFUSED_ORDER);
 
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
@@ -316,7 +316,7 @@ class RefusedOrderProcessorTest {
                     .build())
                 .build();
 
-        return Arguments.of(judgeApproval, RefusalOrderInstruction.builder().judgeType(JudgeType.DEPUTY_DISTRICT_JUDGE).build(),
+        return Arguments.of(judgeApproval, ExtraReportFieldsInput.builder().judgeType(JudgeType.DEPUTY_DISTRICT_JUDGE).build(),
             List.of(agreedDraftOrderCollectionToBeExamined),
             List.of(
                 DraftOrdersReviewCollection.builder()
