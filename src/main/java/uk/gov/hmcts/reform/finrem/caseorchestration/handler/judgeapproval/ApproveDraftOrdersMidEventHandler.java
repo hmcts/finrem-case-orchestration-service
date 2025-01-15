@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -64,7 +64,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
         setupHearingInstruction(draftOrdersWrapper);
-        setupRefusalOrderInstruction(draftOrdersWrapper);
+        setupExtraReportFieldsInput(draftOrdersWrapper);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
@@ -88,15 +88,15 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .build());
     }
 
-    private void setupRefusalOrderInstruction(DraftOrdersWrapper draftOrdersWrapper) {
-        boolean isRefusalOrderInstructionRequired = IntStream.rangeClosed(1, 5)
+    private void setupExtraReportFieldsInput(DraftOrdersWrapper draftOrdersWrapper) {
+        boolean isExtraReportFieldsInputRequired = IntStream.rangeClosed(1, 5)
             .mapToObj(i -> approveOrderService.resolveJudgeApproval(draftOrdersWrapper, i))
             .filter(Objects::nonNull)
             .map(JudgeApproval::getJudgeDecision)
-            .anyMatch(decision -> decision != null && decision.isRefusalOrderInstructionRequired());
+            .anyMatch(decision -> decision != null && decision.isExtraReportFieldsInputRequired());
 
-        draftOrdersWrapper.setRefusalOrderInstruction(RefusalOrderInstruction.builder()
-            .showRequireRefusalOrderInstructionQuestion(YesOrNo.forValue(isRefusalOrderInstructionRequired))
+        draftOrdersWrapper.setExtraReportFieldsInput(ExtraReportFieldsInput.builder()
+            .showRequireExtraReportFieldsInputQuestion(YesOrNo.forValue(isExtraReportFieldsInputRequired))
             .build());
     }
 
