@@ -94,6 +94,7 @@ public class DocumentConversionService {
 
     /**
      * This method iterates over all pages in the document and removes all annotations from each page.
+     * This was specifically introduced to flatten unflattened signatures which caused issues printing later.
      * @param doc - The document to be flattened
      * @throws IOException - If the annotations cannot be removed
      */
