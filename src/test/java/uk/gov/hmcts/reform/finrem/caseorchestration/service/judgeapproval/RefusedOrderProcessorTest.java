@@ -143,7 +143,7 @@ class RefusedOrderProcessorTest {
                     .max(Comparator.comparing(r -> r.getValue().getRefusedDate(), Comparator.nullsFirst(Comparator.naturalOrder())))
                     .ifPresentOrElse(r -> {
                         assertEquals(expectedRefusedOrder, r.getValue());
-                        assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(1);
+                        assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
                         draftOrdersWrapper.getRefusalOrderIdsToBeSent().stream().findFirst()
                             .ifPresentOrElse(u -> assertEquals(r.getId(), u.getValue()), () -> fail("Unexpected missing refused order id"));
                     }, () -> fail("Unexpected missing refused order"));
