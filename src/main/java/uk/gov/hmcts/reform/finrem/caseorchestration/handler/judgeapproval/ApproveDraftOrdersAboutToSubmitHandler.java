@@ -56,6 +56,6 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         draftOrdersWrapper.setJudgeApproval5(null);
         draftOrdersWrapper.setHearingInstruction(null);
         draftOrdersWrapper.setShowWarningMessageToJudge(null);
-        draftOrdersWrapper.setRefusalOrderInstruction(null);
+        draftOrdersWrapper.setExtraReportFieldsInput(null);
     }
 }

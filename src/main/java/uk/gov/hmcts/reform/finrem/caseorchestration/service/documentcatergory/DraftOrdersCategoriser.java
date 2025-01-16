@@ -23,6 +23,12 @@ public class DraftOrdersCategoriser {
         super();
     }
 
+    /**
+     * Categorise the uploaded suggested draft order documents based on the order filed by value.
+     * The category is set only if the type of draft order upload is 'Suggested Draft Order'.
+     *
+     * @param finremCaseData the case data
+     */
     public void categoriseDocuments(FinremCaseData finremCaseData) {
         // Determine type of draft order
         if (!isSuggestedDraftOrderPriorToHearing(finremCaseData)) {
