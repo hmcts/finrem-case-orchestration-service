@@ -18,9 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -154,7 +154,7 @@ class ApproveDraftOrdersMidEventHandlerTest {
     }
 
     @Test
-    void shouldPopulateRefusalOrderInstruction() {
+    void shouldPopulateExtraReportFieldsInput() {
         // Arrange
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
@@ -177,9 +177,9 @@ class ApproveDraftOrdersMidEventHandlerTest {
         FinremCaseData responseData = response.getData();
         DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
 
-        RefusalOrderInstruction refusalOrderInstruction = responseDraftOrdersWrapper.getRefusalOrderInstruction();
+        ExtraReportFieldsInput extraReportFieldsInput = responseDraftOrdersWrapper.getExtraReportFieldsInput();
         assertEquals(NO, responseDraftOrdersWrapper.getHearingInstruction().getShowRequireAnotherHearingQuestion());
-        assertNotNull(refusalOrderInstruction, "refusalOrderInstruction should not be null");
-        assertEquals(YES, refusalOrderInstruction.getShowRequireRefusalOrderInstructionQuestion());
+        assertNotNull(extraReportFieldsInput, "extraReportFieldsInput should not be null");
+        assertEquals(YES, extraReportFieldsInput.getShowRequireExtraReportFieldsInputQuestion());
     }
 }

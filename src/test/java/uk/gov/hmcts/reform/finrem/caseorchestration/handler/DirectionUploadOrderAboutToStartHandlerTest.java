@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,12 +44,6 @@ class DirectionUploadOrderAboutToStartHandlerTest {
 
     @InjectMocks
     private DirectionUploadOrderAboutToStartHandler underTest;
-
-    @Spy
-    private HasApprovableCollectionReader hasApprovableCollectionReader = new HasApprovableCollectionReader();
-
-    @Spy
-    private ProcessOrderService processOrderService = new ProcessOrderService(hasApprovableCollectionReader);
 
     @Test
     void testCanHandle() {

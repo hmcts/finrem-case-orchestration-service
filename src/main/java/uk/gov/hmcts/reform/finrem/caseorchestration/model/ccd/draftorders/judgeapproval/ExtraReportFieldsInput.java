@@ -16,10 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RefusalOrderInstruction {
+public class ExtraReportFieldsInput {
 
-    @JsonProperty("showRequireRefusalOrderInstructionQuestion")
-    private YesOrNo showRequireRefusalOrderInstructionQuestion;
+    @JsonProperty("showRequireExtraReportFieldsInputQuestion")
+    private YesOrNo showRequireExtraReportFieldsInputQuestion;
 
     @JsonProperty("judgeType")
     private JudgeType judgeType;
