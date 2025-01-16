@@ -45,6 +45,22 @@ class UploadDraftOrdersMidEventHandlerTest {
         assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
     }
 
+    private static UploadAgreedDraftOrderCollection toUploadAgreedDraftOrderCollection(String documentName) {
+        return UploadAgreedDraftOrderCollection.builder()
+            .value(UploadedDraftOrder.builder()
+                .agreedDraftOrderDocument(CaseDocument.builder().documentFilename(documentName).build())
+                .build())
+            .build();
+    }
+
+    private static UploadSuggestedDraftOrderCollection toUploadSuggestedDraftOrderCollection(String documentName) {
+        return UploadSuggestedDraftOrderCollection.builder()
+            .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename(documentName).build())
+                .build())
+            .build();
+    }
+
     @ParameterizedTest
     @MethodSource("provideAgreedDraftOrderTestCases")
     void shouldReturnNoErrorsWhenAllDocumentsAreWordFiles(List<UploadAgreedDraftOrderCollection> agreedDraftOrderCollection) {
@@ -65,79 +81,30 @@ class UploadDraftOrdersMidEventHandlerTest {
     private static Stream<Arguments> provideAgreedDraftOrderTestCases() {
         return Stream.of(
             // Case 1: All valid Word documents
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample1.doc").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample2.docx").build())
-                            .build())
-                        .build()
-                )
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("sample1.doc"),
+                toUploadAgreedDraftOrderCollection("sample2.doc")
+            )),
             // Case 2: One null document value
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(null) // Null document
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample.doc").build())
-                            .build())
-                        .build()
-                )
-            ),
+            Arguments.of(List.of(
+                UploadAgreedDraftOrderCollection.builder().value(null).build(),
+                toUploadAgreedDraftOrderCollection("sample.doc")
+            )),
             // Case 3: Special characters in filenames
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample@file.doc").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample file.doc").build())
-                            .build())
-                        .build()
-                )
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("sample@file.doc"),
+                toUploadAgreedDraftOrderCollection("sample file.doc")
+            )),
             // Case 4: Very long filename
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            // Long filename
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("a".repeat(255) + ".doc").build())
-                            .build())
-                        .build()
-                )
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("a".repeat(255) + ".doc")
+            )),
             // Case 5: Multiple valid Word documents
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("valid1.doc").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("valid2.docx").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("valid3.doc").build())
-                            .build())
-                        .build()
-                )
-            )
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("valid1.doc"),
+                toUploadAgreedDraftOrderCollection("valid2.doc"),
+                toUploadAgreedDraftOrderCollection("valid3.doc")
+            ))
         );
     }
 
@@ -167,81 +134,33 @@ class UploadDraftOrdersMidEventHandlerTest {
 
     private static Stream<org.junit.jupiter.params.provider.Arguments> provideNonWordDocumentEdgeCases() {
         return Stream.of(
-            // Case 2: One document with an empty filename
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample.doc").build())
-                            .build())
-                        .build()
-                ), true
-            ),
+            // Case 0: One document with an empty filename
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection(""),
+                toUploadAgreedDraftOrderCollection("sample.doc")
+            ), true),
             // Case 1: Empty document filename
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("").build())
-                            .build())
-                        .build()
-                ), true
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("")
+            ), true),
             // Case 2: Null document
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(null) // Null document
-                            .build())
-                        .build()
-                ), false
-            ),
+            Arguments.of(List.of(
+                UploadAgreedDraftOrderCollection.builder().value(UploadedDraftOrder.builder().agreedDraftOrderDocument(null).build()).build()
+            ), false),
             // Case 3: Mixed document types
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample.doc").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample.pdf").build())
-                            .build())
-                        .build()
-                ), true
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("sample.doc"),
+                toUploadAgreedDraftOrderCollection("sample.pdf")
+            ), true),
             // Case 4: Unusual file extension
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample.docx.txt").build())
-                            .build())
-                        .build()
-                ), true
-            ),
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("sample.docx.txt")
+            ), true),
             // Case 5: Multiple non-Word documents
-            Arguments.of(
-                List.of(
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample1.pdf").build())
-                            .build())
-                        .build(),
-                    UploadAgreedDraftOrderCollection.builder()
-                        .value(UploadedDraftOrder.builder()
-                            .agreedDraftOrderDocument(CaseDocument.builder().documentFilename("sample2.txt").build())
-                            .build())
-                        .build()
-                ), true
-            )
+            Arguments.of(List.of(
+                toUploadAgreedDraftOrderCollection("sample1.pdf"),
+                toUploadAgreedDraftOrderCollection("sample2.txt")
+            ), true)
         );
     }
 
@@ -272,43 +191,19 @@ class UploadDraftOrdersMidEventHandlerTest {
     private static Stream<Arguments> provideSuggestedDraftOrderTestCases() {
         return Stream.of(
             // Case 1: All valid Word documents
-            Arguments.of(
-                List.of(
-                    UploadSuggestedDraftOrderCollection.builder()
-                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
-                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested1.doc").build())
-                            .build())
-                        .build(),
-                    UploadSuggestedDraftOrderCollection.builder()
-                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
-                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested2.doc").build())
-                            .build())
-                        .build()
-                ), false
-            ),
+            Arguments.of(List.of(
+                toUploadSuggestedDraftOrderCollection("suggested1.doc"),
+                toUploadSuggestedDraftOrderCollection("suggested2.doc")
+            ), false),
             // Case 2: One null document value
-            Arguments.of(
-                List.of(
-                    UploadSuggestedDraftOrderCollection.builder()
-                        .value(null) // Null document
-                        .build(),
-                    UploadSuggestedDraftOrderCollection.builder()
-                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
-                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested.doc").build())
-                            .build())
-                        .build()
-                ), false
-            ),
+            Arguments.of(List.of(
+                UploadSuggestedDraftOrderCollection.builder().value(null).build(),
+                toUploadSuggestedDraftOrderCollection("suggested.doc")
+            ), false),
             // Case 3: Invalid file type
-            Arguments.of(
-                List.of(
-                    UploadSuggestedDraftOrderCollection.builder()
-                        .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
-                            .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename("suggested.pdf").build())
-                            .build())
-                        .build()
-                ), true
-            )
+            Arguments.of(List.of(
+                toUploadSuggestedDraftOrderCollection("suggested.pdf")
+            ), true)
         );
     }
 }
