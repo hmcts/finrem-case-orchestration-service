@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,9 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
@@ -69,6 +72,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+
+    @Mock
+    private ProcessOrderService processOrderService;
 
     @Test
     void testCanHandle() {
@@ -172,6 +178,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test4 = null;
         AgreedDraftOrderCollection test5 = null;
         AgreedDraftOrderCollection test6 = null;
+        CaseDocument stampedDocument = CaseDocument.builder().build();
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -210,8 +217,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
+        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class),
+            any(String.class))).thenReturn(stampedDocument);
+
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class), any(String.class));
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
@@ -281,6 +292,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3 = null;
         AgreedDraftOrderCollection test4 = null;
 
+        CaseDocument stampedDocument = CaseDocument.builder().build();
+
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -314,12 +327,16 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
+        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class),
+            any(String.class))).thenReturn(stampedDocument);
+
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class), any(String.class));
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
-        assertEquals(TARGET_DOCUMENT_3, test1.getValue().getPsaDocument());
+        assertEquals(stampedDocument, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
-        assertEquals(TARGET_DOCUMENT_4, test2.getValue().getPsaDocument());
+        assertEquals(stampedDocument, test2.getValue().getPsaDocument());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
     }
