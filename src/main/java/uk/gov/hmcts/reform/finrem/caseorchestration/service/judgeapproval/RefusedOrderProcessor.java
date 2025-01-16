@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -119,8 +118,9 @@ public class RefusedOrderProcessor {
             .map(RefusedOrderCollection::getId)
             .map(UuidCollection::new)
             .toList();
-        List<UuidCollection> existingRefusalOrderIds = Optional.ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent())
-            .orElse(new ArrayList<>());
+        List<UuidCollection> existingRefusalOrderIds = ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent())
+            .orElseGet(ArrayList::new);
+
         existingRefusalOrderIds.addAll(newRefusalOrderIds);
         draftOrdersWrapper.setRefusalOrderIdsToBeSent(existingRefusalOrderIds);
 

@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.draft
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -68,10 +68,10 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
 
         // Process the refused orders collection from the draftOrdersWrapper.
         // Filter the orders whose IDs are present in the refusalOrderIdsToBeSent list.
-        List<RefusedOrder> refusedOrders =
-            ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElse(List.of()).stream()
-                .filter(d -> refusalOrderIdsToBeSent.contains(d.getId())).map(RefusedOrderCollection::getValue)
-                .toList();
+        List<RefusedOrder> refusedOrders = emptyIfNull(draftOrdersWrapper.getRefusedOrdersCollection()).stream()
+            .filter(d -> refusalOrderIdsToBeSent.contains(d.getId()))
+            .map(RefusedOrderCollection::getValue)
+            .toList();
 
         if (!refusedOrders.isEmpty()) {
             RefusedOrderCorrespondenceRequest request = new RefusedOrderCorrespondenceRequest(finremCaseDetails,
@@ -81,7 +81,7 @@ public class ApproveDraftOrdersSubmittedHandler extends FinremCallbackHandler {
     }
 
     private List<UUID> getLatestRefusalOrderIds(DraftOrdersWrapper draftOrdersWrapper) {
-        return ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).orElse(List.of()).stream()
+        return emptyIfNull(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).stream()
             .map(UuidCollection::getValue)
             .toList();
     }
