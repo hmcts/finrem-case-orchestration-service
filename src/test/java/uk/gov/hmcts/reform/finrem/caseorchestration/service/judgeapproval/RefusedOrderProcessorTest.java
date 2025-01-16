@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -84,9 +85,11 @@ class RefusedOrderProcessorTest {
                                                           List<DraftOrdersReviewCollection> draftOrdersReviewCollection,
                                                           List<RefusedOrderCollection> existingRefusedOrders,
                                                           AgreedDraftOrderCollection targetAgreedDraftOrderCollection,
-                                                          DraftOrderDocReviewCollection targetDraftOrderDocReviewCollection,
+                                                          List<DraftOrderDocReviewCollection> targetDraftOrderDocReviewCollection,
                                                           PsaDocReviewCollection targetPsaDocReviewCollection,
-                                                          RefusedOrder expectedRefusedOrder) {
+                                                          RefusedOrder expectedRefusedOrder,
+                                                          int expectedRefusedOrdersSize,
+                                                          int expectedRefusedOrderIdsSize) {
         DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(agreedDraftOrderCollections)
             .draftOrdersReviewCollection(draftOrdersReviewCollection)
@@ -121,16 +124,17 @@ class RefusedOrderProcessorTest {
                 Optional.ofNullable(targetPsaDocReviewCollection)
             ).allMatch(Optional::isEmpty) ? 0 : 1;
 
-            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(existingRefusedOrders.size() + result);
+            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(expectedRefusedOrdersSize);
+            assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
 
             if (result != 0) {
-                assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(1);
                 // verify agreedDraftOrderToBeExamined is removed
                 assertTrue(isAgreedDraftOrderAbsent(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetAgreedDraftOrderCollection));
 
                 List<DraftOrdersReviewCollection> newDraftOrdersReviewCollections = draftOrdersWrapper.getDraftOrdersReviewCollection();
                 if (targetDraftOrderDocReviewCollection != null) {
-                    assertTrue(isDraftOrderDocumentReviewAbsent(newDraftOrdersReviewCollections, targetDraftOrderDocReviewCollection));
+                    targetDraftOrderDocReviewCollection.forEach(a ->
+                        assertTrue(isDraftOrderDocumentReviewAbsent(newDraftOrdersReviewCollections, a)));
                 }
                 if (targetPsaDocReviewCollection != null) {
                     assertTrue(isPsaDocumentReviewAbsent(newDraftOrdersReviewCollections, targetPsaDocReviewCollection));
@@ -156,8 +160,10 @@ class RefusedOrderProcessorTest {
             .build();
         return Stream.of(
             targetDocNotFound(judgeApproval),
-            refuseTargetedDraftOrder(judgeApproval, true),
-            refuseTargetedDraftOrder(judgeApproval, false),
+            refuseTargetedDraftOrder(judgeApproval, 1, true),
+            refuseTargetedDraftOrder(judgeApproval, 1, false),
+            refuseTargetedDraftOrder(judgeApproval, 3, true),
+            refuseTargetedDraftOrder(judgeApproval, 3, false),
             refuseTargetedPsa(judgeApproval, true),
             refuseTargetedPsa(judgeApproval, false),
             refuseTargetedPsaWithExistingRefusedOrders(judgeApproval)
@@ -187,20 +193,13 @@ class RefusedOrderProcessorTest {
             null,
             null,
             null,
-            null
+            null,
+            0, 0
         );
     }
 
-    static Arguments refuseTargetedDraftOrder(JudgeApproval judgeApproval, boolean withAttachment) {
-        AgreedDraftOrderCollection agreedDraftOrderCollectionToBeExamined =
-            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
-                    .draftOrder(TARGET_DOCUMENT)
-                    .orderStatus(OrderStatus.REFUSED)
-                    .build())
-                .build();
-
-        DraftOrderDocReviewCollection draftOrderDocReviewCollectionToBeExamined =
-            DraftOrderDocReviewCollection.builder().value(DraftOrderDocumentReview.builder()
+    private static DraftOrderDocReviewCollection buildDraftOrderReviewCollection(boolean withAttachment) {
+        return DraftOrderDocReviewCollection.builder().value(DraftOrderDocumentReview.builder()
                 .draftOrderDocument(TARGET_DOCUMENT)
                 .submittedBy(SUBMITTED_BY)
                 .submittedByEmail(SUBMITTED_BY_EMAIL)
@@ -210,6 +209,23 @@ class RefusedOrderProcessorTest {
                 .refusedDate(FIXED_DATE_TIME)
                 .approvalJudge("Mary Chapman")
                 .build()).build();
+    }
+
+    static Arguments refuseTargetedDraftOrder(JudgeApproval judgeApproval, int refusedOrderCount, boolean withAttachment) {
+        AgreedDraftOrderCollection agreedDraftOrderCollectionToBeExamined =
+            AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                    .draftOrder(TARGET_DOCUMENT)
+                    .orderStatus(OrderStatus.REFUSED)
+                    .build())
+                .build();
+
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollections = new ArrayList<>();
+        List<DraftOrderDocReviewCollection> targetDraftOrderDocReviewCollection = new ArrayList<>();
+        for (int i = 0; i < refusedOrderCount; i++) {
+            DraftOrderDocReviewCollection draftOrderDocReviewCollectionToBeExamined = buildDraftOrderReviewCollection(withAttachment);
+            draftOrderDocReviewCollections.add(draftOrderDocReviewCollectionToBeExamined);
+            targetDraftOrderDocReviewCollection.add(draftOrderDocReviewCollectionToBeExamined);
+        }
 
         return Arguments.of(judgeApproval, null,
             List.of(agreedDraftOrderCollectionToBeExamined),
@@ -224,16 +240,14 @@ class RefusedOrderProcessorTest {
                                         .psaDocument(CaseDocument.builder().build()).build())
                                     .build()
                             ))
-                            .draftOrderDocReviewCollection(List.of(
-                                draftOrderDocReviewCollectionToBeExamined
-                            ))
+                            .draftOrderDocReviewCollection(draftOrderDocReviewCollections)
                             .build()
                     )
                     .build()
             ),
             List.of(),
             agreedDraftOrderCollectionToBeExamined,
-            draftOrderDocReviewCollectionToBeExamined,
+            targetDraftOrderDocReviewCollection,
             null,
             RefusedOrder.builder()
                 .refusedDate(FIXED_DATE_TIME)
@@ -246,7 +260,8 @@ class RefusedOrderProcessorTest {
                 .submittedBy(SUBMITTED_BY)
                 .attachments(withAttachment ? ATTACHMENTS : null)
                 .hearingDate(HEARING_DATE)
-                .build()
+                .build(),
+            refusedOrderCount, refusedOrderCount
         );
     }
 
@@ -293,7 +308,8 @@ class RefusedOrderProcessorTest {
                 .judgeFeedback(JUDGE_FEEDBACK)
                 .submittedByEmail(withSubmittedByEmail ? SUBMITTED_BY_EMAIL : null).submittedDate(SUBMITTED_DATE).submittedBy(SUBMITTED_BY)
                 .hearingDate(HEARING_DATE)
-                .build()
+                .build(),
+            1, 1
         );
     }
 
@@ -355,15 +371,16 @@ class RefusedOrderProcessorTest {
                 .submittedByEmail(SUBMITTED_BY_EMAIL).submittedDate(SUBMITTED_DATE).submittedBy(SUBMITTED_BY)
                 .hearingDate(HEARING_DATE)
                 .judgeType(JudgeType.DEPUTY_DISTRICT_JUDGE)
-                .build()
+                .build(),
+            3, 1
         );
     }
 
-    public boolean isAgreedDraftOrderAbsent(List<AgreedDraftOrderCollection> agreedDraftOrderCollections, AgreedDraftOrderCollection targetObject) {
+    private boolean isAgreedDraftOrderAbsent(List<AgreedDraftOrderCollection> agreedDraftOrderCollections, AgreedDraftOrderCollection targetObject) {
         return agreedDraftOrderCollections.stream().noneMatch(order -> order.equals(targetObject));
     }
 
-    public boolean isPsaDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections, PsaDocReviewCollection targetObject) {
+    private boolean isPsaDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections, PsaDocReviewCollection targetObject) {
         return draftOrdersReviewCollections.stream()
             .map(DraftOrdersReviewCollection::getValue) // Extract DraftOrdersReview
             .filter(draftOrdersReview -> draftOrdersReview.getPsaDocReviewCollection() != null) // Filter non-null collections
@@ -371,7 +388,7 @@ class RefusedOrderProcessorTest {
             .noneMatch(order -> order.equals(targetObject));
     }
 
-    public boolean isDraftOrderDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections,
+    private boolean isDraftOrderDocumentReviewAbsent(List<DraftOrdersReviewCollection> draftOrdersReviewCollections,
                                                     DraftOrderDocReviewCollection targetObject) {
         return draftOrdersReviewCollections.stream()
             .map(DraftOrdersReviewCollection::getValue) // Extract DraftOrdersReview

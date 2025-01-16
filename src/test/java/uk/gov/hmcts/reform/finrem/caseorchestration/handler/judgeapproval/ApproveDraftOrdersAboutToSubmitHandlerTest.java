@@ -61,11 +61,12 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval4()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getJudgeApproval5()).isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getShowWarningMessageToJudge()).isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getRefusalOrderInstruction()).isNull();
     }
 
     @Test
     void shouldInvokeApprovalServicePopulateJudgeDecisions() {
-        DraftOrdersWrapper draftOrdersWrapper = null;
+        DraftOrdersWrapper draftOrdersWrapper;
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(draftOrdersWrapper = DraftOrdersWrapper.builder()
                 .hearingInstruction(HearingInstruction.builder().build())

@@ -11,14 +11,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @RequiredArgsConstructor
 @Getter
 public enum OrderFiledBy {
-    APPLICANT("Applicant"),
-    RESPONDENT("Respondent"),
-    APPLICANT_BARRISTER("Applicant Barrister"),
-    RESPONDENT_BARRISTER("Respondent Barrister"),
-    INTERVENER_1("Intervener 1"),
-    INTERVENER_2("Intervener 2"),
-    INTERVENER_3("Intervener 3"),
-    INTERVENER_4("Intervener 4");
+    APPLICANT("The applicant"),
+    RESPONDENT("The respondent"),
+    APPLICANT_BARRISTER("The applicant barrister"),
+    RESPONDENT_BARRISTER("The respondent barrister"),
+    INTERVENER_1("The intervener 1"),
+    INTERVENER_2("The intervener 2"),
+    INTERVENER_3("The intervener 3"),
+    INTERVENER_4("The intervener 4");
 
     @Getter(onMethod_ = @JsonValue)
     private final String value;

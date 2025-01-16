@@ -41,6 +41,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
         approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
         clearInputFields(draftOrdersWrapper);
 
@@ -55,5 +56,6 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         draftOrdersWrapper.setJudgeApproval5(null);
         draftOrdersWrapper.setHearingInstruction(null);
         draftOrdersWrapper.setShowWarningMessageToJudge(null);
+        draftOrdersWrapper.setRefusalOrderInstruction(null);
     }
 }

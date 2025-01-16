@@ -20,6 +20,8 @@ public interface RefusalOrderConvertible extends Approvable {
 
     String getSubmittedByEmail();
 
+    OrderFiledBy getOrderFiledBy();
+
     LocalDateTime getSubmittedDate();
 
     void setRefusedDate(LocalDateTime refusedDate);

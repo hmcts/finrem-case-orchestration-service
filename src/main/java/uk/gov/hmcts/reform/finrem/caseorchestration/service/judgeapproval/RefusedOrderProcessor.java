@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -72,18 +73,12 @@ public class RefusedOrderProcessor {
             .filterAndCollectPsaDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(), removedPsaItems, REFUSED::equals));
 
         // create RefusedOrder from collected items.
-        String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
-        LocalDate hearingDate = judgeApproval.getHearingDate();
-
-        List<RefusedOrderCollection> existingRefusedOrders =
-            ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new);
-
-        List<UUID> refusalOrderIds = new ArrayList<>();
+        final String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
+        final LocalDate hearingDate = judgeApproval.getHearingDate();
 
         Function<HasApprovable, RefusedOrderCollection> toRefusedOrderCollection = item -> {
             if (item.getValue() instanceof RefusalOrderConvertible refusalOrderConvertible) {
                 UUID uuid = UUID.randomUUID();
-                refusalOrderIds.add(uuid);
 
                 JudgeType judgeType = ofNullable(draftOrdersWrapper.getRefusalOrderInstruction()).map(RefusalOrderInstruction::getJudgeType)
                     .orElse(null);
@@ -92,21 +87,26 @@ public class RefusedOrderProcessor {
                         finremCaseDetails.getId());
                 }
 
-                RefusedOrder.RefusedOrderBuilder orderBuilder = RefusedOrder.builder()
+                RefusedOrder refusedOrder = RefusedOrder.builder()
                     .refusedDocument(refusalOrderConvertible.getRefusedDocument())
                     .refusalOrder(refusedOrderGenerator.generateRefuseOrder(finremCaseDetails, judgeFeedback,
                         refusalOrderConvertible.getRefusedDate(), refusalOrderConvertible.getApprovalJudge(), judgeType, userAuthorisation))
                     .refusedDate(refusalOrderConvertible.getRefusedDate())
                     .submittedDate(refusalOrderConvertible.getSubmittedDate())
                     .submittedBy(refusalOrderConvertible.getSubmittedBy())
+                    .orderFiledBy(refusalOrderConvertible.getOrderFiledBy())
                     .submittedByEmail(refusalOrderConvertible.getSubmittedByEmail())
                     .refusalJudge(refusalOrderConvertible.getApprovalJudge())
                     .attachments(item.getValue() instanceof DraftOrderDocumentReview d ? d.getAttachments() : null)
                     .judgeFeedback(judgeFeedback)
                     .hearingDate(hearingDate)
-                    .judgeType(judgeType);
+                    .judgeType(judgeType)
+                    .build();
 
-                return RefusedOrderCollection.builder().id(uuid).value(orderBuilder.build()).build();
+                return RefusedOrderCollection.builder()
+                    .id(uuid)
+                    .value(refusedOrder)
+                    .build();
             } else {
                 return null;
             }
@@ -117,10 +117,21 @@ public class RefusedOrderProcessor {
             removedPsaItems.stream().filter(a -> a.getValue() != null).map(toRefusedOrderCollection).filter(Objects::nonNull)
         ).toList();
 
+        List<UuidCollection> newRefusalOrderIds = newRefusedOrders.stream()
+            .map(RefusedOrderCollection::getId)
+            .map(UuidCollection::new)
+            .toList();
+        List<UuidCollection> existingRefusalOrderIds = Optional.ofNullable(draftOrdersWrapper.getRefusalOrderIdsToBeSent())
+            .orElse(new ArrayList<>());
+        existingRefusalOrderIds.addAll(newRefusalOrderIds);
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(existingRefusalOrderIds);
+
+        List<RefusedOrderCollection> existingRefusedOrders =
+            ofNullable(draftOrdersWrapper.getRefusedOrdersCollection()).orElseGet(ArrayList::new);
+
         draftOrdersWrapper.setRefusedOrdersCollection(
             Stream.concat(existingRefusedOrders.stream(), newRefusedOrders.stream()).toList()
         );
-        draftOrdersWrapper.setRefusalOrderIdsToBeSent(refusalOrderIds.stream().map(UuidCollection::new).toList());
     }
 
     private void filterRefusedDraftOrderCollections(DraftOrdersWrapper draftOrdersWrapper) {

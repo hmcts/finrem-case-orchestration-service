@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class PsaDocumentReview implements HasCaseDocument, Reviewable, RefusalOr
     private YesOrNo resubmission;
     private String submittedBy;
     private String submittedByEmail;
+    private OrderFiledBy orderFiledBy;
     private String uploadedOnBehalfOf;
     private String approvalJudge;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
