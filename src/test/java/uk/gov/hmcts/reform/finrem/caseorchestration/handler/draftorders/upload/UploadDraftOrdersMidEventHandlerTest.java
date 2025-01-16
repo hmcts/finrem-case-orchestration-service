@@ -164,8 +164,7 @@ class UploadDraftOrdersMidEventHandlerTest {
         }
         assertThat(response.getData()).isNotNull();
     }
-
-
+    
     private static Stream<org.junit.jupiter.params.provider.Arguments> provideNonWordDocumentEdgeCases() {
         return Stream.of(
             // Case 0: One document with an empty filename
