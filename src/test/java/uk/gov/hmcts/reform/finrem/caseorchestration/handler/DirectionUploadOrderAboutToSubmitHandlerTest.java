@@ -222,7 +222,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class), any(String.class));
+        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
+            any(CaseDocument.class), any(String.class));
+        assertEquals(stampedDocument, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
@@ -238,6 +240,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test3 = null;
         AgreedDraftOrderCollection test4 = null;
         AgreedDraftOrderCollection test5 = null;
+        CaseDocument stampedDocument = CaseDocument.builder().build();
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -276,8 +279,14 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
+        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), any(CaseDocument.class),
+            any(String.class))).thenReturn(stampedDocument);
+
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
+            any(CaseDocument.class), any(String.class));
+        assertEquals(stampedDocument, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
