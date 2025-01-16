@@ -41,6 +41,9 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        // Clear field in case it contains ids from previously processed refused orders
+        // The ids are handled in the submitted callback so can't be removed
+        // and clearing them in the about to start callback doesn't work with CCD
         draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
         approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
         clearInputFields(draftOrdersWrapper);
