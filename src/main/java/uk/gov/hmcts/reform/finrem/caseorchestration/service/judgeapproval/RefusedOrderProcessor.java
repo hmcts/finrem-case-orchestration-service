@@ -78,8 +78,6 @@ public class RefusedOrderProcessor {
 
         Function<HasApprovable, RefusedOrderCollection> toRefusedOrderCollection = item -> {
             if (item.getValue() instanceof RefusalOrderConvertible refusalOrderConvertible) {
-                UUID uuid = UUID.randomUUID();
-
                 JudgeType judgeType = ofNullable(draftOrdersWrapper.getRefusalOrderInstruction()).map(RefusalOrderInstruction::getJudgeType)
                     .orElse(null);
                 if (judgeType == null) {
@@ -104,7 +102,7 @@ public class RefusedOrderProcessor {
                     .build();
 
                 return RefusedOrderCollection.builder()
-                    .id(uuid)
+                    .id(UUID.randomUUID())
                     .value(refusedOrder)
                     .build();
             } else {
