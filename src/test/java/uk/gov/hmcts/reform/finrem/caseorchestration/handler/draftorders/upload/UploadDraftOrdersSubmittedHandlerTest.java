@@ -77,6 +77,33 @@ class UploadDraftOrdersSubmittedHandlerTest {
             .hasMessage("No uploaded draft order found for Case ID: " + caseReference);
     }
 
+    @Test
+    void givenDraftWithNoJudge_whenHandle_thenNotificationSentToAdmin() {
+        String caseReference = "1727874196328932";
+        List<AgreedDraftOrderCollection> agreedDraftOrderCollections = agreedDraftOrdersCollection(
+            List.of(LocalDateTime.of(2023, 10, 10, 1, 0, 1)));
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollections = mockDraftOrdersReviewCollection(
+            List.of(LocalDateTime.of(2023, 10, 10, 1, 0, 1)), null);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .agreedDraftOrderCollection(agreedDraftOrderCollections)
+                .draftOrdersReviewCollection(draftOrdersReviewCollections)
+                .build())
+            .build();
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData);
+
+        var response = uploadDraftOrdersSubmittedHandler.handle(request, AUTH_TOKEN);
+        assertThat(response.getConfirmationHeader()).isNotNull();
+        assertThat(response.getConfirmationBody()).isNotNull();
+
+        verify(draftOrdersNotificationRequestMapper).buildAdminReviewNotificationRequest(any(FinremCaseDetails.class),
+            any(LocalDate.class));
+        verify(notificationService).sendContestedReadyToReviewOrderToAdmin(any());
+        verify(notificationService, never()).sendContestedReadyToReviewOrderToJudge(any());
+    }
+
     @ParameterizedTest
     @MethodSource
     void testHandle(List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
@@ -195,8 +222,8 @@ class UploadDraftOrdersSubmittedHandlerTest {
             + "#Case%20documents).";
     }
 
-    private static List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection(List<LocalDateTime> dateTimes) {
-
+    private static List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection(List<LocalDateTime> dateTimes,
+                                                                                     String hearingJudge) {
         List<DraftOrderDocReviewCollection> draftOrdersReviewCollection = dateTimes.stream().map(dateTime -> {
             DraftOrderDocumentReview draftOrderDocument = DraftOrderDocumentReview.builder()
                 .submittedDate(dateTime)
@@ -210,7 +237,7 @@ class UploadDraftOrdersSubmittedHandlerTest {
 
         DraftOrdersReview review = DraftOrdersReview.builder()
             .hearingDate(LocalDate.now())
-            .hearingJudge("Judge Smith")
+            .hearingJudge(hearingJudge)
             .draftOrderDocReviewCollection(draftOrdersReviewCollection)
             .build();
 
@@ -219,5 +246,9 @@ class UploadDraftOrdersSubmittedHandlerTest {
             .build();
 
         return List.of(reviewCollection);
+    }
+
+    private static List<DraftOrdersReviewCollection> mockDraftOrdersReviewCollection(List<LocalDateTime> dateTimes) {
+        return mockDraftOrdersReviewCollection(dateTimes, "Judge Smith");
     }
 }

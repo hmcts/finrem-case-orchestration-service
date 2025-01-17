@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
@@ -1577,6 +1578,17 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         // Assert
         verify(emailService).sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToAdmin() {
+        NotificationRequest request = NotificationRequest.builder()
+            .caseReferenceNumber("123456789")
+            .build();
+
+        notificationService.sendContestedReadyToReviewOrderToAdmin(request);
+
+        verify(emailService).sendConfirmationEmail(request, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN);
     }
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {

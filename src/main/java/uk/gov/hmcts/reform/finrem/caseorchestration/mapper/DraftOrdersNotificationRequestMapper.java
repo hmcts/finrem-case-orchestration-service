@@ -28,7 +28,6 @@ public class DraftOrdersNotificationRequestMapper {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
 
     public NotificationRequest buildJudgeNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate, String judge) {
-
         NotificationRequest judgeNotificationRequest = new NotificationRequest();
         judgeNotificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
         judgeNotificationRequest.setHearingDate(dateFormatter.format(hearingDate));
@@ -39,11 +38,30 @@ public class DraftOrdersNotificationRequestMapper {
         return judgeNotificationRequest;
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for a draft order ready for review notification that is to be sent to admin.
+     *
+     * @param caseDetails the case details
+     * @param hearingDate the hearing date that the draft order is associated with
+     * @return a {@link NotificationRequest} containing all required notification placeholder data
+     */
+    public NotificationRequest buildAdminReviewNotificationRequest(FinremCaseDetails caseDetails, LocalDate hearingDate) {
+        FinremCaseData caseData = caseDetails.getData();
+        String email = getCourtAdminEmail(caseData);
+
+        return NotificationRequest.builder()
+            .notificationEmail(email)
+            .caseReferenceNumber(String.valueOf(caseDetails.getId()))
+            .applicantName(caseData.getFullApplicantName())
+            .respondentName(caseData.getRespondentFullName())
+            .hearingDate(dateFormatter.format(hearingDate))
+            .build();
+    }
+
     public NotificationRequest buildCaseworkerDraftOrderReviewOverdue(FinremCaseDetails caseDetails,
                                                                       DraftOrdersReview draftOrdersReview) {
         FinremCaseData caseData = caseDetails.getData();
-        String selectedAllocatedCourt = caseDetails.getData().getSelectedAllocatedCourt();
-        String notificationEmail = courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
+        String notificationEmail = getCourtAdminEmail(caseData);
 
         return NotificationRequest.builder()
             .notificationEmail(notificationEmail)
@@ -86,5 +104,10 @@ public class DraftOrdersNotificationRequestMapper {
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
             .name(refusedOrder.getSubmittedBy())
             .build();
+    }
+
+    private String getCourtAdminEmail(FinremCaseData caseData) {
+        String selectedAllocatedCourt = caseData.getSelectedAllocatedCourt();
+        return courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
     }
 }
