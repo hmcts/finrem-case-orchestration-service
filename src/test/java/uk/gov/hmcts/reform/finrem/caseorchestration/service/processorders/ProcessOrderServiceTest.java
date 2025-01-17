@@ -6,15 +6,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -23,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
@@ -56,12 +51,6 @@ class ProcessOrderServiceTest {
 
     @InjectMocks
     private ProcessOrderService underTest;
-
-    @Mock
-    private DocumentHelper documentHelper;
-
-    @Mock
-    private GenericDocumentService genericDocumentService;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -293,35 +282,6 @@ class ProcessOrderServiceTest {
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
         }
-    }
-
-    @Test
-    void shouldConvertToPdfAndStampDocument() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(123L)
-            .data(FinremCaseData.builder().build())
-            .build();
-
-        CaseDocument documentA = CaseDocument.builder()
-            .documentFilename("documentA.docx")
-            .build();
-
-        String authorisationToken = "authToken";
-        StampType stampType = StampType.FAMILY_COURT_STAMP;
-
-        CaseDocument stampedDocument = CaseDocument.builder()
-            .documentFilename("stampedDocumentA.pdf")
-            .build();
-
-        when(documentHelper.getStampType(caseDetails.getData())).thenReturn(stampType);
-        when(genericDocumentService.stampDocument(documentA, authorisationToken, stampType,  String.valueOf(caseDetails.getId())))
-            .thenReturn(stampedDocument);
-
-        CaseDocument result = underTest.convertToPdfAndStampDocument(caseDetails, documentA, authorisationToken);
-
-        assertEquals(stampedDocument, result);
-        verify(documentHelper).getStampType(caseDetails.getData());
-        verify(genericDocumentService).stampDocument(documentA, authorisationToken, stampType,  String.valueOf(caseDetails.getId()));
     }
 
     private static String extractFileName(String url) {

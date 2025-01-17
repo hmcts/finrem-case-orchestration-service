@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
@@ -28,8 +29,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +77,10 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @Mock
-    private ProcessOrderService processOrderService;
+    private GenericDocumentService genericDocumentService;
+
+    @Mock
+    private DocumentHelper documentHelper;
 
     @Test
     void testCanHandle() {
@@ -218,16 +224,18 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_1),
-            any(String.class))).thenReturn(stampedDocumentA);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_2),
-            any(String.class))).thenReturn(stampedDocumentB);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
-            any(CaseDocument.class), any(String.class));
+        verify(genericDocumentService, times(4)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), any(String.class));
         //Check DraftOrderDocReviewCollection is updated
         assertEquals(stampedDocumentA, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
@@ -291,16 +299,18 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_1),
-            any(String.class))).thenReturn(stampedDocumentA);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_2),
-            any(String.class))).thenReturn(stampedDocumentB);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
-            any(CaseDocument.class), any(String.class));
+        verify(genericDocumentService, times(4)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), any(String.class));
         //Check PsaDocReviewCollection is updated
         assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
@@ -359,16 +369,18 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_3),
-            any(String.class))).thenReturn(stampedDocumentA);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_4),
-            any(String.class))).thenReturn(stampedDocumentB);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_3), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_4), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
-            any(CaseDocument.class), any(String.class));
+        verify(genericDocumentService, times(4)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), any(String.class));
         //Check PsaDocReviewCollection is updated
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());

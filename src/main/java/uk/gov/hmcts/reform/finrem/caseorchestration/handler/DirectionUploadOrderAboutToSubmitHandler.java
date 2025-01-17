@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -21,8 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,16 +45,19 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
 
-    private final ProcessOrderService processOrderService;
+    private final DocumentHelper documentHelper;
+
+    private final GenericDocumentService genericDocumentService;
 
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AdditionalHearingDocumentService additionalHearingDocumentService,
                                                     HasApprovableCollectionReader hasApprovableCollectionReader,
-                                                    ProcessOrderService processOrderService) {
+                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService) {
         super(finremCaseDetailsMapper);
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
-        this.processOrderService = processOrderService;
+        this.genericDocumentService = genericDocumentService;
+        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -110,8 +115,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 collector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
-                    CaseDocument stampedDoc = processOrderService.convertToPdfAndStampDocument(caseDetails,
-                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation);
+
+                    StampType stampType = documentHelper.getStampType(caseData);
+                    CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                        String.valueOf(caseDetails.getId()));
                     stampedDoc.setCategoryId(
                         DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId());
 
@@ -129,8 +137,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 psaCollector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
-                    CaseDocument stampedDoc = processOrderService.convertToPdfAndStampDocument(caseDetails,
-                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation);
+
+                    StampType stampType = documentHelper.getStampType(caseData);
+                    CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                        String.valueOf(caseDetails.getId()));
                     stampedDoc.setCategoryId(
                         DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId());
 
@@ -149,8 +160,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             .forEach(unprocessedApprovedOrder ->
                 agreedOrderCollector.stream().filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
                     .forEach(toBeUpdated -> {
-                        CaseDocument stampedDoc = processOrderService.convertToPdfAndStampDocument(caseDetails,
-                            unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation);
+
+                        StampType stampType = documentHelper.getStampType(caseData);
+                        CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                            unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                            String.valueOf(caseDetails.getId()));
                         stampedDoc.setCategoryId(unprocessedApprovedOrder.getValue().getUploadDraftDocument().getCategoryId());
 
                         toBeUpdated.getValue().setOrderStatus(PROCESSED);

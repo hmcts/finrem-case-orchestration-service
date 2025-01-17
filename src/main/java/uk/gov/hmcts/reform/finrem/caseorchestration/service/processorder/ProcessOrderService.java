@@ -3,19 +3,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
 import java.util.ArrayList;
@@ -32,8 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 public class ProcessOrderService {
 
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
-    private final DocumentHelper documentHelper;
-    private final GenericDocumentService genericDocumentService;
 
     private static <T> List<T> nullSafeList(List<T> t) {
         return ofNullable(t).orElse(List.of());
@@ -147,17 +141,5 @@ public class ProcessOrderService {
 
     private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {
         return nullSafeList(caseData.getUploadHearingOrder()).isEmpty();
-    }
-
-    public CaseDocument convertToPdfAndStampDocument(FinremCaseDetails caseDetails,
-                                              CaseDocument document,
-                                              String authorisationToken) {
-
-        String caseId = String.valueOf(caseDetails.getId());
-        FinremCaseData caseData = caseDetails.getData();
-        StampType stampType = documentHelper.getStampType(caseData);
-
-        return genericDocumentService.stampDocument(document,
-            authorisationToken, stampType, caseId);
     }
 }

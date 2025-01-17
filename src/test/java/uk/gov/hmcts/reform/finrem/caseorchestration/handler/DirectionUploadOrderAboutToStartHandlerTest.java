@@ -59,7 +59,7 @@ class DirectionUploadOrderAboutToStartHandlerTest {
     private GenericDocumentService genericDocumentService;
 
     @Spy
-    private ProcessOrderService processOrderService = new ProcessOrderService(hasApprovableCollectionReader, documentHelper, genericDocumentService);
+    private ProcessOrderService processOrderService = new ProcessOrderService(hasApprovableCollectionReader);
 
     @Test
     void testCanHandle() {
