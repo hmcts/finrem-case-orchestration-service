@@ -133,7 +133,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
-            log.error(format(e.getMessage() + " on Case ID: %s",  caseDetails.getId()), e);
+            log.error(format("%s on Case ID: %s", e.getMessage(), caseDetails.getId()), e);
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
