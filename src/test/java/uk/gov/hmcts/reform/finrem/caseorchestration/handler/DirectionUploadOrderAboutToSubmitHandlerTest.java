@@ -226,14 +226,20 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
+        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
             any(CaseDocument.class), any(String.class));
+        //Check DraftOrderDocReviewCollection is updated
         assertEquals(stampedDocumentA, test1.getValue().getDraftOrderDocument());
-        assertEquals(stampedDocumentB, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(stampedDocumentB, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
+
+        //Check AgreedDraftOrderCollection is updated
+        assertEquals(stampedDocumentA, test3.getValue().getDraftOrder());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(stampedDocumentB, test4.getValue().getDraftOrder());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+
         assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
         assertEquals(TO_BE_REVIEWED, test6.getValue().getOrderStatus());
     }
@@ -285,22 +291,28 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_3),
+        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_1),
             any(String.class))).thenReturn(stampedDocumentA);
 
-        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_4),
+        when(processOrderService.convertToPdfAndStampDocument(any(FinremCaseDetails.class), eq(TARGET_DOCUMENT_2),
             any(String.class))).thenReturn(stampedDocumentB);
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
+        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
             any(CaseDocument.class), any(String.class));
+        //Check PsaDocReviewCollection is updated
         assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());
-        assertEquals(stampedDocumentB, test2.getValue().getPsaDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(stampedDocumentB, test2.getValue().getPsaDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
+
+        //Check AgreedDraftOrderCollection is updated
+        assertEquals(stampedDocumentA, test3.getValue().getPensionSharingAnnex());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(stampedDocumentB, test4.getValue().getPensionSharingAnnex());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+
         assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
     }
 
@@ -355,14 +367,18 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(processOrderService, times(2)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
+        verify(processOrderService, times(4)).convertToPdfAndStampDocument(any(FinremCaseDetails.class),
             any(CaseDocument.class), any(String.class));
+        //Check PsaDocReviewCollection is updated
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
         assertEquals(stampedDocumentB, test2.getValue().getPsaDocument());
+
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+        assertEquals(stampedDocumentA, test1.getValue().getPsaDocument());
     }
 
     private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {
