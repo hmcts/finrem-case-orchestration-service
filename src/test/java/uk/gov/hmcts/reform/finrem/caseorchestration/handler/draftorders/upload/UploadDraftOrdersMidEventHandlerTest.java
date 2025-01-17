@@ -150,8 +150,8 @@ class UploadDraftOrdersMidEventHandlerTest {
         if (!(agreedDraftOrderRejected || attachmentFormatRejected)) {
             assertThat(response.getErrors()).isEmpty();
         } else {
-            String wordDocErrorMessage = "You must upload Microsoft Word documents. " +
-                "Document names should clearly reflect the party name, the type of hearing and the date of the hearing.";
+            String wordDocErrorMessage = "You must upload Microsoft Word documents. "
+                + "Document names should clearly reflect the party name, the type of hearing and the date of the hearing.";
             String rejectedAttachmentMessage = "You must upload a PDF file in the additional attachments.";
 
             if (agreedDraftOrderRejected && attachmentFormatRejected) {
@@ -231,8 +231,8 @@ class UploadDraftOrdersMidEventHandlerTest {
         if (!(suggestedOrderRejected || attachmentFormatRejected)) {
             assertThat(response.getErrors()).isEmpty();
         } else {
-            String wordDocErrorMessage = "You must upload Microsoft Word documents. " +
-                "Document names should clearly reflect the party name, the type of hearing and the date of the hearing.";
+            String wordDocErrorMessage = "You must upload Microsoft Word documents. "
+                + "Document names should clearly reflect the party name, the type of hearing and the date of the hearing.";
             String rejectedAttachmentMessage = "You must upload a PDF file in the additional attachments.";
 
             if (suggestedOrderRejected && attachmentFormatRejected) {
