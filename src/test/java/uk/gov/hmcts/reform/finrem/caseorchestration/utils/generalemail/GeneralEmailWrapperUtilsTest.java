@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Utility class for handling Refuge Wrapper updates in case data.
+ * Utility class for GeneralEmailWrapper related static methods
  */
 @Slf4j
 class GeneralEmailWrapperUtilsTest {

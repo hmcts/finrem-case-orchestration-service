@@ -151,8 +151,9 @@ class GeneralEmailAboutToSubmitHandlerTest {
     /**
      * Verifies that the method {@code setGeneralEmailValuesToNull} in {@link GeneralEmailWrapperUtils}
      * is invoked so that GeneralEmailWrapper details are cleared for both consented and contested cases.
-     * Parameterised tests a little awkward owing to their static nature.  So instead iterate over a list
-     * containing a single consented and contested callback request, to check the method is called for both case types.
+     * Iterates over a list containing a single consented and contested callback request, to check the method
+     * is called for both case types; simpler that refactoring dependencies to be static and making this a
+     * pararmeterised test.
      */
     @Test
     void testSetGeneralEmailValuesToNullIsUsed() {
