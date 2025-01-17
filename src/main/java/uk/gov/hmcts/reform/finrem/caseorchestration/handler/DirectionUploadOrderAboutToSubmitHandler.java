@@ -45,7 +45,6 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private final ProcessOrderService processOrderService;
 
-
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AdditionalHearingDocumentService additionalHearingDocumentService,
                                                     HasApprovableCollectionReader hasApprovableCollectionReader,
