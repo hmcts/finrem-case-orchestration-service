@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 /**
- * Utility class for GeneralEmailWrapper related static methods
+ * Utility class for GeneralEmailWrapper related static methods.
  */
 @Slf4j
 public class GeneralEmailWrapperUtils {
