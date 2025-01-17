@@ -157,9 +157,7 @@ public class ProcessOrderService {
         FinremCaseData caseData = caseDetails.getData();
         StampType stampType = documentHelper.getStampType(caseData);
 
-        CaseDocument stampedDoc = genericDocumentService.stampDocument(document,
+        return genericDocumentService.stampDocument(document,
             authorisationToken, stampType, caseId);
-
-        return stampedDoc;
     }
 }
