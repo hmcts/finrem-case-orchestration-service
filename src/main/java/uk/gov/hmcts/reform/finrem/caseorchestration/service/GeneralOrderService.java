@@ -242,7 +242,7 @@ public class GeneralOrderService {
         populateFinalisedOrderToOrdersToShare(data, dynamicListElements);
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
-        data.setOrdersToShare(dynamicOrderList);
+        data.getSendOrderWrapper().setOrdersToShare(dynamicOrderList);
     }
 
     private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {

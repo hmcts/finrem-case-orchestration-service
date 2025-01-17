@@ -94,7 +94,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
-            DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
+            DynamicMultiSelectList selectedOrders = caseData.getSendOrderWrapper().getOrdersToShare();
             log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
@@ -246,7 +246,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void clearTemporaryFields(FinremCaseData caseData) {
         caseData.setAdditionalDocument(null);
-        caseData.setOrdersToShare(null);
+        caseData.getSendOrderWrapper().setOrdersToShare(null);
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,

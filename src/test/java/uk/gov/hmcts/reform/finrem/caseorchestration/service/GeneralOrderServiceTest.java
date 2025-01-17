@@ -293,7 +293,7 @@ class GeneralOrderServiceTest {
         data.setUploadHearingOrder(hearingOrderDocuments);
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(data.getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(1);
+        assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(1);
     }
 
 
@@ -313,11 +313,11 @@ class GeneralOrderServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setOrdersToShare(selectList);
+        data.getSendOrderWrapper().setOrdersToShare(selectList);
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(data.getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
+        assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
     }
 
     @Test
@@ -340,11 +340,11 @@ class GeneralOrderServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setOrdersToShare(selectList);
+        data.getSendOrderWrapper().setOrdersToShare(selectList);
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(data.getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
+        assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("Not document available to share with other parties").isEmpty();
     }
 
     @Test
@@ -370,12 +370,12 @@ class GeneralOrderServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setOrdersToShare(selectList);
+        data.getSendOrderWrapper().setOrdersToShare(selectList);
 
         when(partyService.getDynamicMultiSelectListElement(anyString(), anyString())).thenReturn(DynamicMultiSelectListElement.builder().build());
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(data.getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(2);
+        assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(2);
     }
 
     @Test
@@ -455,7 +455,7 @@ class GeneralOrderServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setOrdersToShare(selectList);
+        data.getSendOrderWrapper().setOrdersToShare(selectList);
 
         Pair<List<CaseDocument>, List<CaseDocument>> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
