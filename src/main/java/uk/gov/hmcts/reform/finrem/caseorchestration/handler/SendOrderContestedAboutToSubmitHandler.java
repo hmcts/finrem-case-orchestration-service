@@ -148,7 +148,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private Pair<List<PsaDocumentReview>, List<DraftOrderDocumentReview>> removeDocumentFromDraftOrderReview(FinremCaseData caseData,
-                                                                                                              List<CaseDocument> hearingOrders) {
+                                                                                                             List<CaseDocument> hearingOrders) {
 
         List<PsaDocumentReview> removedPsaDocuments = new ArrayList<>();
         List<DraftOrderDocumentReview> removedDraftOrderDocuments = new ArrayList<>();
