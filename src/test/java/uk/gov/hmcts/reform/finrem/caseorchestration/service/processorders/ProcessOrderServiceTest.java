@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -320,9 +319,7 @@ class ProcessOrderServiceTest {
 
         CaseDocument result = underTest.convertToPdfAndStampDocument(caseDetails, documentA, authorisationToken);
 
-        assertNotNull(result);
         assertEquals(stampedDocument, result);
-
         verify(documentHelper).getStampType(caseDetails.getData());
         verify(genericDocumentService).stampDocument(documentA, authorisationToken, stampType,  String.valueOf(caseDetails.getId()));
     }
