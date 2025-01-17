@@ -16,9 +16,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- * Utility class for GeneralEmailWrapper related static methods
- */
 @Slf4j
 class GeneralEmailWrapperUtilsTest {
 
