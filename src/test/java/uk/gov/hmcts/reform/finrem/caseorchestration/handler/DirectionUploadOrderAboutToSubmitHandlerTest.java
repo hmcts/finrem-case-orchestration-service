@@ -187,6 +187,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         CaseDocument stampedDocumentA = CaseDocument.builder().documentFilename("stampedA.pdf").build();
         CaseDocument stampedDocumentB = CaseDocument.builder().documentFilename("stampedB.pdf").build();
 
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
+
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -224,14 +230,6 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentA);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentB);
-
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(4)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
@@ -261,6 +259,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test5 = null;
         CaseDocument stampedDocumentA = CaseDocument.builder().documentFilename("stampedA.pdf").build();
         CaseDocument stampedDocumentB = CaseDocument.builder().documentFilename("stampedB.pdf").build();
+
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -299,14 +303,6 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .build())
             .build());
 
-        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_1), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentA);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_2), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentB);
-
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         verify(genericDocumentService, times(4)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
@@ -335,6 +331,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         CaseDocument stampedDocumentA = CaseDocument.builder().documentFilename("stampedA.pdf").build();
         CaseDocument stampedDocumentB = CaseDocument.builder().documentFilename("stampedB.pdf").build();
+
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_3), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentA);
+        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_4), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
+            .thenReturn(stampedDocumentB);
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -368,14 +370,6 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 ))
                 .build())
             .build());
-
-        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_3), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentA);
-
-        when(genericDocumentService.stampDocument(eq(TARGET_DOCUMENT_4), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(stampedDocumentB);
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
