@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -601,7 +602,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
-        data.setOrdersToShare(DynamicMultiSelectList.builder().build());
+        data.getSendOrderWrapper().setOrdersToShare(DynamicMultiSelectList.builder().build());
         data.setOrderApprovedCoverLetter(null);
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
@@ -619,7 +620,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
-        finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
@@ -674,7 +675,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
-        finremCaseDataBuilder.ordersToShare(DynamicMultiSelectList.builder().build());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
