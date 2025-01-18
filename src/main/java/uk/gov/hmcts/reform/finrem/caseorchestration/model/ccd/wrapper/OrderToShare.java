@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -7,9 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.List;
+import static java.util.Optional.ofNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -17,13 +18,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SendOrderWrapper {
+public class OrderToShare {
 
-    @Deprecated
-    private DynamicMultiSelectList ordersToShare;
+    private DynamicMultiSelectList documentToShare;
 
-    private List<OrderToShareCollection> ordersToShareCollection;
+    private DynamicMultiSelectList attachmentsToShare;
 
-    private SendOrderEventPostStateOption sendOrderPostStateOption;
+    @JsonIgnore
+    public YesOrNo getHasAttachment() {
+        return YesOrNo.forValue(ofNullable(attachmentsToShare).map(DynamicMultiSelectList::getListItems).isEmpty());
+    }
 
 }

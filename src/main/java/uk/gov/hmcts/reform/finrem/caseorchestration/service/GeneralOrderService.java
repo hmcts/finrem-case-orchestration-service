@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPrevie
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
@@ -32,6 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -217,7 +220,7 @@ public class GeneralOrderService {
 
     public void setOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
-        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<OrderToShareCollection> orderToShareCollection = new ArrayList<>();
 
         List<ContestedGeneralOrderCollection> generalOrders = data.getGeneralOrderWrapper().getGeneralOrders();
 
@@ -226,7 +229,7 @@ public class GeneralOrderService {
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 if (order != null && order.getAdditionalDocument() != null) {
-                    appendDynamicListElement(dynamicListElements, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
+                    appendOrderToShareCollection(orderToShareCollection, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
                 }
             });
         }
@@ -235,31 +238,50 @@ public class GeneralOrderService {
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
             hearingOrderDocuments.forEach(obj ->
-                appendDynamicListElement(dynamicListElements, obj.getValue().getUploadDraftDocument(), "Case documents tab [Approved Order] - %s"));
+                appendOrderToShareCollection(orderToShareCollection, obj.getValue().getUploadDraftDocument(),
+                    "Case documents tab [Approved Order] - %s"));
         }
 
-        populateProcessedAgreedDraftOrderToOrdersToShare(data, dynamicListElements);
-        populateFinalisedOrderToOrdersToShare(data, dynamicListElements);
+        populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
+        populateFinalisedOrderToOrdersToShare(data, orderToShareCollection);
 
-        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
-        data.getSendOrderWrapper().setOrdersToShare(dynamicOrderList);
+        data.getSendOrderWrapper().setOrdersToShareCollection(orderToShareCollection);
     }
 
-    private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
+    private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
         emptyIfNull(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).stream()
-            .filter(d -> PROCESSED == d.getValue().getOrderStatus())
-            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getTargetDocument(), "Approved order - %s"));
+            .map(AgreedDraftOrderCollection::getValue)
+            .filter(agreedDraftOrder -> PROCESSED == agreedDraftOrder.getOrderStatus())
+            .forEach(agreedDraftOrder ->
+                appendOrderToShareCollection(orderToShareCollection, agreedDraftOrder.getTargetDocument(), "Approved order - %s",
+                    emptyIfNull(agreedDraftOrder.getAttachments()).toArray(CaseDocument[]::new)
+            ));
     }
 
-    private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
-        emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection())
-            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getFinalisedDocument(), "Finalised order - %s"));
+    private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
+        emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).stream()
+            .map(FinalisedOrderCollection::getValue)
+            .forEach(finalisedOrder ->
+                appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s",
+                    emptyIfNull(finalisedOrder.getAttachments()).toArray(CaseDocument[]::new)
+                ));
     }
 
-    private void appendDynamicListElement(List<DynamicMultiSelectListElement> dynamicListElements,
-                                          CaseDocument document, String format) {
-        dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
-            String.format(format, document.getDocumentFilename())));
+    private void appendOrderToShareCollection(List<OrderToShareCollection> orderToShareCollection,
+                                              CaseDocument document, String format, CaseDocument... attachments) {
+        OrderToShare.OrderToShareBuilder builder = OrderToShare.builder();
+        if (attachments != null) {
+            List<DynamicMultiSelectListElement> attachmentElements = Arrays.stream(attachments)
+                .map(attachment -> partyService.getDynamicMultiSelectListElement(getDocumentId(attachment), attachment.getDocumentFilename()))
+                .toList();
+            builder.attachmentsToShare(DynamicMultiSelectList.builder().listItems(attachmentElements).build());
+        }
+        orderToShareCollection.add(OrderToShareCollection.builder().value(builder
+            .documentToShare(DynamicMultiSelectList.builder().listItems(List.of(
+                partyService.getDynamicMultiSelectListElement(getDocumentId(document),
+                    String.format(format, document.getDocumentFilename()))
+            )).build())
+            .build()).build());
     }
 
     private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
@@ -271,20 +293,6 @@ public class GeneralOrderService {
     private String getDocumentId(CaseDocument caseDocument) {
         String documentUrl = caseDocument.getDocumentUrl();
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
-    }
-
-    private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                                       DynamicMultiSelectList selectedOrders) {
-        if (selectedOrders != null && selectedOrders.getValue() != null) {
-            return DynamicMultiSelectList.builder()
-                .value(selectedOrders.getValue())
-                .listItems(dynamicMultiSelectListElement)
-                .build();
-        } else {
-            return DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListElement)
-                .build();
-        }
     }
 
     public List<String> getParties(FinremCaseDetails caseDetails) {
