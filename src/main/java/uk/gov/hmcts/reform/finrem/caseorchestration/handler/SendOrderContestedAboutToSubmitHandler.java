@@ -80,7 +80,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
-            DynamicMultiSelectList selectedOrders = caseData.getOrdersToShare();
+            DynamicMultiSelectList selectedOrders = caseData.getSendOrderWrapper().getOrdersToShare();
             log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
@@ -109,7 +109,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             caseData.setAdditionalDocument(null);
             setConsolidateView(caseDetails, parties);
-            caseData.setOrdersToShare(new DynamicMultiSelectList());
+            caseData.getSendOrderWrapper().setOrdersToShare(new DynamicMultiSelectList());
         } catch (RuntimeException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
