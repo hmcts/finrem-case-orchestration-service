@@ -247,7 +247,7 @@ public class GeneralOrderService {
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
         populateFinalisedOrderToOrdersToShare(data, orderToShareCollection);
-
+        
         data.getSendOrderWrapper().setOrdersToShareCollection(orderToShareCollection);
     }
 
