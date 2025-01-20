@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
@@ -71,7 +73,6 @@ public class GeneralOrderService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
-    private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
     private final Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
@@ -275,16 +276,17 @@ public class GeneralOrderService {
         OrderToShare.OrderToShareBuilder builder = OrderToShare.builder();
         builder.hasSupportingDocuments(YesOrNo.forValue(!isEmpty(attachments)));
         if (attachments != null) {
-            List<DynamicMultiSelectListElement> attachmentElements = Arrays.stream(attachments)
-                .map(attachment -> partyService.getDynamicMultiSelectListElement(getDocumentId(attachment), attachment.getDocumentFilename()))
+            List<AttachmentToShareCollection> attachmentElements = Arrays.stream(attachments)
+                .map(attachment -> AttachmentToShareCollection.builder()
+                    .value(AttachmentToShare.builder()
+                        .attachmentName(attachment.getDocumentFilename())
+                        .build())
+                    .build())
                 .toList();
-            builder.attachmentsToShare(DynamicMultiSelectList.builder().listItems(attachmentElements).build());
+            builder.attachmentsToShare(attachmentElements);
         }
         orderToShareCollection.add(OrderToShareCollection.builder().value(builder
-            .documentToShare(DynamicMultiSelectList.builder().listItems(List.of(
-                partyService.getDynamicMultiSelectListElement(getDocumentId(document),
-                    String.format(format, document.getDocumentFilename()))
-            )).build())
+            .documentName(String.format(format, document.getDocumentFilename()))
             .build()).build());
     }
 
