@@ -24,4 +24,11 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailBody;
     private CaseDocument generalEmailUploadedDocument;
     private List<GeneralEmailCollection> generalEmailCollection;
+
+    public void setGeneralEmailValuesToNull() {
+        this.setGeneralEmailRecipient(null);
+        this.setGeneralEmailCreatedBy(null);
+        this.setGeneralEmailUploadedDocument(null);
+        this.setGeneralEmailBody(null);
+    }
 }

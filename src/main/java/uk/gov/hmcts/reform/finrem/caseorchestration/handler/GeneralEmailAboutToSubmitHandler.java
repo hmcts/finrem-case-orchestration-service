@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.generalemail.GeneralEmailWrapperUtils;
 
 @Slf4j
 @Service
@@ -69,9 +68,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
             generalEmailCategoriser.categorise(caseDetails.getData());
         }
 
-        GeneralEmailWrapperUtils.setGeneralEmailValuesToNull(callbackRequest.getCaseDetails());
+        caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
-
 }

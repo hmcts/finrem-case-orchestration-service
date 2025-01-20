@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.generalemail.GeneralEmailWrapperUtils;
 
 import java.util.List;
 
@@ -34,7 +33,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -149,25 +149,33 @@ class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     /**
-     * Verifies that the method {@code setGeneralEmailValuesToNull} in {@link GeneralEmailWrapperUtils}
-     * is invoked so that GeneralEmailWrapper details are cleared for both consented and contested cases.
-     * Iterates over a list containing a single consented and contested callback request, to check the method
-     * is called for both case types; simpler that refactoring dependencies to be static and making this a
-     * pararmeterised test.
+     * Checks that about-to-submit calls {@code setGeneralEmailValuesToNull} in {@link GeneralEmailWrapper}.
+     * For consented cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
+     * For contested cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
      */
     @Test
-    void testSetGeneralEmailValuesToNullIsUsed() {
-        FinremCallbackRequest consentedRequest = buildFinremCallbackRequest(true);
-        FinremCallbackRequest contestedRequest = buildFinremCallbackRequest(false);
+    void shouldCallSetGeneralEmailValuesToNullOnce() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
 
-        for (FinremCallbackRequest callbackRequest : List.of(contestedRequest, consentedRequest)) {
-            FinremCaseDetails consentedCaseDetails = callbackRequest.getCaseDetails();
-            try (MockedStatic<GeneralEmailWrapperUtils> mockedStatic = mockStatic(GeneralEmailWrapperUtils.class)) {
-                handler.handle(callbackRequest, AUTH_TOKEN);
-                mockedStatic.verify(() -> GeneralEmailWrapperUtils.setGeneralEmailValuesToNull(consentedCaseDetails),
-                        times(1));
-            }
-        }
+        // consented test
+        when(caseDetails.isConsentedApplication()).thenReturn(true);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        InOrder inOrderConsented = inOrder(notificationService, generalEmailWrapper);
+        inOrderConsented.verify(notificationService, times(1)).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderConsented.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+
+        // contested test
+        when(caseDetails.isConsentedApplication()).thenReturn(false);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
+        inOrderContested.verify(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
     }
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
