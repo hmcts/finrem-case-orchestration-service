@@ -49,7 +49,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
 
     @JsonIgnore
     @Override
-    public CaseDocument getReplacedDocument() {
+    public CaseDocument getTargetDocument() {
         return draftOrderDocument;
     }
 
