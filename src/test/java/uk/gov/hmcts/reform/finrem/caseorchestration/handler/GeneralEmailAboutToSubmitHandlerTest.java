@@ -174,7 +174,7 @@ class GeneralEmailAboutToSubmitHandlerTest {
         when(caseDetails.isConsentedApplication()).thenReturn(false);
         handler.handle(callbackRequest, AUTH_TOKEN);
         InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
-        inOrderContested.verify(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
         inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
     }
 

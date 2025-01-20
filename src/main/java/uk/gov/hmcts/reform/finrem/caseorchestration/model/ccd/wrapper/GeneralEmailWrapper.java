@@ -25,6 +25,11 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private CaseDocument generalEmailUploadedDocument;
     private List<GeneralEmailCollection> generalEmailCollection;
 
+    /**
+     * Clears working data, but leaves generalEmailCollection untouched.
+     * The data set to null below is working data, used to capture User input from an EXUI event.
+     * The generalEmailCollection is preserved as a record of emails sent.
+     */
     public void setGeneralEmailValuesToNull() {
         this.setGeneralEmailRecipient(null);
         this.setGeneralEmailCreatedBy(null);
