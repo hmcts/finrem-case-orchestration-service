@@ -108,6 +108,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private void handleDraftOrderDocuments(FinremCaseDetails caseDetails, String authorisation) {
         FinremCaseData caseData = caseDetails.getData();
+
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
@@ -131,6 +132,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
     private void handlePsaDocuments(FinremCaseDetails caseDetails, String authorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
+
         hasApprovableCollectionReader.filterAndCollectPsaDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             psaCollector, APPROVED_BY_JUDGE::equals);
 
@@ -153,6 +155,7 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
     private void handleAgreedDraftOrdersCollection(FinremCaseDetails caseDetails, String authorisation) {
         FinremCaseData caseData = caseDetails.getData();
         List<AgreedDraftOrderCollection> agreedOrderCollector = new ArrayList<>();
+
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
