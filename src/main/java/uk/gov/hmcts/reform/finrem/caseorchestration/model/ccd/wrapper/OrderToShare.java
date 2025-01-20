@@ -22,6 +22,10 @@ public class OrderToShare {
 
     private DynamicMultiSelectList documentToShare;
 
+    private YesOrNo hasSupportingDocuments;
+    
+    private YesOrNo includeSupportingDocument;
+
     private DynamicMultiSelectList attachmentsToShare;
 
     @JsonIgnore

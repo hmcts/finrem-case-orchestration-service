@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -49,6 +50,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
@@ -271,6 +273,7 @@ public class GeneralOrderService {
     private void appendOrderToShareCollection(List<OrderToShareCollection> orderToShareCollection,
                                               CaseDocument document, String format, CaseDocument... attachments) {
         OrderToShare.OrderToShareBuilder builder = OrderToShare.builder();
+        builder.hasSupportingDocuments(YesOrNo.forValue(!isEmpty(attachments)));
         if (attachments != null) {
             List<DynamicMultiSelectListElement> attachmentElements = Arrays.stream(attachments)
                 .map(attachment -> partyService.getDynamicMultiSelectListElement(getDocumentId(attachment), attachment.getDocumentFilename()))
