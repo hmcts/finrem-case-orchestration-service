@@ -149,7 +149,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        when(generalOrderService.hearingOrdersToShare(caseDetails, caseDetails.getData().getOrdersToShare()))
+        when(generalOrderService.hearingOrdersToShare(caseDetails, caseDetails.getData().getSendOrderWrapper().getOrdersToShare()))
             .thenThrow(RuntimeException.class);
 
         Exception exception = Assert.assertThrows(RuntimeException.class,
@@ -178,7 +178,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -229,7 +229,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -281,7 +281,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
         data.setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -378,7 +378,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
@@ -426,7 +426,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
@@ -487,7 +487,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
             .code(uuid).label("app_docs.pdf").build())).build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
