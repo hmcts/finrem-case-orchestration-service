@@ -97,6 +97,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
 import java.util.ArrayList;
@@ -145,7 +146,9 @@ class DuplicateFilenameDocumentCheckerTest {
                 .caseDocument(DUPLICATED_CASE_DOCUMENT)
                 .bytes(new byte[0])
                 .beforeCaseDetails(FinremCaseDetailsBuilderFactory.from(caseType, FinremCaseData.builder()
-                    .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
+                    .sendOrderWrapper(SendOrderWrapper.builder()
+                        .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
+                        .build())
                     .generalOrderWrapper(GeneralOrderWrapper.builder()
                         .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
                         .build())).build())
@@ -165,7 +168,9 @@ class DuplicateFilenameDocumentCheckerTest {
                 .uploadGeneralDocuments(List.of(UploadGeneralDocumentCollection.builder()
                     .value(UploadGeneralDocument.builder().build())
                     .build()))
-                .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .additionalDocument(CaseDocument.builder().documentFilename("additionalDocument").build())
+                    .build())
                 .generalOrderWrapper(GeneralOrderWrapper.builder()
                     .generalOrderLatestDocument(CaseDocument.builder().documentFilename("generalOrderLatestDocument").build())
                     .build())).build())
@@ -841,7 +846,9 @@ class DuplicateFilenameDocumentCheckerTest {
                 .orderDirectionOpt1(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .additionalDocument(DUPLICATED_CASE_DOCUMENT)
+                .sendOrderWrapper(SendOrderWrapper.builder()
+                    .additionalDocument(DUPLICATED_CASE_DOCUMENT)
+                    .build())
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .orderRefusalPreviewDocument(DUPLICATED_CASE_DOCUMENT)
