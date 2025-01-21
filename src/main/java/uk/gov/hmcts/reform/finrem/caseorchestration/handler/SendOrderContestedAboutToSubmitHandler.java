@@ -89,8 +89,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
 
+        FinremCaseData caseData = caseDetails.getData();
         try {
-            FinremCaseData caseData = caseDetails.getData();
             List<String> parties = generalOrderService.getParties(caseDetails);
             log.info("Selected parties {} on Case ID: {}", parties, caseId);
 
@@ -98,12 +98,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             log.info("Selected orders {} on Case ID: {} ", selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
-            CaseDocument document = caseData.getAdditionalDocument();
+            CaseDocument document = caseData.getSendOrderWrapper().getAdditionalDocument();
             if (document != null) {
                 log.info("Additional uploaded document with send order {} for Case ID: {}", document, caseId);
                 CaseDocument additionalUploadedOrderDoc = genericDocumentService.convertDocumentIfNotPdfAlready(document, userAuthorisation, caseId);
                 printOrderCollection.add(addToPrintOrderCollection(additionalUploadedOrderDoc));
-                caseData.setAdditionalDocument(additionalUploadedOrderDoc);
+                caseData.getSendOrderWrapper().setAdditionalDocument(additionalUploadedOrderDoc);
             }
 
             log.info("Share and print general with for Case ID: {}", caseDetails.getId());
@@ -130,15 +130,16 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             setConsolidateView(caseDetails, parties);
 
-            clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
             log.error(format("%s on Case ID: %s", e.getMessage(), caseDetails.getId()), e);
+            clearTemporaryFields(caseData);
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
+        clearTemporaryFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
@@ -245,8 +246,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void clearTemporaryFields(FinremCaseData caseData) {
-        caseData.setAdditionalDocument(null);
+        caseData.getSendOrderWrapper().setAdditionalDocument(null);
+        caseData.getSendOrderWrapper().setPartiesOnCase(null);
         caseData.getSendOrderWrapper().setOrdersToShare(null);
+        caseData.getSendOrderWrapper().setOrdersToShareCollection(null);
+        caseData.getSendOrderWrapper().setSendOrderPostStateOption(null);
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,

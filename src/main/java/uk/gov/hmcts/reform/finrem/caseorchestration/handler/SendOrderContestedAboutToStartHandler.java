@@ -44,7 +44,7 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
 
         generalOrderService.setOrderList(caseDetails);
 
-        finremCaseData.setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
+        finremCaseData.getSendOrderWrapper().setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();

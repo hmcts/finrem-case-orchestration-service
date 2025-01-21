@@ -489,7 +489,7 @@ public class IntervenerShareDocumentsService implements SharedService {
         }
 
         DynamicMultiSelectList solicitorRoles = data.getSolicitorRoleList();
-        List<String> selectedParties = data.getSelectedParties(solicitorRoles);
+        List<String> selectedParties = data.getSendOrderWrapper().getSelectedParties(solicitorRoles);
         selectablePartiesCorrespondenceService.setPartiesToReceiveCorrespondence(data, selectedParties);
 
         if (isEitherPartyNotAnOption(solicitorRoles.getListItems())) {

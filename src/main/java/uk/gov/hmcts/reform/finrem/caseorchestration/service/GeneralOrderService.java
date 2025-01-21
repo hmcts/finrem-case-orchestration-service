@@ -301,7 +301,7 @@ public class GeneralOrderService {
 
     public List<String> getParties(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
-        DynamicMultiSelectList parties = data.getPartiesOnCase();
+        DynamicMultiSelectList parties = data.getSendOrderWrapper().getPartiesOnCase();
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 

@@ -49,7 +49,7 @@ public class SelectablePartiesCorrespondenceService {
     }
 
     public void setPartiesToReceiveCorrespondence(FinremCaseData data) {
-        List<String> selectedParties = data.getSelectedParties();
+        List<String> selectedParties = data.getSendOrderWrapper().getSelectedParties();
         setPartiesToReceiveCorrespondence(data, selectedParties);
     }
 

@@ -140,7 +140,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
 
-        assertNull(caseData.getPartiesOnCase());
+        assertNull(caseData.getSendOrderWrapper().getPartiesOnCase());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
@@ -167,7 +167,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(new DynamicMultiSelectList());
+        data.getSendOrderWrapper().setPartiesOnCase(new DynamicMultiSelectList());
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -184,7 +184,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -201,12 +201,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertNull(caseData.getPartiesOnCase().getValue());
+        assertNull(caseData.getSendOrderWrapper().getPartiesOnCase().getValue());
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getAdditionalDocument());
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
     }
@@ -216,7 +216,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(new DynamicMultiSelectList());
+        data.getSendOrderWrapper().setPartiesOnCase(new DynamicMultiSelectList());
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -233,7 +233,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -251,12 +251,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertNull(caseData.getPartiesOnCase().getValue());
+        assertNull(caseData.getSendOrderWrapper().getPartiesOnCase().getValue());
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getAdditionalDocument());
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(generalOrderService, never()).isSelectedOrderMatches(any(DynamicMultiSelectList.class), any(ContestedGeneralOrder.class));
@@ -268,7 +268,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(getParties());
+        data.getSendOrderWrapper().setPartiesOnCase(getParties());
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -285,7 +285,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -306,7 +306,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
+        assertEquals(12, caseData.getSendOrderWrapper().getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
@@ -326,7 +326,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         caseData = response.getData();
-        assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
+        assertEquals(12, caseData.getSendOrderWrapper().getPartiesOnCase().getValue().size(), "selected parties on case");
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
@@ -365,7 +365,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(getParties());
+        data.getSendOrderWrapper().setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
             .uploadDraftDocument(caseDocument("http://abc/docurl", "abc.pdf", "http://abc/binaryurl"))
@@ -398,7 +398,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
+        assertEquals(12, caseData.getSendOrderWrapper().getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(2, caseData.getFinalOrderCollection().size());
 
@@ -412,7 +412,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         data.setOrderApprovedCoverLetter(caseDocument("coversheet", "coversheet"));
-        data.setPartiesOnCase(getParties());
+        data.getSendOrderWrapper().setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
         DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
@@ -443,7 +443,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertEquals(12, caseData.getPartiesOnCase().getValue().size());
+        assertEquals(12, caseData.getSendOrderWrapper().getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().size());
         assertEquals(1, caseData.getFinalOrderCollection().size());
@@ -461,7 +461,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
 
-        data.setPartiesOnCase(getParties());
+        data.getSendOrderWrapper().setPartiesOnCase(getParties());
         ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
                 LocalDateTime.of(LocalDate.of(2019, 12, 31),
                     LocalTime.of(6, 30, 45)))
@@ -595,7 +595,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setPartiesOnCase(getParties());
+        data.getSendOrderWrapper().setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
             .uploadDraftDocument(caseDocument("http://abc/docurl", "abc.pdf", "http://abc/binaryurl"))
