@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
@@ -85,7 +85,7 @@ public class RefusedOrderProcessor {
                 UUID uuid = UUID.randomUUID();
                 refusalOrderIds.add(uuid);
 
-                JudgeType judgeType = ofNullable(draftOrdersWrapper.getRefusalOrderInstruction()).map(RefusalOrderInstruction::getJudgeType)
+                JudgeType judgeType = ofNullable(draftOrdersWrapper.getExtraReportFieldsInput()).map(ExtraReportFieldsInput::getJudgeType)
                     .orElse(null);
                 if (judgeType == null) {
                     log.warn("{} - Judge type was not captured and an empty string will be shown in the refusal order.",
