@@ -24,11 +24,11 @@ public class OrderToShare {
 
     private String documentName;
 
-    private List<Yes> documentToShare;
+    private YesOrNo documentToShare;
 
     private YesOrNo hasSupportingDocuments;
     
-    private YesOrNo includeSupportingDocument;
+    private List<Yes> includeSupportingDocument;
 
     private List<AttachmentToShareCollection> attachmentsToShare;
 
