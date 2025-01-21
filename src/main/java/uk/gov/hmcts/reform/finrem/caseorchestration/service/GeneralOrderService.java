@@ -73,7 +73,6 @@ public class GeneralOrderService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
-    private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
     private final Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
@@ -281,7 +280,6 @@ public class GeneralOrderService {
                 .map(attachment -> AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
                         .attachmentName(attachment.getDocumentFilename())
-                        .documentToShare(YesOrNo.NO)
                         .build())
                     .build())
                 .toList();
@@ -289,7 +287,6 @@ public class GeneralOrderService {
         }
         orderToShareCollection.add(OrderToShareCollection.builder().value(builder
             .documentName(String.format(format, document.getDocumentFilename()))
-            .documentToShare(YesOrNo.NO)
             .build()).build());
     }
 

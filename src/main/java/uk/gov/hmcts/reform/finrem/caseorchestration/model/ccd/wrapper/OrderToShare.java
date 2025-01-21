@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class OrderToShare {
 
     private String documentName;
 
-    private YesOrNo documentToShare;
+    private Yes documentToShare;
 
     private YesOrNo hasSupportingDocuments;
     

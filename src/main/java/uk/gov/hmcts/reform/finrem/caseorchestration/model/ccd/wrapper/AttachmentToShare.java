@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -18,6 +18,6 @@ public class AttachmentToShare {
 
     private String attachmentName;
 
-    private YesOrNo documentToShare;
+    private Yes documentToShare;
 
 }

@@ -60,7 +60,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
@@ -97,8 +96,6 @@ class GeneralOrderServiceTest {
     private LetterAddresseeGeneratorMapper letterAddresseeGeneratorMapper;
     @Mock
     private InternationalPostalService postalService;
-    @Mock
-    private PartyService partyService;
     @Spy
     private CaseDataService caseDataService = new CaseDataService(objectMapper);
     @Spy
@@ -372,7 +369,7 @@ class GeneralOrderServiceTest {
 
         data.getSendOrderWrapper().setOrdersToShare(selectList);
 
-        when(partyService.getDynamicMultiSelectListElement(anyString(), anyString())).thenReturn(DynamicMultiSelectListElement.builder().build());
+        //when(partyService.getDynamicMultiSelectListElement(anyString(), anyString())).thenReturn(DynamicMultiSelectListElement.builder().build());
         generalOrderService.setOrderList(caseDetails);
 
         assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(2);
@@ -754,9 +751,6 @@ class GeneralOrderServiceTest {
             .build();
         DynamicMultiSelectListElement expectedDynamicListElement = DynamicMultiSelectListElement.builder().build();
 
-        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Approved order - processedFileName.pdf")))
-            .thenReturn(expectedDynamicListElement);
-
         generalOrderService.setOrderList(caseDetails);
 
         assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToShare().getListItems())
@@ -792,11 +786,6 @@ class GeneralOrderServiceTest {
             .build();
         DynamicMultiSelectListElement expectedDynamicListElementA = DynamicMultiSelectListElement.builder().build();
         DynamicMultiSelectListElement expectedDynamicListElementB = DynamicMultiSelectListElement.builder().build();
-
-        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderOne.pdf")))
-            .thenReturn(expectedDynamicListElementA);
-        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderTwo.pdf")))
-            .thenReturn(expectedDynamicListElementB);
 
         generalOrderService.setOrderList(caseDetails);
 
