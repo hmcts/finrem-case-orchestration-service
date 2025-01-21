@@ -103,7 +103,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
     }
 
     private void setupData(CaseDetails caseDetails) {
