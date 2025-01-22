@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.Process
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -197,5 +198,42 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(any(FinremCaseData.class))).thenReturn(true);
+    }
+
+    @Test
+    void givenContestedCase_whenDirectionUploadOrderWithPreviousFiles_shouldNotModifyUploadHearingOrder() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.DIRECTION_UPLOAD_ORDER);
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = finremCallbackRequest.getCaseDetailsBefore().getData();
+
+        mockPassAllValidations();
+
+        //Create old and new documents
+        CaseDocument oldDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+        CaseDocument newDocument = TestSetUpUtils.caseDocument("new-file-url", "new-file-name", "new-binary-url");
+
+        //Old document in 'before' case data
+        DirectionOrder oldOrder = DirectionOrder.builder().uploadDraftDocument(oldDocument).build();
+        DirectionOrderCollection oldOrderCollection = DirectionOrderCollection.builder().value(oldOrder).build();
+        caseDataBefore.setUploadHearingOrder(List.of(oldOrderCollection));
+
+        //New document in current case data
+        DirectionOrder newOrder = DirectionOrder.builder().uploadDraftDocument(newDocument).build();
+        DirectionOrderCollection newOrderCollection = DirectionOrderCollection.builder().value(newOrder).build();
+        caseData.setUploadHearingOrder(List.of(oldOrderCollection, newOrderCollection));
+
+        //Create similar setup for hearingOrderOtherDocuments
+        DocumentCollection oldDocCollection = DocumentCollection.builder().value(oldDocument).build();
+        DocumentCollection newDocCollection = DocumentCollection.builder().value(newDocument).build();
+        caseDataBefore.setHearingOrderOtherDocuments(List.of(oldDocCollection));
+        caseData.setHearingOrderOtherDocuments(List.of(oldDocCollection, newDocCollection));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getUploadHearingOrder())
+            .extracting(DirectionOrderCollection::getValue)
+            .extracting(DirectionOrder::getUploadDraftDocument)
+            .containsExactlyInAnyOrder(oldDocument, newDocument);
+        assertThat(response.getErrors()).isEmpty();
     }
 }
