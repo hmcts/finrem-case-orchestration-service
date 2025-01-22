@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -61,27 +63,26 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                 .data(caseData).errors(List.of("Upload Approved Order is required.")).build();
         }
 
-        List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
-        if (uploadHearingOrders != null) {
-            List<DirectionOrderCollection> uploadHearingOrdersBefore = caseDataBefore.getUploadHearingOrder();
-            if (uploadHearingOrdersBefore != null && !uploadHearingOrdersBefore.isEmpty()) {
-                uploadHearingOrders.removeAll(uploadHearingOrdersBefore);
-            }
+        List<DirectionOrderCollection> uploadHearingOrders = filterNewItems(
+            caseData.getUploadHearingOrder(),
+            caseDataBefore.getUploadHearingOrder()
+        );
+        if (CollectionUtils.isNotEmpty(uploadHearingOrders)) {
             uploadHearingOrders.forEach(doc ->
                 bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-                    caseId, errors, userAuthorisation)
-            );
+                    caseId, errors, userAuthorisation));
         }
-        List<DocumentCollection> hearingOrderOtherDocuments = caseData.getHearingOrderOtherDocuments();
-        if (hearingOrderOtherDocuments != null) {
-            List<DocumentCollection> hearingOrderOtherDocumentsBefore = caseDataBefore.getHearingOrderOtherDocuments();
-            if (hearingOrderOtherDocumentsBefore != null && !hearingOrderOtherDocumentsBefore.isEmpty()) {
-                hearingOrderOtherDocuments.removeAll(hearingOrderOtherDocumentsBefore);
-            }
-            hearingOrderOtherDocuments.forEach(doc ->
-                bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue(),
-                    caseId, errors, userAuthorisation)
+
+        if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
+            List<DocumentCollection> hearingOrderOtherDocuments = filterNewItems(
+                caseData.getHearingOrderOtherDocuments(),
+                caseDataBefore.getHearingOrderOtherDocuments()
             );
+            if (CollectionUtils.isNotEmpty(hearingOrderOtherDocuments)) {
+                hearingOrderOtherDocuments.forEach(doc ->
+                    bulkPrintDocumentService.validateEncryptionOnUploadedDocument(doc.getValue(),
+                        caseId, errors, userAuthorisation));
+            }
         }
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
@@ -110,5 +111,13 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
+    }
+
+    private <T> List<T> filterNewItems(List<T> currentList, List<T> previousList) {
+        List<T> safePreviousList = ListUtils.emptyIfNull(previousList);
+        return ListUtils.emptyIfNull(currentList)
+            .stream()
+            .filter(item -> safePreviousList.stream().noneMatch(item::equals))
+            .toList();
     }
 }
