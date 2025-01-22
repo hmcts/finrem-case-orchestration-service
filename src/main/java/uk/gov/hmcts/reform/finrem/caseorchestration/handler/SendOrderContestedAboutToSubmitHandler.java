@@ -87,7 +87,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
+            callbackRequest.getEventType(), callbackRequest.getEventType(), caseId);
 
         FinremCaseData caseData = caseDetails.getData();
         try {
