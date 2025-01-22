@@ -249,7 +249,7 @@ public class GeneralOrderService {
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
         populateFinalisedOrderToOrdersToShare(data, orderToShareCollection);
         
-        data.getSendOrderWrapper().setOrdersToShareCollection(orderToShareCollection);
+        data.getSendOrderWrapper().getOrdersToShareWrapper().setOrdersToShareCollection(orderToShareCollection);
     }
 
     private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
