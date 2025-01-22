@@ -369,7 +369,6 @@ class GeneralOrderServiceTest {
 
         data.getSendOrderWrapper().setOrdersToShare(selectList);
 
-        //when(partyService.getDynamicMultiSelectListElement(anyString(), anyString())).thenReturn(DynamicMultiSelectListElement.builder().build());
         generalOrderService.setOrderList(caseDetails);
 
         assertThat(data.getSendOrderWrapper().getOrdersToShare().getListItems()).as("One document available to share with other parties").hasSize(2);
