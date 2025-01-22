@@ -846,11 +846,6 @@ class DuplicateFilenameDocumentCheckerTest {
                 .orderDirectionOpt1(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .sendOrderWrapper(SendOrderWrapper.builder()
-                    .additionalDocument(DUPLICATED_CASE_DOCUMENT)
-                    .build())
-                .build()),
-            Arguments.of(FinremCaseData.builder()
                 .orderRefusalPreviewDocument(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
