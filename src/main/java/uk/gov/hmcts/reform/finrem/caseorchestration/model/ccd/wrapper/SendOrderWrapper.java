@@ -27,16 +27,16 @@ public class SendOrderWrapper {
     private DynamicMultiSelectList ordersToShare;
 
     @Getter(AccessLevel.NONE)
-    @JsonProperty("otsw")
-    private OrdersToShareWrapper ordersToShareWrapper;
+    @JsonProperty("ordersToSend")
+    private OrderToSend ordersToSend;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
 
-    public OrdersToShareWrapper getOrdersToShareWrapper() {
-        if (this.ordersToShareWrapper == null) {
-            this.ordersToShareWrapper = new OrdersToShareWrapper();
+    public OrderToSend getOrdersToSend() {
+        if (this.ordersToSend == null) {
+            this.ordersToSend = new OrderToSend();
         }
-        return this.ordersToShareWrapper;
+        return this.ordersToSend;
     }
 
 }
