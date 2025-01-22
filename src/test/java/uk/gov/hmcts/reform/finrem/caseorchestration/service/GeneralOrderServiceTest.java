@@ -759,7 +759,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(caseDetails.getData().getOrdersToShare().getListItems())
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToShare().getListItems())
             .as("The processed order should appear in ordersToShare.")
             .containsExactly(expectedDynamicListElement);
     }
@@ -800,7 +800,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(caseDetails.getData().getOrdersToShare().getListItems())
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToShare().getListItems())
             .as("The finalised orders should appear in ordersToShare.")
             .containsExactly(expectedDynamicListElementA, expectedDynamicListElementB);
     }
