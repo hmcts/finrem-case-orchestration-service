@@ -17,5 +17,5 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrdersToShareWrapper {
 
-    private List<OrderToShareCollection> ordersToShareCollection;
+    private List<OrderToShareCollection> value;
 }
