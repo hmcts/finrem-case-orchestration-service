@@ -48,18 +48,23 @@ public class SendOrderContestedMidHandler extends FinremCallbackHandler {
         if (nonSelectedOrder(inputs)) {
             errors.add("You must select at least one order.");
         } else {
-            List<OrderToShare> ordersMarkedToIncludeSupportingDocuments = inputs.stream().map(OrderToShareCollection::getValue)
-                .filter(orderToShare -> orderToShare.getDocumentToShare().isYes() && isIncludeSupportingDocumentsChecked(orderToShare))
-                .toList();
-            ordersMarkedToIncludeSupportingDocuments.forEach(d -> {
-                if (emptyIfNull(d.getAttachmentsToShare()).stream().map(AttachmentToShareCollection::getValue)
-                    .map(AttachmentToShare::getDocumentToShare).noneMatch(attachmentYesOrNo -> YesOrNo.isYes(attachmentYesOrNo))) {
-                    errors.add("You chose to include a supporting document but none have been selected.");
-                }
-            });
+            getOrdersMarkedToIncludeSupportingDocuments(inputs).stream()
+                .filter(this::containsSupportingDocumentNotSelected)
+                .forEach(order -> errors.add("You chose to include a supporting document but none have been selected."));
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
+    }
+
+    private boolean containsSupportingDocumentNotSelected(OrderToShare orderToShare) {
+        return emptyIfNull(orderToShare.getAttachmentsToShare()).stream().map(AttachmentToShareCollection::getValue)
+            .map(AttachmentToShare::getDocumentToShare).noneMatch(attachmentYesOrNo -> YesOrNo.isYes(attachmentYesOrNo));
+    }
+
+    private List<OrderToShare> getOrdersMarkedToIncludeSupportingDocuments(List<OrderToShareCollection> inputs) {
+        return inputs.stream().map(OrderToShareCollection::getValue)
+            .filter(orderToShare -> orderToShare.getDocumentToShare().isYes() && isIncludeSupportingDocumentsChecked(orderToShare))
+            .toList();
     }
 
     private boolean nonSelectedOrder(List<OrderToShareCollection> inputs) {
