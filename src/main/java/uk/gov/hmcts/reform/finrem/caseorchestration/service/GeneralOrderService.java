@@ -280,6 +280,7 @@ public class GeneralOrderService {
                 .map(attachment -> AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
                         .attachmentName(attachment.getDocumentFilename())
+                        .documentToShare(YesOrNo.YES) // default to yes
                         .build())
                     .build())
                 .toList();
