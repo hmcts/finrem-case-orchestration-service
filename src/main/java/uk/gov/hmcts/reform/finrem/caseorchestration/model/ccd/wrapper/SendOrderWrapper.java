@@ -3,9 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -27,7 +30,9 @@ public class SendOrderWrapper {
     @Deprecated
     private DynamicMultiSelectList ordersToShare;
 
-    private List<OrderToShareCollection> ordersToShareCollection;
+    @Getter(AccessLevel.NONE)
+    @JsonProperty("ordersToShareWrapper")
+    private OrdersToShareWrapper ordersToShareWrapper;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
 
@@ -45,6 +50,13 @@ public class SendOrderWrapper {
             return List.of();
         }
         return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
+    }
+
+    public OrdersToShareWrapper getOrdersToShareWrapper() {
+        if (ordersToShareWrapper == null) {
+            ordersToShareWrapper = new OrdersToShareWrapper();
+        }
+        return ordersToShareWrapper;
     }
 
 }
