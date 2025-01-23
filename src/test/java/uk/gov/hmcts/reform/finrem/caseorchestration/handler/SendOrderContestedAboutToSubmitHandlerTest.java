@@ -643,7 +643,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
                 .build()).build());
-
     }
 
     @Test
@@ -721,6 +720,5 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
                 .build()).build());
-
     }
 }
