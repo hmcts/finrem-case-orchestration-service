@@ -364,13 +364,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected1).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
@@ -409,13 +408,12 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected1).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument), List.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -471,12 +469,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected1).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
         when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
@@ -507,7 +504,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private DynamicMultiSelectList getParties() {
-
         List<DynamicMultiSelectListElement> list = new ArrayList<>();
         partyList().forEach(role -> list.add(getElementList(role)));
         return DynamicMultiSelectList.builder()
