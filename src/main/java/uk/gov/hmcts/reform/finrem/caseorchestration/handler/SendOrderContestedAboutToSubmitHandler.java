@@ -252,8 +252,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void clearTemporaryFields(FinremCaseData caseData) {
         caseData.getSendOrderWrapper().setAdditionalDocument(null);
-        caseData.getSendOrderWrapper().setOrdersToShare(null); // it is not used in the new flow.
-        caseData.getSendOrderWrapper().getOrdersToSend().setValue(null);
+        caseData.getSendOrderWrapper().setOrdersToSend(null);
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,

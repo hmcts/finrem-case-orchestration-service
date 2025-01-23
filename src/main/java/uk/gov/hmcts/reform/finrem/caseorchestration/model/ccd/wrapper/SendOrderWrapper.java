@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,18 +22,15 @@ public class SendOrderWrapper {
 
     private CaseDocument additionalDocument;
 
-    @Deprecated
-    private DynamicMultiSelectList ordersToShare;
-
     @Getter(AccessLevel.NONE)
     @JsonProperty("ordersToSend")
-    private OrderToSend ordersToSend;
+    private OrdersToSend ordersToSend;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
 
-    public OrderToSend getOrdersToSend() {
+    public OrdersToSend getOrdersToSend() {
         if (this.ordersToSend == null) {
-            this.ordersToSend = new OrderToSend();
+            this.ordersToSend = new OrdersToSend();
         }
         return this.ordersToSend;
     }

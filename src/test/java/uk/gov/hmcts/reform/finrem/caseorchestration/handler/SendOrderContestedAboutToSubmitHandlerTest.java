@@ -40,6 +40,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -70,9 +73,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,7 +88,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedAboutToSubmitHandlerTest {
 
-    private static final String uuid = UUID.fromString("d607c045-878e-475f-ab8e-b2f667d8af64").toString();
+    private static final String UUID_1 = UUID.fromString("d607c045-878e-475f-ab8e-b2f667d8af64").toString();
+    private static final String UUID_2 = UUID.fromString("22222222-878e-475f-ab8e-b2f667d8af64").toString();
 
     private SendOrderContestedAboutToSubmitHandler handler;
     @Mock
@@ -143,7 +147,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getPartiesOnCase());
 
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
-        verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), null);
+        verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of());
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), any());
         verify(documentHelper, never()).getStampType(caseData);
@@ -151,11 +155,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
-
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        when(generalOrderService.hearingOrdersToShare(caseDetails, caseDetails.getData().getSendOrderWrapper().getOrdersToShare()))
-            .thenThrow(RuntimeException.class);
+        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(RuntimeException.class);
 
         Exception exception = Assert.assertThrows(RuntimeException.class,
             () -> handler.handle(callbackRequest, AUTH_TOKEN));
@@ -169,21 +171,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(new DynamicMultiSelectList());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build(), DynamicMultiSelectListElement.builder()
-                .code("app_docs.pdf")
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build(),
+                OrderToShareCollection.builder().value(selected2).build()
+            ))
             .build();
+        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -218,21 +216,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(new DynamicMultiSelectList());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build(), DynamicMultiSelectListElement.builder()
-                .code("app_docs.pdf")
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build(),
+                OrderToShareCollection.builder().value(selected2).build()
+            ))
             .build();
+        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -259,7 +253,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
-        verify(generalOrderService, never()).isSelectedOrderMatches(any(DynamicMultiSelectList.class), any(ContestedGeneralOrder.class));
+        verify(generalOrderService, never()).isSelectedOrderMatches(eq(selectedDocs), any(ContestedGeneralOrder.class));
     }
 
     @Test
@@ -270,21 +264,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build(), DynamicMultiSelectListElement.builder()
-                .code("app_docs.pdf")
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId("app_docs.pdf").documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build(),
+                OrderToShareCollection.builder().value(selected2).build()
+            ))
             .build();
+        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
@@ -294,16 +284,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
         // below mocking is used for the second invocation on the event where the selectedDocs is cleared in the 1st about-to-submit logic.
-        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), isNull()))
-            .thenReturn(Pair.of(List.of(), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of())).thenReturn(Pair.of(List.of(), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
@@ -322,8 +310,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper).getStampType(caseData);
         verify(dateService).addCreatedDateInFinalOrder(any(), any());
 
-        response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size(), "selected parties on case");
@@ -374,18 +361,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setUploadHearingOrder(orderList);
         data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code("abc")
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code("abc")
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId("abc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
             .build();
+        List<OrderToShare> selectedDocs = List.of(selected1);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
@@ -422,18 +406,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setUploadHearingOrder(orderList);
         data.setFinalOrderCollection(orderList);
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
             .build();
+        List<OrderToShare> selectedDocs = List.of(selected1);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
@@ -487,11 +468,15 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
         data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder().value(List.of(DynamicMultiSelectListElement.builder()
-            .code(uuid).label("app_docs.pdf").build())).listItems(List.of(DynamicMultiSelectListElement.builder()
-            .code(uuid).label("app_docs.pdf").build())).build();
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
+            .build();
+        List<OrderToShare> selectedDocs = List.of(selected1);
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
@@ -602,10 +587,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
-        data.getSendOrderWrapper().setOrdersToShare(DynamicMultiSelectList.builder().build());
+        data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder().build());
         data.setOrderApprovedCoverLetter(null);
 
-        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Pair.of(List.of(caseDocument()), List.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -620,7 +605,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
-        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToSend(OrdersToSend.builder().build()).build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
@@ -647,7 +632,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
-        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -675,7 +660,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
-        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToSend(OrdersToSend.builder().build()).build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
@@ -713,7 +698,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
-        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);

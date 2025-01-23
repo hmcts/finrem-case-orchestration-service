@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderToSend {
+public class OrdersToSend {
 
     private List<OrderToShareCollection> value;
 }

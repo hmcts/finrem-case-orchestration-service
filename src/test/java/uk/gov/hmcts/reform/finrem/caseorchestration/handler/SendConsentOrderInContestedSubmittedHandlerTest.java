@@ -20,6 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
@@ -33,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,13 +45,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDERS_TO_SHARE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDERS_TO_SEND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
 class SendConsentOrderInContestedSubmittedHandlerTest {
-    private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
+    private static final String UUID = java.util.UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
     private static final String AUTH_TOKEN = "tokien:)";
 
     @InjectMocks
@@ -92,36 +94,28 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID).documentName("app_docs.pdf").build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
             .build();
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
     }
 
     private void setupData(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put(PARTIES_ON_CASE, getParties());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-                .value(List.of(DynamicMultiSelectListElement.builder()
-                        .code(uuid)
-                        .label("app_docs.pdf")
-                        .build()))
-                .listItems(List.of(DynamicMultiSelectListElement.builder()
-                        .code(uuid)
-                        .label("app_docs.pdf")
-                        .build()))
-                .build();
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID).documentName("app_docs.pdf").build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
+            .build();
 
-        data.put(ORDERS_TO_SHARE, selectedDocs);
+        data.put(ORDERS_TO_SEND, ordersToSend);
     }
 
     @Test
