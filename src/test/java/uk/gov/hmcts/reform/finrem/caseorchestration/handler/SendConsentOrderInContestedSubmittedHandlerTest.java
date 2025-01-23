@@ -20,9 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
@@ -38,21 +35,18 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.List.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDERS_TO_SEND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SendConsentOrderInContestedSubmittedHandlerTest {
-    private static final String UUID = java.util.UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
-    private static final String AUTH_TOKEN = "tokien:)";
 
     @InjectMocks
     private SendConsentOrderInContestedSubmittedHandler consentOrderInContestedSubmittedHandler;
@@ -75,47 +69,20 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
     @Mock
     private ContestedConsentOrderApprovedCorresponder contestedConsentOrderApprovedCorresponder;
 
-
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
-        assertThat(consentOrderInContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_CONSENT_IN_CONTESTED_ORDER),
-            is(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
-        assertThat(consentOrderInContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SEND_CONSENT_IN_CONTESTED_ORDER),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(consentOrderInContestedSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED,
+            EventType.SEND_CONSENT_IN_CONTESTED_ORDER);
     }
 
     private void setupFinremData(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
-
-        OrderToShare selected1 = OrderToShare.builder().documentId(UUID).documentName("app_docs.pdf").build();
-        OrdersToSend ordersToSend = OrdersToSend.builder()
-            .value(of(
-                OrderToShareCollection.builder().value(selected1).build()
-            ))
-            .build();
-
-        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
     }
 
     private void setupData(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put(PARTIES_ON_CASE, getParties());
-
-        OrderToShare selected1 = OrderToShare.builder().documentId(UUID).documentName("app_docs.pdf").build();
-        OrdersToSend ordersToSend = OrdersToSend.builder()
-            .value(of(
-                OrderToShareCollection.builder().value(selected1).build()
-            ))
-            .build();
-
-        data.put(ORDERS_TO_SEND, ordersToSend);
     }
 
     @Test
@@ -266,7 +233,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123L)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("FR_consentSendOrder").caseDetails(caseDetails).build();
     }
 
