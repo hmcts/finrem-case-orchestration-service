@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -21,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -29,60 +31,92 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @Service
 public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
 
+    private static final String HAVING_NON_WORD_DOCUMENT_IN_ORDER_OR_PSA_ERROR_MESSAGE =
+        "You must upload Microsoft Word documents. Document names should clearly reflect the party name, "
+            + "the type of hearing and the date of the hearing.";
+
+    private static final String HAVING_WORD_DOCUMENT_IN_ADDITIONAL_ATTACHMENTS_ERROR_MESSAGE
+        = "You must upload a PDF file in the additional attachments.";
+
     public UploadDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.DRAFT_ORDERS.equals(eventType);
+        return CallbackType.MID_EVENT.equals(callbackType) && CaseType.CONTESTED.equals(caseType) && EventType.DRAFT_ORDERS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(caseDetails.getId());
-        log.info("Invoking contested {} mid event callback for Case ID: {}", callbackRequest.getEventType(),
-            caseId);
+        log.info("Invoking contested {} mid event callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
 
         FinremCaseData finremCaseData = caseDetails.getData();
 
         List<String> errors = new ArrayList<>();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
-        boolean hasNonWordDocument;
-        String error = "You must upload Microsoft Word documents. Document names should clearly reflect the party name, "
-            + "the type of hearing and the date of the hearing.";
 
         String typeOfDraftOrder = draftOrdersWrapper.getTypeOfDraftOrder();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
-                .orElse(List.of())
-                .stream()
-                .map(UploadSuggestedDraftOrderCollection::getValue)
-                .filter(Objects::nonNull)
-                .map(UploadedDraftOrder::getSuggestedDraftOrderDocument)
-                .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
-            if (hasNonWordDocument) {
-                errors.add(error);
+            if (isSuggestedDraftOrderHavingNonWordDocument(draftOrdersWrapper)) {
+                errors.add(HAVING_NON_WORD_DOCUMENT_IN_ORDER_OR_PSA_ERROR_MESSAGE);
+            }
+            if (isSuggestedDraftOrderAdditionalAttachingHavingNonPdfDocument(draftOrdersWrapper)) {
+                errors.add(HAVING_WORD_DOCUMENT_IN_ADDITIONAL_ATTACHMENTS_ERROR_MESSAGE);
             }
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
-            hasNonWordDocument = ofNullable(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
-                .orElse(List.of())
-                .stream()
-                .map(UploadAgreedDraftOrderCollection::getValue)
-                .filter(Objects::nonNull)
-                .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder::getAgreedDraftOrderDocument)
-                .anyMatch(document -> document != null && !FileUtils.isWordDocument(document));
-            if (hasNonWordDocument) {
-                errors.add(error);
+            if (isAgreedDraftOrderHavingNonWordDocument(draftOrdersWrapper)) {
+                errors.add(HAVING_NON_WORD_DOCUMENT_IN_ORDER_OR_PSA_ERROR_MESSAGE);
+            }
+            if (isAgreedDraftOrderAdditionalAttachingHavingNonPdfDocument(draftOrdersWrapper)) {
+                errors.add(HAVING_WORD_DOCUMENT_IN_ADDITIONAL_ATTACHMENTS_ERROR_MESSAGE);
             }
         }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).errors(errors).build();
     }
 
+    private boolean isSuggestedDraftOrderHavingNonWordDocument(DraftOrdersWrapper draftOrdersWrapper) {
+        return emptyIfNull(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
+            .stream()
+            .map(UploadSuggestedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(UploadedDraftOrder::getSuggestedDraftOrderDocument)
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isWordDocument(document));
+    }
+
+    private boolean isAgreedDraftOrderHavingNonWordDocument(DraftOrdersWrapper draftOrdersWrapper) {
+        return emptyIfNull(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
+            .stream()
+            .map(UploadAgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .map(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder::getAgreedDraftOrderDocument)
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isWordDocument(document));
+    }
+
+    private boolean isSuggestedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
+        return emptyIfNull(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
+            .stream()
+            .map(UploadSuggestedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .flatMap(order -> emptyIfNull(order.getSuggestedDraftOrderAdditionalDocumentsCollection()).stream())
+            .map(SuggestedDraftOrderAdditionalDocumentsCollection::getValue)
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isPdf(document));
+    }
+
+    private boolean isAgreedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
+        return emptyIfNull(draftOrdersWrapper.getUploadAgreedDraftOrder().getUploadAgreedDraftOrderCollection())
+            .stream()
+            .map(UploadAgreedDraftOrderCollection::getValue)
+            .filter(Objects::nonNull)
+            .flatMap(order -> emptyIfNull(order.getAgreedDraftOrderAdditionalDocumentsCollection()).stream())
+            .map(AgreedDraftOrderAdditionalDocumentsCollection::getValue)
+            .filter(Objects::nonNull)
+            .anyMatch(document -> !FileUtils.isPdf(document));
+    }
 }
