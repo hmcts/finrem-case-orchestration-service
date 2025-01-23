@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJud
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RefugeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
@@ -123,7 +124,6 @@ public class FinremCaseData implements HasCaseDocument {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
-    private CaseDocument additionalDocument;
     private List<DocumentCollection> additionalCicDocuments;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
@@ -288,8 +288,9 @@ public class FinremCaseData implements HasCaseDocument {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private List<HearingUploadBundleCollection> fdrHearingBundleCollections;
-    private SendOrderEventPostStateOption sendOrderPostStateOption;
-    private DynamicMultiSelectList ordersToShare;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private SendOrderWrapper sendOrderWrapper;
     private DynamicMultiSelectList partiesOnCase;
     private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
@@ -1027,5 +1028,13 @@ public class FinremCaseData implements HasCaseDocument {
             listForHearingWrapper = new ListForHearingWrapper();
         }
         return listForHearingWrapper;
+    }
+
+    @JsonIgnore
+    public SendOrderWrapper getSendOrderWrapper() {
+        if (sendOrderWrapper == null) {
+            this.sendOrderWrapper = new SendOrderWrapper();
+        }
+        return sendOrderWrapper;
     }
 }

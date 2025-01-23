@@ -10,14 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UuidCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.RefusalOrderInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
@@ -81,8 +82,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     @JsonProperty("approveOrdersConfirmationBody")
     private String approveOrdersConfirmationBody;
   
-    @JsonProperty("refusalOrderInstruction")
-    private RefusalOrderInstruction refusalOrderInstruction;
+    @JsonProperty("extraReportFieldsInput")
+    private ExtraReportFieldsInput extraReportFieldsInput;
 
     private String generatedOrderReason;
 
@@ -94,6 +95,12 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private String generatedOrderJudgeName;
 
     private List<UuidCollection> refusalOrderIdsToBeSent;
+
+    private List<DirectionOrderCollection> unprocessedApprovedDocuments;
+
+    private YesOrNo isLegacyApprovedOrderPresent;
+
+    private YesOrNo isUnprocessedApprovedDocumentPresent;
 
     public void appendAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
         if (agreedDraftOrderCollection == null) {

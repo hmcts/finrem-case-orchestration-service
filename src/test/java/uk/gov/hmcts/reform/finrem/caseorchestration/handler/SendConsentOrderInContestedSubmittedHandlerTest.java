@@ -103,7 +103,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
     }
 
     private void setupData(CaseDetails caseDetails) {
@@ -199,7 +199,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
         FinremCaseData finremData = finremCaseDetails.getData();
         finremData.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
-        finremData.setAdditionalDocument(caseDocument());
+        finremData.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         finremData.setContactDetailsWrapper(ContactDetailsWrapper.builder().respondentSolicitorEmail("res@sol.com").build());
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
