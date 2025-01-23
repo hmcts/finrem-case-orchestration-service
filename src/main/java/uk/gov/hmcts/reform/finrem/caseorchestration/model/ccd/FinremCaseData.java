@@ -291,6 +291,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private SendOrderWrapper sendOrderWrapper;
+    private DynamicMultiSelectList partiesOnCase;
     private List<ConfidentialUploadedDocumentData> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
@@ -932,6 +933,20 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CourtList getCourtListIdOrDefault(CourtList courtList) {
         return Optional.ofNullable(courtList).orElse(new DefaultCourt());
+    }
+
+    @JsonIgnore
+    public List<String> getSelectedParties() {
+        DynamicMultiSelectList parties = this.getPartiesOnCase();
+        return this.getSelectedParties(parties);
+    }
+
+    @JsonIgnore
+    public List<String> getSelectedParties(DynamicMultiSelectList parties) {
+        if (parties == null) {
+            return List.of();
+        }
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 
     @JsonIgnore

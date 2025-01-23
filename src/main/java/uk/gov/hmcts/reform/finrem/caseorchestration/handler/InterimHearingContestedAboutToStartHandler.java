@@ -53,7 +53,7 @@ public class InterimHearingContestedAboutToStartHandler extends FinremCallbackHa
         migrateLegacyFields(finremCaseData);
 
         DynamicMultiSelectList allActivePartyList = partyService.getAllActivePartyList(caseDetails);
-        finremCaseData.getSendOrderWrapper().setPartiesOnCase(allActivePartyList);
+        finremCaseData.setPartiesOnCase(allActivePartyList);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
