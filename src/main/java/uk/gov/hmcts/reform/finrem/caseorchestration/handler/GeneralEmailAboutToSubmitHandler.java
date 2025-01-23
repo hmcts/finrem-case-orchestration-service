@@ -68,7 +68,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
             generalEmailCategoriser.categorise(caseDetails.getData());
         }
 
+        caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
-
 }
