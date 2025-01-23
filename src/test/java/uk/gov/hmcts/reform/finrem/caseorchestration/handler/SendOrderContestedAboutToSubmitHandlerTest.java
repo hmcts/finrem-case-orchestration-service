@@ -179,7 +179,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected2).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
@@ -190,7 +189,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
@@ -224,7 +223,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected2).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
@@ -236,7 +234,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
@@ -253,7 +251,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
-        verify(generalOrderService, never()).isSelectedOrderMatches(eq(selectedDocs), any(ContestedGeneralOrder.class));
+        verify(generalOrderService, never()).isSelectedOrderMatches(eq(List.of(selected1, selected2)), any(ContestedGeneralOrder.class));
     }
 
     @Test
@@ -272,7 +270,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 OrderToShareCollection.builder().value(selected2).build()
             ))
             .build();
-        List<OrderToShare> selectedDocs = List.of(selected1, selected2);
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
@@ -282,7 +279,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
         // below mocking is used for the second invocation on the event where the selectedDocs is cleared in the 1st about-to-submit logic.
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of())).thenReturn(Pair.of(List.of(), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
