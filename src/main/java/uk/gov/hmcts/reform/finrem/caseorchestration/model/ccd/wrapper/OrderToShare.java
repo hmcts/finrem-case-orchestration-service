@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -20,7 +21,7 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrderToShare {
+public class OrderToShare implements DocumentIdProvider {
 
     private String documentId;
 
@@ -37,6 +38,10 @@ public class OrderToShare {
     @JsonIgnore
     public YesOrNo getHasAttachment() {
         return YesOrNo.forValue(ofNullable(attachmentsToShare).isEmpty());
+    }
+
+    public boolean shouldIncludeSupportingDocuments() {
+        return CollectionUtils.isNotEmpty(includeSupportingDocument);
     }
 
 }

@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class FinalisedOrder implements HasCaseDocument {
+public class FinalisedOrder implements HasCaseDocument, WithAttahments {
 
     private CaseDocument finalisedDocument;
 

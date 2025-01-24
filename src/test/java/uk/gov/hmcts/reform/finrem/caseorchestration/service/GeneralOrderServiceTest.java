@@ -32,12 +32,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
@@ -739,35 +743,67 @@ class GeneralOrderServiceTest {
         CaseDocument expectedCaseDocument4 = caseDocument(
             "http://document-management-store:8080/documents/33333333-c524-4614-86e5-c569f82c718d",
             "TEST4.pdf");
+        CaseDocument expectedCaseDocument5 = caseDocument(
+            "http://document-management-store:8080/documents/2222222a-c524-4614-86e5-c569f82c718d",
+            "TEST5.pdf");
+        CaseDocument expectedAttachment1 = caseDocument(
+            "http://document-management-store:8080/documents/44444444-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_5.pdf");
+        CaseDocument expectedAttachment2 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_6.pdf");
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
                 .draftOrdersWrapper(DraftOrdersWrapper.builder()
                     .finalisedOrdersCollection(List.of(
                         FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument1).build()).build(),
-                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2).build()).build()
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2)
+                            .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment1).build())).build()).build()
                     ))
                     .agreedDraftOrderCollection(List.of(
-                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment2).build()))
                                 .pensionSharingAnnex(expectedCaseDocument3)
                                 .orderStatus(PROCESSED)
-                            .build()).build(),
-                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
-                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/10000000-c524-4614-86e5-c569f82c718d",
-                                "APPROVED_BY_JUDGE.pdf"))
-                            .orderStatus(APPROVED_BY_JUDGE)
-                            .build()).build(),
-                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
-                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/20000000-c524-4614-86e5-c569f82c718d",
-                                "REFUSED.pdf"))
-                            .orderStatus(REFUSED)
-                            .build()).build(),
-                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
-                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/30000000-c524-4614-86e5-c569f82c718d",
-                                "TO_BE_REVIEWED.pdf"))
-                            .orderStatus(TO_BE_REVIEWED)
-                            .build()).build()
+                                .build())
+                            .build(), // agreedDraftOrder with attachment selected
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(expectedCaseDocument5)
+                                .orderStatus(PROCESSED)
+                                .build())
+                            .build(), // agreedDraftOrder without attachment
+
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(caseDocument(
+                                    "http://document-management-store:8080/documents/10000000-c524-4614-86e5-c569f82c718d",
+                                    "APPROVED_BY_JUDGE.pdf"))
+                                .orderStatus(APPROVED_BY_JUDGE)
+                                .build())
+                            .build(), // non processed should be ignored.
+
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(caseDocument(
+                                    "http://document-management-store:8080/documents/20000000-c524-4614-86e5-c569f82c718d",
+                                    "REFUSED.pdf"))
+                                .orderStatus(REFUSED)
+                                .build())
+                            .build(), // non processed should be ignored.
+
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(caseDocument(
+                                    "http://document-management-store:8080/documents/30000000-c524-4614-86e5-c569f82c718d",
+                                    "TO_BE_REVIEWED.pdf"))
+                                .orderStatus(TO_BE_REVIEWED)
+                                .build())
+                            .build() // non processed should be ignored.
                     ))
+
                     .build())
                 .uploadHearingOrder(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(expectedCaseDocument4).build()).build()
@@ -778,8 +814,29 @@ class GeneralOrderServiceTest {
         Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
             List.of(
                 OrderToShare.builder().documentToShare(YesOrNo.YES).documentId("00000000-c524-4614-86e5-c569f82c718d").build(),
-                OrderToShare.builder().documentToShare(YesOrNo.YES).documentId("11111111-c524-4614-86e5-c569f82c718d").build(),
-                OrderToShare.builder().documentToShare(YesOrNo.YES).documentId("22222222-c524-4614-86e5-c569f82c718d").build(),
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("11111111-c524-4614-86e5-c569f82c718d")
+                    .includeSupportingDocument(List.of(Yes.YES))
+                    .attachmentsToShare(List.of(
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("44444444-c524-4614-86e5-c569f82c718d").build())
+                            .build()
+                    ))
+                    .build(),
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("22222222-c524-4614-86e5-c569f82c718d")
+                    .includeSupportingDocument(List.of(Yes.YES))
+                    .attachmentsToShare(List.of(
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("55555555-c524-4614-86e5-c569f82c718d").build())
+                            .build()
+                    ))
+                    .build(),
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("2222222a-c524-4614-86e5-c569f82c718d")
+                    .build(),
                 OrderToShare.builder().documentToShare(YesOrNo.YES).documentId("33333333-c524-4614-86e5-c569f82c718d").build(),
                 OrderToShare.builder().documentToShare(YesOrNo.NO).documentId("99999999-c524-4614-86e5-c569f82c718d").build()
             ));
@@ -787,7 +844,10 @@ class GeneralOrderServiceTest {
         assertThat(actual.getLeft())
             .containsExactly(expectedCaseDocument4);
         assertThat(actual.getRight())
-            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3);
+            .containsExactly(expectedCaseDocument1,
+                expectedCaseDocument2, expectedAttachment1,
+                expectedCaseDocument3, expectedAttachment2,
+                expectedCaseDocument5);
     }
 
     private OrdersToSend toOrdersToSend(CaseDocument caseDocument) {
