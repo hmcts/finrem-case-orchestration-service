@@ -12,7 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
@@ -37,13 +37,13 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
     private final String someServiceAuthToken = "someServiceAuthToken";
 
-    @MockBean
+    @MockitoBean
     IdamService idamService;
 
     @Autowired
     PrdOrganisationService prdOrganisationService;
 
-    @MockBean
+    @MockitoBean
     PrdOrganisationConfiguration prdOrganisationConfiguration;
 
     @Rule

@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -32,16 +32,16 @@ public class OrganisationApiFindUserByEmailContractTest extends BaseTest {
     private static final String USER_EMAIL_HEADER = "UserEmail";
     private static final String TEST_USER_EMAIL = "test@example.com";
 
-    @MockBean
+    @MockitoBean
     SystemUserService systemUserService;
 
     @Autowired
     PrdOrganisationService prdOrganisationService;
 
-    @MockBean
+    @MockitoBean
     IdamService idamService;
 
-    @MockBean
+    @MockitoBean
     PrdOrganisationConfiguration prdOrganisationConfiguration;
 
     @Rule

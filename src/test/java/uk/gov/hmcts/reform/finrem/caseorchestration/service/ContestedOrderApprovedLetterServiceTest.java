@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -48,13 +48,13 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
     @Autowired
     private DocumentConfiguration documentConfiguration;
 
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
 
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
-    @MockBean
+    @MockitoBean
     private FinremCaseDetailsMapper mapper;
 
     @Test

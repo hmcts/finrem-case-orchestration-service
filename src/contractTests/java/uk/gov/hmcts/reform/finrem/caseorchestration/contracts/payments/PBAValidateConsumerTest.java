@@ -12,9 +12,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -40,7 +40,7 @@ public class PBAValidateConsumerTest extends BaseTest {
     ObjectMapper objectMapper;
     @Autowired
     PBAValidationClient pbaValidationClient;
-    @MockBean
+    @MockitoBean
     IdamService idamServiceMock;
 
     @Rule
