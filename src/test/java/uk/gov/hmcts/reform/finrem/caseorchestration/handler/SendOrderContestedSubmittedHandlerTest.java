@@ -236,7 +236,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
 
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));

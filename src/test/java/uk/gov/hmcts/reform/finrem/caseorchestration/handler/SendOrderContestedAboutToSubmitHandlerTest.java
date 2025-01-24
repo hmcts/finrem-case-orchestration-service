@@ -179,7 +179,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -202,7 +202,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getAdditionalDocument());
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
 
@@ -230,7 +230,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
@@ -253,7 +253,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getAdditionalDocument());
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(generalOrderService, never()).isSelectedOrderMatches(any(DynamicMultiSelectList.class), any(ContestedGeneralOrder.class));
@@ -282,7 +282,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
         data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
