@@ -31,6 +31,11 @@ public class UploadedDraftOrderCategoriser extends DocumentCategoriser {
     private void setCategoryIfAbsent(DraftDirectionOrder order, DocumentCategory category) {
         if (order != null && order.getUploadDraftDocument() != null && order.getUploadDraftDocument().getCategoryId() == null) {
             order.getUploadDraftDocument().setCategoryId(category.getDocumentCategoryId());
+
+            Optional.ofNullable(order.getJudgeApprovedOrderAdditionalDocumentsCollection())
+                .ifPresent(additionalDocuments -> additionalDocuments.forEach(document ->
+                    document.getValue().setCategoryId(category.getDocumentCategoryId())
+                ));
         }
     }
 }
