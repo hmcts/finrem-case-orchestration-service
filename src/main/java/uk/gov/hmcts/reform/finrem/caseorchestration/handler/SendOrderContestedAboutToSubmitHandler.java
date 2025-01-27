@@ -120,15 +120,17 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<CaseDocument> newProcessedOrders = hearingOrders.getRight();
 
             if (hasApprovedOrdersToBeSent(legacyHearingOrders, newProcessedOrders)) {
-                // below method also adds the cover sheet even if legacyHearingOrders is empty.
-                shareAndSendHearingDocuments(caseDetails, legacyHearingOrders, parties, printOrderCollection, userAuthorisation);
-                log.info("Sending for stamp final order on Case ID: {}", caseDetails.getId());
-                // stamping legacy approved orders and add it to legacy finalised collection
-                legacyHearingOrders.forEach(orderToStamp -> {
-                    log.info("StampFinalOrder {} for Case ID: {}, ", orderToStamp, caseId);
-                    stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
-                });
-
+                // Add order approved cover letter and add orders to printOrderCollection
+                shareAndSendHearingDocuments(caseDetails, concat(legacyHearingOrders.stream(), newProcessedOrders.stream()).toList(),
+                    parties, printOrderCollection, userAuthorisation);
+                if (!legacyHearingOrders.isEmpty()) {
+                    log.info("Going to stamp stamp legacy orders on Case ID: {}", caseDetails.getId());
+                    // stamping legacy approved orders and add it to legacy finalised collection
+                    legacyHearingOrders.forEach(orderToStamp -> {
+                        log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, caseId);
+                        stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
+                    });
+                }
                 // handling processed orders
                 moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
             }
