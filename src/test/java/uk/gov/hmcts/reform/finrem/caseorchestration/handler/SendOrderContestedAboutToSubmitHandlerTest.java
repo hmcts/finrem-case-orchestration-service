@@ -203,7 +203,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
+        assertClearTempFields(caseData);
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
     }
@@ -248,7 +248,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
+        assertClearTempFields(caseData);
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(generalOrderService, never()).isSelectedOrderMatches(eq(List.of(selected1, selected2)), any(ContestedGeneralOrder.class));
@@ -720,5 +720,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
                 .build()).build());
+    }
+
+    private void assertClearTempFields(FinremCaseData caseData) {
+        assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
+        assertThat(caseData)
+            .extracting(FinremCaseData::getSendOrderWrapper)
+            .extracting(SendOrderWrapper::getOrdersToSend)
+            .extracting(OrdersToSend::getValue)
+            .isNull();
     }
 }
