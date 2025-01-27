@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -80,12 +81,14 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
         List<DraftDirectionOrderCollection> directionOrderCollection = caseData.getDraftDirectionWrapper().getDraftDirectionOrderCollection();
 
-        directionOrderCollection.forEach(order -> order.getValue().getJudgeApprovedOrderAdditionalDocumentsCollection().forEach(additionalDoc -> {
-            CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
-                additionalDoc.getValue(), authorisation,
-                String.valueOf(caseDetails.getId()));
+        directionOrderCollection.stream().map(order -> order.getValue().getJudgeApprovedOrderAdditionalDocumentsCollection())
+            .filter(CollectionUtils::isNotEmpty).forEach(additionalDocs -> additionalDocs.forEach(additionalDoc -> {
+                CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
+                    additionalDoc.getValue(), authorisation,
+                    String.valueOf(caseDetails.getId()));
 
-            additionalDoc.setValue(documentPdf);
-        }));
+                additionalDoc.setValue(documentPdf);
+            }
+        ));
     }
 }
