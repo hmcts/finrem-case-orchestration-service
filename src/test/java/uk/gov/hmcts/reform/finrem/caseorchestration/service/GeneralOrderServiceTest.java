@@ -417,106 +417,6 @@ class GeneralOrderServiceTest {
         assertThat(documentList.getLeft()).as("One document available to share with other parties").hasSize(1);
     }
 
-    private DynamicMultiSelectListElement getDynamicElementList(String role) {
-        return DynamicMultiSelectListElement.builder()
-            .code(role)
-            .label(role)
-            .build();
-    }
-
-    private Map<String, Object> convertToMap(Object object) {
-        return new ObjectMapper().convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    private CaseDetails consentedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private CaseDetails contestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private FinremCaseDetails contestedFinremCaseDetails() throws Exception {
-        return readRequestJson("/fixtures/general-order-contested.json").getCaseDetails();
-    }
-
-    private FinremCaseDetails consentedInContestedFinremCaseDetails() throws Exception {
-        return readRequestJson("/fixtures/general-order-consented-in-contested.json").getCaseDetails();
-    }
-
-    private FinremCaseDetails consentedFinremCaseDetails() throws Exception {
-        return readRequestJson("/fixtures/general-order-consented.json").getCaseDetails();
-    }
-
-    private FinremCallbackRequest readRequestJson(String filename) throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(filename)) {
-            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
-        }
-    }
-
-    private static void doCaseDocumentAssert(CaseDocument result) {
-        assertEquals(FILE_NAME, result.getDocumentFilename());
-        assertEquals(DOC_URL, result.getDocumentUrl());
-        assertEquals(BINARY_URL, result.getDocumentBinaryUrl());
-    }
-
-    private CaseDetails consentedInContestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented-in-contested.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private void verifyAdditionalFieldsConsented() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq("FL-FRM-GOR-ENG-00484.docx"),
-                argThat(fileName -> fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf")));
-
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertEquals("DD12D12345", data.get("DivorceCaseNumber"));
-        assertEquals("Consented Applicant Name", data.get("ApplicantName"));
-        assertEquals("Consented Respondent Name", data.get("RespondentName"));
-        assertEquals("SITTING in private", data.get("GeneralOrderCourt"));
-        assertEquals("His Honour Judge Consented", data.get("GeneralOrderJudgeDetails"));
-        assertEquals("Consented Recitals", data.get("GeneralOrderRecitals"));
-        assertEquals("2020-01-01", data.get("GeneralOrderDate"));
-        assertEquals("Test is dummy text for consented", data.get("GeneralOrderBodyText"));
-        assertEquals("Sitting in the Family Court", data.get("GeneralOrderHeaderOne"));
-    }
-
-    private void verifyAdditionalFieldsContested() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq("FL-FRM-GOR-ENG-00484.docx"),
-                argThat(fileName ->
-                    fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf"))
-            );
-
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
-        assertEquals("DD98D76543", data.get("DivorceCaseNumber"));
-        assertEquals("Contested Applicant Name", data.get("ApplicantName"));
-        assertEquals("Contested Respondent Name", data.get("RespondentName"));
-        assertEquals("Nottingham County Court and Family Court", data.get("GeneralOrderCourt"));
-        assertEquals("Her Honour Judge Contested", data.get("GeneralOrderJudgeDetails"));
-        assertEquals("Contested Recitals", data.get("GeneralOrderRecitals"));
-        assertEquals("2020-06-01", data.get("GeneralOrderDate"));
-        assertEquals("Test is dummy text for contested", data.get("GeneralOrderBodyText"));
-        assertEquals("In the Family Court", data.get("GeneralOrderHeaderOne"));
-        assertEquals("sitting in the", data.get("GeneralOrderHeaderTwo"));
-        assertEquals("SITTING AT the Family Court at the ", data.get("GeneralOrderCourtSitting"));
-        Map<String, Object> court = convertToMap(data.get("courtDetails"));
-
-        assertEquals("Nottingham County Court And Family Court", court.get("courtName"));
-        assertEquals("60 Canal Street, Nottingham NG1 7EJ", court.get("courtAddress"));
-        assertEquals("0115 910 3504", court.get("phoneNumber"));
-        assertEquals("FRCNottingham@justice.gov.uk", court.get("email"));
-    }
-
     @Test
     void isSelectedGeneralOrderMatchesReturnTrue() {
         List<OrderToShare> selectList = new ArrayList<>();
@@ -524,12 +424,6 @@ class GeneralOrderServiceTest {
         ContestedGeneralOrder contestedGeneralOrder
             = ContestedGeneralOrder.builder().additionalDocument(caseDocument()).build();
         assertTrue(generalOrderService.isSelectedOrderMatches(selectList, contestedGeneralOrder));
-    }
-
-    private String getDocumentId(CaseDocument caseDocument) {
-        // TODO move this block after all tests
-        String documentUrl = caseDocument.getDocumentUrl();
-        return caseDocument.getDocumentUrl().substring(documentUrl.lastIndexOf("/") + 1);
     }
 
     @Test
@@ -573,121 +467,6 @@ class GeneralOrderServiceTest {
             generalOrderService.isOrderSharedWithIntervener3(caseDetails));
         assertEquals(data.getIntervenerFour().getIntervenerCorrespondenceEnabled(),
             generalOrderService.isOrderSharedWithIntervener4(caseDetails));
-    }
-
-    private DynamicMultiSelectList buildDynamicSelectableParties() {
-        // TODO move this block after all tests
-        return DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(CaseRole.APP_SOLICITOR.getCcdCode())
-                .label(CaseRole.APP_SOLICITOR.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(CaseRole.APP_SOLICITOR.getCcdCode())
-                .label(CaseRole.APP_SOLICITOR.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
-                .build(), DynamicMultiSelectListElement.builder()
-                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
-                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
-                .build()))
-            .build();
-    }
-
-    private List<ContestedGeneralOrderCollection> getGeneralOrderCollection() {
-        // TODO move this block after all tests
-        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
-            .builder()
-            .dateOfOrder(LocalDate.of(2002, 2, 5))
-            .judge("Moj")
-            .generalOrderText("general order")
-            .additionalDocument(caseDocument())
-            .build();
-
-        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
-        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
-        collections.add(collection);
-        return collections;
-    }
-
-    private List<ContestedGeneralOrderCollection> getGeneralOrderCollectionNoAdditionalDocument() {
-        // TODO move this block after all tests
-        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
-            .builder()
-            .dateOfOrder(LocalDate.of(2002, 2, 5))
-            .judge("Moj")
-            .generalOrderText("general order")
-            .build();
-
-        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
-        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
-        collections.add(collection);
-        return collections;
-    }
-
-    @Test
-    void shouldPopulateProcessedApprovedDocumentsToOrdersToShareList() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
-                .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                    .agreedDraftOrderCollection(List.of(
-                        AgreedDraftOrderCollection.builder()
-                            .value(AgreedDraftOrder.builder()
-                                .orderStatus(PROCESSED)
-                                .draftOrder(caseDocument("https://fakeurl/documentUrl", "processedFileName.pdf", "binaryUrl")).build())
-                            .build(),
-                        agreedDraftOrderCollection(TO_BE_REVIEWED),
-                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
-                        agreedDraftOrderCollection(REFUSED)
-                    ))
-                    .build())
-                .build())
-            .build();
-        generalOrderService.setOrderList(caseDetails);
-
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
-            .as("The processed order should appear in ordersToSend.")
-            .containsExactly(OrderToShareCollection.builder()
-                .value(OrderToShare.builder()
-                    .documentId("documentUrl")
-                    .documentName("Approved order - processedFileName.pdf")
-                    .hasSupportingDocuments(YesOrNo.NO)
-                    .attachmentsToShare(List.of())
-                    .build())
-                .build());
-    }
-
-    private static AgreedDraftOrderCollection agreedDraftOrderCollection(OrderStatus orderStatus) {
-        // TODO move this block after all tests
-        return AgreedDraftOrderCollection.builder()
-            .value(AgreedDraftOrder.builder().orderStatus(orderStatus).draftOrder(caseDocument()).build())
-            .build();
     }
 
     @Test
@@ -854,6 +633,222 @@ class GeneralOrderServiceTest {
                 expectedCaseDocument2, expectedAttachment1,
                 expectedCaseDocument3, expectedAttachment2,
                 expectedCaseDocument5);
+    }
+
+    @Test
+    void shouldPopulateProcessedApprovedDocumentsToOrdersToShareList() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .orderStatus(PROCESSED)
+                                .draftOrder(caseDocument("https://fakeurl/documentUrl", "processedFileName.pdf", "binaryUrl")).build())
+                            .build(),
+                        agreedDraftOrderCollection(TO_BE_REVIEWED),
+                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
+                        agreedDraftOrderCollection(REFUSED)
+                    ))
+                    .build())
+                .build())
+            .build();
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
+            .as("The processed order should appear in ordersToSend.")
+            .containsExactly(OrderToShareCollection.builder()
+                .value(OrderToShare.builder()
+                    .documentId("documentUrl")
+                    .documentName("Approved order - processedFileName.pdf")
+                    .hasSupportingDocuments(YesOrNo.NO)
+                    .attachmentsToShare(List.of())
+                    .build())
+                .build());
+    }
+
+    private DynamicMultiSelectListElement getDynamicElementList(String role) {
+        return DynamicMultiSelectListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+    }
+
+    private Map<String, Object> convertToMap(Object object) {
+        return new ObjectMapper().convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private CaseDetails consentedCaseDetails() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails contestedCaseDetails() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private FinremCaseDetails contestedFinremCaseDetails() throws Exception {
+        return readRequestJson("/fixtures/general-order-contested.json").getCaseDetails();
+    }
+
+    private FinremCaseDetails consentedInContestedFinremCaseDetails() throws Exception {
+        return readRequestJson("/fixtures/general-order-consented-in-contested.json").getCaseDetails();
+    }
+
+    private FinremCaseDetails consentedFinremCaseDetails() throws Exception {
+        return readRequestJson("/fixtures/general-order-consented.json").getCaseDetails();
+    }
+
+    private FinremCallbackRequest readRequestJson(String filename) throws IOException {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(filename)) {
+            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class);
+        }
+    }
+
+    private static void doCaseDocumentAssert(CaseDocument result) {
+        assertEquals(FILE_NAME, result.getDocumentFilename());
+        assertEquals(DOC_URL, result.getDocumentUrl());
+        assertEquals(BINARY_URL, result.getDocumentBinaryUrl());
+    }
+
+    private CaseDetails consentedInContestedCaseDetails() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented-in-contested.json")) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private void verifyAdditionalFieldsConsented() {
+        verify(genericDocumentService, times(1))
+            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+                eq("FL-FRM-GOR-ENG-00484.docx"),
+                argThat(fileName -> fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf")));
+
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertEquals("DD12D12345", data.get("DivorceCaseNumber"));
+        assertEquals("Consented Applicant Name", data.get("ApplicantName"));
+        assertEquals("Consented Respondent Name", data.get("RespondentName"));
+        assertEquals("SITTING in private", data.get("GeneralOrderCourt"));
+        assertEquals("His Honour Judge Consented", data.get("GeneralOrderJudgeDetails"));
+        assertEquals("Consented Recitals", data.get("GeneralOrderRecitals"));
+        assertEquals("2020-01-01", data.get("GeneralOrderDate"));
+        assertEquals("Test is dummy text for consented", data.get("GeneralOrderBodyText"));
+        assertEquals("Sitting in the Family Court", data.get("GeneralOrderHeaderOne"));
+    }
+
+    private void verifyAdditionalFieldsContested() {
+        verify(genericDocumentService, times(1))
+            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+                eq("FL-FRM-GOR-ENG-00484.docx"),
+                argThat(fileName ->
+                    fileName.matches("generalOrder-\\d{8}-\\d{6}\\.pdf"))
+            );
+
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertEquals("DD98D76543", data.get("DivorceCaseNumber"));
+        assertEquals("Contested Applicant Name", data.get("ApplicantName"));
+        assertEquals("Contested Respondent Name", data.get("RespondentName"));
+        assertEquals("Nottingham County Court and Family Court", data.get("GeneralOrderCourt"));
+        assertEquals("Her Honour Judge Contested", data.get("GeneralOrderJudgeDetails"));
+        assertEquals("Contested Recitals", data.get("GeneralOrderRecitals"));
+        assertEquals("2020-06-01", data.get("GeneralOrderDate"));
+        assertEquals("Test is dummy text for contested", data.get("GeneralOrderBodyText"));
+        assertEquals("In the Family Court", data.get("GeneralOrderHeaderOne"));
+        assertEquals("sitting in the", data.get("GeneralOrderHeaderTwo"));
+        assertEquals("SITTING AT the Family Court at the ", data.get("GeneralOrderCourtSitting"));
+        Map<String, Object> court = convertToMap(data.get("courtDetails"));
+
+        assertEquals("Nottingham County Court And Family Court", court.get("courtName"));
+        assertEquals("60 Canal Street, Nottingham NG1 7EJ", court.get("courtAddress"));
+        assertEquals("0115 910 3504", court.get("phoneNumber"));
+        assertEquals("FRCNottingham@justice.gov.uk", court.get("email"));
+    }
+
+    private String getDocumentId(CaseDocument caseDocument) {
+        String documentUrl = caseDocument.getDocumentUrl();
+        return caseDocument.getDocumentUrl().substring(documentUrl.lastIndexOf("/") + 1);
+    }
+
+    private DynamicMultiSelectList buildDynamicSelectableParties() {
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(CaseRole.APP_SOLICITOR.getCcdCode())
+                .label(CaseRole.APP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .label(CaseRole.RESP_SOLICITOR.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_1.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_2.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_3.getCcdCode())
+                .build(), DynamicMultiSelectListElement.builder()
+                .code(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .label(CaseRole.INTVR_SOLICITOR_4.getCcdCode())
+                .build()))
+            .build();
+    }
+
+    private List<ContestedGeneralOrderCollection> getGeneralOrderCollection() {
+        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(LocalDate.of(2002, 2, 5))
+            .judge("Moj")
+            .generalOrderText("general order")
+            .additionalDocument(caseDocument())
+            .build();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+        return collections;
+    }
+
+    private List<ContestedGeneralOrderCollection> getGeneralOrderCollectionNoAdditionalDocument() {
+        ContestedGeneralOrder generalOrder = ContestedGeneralOrder
+            .builder()
+            .dateOfOrder(LocalDate.of(2002, 2, 5))
+            .judge("Moj")
+            .generalOrderText("general order")
+            .build();
+
+        ContestedGeneralOrderCollection collection = ContestedGeneralOrderCollection.builder().value(generalOrder).build();
+        List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
+        collections.add(collection);
+        return collections;
+    }
+
+    private static AgreedDraftOrderCollection agreedDraftOrderCollection(OrderStatus orderStatus) {
+        return AgreedDraftOrderCollection.builder()
+            .value(AgreedDraftOrder.builder().orderStatus(orderStatus).draftOrder(caseDocument()).build())
+            .build();
     }
 
     private OrdersToSend toOrdersToSend(CaseDocument caseDocument) {
