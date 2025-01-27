@@ -293,6 +293,7 @@ class GeneralOrderServiceTest {
         data.setUploadHearingOrder(hearingOrderDocuments);
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
+        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("One document available to share with other parties").hasSize(1);
     }
 
@@ -305,6 +306,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
+        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("Not document available to share with other parties").isEmpty();
     }
 
@@ -320,6 +322,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
+        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("Not document available to share with other parties").isEmpty();
     }
 
@@ -338,6 +341,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
+        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("One document available to share with other parties").hasSize(2);
     }
 
@@ -666,8 +670,9 @@ class GeneralOrderServiceTest {
             .build();
         generalOrderService.setOrderList(caseDetails);
 
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
-            .as("The processed order should appear in ordersToShare.")
+            .as("The processed order should appear in ordersToSend.")
             .containsExactly(OrderToShareCollection.builder()
                 .value(OrderToShare.builder()
                     .documentId("documentUrl")
@@ -708,6 +713,7 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
         assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
             .as("The finalised orders should appear in ordersToShare.")
             .containsExactly(

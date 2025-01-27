@@ -23,11 +23,4 @@ public class SendOrderWrapper {
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
 
-    public OrdersToSend getOrdersToSend() {
-        if (this.ordersToSend == null) {
-            this.ordersToSend = new OrdersToSend();
-        }
-        return this.ordersToSend;
-    }
-
 }

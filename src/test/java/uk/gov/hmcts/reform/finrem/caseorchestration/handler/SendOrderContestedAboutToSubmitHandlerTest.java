@@ -727,7 +727,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(caseData)
             .extracting(FinremCaseData::getSendOrderWrapper)
             .extracting(SendOrderWrapper::getOrdersToSend)
-            .extracting(OrdersToSend::getValue)
             .isNull();
     }
 }

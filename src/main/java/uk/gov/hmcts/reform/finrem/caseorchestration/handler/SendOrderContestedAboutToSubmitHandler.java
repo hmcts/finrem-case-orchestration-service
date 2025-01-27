@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -379,7 +380,10 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private List<OrderToShare> getSelectedOrders(SendOrderWrapper sendOrderWrapper) {
-        return emptyIfNull(sendOrderWrapper.getOrdersToSend().getValue()).stream().map(OrderToShareCollection::getValue)
+        return emptyIfNull(
+            Optional.ofNullable(sendOrderWrapper.getOrdersToSend()).orElse(OrdersToSend.builder().build()).getValue()
+        ).stream()
+            .map(OrderToShareCollection::getValue)
             .filter(orderToShare -> YesOrNo.isYes(orderToShare.getDocumentToShare()))
             .toList();
     }

@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DocumentId
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
@@ -252,7 +253,10 @@ public class GeneralOrderService {
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
         populateFinalisedOrderToOrdersToShare(data, orderToShareCollection);
-        
+
+        if (data.getSendOrderWrapper().getOrdersToSend() == null) {
+            data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder().build());
+        }
         data.getSendOrderWrapper().getOrdersToSend().setValue(orderToShareCollection);
     }
 

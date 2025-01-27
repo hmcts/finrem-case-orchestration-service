@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Attachment
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
@@ -44,7 +46,8 @@ public class SendOrderContestedMidHandler extends FinremCallbackHandler {
 
         List<String> errors = new ArrayList<>();
 
-        List<OrderToShareCollection> inputs = emptyIfNull(caseData.getSendOrderWrapper().getOrdersToSend().getValue());
+        List<OrderToShareCollection> inputs = emptyIfNull(Optional.ofNullable(caseData.getSendOrderWrapper().getOrdersToSend())
+            .orElse(OrdersToSend.builder().build()).getValue());
         if (nonSelectedOrder(inputs)) {
             errors.add("You must select at least one order.");
         } else {
