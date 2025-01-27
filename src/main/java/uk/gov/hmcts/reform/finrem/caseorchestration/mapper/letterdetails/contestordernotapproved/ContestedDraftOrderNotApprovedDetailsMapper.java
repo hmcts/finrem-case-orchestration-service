@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestordernotapproved;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
@@ -23,6 +24,7 @@ import static java.util.Optional.ofNullable;
  * Repurpose this mapper class to transform FinremCaseDetails and court list information
  * into a document template details object specific to refusal order scenario.
  */
+@Slf4j
 @Component
 public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterDetailsMapper {
 
@@ -51,7 +53,7 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
             .applicantName(caseDetails.getData().getFullApplicantName())
             .respondentName(caseDetails.getData().getRespondentFullName())
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
-            .judgeDetails(getJudgeDetails(draftOrdersWrapper))
+            .judgeDetails(getJudgeDetails(draftOrdersWrapper, caseDetails))
             .contestOrderNotApprovedRefusalReasons(draftOrdersWrapper.getGeneratedOrderReason())
             .civilPartnership(YesOrNo.getYesOrNo(caseDetails.getData().getCivilPartnership()))
             .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
@@ -59,7 +61,11 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
             .build();
     }
 
-    private String getJudgeDetails(DraftOrdersWrapper draftOrdersWrapper) {
+    private String getJudgeDetails(DraftOrdersWrapper draftOrdersWrapper, FinremCaseDetails caseDetails) {
+        if (draftOrdersWrapper.getGeneratedOrderJudgeType() == null) {
+            log.warn("{} - Judge type was not captured and an empty string will be shown in the refusal order.",
+                caseDetails.getId());
+        }
         return Stream.of(
                 ofNullable(draftOrdersWrapper.getGeneratedOrderJudgeType()).map(JudgeType::getValue).orElse(""),
                 draftOrdersWrapper.getGeneratedOrderJudgeName()
