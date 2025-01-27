@@ -209,6 +209,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertClearTempFields(caseData);
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
+        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
@@ -255,6 +256,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(generalOrderService, never()).isSelectedOrderMatches(eq(List.of(selected1, selected2)), any(ContestedGeneralOrder.class));
+        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
@@ -309,6 +311,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
         verify(dateService).addCreatedDateInFinalOrder(any(), any());
+        verify(sendOrdersCategoriser).categorise(caseData);
 
         response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -345,6 +348,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
+        verify(sendOrdersCategoriser, times(2)).categorise(caseData);
     }
 
     @Test
@@ -387,6 +391,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
+        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
@@ -428,6 +433,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
+        verify(sendOrdersCategoriser).categorise(caseData);
         verify(documentHelper, never()).getStampType(caseData);
     }
 
