@@ -1,25 +1,38 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
+public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService postalService;
+    private final ObjectMapper objectMapper;
+
+    public AmendApplicationConsentedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                               ConsentOrderService consentOrderService,
+                                               InternationalPostalService postalService,
+                                               ObjectMapper objectMapper) {
+        super(finremCaseDetailsMapper);
+        this.consentOrderService = consentOrderService;
+        this.postalService = postalService;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -29,15 +42,17 @@ public class AmendApplicationConsentedMidHandler implements CallbackHandler<Map<
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = finremCaseDetails.getData();
 
-        log.info("Invoking amend application mid event for caseId {}", callbackRequest.getCaseDetails().getId());
-        List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
-        List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
-        errors.addAll(validate);
+        log.info("Invoking amend application mid event for caseId {}", finremCaseDetails.getId());
+        List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
+        errors.addAll(postalService.validate(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseData(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
-            .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseData).errors(errors).build();
     }
 }
