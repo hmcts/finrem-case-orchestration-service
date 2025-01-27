@@ -58,6 +58,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderI
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerThreeDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderIntervenerTwoDocumentHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderRespondentDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -87,6 +89,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedAboutToSubmitHandlerTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(SendOrderContestedAboutToSubmitHandler.class);
 
     private static final String UUID_1 = UUID.fromString("d607c045-878e-475f-ab8e-b2f667d8af64").toString();
     private static final String UUID_2 = UUID.fromString("22222222-878e-475f-ab8e-b2f667d8af64").toString();
@@ -136,21 +141,20 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
-
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of())).thenReturn(Pair.of(List.of(), List.of()));
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
 
         assertNull(caseData.getPartiesOnCase());
-
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of());
-
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), any());
         verify(documentHelper, never()).getStampType(caseData);
+        verify(sendOrdersCategoriser).categorise(caseData);
+        assertThat(logs.getErrors()).isEmpty();
     }
 
     @Test
