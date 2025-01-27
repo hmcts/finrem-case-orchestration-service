@@ -77,7 +77,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
-        this.dateService =  dateService;
+        this.dateService = dateService;
         this.sendOrdersCategoriser = sendOrdersCategoriser;
     }
 
