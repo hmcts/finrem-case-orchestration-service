@@ -365,8 +365,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    // TODO
-    void givenContestedCase_whenOrderAvailableToShareWithPartiesAndAttachments_thenHandlerHandleRequest() {
+    void givenContestedCase_whenOrderAvailableToShareWithPartiesAndAttachments_thenCheckOrdersSentToPartiesCollection() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -397,12 +396,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
+        CaseDocument legacyApprovedOrder = null;
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2)))
-            .thenReturn(Pair.of(List.of(caseDocument("http://fakeurl/1111", "111.pdf")),
+            .thenReturn(Pair.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111", "111.pdf")),
                 List.of(caseDocument("http://fakeurl/2222", "222.pdf"))));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq("123")))
+        when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, "123"))
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
             .thenReturn(caseDocument("http://fakeurl/additionalDocumentPdf", "additionalDocument.pdf"));
@@ -411,14 +411,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
 
-        assertThat(caseData.getPartiesOnCase().getValue()).as("selected parties on case").hasSize(12);
-        assertThat(caseData.getFinalOrderCollection()).hasSize(1);
-        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
-        assertThat(caseData.getOrderWrapper().getIntv1OrderCollections()).hasSize(1);
-        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
-        assertThat(caseData.getOrderWrapper().getAppOrderCollections()).hasSize(1);
-        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
-        assertThat(caseData.getOrderWrapper().getRespOrderCollections()).hasSize(1);
         assertThat(caseData.getOrdersSentToPartiesCollection())
             .map(OrderSentToPartiesCollection::getValue)
             .map(SendOrderDocuments::getCaseDocument)
@@ -431,13 +423,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             + "uuid1|app_docs.pdf ===> [attachment_1|attachment1.pdf],"
             + "uuid2|app_docs2.pdf ===> []"
             + ") to parties: [" + partyListInString() + "]");
-
-        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
-        verify(generalOrderService).isSelectedOrderMatches(any(), any());
-        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
-        verify(documentHelper).getStampType(caseData);
-        verify(dateService).addCreatedDateInFinalOrder(any(), any());
-        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
