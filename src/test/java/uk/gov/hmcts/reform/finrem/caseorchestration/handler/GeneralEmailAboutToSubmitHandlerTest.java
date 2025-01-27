@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -28,15 +30,19 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GeneralEmailAboutToSubmitHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class GeneralEmailAboutToSubmitHandlerTest {
 
     private GeneralEmailAboutToSubmitHandler handler;
 
@@ -53,8 +59,8 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    public void init() {
         GeneralEmailDocumentCategoriser categoriser = new GeneralEmailDocumentCategoriser(featureToggleService);
         handler =  new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper,
             notificationService,
@@ -64,21 +70,15 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenACcdCallbackGeneralEmailAboutToSubmitHandler_WhenCanHandleCalled_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL),
-            is(true));
+    void shouldHandleAllCaseTypes() {
+        assertCanHandle(handler,
+                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_EMAIL),
+                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL)
+        );
     }
 
     @Test
-    public void givenACcdCallbackAboutToSubmit_WhenCanHandleCalled_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL),
-            is(false));
-    }
-
-    @Test
-    public void givenACcdCallbackCallbackGeneralEmailAboutToSubmitHandler_WhenHandle_thenSendEmail() {
+    void givenACcdCallbackCallbackGeneralEmailAboutToSubmitHandler_WhenHandle_thenSendEmail() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
         handler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendConsentGeneralEmail(any(FinremCaseDetails.class), anyString());
@@ -86,7 +86,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForApplicantRecipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForApplicantRecipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setApplicantEmail("test@gmail.com");
@@ -94,7 +94,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForRespondentRecipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForRespondentRecipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setRespondentSolicitorEmail("test@gmail.com");
@@ -102,7 +102,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForIntervener1Recipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForIntervener1Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerOne());
@@ -110,7 +110,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForIntervener2Recipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForIntervener2Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerTwo());
@@ -118,7 +118,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForIntervener3Recipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForIntervener3Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerEmail(callbackRequest.getCaseDetails().getData().getIntervenerThree());
@@ -126,7 +126,7 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForIntervener4Recipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForIntervener4Recipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         setIntervenerSolEmail(callbackRequest.getCaseDetails().getData().getIntervenerFour());
@@ -134,18 +134,48 @@ public class GeneralEmailAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenContestedCallbackRequest_whenHandledForUnrecognisedRecipient_thenDocumentIsCategorised() {
+    void givenContestedCallbackRequest_whenHandledForUnrecognisedRecipient_thenDocumentIsCategorised() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(false);
         verifyDocumentCategory(callbackRequest, DocumentCategory.COURT_CORRESPONDENCE_OTHER);
     }
 
     @Test
-    public void givenConsentedCallbackRequest_whenHandledForRecipient_thenNotCategorised() {
+    void givenConsentedCallbackRequest_whenHandledForRecipient_thenNotCategorised() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertNull(response.getData().getGeneralEmailWrapper().getGeneralEmailCollection().get(0)
                 .getValue().getGeneralEmailUploadedDocument().getCategoryId());
+    }
+
+    /**
+     * Checks that about-to-submit calls {@code setGeneralEmailValuesToNull} in {@link GeneralEmailWrapper}.
+     * For consented cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
+     * For contested cases, check that {@code setGeneralEmailValuesToNull} is called once after the notification is sent
+     */
+    @Test
+    void shouldCallSetGeneralEmailValuesToNullOnce() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
+
+        // consented test
+        when(caseDetails.isConsentedApplication()).thenReturn(true);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        InOrder inOrderConsented = inOrder(notificationService, generalEmailWrapper);
+        inOrderConsented.verify(notificationService, times(1)).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderConsented.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+
+        // contested test
+        when(caseDetails.isConsentedApplication()).thenReturn(false);
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
+        inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
+        inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
     }
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
