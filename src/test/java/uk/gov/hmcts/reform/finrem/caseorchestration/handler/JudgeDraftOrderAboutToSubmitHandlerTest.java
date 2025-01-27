@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,31 +82,12 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenNoAdditionalDocuments_whenHandle_thenAllInvocationsAreExecuted() {
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        DraftDirectionOrder directionOrder =
-            DraftDirectionOrder
-                .builder()
-                .purposeOfDocument("test")
-                .uploadDraftDocument(caseDocument)
-                .build();
-        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
-
-        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
-        draftDirectionOrderCollection.add(directionOrderCollection);
-
         CaseDetails caseDetails = CaseDetails.builder().build();
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
-
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        //No additional Documents
+        FinremCallbackRequest callbackRequest = setupTestData(Collections.emptyList());
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .eventType(EventType.JUDGE_DRAFT_ORDER)
-            .caseDetails(finremCaseDetails)
-            .build();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -118,9 +100,14 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
     @Test
     void givenMultipleAdditionalDocuments_whenHandle_thenAllAdditionalDocumentsAreConvertedToPdf() {
-
+        CaseDetails caseDetails = CaseDetails.builder().build();
         CaseDocument document1 = CaseDocument.builder().documentFilename("additional doc 1.docx").build();
         CaseDocument document2 = CaseDocument.builder().documentFilename("additional doc 2.docx").build();
+        CaseDocument pdfConverted1 = caseDocument(FILE_URL, "additional doc 1.pdf", FILE_BINARY_URL);
+        CaseDocument pdfConverted2 = caseDocument(FILE_URL, "additional doc 2.pdf", FILE_BINARY_URL);
+
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document1), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted1);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document2), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted2);
 
         JudgeApprovedOrderAdditionalDocumentsCollection additionalDocument1 = JudgeApprovedOrderAdditionalDocumentsCollection.builder()
             .value(document1)
@@ -129,38 +116,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
             .value(document2)
             .build();
 
-        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
-        DraftDirectionOrder directionOrder =
-            DraftDirectionOrder
-                .builder()
-                .purposeOfDocument("test")
-                .uploadDraftDocument(caseDocument)
-                .judgeApprovedOrderAdditionalDocumentsCollection(List.of(additionalDocument1, additionalDocument2))
-                .build();
-        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
-
-        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
-        draftDirectionOrderCollection.add(directionOrderCollection);
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
-        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
-
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
-
-        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
-
-        CaseDocument pdfConverted1 = caseDocument(FILE_URL, "additional doc 1.pdf", FILE_BINARY_URL);
-        CaseDocument pdfConverted2 = caseDocument(FILE_URL, "additional doc 2.pdf", FILE_BINARY_URL);
-
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document1), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted1);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document2), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted2);
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .eventType(EventType.JUDGE_DRAFT_ORDER)
-            .caseDetails(finremCaseDetails)
-            .build();
+        FinremCallbackRequest callbackRequest = setupTestData(List.of(additionalDocument1, additionalDocument2));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -174,7 +130,36 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
             any(String.class), any(String.class));
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
         verify(caseDataService).moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-        verify(uploadedDraftOrderCategoriser).categorise(caseData);
+        verify(uploadedDraftOrderCategoriser).categorise(callbackRequest.getCaseDetails().getData());
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
+    }
+
+    private FinremCallbackRequest setupTestData(List<JudgeApprovedOrderAdditionalDocumentsCollection> additionalDocuments) {
+        CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
+
+        //Create direction order with additional documents (if any)
+        DraftDirectionOrder directionOrder =
+            DraftDirectionOrder.builder()
+                .purposeOfDocument("test")
+                .uploadDraftDocument(caseDocument)
+                .judgeApprovedOrderAdditionalDocumentsCollection(additionalDocuments)
+                .build();
+
+        DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();
+
+        //Set up draft direction order collection list
+        List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
+        draftDirectionOrderCollection.add(directionOrderCollection);
+
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.setDraftDirectionOrderCollection(draftDirectionOrderCollection);
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+
+        return FinremCallbackRequest.builder()
+            .eventType(EventType.JUDGE_DRAFT_ORDER)
+            .caseDetails(finremCaseDetails)
+            .build();
     }
 }
