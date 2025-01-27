@@ -157,7 +157,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
+    void givenContestedCase_whenAnyOfMethodFails_thenHandlerReturnErrorInTheResponse() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
