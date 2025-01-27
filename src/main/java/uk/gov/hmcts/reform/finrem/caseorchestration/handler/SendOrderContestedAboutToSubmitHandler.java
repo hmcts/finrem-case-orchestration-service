@@ -52,7 +52,9 @@ import static java.lang.String.format;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @Slf4j
 @Service
@@ -83,9 +85,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && SEND_ORDER.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && SEND_ORDER.equals(eventType);
     }
 
     @Override
