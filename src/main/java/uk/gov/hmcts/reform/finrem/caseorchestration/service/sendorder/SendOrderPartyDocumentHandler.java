@@ -113,7 +113,7 @@ public abstract class SendOrderPartyDocumentHandler {
     }
 
     private void addAdditionalOrderDocumentToPartyCollection(FinremCaseData caseData, List<ApprovedOrderCollection> approvedOrderCollections) {
-        CaseDocument additionalDocument = caseData.getAdditionalDocument();
+        CaseDocument additionalDocument = caseData.getSendOrderWrapper().getAdditionalDocument();
         if (additionalDocument != null) {
             approvedOrderCollections.add(getApprovedOrderCollection(additionalDocument));
         }

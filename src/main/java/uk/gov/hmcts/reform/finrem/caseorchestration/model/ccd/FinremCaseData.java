@@ -124,7 +124,6 @@ public class FinremCaseData implements HasCaseDocument {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
-    private CaseDocument additionalDocument;
     private List<DocumentCollection> additionalCicDocuments;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
