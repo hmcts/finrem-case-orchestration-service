@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -161,11 +160,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(RuntimeException.class);
+        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
 
-        Exception exception = Assert.assertThrows(RuntimeException.class,
-            () -> handler.handle(callbackRequest, AUTH_TOKEN));
-        assertNull(exception.getMessage());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors()).isNotEmpty().containsExactly("unlucky");
+        assertThat(logs.getErrors()).contains("FAIL: unlucky on Case ID: 123");
     }
 
     @Test
