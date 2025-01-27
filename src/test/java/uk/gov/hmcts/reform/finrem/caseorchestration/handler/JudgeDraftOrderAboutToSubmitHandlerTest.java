@@ -85,7 +85,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         CaseDetails caseDetails = CaseDetails.builder().build();
         //No additional Documents
         FinremCallbackRequest callbackRequest = setupTestData(Collections.emptyList());
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
 
@@ -93,7 +92,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
         verify(caseDataService).moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-        verify(uploadedDraftOrderCategoriser).categorise(caseData);
+        verify(uploadedDraftOrderCategoriser).categorise(callbackRequest.getCaseDetails().getData());
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
     }
