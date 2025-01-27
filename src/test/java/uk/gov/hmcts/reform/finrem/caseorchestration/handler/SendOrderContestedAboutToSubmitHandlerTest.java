@@ -248,7 +248,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
 
-
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
