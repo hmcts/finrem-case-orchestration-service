@@ -365,24 +365,24 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenContestedCase_whenOrderAvailableToShareWithPartiesAndAttachments_thenCheckOrdersSentToPartiesCollection() {
+    void givenContestedCaseWithSelectedOrderAndAttachment_whenSubmit_thenSentToPartiesCollectionPopulated() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        OrderToShare selected1 = OrderToShare.builder().documentId("uuid1").documentName("app_docs.pdf").documentToShare(YesOrNo.YES)
+        OrderToShare selected1 = OrderToShare.builder().documentId("uuid1").documentName("order1.pdf").documentToShare(YesOrNo.YES)
             .attachmentsToShare(of(
                 AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
-                        .documentId("attachment_1")
+                        .documentId("uuid3")
                         .attachmentName("attachment1.pdf")
                         .documentToShare(YesOrNo.YES)
                         .build())
                     .build())
             )
             .build();
-        OrderToShare selected2 = OrderToShare.builder().documentId("uuid2").documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId("uuid2").documentName("order2.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
             .value(of(
                 OrderToShareCollection.builder().value(selected1).build(),
@@ -399,29 +399,27 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         CaseDocument legacyApprovedOrder = null;
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2)))
-            .thenReturn(Pair.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111", "111.pdf")),
-                List.of(caseDocument("http://fakeurl/2222", "222.pdf"))));
-        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+            .thenReturn(Pair.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111Legacy", "111.pdf")),
+                List.of(caseDocument("http://fakeurl/2222NewFlow", "222.pdf"))));
+        when(documentHelper.getStampType(data)).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, "123"))
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
-            .thenReturn(caseDocument("http://fakeurl/additionalDocumentPdf", "additionalDocument.pdf"));
+            .thenReturn(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        FinremCaseData caseData = response.getData();
-
-        assertThat(caseData.getOrdersSentToPartiesCollection())
+        assertThat(response.getData().getOrdersSentToPartiesCollection())
             .map(OrderSentToPartiesCollection::getValue)
             .map(SendOrderDocuments::getCaseDocument)
             .map(CaseDocument::getDocumentUrl)
-            .containsAnyOf("http://fakeurl/additionalDocumentPdf",
-                "http://fakeurl/1111",
-                "http://fakeurl/2222",
+            .containsAnyOf("http://fakeurl/additionalDocument",
+                "http://fakeurl/1111Legacy",
+                "http://fakeurl/2222NewFlow",
                 "http://fakeurl/orderApprovedCoverLetter");
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
-            + "uuid1|app_docs.pdf ===> [attachment_1|attachment1.pdf],"
-            + "uuid2|app_docs2.pdf ===> []"
+            + "uuid1|order1.pdf ===> [uuid3|attachment1.pdf],"
+            + "uuid2|order2.pdf ===> []"
             + ") to parties: [" + partyListInString() + "]");
     }
 
