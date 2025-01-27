@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAttahments;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAttachments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable, WithAttahments {
+public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable, WithAttachments {
     private OrderStatus orderStatus;
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;

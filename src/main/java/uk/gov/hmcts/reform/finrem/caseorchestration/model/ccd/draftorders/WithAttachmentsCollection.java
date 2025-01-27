@@ -9,7 +9,7 @@ public interface WithAttachmentsCollection {
     /**
      * Retrieves the value containing attachment details.
      *
-     * @return an instance of {@link WithAttahments} containing attachment data.
+     * @return an instance of {@link WithAttachments} containing attachment data.
      */
-    WithAttahments getValue();
+    WithAttachments getValue();
 }
