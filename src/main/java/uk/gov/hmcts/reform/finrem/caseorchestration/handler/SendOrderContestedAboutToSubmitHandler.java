@@ -46,7 +46,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.stream.Stream.concat;
@@ -114,8 +113,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
             if (hasApprovedOrdersToBeSent(legacyHearingOrders, newProcessedOrders)) {
                 // Add order approved cover letter and add orders (legacy and new) to printOrderCollection
-                shareAndSendHearingDocuments(caseDetails, concat(legacyHearingOrders.stream(), // legacy orders must be PDF in old journey
-                    convertNewProcessedToPdfIfNecessary(newProcessedOrders, userAuthorisation, caseId)).toList(),
+                shareAndSendHearingDocuments(caseDetails, concat(legacyHearingOrders.stream(), newProcessedOrders.stream()).toList(),
                     parties, printOrderCollection, userAuthorisation);
 
                 stampLegacyHearingOrders(caseDetails, legacyHearingOrders, userAuthorisation);
@@ -167,12 +165,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
             });
         }
-    }
-
-    private Stream<CaseDocument> convertNewProcessedToPdfIfNecessary(List<CaseDocument> newProcessedOrders, String userAuthorisation, String caseId) {
-        return newProcessedOrders.stream().map(
-            d -> genericDocumentService.convertDocumentIfNotPdfAlready(d, userAuthorisation, caseId)
-        );
     }
 
     private boolean hasApprovedOrdersToBeSent(List<CaseDocument> legacyHearingOrders, List<CaseDocument> newProcessedOrders) {
