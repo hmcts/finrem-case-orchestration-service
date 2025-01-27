@@ -197,8 +197,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertNull(caseData.getPartiesOnCase().getValue());
@@ -243,8 +242,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertNull(caseData.getPartiesOnCase().getValue());
@@ -381,8 +379,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
@@ -423,8 +420,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument), List.of()));
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
@@ -494,8 +490,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(1, caseData.getFinalOrderCollection().size());
