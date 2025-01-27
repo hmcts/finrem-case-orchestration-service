@@ -503,8 +503,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
-        verify(sendOrdersCategoriser).categorise(caseData);
         verify(documentHelper, never()).getStampType(caseData);
+        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
