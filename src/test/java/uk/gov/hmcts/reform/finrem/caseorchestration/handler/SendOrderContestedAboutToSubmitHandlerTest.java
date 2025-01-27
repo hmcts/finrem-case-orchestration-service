@@ -160,11 +160,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenAnyOfMethodFails_thenHandlerReturnErrorInTheResponse() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().setSendOrderWrapper(SendOrderWrapper.builder()
+            .ordersToSend(OrdersToSend.builder()
+                .value(of(OrderToShareCollection.builder().value(OrderToShare.builder().build()).build())).build())
+            .additionalDocument(caseDocument())
+            .build());
         when(generalOrderService.hearingOrdersToShare(eq(caseDetails), anyList())).thenThrow(new RuntimeException("unlucky"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getErrors()).isNotEmpty().containsExactly("unlucky");
         assertThat(logs.getErrors()).contains("FAIL: unlucky on Case ID: 123");
+        assertClearTempFields(caseDetails.getData());
     }
 
     @Test
