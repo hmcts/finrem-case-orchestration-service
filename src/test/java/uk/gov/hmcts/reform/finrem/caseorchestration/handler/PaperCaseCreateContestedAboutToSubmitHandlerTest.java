@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUt
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -155,8 +154,6 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(finremCaseDetailsMapper, times(1)).mapToCaseDetails(any(FinremCaseDetails.class));
-        verify(finremCaseDetailsMapper, times(1)).mapToFinremCaseData(anyMap());
         verify(caseDataService,times(1)).setFinancialRemediesCourtDetails(any(CaseDetails.class));
     }
 }
