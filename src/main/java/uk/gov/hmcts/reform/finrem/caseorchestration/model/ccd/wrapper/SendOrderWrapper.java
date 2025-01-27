@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,6 @@ public class SendOrderWrapper {
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
 
-    @JsonIgnore
     public OrdersToSend getOrdersToSend() {
         if (this.ordersToSend == null) {
             this.ordersToSend = new OrdersToSend();
