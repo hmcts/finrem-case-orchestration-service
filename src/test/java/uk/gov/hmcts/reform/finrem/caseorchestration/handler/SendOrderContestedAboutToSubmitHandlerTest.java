@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
@@ -118,7 +120,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private SendOrdersCategoriser sendOrdersCategoriser;
 
     @BeforeEach
-    public void setUpTest() {
+    void setUpTest() {
         handler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
             genericDocumentService,
@@ -364,13 +366,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    // TODO
     void givenContestedCase_whenOrderAvailableToShareWithPartiesAndAttachments_thenHandlerHandleRequest() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES)
+        OrderToShare selected1 = OrderToShare.builder().documentId("uuid1").documentName("app_docs.pdf").documentToShare(YesOrNo.YES)
             .attachmentsToShare(of(
                 AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
@@ -381,7 +384,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build())
             )
             .build();
-        OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId("uuid2").documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
             .value(of(
                 OrderToShareCollection.builder().value(selected1).build(),
@@ -389,20 +392,21 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
+        CaseDocument additionalDocument = null;
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
-        List<CaseDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.docx"));
+        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2)))
+            .thenReturn(Pair.of(List.of(caseDocument("http://fakeurl/1111", "111.pdf")),
+                List.of(caseDocument("http://fakeurl/2222", "222.pdf"))));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
-            .thenReturn(caseDocument());
-
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq("123")))
+            .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(caseDocument("http://fakeurl/additionalDocumentPdf", "additionalDocument.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -416,10 +420,17 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(caseData.getOrderWrapper().getAppOrderCollections()).hasSize(1);
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertThat(caseData.getOrderWrapper().getRespOrderCollections()).hasSize(1);
-        assertThat(caseData.getOrdersSentToPartiesCollection()).hasSize(3);
+        assertThat(caseData.getOrdersSentToPartiesCollection())
+            .map(OrderSentToPartiesCollection::getValue)
+            .map(SendOrderDocuments::getCaseDocument)
+            .map(CaseDocument::getDocumentUrl)
+            .containsAnyOf("http://fakeurl/additionalDocumentPdf",
+                "http://fakeurl/1111",
+                "http://fakeurl/2222",
+                "http://fakeurl/orderApprovedCoverLetter");
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
-            + "d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [attachment_1|attachment1.pdf],"
-            + "22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf ===> []"
+            + "uuid1|app_docs.pdf ===> [attachment_1|attachment1.pdf],"
+            + "uuid2|app_docs2.pdf ===> []"
             + ") to parties: [" + partyListInString() + "]");
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
