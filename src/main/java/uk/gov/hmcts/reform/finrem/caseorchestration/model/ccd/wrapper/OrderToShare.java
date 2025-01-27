@@ -15,6 +15,10 @@ import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
+/**
+ * Represents an order document that can be shared within the case orchestration process.
+ * This class provides details such as the document ID, name, and related sharing preferences.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -35,11 +39,21 @@ public class OrderToShare implements DocumentIdProvider {
 
     private List<AttachmentToShareCollection> attachmentsToShare;
 
+    /**
+     * Determines if the order has attachments.
+     *
+     * @return {@link YesOrNo#YES} if attachments exist, otherwise {@link YesOrNo#NO}.
+     */
     @JsonIgnore
     public YesOrNo getHasAttachment() {
         return YesOrNo.forValue(ofNullable(attachmentsToShare).isEmpty());
     }
 
+    /**
+     * Checks if supporting documents should be included.
+     *
+     * @return {@code true} if supporting documents are included, otherwise {@code false}.
+     */
     public boolean shouldIncludeSupportingDocuments() {
         return CollectionUtils.isNotEmpty(includeSupportingDocument);
     }

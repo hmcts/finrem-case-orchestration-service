@@ -9,6 +9,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Represents a collection of orders to be sent within the case orchestration process.
+ * This class encapsulates a list of {@link OrderToShareCollection} objects, which contain details
+ * of the individual orders that can be shared.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -17,5 +22,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrdersToSend {
 
+    /**
+     * A list of order collections to be sent.
+     */
     private List<OrderToShareCollection> value;
 }
