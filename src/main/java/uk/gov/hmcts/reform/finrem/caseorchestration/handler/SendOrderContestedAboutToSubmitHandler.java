@@ -100,7 +100,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             List<String> parties = generalOrderService.getParties(caseDetails);
             List<OrderToShare> selectedOrders = getSelectedOrders(caseData.getSendOrderWrapper());
 
-            logSelectedPartiesAndOrders(parties,selectedOrders, caseId);
+            logSelectedPartiesAndOrders(parties, selectedOrders, caseId);
 
             List<OrderSentToPartiesCollection> printOrderCollection = new ArrayList<>();
             CaseDocument document = caseData.getSendOrderWrapper().getAdditionalDocument();
@@ -405,6 +405,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void logSelectedPartiesAndOrders(List<String> parties, List<OrderToShare> selectedOrders, String caseId) {
-        log.info("{} - sending orders: ({}) to parties: {} on Case ID: {}", formatOrderToShareList(selectedOrders), SEND_ORDER, parties, caseId);
+        log.info("FR_sendOrder({}) - sending orders: ({}) to parties: {}", caseId, formatOrderToShareList(selectedOrders), parties);
     }
 }

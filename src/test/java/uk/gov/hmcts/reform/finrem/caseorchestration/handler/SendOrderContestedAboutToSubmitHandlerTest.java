@@ -38,6 +38,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
@@ -212,6 +214,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertClearTempFields(caseData);
+        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: "
+            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [],22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf ===> []) "
+            + "to parties: []");
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
@@ -309,6 +314,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getRespOrderCollections().size());
         assertEquals(3, caseData.getOrdersSentToPartiesCollection().size());
+        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: "
+            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [],app_docs.pdf|app_docs2.pdf ===> []) "
+            + "to parties: [" + partyListInString() + "]");
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
@@ -353,6 +361,73 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
+    }
+
+    @Test
+    void givenContestedCase_whenOrderAvailableToShareWithPartiesAndAttachments_thenHandlerHandleRequest() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES)
+            .attachmentsToShare(of(
+                AttachmentToShareCollection.builder()
+                    .value(AttachmentToShare.builder()
+                        .documentId("attachment_1")
+                        .attachmentName("attachment1.pdf")
+                        .documentToShare(YesOrNo.YES)
+                        .build())
+                    .build())
+            )
+            .build();
+        OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build(),
+                OrderToShareCollection.builder().value(selected2).build()
+            ))
+            .build();
+
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
+        data.setOrderApprovedCoverLetter(caseDocument());
+        List<CaseDocument> caseDocuments = new ArrayList<>();
+        caseDocuments.add(caseDocument());
+        data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
+
+        when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+            .thenReturn(caseDocument());
+
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+
+        assertThat(caseData.getPartiesOnCase().getValue()).as("selected parties on case").hasSize(12);
+        assertThat(caseData.getFinalOrderCollection()).hasSize(1);
+        assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
+        assertThat(caseData.getOrderWrapper().getIntv1OrderCollections()).hasSize(1);
+        assertNull(caseData.getOrderWrapper().getAppOrderCollection());
+        assertThat(caseData.getOrderWrapper().getAppOrderCollections()).hasSize(1);
+        assertNull(caseData.getOrderWrapper().getRespOrderCollection());
+        assertThat(caseData.getOrderWrapper().getRespOrderCollections()).hasSize(1);
+        assertThat(caseData.getOrdersSentToPartiesCollection()).hasSize(3);
+        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
+            + "d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [attachment_1|attachment1.pdf],"
+            + "22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf ===> []"
+            + ") to parties: [" + partyListInString() + "]");
+
+        verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
+        verify(generalOrderService).isSelectedOrderMatches(any(), any());
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(any(), any(), anyString());
+        verify(documentHelper).getStampType(caseData);
+        verify(dateService).addCreatedDateInFinalOrder(any(), any());
+        verify(sendOrdersCategoriser).categorise(caseData);
     }
 
     @Test
@@ -529,6 +604,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_BARRISTER_2.getCcdCode(),
             CaseRole.INTVR_SOLICITOR_3.getCcdCode(), CaseRole.INTVR_BARRISTER_3.getCcdCode(),
             CaseRole.INTVR_SOLICITOR_4.getCcdCode(), CaseRole.INTVR_BARRISTER_4.getCcdCode());
+    }
+
+    private static String partyListInString() {
+        return "[APPSOLICITOR], [APPBARRISTER], [RESPSOLICITOR], [RESPBARRISTER], [INTVRSOLICITOR1], [INTVRBARRISTER1], [INTVRSOLICITOR2], "
+            + "[INTVRBARRISTER2], [INTVRSOLICITOR3], [INTVRBARRISTER3], [INTVRSOLICITOR4], [INTVRBARRISTER4]";
     }
 
     private DynamicMultiSelectListElement getElementList(String role) {
