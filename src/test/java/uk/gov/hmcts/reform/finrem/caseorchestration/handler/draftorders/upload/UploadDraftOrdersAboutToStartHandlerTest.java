@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class UploadDraftOrderAboutToStartHandlerTest {
+class UploadDraftOrdersAboutToStartHandlerTest {
 
     @InjectMocks
     private UploadDraftOrdersAboutToStartHandler handler;
@@ -125,12 +125,13 @@ class UploadDraftOrderAboutToStartHandlerTest {
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.YES);
     }
 
-    @Test
-    void givenUserIsNotCaseWorkerWhenHandleThenShowUploadQuestionIsNo() {
+    @ParameterizedTest
+    @MethodSource("provideCaseRoles")
+    void givenUserIsNotCaseWorkerWhenHandleThenShowUploadQuestionIsNo(CaseRole caseRole) {
         long caseID = 1727874196328932L;
         FinremCallbackRequest request = FinremCallbackRequestFactory.fromId(caseID);
         CaseAssignedUserRole caseAssignedUserRole = CaseAssignedUserRole.builder()
-            .caseRole(CaseRole.APP_SOLICITOR.getCcdCode())
+            .caseRole(caseRole.getCcdCode())
             .build();
         when(caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseID), AUTH_TOKEN)).thenReturn(
             CaseAssignedUserRolesResource.builder()
@@ -140,6 +141,19 @@ class UploadDraftOrderAboutToStartHandlerTest {
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertThat(response.getData().getDraftOrdersWrapper().getShowUploadPartyQuestion()).isEqualTo(YesOrNo.NO);
+    }
+
+    private static Stream<Arguments> provideCaseRoles() {
+        return Stream.of(
+            Arguments.of(CaseRole.APP_SOLICITOR),
+            Arguments.of(CaseRole.RESP_SOLICITOR),
+            Arguments.of(CaseRole.APP_BARRISTER),
+            Arguments.of(CaseRole.RESP_BARRISTER),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_1),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_2),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_3),
+            Arguments.of(CaseRole.INTVR_SOLICITOR_4)
+        );
     }
 
     @ParameterizedTest
