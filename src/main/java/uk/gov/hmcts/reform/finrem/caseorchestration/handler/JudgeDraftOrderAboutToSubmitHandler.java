@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final HearingOrderService hearingOrderService;                              
+    private final HearingOrderService hearingOrderService;
     private final GenericDocumentService genericDocumentService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final CaseDataService caseDataService;
@@ -88,7 +88,6 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
                     String.valueOf(caseDetails.getId()));
 
                 additionalDoc.setValue(documentPdf);
-            }
-        ));
+            }));
     }
 }
