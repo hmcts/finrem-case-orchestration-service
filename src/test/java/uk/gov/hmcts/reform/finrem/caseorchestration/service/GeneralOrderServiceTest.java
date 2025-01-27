@@ -515,6 +515,50 @@ class GeneralOrderServiceTest {
     }
 
     @Test
+    void testGeneralOrderServiceHearingOrdersToShareIfFinalisedOrdersCollectionIsNull() {
+        CaseDocument expectedCaseDocument = caseDocument(
+            "http://document-management-store:8080/documents/22222222-c524-4614-86e5-c569f82c718d",
+            "TEST3.pdf");
+        CaseDocument expectedAttachment = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_6.pdf");
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(null)
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment).build()))
+                                .pensionSharingAnnex(expectedCaseDocument)
+                                .orderStatus(PROCESSED)
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build())
+            .build();
+
+        Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
+            List.of(
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("22222222-c524-4614-86e5-c569f82c718d")
+                    .includeSupportingDocument(List.of(Yes.YES))
+                    .attachmentsToShare(List.of(
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("55555555-c524-4614-86e5-c569f82c718d").build())
+                            .build()
+                    ))
+                    .build()
+            ));
+
+        assertThat(actual.getLeft()).isEmpty();
+        assertThat(actual.getRight()).containsExactly(expectedCaseDocument, expectedAttachment);
+    }
+
+    @Test
     void testGeneralOrderServiceHearingOrdersToShare() {
         CaseDocument expectedCaseDocument1 = caseDocument(
             "http://document-management-store:8080/documents/00000000-c524-4614-86e5-c569f82c718d",

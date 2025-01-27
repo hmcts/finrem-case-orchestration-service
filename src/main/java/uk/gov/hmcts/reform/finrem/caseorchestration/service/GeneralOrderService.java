@@ -375,11 +375,7 @@ public class GeneralOrderService {
 
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
         List<FinalisedOrderCollection> finalisedOrders = ofNullable(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection())
-            .orElseGet(() -> {
-                List<FinalisedOrderCollection> newList = new ArrayList<>();
-                caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(newList);
-                return newList;
-            });
+            .orElse(List.of());
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
