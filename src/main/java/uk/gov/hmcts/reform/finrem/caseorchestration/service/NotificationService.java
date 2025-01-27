@@ -1971,6 +1971,11 @@ public class NotificationService {
      */
     public void sendContestedReadyToReviewOrderToAdmin(NotificationRequest notificationRequest) {
         log.info("{} - Sending ready for review email to admin", notificationRequest.getCaseReferenceNumber());
+
+        if (!featureToggleService.isSendToFRCEnabled()) {
+            notificationRequest.setNotificationEmail(DEFAULT_EMAIL);
+        }
+
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN);
     }
 
