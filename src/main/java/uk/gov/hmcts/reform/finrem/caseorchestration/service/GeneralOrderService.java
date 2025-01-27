@@ -374,7 +374,12 @@ public class GeneralOrderService {
         final List<CaseDocument> newOrders = new ArrayList<>();
 
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
-        List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
+        List<FinalisedOrderCollection> finalisedOrders = ofNullable(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .orElseGet(() -> {
+                List<FinalisedOrderCollection> newList = new ArrayList<>();
+                caseData.getDraftOrdersWrapper().setFinalisedOrdersCollection(newList);
+                return newList;
+            });
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
