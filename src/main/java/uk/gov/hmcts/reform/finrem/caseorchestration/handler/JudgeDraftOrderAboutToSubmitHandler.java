@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
+
 @Slf4j
 @Service
 public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
@@ -34,7 +35,8 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     private final CaseDataService caseDataService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
-    public JudgeDraftOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingOrderService hearingOrderService, GenericDocumentService genericDocumentService,
+    public JudgeDraftOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingOrderService hearingOrderService,
+                                               GenericDocumentService genericDocumentService,
                                                ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
                                                CaseDataService caseDataService,
                                                UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser) {
@@ -65,10 +67,11 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        Map<String, Object> caseData = caseDetails.getData();
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, userAuthorisation);
         convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
+
+        Map<String, Object> caseData = caseDetails.getData();
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         uploadedDraftOrderCategoriser.categorise(finremCaseDetails.getData());

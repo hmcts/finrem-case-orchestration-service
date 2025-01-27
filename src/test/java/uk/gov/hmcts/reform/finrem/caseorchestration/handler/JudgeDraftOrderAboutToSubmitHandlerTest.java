@@ -107,6 +107,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document1), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted1);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document2), eq(AUTH_TOKEN), any(String.class))).thenReturn(pdfConverted2);
+        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
 
         JudgeApprovedOrderAdditionalDocumentsCollection additionalDocument1 = JudgeApprovedOrderAdditionalDocumentsCollection.builder()
             .value(document1)
