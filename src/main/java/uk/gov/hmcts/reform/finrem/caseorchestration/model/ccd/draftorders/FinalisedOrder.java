@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -25,7 +26,7 @@ public class FinalisedOrder implements HasCaseDocument {
 
     private CaseDocument finalisedDocument;
 
-    private List<CaseDocumentCollection> attachments;
+    private List<DocumentCollection> attachments;
 
     private String submittedBy;
 
