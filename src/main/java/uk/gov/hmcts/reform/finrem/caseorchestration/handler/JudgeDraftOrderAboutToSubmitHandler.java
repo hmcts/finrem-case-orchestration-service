@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.List;
-import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
@@ -52,7 +51,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.JUDGE_DRAFT_ORDER.equals(eventType));
+            && EventType.JUDGE_DRAFT_ORDER.equals(eventType);
     }
 
     @Override
@@ -61,23 +60,21 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(finremCaseDetails.getId());
-        log.info("Invoking contested event {} mid callback for Case ID: {}",
-            EventType.JUDGE_DRAFT_ORDER, caseId);
+        log.info("Invoking contested event {} about to submit callback for Case ID: {}",
+            callbackRequest.getEventType(), caseId);
         validateCaseData(callbackRequest);
-
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, userAuthorisation);
-        convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
+        caseDataService.moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-
-        uploadedDraftOrderCategoriser.categorise(finremCaseDetails.getData());
+        FinremCaseDetails finremCaseDetailsUpdated = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        convertAdditionalDocumentsToPdf(finremCaseDetailsUpdated, userAuthorisation);
+        uploadedDraftOrderCategoriser.categorise(finremCaseDetailsUpdated.getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseDetails.getData()).build();
+            .data(finremCaseDetailsUpdated.getData()).build();
     }
 
     private void convertAdditionalDocumentsToPdf(FinremCaseDetails caseDetails, String authorisation) {
