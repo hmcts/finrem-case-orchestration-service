@@ -305,7 +305,7 @@ class GeneralOrderServiceTest {
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
         assertThat(data.getSendOrderWrapper().getOrdersToSend())
-            .as("Not document available to share with other parties")
+            .as("No document available to share with other parties")
             .isNotNull()
             .extracting(OrdersToSend::getValue)
             .satisfies(value -> assertThat(value).isEmpty());
@@ -324,7 +324,7 @@ class GeneralOrderServiceTest {
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
         assertThat(data.getSendOrderWrapper().getOrdersToSend())
-            .as("Not document available to share with other parties")
+            .as("No document available to share with other parties")
             .isNotNull()
             .extracting(OrdersToSend::getValue)
             .satisfies(value -> assertThat(value).isEmpty());
