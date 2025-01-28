@@ -380,7 +380,7 @@ public class GeneralOrderService {
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
         if (selectedOrders != null) {
-            if (selectedOrders.stream().anyMatch(s -> YesOrNo.isYes(s.getDocumentToShare()))) {
+            if (selectedOrders.stream().anyMatch(s -> !YesOrNo.isYes(s.getDocumentToShare()))) {
                 log.warn("It assumes that the provided selectedOrders should have a value of 'Yes' in documentToShare;"
                     + " however, this logic filters them regardless.");
             }
