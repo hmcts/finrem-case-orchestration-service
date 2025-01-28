@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
@@ -83,6 +84,25 @@ public class HasApprovableCollectionReader {
             DraftOrdersReview::getPsaDocReviewCollection,
             DraftOrdersReview.DraftOrdersReviewBuilder::psaDocReviewCollection
         );
+    }
+
+    /**
+     * Collects agreed draft orders from the given list that match the specified status predicate
+     * and adds them to the provided collector list.
+     *
+     * @param agreedDraftOrderCollections the list of agreed draft orders to process;
+     *                                     if null, no processing is performed.
+     * @param collector                   the list where matching agreed draft orders are collected;
+     *                                     if null, no items are added.
+     * @param statusPredicate             the predicate used to determine the order status to collect.
+     *                                     Orders that satisfy this predicate are added to the collector.
+     */
+    public void collectAgreedDraftOrders(
+        List<AgreedDraftOrderCollection> agreedDraftOrderCollections,
+        List<AgreedDraftOrderCollection> collector,
+        Predicate<OrderStatus> statusPredicate) {
+        Map<Boolean, List<AgreedDraftOrderCollection>> partitioned = partitionByOrderStatus(agreedDraftOrderCollections, statusPredicate);
+        collector.addAll(partitioned.getOrDefault(true, List.of()));
     }
 
     private <T extends HasApprovable> List<DraftOrdersReviewCollection> filterAndCollect(

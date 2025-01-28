@@ -377,7 +377,7 @@ class FinremCaseDetailMapperTest {
         assertEquals(AssignToJudgeReason.DRAFT_CONSENT_ORDER, caseData.getAssignedToJudgeReason());
         assertEquals(SolicitorToDraftOrder.APPLICANT_SOLICITOR, caseData.getSolicitorResponsibleForDraftingOrder());
         assertEquals(JudgeType.HER_HONOUR_JUDGE, caseData.getRefusalOrderJudgeType());
-        assertEquals(SendOrderEventPostStateOption.PREPARE_FOR_HEARING, caseData.getSendOrderPostStateOption());
+        assertEquals(SendOrderEventPostStateOption.PREPARE_FOR_HEARING, caseData.getSendOrderWrapper().getSendOrderPostStateOption());
         assertEquals(Region.SOUTHEAST, caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList());
         assertEquals(RegionSouthEastFrc.KENT, caseData.getRegionWrapper().getAllocatedRegionWrapper().getSouthEastFrcList());
         assertEquals(KentSurreyCourt.FR_kent_surreyList_1,

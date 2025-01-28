@@ -25,16 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class DirectionUploadOrderSubmittedHandlerTest {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     @Mock
     private HearingDocumentService hearingDocumentService;
     @Mock
@@ -43,33 +42,9 @@ class DirectionUploadOrderSubmittedHandlerTest {
     @InjectMocks
     private DirectionUploadOrderSubmittedHandler handler;
 
-
     @Test
-    void givenACcdCallbackContestedCase_WhenASubmitEventDirectionUploadOrder_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(false));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenASubmitEventListForHearing_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.DIRECTION_UPLOAD_ORDER),
-            is(false));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER);
     }
 
     @Test
@@ -137,7 +112,6 @@ class DirectionUploadOrderSubmittedHandlerTest {
             .listItems(list)
             .build();
     }
-
 
     private List<String> partyList() {
         return of(CaseRole.APP_SOLICITOR.getCcdCode(),

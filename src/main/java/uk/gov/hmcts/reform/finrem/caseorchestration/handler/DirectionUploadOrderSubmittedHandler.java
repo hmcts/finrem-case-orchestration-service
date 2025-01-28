@@ -14,6 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
 @Slf4j
 @Service
 public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler {
@@ -30,9 +34,8 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.DIRECTION_UPLOAD_ORDER.equals(eventType);
+        return SUBMITTED.equals(callbackType) && CONTESTED.equals(caseType)
+            && DIRECTION_UPLOAD_ORDER.equals(eventType);
     }
 
     @Override
@@ -40,8 +43,7 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
                                                                               String userAuthorisation) {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Handling contested event {} submit callback for case id: {}",
-            EventType.DIRECTION_UPLOAD_ORDER, caseDetails.getId());
+        log.info("Handling contested event {} submit callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         if (CollectionUtils.isNotEmpty(caseDetails.getData().getDirectionDetailsCollection())) {

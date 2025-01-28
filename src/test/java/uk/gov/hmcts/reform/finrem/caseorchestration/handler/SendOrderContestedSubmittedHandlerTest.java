@@ -85,7 +85,7 @@ class SendOrderContestedSubmittedHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
     }
 
     private void setupGeneralOrderData(FinremCaseDetails caseDetails) {
@@ -103,7 +103,7 @@ class SendOrderContestedSubmittedHandlerTest {
                 .build()))
             .build();
 
-        data.setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
     }
 
     @Test
@@ -111,7 +111,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-        caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -124,7 +124,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-        caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
+        caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -137,7 +137,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-        caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
+        caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
@@ -149,7 +149,7 @@ class SendOrderContestedSubmittedHandlerTest {
     void givenNoPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
+        caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(ccdService, never()).executeCcdEventOnCase(any(), any(), any(), any());
@@ -165,7 +165,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(List.of(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode()));
@@ -181,7 +181,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
         FinremCaseData data = caseDetails.getData();
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verifyNoInteractions(ccdService);
@@ -197,7 +197,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getCcdCode()));
@@ -216,7 +216,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         when(generalOrderService.getParties(any(FinremCaseDetails.class)))
             .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getCcdCode()));
 
@@ -235,8 +235,8 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        data.setAdditionalDocument(caseDocument());
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
 
         data.setDirectionDetailsCollection(singletonList(DirectionDetailCollection.builder()
             .value(DirectionDetail.builder().isAnotherHearingYN(YesOrNo.YES).build()).build()));
@@ -258,7 +258,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         data.setUploadHearingOrder(of(DirectionOrderCollection.builder()
             .id(uuid)
             .value(DirectionOrder.builder()
@@ -284,7 +284,7 @@ class SendOrderContestedSubmittedHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+        data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         data.setUploadHearingOrder(of(DirectionOrderCollection.builder()
             .id(uuid)
             .value(DirectionOrder.builder()

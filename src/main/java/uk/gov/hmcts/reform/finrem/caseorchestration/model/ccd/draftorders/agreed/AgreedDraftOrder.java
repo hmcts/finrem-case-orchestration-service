@@ -71,7 +71,7 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
 
     @JsonIgnore
     @Override
-    public CaseDocument getReplacedDocument() {
+    public CaseDocument getTargetDocument() {
         if (draftOrder != null) {
             return draftOrder;
         } else if (pensionSharingAnnex != null) {

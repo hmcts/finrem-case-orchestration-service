@@ -239,7 +239,7 @@ public class GeneralOrderService {
         }
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
-        data.setOrdersToShare(dynamicOrderList);
+        data.getSendOrderWrapper().setOrdersToShare(dynamicOrderList);
     }
 
     private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
