@@ -653,7 +653,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
-            .isEmpty();
+            .isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
             .extracting(DraftOrdersReviewCollection::getValue)
             .containsExactly(DraftOrdersReview.builder().draftOrderDocReviewCollection(List.of()).build());
@@ -719,7 +719,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
-            .isEmpty();
+            .isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
             .extracting(DraftOrdersReviewCollection::getValue)
             .containsExactly(DraftOrdersReview.builder()
