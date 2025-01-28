@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -130,6 +132,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             setConsolidateView(caseDetails, parties);
 
+            resetFields(caseData.getDraftOrdersWrapper());
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
         } catch (RuntimeException e) {
@@ -247,6 +250,15 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private void clearTemporaryFields(FinremCaseData caseData) {
         caseData.getSendOrderWrapper().setAdditionalDocument(null);
         caseData.getSendOrderWrapper().setOrdersToShare(null);
+    }
+
+    private void resetFields(DraftOrdersWrapper draftOrdersWrapper) {
+        if (CollectionUtils.isEmpty(draftOrdersWrapper.getFinalisedOrdersCollection())) {
+            draftOrdersWrapper.setFinalisedOrdersCollection(null);
+        }
+        if (CollectionUtils.isEmpty(draftOrdersWrapper.getAgreedDraftOrderCollection())) {
+            draftOrdersWrapper.setAgreedDraftOrderCollection(null);
+        }
     }
 
     private void setConsolidateView(FinremCaseDetails caseDetails,
