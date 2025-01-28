@@ -423,6 +423,7 @@ class GeneralOrderServiceTest {
         Pair<List<CaseDocument>, List<CaseDocument>> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
         assertThat(documentList.getLeft()).as("One document available to share with other parties").hasSize(1);
+        assertThat(documentList.getRight()).as("No document available to share with other parties").isEmpty();
     }
 
     @Test
