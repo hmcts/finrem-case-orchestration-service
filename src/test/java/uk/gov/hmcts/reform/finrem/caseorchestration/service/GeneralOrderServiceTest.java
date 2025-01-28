@@ -57,7 +57,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,6 +72,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -87,8 +87,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
 
-    private UUID uuid;
-    protected String caseId = "123123123";
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Mock
@@ -118,8 +116,6 @@ class GeneralOrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        uuid = UUID.fromString("2ec43a65-3614-4b53-ab89-18252855f399");
-
         lenient().when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         lenient().when(documentConfiguration.getGeneralOrderFileName()).thenReturn("generalOrder.pdf");
         lenient().when(documentConfiguration.getGeneralOrderTemplate(any(CaseDetails.class))).thenReturn("FL-FRM-GOR-ENG-00484.docx");
@@ -266,8 +262,8 @@ class GeneralOrderServiceTest {
         CaseDocument pdfDoc = caseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
             "test.pdf",
             "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary");
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseId)).thenReturn(pdfDoc);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, CASE_ID)).thenReturn(pdfDoc);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, CASE_ID);
         assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
             latestGeneralOrder.getBinaryFileUrl());
     }
@@ -276,7 +272,7 @@ class GeneralOrderServiceTest {
     void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, CASE_ID);
         assertNull(latestGeneralOrder);
     }
 
@@ -286,15 +282,17 @@ class GeneralOrderServiceTest {
 
         List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
-                .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
                 .build());
-
         data.setUploadHearingOrder(hearingOrderDocuments);
+
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
-        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("One document available to share with other parties").hasSize(1);
+        assertThat(data.getSendOrderWrapper().getOrdersToSend())
+            .as("Orders to send should not be null and should contain exactly one document to share with other parties.")
+            .isNotNull()
+            .extracting(OrdersToSend::getValue)
+            .satisfies(value -> assertThat(value).hasSize(1));
     }
 
     @Test
@@ -302,12 +300,15 @@ class GeneralOrderServiceTest {
         FinremCaseData data = FinremCaseData.builder().build();
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionNoAdditionalDocument());
-        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument("url", "moj.pdf", "binaryurl")));
+        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument()));
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
-        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("Not document available to share with other parties").isEmpty();
+        assertThat(data.getSendOrderWrapper().getOrdersToSend())
+            .as("Not document available to share with other parties")
+            .isNotNull()
+            .extracting(OrdersToSend::getValue)
+            .satisfies(value -> assertThat(value).isEmpty());
     }
 
     @Test
@@ -318,12 +319,15 @@ class GeneralOrderServiceTest {
         List<ContestedGeneralOrderCollection> collections = new ArrayList<>();
         collections.add(collection);
         data.getGeneralOrderWrapper().setGeneralOrders(collections);
-        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument("url", "moj.pdf", "binaryurl")));
+        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument()));
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
-        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("Not document available to share with other parties").isEmpty();
+        assertThat(data.getSendOrderWrapper().getOrdersToSend())
+            .as("Not document available to share with other parties")
+            .isNotNull()
+            .extracting(OrdersToSend::getValue)
+            .satisfies(value -> assertThat(value).isEmpty());
     }
 
     @Test
@@ -332,17 +336,19 @@ class GeneralOrderServiceTest {
 
         List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
-                .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
                 .build());
         data.setUploadHearingOrder(hearingOrderDocuments);
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
-        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument("url", "moj.pdf", "binaryurl")));
+        data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument()));
 
         generalOrderService.setOrderList(FinremCaseDetails.builder().data(data).build());
 
-        assertThat(data.getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(data.getSendOrderWrapper().getOrdersToSend().getValue()).as("One document available to share with other parties").hasSize(2);
+        assertThat(data.getSendOrderWrapper().getOrdersToSend())
+            .as("One document available to share with other parties")
+            .isNotNull()
+            .extracting(OrdersToSend::getValue)
+            .satisfies(value -> assertThat(value).hasSize(2));
     }
 
     @Test
@@ -363,7 +369,10 @@ class GeneralOrderServiceTest {
         data.setPartiesOnCase(parties);
 
         List<String> partyList = generalOrderService.getParties(FinremCaseDetails.builder().data(data).build());
-        assertThat(partyList).as("6 parties available").hasSize(6);
+        assertThat(partyList).as("6 parties available")
+            .containsExactlyInAnyOrder(CaseRole.APP_SOLICITOR.getCcdCode(), CaseRole.RESP_SOLICITOR.getCcdCode(),
+                CaseRole.INTVR_SOLICITOR_1.getCcdCode(), CaseRole.INTVR_SOLICITOR_2.getCcdCode(), CaseRole.INTVR_SOLICITOR_3.getCcdCode(),
+                CaseRole.INTVR_SOLICITOR_4.getCcdCode());
     }
 
     @Test
@@ -402,7 +411,6 @@ class GeneralOrderServiceTest {
         CaseDocument caseDocument = caseDocument();
         List<DirectionOrderCollection> hearingOrderDocuments = List.of(
             DirectionOrderCollection.builder()
-                .id(uuid.toString())
                 .value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build())
                 .build());
 
@@ -699,17 +707,19 @@ class GeneralOrderServiceTest {
             .build();
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
-            .as("The processed order should appear in ordersToSend.")
-            .containsExactly(OrderToShareCollection.builder()
-                .value(OrderToShare.builder()
-                    .documentId("documentUrl")
-                    .documentName("Approved order - processedFileName.pdf")
-                    .hasSupportingDocuments(YesOrNo.NO)
-                    .attachmentsToShare(List.of())
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend())
+            .as("Orders to send should not be null and should contain the processed order.")
+            .isNotNull()
+            .satisfies(ordersToSend -> assertThat(ordersToSend.getValue())
+                .containsExactly(OrderToShareCollection.builder()
+                    .value(OrderToShare.builder()
+                        .documentId("documentUrl")
+                        .documentName("Approved order - processedFileName.pdf")
+                        .hasSupportingDocuments(YesOrNo.NO)
+                        .attachmentsToShare(List.of())
+                        .build())
                     .build())
-                .build());
+            );
     }
 
     private DynamicMultiSelectListElement getDynamicElementList(String role) {
