@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -34,7 +35,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Yes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -542,7 +542,7 @@ class GeneralOrderServiceTest {
                     .agreedDraftOrderCollection(List.of(
                         AgreedDraftOrderCollection.builder()
                             .value(AgreedDraftOrder.builder()
-                                .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment).build()))
+                                .attachments(List.of(DocumentCollection.builder().value(expectedAttachment).build()))
                                 .pensionSharingAnnex(expectedCaseDocument)
                                 .orderStatus(PROCESSED)
                                 .build())
@@ -600,12 +600,12 @@ class GeneralOrderServiceTest {
                     .finalisedOrdersCollection(List.of(
                         FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument1).build()).build(),
                         FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2)
-                            .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment1).build())).build()).build()
+                            .attachments(List.of(DocumentCollection.builder().value(expectedAttachment1).build())).build()).build()
                     ))
                     .agreedDraftOrderCollection(List.of(
                         AgreedDraftOrderCollection.builder()
                             .value(AgreedDraftOrder.builder()
-                                .attachments(List.of(CaseDocumentCollection.builder().value(expectedAttachment2).build()))
+                                .attachments(List.of(DocumentCollection.builder().value(expectedAttachment2).build()))
                                 .pensionSharingAnnex(expectedCaseDocument3)
                                 .orderStatus(PROCESSED)
                                 .build())
