@@ -500,10 +500,11 @@ class GeneralOrderServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend()).isNotNull();
-        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend().getValue())
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend())
             .as("The finalised orders should appear in ordersToShare.")
-            .containsExactly(
+            .isNotNull()
+            .extracting(OrdersToSend::getValue)
+            .isEqualTo(List.of(
                 OrderToShareCollection.builder()
                     .value(OrderToShare.builder()
                         .documentId("documentUrl1")
@@ -519,7 +520,9 @@ class GeneralOrderServiceTest {
                         .hasSupportingDocuments(YesOrNo.NO)
                         .attachmentsToShare(List.of())
                         .build())
-                    .build());
+                    .build()
+            ));
+
     }
 
     @Test
