@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -163,7 +163,7 @@ class DraftOrderServiceTest {
             .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
-            .attachments(List.of(CaseDocumentCollection.builder().value(attachment1).build()))
+            .attachments(List.of(DocumentCollection.builder().value(attachment1).build()))
             .build();
 
         UploadAgreedDraftOrder uploadOrder1 = UploadAgreedDraftOrder.builder()
@@ -199,8 +199,8 @@ class DraftOrderServiceTest {
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
-                CaseDocumentCollection.builder().value(attachment1).build(),
-                CaseDocumentCollection.builder().value(attachment2).build()
+                DocumentCollection.builder().value(attachment1).build(),
+                DocumentCollection.builder().value(attachment2).build()
             ))
             .build();
 
