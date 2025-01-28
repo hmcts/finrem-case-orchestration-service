@@ -87,7 +87,10 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         CaseDetails oldCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
+
+        // Call to caseDataService to set PowerBI tracking fields.
         caseDataService.setFinancialRemediesCourtDetails(oldCaseDetails);
+
         caseData = finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();

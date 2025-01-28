@@ -173,7 +173,13 @@ public class CaseDataService {
         return buildFullName(caseDetails.getData(), INTERVENER4_FIRST_MIDDLE_NAME, INTERVENER4_LAST_NAME);
     }
 
-
+    /**
+     * Sets PowerBI fields used for tracking and gather statistics.
+     * Note that these tracking fields are used both consented and contested application
+     * in-spite of the 'Consent_Order_FRC...' naming.
+     *
+     * @param caseDetails
+     */
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void setFinancialRemediesCourtDetails(CaseDetails caseDetails) {
         Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());

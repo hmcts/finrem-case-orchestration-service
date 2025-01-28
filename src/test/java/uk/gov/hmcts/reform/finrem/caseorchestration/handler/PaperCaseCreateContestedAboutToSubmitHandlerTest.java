@@ -154,6 +154,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
+        // Verify call to caseDataService to set PowerBI tracking fields.
         verify(caseDataService,times(1)).setFinancialRemediesCourtDetails(any(CaseDetails.class));
     }
 }
