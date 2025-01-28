@@ -58,7 +58,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
-
         SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderWrapper().getSendOrderPostStateOption();
         if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
             caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(null);
