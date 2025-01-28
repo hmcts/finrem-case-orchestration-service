@@ -178,7 +178,7 @@ public class CaseDataService {
      * Note that these tracking fields are used both consented and contested application
      * in-spite of the 'Consent_Order_FRC...' naming.
      *
-     * @param caseDetails
+     * @param caseDetails the case data as a {@code Map<String, Object>}
      */
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public void setFinancialRemediesCourtDetails(CaseDetails caseDetails) {
