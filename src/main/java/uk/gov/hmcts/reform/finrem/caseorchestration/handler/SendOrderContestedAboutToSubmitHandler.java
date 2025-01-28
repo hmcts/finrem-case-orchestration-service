@@ -407,7 +407,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private String formatOrderToShare(OrderToShare o) {
-        return format("%s|%s ===> [%s]", o.getDocumentId(), o.getDocumentName(), formatSelectedAttachment(o));
+        return format("(%s|%s)+[%s]", o.getDocumentId(), o.getDocumentName(), formatSelectedAttachment(o));
     }
 
     private String formatOrderToShareList(List<OrderToShare> selectedOrders) {

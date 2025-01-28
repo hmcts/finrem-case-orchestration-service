@@ -194,18 +194,18 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
-        List<CaseDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
+        List<CaseDocument> legacyDocs = new ArrayList<>();
+        legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(legacyDocs, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(caseDocument());
+            .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -216,9 +216,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getAppOrderCollection());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertClearTempFields(caseData);
-        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: "
-            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [],22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf ===> []) "
-            + "to parties: []");
+        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
+            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf)+[],"
+            + "(22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf)+[]"
+            + ") to parties: []");
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
@@ -241,18 +242,18 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .build();
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
-        data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
-        List<CaseDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(caseDocument());
+        data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
+        List<CaseDocument> legacyDocs = new ArrayList<>();
+        legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(legacyDocs, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
-            .thenReturn(caseDocument());
+            .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -278,7 +279,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setPartiesOnCase(getParties());
 
         OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
-        OrderToShare selected2 = OrderToShare.builder().documentId("app_docs.pdf").documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected2 = OrderToShare.builder().documentId(UUID_2).documentName("app_docs2.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
             .value(of(
                 OrderToShareCollection.builder().value(selected1).build(),
@@ -315,9 +316,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getRespOrderCollections().size());
         assertEquals(3, caseData.getOrdersSentToPartiesCollection().size());
-        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: "
-            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf ===> [],app_docs.pdf|app_docs2.pdf ===> []) "
-            + "to parties: [" + partyListInString() + "]");
+        assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
+            + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf)+[],"
+            + "(22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf)+[]"
+            + ") to parties: [" + partyListInString() + "]");
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(generalOrderService).isSelectedOrderMatches(any(), any());
@@ -418,8 +420,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 "http://fakeurl/2222NewFlow",
                 "http://fakeurl/orderApprovedCoverLetter");
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
-            + "uuid1|order1.pdf ===> [uuid3|attachment1.pdf],"
-            + "uuid2|order2.pdf ===> []"
+            + "(uuid1|order1.pdf)+[uuid3|attachment1.pdf],"
+            + "(uuid2|order2.pdf)+[]"
             + ") to parties: [" + partyListInString() + "]");
     }
 
@@ -470,10 +472,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setOrderApprovedCoverLetter(caseDocument("coversheet", "coversheet"));
+        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/coversheet", "coversheet"));
         data.setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
-        CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
+        CaseDocument caseDocument = caseDocument();
         DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
             .uploadDraftDocument(caseDocument)
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
@@ -560,8 +562,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     additionalHearingDocumentFilename,
                     additionalHearingDocumentUrl + "/binary"))
                 .orElse(null)));
-        when(genericDocumentService.stampDocument(
-            any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
+        when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
