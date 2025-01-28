@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeApprovedOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -109,10 +109,10 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document1), eq(AUTH_TOKEN), eq("123"))).thenReturn(pdfConverted1);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document2), eq(AUTH_TOKEN), eq("123"))).thenReturn(pdfConverted2);
 
-        JudgeApprovedOrderAdditionalDocumentsCollection additionalDocument1 = JudgeApprovedOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocument1 = DocumentCollection.builder()
             .value(document1)
             .build();
-        JudgeApprovedOrderAdditionalDocumentsCollection additionalDocument2 = JudgeApprovedOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocument2 = DocumentCollection.builder()
             .value(document2)
             .build();
 
@@ -123,8 +123,8 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         assertThat(response.getData().getDraftDirectionWrapper().getDraftDirectionOrderCollection())
             .isNotEmpty()
             .extracting(DraftDirectionOrderCollection::getValue)
-            .flatExtracting(DraftDirectionOrder::getJudgeApprovedOrderAdditionalDocumentsCollection)
-            .extracting(JudgeApprovedOrderAdditionalDocumentsCollection::getValue)
+            .flatExtracting(DraftDirectionOrder::getAdditionalDocuments)
+            .extracting(DocumentCollection::getValue)
             .containsExactlyInAnyOrder(pdfConverted1, pdfConverted2);
 
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
@@ -135,7 +135,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
-    private FinremCallbackRequest setupTestData(List<JudgeApprovedOrderAdditionalDocumentsCollection> additionalDocuments) {
+    private FinremCallbackRequest setupTestData(List<DocumentCollection> additionalDocuments) {
         CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
         //Create direction order with additional documents (if any)
@@ -143,7 +143,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
             DraftDirectionOrder.builder()
                 .purposeOfDocument("test")
                 .uploadDraftDocument(caseDocument)
-                .judgeApprovedOrderAdditionalDocumentsCollection(additionalDocuments)
+                .additionalDocuments(additionalDocuments)
                 .build();
 
         DraftDirectionOrderCollection directionOrderCollection = DraftDirectionOrderCollection.builder().value(directionOrder).build();

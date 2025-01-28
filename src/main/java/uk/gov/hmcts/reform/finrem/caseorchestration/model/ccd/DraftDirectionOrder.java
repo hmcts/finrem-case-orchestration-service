@@ -25,5 +25,5 @@ public class DraftDirectionOrder implements HasCaseDocument {
     CaseDocument uploadDraftDocument;
 
     @JsonProperty("additionalDocuments")
-    private List<JudgeApprovedOrderAdditionalDocumentsCollection> judgeApprovedOrderAdditionalDocumentsCollection;
+    private List<DocumentCollection> additionalDocuments;
 }

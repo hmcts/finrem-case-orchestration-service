@@ -32,7 +32,7 @@ public class UploadedDraftOrderCategoriser extends DocumentCategoriser {
         if (order != null && order.getUploadDraftDocument() != null && order.getUploadDraftDocument().getCategoryId() == null) {
             order.getUploadDraftDocument().setCategoryId(category.getDocumentCategoryId());
 
-            Optional.ofNullable(order.getJudgeApprovedOrderAdditionalDocumentsCollection())
+            Optional.ofNullable(order.getAdditionalDocuments())
                 .ifPresent(additionalDocuments -> additionalDocuments.forEach(document ->
                     document.getValue().setCategoryId(category.getDocumentCategoryId())
                 ));

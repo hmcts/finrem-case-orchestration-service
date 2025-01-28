@@ -81,7 +81,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
         List<DraftDirectionOrderCollection> directionOrderCollection = caseData.getDraftDirectionWrapper().getDraftDirectionOrderCollection();
 
-        directionOrderCollection.stream().map(order -> order.getValue().getJudgeApprovedOrderAdditionalDocumentsCollection())
+        directionOrderCollection.stream().map(order -> order.getValue().getAdditionalDocuments())
             .filter(CollectionUtils::isNotEmpty).forEach(additionalDocs -> additionalDocs.forEach(additionalDoc -> {
                 CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
                     additionalDoc.getValue(), authorisation,
