@@ -374,8 +374,7 @@ public class GeneralOrderService {
         final List<CaseDocument> newOrders = new ArrayList<>();
 
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
-        List<FinalisedOrderCollection> finalisedOrders = ofNullable(caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection())
-            .orElse(List.of());
+        List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
@@ -447,7 +446,7 @@ public class GeneralOrderService {
             emptyIfNull(selected.getAttachmentsToShare()).stream()
                 .map(AttachmentToShareCollection::getValue)
                 .filter(this::isAttachmentSelected)
-                .forEach(attachmentSelected -> addToOrders(attachmentSelected, orderCollections.stream()
+                .forEach(attachmentSelected -> addToOrders(attachmentSelected, emptyIfNull(orderCollections).stream()
                         .map(WithAttachmentsCollection::getValue)
                         .flatMap(d -> emptyIfNull(d.getAttachments()).stream())
                         .map(DocumentCollection::getValue).toList(),
