@@ -247,9 +247,10 @@ public class GeneralOrderService {
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
-            hearingOrderDocuments.forEach(obj ->
-                appendOrderToShareCollection(orderToShareCollection, obj.getValue().getUploadDraftDocument(),
-                    "Case documents tab [Approved Order] - %s"));
+            hearingOrderDocuments.stream().map(DirectionOrderCollection::getValue).forEach(directionOrder ->
+                appendOrderToShareCollection(orderToShareCollection, directionOrder.getUploadDraftDocument(),
+                    "Case documents tab [Approved Order] - %s",
+                    emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)));
         }
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
