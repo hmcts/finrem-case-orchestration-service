@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
@@ -1577,6 +1578,40 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         // Assert
         verify(emailService).sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToAdmin() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+        NotificationRequest request = NotificationRequest.builder()
+            .caseReferenceNumber("123456789")
+            .notificationEmail("test@test.com")
+            .build();
+
+        notificationService.sendContestedReadyToReviewOrderToAdmin(request);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("test@test.com", actual.getNotificationEmail());
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToAdminToFrcDisabled() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
+        NotificationRequest nr = NotificationRequest.builder()
+            .caseReferenceNumber("123456789")
+            .notificationEmail("test@test.com")
+            .build();
+
+        notificationService.sendContestedReadyToReviewOrderToAdmin(nr);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("fr_applicant_solicitor1@mailinator.com", actual.getNotificationEmail());
     }
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
