@@ -465,11 +465,11 @@ public class GeneralOrderService {
             emptyIfNull(selected.getAttachmentsToShare()).stream()
                 .map(AttachmentToShareCollection::getValue)
                 .filter(this::isAttachmentSelected)
-                .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections).stream()
-                        .map(WithAttachmentsCollection::getValue)
-                            .flatMap(d -> emptyIfNull(d.getAttachments()).stream())
-                            .map(DocumentCollection::getValue).toList(),
-                        d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
+                .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections)
+                    .stream()
+                    .map(WithAttachmentsCollection::getValue)
+                    .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollection::getValue)
+                    .toList(), d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
         }
         return orderAdded != null;
     }
