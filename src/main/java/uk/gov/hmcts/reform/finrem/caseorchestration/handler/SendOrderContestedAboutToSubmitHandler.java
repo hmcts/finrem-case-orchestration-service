@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
@@ -44,6 +46,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.sendorder.SendOrderP
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -94,8 +97,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = getCaseId(caseDetails);
-        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            callbackRequest.getEventType(), callbackRequest.getEventType(), caseId);
+        log.info("Invoking contested event {}, callback {} callback for Case ID: {}", callbackRequest.getEventType(), callbackRequest.getEventType(),
+            caseId);
 
         FinremCaseData caseData = caseDetails.getData();
         try {
@@ -109,16 +112,18 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             handleAdditionalDocumentUploadedInSendOrderEvent(caseDetails, printOrderCollection, userAuthorisation);
             shareAndSendGeneralOrderWithSelectedParties(caseDetails, parties, selectedOrders, printOrderCollection);
 
-            Pair<List<CaseDocument>, List<CaseDocument>> hearingOrders = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
+            Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrders
+                = generalOrderService.hearingOrdersToShare(caseDetails, selectedOrders);
             List<CaseDocument> legacyHearingOrders = hearingOrders.getLeft();
-            List<CaseDocument> newProcessedOrders = hearingOrders.getRight();
+            List<CaseDocument> newProcessedOrders = hearingOrders.getMiddle();
+            Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = hearingOrders.getRight();
 
             if (hasApprovedOrdersToBeSent(legacyHearingOrders, newProcessedOrders)) {
                 // Add order approved cover letter and add orders (legacy and new) to printOrderCollection
                 shareAndSendHearingDocuments(caseDetails, concat(legacyHearingOrders.stream(), newProcessedOrders.stream()).toList(),
                     parties, printOrderCollection, userAuthorisation);
 
-                stampLegacyHearingOrders(caseDetails, legacyHearingOrders, userAuthorisation);
+                stampLegacyHearingOrdersAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrders, order2AttachmentMap, userAuthorisation);
 
                 // handling processed orders
                 moveApprovedDocumentsToFinalisedOrder(caseData, newProcessedOrders);
@@ -160,13 +165,15 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         }
     }
 
-    private void stampLegacyHearingOrders(FinremCaseDetails caseDetails, List<CaseDocument> legacyHearingOrders, String userAuthorisation) {
+    private void stampLegacyHearingOrdersAndPopulateFinalOrderCollection(FinremCaseDetails caseDetails, List<CaseDocument> legacyHearingOrders,
+                                                                         Map<CaseDocument, List<CaseDocument>> order2AttachmentMap,
+                                                                         String userAuthorisation) {
         if (!legacyHearingOrders.isEmpty()) {
             log.info("Going to stamp stamp legacy orders on Case ID: {}", getCaseId(caseDetails));
             // stamping legacy approved orders and add it to legacy finalised collection
             legacyHearingOrders.forEach(orderToStamp -> {
                 log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, getCaseId(caseDetails));
-                stampAndAddToCollection(caseDetails, orderToStamp, userAuthorisation);
+                stampAndAddToCollection(caseDetails, orderToStamp, order2AttachmentMap.get(orderToStamp), userAuthorisation);
             });
         }
     }
@@ -352,7 +359,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         }
     }
 
-    private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder, String authToken) {
+    private void stampAndAddToCollection(FinremCaseDetails caseDetails, CaseDocument latestHearingOrder, List<CaseDocument> additionalAttachments,
+                                         String authToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> finalOrderCollection = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, latestHearingOrder)) {
@@ -361,7 +369,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 StampType stampType = documentHelper.getStampType(caseData);
                 CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType, getCaseId(caseDetails));
                 log.info("Stamped Documents = {} for caseId {}", stampedDocs, getCaseId(caseDetails));
-                finalOrderCollection.add(prepareFinalOrderList(stampedDocs));
+                finalOrderCollection.add(prepareFinalOrderList(stampedDocs, additionalAttachments));
                 log.info("If Existing final order collection = {}", finalOrderCollection);
             }
             caseData.setFinalOrderCollection(finalOrderCollection);
@@ -393,11 +401,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             .build();
     }
 
-    private DirectionOrderCollection prepareFinalOrderList(CaseDocument document) {
+    private DirectionOrderCollection prepareFinalOrderList(CaseDocument document, List<CaseDocument> additionalDocuments) {
         return DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(document)
                 .orderDateTime(LocalDateTime.now())
                 .isOrderStamped(YesOrNo.YES)
+                .additionalDocuments(additionalDocuments == null || additionalDocuments.isEmpty() ? null : additionalDocuments.stream()
+                    .map(a -> DocumentCollection.builder().value(a).build()).toList())
                 .build())
             .build();
     }

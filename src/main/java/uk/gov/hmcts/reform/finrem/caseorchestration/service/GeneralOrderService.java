@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -357,23 +358,32 @@ public class GeneralOrderService {
     }
 
     /**
-     * Processes the selected hearing orders and categorizes them into legacy and new orders.
+     * Categorizes hearing orders to share into legacy orders, new orders, and a mapping of orders to their attachments.
      *
-     * <p>This method takes a list of selected orders and categorizes them into legacy or new
-     * orders based on their type and status. It assumes that the provided {@code selectedOrders}
-     * should have a value of 'Yes' in {@code documentToShare}; however, the filtering logic
-     * applies regardless of this assumption.</p>
+     * <p>This method processes selected orders and determines whether they belong to:
+     * <ul>
+     *   <li>Legacy orders: Previously uploaded hearing orders.</li>
+     *   <li>New orders: Finalized or processed draft orders.</li>
+     *   <li>Order-to-attachment map: A mapping between a case document and its related attachments.</li>
+     * </ul>
+     * It filters orders based on whether they are marked to be shared and logs a warning if an unexpected value is encountered.</p>
      *
-     * @param caseDetails    the case details containing the case data
-     * @param selectedOrders the list of orders selected to be shared
-     * @return a pair containing two lists of case documents:
-     *         - the first list contains legacy orders,
-     *         - the second list contains new orders
+     * @param caseDetails      the case details containing all relevant case data
+     * @param selectedOrders   the list of orders selected for sharing
+     * @return a {@link Triple} containing:
+     *         <ul>
+     *           <li>First: List of legacy hearing orders ({@code List<CaseDocument>}).</li>
+     *           <li>Second: List of new hearing orders ({@code List<CaseDocument>}).</li>
+     *           <li>Third: A mapping of orders to their corresponding attachments ({@code Map<CaseDocument, List<CaseDocument>>}).</li>
+     *         </ul>
      */
-    public Pair<List<CaseDocument>, List<CaseDocument>> hearingOrdersToShare(FinremCaseDetails caseDetails, List<OrderToShare> selectedOrders) {
+    public Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrdersToShare(
+        FinremCaseDetails caseDetails, List<OrderToShare> selectedOrders) {
+
         FinremCaseData caseData = caseDetails.getData();
         final List<CaseDocument> legacyOrders = new ArrayList<>();
         final List<CaseDocument> newOrders = new ArrayList<>();
+        final Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = new HashMap<>();
 
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
         List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
@@ -386,16 +396,16 @@ public class GeneralOrderService {
                     + " however, this logic filters them regardless.");
             }
             selectedOrders.stream().filter(o -> YesOrNo.isYes(o.getDocumentToShare())).forEach(selected -> {
-                boolean isProcessed = populateSelectedUploadHearingOrder(legacyOrders, hearingOrders, selected);
+                boolean isProcessed = populateSelectedUploadHearingOrder(legacyOrders, order2AttachmentMap, hearingOrders, selected);
                 if (!isProcessed) {
-                    isProcessed = populateSelectedFinalisedOrders(newOrders, finalisedOrders, selected);
+                    isProcessed = populateSelectedFinalisedOrders(newOrders, order2AttachmentMap, finalisedOrders, selected);
                 }
                 if (!isProcessed) {
-                    populateSelectedProcessedOrders(newOrders, agreedDraftOrderCollection, selected);
+                    populateSelectedProcessedOrders(newOrders, order2AttachmentMap, agreedDraftOrderCollection, selected);
                 }
             });
         }
-        return Pair.of(legacyOrders, newOrders);
+        return Triple.of(legacyOrders, newOrders, order2AttachmentMap);
     }
 
     public boolean isSelectedOrderMatches(List<OrderToShare> selectedDocs, ContestedGeneralOrder order) {
@@ -423,50 +433,74 @@ public class GeneralOrderService {
         });
     }
 
-    private boolean populateSelectedUploadHearingOrder(List<CaseDocument> orders, List<DirectionOrderCollection> hearingOrders,
-                                                       OrderToShare selected) {
-        return populateSelectedOrdersWithAttachment(orders, hearingOrders, hearingOrder
-            -> ((DirectionOrder) hearingOrder.getValue()).getUploadDraftDocument(), selected);
+    private boolean populateSelectedUploadHearingOrder(List<CaseDocument> matchingOrders,
+                                                       Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                       List<DirectionOrderCollection> hearingOrders, OrderToShare selected) {
+        return populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap, hearingOrders,
+            hearingOrder -> ((DirectionOrder) hearingOrder.getValue()).getUploadDraftDocument(), selected);
     }
 
-    private boolean populateSelectedFinalisedOrders(List<CaseDocument> orders, List<FinalisedOrderCollection> finalisedOrders,
-                                                    OrderToShare selected) {
-        return populateSelectedOrdersWithAttachment(orders, finalisedOrders, finalisedOrder
-            -> ((FinalisedOrder) finalisedOrder.getValue()).getFinalisedDocument(), selected);
+    private boolean populateSelectedFinalisedOrders(List<CaseDocument> matchingOrders,
+                                                    Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                    List<FinalisedOrderCollection> finalisedOrders, OrderToShare selected) {
+        return populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap, finalisedOrders,
+            finalisedOrder -> ((FinalisedOrder) finalisedOrder.getValue()).getFinalisedDocument(), selected);
     }
 
-    private void populateSelectedProcessedOrders(List<CaseDocument> orders, List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
-                                                 OrderToShare selected) {
-        populateSelectedOrdersWithAttachment(orders, agreedDraftOrderCollection, obj -> ((AgreedDraftOrder) obj.getValue()).getTargetDocument(),
-            selected);
+    private void populateSelectedProcessedOrders(List<CaseDocument> matchingOrders, Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                 List<AgreedDraftOrderCollection> agreedDraftOrderCollection, OrderToShare selected) {
+        populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap,
+            agreedDraftOrderCollection, agreedDraftOrder -> ((AgreedDraftOrder) agreedDraftOrder.getValue()).getTargetDocument(), selected);
     }
 
-    private boolean populateSelectedOrdersWithAttachment(List<CaseDocument> orders, List<? extends WithAttachmentsCollection> orderCollections,
+    private boolean populateSelectedOrdersWithAttachment(List<CaseDocument> matchingOrders,
+                                                         Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                         List<? extends WithAttachmentsCollection> orderCollections,
                                                          Function<WithAttachmentsCollection, CaseDocument> documentExtractor, OrderToShare selected) {
-        boolean ret = addToOrders(selected, orderCollections, documentExtractor, orders);
+        CaseDocument orderAdded = collectMatchingDocument(selected, orderCollections, documentExtractor, matchingOrders);
 
         if (selected.shouldIncludeSupportingDocuments()) {
+            matchingOrder2AttachmentMap.put(orderAdded, new ArrayList<>());
+
             emptyIfNull(selected.getAttachmentsToShare()).stream()
                 .map(AttachmentToShareCollection::getValue)
                 .filter(this::isAttachmentSelected)
-                .forEach(attachmentSelected -> addToOrders(attachmentSelected, emptyIfNull(orderCollections).stream()
+                .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections).stream()
                         .map(WithAttachmentsCollection::getValue)
-                        .flatMap(d -> emptyIfNull(d.getAttachments()).stream())
-                        .map(DocumentCollection::getValue).toList(),
-                    d -> d, orders));
+                            .flatMap(d -> emptyIfNull(d.getAttachments()).stream())
+                            .map(DocumentCollection::getValue).toList(),
+                        d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
         }
-        return ret;
+        return orderAdded != null;
     }
 
-    private <T> boolean addToOrders(DocumentIdProvider selected, List<? extends T> collection, Function<T, CaseDocument> documentExtractor,
-                                    List<CaseDocument> orders) {
+    /**
+     * Adds a matching document from the given collection to the matchingDocuments list.
+     *
+     * <p>Finds the first document in the collection that matches the selected document ID
+     * and adds it to the matchingDocuments list. If a matching document is found and added, it is returned;
+     * otherwise, returns {@code null}.</p>
+     *
+     * @param <T> the type of elements in the collection
+     * @param selected the document ID provider to match against
+     * @param collection the list of elements containing documents
+     * @param documentExtractor a function to extract a {@link CaseDocument} from an element
+     * @param matchingDocuments the list to which the matching document should be added
+     * @return the added {@link CaseDocument}, or {@code null} if no matching document is found
+     */
+    private <T> CaseDocument collectMatchingDocument(DocumentIdProvider selected, List<? extends T> collection,
+                                                     Function<T, CaseDocument> documentExtractor,
+                                                     List<CaseDocument> matchingDocuments) {
         return emptyIfNull(collection).stream()
             .map(documentExtractor)
             .filter(Objects::nonNull)
             .filter(caseDocument -> getDocumentId(caseDocument).equals(selected.getDocumentId()))
             .findFirst()
-            .map(orders::add)
-            .orElse(false);
+            .map(caseDocument -> {
+                matchingDocuments.add(caseDocument);
+                return caseDocument;
+            })
+            .orElse(null);
     }
 
     private boolean isAttachmentSelected(AttachmentToShare attachmentToShare) {
