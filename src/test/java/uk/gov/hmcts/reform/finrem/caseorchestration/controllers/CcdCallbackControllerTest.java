@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
@@ -27,7 +27,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
     private static final String COS_ABOUT_TO_SUBMIT_ENDPOINT = "/case-orchestration/ccdAboutToSubmitEvent";
     private static final String COS_SUBMITTED_ENDPOINT = "/case-orchestration/ccdSubmittedEvent";
 
-    @MockBean
+    @MockitoBean
     private CallbackDispatchService callbackDispatchService;
 
 
