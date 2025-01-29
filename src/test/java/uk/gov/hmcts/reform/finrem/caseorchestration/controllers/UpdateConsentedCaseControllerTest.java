@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -38,13 +38,13 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
     private JsonNode requestContent;
 
-    @MockBean
+    @MockitoBean
     private UpdateContactDetailsService updateContactDetailsService;
 
-    @MockBean
+    @MockitoBean
     private UpdateRepresentationWorkflowService mockNocWorkflowService;
 
-    @MockBean
+    @MockitoBean
     private FeatureToggleService featureToggleService;
 
     @Before

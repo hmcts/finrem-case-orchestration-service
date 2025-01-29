@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -41,13 +41,13 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     @Autowired
     private UploadApprovedOrderService uploadApprovedOrderService;
 
-    @MockBean
+    @MockitoBean
     private HearingOrderService hearingOrderService;
-    @MockBean
+    @MockitoBean
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    @MockBean
+    @MockitoBean
     private AdditionalHearingDocumentService additionalHearingDocumentService;
-    @MockBean
+    @MockitoBean
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     @Test

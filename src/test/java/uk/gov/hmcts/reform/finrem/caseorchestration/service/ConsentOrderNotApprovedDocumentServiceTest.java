@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -54,13 +54,13 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String COVER_LETTER_BINARY_URL = "cover_letter_url/binary";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
 
-    @MockBean
+    @MockitoBean
     private DocumentOrderingService documentOrderingService;
 
-    @MockBean
+    @MockitoBean
     private DocumentHelper documentHelper;
 
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
 
     @InjectMocks

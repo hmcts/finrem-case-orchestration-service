@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -33,9 +33,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
     private static final String PBA_CONFIRMATION_URL = "/case-orchestration/payment-confirmation";
 
-    @MockBean
+    @MockitoBean
     private PaymentConfirmationService paymentConfirmationService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     @Before

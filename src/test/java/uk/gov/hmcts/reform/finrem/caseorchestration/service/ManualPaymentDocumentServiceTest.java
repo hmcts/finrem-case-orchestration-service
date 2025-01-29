@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -39,7 +39,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     private ManualPaymentDocumentService manualPaymentDocumentService;
     @Autowired
     private ObjectMapper mapper;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
