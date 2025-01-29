@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -88,31 +88,31 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     @Autowired
     private UpdateRepresentationService updateRepresentationService;
 
-    @MockBean
+    @MockitoBean
     private AuditEventService auditEventService;
 
-    @MockBean
+    @MockitoBean
     private IdamAuthService idamClient;
 
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
-    @MockBean
+    @MockitoBean
     private PrdOrganisationService organisationService;
 
-    @MockBean
+    @MockitoBean
     private UpdateSolicitorDetailsService updateSolicitorDetailsService;
 
-    @MockBean
+    @MockitoBean
     private ChangeOfRepresentationService changeOfRepresentationService;
 
-    @MockBean
+    @MockitoBean
     private AddedSolicitorService addedSolicitorService;
 
-    @MockBean
+    @MockitoBean
     private RemovedSolicitorService removedSolicitorService;
 
-    @MockBean
+    @MockitoBean
     private BarristerRepresentationChecker barristerRepresentationChecker;
 
     private UserDetails testAppSolicitor;

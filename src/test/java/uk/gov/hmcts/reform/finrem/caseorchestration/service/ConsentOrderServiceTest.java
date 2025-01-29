@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -48,7 +48,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     @Autowired
     private ConsentOrderService consentOrderService;
 
-    @MockBean
+    @MockitoBean
     private BulkPrintDocumentService service;
 
     private CallbackRequest callbackRequest;

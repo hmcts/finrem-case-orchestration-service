@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -105,33 +105,33 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
     private NotificationsController notificationsController;
-    @MockBean
+    @MockitoBean
     private NocLetterNotificationService nocLetterNotificationService;
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
-    @MockBean
+    @MockitoBean
     private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
-    @MockBean
+    @MockitoBean
     private TransferCourtService transferCourtService;
-    @MockBean
+    @MockitoBean
     private FeatureToggleService featureToggleService;
-    @MockBean
+    @MockitoBean
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private DocumentConfiguration documentConfiguration;
-    @MockBean
+    @MockitoBean
     private DocumentHelper documentHelper;
-    @MockBean
+    @MockitoBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
-    @MockBean
+    @MockitoBean
     private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
-    @MockBean
+    @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @MockBean
+    @MockitoBean
     private InternationalPostalService postalService;
 
     @Override

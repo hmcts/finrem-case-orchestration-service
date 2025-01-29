@@ -8,7 +8,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -50,7 +50,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     @Rule
     public ExpectedException expectedException = none();
 
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
 
     @Captor

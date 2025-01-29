@@ -4,8 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -42,17 +42,17 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     @Autowired
     HearingOrderController hearingOrderController;
 
-    @MockBean
+    @MockitoBean
     private HearingOrderService hearingOrderService;
-    @MockBean
+    @MockitoBean
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
-    @MockBean
+    @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @MockBean
+    @MockitoBean
     private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     CallbackRequest request;

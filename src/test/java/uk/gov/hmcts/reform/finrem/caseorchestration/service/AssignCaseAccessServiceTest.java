@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -79,15 +79,15 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     @Autowired
     private AssignCaseAccessService assignCaseAccessService;
 
-    @MockBean
+    @MockitoBean
     private AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
-    @MockBean
+    @MockitoBean
     private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
-    @MockBean
+    @MockitoBean
     private RestService restService;
-    @MockBean
+    @MockitoBean
     private SystemUserService systemUserService;
 
     @ClassRule
