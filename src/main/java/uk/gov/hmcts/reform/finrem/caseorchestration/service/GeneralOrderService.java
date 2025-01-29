@@ -459,7 +459,7 @@ public class GeneralOrderService {
                                                          Function<WithAttachmentsCollection, CaseDocument> documentExtractor, OrderToShare selected) {
         CaseDocument orderAdded = collectMatchingDocument(selected, orderCollections, documentExtractor, matchingOrders);
 
-        if (selected.shouldIncludeSupportingDocuments()) {
+        if (orderAdded != null && selected.shouldIncludeSupportingDocuments()) {
             matchingOrder2AttachmentMap.put(orderAdded, new ArrayList<>());
 
             emptyIfNull(selected.getAttachmentsToShare()).stream()

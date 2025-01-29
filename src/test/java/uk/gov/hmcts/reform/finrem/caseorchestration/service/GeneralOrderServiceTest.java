@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -420,10 +420,12 @@ class GeneralOrderServiceTest {
         data.getSendOrderWrapper().setOrdersToSend(toOrdersToSend(caseDocument, selectList));
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().data(data).build();
-        Pair<List<CaseDocument>, List<CaseDocument>> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
+        Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> documentList
+            = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
         assertThat(documentList.getLeft()).as("One document available to share with other parties").hasSize(1);
-        assertThat(documentList.getRight()).as("No document available to share with other parties").isEmpty();
+        assertThat(documentList.getMiddle()).as("No document available to share with other parties").isEmpty();
+        assertThat(documentList.getRight()).as("One document available to share with other parties").isEmpty();
     }
 
     @Test
@@ -552,8 +554,8 @@ class GeneralOrderServiceTest {
                 .build())
             .build();
 
-        Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
-            List.of(
+        Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> actual = generalOrderService
+            .hearingOrdersToShare(caseDetails, List.of(
                 OrderToShare.builder().documentToShare(YesOrNo.YES)
                     .documentId("22222222-c524-4614-86e5-c569f82c718d")
                     .includeSupportingDocument(List.of(Yes.YES))
@@ -567,7 +569,8 @@ class GeneralOrderServiceTest {
             ));
 
         assertThat(actual.getLeft()).isEmpty();
-        assertThat(actual.getRight()).containsExactly(expectedCaseDocument, expectedAttachment);
+        assertThat(actual.getMiddle()).containsExactly(expectedCaseDocument);
+        assertThat(actual.getRight()).containsEntry(expectedCaseDocument, List.of(expectedAttachment));
     }
 
     @Test
@@ -652,8 +655,8 @@ class GeneralOrderServiceTest {
                 .build())
             .build();
 
-        Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
-            List.of(
+        Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> actual = generalOrderService
+            .hearingOrdersToShare(caseDetails, List.of(
                 OrderToShare.builder().documentToShare(YesOrNo.YES).documentId("00000000-c524-4614-86e5-c569f82c718d").build(),
                 OrderToShare.builder().documentToShare(YesOrNo.YES)
                     .documentId("11111111-c524-4614-86e5-c569f82c718d")
@@ -684,11 +687,11 @@ class GeneralOrderServiceTest {
 
         assertThat(actual.getLeft())
             .containsExactly(expectedCaseDocument4);
-        assertThat(actual.getRight())
-            .containsExactly(expectedCaseDocument1,
-                expectedCaseDocument2, expectedAttachment1,
-                expectedCaseDocument3, expectedAttachment2,
-                expectedCaseDocument5);
+        assertThat(actual.getMiddle())
+            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3, expectedCaseDocument5);
+        assertThat(actual.getRight()).containsExactlyInAnyOrderEntriesOf(
+            Map.of(expectedCaseDocument2, List.of(expectedAttachment1),
+                expectedCaseDocument3, List.of(expectedAttachment2)));
     }
 
     @Test
