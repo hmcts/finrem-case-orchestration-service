@@ -59,8 +59,8 @@ public class HearingOrderService {
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
                 authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
-            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken);
             List<DocumentCollection> additionalDocs = judgeApprovedHearingOrder.get().getAdditionalDocuments();
+            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken, additionalDocs);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder, additionalDocs);
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
@@ -174,13 +174,15 @@ public class HearingOrderService {
 
     public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData,
                                                               CaseDocument stampedHearingOrder,
-                                                              String authorisationToken) {
+                                                              String authorisationToken,
+                                                              List<DocumentCollection> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = documentHelper.getFinalOrderCollection(caseData);
         List<DirectionOrderCollection> finalDatedCollection = orderDateService.addCreatedDateInFinalOrder(finalOrderCollection, authorisationToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
             DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
                     .uploadDraftDocument(stampedHearingOrder)
+                    .additionalDocuments(additionalDocs)
                     .orderDateTime(LocalDateTime.now())
                     .isOrderStamped(YesOrNo.YES)
                     .build())
