@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 
 import java.util.List;
@@ -27,6 +28,9 @@ public class UploadAgreedDraftOrder {
 
     @JsonProperty("hearingDetails")
     private DynamicList hearingDetails;
+
+    @JsonProperty("judgeKnownAtHearing")
+    private YesOrNo judgeKnownAtHearing;
 
     @JsonProperty("judge")
     private String judge;

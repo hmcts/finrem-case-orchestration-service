@@ -158,7 +158,7 @@ public class DraftOrderService {
         }
 
         // ensure non-null judge
-        if (uploadAgreedDraftOrder.getJudge() == null) {
+        if (YesOrNo.YES.equals(uploadAgreedDraftOrder.getJudgeKnownAtHearing()) && uploadAgreedDraftOrder.getJudge() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(),
                 format("Unexpected null judge for Case ID: %s", finremCaseData.getCcdCaseId()));
         }
@@ -176,7 +176,7 @@ public class DraftOrderService {
             .filter(dor -> dor.getHearingType().equals(hearingType)
                 && dor.getHearingDate().equals(hearingDate)
                 && dor.getHearingTime().equals(hearingTime)
-                && dor.getHearingJudge().equals(hearingJudge))
+                && Objects.equals(dor.getHearingJudge(), hearingJudge))
             .findFirst()
             .orElse(null);
 
