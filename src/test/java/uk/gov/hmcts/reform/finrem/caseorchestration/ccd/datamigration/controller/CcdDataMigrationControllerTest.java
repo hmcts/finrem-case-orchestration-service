@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 
@@ -58,7 +58,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Autowired
     private CcdDataMigrationController CcdDataMigrationController;
 
-    @MockBean
+    @MockitoBean
     private RemoveRespondentSolOrg removeRespondentSolOrg;
 
     @Test

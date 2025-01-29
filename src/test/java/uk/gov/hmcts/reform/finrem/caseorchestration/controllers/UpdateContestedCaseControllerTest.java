@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
@@ -60,9 +60,9 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     private JsonNode requestContent;
 
-    @MockBean
+    @MockitoBean
     private OnlineFormDocumentService onlineFormDocumentService;
-    @MockBean
+    @MockitoBean
     private CaseFlagsService caseFlagsService;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -80,7 +80,7 @@ public class ApplicantShareDocumentsServiceTest {
     private IntervenerShareDocumentsService intervenerShareDocumentsService;
     private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
-    @MockBean
+    @MockitoBean
     private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
 
     @Mock

@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 @ActiveProfiles("test-mock-feign-clients")
 public class FinremDocumentOrderingServiceTest extends BaseServiceTest {
 
-    @MockBean
+    @MockitoBean
     private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @Autowired
