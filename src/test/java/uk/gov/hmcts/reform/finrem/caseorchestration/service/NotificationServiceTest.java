@@ -7,10 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -132,17 +132,17 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired
     private CourtDetailsConfiguration courtDetailsConfiguration;
 
-    @MockBean
+    @MockitoBean
     private FeatureToggleService featureToggleService;
-    @MockBean
+    @MockitoBean
     private NotificationRequestMapper notificationRequestMapper;
-    @MockBean
+    @MockitoBean
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
-    @MockBean
+    @MockitoBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     private CallbackRequest callbackRequest;

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -36,13 +36,13 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
     @Autowired
     private ConsentHearingService service;
-    @MockBean
+    @MockitoBean
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
     @Autowired
     private ConsentedHearingHelper helper;

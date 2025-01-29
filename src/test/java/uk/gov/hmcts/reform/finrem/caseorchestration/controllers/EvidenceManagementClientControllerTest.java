@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
@@ -33,7 +33,8 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     private static final String EM_CLIENT_UPLOAD_URL = "http://localhost/case-orchestration/emclientapi/upload";
     public static final String CASE_ID = "123123123";
 
-    @MockBean private EvidenceManagementUploadService emUploadService;
+    @MockitoBean
+    private EvidenceManagementUploadService emUploadService;
     private static final String CASE_ID_HEADER = "caseTypeId";
 
     @Test

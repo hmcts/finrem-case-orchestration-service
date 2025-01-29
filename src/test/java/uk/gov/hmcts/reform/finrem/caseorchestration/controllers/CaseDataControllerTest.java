@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -47,11 +47,11 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Autowired
     private CaseDataController caseDataController;
 
-    @MockBean
+    @MockitoBean
     private UpdateSolicitorDetailsService updateSolicitorDetailsService;
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     protected CaseDetails caseDetails;
