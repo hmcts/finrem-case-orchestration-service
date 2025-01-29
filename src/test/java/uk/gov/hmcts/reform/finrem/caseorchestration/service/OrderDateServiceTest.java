@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
@@ -30,7 +30,7 @@ public class OrderDateServiceTest extends BaseServiceTest {
     public static final String TOKEN = "Token";
     @Autowired
     private OrderDateService orderDateService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementAuditService emService;
 
     @Before

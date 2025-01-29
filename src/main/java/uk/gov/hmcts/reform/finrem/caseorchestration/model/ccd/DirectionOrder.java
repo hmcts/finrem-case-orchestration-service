@@ -37,4 +37,5 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments {
     public List<DocumentCollection> getAttachments() {
         return additionalDocuments;
     }
+
 }

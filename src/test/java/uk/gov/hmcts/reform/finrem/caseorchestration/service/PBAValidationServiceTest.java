@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class PBAValidationServiceTest extends BaseServiceTest {
     @Autowired
     private PBAValidationService pbaValidationService;
 
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
 
     @ClassRule

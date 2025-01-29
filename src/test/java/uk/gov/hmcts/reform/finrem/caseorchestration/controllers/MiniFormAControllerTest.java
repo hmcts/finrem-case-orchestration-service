@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -41,14 +41,14 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     protected JsonNode requestContent;
 
-    @MockBean
+    @MockitoBean
     protected OnlineFormDocumentService documentService;
-    @MockBean
+    @MockitoBean
     protected IdamService idamService;
-    @MockBean
+    @MockitoBean
     protected CaseDataService caseDataService;
 
-    @MockBean
+    @MockitoBean
     protected DefaultsConfiguration defaultsConfiguration;
 
     protected String endpoint() {

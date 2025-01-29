@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -48,15 +48,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(ContestedDraftOrderNotApprovedController.class)
 public class ContestedDraftOrderNotApprovedControllerTest extends BaseControllerTest {
 
-    @MockBean
+    @MockitoBean
     private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
-    @MockBean
+    @MockitoBean
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
     private PaperNotificationService paperNotificationService;
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
-    @MockBean
+    @MockitoBean
     private DocumentHelper documentHelper;
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";

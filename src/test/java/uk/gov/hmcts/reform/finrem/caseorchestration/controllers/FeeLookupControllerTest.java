@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
@@ -36,9 +36,9 @@ public class FeeLookupControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
 
-    @MockBean
+    @MockitoBean
     private FeeService feeService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     private void doFeeLookupSetUp(ApplicationType applicationType) throws IOException, URISyntaxException {

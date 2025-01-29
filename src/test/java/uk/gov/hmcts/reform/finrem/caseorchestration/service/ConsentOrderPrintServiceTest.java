@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -74,20 +74,20 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private ObjectMapper mapper;
     @Autowired
     private ConsentOrderPrintService consentOrderPrintService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementAuditService evidenceManagementAuditService;
 
-    @MockBean
+    @MockitoBean
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean
+    @MockitoBean
     private GenerateCoverSheetService coverSheetService;
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @MockBean
+    @MockitoBean
     private DocumentOrderingService documentOrderingService;
 
     @Before

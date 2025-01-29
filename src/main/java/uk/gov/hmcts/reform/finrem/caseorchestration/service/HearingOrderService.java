@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -58,8 +59,9 @@ public class HearingOrderService {
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
                 authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
-            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken);
-            appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
+            List<DocumentCollection> additionalDocs = judgeApprovedHearingOrder.get().getAdditionalDocuments();
+            updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken, additionalDocs);
+            appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder, additionalDocs);
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
@@ -135,6 +137,7 @@ public class HearingOrderService {
                     genericDocumentService.convertDocumentIfNotPdfAlready(
                         draftOrder.getUploadDraftDocument(),
                         authorisationToken, caseId))
+                .additionalDocuments(draftOrder.getAdditionalDocuments())
                 .build());
 
         }
@@ -152,14 +155,14 @@ public class HearingOrderService {
             : draftDirectionOrderCollectionTail;
     }
 
-    private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document) {
+    private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document, List<DocumentCollection> additionalDocs) {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<CollectionElement<DirectionOrder>> directionOrders = Optional.ofNullable(caseData.get(HEARING_ORDER_COLLECTION))
             .map(this::convertToListOfDirectionOrder)
             .orElse(new ArrayList<>());
 
-        DirectionOrder newDirectionOrder = DirectionOrder.builder().uploadDraftDocument(document).build();
+        DirectionOrder newDirectionOrder = DirectionOrder.builder().uploadDraftDocument(document).additionalDocuments(additionalDocs).build();
         directionOrders.add(CollectionElement.<DirectionOrder>builder().value(newDirectionOrder).build());
 
         caseData.put(HEARING_ORDER_COLLECTION, directionOrders);
@@ -171,13 +174,15 @@ public class HearingOrderService {
 
     public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData,
                                                               CaseDocument stampedHearingOrder,
-                                                              String authorisationToken) {
+                                                              String authorisationToken,
+                                                              List<DocumentCollection> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = documentHelper.getFinalOrderCollection(caseData);
         List<DirectionOrderCollection> finalDatedCollection = orderDateService.addCreatedDateInFinalOrder(finalOrderCollection, authorisationToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
             DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
                     .uploadDraftDocument(stampedHearingOrder)
+                    .additionalDocuments(additionalDocs)
                     .orderDateTime(LocalDateTime.now())
                     .isOrderStamped(YesOrNo.YES)
                     .build())

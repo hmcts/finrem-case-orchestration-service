@@ -11,16 +11,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
@@ -28,7 +31,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfig
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
@@ -60,13 +65,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -137,31 +147,50 @@ public class ManageBarristersITest implements IntegrationTest {
 
     @Autowired
     private CcdCallbackController ccdCallbackController;
-
-    @MockBean
+    @MockitoBean
     private DataStoreClient dataStoreClient;
-    @MockBean
+    @MockitoBean
     private AuthTokenGenerator authTokenGenerator;
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
-    @MockBean
+    @MockitoBean
     private OrganisationApi organisationApi;
-    @MockBean
+    @MockitoBean
     private CaseDataApiV2 caseDataApiV2;
-    @MockBean
+    @MockitoBean
     private SystemUserService systemUserService;
-    @MockBean
-    BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
+    private BulkPrintService bulkPrintService;
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Captor
     private ArgumentCaptor<NotificationRequest> notificationRequestArgumentCaptor;
-    @MockBean
+    @MockitoBean
     private InternationalPostalService postalService;
+    @MockitoBean
+    private IdamAuthApi idamAuthApi;
+    @MockitoBean
+    private AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
+    @MockitoBean
+    private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
+    @MockitoBean
+    private RestService restService;
+    @MockitoBean
+    private CaseAssignmentApi caseAssignmentApi;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
+    @MockitoBean
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    @MockitoBean
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    @MockitoBean
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    @MockitoBean
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 

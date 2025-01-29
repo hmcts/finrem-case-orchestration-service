@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CcdDataStoreServiceConfiguration;
@@ -38,13 +38,13 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
     private static final String CASE_TYPE_ID = "FinancialRemedyMVP2";
     private static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
-    @MockBean
+    @MockitoBean
     IdamService idamService;
 
     @Autowired
     CcdDataStoreService ccdDataStoreService;
 
-    @MockBean
+    @MockitoBean
     CcdDataStoreServiceConfiguration ccdDataStoreServiceConfiguration;
 
     @Autowired
