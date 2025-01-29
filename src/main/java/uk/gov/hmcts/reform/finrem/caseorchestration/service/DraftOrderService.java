@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -120,11 +120,11 @@ public class DraftOrderService {
         ofNullable(uploadDraftOrder.getAgreedDraftOrderDocument()).ifPresent(builder::draftOrder);
 
         // Add additional attachments for orders only
-        List<CaseDocumentCollection> attachments = ofNullable(uploadDraftOrder.getAgreedDraftOrderAdditionalDocumentsCollection())
+        List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAgreedDraftOrderAdditionalDocumentsCollection())
             .orElse(List.of()).stream()
             .map(AgreedDraftOrderAdditionalDocumentsCollection::getValue)
             .filter(Objects::nonNull)
-            .map(value -> CaseDocumentCollection.builder().value(value).build())
+            .map(value -> DocumentCollection.builder().value(value).build())
             .toList();
         if (!attachments.isEmpty()) {
             builder.attachments(attachments);

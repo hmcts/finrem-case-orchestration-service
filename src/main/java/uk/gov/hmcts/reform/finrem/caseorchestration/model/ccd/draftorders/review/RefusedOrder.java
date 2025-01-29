@@ -10,9 +10,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 
 import java.time.LocalDate;
@@ -43,7 +43,7 @@ public class RefusedOrder implements HasCaseDocument {
 
     private OrderFiledBy orderFiledBy;
 
-    private List<CaseDocumentCollection> attachments;
+    private List<DocumentCollection> attachments;
 
     private String refusalJudge;
 

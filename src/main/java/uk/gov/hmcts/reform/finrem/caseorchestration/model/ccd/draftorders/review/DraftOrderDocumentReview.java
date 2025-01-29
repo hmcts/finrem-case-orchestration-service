@@ -8,11 +8,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingInstructionProcessable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 
@@ -34,7 +34,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
     private String submittedByEmail;
     private OrderFiledBy orderFiledBy;
     private String uploadedOnBehalfOf;
-    private List<CaseDocumentCollection> attachments;
+    private List<DocumentCollection> attachments;
     private String approvalJudge;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime approvalDate;

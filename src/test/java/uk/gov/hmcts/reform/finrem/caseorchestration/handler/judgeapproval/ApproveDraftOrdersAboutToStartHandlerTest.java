@@ -17,10 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -192,9 +192,9 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     private static final CaseDocument PSA_DOC_4 = CaseDocument.builder().documentFilename("samplePsaDocument4").build();
     private static final CaseDocument PSA_DOC_5 = CaseDocument.builder().documentFilename("samplePsaDocument5").build();
     private static final CaseDocument PSA_DOC_6 = CaseDocument.builder().documentFilename("samplePsaDocument6").build();
-    private static final CaseDocumentCollection DO_ATTACHMENT_1 = CaseDocumentCollection.builder()
+    private static final DocumentCollection DO_ATTACHMENT_1 = DocumentCollection.builder()
         .value(CaseDocument.builder().documentFilename("attachment1").build()).build();
-    private static final CaseDocumentCollection DO_ATTACHMENT_2 = CaseDocumentCollection.builder()
+    private static final DocumentCollection DO_ATTACHMENT_2 = DocumentCollection.builder()
         .value(CaseDocument.builder().documentFilename("attachment2").build()).build();
 
     private static DraftOrdersReview.DraftOrdersReviewBuilder applyHearingInfo1(DraftOrdersReview.DraftOrdersReviewBuilder builder) {
@@ -216,17 +216,17 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReviewWithoutSubmittedDate(CaseDocument draftOrderDocument,
-                                                                                                   List<CaseDocumentCollection> attachments) {
+                                                                                                   List<DocumentCollection> attachments) {
         return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, null);
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments) {
+                                                                               List<DocumentCollection> attachments) {
         return buildDraftOrderDocumentReview(draftOrderDocument, attachments, TO_BE_REVIEWED, LocalDateTime.now());
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments, OrderStatus orderStatus) {
+                                                                               List<DocumentCollection> attachments, OrderStatus orderStatus) {
         return buildDraftOrderDocumentReview(draftOrderDocument, attachments, orderStatus, LocalDateTime.now());
     }
 
@@ -235,7 +235,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
     }
 
     private static DraftOrderDocReviewCollection buildDraftOrderDocumentReview(CaseDocument draftOrderDocument,
-                                                                               List<CaseDocumentCollection> attachments, OrderStatus orderStatus,
+                                                                               List<DocumentCollection> attachments, OrderStatus orderStatus,
                                                                                LocalDateTime submittedDate) {
         return DraftOrderDocReviewCollection.builder()
             .value(DraftOrderDocumentReview.builder()
@@ -274,7 +274,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
 
     private static JudgeApproval buildJudgeApproval(JudgeApprovalDocType docType,
                                                     String hearingInfo, CaseDocument document,
-                                                    List<CaseDocumentCollection> attachments) {
+                                                    List<DocumentCollection> attachments) {
         return JudgeApproval.builder()
             .hearingInfo(hearingInfo)
             .hearingJudge("Mr Judge")
