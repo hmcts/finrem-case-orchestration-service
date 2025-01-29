@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -31,7 +30,6 @@ import java.util.stream.Stream;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RefusedOrderProcessor {
@@ -87,10 +85,6 @@ public class RefusedOrderProcessor {
 
                 JudgeType judgeType = ofNullable(draftOrdersWrapper.getExtraReportFieldsInput()).map(ExtraReportFieldsInput::getJudgeType)
                     .orElse(null);
-                if (judgeType == null) {
-                    log.warn("{} - Judge type was not captured and an empty string will be shown in the refusal order.",
-                        finremCaseDetails.getId());
-                }
 
                 RefusedOrder.RefusedOrderBuilder orderBuilder = RefusedOrder.builder()
                     .refusedDocument(refusalOrderConvertible.getRefusedDocument())
