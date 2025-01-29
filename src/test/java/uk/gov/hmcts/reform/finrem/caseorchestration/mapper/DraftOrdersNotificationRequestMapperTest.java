@@ -61,7 +61,79 @@ class DraftOrdersNotificationRequestMapperTest {
         assertEquals("judge@test.com", result.getNotificationEmail());
         assertEquals("Hamzah Tahir", result.getApplicantName());
         assertEquals("Anne Taylor", result.getRespondentName());
+    }
 
+    @Test
+    void testBuildAdminNotificationRequest() {
+        mockCourtDetailsConfiguration();
+        FinremCaseDetails caseDetails = createCaseDetails();
+
+        NotificationRequest notificationRequest = mapper.buildAdminReviewNotificationRequest(caseDetails,
+            LocalDate.of(2025, 1, 17));
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("receipient@test.com");
+        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
+        assertThat(notificationRequest.getApplicantName()).isEqualTo("Hamzah Tahir");
+        assertThat(notificationRequest.getRespondentName()).isEqualTo("Anne Taylor");
+        assertThat(notificationRequest.getHearingDate()).isEqualTo("17 January 2025");
+    }
+
+    @Test
+    void testBuildCaseworkerDraftOrderReviewOverdue() {
+        mockCourtDetailsConfiguration();
+        DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
+        FinremCaseDetails caseDetails = createCaseDetails(draftOrdersReview);
+
+        NotificationRequest notificationRequest = mapper.buildCaseworkerDraftOrderReviewOverdue(caseDetails,
+            draftOrdersReview);
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("receipient@test.com");
+        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
+        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
+        assertThat(notificationRequest.getApplicantName()).isEqualTo("Hamzah Tahir");
+        assertThat(notificationRequest.getRespondentName()).isEqualTo("Anne Taylor");
+        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
+        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
+        assertThat(notificationRequest.getJudgeName()).isEqualTo("judge@test.com");
+        assertThat(notificationRequest.getOldestDraftOrderDate()).isEqualTo("10 January 2024");
+    }
+
+    @Test
+    void testBuildRefusedDraftOrderOrPsaNotificationRequest() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview());
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
+                .submittedByEmail("hello@world.com")
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
+        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
+        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
+        assertThat(notificationRequest.getApplicantName()).isEqualTo("Hamzah Tahir");
+        assertThat(notificationRequest.getRespondentName()).isEqualTo("Anne Taylor");
+        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
+        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
+        assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
+        assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
+        assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
+        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
+        assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
+    }
+
+    private FinremCaseDetails createCaseDetails(DraftOrdersReview draftOrdersReview) {
+        FinremCaseDetails caseDetails = createCaseDetails();
+        caseDetails.getData().getDraftOrdersWrapper().setDraftOrdersReviewCollection(List.of(
+            DraftOrdersReviewCollection.builder()
+                .value(draftOrdersReview)
+                .build())
+        );
+        return caseDetails;
     }
 
     private FinremCaseDetails createCaseDetails() {
@@ -73,6 +145,7 @@ class DraftOrdersNotificationRequestMapperTest {
         String judgeEmail = "judge@test.com";
 
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .solicitorReference("A_RANDOM_STRING")
             .applicantFmName(applicantFirstName)
             .applicantLname(applicantLastName)
             .respondentFmName(respondentFirstName)
@@ -90,39 +163,13 @@ class DraftOrdersNotificationRequestMapperTest {
             .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseType(CaseType.CONTESTED)
             .contactDetailsWrapper(contactDetailsWrapper)
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
                     .judge(judgeEmail)
                     .hearingDetails(hearingDetails)
                     .build())
-                .build())
-            .build();
-
-        caseData.setCcdCaseType(CaseType.CONTESTED);
-
-        return FinremCaseDetails.builder()
-            .id(caseReference)
-            .data(caseData)
-            .build();
-    }
-
-    @Test
-    void testBuildCaseworkerDraftOrderReviewOverdue() {
-        CourtDetails courtDetails = mock(CourtDetails.class);
-        when(courtDetails.getEmail()).thenReturn("receipient@test.com");
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
-            LIVERPOOL_CIVIL_FAMILY_COURT.getSelectedCourtId(), courtDetails));
-
-        DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .applicantFmName("Charlie")
-                .applicantLname("Hull")
-                .respondentFmName("Stella")
-                .respondentLname("Hull")
                 .build())
             .regionWrapper(RegionWrapper.builder()
                 .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
@@ -132,31 +179,12 @@ class DraftOrdersNotificationRequestMapperTest {
                     .northWestFrcList(RegionNorthWestFrc.LIVERPOOL)
                     .build())
                 .build())
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .draftOrdersReviewCollection(List.of(
-                    DraftOrdersReviewCollection.builder()
-                        .value(draftOrdersReview)
-                        .build()
-                ))
-                .build())
             .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(45347643533535L)
+
+        return FinremCaseDetails.builder()
+            .id(caseReference)
             .data(caseData)
             .build();
-
-        NotificationRequest notificationRequest = mapper.buildCaseworkerDraftOrderReviewOverdue(caseDetails,
-            draftOrdersReview);
-
-        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("receipient@test.com");
-        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("45347643533535");
-        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
-        assertThat(notificationRequest.getApplicantName()).isEqualTo("Charlie Hull");
-        assertThat(notificationRequest.getRespondentName()).isEqualTo("Stella Hull");
-        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
-        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
-        assertThat(notificationRequest.getJudgeName()).isEqualTo("judge@test.com");
-        assertThat(notificationRequest.getOldestDraftOrderDate()).isEqualTo("10 January 2024");
     }
 
     private DraftOrdersReview createDraftOrdersReview() {
@@ -176,61 +204,10 @@ class DraftOrdersNotificationRequestMapperTest {
             .build();
     }
 
-    @Test
-    void testBuildRefusedDraftOrderOrPsaNotificationRequest() {
-        DraftOrdersReview draftOrdersReview = createDraftOrdersReview();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseType(CaseType.CONTESTED)
-            .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                .solicitorReference("A_RANDOM_STRING")
-                .applicantFmName("Charlie")
-                .applicantLname("Hull")
-                .respondentFmName("Stella")
-                .respondentLname("Hull")
-                .build())
-            .regionWrapper(RegionWrapper.builder()
-                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                    .courtListWrapper(DefaultCourtListWrapper.builder()
-                        .liverpoolCourtList(LIVERPOOL_CIVIL_FAMILY_COURT).build())
-                    .regionList(Region.NORTHWEST)
-                    .northWestFrcList(RegionNorthWestFrc.LIVERPOOL)
-                    .build())
-                .build())
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .draftOrdersReviewCollection(List.of(
-                    DraftOrdersReviewCollection.builder()
-                        .value(draftOrdersReview)
-                        .build()
-                ))
-                .build())
-            .build();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .id(45347643533535L)
-            .data(caseData)
-            .build();
-
-        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
-            RefusedOrder.builder()
-                .hearingDate(LocalDate.of(2024, 1, 5))
-                .refusalJudge("Peter Chapman")
-                .judgeFeedback("Judge Feedback")
-                .submittedBy("Mr. Uploader")
-                .submittedByEmail("hello@world.com")
-                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
-                .build());
-
-        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
-        assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("45347643533535");
-        assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
-        assertThat(notificationRequest.getApplicantName()).isEqualTo("Charlie Hull");
-        assertThat(notificationRequest.getRespondentName()).isEqualTo("Stella Hull");
-        assertThat(notificationRequest.getHearingDate()).isEqualTo("5 January 2024");
-        assertThat(notificationRequest.getSelectedCourt()).isEqualTo(RegionNorthWestFrc.LIVERPOOL.getValue());
-        assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
-        assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
-        assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
-        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
-        assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
+    private void mockCourtDetailsConfiguration() {
+        CourtDetails courtDetails = mock(CourtDetails.class);
+        when(courtDetails.getEmail()).thenReturn("receipient@test.com");
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
+            LIVERPOOL_CIVIL_FAMILY_COURT.getSelectedCourtId(), courtDetails));
     }
 }
