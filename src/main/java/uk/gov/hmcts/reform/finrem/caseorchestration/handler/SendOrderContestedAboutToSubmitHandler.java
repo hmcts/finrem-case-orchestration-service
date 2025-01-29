@@ -119,9 +119,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = hearingOrders.getRight();
 
             if (hasApprovedOrdersToBeSent(legacyHearingOrders, newProcessedOrders)) {
+                List<CaseDocument> caseDocumentsToShare = concat(
+                    concat(legacyHearingOrders.stream(), newProcessedOrders.stream()),
+                    order2AttachmentMap.values().stream().flatMap(List::stream)
+                ).toList();
+
                 // Add order approved cover letter and add orders (legacy and new) to printOrderCollection
-                shareAndSendHearingDocuments(caseDetails, concat(legacyHearingOrders.stream(), newProcessedOrders.stream()).toList(),
-                    parties, printOrderCollection, userAuthorisation);
+                shareAndSendHearingDocuments(caseDetails, caseDocumentsToShare, parties, printOrderCollection, userAuthorisation);
 
                 stampLegacyHearingOrdersAndPopulateFinalOrderCollection(caseDetails, legacyHearingOrders, order2AttachmentMap, userAuthorisation);
 
