@@ -139,8 +139,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData()).errors(List.of(e.getMessage())).build();
         }
-
-        clearTemporaryFields(caseData);
+        
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
