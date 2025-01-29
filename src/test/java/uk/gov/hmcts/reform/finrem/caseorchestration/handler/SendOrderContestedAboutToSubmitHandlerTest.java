@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -74,6 +75,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -444,7 +446,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setUploadHearingOrder(orderList);
         data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
-        OrderToShare selected1 = OrderToShare.builder().documentId("abc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected1 = OrderToShare.builder().documentId("legacyDoc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
             .value(of(
                 OrderToShareCollection.builder().value(selected1).build()
@@ -455,18 +457,30 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument()), List.of(),
-            Map.of()));
+
+        CaseDocument legacyDocCaseDocument = caseDocument("http://fakeurl/legacyDoc", "legacyDoc.pdf");
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1)))
+            .thenReturn(Triple.of(List.of(legacyDocCaseDocument), List.of(),
+                Map.of(legacyDocCaseDocument, List.of(caseDocument("http://fakeurl/legacyAttachment", "legacyAttachmentDoc.pdf")))));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
-            .thenReturn(caseDocument());
+            .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
-        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertThat(caseData.getFinalOrderCollection())
+            .map(DirectionOrderCollection::getValue)
+            .map(DirectionOrder::getUploadDraftDocument)
+            .map(CaseDocument::getDocumentUrl).containsExactlyInAnyOrder("http://abc/docurl", "http://fakeurl/stampedDoc");
+        assertThat(caseData.getFinalOrderCollection())
+            .map(DirectionOrderCollection::getValue)
+            .flatMap(o -> emptyIfNull(o.getAdditionalDocuments()))
+            .map(DocumentCollection::getValue)
+            .map(CaseDocument::getDocumentUrl)
+            .containsExactlyInAnyOrder("http://fakeurl/legacyAttachment");
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
