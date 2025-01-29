@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
@@ -55,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
@@ -81,7 +82,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 @Category(IntegrationTest.class)
 public class EmailServiceTest {
 
-    @MockBean
+    @MockitoBean
     private EmailClient mockClient;
 
     @Autowired
@@ -674,6 +675,22 @@ public class EmailServiceTest {
 
         assertEquals(TEST_CASE_FAMILY_MAN_ID, returnedTemplateVars.get("caseReferenceNumber"));
         assertEquals("judge@email.com", returnedTemplateVars.get("notificationEmail"));
+        assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
+        assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
+        assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
+    }
+
+    @Test
+    public void givenAdminReadyToReviewTemplate_whenPopulateTemplateVars_thenAddHearingDateToTemplateVars() {
+        setContestedData();
+        notificationRequest.setHearingDate("1 January 2024");
+        notificationRequest.setNotificationEmail("admin@email.com");
+
+        Map<String, Object> returnedTemplateVars =
+            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name());
+
+        assertEquals(TEST_CASE_FAMILY_MAN_ID, returnedTemplateVars.get("caseReferenceNumber"));
+        assertEquals("admin@email.com", returnedTemplateVars.get("notificationEmail"));
         assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
         assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
         assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
