@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
@@ -143,11 +142,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                 collector.stream()
                     .filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder))
                     .map(DraftOrderDocReviewCollection::getValue)
-                    .forEach(toBeUpdated -> {
-                        CaseDocument originalDocument = toBeUpdated.getDraftOrderDocument();
+                    .forEach(draftOrderDocumentReview -> {
+                        CaseDocument originalDocument = draftOrderDocumentReview.getDraftOrderDocument();
                         CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
-                        toBeUpdated.setOrderStatus(PROCESSED);
-                        toBeUpdated.setDraftOrderDocument(stampedDocument);
+                        draftOrderDocumentReview.setOrderStatus(PROCESSED);
+                        draftOrderDocumentReview.setDraftOrderDocument(stampedDocument);
                     })
             );
     }
@@ -163,11 +162,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                 psaCollector.stream()
                     .filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder))
                     .map(PsaDocReviewCollection::getValue)
-                    .forEach(toBeUpdated -> {
-                        CaseDocument originalDocument = toBeUpdated.getPsaDocument();
+                    .forEach(psaDocumentReview -> {
+                        CaseDocument originalDocument = psaDocumentReview.getPsaDocument();
                         CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
-                        toBeUpdated.setOrderStatus(PROCESSED);
-                        toBeUpdated.setPsaDocument(stampedDocument);
+                        psaDocumentReview.setOrderStatus(PROCESSED);
+                        psaDocumentReview.setPsaDocument(stampedDocument);
                     })
             );
     }
@@ -182,8 +181,8 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             .forEach(unprocessedApprovedOrder ->
                 agreedOrderCollector.stream()
                     .filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
-                    .forEach(toBeUpdated -> {
-                        AgreedDraftOrder agreedDraftOrder = toBeUpdated.getValue();
+                    .map(AgreedDraftOrderCollection::getValue)
+                    .forEach(agreedDraftOrder -> {
                         if (agreedDraftOrder.getDraftOrder() != null) {
                             CaseDocument originalDocument = agreedDraftOrder.getDraftOrder();
                             CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
