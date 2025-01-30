@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -69,10 +70,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -146,7 +149,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of())).thenReturn(Pair.of(List.of(), List.of()));
+        when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of()))
+            .thenReturn(Triple.of(List.of(), List.of(), Map.of()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
@@ -202,7 +206,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(legacyDocs, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
+            Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
@@ -250,7 +255,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(legacyDocs, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
+            Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
@@ -295,9 +301,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Pair.of(caseDocuments, List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(caseDocuments, List.of(),
+            Map.of()));
         // below mocking is used for the second invocation on the event where the selectedDocs is cleared in the 1st about-to-submit logic.
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of())).thenReturn(Pair.of(List.of(), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of())).thenReturn(Triple.of(List.of(), List.of(), Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
@@ -401,8 +408,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         CaseDocument legacyApprovedOrder = null;
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2)))
-            .thenReturn(Pair.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111Legacy", "111.pdf")),
-                List.of(caseDocument("http://fakeurl/2222NewFlow", "222.pdf"))));
+            .thenReturn(Triple.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111Legacy", "111.pdf")),
+                List.of(caseDocument("http://fakeurl/2222NewFlow", "222.pdf")), Map.of()));
         when(documentHelper.getStampType(data)).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(legacyApprovedOrder, AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, "123"))
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
@@ -439,7 +446,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setUploadHearingOrder(orderList);
         data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
-        OrderToShare selected1 = OrderToShare.builder().documentId("abc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrderToShare selected1 = OrderToShare.builder().documentId("legacyDoc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
             .value(of(
                 OrderToShareCollection.builder().value(selected1).build()
@@ -450,17 +457,30 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+
+        CaseDocument legacyDocCaseDocument = caseDocument("http://fakeurl/legacyDoc", "legacyDoc.pdf");
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1)))
+            .thenReturn(Triple.of(List.of(legacyDocCaseDocument), List.of(),
+                Map.of(legacyDocCaseDocument, List.of(caseDocument("http://fakeurl/legacyAttachment", "legacyAttachmentDoc.pdf")))));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
-            .thenReturn(caseDocument());
+            .thenReturn(caseDocument("http://fakeurl/stampedDoc", "stampedDoc.pdf"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
         assertEquals(12, caseData.getPartiesOnCase().getValue().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
-        assertEquals(2, caseData.getFinalOrderCollection().size());
+        assertThat(caseData.getFinalOrderCollection())
+            .map(DirectionOrderCollection::getValue)
+            .map(DirectionOrder::getUploadDraftDocument)
+            .map(CaseDocument::getDocumentUrl).containsExactlyInAnyOrder("http://abc/docurl", "http://fakeurl/stampedDoc");
+        assertThat(caseData.getFinalOrderCollection())
+            .map(DirectionOrderCollection::getValue)
+            .flatMap(o -> emptyIfNull(o.getAdditionalDocuments()))
+            .map(DocumentCollection::getValue)
+            .map(CaseDocument::getDocumentUrl)
+            .containsExactlyInAnyOrder("http://fakeurl/legacyAttachment");
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
@@ -494,7 +514,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument), List.of(),
+            Map.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -554,7 +575,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument()), List.of(),
+            Map.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
         when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
@@ -668,7 +690,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.setOrderApprovedCoverLetter(null);
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
-            .thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+            .thenReturn(Triple.of(List.of(caseDocument()), List.of(), Map.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -710,7 +732,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
-            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
+            .thenReturn(Triple.of(List.of(), List.of(caseDocument1), Map.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -775,7 +797,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
-            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
+            .thenReturn(Triple.of(List.of(), List.of(caseDocument1), Map.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
