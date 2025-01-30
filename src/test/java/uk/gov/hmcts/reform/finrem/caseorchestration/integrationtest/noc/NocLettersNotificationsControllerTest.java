@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
@@ -131,6 +132,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
     @MockitoBean
     AssignToJudgeCorresponder assignToJudgeCorresponder;
+    @MockitoBean
+    DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
