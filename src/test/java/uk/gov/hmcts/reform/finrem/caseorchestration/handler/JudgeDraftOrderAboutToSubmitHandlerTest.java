@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
+class JudgeDraftOrderAboutToSubmitHandlerTest {
 
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
@@ -98,8 +98,8 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         CaseDocument pdfConverted1 = caseDocument(FILE_URL, "additional doc 1.pdf", FILE_BINARY_URL);
         CaseDocument pdfConverted2 = caseDocument(FILE_URL, "additional doc 2.pdf", FILE_BINARY_URL);
 
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document1), eq(AUTH_TOKEN), eq("123"))).thenReturn(pdfConverted1);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(document2), eq(AUTH_TOKEN), eq("123"))).thenReturn(pdfConverted2);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(document1, AUTH_TOKEN, "123")).thenReturn(pdfConverted1);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(document2, AUTH_TOKEN, "123")).thenReturn(pdfConverted2);
 
         DocumentCollection additionalDocument1 = DocumentCollection.builder()
             .value(document1)
