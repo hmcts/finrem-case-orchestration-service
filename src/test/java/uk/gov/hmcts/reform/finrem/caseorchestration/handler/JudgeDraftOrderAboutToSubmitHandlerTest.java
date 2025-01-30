@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,7 +48,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
 
-    @InjectMocks
     private JudgeDraftOrderAboutToSubmitHandler handler;
     @Mock
     private HearingOrderService hearingOrderService;
