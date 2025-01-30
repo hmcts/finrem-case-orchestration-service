@@ -69,16 +69,12 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     @InjectMocks
     private DirectionUploadOrderAboutToSubmitHandler underTest;
-
     @Spy
     private HasApprovableCollectionReader hasApprovableCollectionReader;
-
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
-
     @Mock
     private GenericDocumentService genericDocumentService;
-
     @Mock
     private DocumentHelper documentHelper;
 
