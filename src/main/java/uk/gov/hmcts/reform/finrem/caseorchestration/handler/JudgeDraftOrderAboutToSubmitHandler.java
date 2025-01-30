@@ -63,6 +63,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
         validateCaseData(callbackRequest);
+        convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, userAuthorisation);
@@ -70,7 +71,6 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         caseDataService.moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         FinremCaseDetails finremCaseDetailsUpdated = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        convertAdditionalDocumentsToPdf(finremCaseDetailsUpdated, userAuthorisation);
         uploadedDraftOrderCategoriser.categorise(finremCaseDetailsUpdated.getData());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
