@@ -53,13 +53,14 @@ public class HearingOrderService {
 
         if (judgeApprovedHearingOrder.isPresent()) {
             String caseId = caseDetails.getId().toString();
+            DraftDirectionOrder order = judgeApprovedHearingOrder.get();
             CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-                judgeApprovedHearingOrder.get().getUploadDraftDocument(),
+                order.getUploadDraftDocument(),
                 authorisationToken, caseId);
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
                 authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
-            List<DocumentCollection> additionalDocs = judgeApprovedHearingOrder.get().getAdditionalDocuments();
+            List<DocumentCollection> additionalDocs = order.getAdditionalDocuments();
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken, additionalDocs);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder, additionalDocs);
         } else {
