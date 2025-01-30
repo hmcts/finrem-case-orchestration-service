@@ -66,9 +66,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        // clear a temporary field which was used on submitted event.
-        draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
-
         List<String> errors = validateDraftOrdersWrapper(draftOrdersWrapper);
         if (errors.isEmpty()) {
             List<DraftOrdersReviewCollection> outstanding = draftOrdersWrapper.getOutstandingDraftOrdersReviewCollection();
