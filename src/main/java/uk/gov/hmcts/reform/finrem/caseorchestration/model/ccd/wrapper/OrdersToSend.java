@@ -6,21 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 
+import java.util.List;
+
+/**
+ * Represents a collection of orders to be sent within the case orchestration process.
+ * This class encapsulates a list of {@link OrderToShareCollection} objects, which contain details
+ * of the individual orders that can be shared.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SendOrderWrapper {
+public class OrdersToSend {
 
-    private CaseDocument additionalDocument;
-
-    private OrdersToSend ordersToSend;
-
-    private SendOrderEventPostStateOption sendOrderPostStateOption;
-
+    /**
+     * A list of order collections to be sent.
+     */
+    private List<OrderToShareCollection> value;
 }

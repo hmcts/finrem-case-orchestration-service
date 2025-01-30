@@ -12,6 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
 @Slf4j
 @Service
 public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler {
@@ -29,22 +33,22 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+        return ABOUT_TO_START.equals(callbackType) && CONTESTED.equals(caseType) && SEND_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to start callback for Case ID: {}",
-            callbackRequest.getEventType(), caseDetails.getId());
+        log.info("Invoking contested {} about to start callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
 
         generalOrderService.setOrderList(caseDetails);
 
         finremCaseData.setPartiesOnCase(partyService.getAllActivePartyList(caseDetails));
+
+        // clear the value which was used in previous submitted event.
+        finremCaseData.getSendOrderWrapper().setSendOrderPostStateOption(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
