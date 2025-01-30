@@ -87,7 +87,8 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
                 DraftOrdersWrapper::getJudgeApproval3,
                 DraftOrdersWrapper::getJudgeApproval4,
                 DraftOrdersWrapper::getJudgeApproval5,
-                DraftOrdersWrapper::getShowWarningMessageToJudge)
+                DraftOrdersWrapper::getShowWarningMessageToJudge,
+                DraftOrdersWrapper::getExtraReportFieldsInput)
             .containsOnlyNulls();
     }
 
@@ -103,7 +104,7 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
     @ParameterizedTest
     @MethodSource("provideInvokeApprovalServicePopulateJudgeDecisionsAndGenerateCoverLetterData")
     void shouldInvokeApprovalServicePopulateJudgeDecisionsAndGenerateCoverLetter(Pair<Boolean, Boolean> statuses, boolean shouldGenerateCoverLetter) {
-        DraftOrdersWrapper draftOrdersWrapper = null;
+        DraftOrdersWrapper draftOrdersWrapper;
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(draftOrdersWrapper = DraftOrdersWrapper.builder()
                 .hearingInstruction(HearingInstruction.builder().build())

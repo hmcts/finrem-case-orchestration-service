@@ -57,6 +57,10 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
+        // Clear field in case it contains ids from previously processed refused orders
+        // The ids are handled in the submitted callback so can't be removed
+        // and clearing them in the about to start callback doesn't work with CCD
+        draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
         Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
         if (containsApprovalStatus(statuses)) {
             generateAndStoreCoverLetter(caseDetails, userAuthorisation);
@@ -98,5 +102,6 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         draftOrdersWrapper.setJudgeApproval5(null);
         draftOrdersWrapper.setHearingInstruction(null);
         draftOrdersWrapper.setShowWarningMessageToJudge(null);
+        draftOrdersWrapper.setExtraReportFieldsInput(null);
     }
 }
