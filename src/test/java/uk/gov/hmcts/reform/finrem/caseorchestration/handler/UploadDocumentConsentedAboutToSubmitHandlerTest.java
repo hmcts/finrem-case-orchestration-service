@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -42,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UploadDocumentConsentedAboutToSubmitHandlerTest {
 
     @TestLogs
-    private final TestLogger logs = new TestLogger(UploadDocumentConsentedAboutToSubmitHandler.class);
+    private final TestLogger logs = new TestLogger(DocumentWarningsHelper.class);
 
     @Mock
     private DocumentCheckerService documentCheckerService;
@@ -55,7 +56,8 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @BeforeEach
     public void setUpTest() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService, newUploadedDocumentsService);
+        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, new DocumentWarningsHelper(documentCheckerService,
+            newUploadedDocumentsService));
     }
 
     @Test

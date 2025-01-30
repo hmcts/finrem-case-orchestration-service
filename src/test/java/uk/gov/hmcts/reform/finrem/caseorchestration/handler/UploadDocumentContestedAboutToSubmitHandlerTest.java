@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -45,7 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @TestLogs
-    private final TestLogger logs = new TestLogger(UploadDocumentContestedAboutToSubmitHandler.class);
+    private final TestLogger logs = new TestLogger(DocumentWarningsHelper.class);
 
     @Mock
     private NewUploadedDocumentsService newUploadedDocumentsService;
@@ -60,7 +61,8 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     public void setUpTest() {
         underTest = new UploadDocumentContestedAboutToSubmitHandler(
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
-            documentCheckerService, newUploadedDocumentsService, uploadGeneralDocumentsCategoriser);
+            new DocumentWarningsHelper(documentCheckerService,
+                newUploadedDocumentsService), uploadGeneralDocumentsCategoriser);
     }
 
     @Test
@@ -133,7 +135,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEqualTo(expectedWarnings);
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
-                "%s - Number of warnings encountered when uploading general document: %s", CASE_ID, 1));
+                "%s - Number of warnings encountered when uploading document: %s", CASE_ID, 1));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }
@@ -170,7 +172,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).isEqualTo(hasWarnings ? List.of("1warnings", "2warnings") : List.of());
         if (hasWarnings) {
             assertThat(logs.getInfos()).containsExactly(format(
-                "%s - Number of warnings encountered when uploading general document: %s", CASE_ID, 2));
+                "%s - Number of warnings encountered when uploading document: %s", CASE_ID, 2));
         } else {
             assertThat(logs.getInfos()).isEmpty();
         }
