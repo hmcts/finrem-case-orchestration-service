@@ -124,10 +124,11 @@ class RefusedOrderProcessorTest {
                 Optional.ofNullable(targetPsaDocReviewCollection)
             ).allMatch(Optional::isEmpty) ? 0 : 1;
 
-            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(expectedRefusedOrdersSize);
-            assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
-
-            if (result != 0) {
+            if (result == 0) {
+                assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).isNull();
+            } else {
+                assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(expectedRefusedOrdersSize);
+                assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
                 // verify agreedDraftOrderToBeExamined is removed
                 assertTrue(isAgreedDraftOrderAbsent(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetAgreedDraftOrderCollection));
 
