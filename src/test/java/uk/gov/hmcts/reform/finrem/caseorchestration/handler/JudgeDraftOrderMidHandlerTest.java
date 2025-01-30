@@ -74,8 +74,8 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        String errormessage = "No orders have been uploaded. Please upload an order.";
-        assertThat(response.getErrors()).contains(errormessage);
+        String errorMessage = "No orders have been uploaded. Please upload an order.";
+        assertThat(response.getErrors()).contains(errorMessage);
     }
 
     @Test
