@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -27,6 +29,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
@@ -51,13 +65,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.List.of;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -65,6 +80,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedAboutToSubmitHandlerTest {
@@ -110,18 +126,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER));
-    }
-
-    @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventClose_thenHandlerCanNotHandle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SEND_ORDER));
+    void testCanHandle() {
+        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER);
     }
 
     @Test
@@ -142,7 +148,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), any());
         verify(documentHelper, never()).getStampType(caseData);
     }
-
 
     @Test
     void givenContestedCase_whenAnyOfMethodFails_thenHandlerThrowError() {
@@ -186,9 +191,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
-
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
@@ -205,7 +209,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertNull(caseData.getSendOrderWrapper().getAdditionalDocument());
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
-
     }
 
     @Test
@@ -239,7 +242,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any(String.class)))
             .thenReturn(caseDocument());
@@ -289,7 +292,10 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(caseDocuments);
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(caseDocuments, List.of()));
+        // below mocking is used for the second invocation on the event where the selectedDocs is cleared in the 1st about-to-submit logic.
+        when(generalOrderService.hearingOrdersToShare(eq(caseDetails), isNull()))
+            .thenReturn(Pair.of(List.of(), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
@@ -366,6 +372,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
+        data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
         DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiSelectListElement.builder()
@@ -382,7 +389,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(genericDocumentService.stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), anyString()))
             .thenReturn(caseDocument());
@@ -397,7 +404,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
-
     }
 
     @Test
@@ -405,6 +411,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
+        data.setOrderApprovedCoverLetter(caseDocument("coversheet", "coversheet"));
         data.setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         CaseDocument caseDocument = caseDocument("docurl", "abc.pdf", "binaryurl");
@@ -430,7 +437,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument), List.of()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
             = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -443,7 +450,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper, never()).getStampType(caseData);
-
     }
 
     @Test
@@ -455,8 +461,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         String additionalHearingDocumentFilename = "AdditionalHearingDocument.pdf";
 
-        String previousOrderDocumentUrl = "http://dm-store:8080/documents/929756-654321-123456-654381";
-        String previousOrderDocumentFilename = "PreviousOrder.pdf";
         data.setPartiesOnCase(getParties());
         ApproveOrder additionalHearingOrder = ApproveOrder.builder().orderReceivedAt(
                 LocalDateTime.of(LocalDate.of(2019, 12, 31),
@@ -490,7 +494,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
 
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(of(caseDocument()));
+        when(generalOrderService.hearingOrdersToShare(caseDetails, selectedDocs)).thenReturn(Pair.of(List.of(caseDocument()), List.of()));
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.hasAnotherHearing(any(FinremCaseData.class))).thenReturn(true);
         when(documentHelper.getLatestAdditionalHearingDocument(any(FinremCaseData.class)))
@@ -584,5 +588,161 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).build())
             .build();
+    }
+
+    @Test
+    void givenContestedCase_whenCoversheetIsMissing_thenShowAnErrorMessage() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setPartiesOnCase(getParties());
+        List<DirectionOrderCollection> orderList = new ArrayList<>();
+        DirectionOrderCollection order = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+            .uploadDraftDocument(caseDocument("http://abc/docurl", "abc.pdf", "http://abc/binaryurl"))
+            .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
+        orderList.add(order);
+        data.setUploadHearingOrder(orderList);
+        data.getSendOrderWrapper().setOrdersToShare(DynamicMultiSelectList.builder().build());
+        data.setOrderApprovedCoverLetter(null);
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(Pair.of(List.of(caseDocument()), List.of()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors())
+            .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
+    }
+
+    @Test
+    void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
+        CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
+
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
+        finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(new ArrayList<>(of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().draftOrder(caseDocument1).build())
+                    .build()
+            )))
+            .draftOrdersReviewCollection(new ArrayList<>(of(
+                DraftOrdersReviewCollection.builder()
+                    .value(DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(new ArrayList<>(of(
+                            DraftOrderDocReviewCollection.builder()
+                                .value(DraftOrderDocumentReview.builder()
+                                    .draftOrderDocument(caseDocument1)
+                                    .submittedBy("SUBMITTED BY AAA")
+                                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge A")
+                                    .build())
+                                .build()))
+                        ).build())
+                    .build()
+            )))
+            .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .containsExactly(DraftOrdersReview.builder().draftOrderDocReviewCollection(List.of()).build());
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                    .finalisedDocument(caseDocument1)
+                    .submittedBy("SUBMITTED BY AAA")
+                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                    .approvalJudge("Mr Judge A")
+                .build()).build());
+
+    }
+
+    @Test
+    void givenContestedCase_whenSendingPsaDocumentReviewOrder_thenFinalisedOrderIsGenerated() {
+        CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
+        CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
+
+        FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
+        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
+        finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToShare(DynamicMultiSelectList.builder().build()).build());
+        finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(new ArrayList<>(of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(caseDocument1).build())
+                    .build()
+            )))
+            .draftOrdersReviewCollection(new ArrayList<>(of(
+                DraftOrdersReviewCollection.builder()
+                    .value(DraftOrdersReview.builder()
+                        .psaDocReviewCollection(new ArrayList<>(of(
+                            PsaDocReviewCollection.builder()
+                                .value(PsaDocumentReview.builder()
+                                    .psaDocument(caseDocument1)
+                                    .submittedBy("SUBMITTED BY BBB")
+                                    .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge B")
+                                    .build())
+                                .build()
+                        )))
+                        .draftOrderDocReviewCollection(new ArrayList<>(of(
+                            DraftOrderDocReviewCollection.builder()
+                                .value(DraftOrderDocumentReview.builder()
+                                    .draftOrderDocument(caseDocument2)
+                                    .submittedBy("SUBMITTED BY AAA")
+                                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                                    .approvalJudge("Mr Judge A")
+                                    .build())
+                                .build()))
+                        ).build())
+                    .build()
+            )))
+            .build());
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
+
+        when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), any(DynamicMultiSelectList.class)))
+            .thenReturn(Pair.of(List.of(), List.of(caseDocument1)));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .extracting(DraftOrdersReviewCollection::getValue)
+            .containsExactly(DraftOrdersReview.builder()
+                .psaDocReviewCollection(List.of())
+                .draftOrderDocReviewCollection(List.of(
+                    DraftOrderDocReviewCollection.builder()
+                        .value(DraftOrderDocumentReview.builder()
+                            .draftOrderDocument(caseDocument2)
+                            .submittedBy("SUBMITTED BY AAA")
+                            .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                            .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                            .approvalJudge("Mr Judge A")
+                            .build())
+                        .build()
+                )).build());
+        assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
+            .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                .finalisedDocument(caseDocument1)
+                .submittedBy("SUBMITTED BY BBB")
+                .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
+                .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
+                .approvalJudge("Mr Judge B")
+                .build()).build());
+
     }
 }
