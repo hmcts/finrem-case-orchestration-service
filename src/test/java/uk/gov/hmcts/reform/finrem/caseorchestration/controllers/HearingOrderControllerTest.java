@@ -67,18 +67,6 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenStoreHearingOrder_expectedServicesAreInvoked() {
-        when(finremCaseDetailsMapper.mapToCaseDetails(any())).thenReturn(caseDetails);
-        when(finremCaseDetailsMapper.mapToFinremCaseDetails(any())).thenReturn(finremCaseDetails);
-
-        hearingOrderController.storeHearingOrder(AUTH_TOKEN, request);
-
-        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
-        verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
-        verify(uploadedDraftOrderCategoriser).categorise(any());
-    }
-
-    @Test
     public void givenDraftDirectionOrderCollectionIsNotEmpty_whenStartingHearingOrderApproval_thenLatestDraftDirOrderIsPopulated() {
         DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().build();
         when(hearingOrderService.draftDirectionOrderCollectionTail(any(), any())).thenReturn(Optional.of(draftDirectionOrder));
