@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
@@ -41,8 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,8 +57,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
     private GenericDocumentService genericDocumentService;
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    @Mock
-    private CaseDataService caseDataService;
+
     @Mock
     private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
     @Spy
@@ -75,7 +71,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
             hearingOrderService,
             genericDocumentService,
             contestedOrderApprovedLetterService,
-            caseDataService,
             uploadedDraftOrderCategoriser
         );
     }
@@ -93,7 +88,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
-        verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
         verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
@@ -130,7 +124,6 @@ class JudgeDraftOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
             any(String.class), any(String.class));
         verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
-        verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
     }

@@ -13,16 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.List;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 
 @Slf4j
 @Service
@@ -31,19 +27,16 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     private final HearingOrderService hearingOrderService;
     private final GenericDocumentService genericDocumentService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    private final CaseDataService caseDataService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     public JudgeDraftOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingOrderService hearingOrderService,
                                                GenericDocumentService genericDocumentService,
                                                ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
-                                               CaseDataService caseDataService,
                                                UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser) {
         super(finremCaseDetailsMapper);
         this.hearingOrderService = hearingOrderService;
         this.genericDocumentService = genericDocumentService;
         this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
-        this.caseDataService = caseDataService;
         this.uploadedDraftOrderCategoriser = uploadedDraftOrderCategoriser;
     }
 
@@ -68,8 +61,6 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
-        caseDataService.moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-
         FinremCaseDetails finremCaseDetailsUpdated = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         uploadedDraftOrderCategoriser.categorise(finremCaseDetailsUpdated.getData());
 
