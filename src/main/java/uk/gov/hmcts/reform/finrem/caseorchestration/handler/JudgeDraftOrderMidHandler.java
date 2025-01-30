@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -51,7 +51,7 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
 
         List<String> errors = new ArrayList<>();
-        if (ObjectUtils.isEmpty(draftDirectionOrderCollection)) {
+        if (CollectionUtils.isEmpty(draftDirectionOrderCollection)) {
             errors.add(NO_ORDERS_IN_COLLECTION);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(errors).build();
