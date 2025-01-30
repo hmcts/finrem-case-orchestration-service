@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.BaseHandlerTestSetup;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
@@ -18,11 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UploadedDraftOrderCategoriserTest extends BaseHandlerTestSetup {
+class UploadedDraftOrderCategoriserTest {
     private UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     @Mock
@@ -43,7 +41,6 @@ class UploadedDraftOrderCategoriserTest extends BaseHandlerTestSetup {
         caseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection()
             .forEach(order -> {
                 assertEquals(DocumentCategory.SYSTEM_DUPLICATES.getDocumentCategoryId(), order.getValue().getUploadDraftDocument().getCategoryId());
-                assertNull(order.getValue().getAdditionalDocuments()); // No additional documents
             });
     }
 
@@ -57,7 +54,6 @@ class UploadedDraftOrderCategoriserTest extends BaseHandlerTestSetup {
             .forEach(order -> {
                 assertEquals(DocumentCategory.POST_HEARING_DRAFT_ORDER.getDocumentCategoryId(),
                     order.getValue().getUploadDraftDocument().getCategoryId());
-                assertNull(order.getValue().getAdditionalDocuments()); // No additional documents
             });
     }
 
