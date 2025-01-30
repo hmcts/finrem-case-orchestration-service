@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,7 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
 import java.util.ArrayList;
@@ -41,12 +45,19 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private final HasApprovableCollectionReader hasApprovableCollectionReader;
 
+    private final DocumentHelper documentHelper;
+
+    private final GenericDocumentService genericDocumentService;
+
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AdditionalHearingDocumentService additionalHearingDocumentService,
-                                                    HasApprovableCollectionReader hasApprovableCollectionReader) {
+                                                    HasApprovableCollectionReader hasApprovableCollectionReader,
+                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService) {
         super(finremCaseDetailsMapper);
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
+        this.genericDocumentService = genericDocumentService;
+        this.documentHelper = documentHelper;
     }
 
     @Override
@@ -75,9 +86,9 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                 .data(caseData).errors(List.of("There was an unexpected error")).build();
         }
 
-        handleDraftOrderDocuments(caseData);
-        handlePsaDocuments(caseData);
-        handleAgreedDraftOrdersCollection(caseData);
+        handleDraftOrderDocuments(caseDetails, userAuthorisation);
+        handlePsaDocuments(caseDetails, userAuthorisation);
+        handleAgreedDraftOrdersCollection(caseDetails, userAuthorisation);
         clearTemporaryFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
@@ -95,7 +106,9 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         });
     }
 
-    private void handleDraftOrderDocuments(FinremCaseData caseData) {
+    private void handleDraftOrderDocuments(FinremCaseDetails caseDetails, String authorisation) {
+        FinremCaseData caseData = caseDetails.getData();
+
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
@@ -103,26 +116,46 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 collector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
+
+                    StampType stampType = documentHelper.getStampType(caseData);
+                    CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                        String.valueOf(caseDetails.getId()));
+                    stampedDoc.setCategoryId(
+                        DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId());
+
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                    toBeUpdated.getValue().setDraftOrderDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+                    toBeUpdated.getValue().setDraftOrderDocument(stampedDoc);
                 }));
     }
 
-    private void handlePsaDocuments(FinremCaseData caseData) {
+    private void handlePsaDocuments(FinremCaseDetails caseDetails, String authorisation) {
+        FinremCaseData caseData = caseDetails.getData();
         List<PsaDocReviewCollection> psaCollector = new ArrayList<>();
+
         hasApprovableCollectionReader.filterAndCollectPsaDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             psaCollector, APPROVED_BY_JUDGE::equals);
 
         getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
                 psaCollector.stream().filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder)).forEach(toBeUpdated -> {
+
+                    StampType stampType = documentHelper.getStampType(caseData);
+                    CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                        unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                        String.valueOf(caseDetails.getId()));
+                    stampedDoc.setCategoryId(
+                        DocumentCategory.APPROVED_ORDERS.getDocumentCategoryId());
+
                     toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                    toBeUpdated.getValue().setPsaDocument(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+                    toBeUpdated.getValue().setPsaDocument(stampedDoc);
                 }));
     }
 
-    private void handleAgreedDraftOrdersCollection(FinremCaseData caseData) {
+    private void handleAgreedDraftOrdersCollection(FinremCaseDetails caseDetails, String authorisation) {
+        FinremCaseData caseData = caseDetails.getData();
         List<AgreedDraftOrderCollection> agreedOrderCollector = new ArrayList<>();
+
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
@@ -130,12 +163,19 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             .forEach(unprocessedApprovedOrder ->
                 agreedOrderCollector.stream().filter(agreedDraftOrder -> doesDocumentMatch(agreedDraftOrder, unprocessedApprovedOrder))
                     .forEach(toBeUpdated -> {
+
+                        StampType stampType = documentHelper.getStampType(caseData);
+                        CaseDocument stampedDoc = genericDocumentService.stampDocument(
+                            unprocessedApprovedOrder.getValue().getUploadDraftDocument(), authorisation, stampType,
+                            String.valueOf(caseDetails.getId()));
+                        stampedDoc.setCategoryId(unprocessedApprovedOrder.getValue().getUploadDraftDocument().getCategoryId());
+
                         toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                        // replace the document by the new uploaded approved document
+                        // replace the document by the new stamped document
                         if (toBeUpdated.getValue().getPensionSharingAnnex() != null) {
-                            toBeUpdated.getValue().setPensionSharingAnnex(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+                            toBeUpdated.getValue().setPensionSharingAnnex(stampedDoc);
                         } else if (toBeUpdated.getValue().getDraftOrder() != null) {
-                            toBeUpdated.getValue().setDraftOrder(unprocessedApprovedOrder.getValue().getUploadDraftDocument());
+                            toBeUpdated.getValue().setDraftOrder(stampedDoc);
                         }
                     }));
     }
