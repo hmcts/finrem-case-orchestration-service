@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -17,15 +19,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -36,19 +41,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
-    private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
-    private PaperCaseCreateContestedAboutToSubmitHandler handler;
     @Mock
     private IdamService idamService;
     @Mock
     private CaseFlagsService caseFlagsService;
+    @Mock
+    private CaseDataService caseDataService;
 
-    @BeforeEach
-    void setup() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new PaperCaseCreateContestedAboutToSubmitHandler(finremCaseDetailsMapper, caseFlagsService, idamService);
-    }
+    @Spy
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
+        new ObjectMapper().registerModule(new JavaTimeModule())
+    );
+
+    @InjectMocks
+    private PaperCaseCreateContestedAboutToSubmitHandler handler;
+
+    private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
+    private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
 
     @Test
     void canHandle() {
@@ -79,9 +88,9 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
 
-        assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), NO_VALUE);
-        assertEquals(caseData.getFastTrackDecision(), YesOrNo.NO);
-        assertEquals(caseData.getPaperApplication(), YesOrNo.YES);
+        assertEquals(NO_VALUE, caseData.getContactDetailsWrapper().getIsAdmin());
+        assertEquals(YesOrNo.NO, caseData.getFastTrackDecision());
+        assertEquals(YesOrNo.YES, caseData.getPaperApplication());
         assertTrue(caseData.isApplicantRepresentedByASolicitor());
     }
 
@@ -93,9 +102,9 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
 
-        assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), YES_VALUE);
-        assertEquals(caseData.getFastTrackDecision(), YesOrNo.YES);
-        assertEquals(caseData.getPaperApplication(), YesOrNo.YES);
+        assertEquals(YES_VALUE, caseData.getContactDetailsWrapper().getIsAdmin());
+        assertEquals(YesOrNo.YES, caseData.getFastTrackDecision());
+        assertEquals(YesOrNo.YES, caseData.getPaperApplication());
     }
 
     @Test
@@ -106,9 +115,9 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         FinremCaseData caseData = handle.getData();
 
-        assertEquals(caseData.getContactDetailsWrapper().getIsAdmin(), NO_VALUE);
-        assertEquals(caseData.getFastTrackDecision(), YesOrNo.NO);
-        assertEquals(caseData.getPaperApplication(), YesOrNo.YES);
+        assertEquals(NO_VALUE, caseData.getContactDetailsWrapper().getIsAdmin());
+        assertEquals(YesOrNo.NO, caseData.getFastTrackDecision());
+        assertEquals(YesOrNo.YES, caseData.getPaperApplication());
         assertTrue(caseData.isApplicantRepresentedByASolicitor());
     }
 
@@ -138,5 +147,14 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
             // Check that updateApplicantInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
+    }
+
+    @Test
+    void testSetFinancialRemediesCourtDetailsCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+        // Verify call to caseDataService to set PowerBI tracking fields.
+        verify(caseDataService,times(1)).setFinancialRemediesCourtDetails(any(CaseDetails.class));
     }
 }
