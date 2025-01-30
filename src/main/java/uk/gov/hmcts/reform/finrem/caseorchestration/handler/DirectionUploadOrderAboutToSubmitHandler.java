@@ -142,11 +142,12 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             .forEach(unprocessedApprovedOrder ->
                 collector.stream()
                     .filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder))
+                    .map(DraftOrderDocReviewCollection::getValue)
                     .forEach(toBeUpdated -> {
-                        CaseDocument originalDocument = toBeUpdated.getValue().getDraftOrderDocument();
+                        CaseDocument originalDocument = toBeUpdated.getDraftOrderDocument();
                         CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
-                        toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                        toBeUpdated.getValue().setDraftOrderDocument(stampedDocument);
+                        toBeUpdated.setOrderStatus(PROCESSED);
+                        toBeUpdated.setDraftOrderDocument(stampedDocument);
                     })
             );
     }
@@ -161,11 +162,12 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             .forEach(unprocessedApprovedOrder ->
                 psaCollector.stream()
                     .filter(psa -> doesDocumentMatch(psa, unprocessedApprovedOrder))
+                    .map(PsaDocReviewCollection::getValue)
                     .forEach(toBeUpdated -> {
-                        CaseDocument originalDocument = toBeUpdated.getValue().getPsaDocument();
+                        CaseDocument originalDocument = toBeUpdated.getPsaDocument();
                         CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
-                        toBeUpdated.getValue().setOrderStatus(PROCESSED);
-                        toBeUpdated.getValue().setPsaDocument(stampedDocument);
+                        toBeUpdated.setOrderStatus(PROCESSED);
+                        toBeUpdated.setPsaDocument(stampedDocument);
                     })
             );
     }
