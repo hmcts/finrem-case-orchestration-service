@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentSer
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,9 +68,18 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER));
     }
 
+    @Test
+    void givenDraftDirectionOrderCollectionIsEmpty_whenHandle_shouldGetError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        String errormessage = "No orders have been uploaded. Please upload an order.";
+        assertThat(response.getErrors()).contains(errormessage);
+    }
 
     @Test
-    void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenDraftOrderUploadedButNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -83,7 +93,7 @@ class JudgeDraftOrderMidHandlerTest extends BaseHandlerTestSetup {
     }
 
     @Test
-    void givenContestedCase_whenThereIsexistingDraftOrderNonEncryptedFileShouldNotGetError() throws Exception {
+    void givenContestedCase_whenThereIsexistingDraftOrderNonEncryptedFileShouldNotGetError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest(EventType.JUDGE_DRAFT_ORDER);
         FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
 

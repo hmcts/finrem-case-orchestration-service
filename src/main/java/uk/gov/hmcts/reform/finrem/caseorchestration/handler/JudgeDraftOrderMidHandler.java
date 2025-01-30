@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -21,6 +22,9 @@ import java.util.List;
 public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
 
     private final BulkPrintDocumentService service;
+
+    private static final String NO_ORDERS_IN_COLLECTION
+        = "No orders have been uploaded. Please upload an order.";
 
     public JudgeDraftOrderMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                      BulkPrintDocumentService service) {
@@ -43,9 +47,15 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
         log.info("Invoking contested event {} mid callback for Case ID: {}",
             EventType.JUDGE_DRAFT_ORDER, caseId);
         FinremCaseData caseData = caseDetails.getData();
-
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = draftDirectionWrapper.getDraftDirectionOrderCollection();
+
+        List<String> errors = new ArrayList<>();
+        if (ObjectUtils.isEmpty(draftDirectionOrderCollection)) {
+            errors.add(NO_ORDERS_IN_COLLECTION);
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseData).errors(errors).build();
+        }
 
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeCaseData = caseDetailsBefore.getData();
@@ -59,7 +69,6 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
             }
         }
 
-        List<String> errors = new ArrayList<>();
         draftDirectionOrderCollection.forEach(doc ->
             service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
                 caseId, errors, userAuthorisation)
