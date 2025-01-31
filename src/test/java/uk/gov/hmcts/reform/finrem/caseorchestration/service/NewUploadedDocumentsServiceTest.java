@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 
 import java.util.List;
 import java.util.function.Function;
@@ -244,8 +244,8 @@ class NewUploadedDocumentsServiceTest {
     void givenCaseWithExistingDocument_whenDocumentUploadedOrNot_thenReturnExpectedDocument(
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataBeforeModifier,
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataModifier,
-        Function<FinremCaseData, List<CaseDocumentCollection<?>>> accessor,
-        List<CaseDocumentCollection<?>> expectedReturn) {
+        Function<FinremCaseData, List<UploadingDocumentAccessor<?>>> accessor,
+        List<UploadingDocumentAccessor<?>> expectedReturn) {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
         FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();
         assertEquals(expectedReturn, underTest.getNewUploadDocuments(caseData, caseDataBefore, accessor));

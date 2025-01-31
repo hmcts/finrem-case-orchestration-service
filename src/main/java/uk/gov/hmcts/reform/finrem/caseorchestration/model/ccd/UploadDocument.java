@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadDocument implements HasDocumentLink {
+public class UploadDocument implements HasUploadingDocument, HasCaseDocument {
     @JsonProperty("DocumentType")
     private UploadDocumentType documentType;
     @JsonProperty("DocumentEmailContent")
@@ -34,4 +35,10 @@ public class UploadDocument implements HasDocumentLink {
     private String documentComment;
     @JsonProperty("DocumentFileName")
     private String documentFileName;
+
+    @Override
+    @JsonIgnore
+    public CaseDocument getUploadingDocument() {
+        return documentLink;
+    }
 }
