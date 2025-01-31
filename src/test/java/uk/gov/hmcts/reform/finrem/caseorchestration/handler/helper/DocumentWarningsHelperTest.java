@@ -114,7 +114,8 @@ class DocumentWarningsHelperTest {
         stubReturnSingleWarningForUnacceptedDocument();
         stubReturnSingleWarningForUnacceptedDocument(UNACCEPTED_DOCUMENT_2);
 
-        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), getDocumentsFromCaseData, AUTH_TOKEN);
+        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore),
+            getDocumentsFromCaseData, AUTH_TOKEN);
         assertThat(actual).containsExactly("unaccepted document detected");
         assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 1");
     }
