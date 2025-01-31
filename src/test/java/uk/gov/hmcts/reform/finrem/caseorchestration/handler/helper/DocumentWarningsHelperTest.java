@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -48,7 +48,7 @@ class DocumentWarningsHelperTest {
     void givenValidCaseDataWithoutDocumentUploaded_thenReturnEmptyList() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> accessor = createGetDocumentsFromCaseDataFn();
 
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of());
 
@@ -60,7 +60,7 @@ class DocumentWarningsHelperTest {
     void givenValidCaseDataWithDocumentUpload_whenUnexpectedExceptionThrownInWarningChecking_thenReturnEmptyListAndLogInErrorLevel() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> accessor = createGetDocumentsFromCaseDataFn();
 
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
             UNACCEPTED_DOCUMENT));
@@ -76,7 +76,7 @@ class DocumentWarningsHelperTest {
     void givenValidCaseData_whenWarningIsDetected_thenReturnListOfWarningMessage() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> accessor = createGetDocumentsFromCaseDataFn();
 
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
             UNACCEPTED_DOCUMENT));
@@ -91,7 +91,7 @@ class DocumentWarningsHelperTest {
     void givenValidCaseDataWithMultipleUploadingDocuments_whenWarningIsDetected_thenReturnListOfWarningMessage() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> accessor = createGetDocumentsFromCaseDataFn();
 
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
             UNACCEPTED_DOCUMENT, ACCEPTED_DOCUMENT));
@@ -107,14 +107,15 @@ class DocumentWarningsHelperTest {
     void givenValidCaseDataWithTwoUnacceptedUploadingDocuments_whenWarningIsDetected_thenReturnListOfWarningMessage() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> getDocumentsFromCaseData = createGetDocumentsFromCaseDataFn();
 
-        when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
+        when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, getDocumentsFromCaseData)).thenReturn(List.of(
             UNACCEPTED_DOCUMENT, UNACCEPTED_DOCUMENT_2));
         stubReturnSingleWarningForUnacceptedDocument();
         stubReturnSingleWarningForUnacceptedDocument(UNACCEPTED_DOCUMENT_2);
 
-        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
+        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore),
+            getDocumentsFromCaseData, AUTH_TOKEN);
         assertThat(actual).containsExactly("unaccepted document detected");
         assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 1");
     }
@@ -123,7 +124,7 @@ class DocumentWarningsHelperTest {
     void givenValidCaseData_whenMultipleWarningsAreDetected_thenReturnSortedListOfWarningMessages() {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
-        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+        Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> accessor = createGetDocumentsFromCaseDataFn();
 
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
             UNACCEPTED_DOCUMENT));
@@ -142,14 +143,14 @@ class DocumentWarningsHelperTest {
         }
     }
 
-    private static class DummyUploadingDocumentAccessor implements UploadingDocumentAccessor<DummyHasUploadingDocuments> {
+    private static class DummyUploadingDocumentsHolder implements UploadingDocumentsHolder<DummyHasUploadingDocuments> {
 
         public DummyHasUploadingDocuments getValue() {
             return null;
         }
     }
 
-    private static Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> createAccessor() {
+    private static Function<FinremCaseData, List<DummyUploadingDocumentsHolder>> createGetDocumentsFromCaseDataFn() {
         return caseData -> null;
     }
 

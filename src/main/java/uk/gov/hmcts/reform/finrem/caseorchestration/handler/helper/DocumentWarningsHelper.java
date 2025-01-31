@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
@@ -30,14 +30,14 @@ public class DocumentWarningsHelper {
      * Retrieves document warnings for newly uploaded documents.
      *
      * @param callbackRequest       the callback request containing case details
-     * @param documentAccessorFunction function to retrieve document collections from case data
+     * @param getDocumentsFromCaseData function to retrieve document collections from case data
      * @param userAuthorisation     the user's authorisation token
-     * @param <T>                   a type that extends UploadingDocumentAccessor
+     * @param <T>                   a type that extends UploadingDocumentsHolder
      * @return a sorted list of warning messages related to the uploaded documents
      */
-    public <T extends UploadingDocumentAccessor<?>> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest,
-                                                                                     Function<FinremCaseData, List<T>> documentAccessorFunction,
-                                                                                     String userAuthorisation) {
+    public <T extends UploadingDocumentsHolder<?>> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest,
+                                                                                    Function<FinremCaseData, List<T>> getDocumentsFromCaseData,
+                                                                                    String userAuthorisation) {
 
         FinremCaseDetails beforeFinremCaseDetails = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
@@ -46,7 +46,7 @@ public class DocumentWarningsHelper {
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, documentAccessorFunction);
+        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData);
 
         Set<String> allWarnings = newDocuments.stream()
             .flatMap(documentLink -> {

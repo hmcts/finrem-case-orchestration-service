@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
@@ -266,10 +266,10 @@ class NewUploadedDocumentsServiceTest {
     void givenCaseWithExistingDocument_whenDocumentUploadedOrNot_thenReturnExpectedDocument(
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataBeforeModifier,
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataModifier,
-        Function<FinremCaseData, List<UploadingDocumentAccessor<?>>> accessor,
+        Function<FinremCaseData, List<UploadingDocumentsHolder<?>>> getDocumentsFromCaseData,
         List<CaseDocument> expectedReturn) {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
         FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();
-        assertEquals(expectedReturn, underTest.getNewUploadDocuments(caseData, caseDataBefore, accessor));
+        assertEquals(expectedReturn, underTest.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData));
     }
 }
