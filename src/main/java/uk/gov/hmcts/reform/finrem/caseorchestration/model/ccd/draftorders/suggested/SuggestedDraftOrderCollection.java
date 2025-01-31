@@ -6,12 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SuggestedDraftOrderCollection implements HasCaseDocument {
+public class SuggestedDraftOrderCollection implements HasCaseDocument, UploadingDocumentAccessor<SuggestedDraftOrder> {
     private SuggestedDraftOrder value;
 }

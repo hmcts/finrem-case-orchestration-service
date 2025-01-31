@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,6 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApp
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgreedDraftOrderCollection implements HasCaseDocument, HasApprovable {
+public class AgreedDraftOrderCollection implements HasCaseDocument, HasApprovable, UploadingDocumentAccessor<AgreedDraftOrder> {
     private AgreedDraftOrder value;
 }

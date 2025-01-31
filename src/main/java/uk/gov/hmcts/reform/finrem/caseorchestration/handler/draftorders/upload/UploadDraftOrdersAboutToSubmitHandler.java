@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -35,7 +36,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -49,24 +53,26 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final DraftOrderService draftOrderService;
 
+    private final DocumentWarningsHelper documentWarningsHelper;
+
+
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
-                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService) {
+                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService,
+                                                 DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
         this.caseAssignedRoleService = caseAssignedRoleService;
         this.draftOrderService = draftOrderService;
+        this.documentWarningsHelper = documentWarningsHelper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.DRAFT_ORDERS.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && DRAFT_ORDERS.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
@@ -75,16 +81,25 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         OrderFiledBy orderFiledBy = getOrderFiledBy(caseDetails, userAuthorisation);
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
+        List<String> warnings = new ArrayList<>();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
+            warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
+                caseData -> caseData.getDraftOrdersWrapper().getSuggestedDraftOrderCollection(),
+                userAuthorisation);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
+            warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
+                caseData -> caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
+                userAuthorisation);
         }
+
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .warnings(warnings)
             .data(finremCaseData).build();
     }
 
