@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
@@ -21,14 +20,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrderUtils.consolidateUploadingDocuments;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable, HasUploadingDocuments {
+public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Approvable {
     private OrderStatus orderStatus;
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;
@@ -96,11 +93,5 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
                     + "Ensure the document to be amended corresponds to a valid existing document."
             );
         }
-    }
-
-    @Override
-    @JsonIgnore
-    public List<CaseDocument> getUploadingDocuments() {
-        return consolidateUploadingDocuments(draftOrder, pensionSharingAnnex, attachments);
     }
 }

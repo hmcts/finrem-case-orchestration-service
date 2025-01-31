@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SuggestedPensionSharingAnnexCollection implements HasCaseDocument {
+public class SuggestedPensionSharingAnnexCollection {
 
     private SuggestedPensionSharingAnnex value;
 }

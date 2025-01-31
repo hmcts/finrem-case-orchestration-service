@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SuggestedPensionSharingAnnex implements HasCaseDocument {
+public class SuggestedPensionSharingAnnex {
 
     @JsonProperty("suggestedPensionSharingAnnexes")
     private CaseDocument suggestedPensionSharingAnnexes;

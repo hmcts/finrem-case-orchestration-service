@@ -13,6 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SuggestedDraftOrderAdditionalDocumentsCollection implements HasCaseDocument {
+public class SuggestedDraftOrderAdditionalDocumentsCollection {
     private CaseDocument value;
 }
