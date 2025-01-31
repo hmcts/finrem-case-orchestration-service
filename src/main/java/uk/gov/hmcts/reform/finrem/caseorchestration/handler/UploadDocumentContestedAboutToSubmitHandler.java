@@ -62,7 +62,7 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings((documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadGeneralDocuments, userAuthorisation)))
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadGeneralDocuments, userAuthorisation))
             .data(caseData).build();
     }
 

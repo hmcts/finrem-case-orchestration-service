@@ -39,7 +39,7 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings((documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadDocuments, userAuthorisation)))
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadDocuments, userAuthorisation))
             .data(caseData).build();
     }
 
