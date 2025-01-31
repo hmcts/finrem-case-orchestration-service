@@ -26,8 +26,18 @@ public class DocumentWarningsHelper {
 
     private final NewUploadedDocumentsService newUploadedDocumentsService;
 
-    public <T extends UploadingDocumentAccessor<?>> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest, Function<FinremCaseData,
-        List<T>> accessor, String userAuthorisation) {
+    /**
+     * Retrieves document warnings for newly uploaded documents.
+     *
+     * @param callbackRequest       the callback request containing case details
+     * @param documentAccessorFunction function to retrieve document collections from case data
+     * @param userAuthorisation     the user's authorisation token
+     * @param <T>                   a type that extends UploadingDocumentAccessor
+     * @return a sorted list of warning messages related to the uploaded documents
+     */
+    public <T extends UploadingDocumentAccessor<?>> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest,
+                                                                                     Function<FinremCaseData, List<T>> documentAccessorFunction,
+                                                                                     String userAuthorisation) {
 
         FinremCaseDetails beforeFinremCaseDetails = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
@@ -36,7 +46,7 @@ public class DocumentWarningsHelper {
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, accessor);
+        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, documentAccessorFunction);
 
         Set<String> allWarnings = newDocuments.stream()
             .flatMap(documentLink -> {

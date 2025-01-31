@@ -18,24 +18,21 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Service
 public class NewUploadedDocumentsService {
 
+
     /**
-     * Retrieves the list of newly uploaded documents by comparing the current and previous case data.
+     * Retrieves a list of newly uploaded documents by comparing the current and previous case data.
      *
-     * <p>
-     * This method extracts documents from the provided {@code FinremCaseData} instances using the given accessor
-     * and determines which documents are newly uploaded (i.e., present in {@code caseData} but not in {@code caseDataBefore}).
-     * </p>
-     *
-     * @param <T>           The type of document accessor, which extends {@link UploadingDocumentAccessor}.
-     * @param caseData      The current {@link FinremCaseData} instance containing the latest uploaded documents.
-     * @param caseDataBefore The previous {@link FinremCaseData} instance to compare against.
-     * @param accessor      A function that extracts a list of {@code UploadingDocumentAccessor} instances from {@link FinremCaseData}.
-     * @return A list of {@link CaseDocument} instances that are newly uploaded (i.e., present in {@code caseData} but not in {@code caseDataBefore}).
+     * @param caseData                 the current case data containing uploaded documents
+     * @param caseDataBefore           the previous case data before the latest update
+     * @param documentAccessorFunction a function to extract document collections from case data
+     * @param <T>                      a type that extends {@link UploadingDocumentAccessor}
+     * @return a list of newly uploaded {@link CaseDocument} objects; returns an empty list if no new documents are found
      */
-    public <T extends UploadingDocumentAccessor<?>> List<CaseDocument> getNewUploadDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore,
-                                                                                             Function<FinremCaseData, List<T>> accessor) {
-        List<T> uploadedDocuments = accessor.apply(caseData);
-        List<T> previousDocuments = accessor.apply(caseDataBefore);
+    public <T extends UploadingDocumentAccessor<?>> List<CaseDocument> getNewUploadDocuments(
+        FinremCaseData caseData, FinremCaseData caseDataBefore,  Function<FinremCaseData, List<T>> documentAccessorFunction) {
+
+        List<T> uploadedDocuments = documentAccessorFunction.apply(caseData);
+        List<T> previousDocuments = documentAccessorFunction.apply(caseDataBefore);
 
         if (isEmpty(uploadedDocuments)) {
             return Collections.emptyList();
