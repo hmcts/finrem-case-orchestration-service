@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class DocumentWarningsHelperTest {
 
     @TestLogs
@@ -39,6 +39,10 @@ class DocumentWarningsHelperTest {
     private DocumentCheckerService documentCheckerService;
     @InjectMocks
     private DocumentWarningsHelper underTest;
+
+    private static final CaseDocument ACCEPTED_DOCUMENT = caseDocument("https://fakeurl/accepted", "accepted.docx");
+    private static final CaseDocument UNACCEPTED_DOCUMENT = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
+    private static final CaseDocument UNACCEPTED_DOCUMENT_2 = caseDocument("https://fakeurl/unacceptedB", "unacceptedB.docx");
 
     @Test
     void givenValidCaseDataWithoutDocumentUploaded_thenReturnEmptyList() {
@@ -57,15 +61,10 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
-        DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
-        CaseDocument mockedCaesDocument = mock(CaseDocument.class);
 
-        when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(caseDocument()));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            mockedCaesDocument));
-        when(documentCheckerService.getWarnings(eq(mockedCaesDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+            UNACCEPTED_DOCUMENT));
+        when(documentCheckerService.getWarnings(eq(UNACCEPTED_DOCUMENT), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenThrow(new RuntimeException("unexpected exception"));
 
         List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
@@ -78,16 +77,42 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
-        DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
 
-        CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
-        when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(unacceptedDocument));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            unacceptedDocument));
-        when(documentCheckerService.getWarnings(eq(unacceptedDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
-            .thenReturn(List.of("unaccepted document detected"));
+            UNACCEPTED_DOCUMENT));
+        stubReturnSingleWarningForUnacceptedDocument();
+
+        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
+        assertThat(actual).containsExactly("unaccepted document detected");
+        assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 1");
+    }
+
+    @Test
+    void givenValidCaseDataWithMultipleUploadingDocuments_whenWarningIsDetected_thenReturnListOfWarningMessage() {
+        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
+        FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
+        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+
+        when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
+            UNACCEPTED_DOCUMENT, ACCEPTED_DOCUMENT));
+        stubReturnSingleWarningForUnacceptedDocument();
+        stubReturnEmptyWarningsForAcceptedDocument();
+
+        List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
+        assertThat(actual).containsExactly("unaccepted document detected");
+        assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 1");
+    }
+
+    @Test
+    void givenValidCaseDataWithTwoUnacceptedUploadingDocuments_whenWarningIsDetected_thenReturnListOfWarningMessage() {
+        FinremCaseData mockedCaseData = mock(FinremCaseData.class);
+        FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
+        Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
+
+        when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
+            UNACCEPTED_DOCUMENT, UNACCEPTED_DOCUMENT_2));
+        stubReturnSingleWarningForUnacceptedDocument();
+        stubReturnSingleWarningForUnacceptedDocument(UNACCEPTED_DOCUMENT_2);
 
         List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
         assertThat(actual).containsExactly("unaccepted document detected");
@@ -99,16 +124,10 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseData = mock(FinremCaseData.class);
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
-        DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
 
-        CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
-        when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(unacceptedDocument));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            unacceptedDocument));
-        when(documentCheckerService.getWarnings(eq(unacceptedDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
-            .thenReturn(List.of("unaccepted document detected", "another warning detected"));
+            UNACCEPTED_DOCUMENT));
+        stubReturnMultipleWarningsForUnacceptedDocument();
 
         List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
         assertThat(actual).containsExactly("another warning detected", "unaccepted document detected");
@@ -139,6 +158,25 @@ class DocumentWarningsHelperTest {
             .caseDetailsBefore(FinremCaseDetails.builder().data(mockedCaseDataBefore).build())
             .caseDetails(FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).data(mockedCaseData).build())
             .build();
+    }
+
+    private void stubReturnSingleWarningForUnacceptedDocument() {
+        stubReturnSingleWarningForUnacceptedDocument(UNACCEPTED_DOCUMENT);
+    }
+
+    private void stubReturnSingleWarningForUnacceptedDocument(CaseDocument targetCaseDocument) {
+        when(documentCheckerService.getWarnings(eq(targetCaseDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of("unaccepted document detected"));
+    }
+
+    private void stubReturnMultipleWarningsForUnacceptedDocument() {
+        when(documentCheckerService.getWarnings(eq(UNACCEPTED_DOCUMENT), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of("another warning detected", "unaccepted document detected"));
+    }
+
+    private void stubReturnEmptyWarningsForAcceptedDocument() {
+        when(documentCheckerService.getWarnings(eq(ACCEPTED_DOCUMENT), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of());
     }
 
 }
