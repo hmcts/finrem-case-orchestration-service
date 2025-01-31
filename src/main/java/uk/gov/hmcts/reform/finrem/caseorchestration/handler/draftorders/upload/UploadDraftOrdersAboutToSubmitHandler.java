@@ -84,21 +84,28 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         List<String> warnings = new ArrayList<>();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
-            warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-                caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getUploadSuggestedDraftOrderCollection(),
-                userAuthorisation));
-            warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-                caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getSuggestedPsaCollection(),
-                userAuthorisation));
-
+            checkUploadingSuggestedDocuments(callbackRequest, userAuthorisation, warnings);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
         }
 
-        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+        clearTemporaryFields(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
+    }
+
+    private void checkUploadingSuggestedDocuments(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getUploadSuggestedDraftOrderCollection(),
+            userAuthorisation));
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getSuggestedPsaCollection(),
+            userAuthorisation));
+    }
+
+    private void clearTemporaryFields(FinremCaseDetails caseDetails) {
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
     }
 
     private static UploadSuggestedDraftOrder nullSafe(UploadSuggestedDraftOrder ret) {
