@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -103,8 +102,8 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .stream()
             .map(UploadSuggestedDraftOrderCollection::getValue)
             .filter(Objects::nonNull)
-            .flatMap(order -> emptyIfNull(order.getSuggestedDraftOrderAdditionalDocumentsCollection()).stream())
-            .map(SuggestedDraftOrderAdditionalDocumentsCollection::getValue)
+            .flatMap(order -> emptyIfNull(order.getAdditionalDocuments()).stream())
+            .map(DocumentCollection::getValue)
             .filter(Objects::nonNull)
             .anyMatch(document -> !FileUtils.isPdf(document));
     }
