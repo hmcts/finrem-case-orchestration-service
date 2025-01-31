@@ -48,7 +48,7 @@ public class NewUploadedDocumentsService {
 
     private List<CaseDocument> extractCaseDocuments(List<? extends UploadingDocumentAccessor<?>> documents) {
         return documents.stream()
-            .map(UploadingDocumentAccessor::getValue) // Explicit cast
+            .map(UploadingDocumentAccessor::getValue)
             .filter(Objects::nonNull)
             .map(HasUploadingDocuments::getUploadingDocuments)
             .flatMap(List::stream)
