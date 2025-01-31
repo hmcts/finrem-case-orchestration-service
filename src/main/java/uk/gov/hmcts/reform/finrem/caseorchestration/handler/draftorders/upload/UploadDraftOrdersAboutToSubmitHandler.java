@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderF
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -87,6 +88,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             checkUploadingSuggestedDocuments(callbackRequest, userAuthorisation, warnings);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
+            checkUploadingAgreedDocuments(callbackRequest, userAuthorisation, warnings);
         }
 
         clearTemporaryFields(caseDetails);
@@ -103,6 +105,15 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             userAuthorisation));
     }
 
+    private void checkUploadingAgreedDocuments(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).getUploadAgreedDraftOrderCollection(),
+            userAuthorisation));
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).getAgreedPsaCollection(),
+            userAuthorisation));
+    }
+
     private void clearTemporaryFields(FinremCaseDetails caseDetails) {
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
@@ -110,6 +121,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private static UploadSuggestedDraftOrder nullSafe(UploadSuggestedDraftOrder ret) {
         return Optional.ofNullable(ret).orElse(UploadSuggestedDraftOrder.builder().build());
+    }
+
+    private static UploadAgreedDraftOrder nullSafe(UploadAgreedDraftOrder ret) {
+        return Optional.ofNullable(ret).orElse(UploadAgreedDraftOrder.builder().build());
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {

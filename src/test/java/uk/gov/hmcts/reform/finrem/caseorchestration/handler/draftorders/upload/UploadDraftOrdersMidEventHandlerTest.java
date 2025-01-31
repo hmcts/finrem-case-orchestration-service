@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
@@ -50,11 +49,11 @@ class UploadDraftOrdersMidEventHandlerTest {
     }
 
     private static UploadAgreedDraftOrderCollection toUploadAgreedDraftOrderCollection(String documentName, String... attachmentDocumentNames) {
-        List<AgreedDraftOrderAdditionalDocumentsCollection> additionalDocuments = attachmentDocumentNames == null
+        List<DocumentCollection> additionalDocuments = attachmentDocumentNames == null
             || attachmentDocumentNames.length == 0
             ? Collections.emptyList()
             : Arrays.stream(attachmentDocumentNames)
-            .map(name -> AgreedDraftOrderAdditionalDocumentsCollection.builder()
+            .map(name -> DocumentCollection.builder()
                 .value(CaseDocument.builder().documentFilename(name).build())
                 .build())
             .toList();

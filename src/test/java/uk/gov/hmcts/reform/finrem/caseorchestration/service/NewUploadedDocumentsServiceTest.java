@@ -11,16 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
@@ -212,50 +214,22 @@ class NewUploadedDocumentsServiceTest {
                 (Function<FinremCaseData, ?>) FinremCaseData::getUploadDocuments,
                 List.of(caseDocument("newUrl", "newBinaryUrl1", "newFilename"))
             ),
-            // 3. agreedDraftOrderCollection
+            // 3. uploadAgreedDraftOrder.draftOrder
             Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) f -> f,
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder().agreedDraftOrderCollection(
-                        List.of(AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
-                            .draftOrder(caseDocument("http://fakeurl/draftOrder", "draftOrder.pdf"))
-                            .pensionSharingAnnex(caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf"))
-                            .attachments(List.of(
-                                DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment1", "attachment1.pdf")).build(),
-                                DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment2", "attachment2.pdf")).build()
-                            ))
-                            .build()).build())
-                    ).build());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) data -> data.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
+                uploadAgreedDraftOrderModified(),
+                (Function<FinremCaseData, ?>) data -> nullSafeUploadAgreedDraftOrder(data).getUploadAgreedDraftOrderCollection(),
                 List.of(
                     caseDocument("http://fakeurl/draftOrder", "draftOrder.pdf"),
-                    caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf"),
                     caseDocument("http://fakeurl/attachment1", "attachment1.pdf"),
                     caseDocument("http://fakeurl/attachment2", "attachment2.pdf")
                 )
             ),
-            // 4. suggestDraftOrderCollection
+            // 3.1 uploadAgreedDraftOrder.pensionSharingAnnex
             Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) f -> f,
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder().suggestedDraftOrderCollection(
-                        List.of(SuggestedDraftOrderCollection.builder().value(SuggestedDraftOrder.builder()
-                            .draftOrder(caseDocument("http://fakeurl/draftOrder", "draftOrder.pdf"))
-                            .pensionSharingAnnex(caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf"))
-                            .attachments(List.of(
-                                DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment1", "attachment1.pdf")).build(),
-                                DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment3", "attachment3.pdf")).build()
-                            ))
-                            .build()).build())
-                    ).build());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) data -> data.getDraftOrdersWrapper().getSuggestedDraftOrderCollection(),
+                uploadAgreedDraftOrderModified(),
+                (Function<FinremCaseData, ?>) data -> nullSafeUploadAgreedDraftOrder(data).getAgreedPsaCollection(),
                 List.of(
-                    caseDocument("http://fakeurl/draftOrder", "draftOrder.pdf"),
-                    caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf"),
-                    caseDocument("http://fakeurl/attachment1", "attachment1.pdf"),
-                    caseDocument("http://fakeurl/attachment3", "attachment3.pdf")
+                    caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf")
                 )
             )
         );
@@ -271,5 +245,39 @@ class NewUploadedDocumentsServiceTest {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
         FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();
         assertEquals(expectedReturn, underTest.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData));
+    }
+
+    private static UploadAgreedDraftOrder nullSafeUploadAgreedDraftOrder(FinremCaseData data) {
+        return ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder())
+            .orElse(UploadAgreedDraftOrder.builder().build());
+    }
+
+    private static Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> uploadAgreedDraftOrderModified() {
+        return  finremCaseDataBuilder -> {
+            finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+                    .agreedPsaCollection(List.of(
+                        AgreedPensionSharingAnnexCollection.builder()
+                            .value(AgreedPensionSharingAnnex.builder()
+                                .agreedPensionSharingAnnexes(caseDocument("http://fakeurl/pensionSharingAnnex", "pensionSharingAnnex.pdf"))
+                                .build())
+                            .build()
+                    ))
+                    .uploadAgreedDraftOrderCollection(List.of(
+                        UploadAgreedDraftOrderCollection.builder()
+                            .value(UploadedDraftOrder.builder()
+                                .agreedDraftOrderDocument(caseDocument("http://fakeurl/draftOrder", "draftOrder.pdf"))
+                                .agreedDraftOrderAdditionalDocumentsCollection(List.of(
+                                    DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment1", "attachment1.pdf")).build(),
+                                    DocumentCollection.builder().value(caseDocument("http://fakeurl/attachment2", "attachment2.pdf")).build()
+                                ))
+                                .build())
+                            .build()
+                    ))
+                    .build()
+                ).build()
+            );
+            return finremCaseDataBuilder;
+        };
     }
 }
