@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
@@ -58,7 +58,7 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
         DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocument mockedSampleHasDocumentLink = mock(DummyHasUploadingDocument.class);
+        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
         CaseDocument mockedCaesDocument = mock(CaseDocument.class);
 
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
@@ -79,7 +79,7 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
         DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocument mockedSampleHasDocumentLink = mock(DummyHasUploadingDocument.class);
+        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
 
         CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
@@ -100,7 +100,7 @@ class DocumentWarningsHelperTest {
         FinremCaseData mockedCaseDataBefore = mock(FinremCaseData.class);
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
         DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
-        DummyHasUploadingDocument mockedSampleHasDocumentLink = mock(DummyHasUploadingDocument.class);
+        DummyHasUploadingDocuments mockedSampleHasDocumentLink = mock(DummyHasUploadingDocuments.class);
 
         CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
@@ -115,7 +115,7 @@ class DocumentWarningsHelperTest {
         assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 2");
     }
 
-    private static class DummyHasUploadingDocument implements HasUploadingDocument {
+    private static class DummyHasUploadingDocuments implements HasUploadingDocuments {
 
         @Override
         public List<CaseDocument> getUploadingDocuments() {
@@ -123,9 +123,9 @@ class DocumentWarningsHelperTest {
         }
     }
 
-    private static class DummyUploadingDocumentAccessor implements UploadingDocumentAccessor<DummyHasUploadingDocument> {
+    private static class DummyUploadingDocumentAccessor implements UploadingDocumentAccessor<DummyHasUploadingDocuments> {
 
-        public DummyHasUploadingDocument getValue() {
+        public DummyHasUploadingDocuments getValue() {
             return null;
         }
     }

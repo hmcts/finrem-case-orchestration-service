@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 
 import java.util.Collections;
@@ -50,7 +50,7 @@ public class NewUploadedDocumentsService {
         return documents.stream()
             .map(UploadingDocumentAccessor::getValue) // Explicit cast
             .filter(Objects::nonNull)
-            .map(HasUploadingDocument::getUploadingDocuments)
+            .map(HasUploadingDocuments::getUploadingDocuments)
             .flatMap(List::stream)
             .toList();
     }

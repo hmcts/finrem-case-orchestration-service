@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UploadDocument implements HasUploadingDocument, HasCaseDocument {
+public class UploadDocument implements HasUploadingDocuments, HasCaseDocument {
     @JsonProperty("DocumentType")
     private UploadDocumentType documentType;
     @JsonProperty("DocumentEmailContent")
