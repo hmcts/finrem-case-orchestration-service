@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -172,8 +171,8 @@ class DraftOrderServiceTest {
                     .value(UploadedDraftOrder.builder()
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
-                        .agreedDraftOrderAdditionalDocumentsCollection(List.of(
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                        .additionalDocuments(List.of(
+                            DocumentCollection.builder()
                                 .value(attachment1)
                                 .build()
                         ))
@@ -210,11 +209,11 @@ class DraftOrderServiceTest {
                     .value(UploadedDraftOrder.builder()
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
-                        .agreedDraftOrderAdditionalDocumentsCollection(List.of(
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                        .additionalDocuments(List.of(
+                            DocumentCollection.builder()
                                 .value(attachment1)
                                 .build(),
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                            DocumentCollection.builder()
                                 .value(attachment2)
                                 .build()
                         ))

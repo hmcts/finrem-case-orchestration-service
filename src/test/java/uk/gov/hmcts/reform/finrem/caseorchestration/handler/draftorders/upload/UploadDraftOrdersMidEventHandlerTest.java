@@ -15,12 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -50,11 +49,11 @@ class UploadDraftOrdersMidEventHandlerTest {
     }
 
     private static UploadAgreedDraftOrderCollection toUploadAgreedDraftOrderCollection(String documentName, String... attachmentDocumentNames) {
-        List<AgreedDraftOrderAdditionalDocumentsCollection> additionalDocuments = attachmentDocumentNames == null
+        List<DocumentCollection> additionalDocuments = attachmentDocumentNames == null
             || attachmentDocumentNames.length == 0
             ? Collections.emptyList()
             : Arrays.stream(attachmentDocumentNames)
-            .map(name -> AgreedDraftOrderAdditionalDocumentsCollection.builder()
+            .map(name -> DocumentCollection.builder()
                 .value(CaseDocument.builder().documentFilename(name).build())
                 .build())
             .toList();
@@ -62,17 +61,17 @@ class UploadDraftOrdersMidEventHandlerTest {
         return UploadAgreedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
                 .agreedDraftOrderDocument(CaseDocument.builder().documentFilename(documentName).build())
-                .agreedDraftOrderAdditionalDocumentsCollection(additionalDocuments)
+                .additionalDocuments(additionalDocuments)
                 .build())
             .build();
     }
 
     private static UploadSuggestedDraftOrderCollection toUploadSuggestedDraftOrderCollection(String documentName, String... attachmentDocumentNames) {
-        List<SuggestedDraftOrderAdditionalDocumentsCollection> additionalDocuments = attachmentDocumentNames == null
+        List<DocumentCollection> additionalDocuments = attachmentDocumentNames == null
             || attachmentDocumentNames.length == 0
             ? Collections.emptyList()
             : Arrays.stream(attachmentDocumentNames)
-            .map(name -> SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+            .map(name -> DocumentCollection.builder()
                 .value(CaseDocument.builder().documentFilename(name).build())
                 .build())
             .toList();
@@ -80,7 +79,7 @@ class UploadDraftOrdersMidEventHandlerTest {
         return UploadSuggestedDraftOrderCollection.builder()
             .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
                 .suggestedDraftOrderDocument(CaseDocument.builder().documentFilename(documentName).build())
-                .suggestedDraftOrderAdditionalDocumentsCollection(additionalDocuments)
+                .additionalDocuments(additionalDocuments)
                 .build())
             .build();
     }

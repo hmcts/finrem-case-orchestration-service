@@ -5,9 +5,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -61,9 +61,9 @@ class DraftOrdersCategoriserTest {
 
         assertThat(uploadedDraftOrder.getSuggestedDraftOrderDocument().getCategoryId())
             .isEqualTo(expectedDocumentCategory.getDocumentCategoryId());
-        assertThat(uploadedDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection())
+        assertThat(uploadedDraftOrder.getAdditionalDocuments())
             .hasSize(3)
-            .extracting(SuggestedDraftOrderAdditionalDocumentsCollection::getValue)
+            .extracting(DocumentCollection::getValue)
             .extracting(CaseDocument::getCategoryId)
             .allMatch(categoryId -> categoryId.equals(expectedDocumentCategory.getDocumentCategoryId()));
     }
@@ -71,10 +71,10 @@ class DraftOrdersCategoriserTest {
     private List<UploadSuggestedDraftOrderCollection> buildSuggestedDraftOrders() {
         UploadedDraftOrder draftOrder = new UploadedDraftOrder();
         draftOrder.setSuggestedDraftOrderDocument(new CaseDocument());
-        draftOrder.setSuggestedDraftOrderAdditionalDocumentsCollection(List.of(
-            SuggestedDraftOrderAdditionalDocumentsCollection.builder().value(new CaseDocument()).build(),
-            SuggestedDraftOrderAdditionalDocumentsCollection.builder().value(new CaseDocument()).build(),
-            SuggestedDraftOrderAdditionalDocumentsCollection.builder().value(new CaseDocument()).build()
+        draftOrder.setAdditionalDocuments(List.of(
+            DocumentCollection.builder().value(new CaseDocument()).build(),
+            DocumentCollection.builder().value(new CaseDocument()).build(),
+            DocumentCollection.builder().value(new CaseDocument()).build()
         ));
 
         return List.of(UploadSuggestedDraftOrderCollection.builder().value(draftOrder).build());
