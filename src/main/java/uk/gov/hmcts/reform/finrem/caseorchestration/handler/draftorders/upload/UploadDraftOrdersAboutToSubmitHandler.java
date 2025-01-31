@@ -94,13 +94,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
                 userAuthorisation);
         }
 
-
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(warnings)
-            .data(finremCaseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
