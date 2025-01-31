@@ -8,7 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,8 +18,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SuggestedPensionSharingAnnex {
+public class SuggestedPensionSharingAnnex implements HasUploadingDocuments {
 
     @JsonProperty("suggestedPensionSharingAnnexes")
     private CaseDocument suggestedPensionSharingAnnexes;
+
+    @Override
+    public List<CaseDocument> getUploadingDocuments() {
+        return suggestedPensionSharingAnnexes == null ? List.of() : List.of(suggestedPensionSharingAnnexes);
+    }
 }

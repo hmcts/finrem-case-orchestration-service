@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderF
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -35,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
@@ -84,20 +84,25 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         List<String> warnings = new ArrayList<>();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
-            warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
-                caseData -> caseData.getDraftOrdersWrapper().getSuggestedDraftOrderCollection(),
-                userAuthorisation);
+            warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+                caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getUploadSuggestedDraftOrderCollection(),
+                userAuthorisation));
+            warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+                caseData -> nullSafe(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getSuggestedPsaCollection(),
+                userAuthorisation));
+
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
-            warnings = documentWarningsHelper.getDocumentWarnings(callbackRequest,
-                caseData -> caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
-                userAuthorisation);
         }
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
+    }
+
+    private static UploadSuggestedDraftOrder nullSafe(UploadSuggestedDraftOrder ret) {
+        return Optional.ofNullable(ret).orElse(UploadSuggestedDraftOrder.builder().build());
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
@@ -218,7 +223,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         // Add additional attachments for orders only
         if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection())) {
             List<DocumentCollection> attachments = new ArrayList<>();
-            for (SuggestedDraftOrderAdditionalDocumentsCollection additionalDoc :
+            for (DocumentCollection additionalDoc :
                 uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection()) {
                 if (additionalDoc.getValue() != null) {
                     attachments.add(DocumentCollection.builder()
