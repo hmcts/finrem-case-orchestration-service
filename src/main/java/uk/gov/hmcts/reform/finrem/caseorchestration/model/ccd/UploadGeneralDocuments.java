@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -42,7 +43,7 @@ public class UploadGeneralDocument implements HasUploadingDocument, HasCaseDocum
 
     @Override
     @JsonIgnore
-    public CaseDocument getUploadingDocument() {
-        return documentLink;
+    public List<CaseDocument> getUploadingDocuments() {
+        return documentLink != null ? List.of(documentLink) : List.of();
     }
 }

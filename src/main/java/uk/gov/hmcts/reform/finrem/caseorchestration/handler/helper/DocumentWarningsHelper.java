@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentAccessor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,12 +36,9 @@ public class DocumentWarningsHelper {
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        List<T> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, accessor);
+        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, accessor);
 
         Set<String> allWarnings = newDocuments.stream()
-            .map(UploadingDocumentAccessor::getValue)
-            .map(d -> ((HasUploadingDocument) d).getUploadingDocument())
-            .filter(Objects::nonNull)
             .flatMap(documentLink -> {
                 try {
                     return documentCheckerService.getWarnings(documentLink, beforeFinremCaseDetails, finremCaseDetails, userAuthorisation)

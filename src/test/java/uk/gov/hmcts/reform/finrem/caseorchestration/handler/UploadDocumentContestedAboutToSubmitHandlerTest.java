@@ -61,8 +61,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     public void setUpTest() {
         underTest = new UploadDocumentContestedAboutToSubmitHandler(
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
-            new DocumentWarningsHelper(documentCheckerService,
-                newUploadedDocumentsService), uploadGeneralDocumentsCategoriser);
+            new DocumentWarningsHelper(documentCheckerService, newUploadedDocumentsService), uploadGeneralDocumentsCategoriser);
     }
 
     @Test
@@ -72,11 +71,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseDataWithoutDocumentUploaded_thenNoWarningShouldBeReturned() {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().documentEmailContent("<documentEmailContent>").build()) // no documentLink
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of());
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(List.of("whatever")); // never reach
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
@@ -89,11 +84,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseDataWithDocumentUpload_whenUnexpectedExceptionThrownInWarningChecking_thenNotBlockTheSubmission() {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument()));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenThrow(new RuntimeException("unexpected exception"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
@@ -107,19 +98,16 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningIsDetected_thenPopulateWarning(boolean hasWarnings) {
+        CaseDocument caseDocument = caseDocument();
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(expectedWarnings);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder()
                 .uploadGeneralDocuments(List.of(
                     createGeneralUploadDocumentItem(
                         UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-                        createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
+                        caseDocument, LocalDate.now(), "New Example", "newDocument.filename")
                 ))
             )
             .build();
@@ -144,11 +132,8 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningAreDetected_thenPopulateWarnings(boolean hasWarnings) {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadGeneralDocumentCollection.builder()
-                .value(UploadGeneralDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        CaseDocument caseDocument = caseDocument();
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "2warnings", "1warnings")
             : List.of());
 
@@ -156,7 +141,7 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
                 .uploadGeneralDocuments(List.of(
                     createGeneralUploadDocumentItem(
                         UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-                        createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
+                        caseDocument(), LocalDate.now(), "New Example", "newDocument.filename")
                 ))
             )
             .build();
@@ -180,13 +165,14 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDateAndCategoriserInvoked() {
+        CaseDocument caseDocument = caseDocument();
         UploadGeneralDocumentCollection oldDoc = createGeneralUploadDocumentItem(
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_APPLICANT,
-            "Old email content", createCaseDocument(), LocalDate.now().minusDays(1),
+            "Old email content", caseDocument, LocalDate.now().minusDays(1),
             "Old Example", "oldDocument.filename");
         UploadGeneralDocumentCollection newDoc = createGeneralUploadDocumentItem(
             UploadGeneralDocumentType.LETTER_EMAIL_FROM_RESPONDENT, "New email content",
-            createCaseDocument(), LocalDate.now(), "New Example", "newDocument.filename");
+            caseDocument, LocalDate.now(), "New Example", "newDocument.filename");
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONTESTED, FinremCaseData.builder()
             .uploadGeneralDocuments(List.of(newDoc, oldDoc)))
@@ -208,13 +194,8 @@ class UploadDocumentContestedAboutToSubmitHandlerTest {
         verify(uploadGeneralDocumentsCategoriser).categorise(finremCaseDetails.getData());
     }
 
-    private CaseDocument createCaseDocument() {
-        return caseDocument("/fileUrl", "/binaryUrl","document.extension");
-    }
-
-    private UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent,
-                                                                            CaseDocument link, LocalDate dateAdded, String comment,
-                                                                            String fileName) {
+    private UploadGeneralDocumentCollection createGeneralUploadDocumentItem(UploadGeneralDocumentType type, String emailContent, CaseDocument link,
+                                                                            LocalDate dateAdded, String comment, String fileName) {
         return UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument
                 .builder()

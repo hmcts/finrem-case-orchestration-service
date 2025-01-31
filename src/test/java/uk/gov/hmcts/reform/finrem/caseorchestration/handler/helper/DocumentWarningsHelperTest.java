@@ -59,12 +59,13 @@ class DocumentWarningsHelperTest {
         Function<FinremCaseData, List<DummyUploadingDocumentAccessor>> accessor = createAccessor();
         DummyUploadingDocumentAccessor mockedDummyUploadingDocumentAccessor = mock(DummyUploadingDocumentAccessor.class);
         DummyHasUploadingDocument mockedSampleHasDocumentLink = mock(DummyHasUploadingDocument.class);
+        CaseDocument mockedCaesDocument = mock(CaseDocument.class);
 
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocument()).thenReturn(caseDocument());
+        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(caseDocument()));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            mockedDummyUploadingDocumentAccessor));
-        when(documentCheckerService.getWarnings(any(CaseDocument.class), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
+            mockedCaesDocument));
+        when(documentCheckerService.getWarnings(eq(mockedCaesDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenThrow(new RuntimeException("unexpected exception"));
 
         List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore), accessor, AUTH_TOKEN);
@@ -82,9 +83,9 @@ class DocumentWarningsHelperTest {
 
         CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocument()).thenReturn(unacceptedDocument);
+        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(unacceptedDocument));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            mockedDummyUploadingDocumentAccessor));
+            unacceptedDocument));
         when(documentCheckerService.getWarnings(eq(unacceptedDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(List.of("unaccepted document detected"));
 
@@ -103,9 +104,9 @@ class DocumentWarningsHelperTest {
 
         CaseDocument unacceptedDocument = caseDocument("https://fakeurl/unaccepted", "unaccepted.docx");
         when(mockedDummyUploadingDocumentAccessor.getValue()).thenReturn(mockedSampleHasDocumentLink);
-        when(mockedSampleHasDocumentLink.getUploadingDocument()).thenReturn(unacceptedDocument);
+        when(mockedSampleHasDocumentLink.getUploadingDocuments()).thenReturn(List.of(unacceptedDocument));
         when(newUploadedDocumentsService.getNewUploadDocuments(mockedCaseData, mockedCaseDataBefore, accessor)).thenReturn(List.of(
-            mockedDummyUploadingDocumentAccessor));
+            unacceptedDocument));
         when(documentCheckerService.getWarnings(eq(unacceptedDocument), any(FinremCaseDetails.class), any(FinremCaseDetails.class), eq(AUTH_TOKEN)))
             .thenReturn(List.of("unaccepted document detected", "another warning detected"));
 
@@ -117,8 +118,8 @@ class DocumentWarningsHelperTest {
     private static class DummyHasUploadingDocument implements HasUploadingDocument {
 
         @Override
-        public CaseDocument getUploadingDocument() {
-            return null;
+        public List<CaseDocument> getUploadingDocuments() {
+            return List.of();
         }
     }
 
