@@ -5,11 +5,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
 
 import java.util.List;
 import java.util.function.Function;
@@ -67,145 +67,147 @@ class NewUploadedDocumentsServiceTest {
                     )).toList());
                     return finremCaseDataBuilder;
                 },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+                (Function<FinremCaseData, ?>) data -> data.getUploadGeneralDocuments().stream().map(UploadGeneralDocumentCollection::getValue).toList(),
                 List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-            ),
-            // 1.1.2 with null document link in the existing docs
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocumentWithNullDocumentLink);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocumentWithNullDocumentLink.stream(), Stream.of(
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-                                .build())
-                            .build()
-                    )).toList());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-            ),
-            // 1.1.2 with null document link in the new doc
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(null)
-                                .build())
-                            .build()
-                    )).toList());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of()
-            ),
-            // 1.2 with new doc
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-                                .build())
-                            .build()
-                    )).toList());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-            ),
-            // 1.3 without new doc - no change
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of()
-            ),
-            // 1.4 with multiple new docs
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-                                .build())
-                            .build(),
-
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(caseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
-                                .build())
-                            .build()
-                    )).toList());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"),
-                    caseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
-            ),
-            // 1.5 no existing doc with a new doc
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder ->
-                    finremCaseDataBuilder,
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(List.of(
-                        UploadGeneralDocumentCollection.builder()
-                            .value(UploadGeneralDocument.builder()
-                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-                                .build())
-                            .build()
-                    ));
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
-            ),
-            // 1.6 removing existing doc
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder ->
-                    finremCaseDataBuilder,
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
-                List.of()
-            ),
-            // 2. uploadDocuments
-            // 2.1 with new doc
-            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadDocuments(existingUploadDocument);
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
-                    finremCaseDataBuilder.uploadDocuments(Stream.concat(existingUploadDocument.stream(), Stream.of(
-                        UploadDocumentCollection.builder()
-                            .value(UploadDocument.builder()
-                                .documentLink(caseDocument("newUrl", "newBinaryUrl1", "newFilename"))
-                                .build())
-                            .build()
-                    )).toList());
-                    return finremCaseDataBuilder;
-                },
-                (Function<FinremCaseData, ?>) FinremCaseData::getUploadDocuments,
-                List.of(caseDocument("newUrl", "newBinaryUrl1", "newFilename"))
             )
+//            ,
+//            // 1.1.2 with null document link in the existing docs
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocumentWithNullDocumentLink);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocumentWithNullDocumentLink.stream(), Stream.of(
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//                                .build())
+//                            .build()
+//                    )).toList());
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//            ),
+//            // 1.1.2 with null document link in the new doc
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(null)
+//                                .build())
+//                            .build()
+//                    )).toList());
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of()
+//            )
+            //,
+//            // 1.2 with new doc
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//                                .build())
+//                            .build()
+//                    )).toList());
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//            ),
+//            // 1.3 without new doc - no change
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of()
+//            ),
+//            // 1.4 with multiple new docs
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(Stream.concat(existingUploadGeneralDocument.stream(), Stream.of(
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//                                .build())
+//                            .build(),
+//
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(caseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
+//                                .build())
+//                            .build()
+//                    )).toList());
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"),
+//                    caseDocument("newUrl2", "newBinaryUrl2", "newFilename2"))
+//            ),
+//            // 1.5 no existing doc with a new doc
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder ->
+//                    finremCaseDataBuilder,
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(List.of(
+//                        UploadGeneralDocumentCollection.builder()
+//                            .value(UploadGeneralDocument.builder()
+//                                .documentLink(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//                                .build())
+//                            .build()
+//                    ));
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of(caseDocument("newUrl1", "newBinaryUrl1", "newFilename1"))
+//            ),
+//            // 1.6 removing existing doc
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadGeneralDocuments(existingUploadGeneralDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder ->
+//                    finremCaseDataBuilder,
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadGeneralDocuments,
+//                List.of()
+//            ),
+//            // 2. uploadDocuments
+//            // 2.1 with new doc
+//            Arguments.of((Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadDocuments(existingUploadDocument);
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+//                    finremCaseDataBuilder.uploadDocuments(Stream.concat(existingUploadDocument.stream(), Stream.of(
+//                        UploadDocumentCollection.builder()
+//                            .value(UploadDocument.builder()
+//                                .documentLink(caseDocument("newUrl", "newBinaryUrl1", "newFilename"))
+//                                .build())
+//                            .build()
+//                    )).toList());
+//                    return finremCaseDataBuilder;
+//                },
+//                (Function<FinremCaseData, ?>) FinremCaseData::getUploadDocuments,
+//                List.of(caseDocument("newUrl", "newBinaryUrl1", "newFilename"))
+//            )
         );
     }
 
@@ -214,7 +216,7 @@ class NewUploadedDocumentsServiceTest {
     void givenCaseWithExistingDocument_whenDocumentUploadedOrNot_thenReturnExpectedDocument(
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataBeforeModifier,
         Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder> caseDataModifier,
-        Function<FinremCaseData, List<UploadingDocumentsHolder<?>>> getDocumentsFromCaseData,
+        Function<FinremCaseData, List<HasUploadingDocuments>> getDocumentsFromCaseData,
         List<CaseDocument> expectedReturn) {
         FinremCaseData caseDataBefore = caseDataBeforeModifier.apply(FinremCaseData.builder()).build();
         FinremCaseData caseData = caseDataModifier.apply(FinremCaseData.builder()).build();

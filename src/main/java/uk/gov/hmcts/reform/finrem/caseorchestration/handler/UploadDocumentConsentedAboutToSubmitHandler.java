@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOAD_DOCUMENT_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -39,7 +41,8 @@ public class UploadDocumentConsentedAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData caseData = finremCaseDetails.getData();
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadDocuments, userAuthorisation))
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data -> emptyIfNull(data.getUploadDocuments()).stream()
+                .map(UploadDocumentCollection::getValue).toList(), userAuthorisation))
             .data(caseData).build();
     }
 

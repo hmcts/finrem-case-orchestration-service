@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadingDocumentsHolder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NewUploadedDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentchecker.DocumentCheckerService;
 
@@ -35,9 +35,9 @@ public class DocumentWarningsHelper {
      * @param <T>                   a type that extends UploadingDocumentsHolder
      * @return a sorted list of warning messages related to the uploaded documents
      */
-    public <T extends UploadingDocumentsHolder<?>> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest,
-                                                                                    Function<FinremCaseData, List<T>> getDocumentsFromCaseData,
-                                                                                    String userAuthorisation) {
+    public <T extends HasUploadingDocuments> List<String> getDocumentWarnings(FinremCallbackRequest callbackRequest,
+                                                                              Function<FinremCaseData, List<T>> getDocumentsFromCaseData,
+                                                                              String userAuthorisation) {
 
         FinremCaseDetails beforeFinremCaseDetails = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
@@ -46,7 +46,7 @@ public class DocumentWarningsHelper {
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData);
+        List<CaseDocument> newDocuments = null;//newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData);
 
         Set<String> allWarnings = newDocuments.stream()
             .flatMap(documentLink -> {

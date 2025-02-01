@@ -21,6 +21,7 @@ import java.util.List;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.UPLOAD_DOCUMENT_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -62,7 +63,8 @@ public class UploadDocumentContestedAboutToSubmitHandler extends FinremCallbackH
         uploadGeneralDocumentsCategoriser.categorise(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, FinremCaseData::getUploadGeneralDocuments, userAuthorisation))
+            .warnings(documentWarningsHelper.getDocumentWarnings(callbackRequest, data -> emptyIfNull(data.getUploadGeneralDocuments()).stream()
+                .map(UploadGeneralDocumentCollection::getValue).toList(), userAuthorisation))
             .data(caseData).build();
     }
 
