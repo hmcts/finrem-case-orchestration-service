@@ -156,8 +156,7 @@ class NewUploadedDocumentsServiceTest {
                 },
                 uploadGeneralDocumentGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename1.4-1"), toCaseDocument("filename1.4-2"))
-            )
-            ,
+            ),
             // 1.5 no existing doc with a new doc
             Arguments.of(
                 Function.identity(),
@@ -167,8 +166,7 @@ class NewUploadedDocumentsServiceTest {
                 },
                 uploadGeneralDocumentGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename1.5"))
-            )
-            ,
+            ),
             // 1.6 removing existing doc
             Arguments.of(
                 (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
