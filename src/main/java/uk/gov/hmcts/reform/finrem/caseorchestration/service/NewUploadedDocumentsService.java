@@ -20,13 +20,13 @@ public class NewUploadedDocumentsService {
 
 
     /**
-     * Retrieves a list of newly uploaded documents by comparing the current and previous case data.
+     * Retrieves the newly uploaded documents by comparing the current and previous case data.
      *
-     * @param caseData                 the current case data containing uploaded documents
-     * @param caseDataBefore           the previous case data before the latest update
-     * @param getDocumentsFromCaseData a function to extract document collections from case data
-     * @param <T>                      a type that extends {@link UploadingDocumentsHolder}
-     * @return a list of newly uploaded {@link CaseDocument} objects; returns an empty list if no new documents are found
+     * @param caseData the current case data containing the uploaded documents.
+     * @param caseDataBefore the previous case data to compare against.
+     * @param getDocumentsFromCaseData a function to extract the list of documents from the case data.
+     * @param <T> a type that extends HasUploadingDocuments, representing documents with upload details.
+     * @return a list of newly uploaded CaseDocument objects.
      */
     public <T extends HasUploadingDocuments> List<CaseDocument> getNewUploadDocuments(
         FinremCaseData caseData, FinremCaseData caseDataBefore, Function<FinremCaseData, List<T>> getDocumentsFromCaseData) {
