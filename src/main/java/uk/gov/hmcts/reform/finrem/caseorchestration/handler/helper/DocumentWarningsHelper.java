@@ -46,7 +46,7 @@ public class DocumentWarningsHelper {
         FinremCaseData caseData = finremCaseDetails.getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
-        List<CaseDocument> newDocuments = null;//newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData);
+        List<CaseDocument> newDocuments = newUploadedDocumentsService.getNewUploadDocuments(caseData, caseDataBefore, getDocumentsFromCaseData);
 
         Set<String> allWarnings = newDocuments.stream()
             .flatMap(documentLink -> {
