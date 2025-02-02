@@ -18,7 +18,6 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Service
 public class NewUploadedDocumentsService {
 
-
     /**
      * Retrieves the newly uploaded documents by comparing the current and previous case data.
      *
