@@ -58,6 +58,32 @@ class DirectionUploadOrderAboutToStartHandlerTest {
     }
 
     @Test
+    void givenOnlyProcessedOrders_whenHandle_shouldNotPopulateUnprocessedApprovedDocuments() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(
+                    DraftOrdersReviewCollection.builder().value(
+                        DraftOrdersReview.builder()
+                            .draftOrderDocReviewCollection(List.of(
+                                buildDraftOrderDocReviewCollection(PROCESSED),
+                                buildDraftOrderDocReviewCollection(PROCESSED)
+                            ))
+                            .build()).build()
+                ))
+                .build())
+            .uploadHearingOrder(List.of())
+            .build();
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(caseData);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            .isEmpty();
+        assertThat(result.getErrors()).containsExactly("There are no draft orders to be processed.");
+    }
+
+    @Test
     void shouldPopulateIsHavingOldDraftOrders() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
             .uploadHearingOrder(List.of(DirectionOrderCollection.builder().build()))
