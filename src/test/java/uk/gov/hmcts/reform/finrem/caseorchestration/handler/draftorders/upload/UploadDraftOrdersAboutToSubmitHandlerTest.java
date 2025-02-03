@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
@@ -47,12 +48,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -88,6 +91,9 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    private DocumentWarningsHelper documentWarningsHelper;
 
     @Test
     void canHandle() {
@@ -147,6 +153,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
         when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
+        stubUploadingDocumentsWithoutWarning();
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -393,4 +400,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .value(DynamicRadioListElement.builder().code(code).build())
             .build();
     }
+
+    private void stubUploadingDocumentsWithoutWarning() {
+        lenient().when(documentWarningsHelper.getDocumentWarnings(any(FinremCallbackRequest.class), any(Function.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of());
+    }
+
 }
