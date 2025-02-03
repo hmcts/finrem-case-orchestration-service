@@ -37,8 +37,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
@@ -87,10 +88,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         List<String> warnings = new ArrayList<>();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
-            checkUploadingSuggestedDocuments(callbackRequest, userAuthorisation, warnings);
+            populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
-            checkUploadingAgreedDocuments(callbackRequest, userAuthorisation, warnings);
+            populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         }
 
         clearTemporaryFields(caseDetails);
@@ -283,38 +284,41 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         return draftOrderService.isPsaSelected(uploadOrdersOrPsas);
     }
 
-    private static UploadSuggestedDraftOrder nullSafe(UploadSuggestedDraftOrder ret) {
-        return Optional.ofNullable(ret).orElse(UploadSuggestedDraftOrder.builder().build());
+    private List<UploadAgreedDraftOrderCollection> getUploadAgreedDraftOrderCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+            .getUploadAgreedDraftOrderCollection());
     }
 
-    private static UploadAgreedDraftOrder nullSafe(UploadAgreedDraftOrder ret) {
-        return Optional.ofNullable(ret).orElse(UploadAgreedDraftOrder.builder().build());
+    private List<AgreedPensionSharingAnnexCollection> getAgreedPsaCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+            .getAgreedPsaCollection());
     }
 
-    private void checkUploadingSuggestedDocuments(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
-        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-            data -> emptyIfNull(nullSafe(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getUploadSuggestedDraftOrderCollection())
-                .stream()
-                .map(UploadSuggestedDraftOrderCollection::getValue)
-                .toList(), userAuthorisation));
-        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-            data -> emptyIfNull(nullSafe(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).getSuggestedPsaCollection())
-                .stream()
-                .map(SuggestedPensionSharingAnnexCollection::getValue)
-                .toList(), userAuthorisation));
+    private List<UploadSuggestedDraftOrderCollection> getUploadSuggestedDraftOrderCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+            .getUploadSuggestedDraftOrderCollection());
     }
 
-    private void checkUploadingAgreedDocuments(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
+    private List<SuggestedPensionSharingAnnexCollection> getSuggestedPsaCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+            .getSuggestedPsaCollection());
+    }
+
+    private void populateSuggestedDraftOrderDocumentWarnings(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
         warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-            data -> emptyIfNull(nullSafe(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).getUploadAgreedDraftOrderCollection())
-                .stream()
-                .map(UploadAgreedDraftOrderCollection::getValue)
-                .toList(), userAuthorisation));
+            data -> concat(
+                getUploadSuggestedDraftOrderCollection(data).stream().map(UploadSuggestedDraftOrderCollection::getValue),
+                getSuggestedPsaCollection(data).stream().map(SuggestedPensionSharingAnnexCollection::getValue)
+            ).toList(),
+            userAuthorisation));
+    }
+
+    private void populateAgreedDraftOrderDocumentWarnings(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
         warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
-            data -> emptyIfNull(nullSafe(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).getAgreedPsaCollection())
-                .stream()
-                .map(AgreedPensionSharingAnnexCollection::getValue)
-                .toList(), userAuthorisation));
+            data -> concat(
+                getUploadAgreedDraftOrderCollection(data).stream().map(UploadAgreedDraftOrderCollection::getValue),
+                getAgreedPsaCollection(data).stream().map(AgreedPensionSharingAnnexCollection::getValue)
+            ).toList(), userAuthorisation));
     }
 
     private void clearTemporaryFields(FinremCaseDetails caseDetails) {
