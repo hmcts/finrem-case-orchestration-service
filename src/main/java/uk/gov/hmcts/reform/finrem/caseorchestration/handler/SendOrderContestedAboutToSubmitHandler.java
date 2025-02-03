@@ -162,7 +162,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
 
     private void stampLegacyHearingOrders(FinremCaseDetails caseDetails, List<CaseDocument> legacyHearingOrders, String userAuthorisation) {
         if (!legacyHearingOrders.isEmpty()) {
-            log.info("Going to stamp stamp legacy orders on Case ID: {}", getCaseId(caseDetails));
+            log.info("Going to stamp legacy orders on Case ID: {}", getCaseId(caseDetails));
             // stamping legacy approved orders and add it to legacy finalised collection
             legacyHearingOrders.forEach(orderToStamp -> {
                 log.info("Stamp and add to FinalOrderCollection {} for Case ID: {}, ", orderToStamp, getCaseId(caseDetails));
