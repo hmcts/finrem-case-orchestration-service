@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -124,6 +125,9 @@ public class RefusedOrderProcessor {
         draftOrdersWrapper.setRefusedOrdersCollection(
             Stream.concat(existingRefusedOrders.stream(), newRefusedOrders.stream()).toList()
         );
+        if (CollectionUtils.isEmpty(draftOrdersWrapper.getRefusedOrdersCollection())) {
+            draftOrdersWrapper.setRefusedOrdersCollection(null);
+        }
     }
 
     private void filterRefusedDraftOrderCollections(DraftOrdersWrapper draftOrdersWrapper) {
