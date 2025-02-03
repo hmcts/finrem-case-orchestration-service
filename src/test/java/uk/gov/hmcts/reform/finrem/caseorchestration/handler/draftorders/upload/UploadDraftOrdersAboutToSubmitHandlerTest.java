@@ -63,6 +63,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
@@ -153,7 +154,8 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         when(draftOrderService.isOrdersSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
         when(draftOrderService.isPsaSelected(List.of(ORDER_TYPE, PSA_TYPE))).thenReturn(true);
-        stubUploadingDocumentsWithoutWarning();
+        when(documentWarningsHelper.getDocumentWarnings(any(FinremCallbackRequest.class), any(Function.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of());
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
@@ -373,6 +375,23 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> handler.handle(request, AUTH_TOKEN));
     }
 
+    @Test
+    void givenValidCase_whenWarningDetected_thenReturnWarnings() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .uploadParty(DynamicRadioList.builder().value(DynamicRadioListElement.builder().code("theRespondent").build()).build())
+            .build());
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        when(documentWarningsHelper.getDocumentWarnings(any(FinremCallbackRequest.class), any(Function.class), eq(AUTH_TOKEN)))
+            .thenReturn(List.of("WARNING1"));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+        assertThat(response.getWarnings()).containsExactly("WARNING1");
+    }
+
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
         CaseAssignedUserRolesResource caseAssignedUserRolesResource = CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(List.of(
@@ -399,11 +418,6 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         return DynamicRadioList.builder()
             .value(DynamicRadioListElement.builder().code(code).build())
             .build();
-    }
-
-    private void stubUploadingDocumentsWithoutWarning() {
-        lenient().when(documentWarningsHelper.getDocumentWarnings(any(FinremCallbackRequest.class), any(Function.class), eq(AUTH_TOKEN)))
-            .thenReturn(List.of());
     }
 
 }

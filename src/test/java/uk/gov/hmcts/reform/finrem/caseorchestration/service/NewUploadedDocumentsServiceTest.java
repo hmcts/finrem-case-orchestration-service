@@ -10,12 +10,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadGeneralDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +64,28 @@ class NewUploadedDocumentsServiceTest {
         return data -> emptyIfNull(data.getUploadDocuments()).stream().map(UploadDocumentCollection::getValue).toList();
     }
 
+    private static Function<FinremCaseData, ?> uploadAgreedDraftOrderGetDocumentsFromCaseData() {
+        return data -> concat(
+            emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+                .getUploadAgreedDraftOrderCollection()
+            ).stream().map(UploadAgreedDraftOrderCollection::getValue),
+            emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+                .getAgreedPsaCollection()
+            ).stream().map(AgreedPensionSharingAnnexCollection::getValue)
+        ).toList();
+    }
+
+    private static Function<FinremCaseData, ?> uploadSuggestedDraftOrderGetDocumentsFromCaseData() {
+        return data -> concat(
+            emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+                .getUploadSuggestedDraftOrderCollection()
+            ).stream().map(UploadSuggestedDraftOrderCollection::getValue),
+            emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+                .getSuggestedPsaCollection()
+            ).stream().map(SuggestedPensionSharingAnnexCollection::getValue)
+        ).toList();
+    }
+
     private static UploadGeneralDocumentCollection uploadGeneralDocumentCollection(String documentName) {
         return UploadGeneralDocumentCollection.builder()
             .value(UploadGeneralDocument.builder().documentLink(toCaseDocument(documentName)).build())
@@ -62,6 +95,31 @@ class NewUploadedDocumentsServiceTest {
     private static UploadDocumentCollection uploadDocumentCollection(String documentName) {
         return UploadDocumentCollection.builder()
             .value(UploadDocument.builder().documentLink(toCaseDocument(documentName)).build())
+            .build();
+    }
+
+    private static UploadAgreedDraftOrderCollection uploadAgreedDraftOrderCollection(String documentName) {
+        return UploadAgreedDraftOrderCollection.builder()
+            .value(UploadedDraftOrder.builder().agreedDraftOrderDocument(toCaseDocument(documentName)).build())
+            .build();
+    }
+
+    private static UploadSuggestedDraftOrderCollection uploadSuggestedDraftOrderCollection(String documentName) {
+        return UploadSuggestedDraftOrderCollection.builder()
+            .value(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder.builder()
+                .suggestedDraftOrderDocument(toCaseDocument(documentName)).build())
+            .build();
+    }
+
+    private static AgreedPensionSharingAnnexCollection uploadAgreedPensionSharingAnnexCollection(String documentName) {
+        return AgreedPensionSharingAnnexCollection.builder()
+            .value(AgreedPensionSharingAnnex.builder().agreedPensionSharingAnnexes(toCaseDocument(documentName)).build())
+            .build();
+    }
+
+    private static SuggestedPensionSharingAnnexCollection uploadSuggestedPensionSharingAnnexCollection(String documentName) {
+        return SuggestedPensionSharingAnnexCollection.builder()
+            .value(SuggestedPensionSharingAnnex.builder().suggestedPensionSharingAnnexes(toCaseDocument(documentName)).build())
             .build();
     }
 
@@ -192,6 +250,64 @@ class NewUploadedDocumentsServiceTest {
                 },
                 uploadDocumentGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename2.1-1"), toCaseDocument("filename2.1-2"))
+            ),
+            // 3. UploadAgreedDraftOrder
+            Arguments.of(
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                            .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+                                .uploadAgreedDraftOrderCollection(List.of(
+                                    uploadAgreedDraftOrderCollection("exFilename3.1")
+                                ))
+                                .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+                            .uploadAgreedDraftOrderCollection(List.of(
+                                uploadAgreedDraftOrderCollection("exFilename3.1"),
+                                uploadAgreedDraftOrderCollection("filename3.1-1")
+                            ))
+                            .agreedPsaCollection(List.of(
+                                uploadAgreedPensionSharingAnnexCollection("filename3.1-2")
+                            ))
+                            .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                uploadAgreedDraftOrderGetDocumentsFromCaseData(),
+                List.of(toCaseDocument("filename3.1-1"), toCaseDocument("filename3.1-2"))
+            ),
+            // 4. UploadSuggestedDraftOrder
+            Arguments.of(
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                            .uploadSuggestedDraftOrderCollection(List.of(
+                                uploadSuggestedDraftOrderCollection("exFilename4.1")
+                            ))
+                            .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                            .uploadSuggestedDraftOrderCollection(List.of(
+                                uploadSuggestedDraftOrderCollection("exFilename4.1"),
+                                uploadSuggestedDraftOrderCollection("filename4.1-1")
+                            ))
+                            .suggestedPsaCollection(List.of(
+                                uploadSuggestedPensionSharingAnnexCollection("filename4.1-2")
+                            ))
+                            .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                uploadSuggestedDraftOrderGetDocumentsFromCaseData(),
+                List.of(toCaseDocument("filename4.1-1"), toCaseDocument("filename4.1-2"))
             )
         );
     }
