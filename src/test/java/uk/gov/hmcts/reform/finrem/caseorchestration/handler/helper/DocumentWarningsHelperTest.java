@@ -134,7 +134,7 @@ class DocumentWarningsHelperTest {
 
         List<String> actual = underTest.getDocumentWarnings(buildFinremCallbackRequest(mockedCaseData, mockedCaseDataBefore),
             DUMMY_GET_DOCUMENT_FROM_CASE_DATA, AUTH_TOKEN);
-        assertThat(actual).containsExactly("A warning which should be on the top", "Warning One");
+        assertThat(actual).containsExactly("A warning that should be at the top.", "Warning One");
         assertThat(logs.getInfos()).contains(CASE_ID + " - Number of warnings encountered when uploading document: 2");
     }
 
