@@ -186,7 +186,6 @@ class NewUploadedDocumentsServiceTest {
                 uploadGeneralDocumentGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename1.2"))
             ),
-
             // 1.3 without new doc - no change
             Arguments.of(
                 (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
@@ -308,6 +307,32 @@ class NewUploadedDocumentsServiceTest {
                 },
                 uploadSuggestedDraftOrderGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename4.1-1"), toCaseDocument("filename4.1-2"))
+            ),
+            // 4.2 without PSA
+            Arguments.of(
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                            .uploadSuggestedDraftOrderCollection(List.of(
+                                uploadSuggestedDraftOrderCollection("exFilename4.2")
+                            ))
+                            .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
+                    finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
+                        .uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+                            .uploadSuggestedDraftOrderCollection(List.of(
+                                uploadSuggestedDraftOrderCollection("exFilename4.2"),
+                                uploadSuggestedDraftOrderCollection("filename4.2-1")
+                            ))
+                            .build())
+                        .build());
+                    return finremCaseDataBuilder;
+                },
+                uploadSuggestedDraftOrderGetDocumentsFromCaseData(),
+                List.of(toCaseDocument("filename4.2-1"))
             )
         );
     }
