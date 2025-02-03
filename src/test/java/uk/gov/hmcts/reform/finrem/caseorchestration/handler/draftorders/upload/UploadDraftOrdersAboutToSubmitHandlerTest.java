@@ -419,5 +419,4 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .value(DynamicRadioListElement.builder().code(code).build())
             .build();
     }
-
 }
