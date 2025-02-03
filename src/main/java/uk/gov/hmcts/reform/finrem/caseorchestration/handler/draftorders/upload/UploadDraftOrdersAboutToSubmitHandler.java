@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderF
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -204,10 +203,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         }
 
         // Add additional attachments for orders only
-        if (!ObjectUtils.isEmpty(uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection())) {
+        if (!ObjectUtils.isEmpty(uploadDraftOrder.getAdditionalDocuments())) {
             List<DocumentCollection> attachments = new ArrayList<>();
-            for (SuggestedDraftOrderAdditionalDocumentsCollection additionalDoc :
-                uploadDraftOrder.getSuggestedDraftOrderAdditionalDocumentsCollection()) {
+            for (DocumentCollection additionalDoc :
+                uploadDraftOrder.getAdditionalDocuments()) {
                 if (additionalDoc.getValue() != null) {
                     attachments.add(DocumentCollection.builder()
                         .value(additionalDoc.getValue())

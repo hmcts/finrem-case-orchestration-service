@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -29,7 +30,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -123,13 +123,13 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .suggestedPensionSharingAnnexes(mock(CaseDocument.class))
                 .build())
             .build();
-        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocumentCollection = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocumentCollection = DocumentCollection.builder()
             .value(mock(CaseDocument.class))
             .build();
         UploadSuggestedDraftOrderCollection orderCollection = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
                 .suggestedDraftOrderDocument(mock(CaseDocument.class))
-                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocumentCollection))
+                .additionalDocuments(List.of(additionalDocumentCollection))
                 .build())
             .build();
 
@@ -199,26 +199,26 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
-        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument1 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocument1 = DocumentCollection.builder()
             .value(mock(CaseDocument.class))
             .build();
-        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument2 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocument2 = DocumentCollection.builder()
             .value(mock(CaseDocument.class))
             .build();
-        SuggestedDraftOrderAdditionalDocumentsCollection additionalDocument3 = SuggestedDraftOrderAdditionalDocumentsCollection.builder()
+        DocumentCollection additionalDocument3 = DocumentCollection.builder()
             .value(mock(CaseDocument.class))
             .build();
         UploadSuggestedDraftOrderCollection orderCollection1 = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
                 .suggestedDraftOrderDocument(mock(CaseDocument.class))
-                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocument1, additionalDocument2))
+                .additionalDocuments(List.of(additionalDocument1, additionalDocument2))
                 .build())
             .build();
 
         UploadSuggestedDraftOrderCollection orderCollection2 = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
                 .suggestedDraftOrderDocument(mock(CaseDocument.class))
-                .suggestedDraftOrderAdditionalDocumentsCollection(List.of(additionalDocument3))
+                .additionalDocuments(List.of(additionalDocument3))
                 .build())
             .build();
 

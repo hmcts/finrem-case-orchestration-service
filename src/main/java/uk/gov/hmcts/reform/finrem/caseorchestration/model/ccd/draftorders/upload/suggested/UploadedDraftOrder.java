@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 
 import java.util.List;
 
@@ -23,5 +24,5 @@ public class UploadedDraftOrder {
     private CaseDocument suggestedDraftOrderDocument;
 
     @JsonProperty("additionalDocuments")
-    private List<SuggestedDraftOrderAdditionalDocumentsCollection> suggestedDraftOrderAdditionalDocumentsCollection;
+    private List<DocumentCollection> additionalDocuments;
 }
