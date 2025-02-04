@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecontactdetail
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -56,12 +59,16 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
     private FinremCaseDetailsMapper detailsMapper;
 
     @Test
-    void canHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS);
+    void shouldHandleContestedAndConsentedCaseTypes() {
+        assertCanHandle(handler,
+                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.UPDATE_CONTACT_DETAILS),
+                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_CONTACT_DETAILS)
+        );
     }
 
-    @Test
-    void givenNoRepresentationChangeAndNoHiddenAddresses_handle() {
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void givenNoRepresentationChangeAndNoHiddenAddresses_handle(CaseType caseType) {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
@@ -69,19 +76,18 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
-        FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
-        request.setCaseDetailsBefore(finremCaseDetailsBefore);
+        FinremCallbackRequest request = createRequest(caseType, finremCaseData);
 
         handler.handle(request, AUTH_TOKEN);
 
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, finremCaseDetailsBefore.getData());
+        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(onlineFormDocumentService, never()).generateContestedMiniForm(any(), any());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
     }
 
-    @Test
-    void givenNoRepresentationChangeAndRespondentHasHiddenAddresses_handle() {
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void givenNoRepresentationChangeAndRespondentHasHiddenAddresses_handle(CaseType caseType) {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
@@ -90,20 +96,26 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
-        FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
-        request.setCaseDetailsBefore(finremCaseDetailsBefore);
+        FinremCallbackRequest request = createRequest(caseType, finremCaseData);
 
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertNotNull(response);
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, finremCaseDetailsBefore.getData());
-        verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
+
+        if (CaseType.CONTESTED.equals(caseType)) {
+            verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        }
+
+        if (CaseType.CONSENTED.equals(caseType)) {
+            verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        }
     }
 
-    @Test
-    void givenNoRepresentationChangeAndApplicantHasHiddenAddresses_handle() {
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void givenNoRepresentationChangeAndApplicantHasHiddenAddresses_handle(CaseType caseType) {
 
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
@@ -112,29 +124,34 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .updateIncludesRepresentativeChange(YesOrNo.NO)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
-        FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
-        request.setCaseDetailsBefore(finremCaseDetailsBefore);
+        FinremCallbackRequest request = createRequest(caseType, finremCaseData);
 
         var response = handler.handle(request, AUTH_TOKEN);
 
         assertNotNull(response);
-        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, finremCaseDetailsBefore.getData());
-        verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        verify(updateContactDetailsService, times(1)).persistOrgPolicies(finremCaseData, request.getCaseDetailsBefore().getData());
         verify(nocWorkflowService, never()).handleNoticeOfChangeWorkflow(any(), any(), any());
+
+        if (CaseType.CONTESTED.equals(caseType)) {
+            verify(onlineFormDocumentService, times(1)).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        }
+
+        if (CaseType.CONSENTED.equals(caseType)) {
+            verify(onlineFormDocumentService, never()).generateContestedMiniForm(AUTH_TOKEN, request.getCaseDetails());
+        }
     }
 
-    @Test
-    void shouldHandleRepresentationChangeWhenUpdateIncludesRepresentativeChange() {
-        // Arrange
+    @ParameterizedTest
+    @EnumSource(CaseType.class)
+    void shouldHandleRepresentationChangeWhenUpdateIncludesRepresentativeChange(CaseType caseType) {
+
         FinremCaseData finremCaseData = FinremCaseData.builder().contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .nocParty(NoticeOfChangeParty.APPLICANT)
                 .updateIncludesRepresentativeChange(YesOrNo.YES)
                 .build()).build();
 
-        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, CaseType.CONTESTED, finremCaseData);
-        request.setCaseDetailsBefore(new FinremCaseDetails());
+        FinremCallbackRequest request = createRequest(caseType, finremCaseData);
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         CaseDetails caseDetailsBefore = CaseDetails.builder().caseTypeId(CONTESTED).build();
@@ -181,5 +198,13 @@ class UpdateContactDetailsAboutToSubmitHandlerTest {
                 .caseDetailsBefore(FinremCaseDetails.builder().id(123L)
                     .data(new FinremCaseData()).build())
                 .build();
+    }
+
+    private FinremCallbackRequest createRequest(CaseType caseType, FinremCaseData finremCaseData) {
+
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(1727874196328932L, caseType, finremCaseData);
+        FinremCaseDetails finremCaseDetailsBefore = new FinremCaseDetails();
+        request.setCaseDetailsBefore(finremCaseDetailsBefore);
+        return request;
     }
 }
