@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SuggestedPensionSharingAnnex implements HasCaseDocument, HasUploadingDocuments {
+public class SuggestedPensionSharingAnnex implements HasUploadingDocuments {
 
     @JsonProperty("suggestedPensionSharingAnnexes")
     private CaseDocument suggestedPensionSharingAnnexes;
