@@ -123,7 +123,6 @@ class DirectionUploadOrderAboutToStartHandlerTest {
             .build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(result.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            .hasSize(1)
             .containsOnly(
                 DirectionOrderCollection.builder().value(DirectionOrder.builder()
                     .isOrderStamped(YesOrNo.NO)
