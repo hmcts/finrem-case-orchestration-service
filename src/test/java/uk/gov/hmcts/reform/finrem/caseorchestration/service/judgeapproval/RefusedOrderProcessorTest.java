@@ -457,8 +457,8 @@ class RefusedOrderProcessorTest {
         // Verify that each remaining review has at least one non-empty collection, either draft order or psa
         remainingReviews.forEach(review -> {
             DraftOrdersReview value = review.getValue();
-            boolean hasNonEmptyCollection = !CollectionUtils.isEmpty(value.getDraftOrderDocReviewCollection()) ||
-                !CollectionUtils.isEmpty(value.getPsaDocReviewCollection());
+            boolean hasNonEmptyCollection = !CollectionUtils.isEmpty(value.getDraftOrderDocReviewCollection())
+                || !CollectionUtils.isEmpty(value.getPsaDocReviewCollection());
             assertThat(hasNonEmptyCollection)
                 .as("Each remaining review must contain at least one non-empty document collection")
                 .isTrue();
