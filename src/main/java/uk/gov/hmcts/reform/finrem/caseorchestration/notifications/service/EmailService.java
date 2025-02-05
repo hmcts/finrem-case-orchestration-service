@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.EnvConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -37,7 +36,8 @@ public class EmailService {
     @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
     private Map<String, Map<String, String>> contestedContactEmails;
 
-    private final EnvConfiguration envConfiguration;
+    @Value("${finrem.manageCase.baseurl}")
+    private String manageCaseBaseUrl;
 
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
@@ -59,7 +59,7 @@ public class EmailService {
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
-    private static final String ENV_PLACEHOLDER = "envPlaceholder";
+    private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -133,8 +133,7 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
             templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
-            log.info("DEBUG: getEnvPlaceholder()" + getEnvPlaceholder());
-            templateVars.put(ENV_PLACEHOLDER, getEnvPlaceholder());
+            templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
         }
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
@@ -208,9 +207,5 @@ public class EmailService {
             log.warn("Failed to attach document to email", e);
         }
         return null;
-    }
-
-    private String getEnvPlaceholder() {
-        return "".equals(envConfiguration.getEnvironment()) ? "" : ("." + envConfiguration.getEnvironment());
     }
 }
