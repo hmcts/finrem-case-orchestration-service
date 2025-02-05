@@ -211,6 +211,6 @@ public class EmailService {
     }
 
     private String getEnvPlaceholder() {
-        return "".equals(envConfiguration.getEnvironment()) ? "" : ("-" + envConfiguration.getEnvironment());
+        return "".equals(envConfiguration.getEnvironment()) ? "" : ("." + envConfiguration.getEnvironment());
     }
 }
