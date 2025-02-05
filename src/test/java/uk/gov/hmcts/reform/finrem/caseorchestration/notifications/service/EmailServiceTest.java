@@ -88,8 +88,8 @@ public class EmailServiceTest {
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private EnvConfiguration envConfiguration;
+    @Value("${finrem.manageCase.baseurl}")
+    private String manageCaseBaseUrl;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
