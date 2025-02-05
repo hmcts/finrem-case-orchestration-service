@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
@@ -34,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasAppro
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -397,4 +401,73 @@ class RefusedOrderProcessorTest {
             .flatMap(draftOrdersReview -> draftOrdersReview.getDraftOrderDocReviewCollection().stream()) // Flatten to DraftOrderDocReviewCollection
             .noneMatch(order -> order.equals(targetObject));
     }
+
+    @Test
+    void shouldRemoveEmptyReviewsAndUpdateUnreviewedFlag() {
+
+        // Create one review with both collections empty and two with a non-empty collection
+        DraftOrdersReviewCollection emptyReview = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(Collections.emptyList())
+                .psaDocReviewCollection(Collections.emptyList())
+                .build())
+            .build();
+
+        DraftOrderDocReviewCollection nonEmptyDocReview = DraftOrderDocReviewCollection.builder()
+            .value(DraftOrderDocumentReview.builder().build())
+            .build();
+        PsaDocReviewCollection nonEmptyDocReview2 = PsaDocReviewCollection.builder()
+            .value(PsaDocumentReview.builder().build())
+            .build();
+
+        DraftOrdersReviewCollection nonEmptyReview = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(List.of(nonEmptyDocReview))
+                .psaDocReviewCollection(Collections.emptyList())
+                .build())
+            .build();
+        DraftOrdersReviewCollection nonEmptyReview2 = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(Collections.emptyList())
+                .psaDocReviewCollection(List.of(nonEmptyDocReview2))
+                .build())
+            .build();
+
+        List<DraftOrdersReviewCollection> reviews = new ArrayList<>(List.of(nonEmptyReview, nonEmptyReview2, emptyReview));
+
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .draftOrdersReviewCollection(reviews)
+            .build();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .id(1L)
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(draftOrdersWrapper)
+                .build())
+            .build();
+
+        JudgeApproval judgeApproval = JudgeApproval.builder().build();
+
+        underTest.processRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, AUTH_TOKEN);
+
+        //The review with both collections empty should have been removed
+        List<DraftOrdersReviewCollection> remainingReviews = draftOrdersWrapper.getDraftOrdersReviewCollection();
+        assertThat(remainingReviews).hasSize(2);
+
+        // Verify that each remaining review has at least one non-empty collection, either draft order or psa
+        remainingReviews.forEach(review -> {
+            DraftOrdersReview value = review.getValue();
+            boolean hasNonEmptyCollection = !CollectionUtils.isEmpty(value.getDraftOrderDocReviewCollection()) ||
+                !CollectionUtils.isEmpty(value.getPsaDocReviewCollection());
+            assertThat(hasNonEmptyCollection)
+                .as("Each remaining review must contain at least one non-empty document collection")
+                .isTrue();
+        });
+
+        // The flag for unreviewed documents should be set to yes
+        assertThat(draftOrdersWrapper.getIsUnreviewedDocumentPresent())
+            .as("The unreviewed documents flag should be YES when a review with documents exists")
+            .isEqualTo(YesOrNo.YES);
+    }
+
 }
