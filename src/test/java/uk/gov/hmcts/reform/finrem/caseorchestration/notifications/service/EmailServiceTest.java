@@ -681,6 +681,7 @@ public class EmailServiceTest {
         assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
         assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
         assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
+        assertEquals("http://localhost:3000", returnedTemplateVars.get("manageCaseBaseUrl"));
     }
 
     @Test
@@ -697,6 +698,7 @@ public class EmailServiceTest {
         assertEquals("1 January 2024", returnedTemplateVars.get("hearingDate"));
         assertEquals(APPLICANT_NAME, returnedTemplateVars.get("applicantName"));
         assertEquals(RESPONDENT_NAME, returnedTemplateVars.get("respondentName"));
+        assertEquals("http://localhost:3000", returnedTemplateVars.get("manageCaseBaseUrl"));
     }
 
     @Test

@@ -133,7 +133,6 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
             templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
-            log.debug("DEBUG manageCaseBaseUrl=" + manageCaseBaseUrl);
             templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
         }
 
