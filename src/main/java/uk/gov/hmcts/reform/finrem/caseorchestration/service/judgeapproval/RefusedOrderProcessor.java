@@ -79,6 +79,15 @@ public class RefusedOrderProcessor {
                 && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
         );
         draftOrdersWrapper.setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+
+        boolean hasUnreviewedDocuments = draftOrdersWrapper.getDraftOrdersReviewCollection().stream()
+            .anyMatch(review ->
+                !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+
+        draftOrdersWrapper.setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+
+
         // create RefusedOrder from collected items.
         final String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
         final LocalDate hearingDate = judgeApproval.getHearingDate();
