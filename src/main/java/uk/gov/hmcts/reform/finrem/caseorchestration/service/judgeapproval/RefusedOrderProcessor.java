@@ -70,6 +70,15 @@ public class RefusedOrderProcessor {
         draftOrdersWrapper.setDraftOrdersReviewCollection(hasApprovableCollectionReader
             .filterAndCollectPsaDocs(draftOrdersWrapper.getDraftOrdersReviewCollection(), removedPsaItems, REFUSED::equals));
 
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
+            new ArrayList<>(draftOrdersWrapper.getDraftOrdersReviewCollection());
+
+        //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
+        draftOrdersReviewCollection.removeIf(review ->
+            CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+        );
+        draftOrdersWrapper.setDraftOrdersReviewCollection(draftOrdersReviewCollection);
         // create RefusedOrder from collected items.
         final String judgeFeedback = judgeApproval.getChangesRequestedByJudge();
         final LocalDate hearingDate = judgeApproval.getHearingDate();
