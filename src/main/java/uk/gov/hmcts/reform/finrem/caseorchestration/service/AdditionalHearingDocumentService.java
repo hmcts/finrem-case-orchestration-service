@@ -210,7 +210,8 @@ public class AdditionalHearingDocumentService {
                 }
                 caseData.setFinalOrderCollection(finalOrderCollection);
                 //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
-                return getDirectionOrderCollection(getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument), orderDateTime);
+                return getDirectionOrderCollection(getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument), orderDateTime,
+                    doc.getValue().getAdditionalDocuments());
             }).toList();
             caseData.setUploadHearingOrder(orderCollections);
             caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
