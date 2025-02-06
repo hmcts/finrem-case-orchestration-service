@@ -6,8 +6,8 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
@@ -42,7 +42,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
 
     private JsonNode requestContent;
 
-    @MockBean
+    @MockitoBean
     private CaseAssignedRoleService service;
 
     @Before

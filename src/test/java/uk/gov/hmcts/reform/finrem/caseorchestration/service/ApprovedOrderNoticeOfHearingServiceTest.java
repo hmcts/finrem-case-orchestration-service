@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -75,17 +75,17 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Autowired
     private AdditionalHearingDocumentService additionalHearingDocumentService;
 
-    @MockBean
+    @MockitoBean
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
-    @MockBean
+    @MockitoBean
     private DocumentHelper documentHelper;
 
     @Captor

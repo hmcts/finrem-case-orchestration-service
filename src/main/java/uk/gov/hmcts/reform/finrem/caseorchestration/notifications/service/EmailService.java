@@ -55,6 +55,7 @@ public class EmailService {
     public static final String INTERVENER_REMOVED_EMAIL = "FR_INTERVENER_REMOVED_EMAIL";
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
+    private static final String HEARING_DATE = "hearingDate";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -125,8 +126,9 @@ public class EmailService {
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
             templateVars.put(PHONE_OPENING_HOURS, notificationRequest.getPhoneOpeningHours());
         }
-        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)) {
-            addJudgeReadyToReviewTemplateVars(notificationRequest, templateVars);
+        if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
+            || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
+            templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         }
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
@@ -154,14 +156,14 @@ public class EmailService {
 
     private void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
                                                         Map<String, Object> templateVars) {
-        templateVars.put("hearingDate", notificationRequest.getHearingDate());
+        templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeName", notificationRequest.getJudgeName());
         templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
     }
 
     private void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
                                                        Map<String, Object> templateVars) {
-        templateVars.put("hearingDate", notificationRequest.getHearingDate());
+        templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeFeedback", notificationRequest.getJudgeFeedback());
         templateVars.put("documentName", notificationRequest.getDocumentName());
     }
@@ -201,10 +203,4 @@ public class EmailService {
         }
         return null;
     }
-
-    private void addJudgeReadyToReviewTemplateVars(NotificationRequest notificationRequest,
-                                                   Map<String, Object> templateVars) {
-        templateVars.put("hearingDate", notificationRequest.getHearingDate());
-    }
-
 }

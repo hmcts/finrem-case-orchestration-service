@@ -33,24 +33,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.util.List.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDERS_TO_SHARE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARTIES_ON_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SendConsentOrderInContestedSubmittedHandlerTest {
-    private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
-    private static final String AUTH_TOKEN = "tokien:)";
 
     @InjectMocks
     private SendConsentOrderInContestedSubmittedHandler consentOrderInContestedSubmittedHandler;
@@ -73,55 +69,20 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
     @Mock
     private ContestedConsentOrderApprovedCorresponder contestedConsentOrderApprovedCorresponder;
 
-
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
-        assertThat(consentOrderInContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_CONSENT_IN_CONTESTED_ORDER),
-            is(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
-        assertThat(consentOrderInContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SEND_CONSENT_IN_CONTESTED_ORDER),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(consentOrderInContestedSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED,
+            EventType.SEND_CONSENT_IN_CONTESTED_ORDER);
     }
 
     private void setupFinremData(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
-
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
-            .build();
-
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
     }
 
     private void setupData(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put(PARTIES_ON_CASE, getParties());
-
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-                .value(List.of(DynamicMultiSelectListElement.builder()
-                        .code(uuid)
-                        .label("app_docs.pdf")
-                        .build()))
-                .listItems(List.of(DynamicMultiSelectListElement.builder()
-                        .code(uuid)
-                        .label("app_docs.pdf")
-                        .build()))
-                .build();
-
-        data.put(ORDERS_TO_SHARE, selectedDocs);
     }
 
     @Test
@@ -272,7 +233,7 @@ class SendConsentOrderInContestedSubmittedHandlerTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123L)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("FR_consentSendOrder").caseDetails(caseDetails).build();
     }
 

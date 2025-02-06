@@ -8,9 +8,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
@@ -92,13 +92,13 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Autowired
     private ObjectMapper mapper;
-    @MockBean
+    @MockitoBean
     private DocumentHelper documentHelper;
-    @MockBean
+    @MockitoBean
     private DocumentConfiguration documentConfiguration;
-    @MockBean
+    @MockitoBean
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementAuditService evidenceManagementAuditService;
     @Autowired
     private EvidenceManagementUploadService evidenceManagementUploadService;
@@ -114,7 +114,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetails;
     private FinremCaseDetails finremCaseDetails;
-    @MockBean
+    @MockitoBean
     private FeatureToggleService featureToggleService;
 
     @Before

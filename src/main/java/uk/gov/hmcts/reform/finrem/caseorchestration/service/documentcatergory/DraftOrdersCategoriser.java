@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedDraftOrderAdditionalDocumentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -12,11 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
 @Component
 public class DraftOrdersCategoriser {
@@ -25,55 +23,41 @@ public class DraftOrdersCategoriser {
         super();
     }
 
-    public void categoriseDocuments(FinremCaseData finremCaseData, String userRole) {
+    /**
+     * Categorise the uploaded suggested draft order documents based on the order filed by value.
+     * The category is set only if the type of draft order upload is 'Suggested Draft Order'.
+     *
+     * @param finremCaseData the case data
+     */
+    public void categoriseDocuments(FinremCaseData finremCaseData) {
         // Determine type of draft order
         if (!isSuggestedDraftOrderPriorToHearing(finremCaseData)) {
             return;
         }
 
-        // Get the current user case role
-        String chosenParty = determineChosenParty(finremCaseData, userRole);
+        UploadSuggestedDraftOrder uploadSuggestedDraftOrder = finremCaseData.getDraftOrdersWrapper()
+            .getUploadSuggestedDraftOrder();
+        OrderFiledBy orderParty = uploadSuggestedDraftOrder.getOrderFiledBy();
 
-        DocumentCategory category = determineCategory(chosenParty);
-        if (category != null) {
-            categoriseOrders(finremCaseData.getDraftOrdersWrapper()
-                .getUploadSuggestedDraftOrder()
-                .getUploadSuggestedDraftOrderCollection(), category);
+        DocumentCategory category = getDocumentCategory(orderParty);
 
-            categorisePsas(finremCaseData.getDraftOrdersWrapper()
-                .getUploadSuggestedDraftOrder()
-                .getSuggestedPsaCollection(), category);
-        }
-
+        categoriseOrders(uploadSuggestedDraftOrder.getUploadSuggestedDraftOrderCollection(), category);
+        categorisePsas(uploadSuggestedDraftOrder.getSuggestedPsaCollection(), category);
     }
 
     private boolean isSuggestedDraftOrderPriorToHearing(FinremCaseData finremCaseData) {
         return SUGGESTED_DRAFT_ORDER_OPTION.equals(finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder());
     }
 
-    private String determineChosenParty(FinremCaseData finremCaseData, String userRole) {
-        if (finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty() != null) {
-            String selectedPartyCode = finremCaseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder().getUploadParty().getValue().getCode();
-
-            if (UPLOAD_PARTY_APPLICANT.equals(selectedPartyCode)) {
-                return APPLICANT.getValue();
-            } else if (UPLOAD_PARTY_RESPONDENT.equals(selectedPartyCode)) {
-                return RESPONDENT.getValue();
-            }
-            return selectedPartyCode;
-        } else {
-            return userRole;
-        }
-    }
-
-    private DocumentCategory determineCategory(String chosenParty) {
-        if (APPLICANT.getValue().equals(chosenParty)) {
-            return DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
-        } else if (RESPONDENT.getValue().equals(chosenParty)) {
-            return DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
-        } else {
-            return null;
-        }
+    private DocumentCategory getDocumentCategory(OrderFiledBy orderFiledBy) {
+        return switch (orderFiledBy) {
+            case APPLICANT, APPLICANT_BARRISTER -> DocumentCategory.HEARING_DOCUMENTS_APPLICANT_PRE_HEARING_DRAFT_ORDER;
+            case RESPONDENT, RESPONDENT_BARRISTER -> DocumentCategory.HEARING_DOCUMENTS_RESPONDENT_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_1 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_1_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_2 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_2_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_3 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_3_PRE_HEARING_DRAFT_ORDER;
+            case INTERVENER_4 -> DocumentCategory.HEARING_DOCUMENTS_INTERVENER_4_PRE_HEARING_DRAFT_ORDER;
+        };
     }
 
     private void categoriseOrders(List<UploadSuggestedDraftOrderCollection> orderCollections, DocumentCategory category) {
@@ -93,11 +77,11 @@ public class DraftOrdersCategoriser {
         }
 
         Optional.ofNullable(order)
-            .map(UploadedDraftOrder::getSuggestedDraftOrderAdditionalDocumentsCollection)
+            .map(UploadedDraftOrder::getAdditionalDocuments)
             .ifPresent(additionalDocs -> additionalDocs.forEach(doc -> setAdditionalDocumentsCategory(doc, category)));
     }
 
-    private void setAdditionalDocumentsCategory(SuggestedDraftOrderAdditionalDocumentsCollection additionalDoc, DocumentCategory category) {
+    private void setAdditionalDocumentsCategory(DocumentCollection additionalDoc, DocumentCategory category) {
         if (additionalDoc != null && additionalDoc.getValue() != null
             && additionalDoc.getValue().getCategoryId() == null) {
             additionalDoc.getValue().setCategoryId(category.getDocumentCategoryId());

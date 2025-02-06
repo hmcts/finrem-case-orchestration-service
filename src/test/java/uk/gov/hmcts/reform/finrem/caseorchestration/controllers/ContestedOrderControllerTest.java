@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -26,10 +26,10 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     private static final String CONTESTED_VALIDATE_HEARING_DATE_JSON = "/fixtures/contested/manage-bundle-validate-hearing-date.json";
     private static final String CONTESTED_VALIDATE_INVALID_DOC_JSON = "/fixtures/contested/manage-bundle-invalidate-document.json";
 
-    @MockBean
+    @MockitoBean
     private IdamService idamService;
 
-    @MockBean
+    @MockitoBean
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @Test

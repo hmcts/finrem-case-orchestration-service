@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -68,6 +75,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralOrderServiceTest {
@@ -250,9 +261,9 @@ class GeneralOrderServiceTest {
     void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(details.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
-        CaseDocument pdfDoc = buildCaseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
-            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
-            "test.pdf");
+        CaseDocument pdfDoc = caseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
+            "test.pdf",
+            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary");
         when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN, caseId)).thenReturn(pdfDoc);
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN, caseId);
         assertEquals("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
@@ -419,7 +430,6 @@ class GeneralOrderServiceTest {
         assertTrue(generalOrderService.isOrderSharedWithIntervener2(caseDetails));
         assertTrue(generalOrderService.isOrderSharedWithIntervener3(caseDetails));
         assertTrue(generalOrderService.isOrderSharedWithIntervener4(caseDetails));
-
     }
 
     @Test
@@ -447,11 +457,10 @@ class GeneralOrderServiceTest {
 
         data.getSendOrderWrapper().setOrdersToShare(selectList);
 
-        List<CaseDocument> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
+        Pair<List<CaseDocument>, List<CaseDocument>> documentList = generalOrderService.hearingOrdersToShare(caseDetails, selectList);
 
-        assertThat(documentList).as("One document available to share with other parties").hasSize(1);
+        assertThat(documentList.getLeft()).as("One document available to share with other parties").hasSize(1);
     }
-
 
     private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
         return DynamicMultiSelectListElement.builder()
@@ -725,7 +734,147 @@ class GeneralOrderServiceTest {
         return collections;
     }
 
-    protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        return caseDocument(url, filename, binaryUrl);
+    @Test
+    void shouldPopulateProcessedApprovedDocumentsToOrdersToShareList() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .orderStatus(PROCESSED)
+                                .draftOrder(caseDocument("documentUrl", "processedFileName.pdf", "binaryUrl")).build())
+                            .build(),
+                        agreedDraftOrderCollection(TO_BE_REVIEWED),
+                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
+                        agreedDraftOrderCollection(REFUSED)
+                    ))
+                    .build())
+                .build())
+            .build();
+        DynamicMultiSelectListElement expectedDynamicListElement = DynamicMultiSelectListElement.builder().build();
+
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Approved order - processedFileName.pdf")))
+            .thenReturn(expectedDynamicListElement);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToShare().getListItems())
+            .as("The processed order should appear in ordersToShare.")
+            .containsExactly(expectedDynamicListElement);
+    }
+
+    private static AgreedDraftOrderCollection agreedDraftOrderCollection(OrderStatus orderStatus) {
+        return AgreedDraftOrderCollection.builder()
+            .value(AgreedDraftOrder.builder().orderStatus(orderStatus).draftOrder(caseDocument()).build())
+            .build();
+    }
+
+    @Test
+    void shouldPopulateFinalisedOrderToOrdersToShareList() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(List.of(
+                        FinalisedOrderCollection.builder()
+                            .value(FinalisedOrder.builder()
+                                .finalisedDocument(caseDocument("documentUrl1", "finalisedOrderOne.pdf", "binaryUrl1"))
+                                .build())
+                            .build(),
+                        FinalisedOrderCollection.builder()
+                            .value(FinalisedOrder.builder()
+                                .finalisedDocument(caseDocument("documentUrl2", "finalisedOrderTwo.pdf", "binaryUrl2"))
+                                .build())
+                            .build()
+                    ))
+                    .build())
+                .build())
+            .build();
+        DynamicMultiSelectListElement expectedDynamicListElementA = DynamicMultiSelectListElement.builder().build();
+        DynamicMultiSelectListElement expectedDynamicListElementB = DynamicMultiSelectListElement.builder().build();
+
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderOne.pdf")))
+            .thenReturn(expectedDynamicListElementA);
+        when(partyService.getDynamicMultiSelectListElement(anyString(), eq("Finalised order - finalisedOrderTwo.pdf")))
+            .thenReturn(expectedDynamicListElementB);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToShare().getListItems())
+            .as("The finalised orders should appear in ordersToShare.")
+            .containsExactly(expectedDynamicListElementA, expectedDynamicListElementB);
+    }
+
+    @Test
+    void testGeneralOrderServiceHearingOrdersToShare() {
+        CaseDocument expectedCaseDocument1 = caseDocument(
+            "http://document-management-store:8080/documents/00000000-c524-4614-86e5-c569f82c718d",
+            "TEST1.pdf");
+        CaseDocument expectedCaseDocument2 = caseDocument(
+            "http://document-management-store:8080/documents/11111111-c524-4614-86e5-c569f82c718d",
+            "TEST2.pdf");
+        CaseDocument expectedCaseDocument3 = caseDocument(
+            "http://document-management-store:8080/documents/22222222-c524-4614-86e5-c569f82c718d",
+            "TEST3.pdf");
+        CaseDocument expectedCaseDocument4 = caseDocument(
+            "http://document-management-store:8080/documents/33333333-c524-4614-86e5-c569f82c718d",
+            "TEST4.pdf");
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(List.of(
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument1).build()).build(),
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2).build()).build()
+                    ))
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                                .pensionSharingAnnex(expectedCaseDocument3)
+                                .orderStatus(PROCESSED)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/10000000-c524-4614-86e5-c569f82c718d",
+                                "APPROVED_BY_JUDGE.pdf"))
+                            .orderStatus(APPROVED_BY_JUDGE)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/20000000-c524-4614-86e5-c569f82c718d",
+                                "REFUSED.pdf"))
+                            .orderStatus(REFUSED)
+                            .build()).build(),
+                        AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                            .pensionSharingAnnex(caseDocument("http://document-management-store:8080/documents/30000000-c524-4614-86e5-c569f82c718d",
+                                "TO_BE_REVIEWED.pdf"))
+                            .orderStatus(TO_BE_REVIEWED)
+                            .build()).build()
+                    ))
+                    .build())
+                .uploadHearingOrder(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(expectedCaseDocument4).build()).build()
+                ))
+                .build())
+            .build();
+
+        List<DynamicMultiSelectListElement> selectedElements = List.of(
+            DynamicMultiSelectListElement.builder().code("00000000-c524-4614-86e5-c569f82c718d").label("TEST1.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("11111111-c524-4614-86e5-c569f82c718d").label("TEST2.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("22222222-c524-4614-86e5-c569f82c718d").label("TEST3.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("33333333-c524-4614-86e5-c569f82c718d").label("TEST4.pdf").build()
+        );
+        List<DynamicMultiSelectListElement> listItems = List.of(
+            DynamicMultiSelectListElement.builder().code("00000000-c524-4614-86e5-c569f82c718d").label("TEST1.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("11111111-c524-4614-86e5-c569f82c718d").label("TEST2.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("22222222-c524-4614-86e5-c569f82c718d").label("TEST3.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("33333333-c524-4614-86e5-c569f82c718d").label("TEST4.pdf").build(),
+            DynamicMultiSelectListElement.builder().code("99999999-c524-4614-86e5-c569f82c718d").label("UNKNOWN.pdf").build()
+        );
+
+        Pair<List<CaseDocument>, List<CaseDocument>> actual = generalOrderService.hearingOrdersToShare(caseDetails,
+            DynamicMultiSelectList.builder().value(selectedElements).listItems(listItems).build());
+
+        assertThat(actual.getLeft())
+            .containsExactly(expectedCaseDocument4);
+        assertThat(actual.getRight())
+            .containsExactly(expectedCaseDocument1, expectedCaseDocument2, expectedCaseDocument3);
     }
 }
