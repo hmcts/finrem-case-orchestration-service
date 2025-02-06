@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -31,10 +31,10 @@ public class AmendApplicationContestedControllerTest extends BaseControllerTest 
     private static final String AMEND_APPLICATION_APP_URL = "/case-orchestration/amend-application-validate-applicant-address";
     private static final String AMEND_APPLICATION_RES_SOL_URL = "/case-orchestration/amend-application-validate-respondent-solicitor";
 
-    @MockBean
+    @MockitoBean
     private InternationalPostalService postalService;
 
-    @MockBean
+    @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Test

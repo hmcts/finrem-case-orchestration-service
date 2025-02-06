@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.draftorders.upload;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -76,15 +77,7 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
         boolean isAgreedLatest = isLatestUploadAnAgreedDraftOrder(caseDetails.getData(), caseReference);
 
         if (isAgreedLatest) {
-            DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
-                .getDraftOrdersWrapper(), caseReference);
-
-            LocalDate hearingDate = review.getHearingDate();
-            String judge = review.getHearingJudge();
-
-            NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper.buildJudgeNotificationRequest(
-                caseDetails, hearingDate, judge);
-            notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
+            sendAgreedOrderReviewNotification(caseDetails);
         }
 
         String confirmationBody = getConfirmationBody(caseDetails);
@@ -92,6 +85,34 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
             .confirmationHeader(CONFIRMATION_HEADER)
             .confirmationBody(confirmationBody)
             .build();
+    }
+
+    private void sendAgreedOrderReviewNotification(FinremCaseDetails caseDetails) {
+        String caseReference = String.valueOf(caseDetails.getId());
+        DraftOrdersReview review = getDraftOrderReviewWithLatestSubmissionDate(caseDetails.getData()
+            .getDraftOrdersWrapper(), caseReference);
+
+        LocalDate hearingDate = review.getHearingDate();
+        String judge = review.getHearingJudge();
+
+        if (StringUtils.isBlank(judge)) {
+            sendAgreedOrderReviewNotificationToAdmin(caseDetails, hearingDate);
+        } else {
+            sendAgreedOrderReviewNotificationToJudge(caseDetails, hearingDate, judge);
+        }
+    }
+
+    private void sendAgreedOrderReviewNotificationToAdmin(FinremCaseDetails caseDetails, LocalDate hearingDate) {
+        NotificationRequest notificationRequest = draftOrdersNotificationRequestMapper
+            .buildAdminReviewNotificationRequest(caseDetails, hearingDate);
+        notificationService.sendContestedReadyToReviewOrderToAdmin(notificationRequest);
+    }
+
+    private void sendAgreedOrderReviewNotificationToJudge(FinremCaseDetails caseDetails, LocalDate hearingDate,
+                                                          String judge) {
+        NotificationRequest judgeNotificationRequest = draftOrdersNotificationRequestMapper
+            .buildJudgeNotificationRequest(caseDetails, hearingDate, judge);
+        notificationService.sendContestedReadyToReviewOrderToJudge(judgeNotificationRequest);
     }
 
     private String getConfirmationBody(FinremCaseDetails caseDetails) {

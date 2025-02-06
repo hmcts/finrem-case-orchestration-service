@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -120,9 +119,9 @@ public class DraftOrderService {
         ofNullable(uploadDraftOrder.getAgreedDraftOrderDocument()).ifPresent(builder::draftOrder);
 
         // Add additional attachments for orders only
-        List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAgreedDraftOrderAdditionalDocumentsCollection())
+        List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAdditionalDocuments())
             .orElse(List.of()).stream()
-            .map(AgreedDraftOrderAdditionalDocumentsCollection::getValue)
+            .map(DocumentCollection::getValue)
             .filter(Objects::nonNull)
             .map(value -> DocumentCollection.builder().value(value).build())
             .toList();
@@ -158,7 +157,7 @@ public class DraftOrderService {
         }
 
         // ensure non-null judge
-        if (uploadAgreedDraftOrder.getJudge() == null) {
+        if (YesOrNo.YES.equals(uploadAgreedDraftOrder.getJudgeKnownAtHearing()) && uploadAgreedDraftOrder.getJudge() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(),
                 format("Unexpected null judge for Case ID: %s", finremCaseData.getCcdCaseId()));
         }
@@ -176,7 +175,7 @@ public class DraftOrderService {
             .filter(dor -> dor.getHearingType().equals(hearingType)
                 && dor.getHearingDate().equals(hearingDate)
                 && dor.getHearingTime().equals(hearingTime)
-                && dor.getHearingJudge().equals(hearingJudge))
+                && Objects.equals(dor.getHearingJudge(), hearingJudge))
             .findFirst()
             .orElse(null);
 
@@ -214,6 +213,7 @@ public class DraftOrderService {
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
                     .submittedByEmail(ado.getSubmittedByEmail())
+                    .orderFiledBy(uploadAgreedDraftOrder.getOrderFiledBy())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
@@ -236,6 +236,7 @@ public class DraftOrderService {
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())
                     .submittedByEmail(ado.getSubmittedByEmail())
+                    .orderFiledBy(uploadAgreedDraftOrder.getOrderFiledBy())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
