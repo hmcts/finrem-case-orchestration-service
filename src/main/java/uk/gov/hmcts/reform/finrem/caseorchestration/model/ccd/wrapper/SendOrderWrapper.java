@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,5 +23,12 @@ public class SendOrderWrapper {
     private OrdersToSend ordersToSend;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+
+    /**
+     *
+     * @deprecated This field is no longer in use and is deprecated since new draft order flow release.
+     */
+    @Deprecated
+    private DynamicMultiSelectList ordersToShare;
 
 }
