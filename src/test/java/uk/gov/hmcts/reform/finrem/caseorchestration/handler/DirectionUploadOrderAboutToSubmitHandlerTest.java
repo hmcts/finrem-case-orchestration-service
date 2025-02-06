@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
@@ -28,6 +29,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
 import java.util.ArrayList;
@@ -40,7 +43,9 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
@@ -48,27 +53,30 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.APPROVED_BY_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.PROCESSED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus.TO_BE_REVIEWED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     private static final CaseDocument TARGET_DOCUMENT_1 = CaseDocument.builder().documentUrl("targetDoc1.docx").build();
-
     private static final CaseDocument TARGET_DOCUMENT_2 = CaseDocument.builder().documentUrl("targetDoc2.docx").build();
-
     private static final CaseDocument TARGET_DOCUMENT_3 = CaseDocument.builder().documentUrl("targetDoc3.docx").build();
-
     private static final CaseDocument TARGET_DOCUMENT_4 = CaseDocument.builder().documentUrl("targetDoc4.docx").build();
+    private static final CaseDocument STAMPED_DOCUMENT_1 = CaseDocument.builder().documentFilename("stamped1.pdf").build();
+    private static final CaseDocument STAMPED_DOCUMENT_2 = CaseDocument.builder().documentFilename("stamped2.pdf").build();
+    private static final long CASE_ID = 12345678L;
 
     @InjectMocks
     private DirectionUploadOrderAboutToSubmitHandler underTest;
-
     @Spy
     private HasApprovableCollectionReader hasApprovableCollectionReader;
-
     @Mock
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Mock
+    private GenericDocumentService genericDocumentService;
+    @Mock
+    private DocumentHelper documentHelper;
 
     @Test
     void testCanHandle() {
@@ -77,7 +85,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     @Test
     void createAndStoreAdditionalHearingDocumentsHandleException() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(123L);
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
         FinremCaseDetails finremCaseDetails = finremCallbackRequest.getCaseDetails();
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
             .createAndStoreAdditionalHearingDocuments(finremCaseDetails, AUTH_TOKEN);
@@ -90,7 +98,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     @Test
     void createAndStoreAdditionalHearingDocuments() throws JsonProcessingException {
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(123L);
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
@@ -113,37 +121,14 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrders(boolean nullExistingUploadHearingOrder) {
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
+
         List<DirectionOrderCollection> uploadHearingOrder = nullExistingUploadHearingOrder ? null : new ArrayList<>();
-        DirectionOrderCollection expectedNewDirectionOrderCollection = null;
+        DirectionOrderCollection expectedNewDirectionOrderCollection;
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
-            .uploadHearingOrder(uploadHearingOrder)
-            .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                .unprocessedApprovedDocuments(List.of(
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
-                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
-                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
-                    expectedNewDirectionOrderCollection = DirectionOrderCollection.builder().value(DirectionOrder.builder()
-                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
-                ))
-                .build())
-            .build());
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res =  underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(res.getData().getUploadHearingOrder()).hasSize(1);
-        assertThat(res.getData().getUploadHearingOrder().get(0)).isEqualTo(expectedNewDirectionOrderCollection);
-    }
-
-    @Test
-    void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrdersWithExistingUploadHearingOrder() {
-        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
-            DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
-        ));
-        DirectionOrderCollection expectedNewDirectionOrderCollection = null;
-
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .uploadHearingOrder(uploadHearingOrder)
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
@@ -159,21 +144,58 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(res.getData().getUploadHearingOrder()).hasSize(2);
-        assertThat(res.getData().getUploadHearingOrder().get(1)).isEqualTo(expectedNewDirectionOrderCollection);
+        assertThat(res.getData().getUploadHearingOrder()).containsExactly(expectedNewDirectionOrderCollection);
+    }
+
+    @Test
+    void shouldInsertNewDocumentFromUnprocessedApprovedDocumentsToUploadHearingOrdersWithExistingUploadHearingOrder() {
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
+
+        List<DirectionOrderCollection> uploadHearingOrder = new ArrayList<>(List.of(
+            DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
+        ));
+        DirectionOrderCollection expectedNewDirectionOrderCollection;
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(12345678L, FinremCaseData.builder()
+            .uploadHearingOrder(uploadHearingOrder)
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .unprocessedApprovedDocuments(List.of(
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
+                        .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
+                    expectedNewDirectionOrderCollection = DirectionOrderCollection.builder().value(DirectionOrder.builder()
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
+                ))
+                .build())
+            .build());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertThat(res.getData().getUploadHearingOrder())
+            .hasSize(2)
+            .contains(expectedNewDirectionOrderCollection);
         assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isNull();
+        assertThat(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent()).isNull();
+        assertThat(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()).isNull();
     }
 
     @Test
     void shouldMarkDraftOrdersReviewCollectionProcessed() {
-        DraftOrderDocReviewCollection test1 = null;
-        DraftOrderDocReviewCollection test2 = null;
-        AgreedDraftOrderCollection test3 = null;
-        AgreedDraftOrderCollection test4 = null;
-        AgreedDraftOrderCollection test5 = null;
-        AgreedDraftOrderCollection test6 = null;
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+        DraftOrderDocReviewCollection test1;
+        DraftOrderDocReviewCollection test2;
+        AgreedDraftOrderCollection test3;
+        AgreedDraftOrderCollection test4;
+        AgreedDraftOrderCollection test5;
+        AgreedDraftOrderCollection test6;
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -212,23 +234,36 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+        //Check DraftOrderDocReviewCollection is updated
+        assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
+
+        //Check AgreedDraftOrderCollection is updated
+        assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getDraftOrder());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getDraftOrder());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+
         assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
         assertEquals(TO_BE_REVIEWED, test6.getValue().getOrderStatus());
     }
 
     @Test
     void shouldMarkPsaCollectionProcessed() {
-        PsaDocReviewCollection test1 = null;
-        PsaDocReviewCollection test2 = null;
-        AgreedDraftOrderCollection test3 = null;
-        AgreedDraftOrderCollection test4 = null;
-        AgreedDraftOrderCollection test5 = null;
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+        PsaDocReviewCollection test1;
+        PsaDocReviewCollection test2;
+        AgreedDraftOrderCollection test3;
+        AgreedDraftOrderCollection test4;
+        AgreedDraftOrderCollection test5;
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder()
@@ -267,21 +302,35 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+        //Check PsaDocReviewCollection is updated
+        assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getPsaDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
+
+        //Check AgreedDraftOrderCollection is updated
+        assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getPensionSharingAnnex());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getPensionSharingAnnex());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+
         assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
     }
 
     @Test
     void shouldReplaceApprovedDocumentAndMarkAsProcessed() {
-        PsaDocReviewCollection test1 = null;
-        PsaDocReviewCollection test2 = null;
-        AgreedDraftOrderCollection test3 = null;
-        AgreedDraftOrderCollection test4 = null;
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_3, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_4, STAMPED_DOCUMENT_2);
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+        PsaDocReviewCollection test1;
+        PsaDocReviewCollection test2;
+        AgreedDraftOrderCollection test3;
+        AgreedDraftOrderCollection test4;
+
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
@@ -316,40 +365,30 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), any(String.class));
+        //Check PsaDocReviewCollection is updated
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
-        assertEquals(TARGET_DOCUMENT_3, test1.getValue().getPsaDocument());
+        assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getPsaDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
-        assertEquals(TARGET_DOCUMENT_4, test2.getValue().getPsaDocument());
+        assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getPsaDocument());
+
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getPensionSharingAnnex());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
-    }
-
-    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {
-        return buildDraftOrderDocReviewCollection(orderStatus, null);
-    }
-
-    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus, CaseDocument document) {
-        return DraftOrderDocReviewCollection.builder()
-            .value(DraftOrderDocumentReview.builder().draftOrderDocument(document).orderStatus(orderStatus).build())
-            .build();
-    }
-
-    private PsaDocReviewCollection buildPsaDocReviewCollection(OrderStatus orderStatus) {
-        return buildPsaDocReviewCollection(orderStatus, null);
-    }
-
-    private PsaDocReviewCollection buildPsaDocReviewCollection(OrderStatus orderStatus, CaseDocument document) {
-        return PsaDocReviewCollection.builder()
-            .value(PsaDocumentReview.builder().psaDocument(document).orderStatus(orderStatus).build())
-            .build();
+        assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getPensionSharingAnnex());
     }
 
     @Test
     void shouldStampNewUploadedDocumentsFromUnprocessedApprovedDocuments() throws JsonProcessingException {
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
+        mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
+
         DirectionOrderCollection expectedNewDocument = DirectionOrderCollection.builder().value(DirectionOrder.builder()
             .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build();
 
-        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder()
+        FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .uploadHearingOrder(new ArrayList<>(List.of(
                 DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(TARGET_DOCUMENT_4).build()).build()
             )))
@@ -376,5 +415,33 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 eq(AUTH_TOKEN));
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+            eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
+    }
+
+    private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
+        when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, String.valueOf(CASE_ID)))
+            .thenReturn(stampedDocument);
+    }
+
+    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {
+        return buildDraftOrderDocReviewCollection(orderStatus, null);
+    }
+
+    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus, CaseDocument document) {
+        return DraftOrderDocReviewCollection.builder()
+            .value(DraftOrderDocumentReview.builder().draftOrderDocument(document).orderStatus(orderStatus).build())
+            .build();
+    }
+
+    private PsaDocReviewCollection buildPsaDocReviewCollection(OrderStatus orderStatus) {
+        return buildPsaDocReviewCollection(orderStatus, null);
+    }
+
+    private PsaDocReviewCollection buildPsaDocReviewCollection(OrderStatus orderStatus, CaseDocument document) {
+        return PsaDocReviewCollection.builder()
+            .value(PsaDocumentReview.builder().psaDocument(document).orderStatus(orderStatus).build())
+            .build();
     }
 }

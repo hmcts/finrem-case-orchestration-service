@@ -180,6 +180,14 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
+    public static CaseDocument caseDocument(String documentUrl, String filename) {
+        CaseDocument caseDocument = new CaseDocument();
+        caseDocument.setDocumentUrl(documentUrl);
+        caseDocument.setDocumentFilename(filename);
+        caseDocument.setDocumentBinaryUrl(documentUrl + "/binary");
+        return caseDocument;
+    }
+
     public static CaseDocument caseDocument(String documentUrl, String filename, String binaryUrl) {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl(documentUrl);

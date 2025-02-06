@@ -7,8 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.RespondentLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -34,10 +36,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderNotApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentOrderingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import java.util.Map;
 
@@ -66,32 +80,60 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private NocLetterNotificationService nocLetterNotificationService;
     @Autowired
     private NotificationsController notificationsController;
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
-    @MockBean
+    @MockitoBean
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @MockitoBean
     GenericDocumentService genericDocumentServiceMock;
-    @MockBean
+    @MockitoBean
     private AssignCaseAccessService assignCaseAccessService;
-    @MockBean
+    @MockitoBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @MockBean
+    @MockitoBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @MockBean
+    @MockitoBean
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean
+    @MockitoBean
     private ConsentOrderPrintService consentOrderPrintService;
-    @MockBean
+    @MockitoBean
     private DocumentOrderingService documentOrderingService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
-    @MockBean
+    @MockitoBean
     private CourtDetailsMapper courtDetailsMapper;
-    @MockBean
+    @MockitoBean
     private InternationalPostalService postalService;
+    @MockitoBean
+    private PaperNotificationService paperNotificationService;
+    @MockitoBean
+    private GeneralEmailService generalEmailService;
+    @MockitoBean
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockitoBean
+    private HearingDocumentService hearingDocumentService;
+    @MockitoBean
+    private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @MockitoBean
+    private TransferCourtService transferCourtService;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
+    @MockitoBean
+    private NoticeOfChangeService noticeOfChangeService;
+    @MockitoBean
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    @MockitoBean
+    private UpdateRepresentationService updateRepresentationService;
+    @MockitoBean
+    UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
+    @MockitoBean
+    UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
+    @MockitoBean
+    AssignToJudgeCorresponder assignToJudgeCorresponder;
+    @MockitoBean
+    DraftOrdersNotificationRequestMapper draftOrdersNotificationRequestMapper;
 
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;

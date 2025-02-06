@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
@@ -21,7 +21,7 @@ public class ShareDocumentsServiceTest extends BaseServiceTest {
     @Autowired
     private ShareDocumentsService shareDocumentsService;
 
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     @Test

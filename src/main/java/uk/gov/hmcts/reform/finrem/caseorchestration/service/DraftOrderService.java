@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Reviewable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -120,11 +119,11 @@ public class DraftOrderService {
         ofNullable(uploadDraftOrder.getAgreedDraftOrderDocument()).ifPresent(builder::draftOrder);
 
         // Add additional attachments for orders only
-        List<CaseDocumentCollection> attachments = ofNullable(uploadDraftOrder.getAgreedDraftOrderAdditionalDocumentsCollection())
+        List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAdditionalDocuments())
             .orElse(List.of()).stream()
-            .map(AgreedDraftOrderAdditionalDocumentsCollection::getValue)
+            .map(DocumentCollection::getValue)
             .filter(Objects::nonNull)
-            .map(value -> CaseDocumentCollection.builder().value(value).build())
+            .map(value -> DocumentCollection.builder().value(value).build())
             .toList();
         if (!attachments.isEmpty()) {
             builder.attachments(attachments);
@@ -158,7 +157,7 @@ public class DraftOrderService {
         }
 
         // ensure non-null judge
-        if (uploadAgreedDraftOrder.getJudge() == null) {
+        if (YesOrNo.YES.equals(uploadAgreedDraftOrder.getJudgeKnownAtHearing()) && uploadAgreedDraftOrder.getJudge() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(),
                 format("Unexpected null judge for Case ID: %s", finremCaseData.getCcdCaseId()));
         }
@@ -176,7 +175,7 @@ public class DraftOrderService {
             .filter(dor -> dor.getHearingType().equals(hearingType)
                 && dor.getHearingDate().equals(hearingDate)
                 && dor.getHearingTime().equals(hearingTime)
-                && dor.getHearingJudge().equals(hearingJudge))
+                && Objects.equals(dor.getHearingJudge(), hearingJudge))
             .findFirst()
             .orElse(null);
 
@@ -214,6 +213,7 @@ public class DraftOrderService {
                     .draftOrderDocument(ado.getDraftOrder())
                     .submittedBy(ado.getSubmittedBy())
                     .submittedByEmail(ado.getSubmittedByEmail())
+                    .orderFiledBy(uploadAgreedDraftOrder.getOrderFiledBy())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())
@@ -236,6 +236,7 @@ public class DraftOrderService {
                     .psaDocument(ado.getPensionSharingAnnex())
                     .submittedBy(ado.getSubmittedBy())
                     .submittedByEmail(ado.getSubmittedByEmail())
+                    .orderFiledBy(uploadAgreedDraftOrder.getOrderFiledBy())
                     .uploadedOnBehalfOf(ado.getUploadedOnBehalfOf())
                     .submittedDate(ado.getSubmittedDate())
                     .resubmission(ado.getResubmission())

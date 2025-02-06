@@ -7,10 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
@@ -131,17 +132,17 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired
     private CourtDetailsConfiguration courtDetailsConfiguration;
 
-    @MockBean
+    @MockitoBean
     private FeatureToggleService featureToggleService;
-    @MockBean
+    @MockitoBean
     private NotificationRequestMapper notificationRequestMapper;
-    @MockBean
+    @MockitoBean
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
-    @MockBean
+    @MockitoBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
-    @MockBean
+    @MockitoBean
     private EvidenceManagementDownloadService evidenceManagementDownloadService;
-    @MockBean
+    @MockitoBean
     private CaseDataService caseDataService;
 
     private CallbackRequest callbackRequest;
@@ -1577,6 +1578,40 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         // Assert
         verify(emailService).sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE);
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToAdmin() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+        NotificationRequest request = NotificationRequest.builder()
+            .caseReferenceNumber("123456789")
+            .notificationEmail("test@test.com")
+            .build();
+
+        notificationService.sendContestedReadyToReviewOrderToAdmin(request);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("test@test.com", actual.getNotificationEmail());
+    }
+
+    @Test
+    public void shouldSendReadyForReviewEmailToAdminToFrcDisabled() {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
+        NotificationRequest nr = NotificationRequest.builder()
+            .caseReferenceNumber("123456789")
+            .notificationEmail("test@test.com")
+            .build();
+
+        notificationService.sendContestedReadyToReviewOrderToAdmin(nr);
+
+        ArgumentCaptor<NotificationRequest> argumentCaptor = ArgumentCaptor.forClass(NotificationRequest.class);
+        verify(emailService).sendConfirmationEmail(argumentCaptor.capture(),
+            eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN));
+        NotificationRequest actual = argumentCaptor.getValue();
+        assertEquals("fr_applicant_solicitor1@mailinator.com", actual.getNotificationEmail());
     }
 
     private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
