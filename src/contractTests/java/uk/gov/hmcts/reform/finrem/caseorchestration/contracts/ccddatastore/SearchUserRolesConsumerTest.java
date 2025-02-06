@@ -12,8 +12,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
@@ -43,17 +43,17 @@ public class SearchUserRolesConsumerTest extends BaseTest {
     CaseAssignedRoleService caseAssignedRoleService;
     @Autowired
     DataStoreClient dataStoreClient;
-    @MockBean
+    @MockitoBean
     CaseDataService caseDataService;
-    @MockBean
+    @MockitoBean
     IdamService idamService;
 
     @Autowired
     ObjectMapper objectMapper;
-    @MockBean
+    @MockitoBean
     SystemUserService systemUserService;
 
-    @MockBean
+    @MockitoBean
     AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
 
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";

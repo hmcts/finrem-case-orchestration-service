@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.CaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
@@ -33,15 +33,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedDraftOrderAdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.time.LocalDate;
@@ -54,9 +51,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,9 +82,6 @@ class DraftOrderServiceTest {
 
     @Mock
     private HearingService hearingService;
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(DraftOrderService.class);
 
     @ParameterizedTest
     @CsvSource({
@@ -168,7 +162,7 @@ class DraftOrderServiceTest {
             .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
-            .attachments(List.of(CaseDocumentCollection.builder().value(attachment1).build()))
+            .attachments(List.of(DocumentCollection.builder().value(attachment1).build()))
             .build();
 
         UploadAgreedDraftOrder uploadOrder1 = UploadAgreedDraftOrder.builder()
@@ -177,8 +171,8 @@ class DraftOrderServiceTest {
                     .value(UploadedDraftOrder.builder()
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
-                        .agreedDraftOrderAdditionalDocumentsCollection(List.of(
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                        .additionalDocuments(List.of(
+                            DocumentCollection.builder()
                                 .value(attachment1)
                                 .build()
                         ))
@@ -204,8 +198,8 @@ class DraftOrderServiceTest {
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
-                CaseDocumentCollection.builder().value(attachment1).build(),
-                CaseDocumentCollection.builder().value(attachment2).build()
+                DocumentCollection.builder().value(attachment1).build(),
+                DocumentCollection.builder().value(attachment2).build()
             ))
             .build();
 
@@ -215,11 +209,11 @@ class DraftOrderServiceTest {
                     .value(UploadedDraftOrder.builder()
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
-                        .agreedDraftOrderAdditionalDocumentsCollection(List.of(
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                        .additionalDocuments(List.of(
+                            DocumentCollection.builder()
                                 .value(attachment1)
                                 .build(),
-                            AgreedDraftOrderAdditionalDocumentsCollection.builder()
+                            DocumentCollection.builder()
                                 .value(attachment2)
                                 .build()
                         ))
@@ -313,7 +307,7 @@ class DraftOrderServiceTest {
     @CsvSource({
         "true, true, true", // Valid input with non-null hearing details and judge
         "false, true, false", // Null hearing details
-        "true, false, false" // Null judge
+        "true, false, true" // Null judge
     })
     @DisplayName("Should populate draft orders review collection based on hearingDetails and judge presence")
     void shouldPopulateDraftOrdersReviewCollectionBasedOnHearingDetailsAndJudgePresence(
@@ -326,7 +320,12 @@ class DraftOrderServiceTest {
         // Mock hearingDetails and judge based on parameters
         DynamicList hearingDetails = hasHearingDetails ? DynamicList.builder().build() : null;
         uploadAgreedDraftOrder.setHearingDetails(hearingDetails);
-        uploadAgreedDraftOrder.setJudge(hasJudge ? "Judge Name" : null);
+        if (hasJudge) {
+            uploadAgreedDraftOrder.setJudgeKnownAtHearing(YesOrNo.YES);
+            uploadAgreedDraftOrder.setJudge("Judge Name");
+        } else {
+            uploadAgreedDraftOrder.setJudgeKnownAtHearing(YesOrNo.NO);
+        }
 
         lenient().when(hearingService.getHearingType(any(), any())).thenReturn("Some Hearing Type");
         lenient().when(hearingService.getHearingDate(any(), any())).thenReturn(LocalDate.now());
@@ -343,14 +342,12 @@ class DraftOrderServiceTest {
         );
 
         // Call the method
-        if (!hasHearingDetails || !hasJudge) {
-            Exception exception = assertThrows(InvalidCaseDataException.class, () ->
-                draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection));
-            String expectedMessage = !hasHearingDetails
-                ? ("Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID)
-                : ("Unexpected null judge for Case ID: " + TestConstants.CASE_ID);
-            String actualMessage = exception.getMessage();
-            assertEquals(expectedMessage, actualMessage);
+        if (!hasHearingDetails) {
+            String expectedMessage = "Unexpected null hearing details for Case ID: " + TestConstants.CASE_ID;
+            assertThatThrownBy(() -> draftOrderService.populateDraftOrdersReviewCollection(finremCaseData,
+                uploadAgreedDraftOrder, newAgreedDraftOrderCollection))
+                .isInstanceOf(InvalidCaseDataException.class)
+                .hasMessage(expectedMessage);
         } else {
             draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, uploadAgreedDraftOrder, newAgreedDraftOrderCollection);
         }
@@ -366,7 +363,11 @@ class DraftOrderServiceTest {
             assertThat(populatedReview.getHearingType()).isEqualTo("Some Hearing Type");
             assertThat(populatedReview.getHearingDate()).isEqualTo(LocalDate.now());
             assertThat(populatedReview.getHearingTime()).isEqualTo("10:00 AM");
-            assertThat(populatedReview.getHearingJudge()).isEqualTo("Judge Name");
+            if (hasJudge) {
+                assertThat(populatedReview.getHearingJudge()).isEqualTo("Judge Name");
+            } else {
+                assertThat(populatedReview.getHearingJudge()).isNull();
+            }
 
             // Further assertions for the draft order and PSA doc collections if needed
             assertThat(populatedReview.getDraftOrderDocReviewCollection()).hasSize(1);
@@ -1172,6 +1173,22 @@ class DraftOrderServiceTest {
         verifyPsaOverdueNotificationSent(psaCollection, 2, null);
         verifyPsaOverdueNotificationSent(psaCollection, 3, null);
         verifyPsaOverdueNotificationSent(psaCollection, 4, null);
+    }
+
+    @Test
+    void givenMissingJudge_whenPopulateDraftOrdersReviewCollection_thenException() {
+        FinremCaseData finremCaseData = FinremCaseData.builder().ccdCaseId(TestConstants.CASE_ID).build();
+        UploadAgreedDraftOrder uploadAgreedDraftOrder = UploadAgreedDraftOrder.builder()
+            .hearingDetails(DynamicList.builder().build())
+            .judgeKnownAtHearing(YesOrNo.YES)
+            .build();
+        List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection = new ArrayList<>();
+
+        String expectedMessage = "Unexpected null judge for Case ID: " + TestConstants.CASE_ID;
+        assertThatThrownBy(() -> draftOrderService.populateDraftOrdersReviewCollection(finremCaseData,
+            uploadAgreedDraftOrder, newAgreedDraftOrderCollection))
+            .isInstanceOf(InvalidCaseDataException.class)
+            .hasMessage(expectedMessage);
     }
 
     private void verifyDraftOrderOverdueNotificationSent(List<DraftOrderDocReviewCollection> collection, int index,
