@@ -512,6 +512,7 @@ class GeneralOrderServiceTest {
                     .value(OrderToShare.builder()
                         .documentId("documentUrl1")
                         .documentName("Finalised order - finalisedOrderOne.pdf")
+                        .documentToShare(YesOrNo.NO)
                         .hasSupportingDocuments(YesOrNo.NO)
                         .attachmentsToShare(List.of())
                         .build())
@@ -520,6 +521,7 @@ class GeneralOrderServiceTest {
                     .value(OrderToShare.builder()
                         .documentId("documentUrl2")
                         .documentName("Finalised order - finalisedOrderTwo.pdf")
+                        .documentToShare(YesOrNo.NO)
                         .hasSupportingDocuments(YesOrNo.NO)
                         .attachmentsToShare(List.of())
                         .build())
@@ -722,8 +724,56 @@ class GeneralOrderServiceTest {
                     .value(OrderToShare.builder()
                         .documentId("documentUrl")
                         .documentName("Approved order - processedFileName.pdf")
+                        .documentToShare(YesOrNo.NO)
                         .hasSupportingDocuments(YesOrNo.NO)
                         .attachmentsToShare(List.of())
+                        .build())
+                    .build())
+            );
+    }
+
+    @Test
+    void shouldPopulateProcessedApprovedDocumentsWithAttachmentToOrdersToShareList() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .orderStatus(PROCESSED)
+                                .attachments(List.of(DocumentCollection.builder()
+                                    .value(caseDocument("https://fakeurl/attachment1", "attachment1.pdf", "attachment1"))
+                                    .build()))
+                                .draftOrder(caseDocument("https://fakeurl/documentUrl", "processedFileName.pdf", "binaryUrl")).build())
+                            .build(),
+                        agreedDraftOrderCollection(TO_BE_REVIEWED),
+                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
+                        agreedDraftOrderCollection(REFUSED)
+                    ))
+                    .build())
+                .build())
+            .build();
+        generalOrderService.setOrderList(caseDetails);
+
+        assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend())
+            .as("Orders to send should not be null and should contain the processed order.")
+            .isNotNull()
+            .satisfies(ordersToSend -> assertThat(ordersToSend.getValue())
+                .containsExactly(OrderToShareCollection.builder()
+                    .value(OrderToShare.builder()
+                        .documentId("documentUrl")
+                        .documentName("Approved order - processedFileName.pdf")
+                        .documentToShare(YesOrNo.NO)
+                        .hasSupportingDocuments(YesOrNo.YES)
+                        .attachmentsToShare(List.of(
+                            AttachmentToShareCollection.builder()
+                                .value(AttachmentToShare.builder()
+                                    .attachmentName("attachment1.pdf")
+                                    .documentId("attachment1")
+                                    .documentToShare(YesOrNo.NO)
+                                    .build())
+                                .build()
+                        ))
                         .build())
                     .build())
             );

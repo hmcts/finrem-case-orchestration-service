@@ -292,16 +292,19 @@ public class GeneralOrderService {
                     .value(AttachmentToShare.builder()
                         .documentId(getDocumentId(attachment))
                         .attachmentName(attachment.getDocumentFilename())
-                        .documentToShare(YesOrNo.YES) // default to yes
+                        .documentToShare(YesOrNo.NO)
                         .build())
                     .build())
                 .toList();
             builder.attachmentsToShare(attachmentElements);
         }
-        orderToShareCollection.add(OrderToShareCollection.builder().value(builder
-            .documentId(getDocumentId(document))
-            .documentName(String.format(format, document.getDocumentFilename()))
-            .build()).build());
+        orderToShareCollection.add(OrderToShareCollection.builder()
+            .value(builder
+                .documentToShare(YesOrNo.NO)
+                .documentId(getDocumentId(document))
+                .documentName(String.format(format, document.getDocumentFilename()))
+                .build())
+            .build());
     }
 
     private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
