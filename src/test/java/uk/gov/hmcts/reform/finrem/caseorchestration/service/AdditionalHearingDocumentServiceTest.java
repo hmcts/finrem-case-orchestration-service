@@ -162,7 +162,7 @@ class AdditionalHearingDocumentServiceTest {
         assertThat(data).extracting("CourtPhone").isEqualTo("0115 910 3504");
         assertThat(data).extracting("CourtEmail").isEqualTo("FRCNottingham@justice.gov.uk");
 
-        assertThat(data.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION)).isNotNull();
+        assertThat(data).extracting(ADDITIONAL_HEARING_DOCUMENT_COLLECTION).isNotNull();
     }
 
     @Test
