@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -132,6 +133,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             setConsolidateView(caseDetails, parties);
 
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+
             resetFields(caseData.getDraftOrdersWrapper());
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
@@ -178,6 +182,27 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         });
 
         return Pair.of(removedPsaDocuments, removedDraftOrderDocuments);
+    }
+
+    private static List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
+            new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
+
+        //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
+        draftOrdersReviewCollection.removeIf(review ->
+            CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                && org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+        );
+
+        // Check for unreviewedDocuments
+        boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
+            .anyMatch(review ->
+                !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    || !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+
+        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+
+        return draftOrdersReviewCollection;
     }
 
     private <T, C> void removeMatchingDocuments(List<C> collection, Function<C, T> valueExtractor, Function<T, CaseDocument> docExtractor,
