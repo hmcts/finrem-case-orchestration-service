@@ -70,7 +70,6 @@ public class OrderDateService {
         }
     }
 
-
     private DirectionOrderCollection getDirectionOrderCollectionObj(DirectionOrder directionOrder, CaseDocument caseDocument,
                                                                     LocalDateTime createdOn,
                                                                     YesOrNo isStamped) {
