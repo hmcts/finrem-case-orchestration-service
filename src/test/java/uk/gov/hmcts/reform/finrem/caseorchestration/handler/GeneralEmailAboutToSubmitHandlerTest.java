@@ -168,14 +168,14 @@ class GeneralEmailAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
         InOrder inOrderConsented = inOrder(notificationService, generalEmailWrapper);
         inOrderConsented.verify(notificationService, times(1)).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderConsented.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+        inOrderConsented.verify(generalEmailWrapper, times(0)).setGeneralEmailValuesToNull();
 
         // contested test
         when(caseDetails.isConsentedApplication()).thenReturn(false);
         handler.handle(callbackRequest, AUTH_TOKEN);
         InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
         inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
-        inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
+        inOrderContested.verify(generalEmailWrapper, times(0)).setGeneralEmailValuesToNull();
     }
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
