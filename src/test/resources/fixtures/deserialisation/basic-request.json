@@ -20,7 +20,12 @@
       "solicitorName": "SolName1",
       "solicitorPhone": "1234567891",
       "solicitorReference": "LL01",
-      "currentUserCaseRoleLabel": "[RESPSOLICITOR]"
+      "currentUserCaseRoleLabel": "[RESPSOLICITOR]",
+      "generalEmailRecipient":  null,
+      "generalEmailCreatedBy": null,
+      "generalEmailBody": null,
+      "generalEmailUploadedDocument": null,
+      "generalEmailCollection": null
     }
   }
 }
