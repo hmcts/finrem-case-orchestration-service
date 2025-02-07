@@ -180,9 +180,6 @@ class AdditionalHearingDocumentServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-
-        lenient().when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
