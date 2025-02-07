@@ -55,8 +55,8 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to submit callback for Case ID: {}",
-            callbackRequest.getEventType(), finremCaseDetails.getId());
+        log.info("For case type: {} and event type: {}, invoking about to submit callback for Case ID: {}",
+            callbackRequest.getCaseDetails().getCaseType(), callbackRequest.getEventType(), finremCaseDetails.getId());
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
