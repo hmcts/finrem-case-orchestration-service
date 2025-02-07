@@ -139,7 +139,6 @@ public class AdditionalHearingDocumentService {
         orderList.add(orderCollection);
     }
 
-
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails,
                                                                                           String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
@@ -155,7 +154,6 @@ public class AdditionalHearingDocumentService {
             new TypeReference<>() {
             });
     }
-
 
     public void sortDirectionDetailsCollection(FinremCaseData caseData) {
         List<DirectionDetailCollection> directionDetailsCollection
@@ -308,7 +306,6 @@ public class AdditionalHearingDocumentService {
         data.getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
     }
 
-
     protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
@@ -334,7 +331,6 @@ public class AdditionalHearingDocumentService {
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
-
         List<BulkPrintDocument> document = new ArrayList<>();
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             BulkPrintDocument additionalUploadedDoc
@@ -357,7 +353,6 @@ public class AdditionalHearingDocumentService {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         }
     }
-
 
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);
