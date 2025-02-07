@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
@@ -355,7 +356,8 @@ class AdditionalHearingDocumentServiceTest {
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
         DirectionOrderCollection uploadOrderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
+            .additionalDocuments(List.of(DocumentCollection.builder().value(caseDocument("attachment", "attachment.pdf")).build())).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
         when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
@@ -382,6 +384,11 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(data.getFinalOrderCollection()).hasSize(2);
         assertThat(data.getUploadHearingOrder()).hasSize(1);
+        // should retain the uploadHearingOrder additionalDocuments
+        assertThat(data.getUploadHearingOrder()).extracting(DirectionOrderCollection::getValue)
+            .map(DirectionOrder::getAdditionalDocuments).contains(List.of(
+                DocumentCollection.builder().value(caseDocument("attachment", "attachment.pdf")).build()
+            ));
         assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
         assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments()).isNull();
     }
