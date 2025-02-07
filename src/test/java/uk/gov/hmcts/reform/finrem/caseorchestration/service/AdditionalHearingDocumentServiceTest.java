@@ -129,7 +129,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void generateAndAddAdditionalHearingDocument() throws JsonProcessingException {
+    void generateAndAddAdditionalHearingDocument() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         caseDetails.getData().put(HEARING_DATE, "2021-01-01");
 
@@ -167,7 +167,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void getHearingOrderAdditionalDocuments() {
+    void getHearingOrderAdditionalDocuments() {
         Map<String, Object> caseData = baseCaseData();
         caseData.put(HEARING_UPLOADED_DOCUMENT, Collections.EMPTY_LIST);
         List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
@@ -176,7 +176,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -227,7 +227,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -281,7 +281,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -340,7 +340,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -466,7 +466,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -482,7 +482,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -498,7 +498,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -514,7 +514,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -530,7 +530,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -542,7 +542,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -576,7 +576,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCase_whenAddToFinalOrderCollection_thenReturnUpdatedList() {
+    void givenCase_whenAddToFinalOrderCollection_thenReturnUpdatedList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -602,7 +602,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void givenCase_whenAddToFinalOrderCollectionCalledButOrderAlreadyInCollection_thenReturnOriginalList() {
+    void givenCase_whenAddToFinalOrderCollectionCalledButOrderAlreadyInCollection_thenReturnOriginalList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
 
@@ -636,7 +636,7 @@ class AdditionalHearingDocumentServiceTest {
     }
 
     @Test
-     void sortDirectionDetailsCollection() {
+    void sortDirectionDetailsCollection() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
