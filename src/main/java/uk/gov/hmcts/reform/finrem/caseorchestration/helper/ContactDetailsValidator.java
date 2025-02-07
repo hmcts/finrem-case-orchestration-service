@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import org.apache.commons.lang3.ObjectUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -29,7 +30,10 @@ public class ContactDetailsValidator {
             return errors;
         }
 
-        if (wrapper.getApplicantAddress() != null
+        Address applicantAddress = wrapper.getApplicantAddress();
+
+        if (applicantAddress != null
+            && !applicantAddress.isEmpty()
             && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode())) {
             errors.add(APPLICANT_POSTCODE_ERROR);
             return errors;
@@ -42,7 +46,10 @@ public class ContactDetailsValidator {
             return errors;
         }
 
-        if (wrapper.getRespondentAddress() != null
+        Address respondentAddress = wrapper.getRespondentAddress();
+
+        if (respondentAddress != null
+            && !respondentAddress.isEmpty()
             && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getPostCode())) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
             return errors;
