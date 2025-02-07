@@ -14,12 +14,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -67,6 +71,9 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         }
         clearInputFields(draftOrdersWrapper);
 
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection = clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
+        draftOrdersWrapper.setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
@@ -103,5 +110,26 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         draftOrdersWrapper.setHearingInstruction(null);
         draftOrdersWrapper.setShowWarningMessageToJudge(null);
         draftOrdersWrapper.setExtraReportFieldsInput(null);
+    }
+
+    private static List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+        List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
+            new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
+
+        //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
+        draftOrdersReviewCollection.removeIf(review ->
+            org.springframework.util.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                && org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+        );
+
+        // Check for unreviewedDocuments
+        boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
+            .anyMatch(review ->
+                !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    || !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+
+        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+
+        return draftOrdersReviewCollection;
     }
 }
