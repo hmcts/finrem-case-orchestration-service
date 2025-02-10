@@ -133,12 +133,13 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             caseData.setOrdersSentToPartiesCollection(printOrderCollection);
             setConsolidateView(caseDetails, parties);
 
-            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
-            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
-
             resetFields(caseData.getDraftOrdersWrapper());
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
+
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+
         } catch (RuntimeException e) {
             log.error(format("%s on Case ID: %s", e.getMessage(), caseDetails.getId()), e);
             // The purpose of this catch block is to make the exception message available in the error message box
@@ -185,6 +186,11 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private static List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+
+        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
+            return new ArrayList<>();
+        }
+
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
             new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
 

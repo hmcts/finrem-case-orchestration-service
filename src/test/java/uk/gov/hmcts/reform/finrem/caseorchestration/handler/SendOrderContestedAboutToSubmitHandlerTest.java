@@ -656,7 +656,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .isNull();
         assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
             .extracting(DraftOrdersReviewCollection::getValue)
-            .containsExactly(DraftOrdersReview.builder().draftOrderDocReviewCollection(List.of()).build());
+            .isEmpty();
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
                     .finalisedDocument(caseDocument1)
@@ -665,7 +665,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
                 .build()).build());
-
     }
 
     @Test
@@ -743,6 +742,5 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
                 .build()).build());
-
     }
 }

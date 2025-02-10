@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
@@ -113,6 +114,11 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private static List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+
+        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
+            return new ArrayList<>();
+        }
+
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
             new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
 
