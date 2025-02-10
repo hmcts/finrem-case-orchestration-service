@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +51,14 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        // JCDEBUG
+        final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        try {
+            log.info("JCDEBUG #7: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+            log.info("JCDEBUG #8: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
+        } catch (JsonProcessingException e) {
+            log.info("JCDEBUG #9: " + e.getMessage());
+        }
         log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
