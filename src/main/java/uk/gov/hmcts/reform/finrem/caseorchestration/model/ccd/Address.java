@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Stream;
 
@@ -36,6 +37,6 @@ public class Address {
     @JsonIgnore
     public boolean isEmpty() {
         return Stream.of(addressLine1, addressLine2, addressLine3, county, country, postTown, postCode)
-            .allMatch(value -> value == null || value.isBlank());
+            .allMatch(StringUtils::isBlank);
     }
 }

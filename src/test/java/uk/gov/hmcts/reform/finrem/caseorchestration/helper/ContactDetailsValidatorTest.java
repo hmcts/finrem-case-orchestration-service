@@ -11,8 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
@@ -25,8 +24,7 @@ class ContactDetailsValidatorTest {
     @MethodSource("provideInvalidCaseData")
     void shouldReturnErrorWhenPostcodeIsMissing(FinremCaseData caseData, String expectedError) {
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        assertEquals(1, errors.size(), "Expected only one error.");
-        assertEquals(expectedError, errors.get(0), "Error message mismatch.");
+        assertThat(errors).containsOnly(expectedError);
     }
 
     private static Stream<Object[]> provideInvalidCaseData() {
@@ -44,46 +42,93 @@ class ContactDetailsValidatorTest {
     void shouldReturnNoErrorsForValidCaseData() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        assertTrue(errors.isEmpty(), "Errors should be empty for valid case data.");
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void shouldNotReturnErrorWhenApplicantAddressIsEmptyOrNull() {
+    void shouldNotReturnErrorWhenApplicantAddressIsEmpty() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        assertTrue(errors.isEmpty(), "No errors should be returned when applicant address is empty or null.");
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    void shouldNotReturnErrorWhenRespondentAddressIsEmptyOrNull() {
+    void shouldNotReturnErrorWhenRespondentAddressIsEmpty() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        assertTrue(errors.isEmpty(), "No errors should be returned when respondent address is empty or null.");
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void shouldNotReturnErrorWhenApplicantAddressIsNull() {
+        FinremCaseData caseData = createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
+        caseData.getContactDetailsWrapper().setApplicantAddress(null); // Null address object
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void shouldNotReturnErrorWhenRespondentAddressIsNull() {
+        FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        caseData.getContactDetailsWrapper().setRespondentAddress(null); // Null address object
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
+        assertThat(errors).isEmpty();
     }
 
     private static FinremCaseData createCaseData(String applicantSolicitorPostcode, String applicantPostcode,
                                                  String respondentSolicitorPostcode, String respondentPostcode,
                                                  YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
                                                  YesOrNo consentedRespondentRepresented) {
-        ContactDetailsWrapper wrapper = new ContactDetailsWrapper();
 
-        wrapper.setSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
-            applicantSolicitorPostcode));
-        wrapper.setApplicantAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
-            applicantPostcode));
-        wrapper.setRespondentSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
-            respondentSolicitorPostcode));
-        wrapper.setRespondentAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
-            respondentPostcode));
-
-        wrapper.setApplicantRepresented(applicantRepresented);
-        wrapper.setContestedRespondentRepresented(contestedRespondentRepresented);
-        wrapper.setConsentedRespondentRepresented(consentedRespondentRepresented);
-
-        FinremCaseData caseData = new FinremCaseData();
-        caseData.setContactDetailsWrapper(wrapper);
-        return caseData;
+        return FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .applicantRepresented(applicantRepresented)
+                .contestedRespondentRepresented(contestedRespondentRepresented)
+                .consentedRespondentRepresented(consentedRespondentRepresented)
+                .applicantAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(applicantPostcode)
+                        .build())
+                .solicitorAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(applicantSolicitorPostcode)
+                        .build())
+                .respondentAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(respondentPostcode)
+                        .build()
+                )
+                .respondentSolicitorAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(respondentSolicitorPostcode)
+                        .build()
+                ).build()
+        ).build();
     }
 }
