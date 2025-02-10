@@ -77,7 +77,7 @@ class UpdateContactDetailsConsentedMidHandlerTest {
     }
 
     @Test
-    void givenNoBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
+    void givenBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
