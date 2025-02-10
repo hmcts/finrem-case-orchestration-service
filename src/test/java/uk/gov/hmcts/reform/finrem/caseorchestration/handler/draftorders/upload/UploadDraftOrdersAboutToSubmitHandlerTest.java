@@ -344,7 +344,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
-        assertEquals(YesOrNo.YES, caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent());
+        assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
     }
 
     @Test
