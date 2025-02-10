@@ -39,7 +39,8 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
     private final IdamService idamService;
 
-    public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService, DraftOrderService draftOrderService,
+    public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService,
+                                                  DraftOrderService draftOrderService,
                                                   ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
                                                   IdamService idamService) {
         super(finremCaseDetailsMapper);
