@@ -49,10 +49,26 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        data.getContactDetailsWrapper().setApplicantAddress(address);
-        data.getContactDetailsWrapper().setRespondentAddress(address);
+        data.getContactDetailsWrapper().setApplicantAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            "SW1A 1AA"
+        ));
+
+        data.getContactDetailsWrapper().setRespondentAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            "SW1A 2AA"
+        ));
+
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
@@ -61,15 +77,40 @@ class UpdateContactDetailsConsentedMidHandlerTest {
     }
 
     @Test
+    void givenNoBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.getContactDetailsWrapper().setApplicantAddress(new Address());
+        data.getContactDetailsWrapper().setRespondentAddress(new Address());
+
+        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertEquals(0, handle.getErrors().size());
+    }
+
+
+    @Test
     void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("");
-        data.getContactDetailsWrapper().setApplicantAddress(address);
+        data.getContactDetailsWrapper().setApplicantAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
+
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -84,9 +125,16 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode(null);
-        data.getContactDetailsWrapper().setApplicantAddress(address);
+        data.getContactDetailsWrapper().setApplicantAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
+
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -101,12 +149,16 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode("");
-        data.getContactDetailsWrapper().setApplicantAddress(address);
-        data.getContactDetailsWrapper().setRespondentAddress(addressBlank);
+        data.getContactDetailsWrapper().setRespondentAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
+
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
@@ -122,12 +174,16 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode(null);
-        data.getContactDetailsWrapper().setApplicantAddress(address);
-        data.getContactDetailsWrapper().setRespondentAddress(addressBlank);
+        data.getContactDetailsWrapper().setRespondentAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
+
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
@@ -143,18 +199,22 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode("");
-        data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setSolicitorAddress(addressBlank);
+        data.getContactDetailsWrapper().setSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors()).containsExactly("Postcode field is required for applicant solicitor address.");
     }
+
 
     @Test
     void givenConsentedCase_WhenNullApplicantSolicitorPostCode_thenHandlerWillShowMessage() {
@@ -163,13 +223,16 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode(null);
-        data.getContactDetailsWrapper().setApplicantAddress(address);
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setSolicitorAddress(addressBlank);
+        data.getContactDetailsWrapper().setSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -183,15 +246,16 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        Address address = new Address();
-        address.setPostCode("AB1 1AB");
-        Address addressBlank = new Address();
-        addressBlank.setPostCode(null);
-        data.getContactDetailsWrapper().setApplicantAddress(address);
-        data.getContactDetailsWrapper().setRespondentAddress(address);
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setRespondentSolicitorAddress(addressBlank);
+        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null
+        ));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
