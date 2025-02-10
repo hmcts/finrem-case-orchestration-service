@@ -10,15 +10,15 @@ import java.util.List;
 
 public class ContactDetailsValidator {
 
-    private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
-    private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
-    private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
-    private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
+    static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
+    static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
+    static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
+    static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
     private ContactDetailsValidator() {
     }
 
-    public static List<String> validateCaseData(FinremCaseData caseData) {
+    public static List<String> validateCaseDataAddresses(FinremCaseData caseData) {
 
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
@@ -34,7 +34,7 @@ public class ContactDetailsValidator {
 
         if (applicantAddress != null
             && !applicantAddress.isEmpty()
-            && ObjectUtils.isEmpty(wrapper.getApplicantAddress().getPostCode())) {
+            && ObjectUtils.isEmpty(applicantAddress.getPostCode())) {
             errors.add(APPLICANT_POSTCODE_ERROR);
             return errors;
         }
@@ -50,7 +50,7 @@ public class ContactDetailsValidator {
 
         if (respondentAddress != null
             && !respondentAddress.isEmpty()
-            && ObjectUtils.isEmpty(wrapper.getRespondentAddress().getPostCode())) {
+            && ObjectUtils.isEmpty(respondentAddress.getPostCode())) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
             return errors;
         }

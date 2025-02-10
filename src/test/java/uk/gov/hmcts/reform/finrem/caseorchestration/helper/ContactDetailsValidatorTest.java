@@ -11,32 +11,39 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_POSTCODE_ERROR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.APPLICANT_SOLICITOR_POSTCODE_ERROR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_SOLICITOR_POSTCODE_ERROR;
+
 
 class ContactDetailsValidatorTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
     void shouldReturnErrorWhenPostcodeIsMissing(FinremCaseData caseData, String expectedError) {
-        List<String> errors = ContactDetailsValidator.validateCaseData(caseData);
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertEquals(1, errors.size(), "Expected only one error.");
         assertEquals(expectedError, errors.get(0), "Error message mismatch.");
     }
 
     private static Stream<Object[]> provideInvalidCaseData() {
         return Stream.of(
-            new Object[]{ createCaseData(null, "SW1A 1AA", "E1 6AN", "EC1A 1BB", YesOrNo.YES, null, null), "Postcode field is required for applicant solicitor address." },
-            new Object[]{ createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null), "Postcode field is required for applicant address." },
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, YesOrNo.YES, null), "Postcode field is required for respondent solicitor address." },
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, null, YesOrNo.YES), "Postcode field is required for respondent solicitor address." },
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", null, null, null, null), "Postcode field is required for respondent address." }
+            new Object[] {
+                createCaseData(null, "SW1A 1AA", "E1 6AN", "EC1A 1BB", YesOrNo.YES, null, null), APPLICANT_SOLICITOR_POSTCODE_ERROR  },
+            new Object[]{ createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null), APPLICANT_POSTCODE_ERROR },
+            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, YesOrNo.YES, null), RESPONDENT_SOLICITOR_POSTCODE_ERROR},
+            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, null, YesOrNo.YES), RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", null, null, null, null), RESPONDENT_POSTCODE_ERROR }
         );
     }
 
     @Test
     void shouldReturnNoErrorsForValidCaseData() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
-        List<String> errors = ContactDetailsValidator.validateCaseData(caseData);
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertTrue(errors.isEmpty(), "Errors should be empty for valid case data.");
     }
 
@@ -44,7 +51,7 @@ class ContactDetailsValidatorTest {
     void shouldNotReturnErrorWhenApplicantAddressIsEmptyOrNull() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
-        List<String> errors = ContactDetailsValidator.validateCaseData(caseData);
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertTrue(errors.isEmpty(), "No errors should be returned when applicant address is empty or null.");
     }
 
@@ -52,19 +59,24 @@ class ContactDetailsValidatorTest {
     void shouldNotReturnErrorWhenRespondentAddressIsEmptyOrNull() {
         FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
-        List<String> errors = ContactDetailsValidator.validateCaseData(caseData);
+        List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertTrue(errors.isEmpty(), "No errors should be returned when respondent address is empty or null.");
     }
 
     private static FinremCaseData createCaseData(String applicantSolicitorPostcode, String applicantPostcode,
                                                  String respondentSolicitorPostcode, String respondentPostcode,
-                                                 YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented, YesOrNo consentedRespondentRepresented) {
+                                                 YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
+                                                 YesOrNo consentedRespondentRepresented) {
         ContactDetailsWrapper wrapper = new ContactDetailsWrapper();
 
-        wrapper.setSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town", applicantSolicitorPostcode));
-        wrapper.setApplicantAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town", applicantPostcode));
-        wrapper.setRespondentSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town", respondentSolicitorPostcode));
-        wrapper.setRespondentAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town", respondentPostcode));
+        wrapper.setSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
+            applicantSolicitorPostcode));
+        wrapper.setApplicantAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
+            applicantPostcode));
+        wrapper.setRespondentSolicitorAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
+            respondentSolicitorPostcode));
+        wrapper.setRespondentAddress(new Address("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "Town",
+            respondentPostcode));
 
         wrapper.setApplicantRepresented(applicantRepresented);
         wrapper.setContestedRespondentRepresented(contestedRespondentRepresented);
