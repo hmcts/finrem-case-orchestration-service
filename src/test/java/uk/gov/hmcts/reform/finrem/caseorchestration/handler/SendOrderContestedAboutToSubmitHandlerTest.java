@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -121,11 +122,14 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     private OrderDateService dateService;
     @Mock
     private SendOrdersCategoriser sendOrdersCategoriser;
+    @Mock
+    private DraftOrderService draftOrderService;
 
     @BeforeEach
     void setUpTest() {
         handler = new SendOrderContestedAboutToSubmitHandler(finremCaseDetailsMapper,
             generalOrderService,
+            draftOrderService,
             genericDocumentService,
             documentHelper,
             List.of(
@@ -149,6 +153,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of()))
             .thenReturn(Triple.of(List.of(), List.of(), Map.of()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -156,6 +162,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData caseData = response.getData();
 
         assertNull(caseData.getPartiesOnCase());
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
         verify(generalOrderService).getParties(callbackRequest.getCaseDetails());
         verify(generalOrderService).hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of());
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), any());
@@ -205,6 +212,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
@@ -228,6 +237,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), any());
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
 
     @Test
@@ -254,6 +264,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
@@ -274,6 +286,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper).getStampType(caseData);
         verify(generalOrderService, never()).isSelectedOrderMatches(eq(List.of(selected1, selected2)), any(ContestedGeneralOrder.class));
         verify(sendOrdersCategoriser).categorise(caseData);
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
+
     }
 
     @Test
@@ -300,6 +314,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(caseDocuments, List.of(),
             Map.of()));
@@ -334,6 +350,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper).getStampType(caseData);
         verify(dateService).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser).categorise(caseData);
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
 
         response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -371,6 +388,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(documentHelper, times(1)).getStampType(caseData);
         verify(dateService, times(1)).addCreatedDateInFinalOrder(any(), any());
         verify(sendOrdersCategoriser, times(2)).categorise(caseData);
+        verify(draftOrderService, times(2)).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
 
     @Test
@@ -415,6 +433,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
             .thenReturn(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -457,6 +477,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
 
         CaseDocument legacyDocCaseDocument = caseDocument("http://fakeurl/legacyDoc", "legacyDoc.pdf");
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1)))
@@ -485,6 +507,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
 
     @Test
@@ -516,6 +539,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument), List.of(),
             Map.of()));
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -528,6 +553,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(genericDocumentService, never()).stampDocument(any(), any(), any(), anyString());
         verify(documentHelper, never()).getStampType(caseData);
         verify(sendOrdersCategoriser).categorise(caseData);
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
 
     @Test
@@ -574,6 +600,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument()), List.of(),
             Map.of()));
@@ -759,6 +787,19 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
         finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToSend(OrdersToSend.builder().build()).build());
+
+        List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>(of(
+            DraftOrderDocReviewCollection.builder()
+                .value(DraftOrderDocumentReview.builder()
+                    .draftOrderDocument(caseDocument2)
+                    .submittedBy("SUBMITTED BY AAA")
+                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
+                    .approvalJudge("Mr Judge A")
+                    .build())
+                .build()
+        ));
+
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
@@ -779,23 +820,21 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                     .build())
                                 .build()
                         )))
-                        .draftOrderDocReviewCollection(new ArrayList<>(of(
-                            DraftOrderDocReviewCollection.builder()
-                                .value(DraftOrderDocumentReview.builder()
-                                    .draftOrderDocument(caseDocument2)
-                                    .submittedBy("SUBMITTED BY AAA")
-                                    .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
-                                    .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
-                                    .approvalJudge("Mr Judge A")
-                                    .build())
-                                .build()))
-                        ).build())
+                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                        .build())
                     .build()
             )))
             .build());
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
+        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
+            .thenReturn(new ArrayList<>(of(
+                DraftOrdersReviewCollection.builder()
+                    .value(DraftOrdersReview.builder()
+                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                        .build())
+                    .build())));
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Triple.of(List.of(), List.of(caseDocument1), Map.of()));
 
@@ -826,7 +865,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
                 .build()).build());
-
+        verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
 
     private void assertClearTempFields(FinremCaseData caseData) {

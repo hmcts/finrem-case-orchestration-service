@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -60,6 +62,9 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
 
     @Mock
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+
+    @Spy
+    private DraftOrderService draftOrderService;
 
     @Mock
     private IdamService idamService;
