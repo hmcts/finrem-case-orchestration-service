@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -26,4 +27,6 @@ public class DirectionOrder implements HasCaseDocument {
     YesOrNo isOrderStamped;
     @JsonProperty("originalDocument")
     CaseDocument originalDocument;
+    @JsonProperty("additionalDocuments")
+    private List<DocumentCollection> additionalDocuments;
 }
