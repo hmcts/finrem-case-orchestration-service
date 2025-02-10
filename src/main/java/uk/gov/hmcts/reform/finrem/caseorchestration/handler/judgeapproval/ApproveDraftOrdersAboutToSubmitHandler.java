@@ -124,8 +124,8 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
         //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
         draftOrdersReviewCollection.removeIf(review ->
-            org.springframework.util.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                && org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+            CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
         );
 
         // Check for unreviewedDocuments
