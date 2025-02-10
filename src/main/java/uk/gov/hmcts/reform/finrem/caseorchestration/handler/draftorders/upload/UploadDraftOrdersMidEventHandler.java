@@ -35,7 +35,7 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             + "the type of hearing and the date of the hearing.";
 
     private static final String HAVING_WORD_DOCUMENT_IN_ADDITIONAL_ATTACHMENTS_ERROR_MESSAGE
-        = "You must upload a PDF file in the additional attachments.";
+        = "You must upload a Word document or a PDF file in the additional attachments.";
 
     public UploadDraftOrdersMidEventHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
@@ -62,7 +62,7 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             if (isSuggestedDraftOrderHavingNonWordDocument(draftOrdersWrapper)) {
                 errors.add(HAVING_NON_WORD_DOCUMENT_IN_ORDER_OR_PSA_ERROR_MESSAGE);
             }
-            if (isSuggestedDraftOrderAdditionalAttachingHavingNonPdfDocument(draftOrdersWrapper)) {
+            if (isSuggestedDraftOrderAdditionalAttachingHavingNonPdfOrWordDocument(draftOrdersWrapper)) {
                 errors.add(HAVING_WORD_DOCUMENT_IN_ADDITIONAL_ATTACHMENTS_ERROR_MESSAGE);
             }
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
@@ -97,7 +97,7 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .anyMatch(document -> !FileUtils.isWordDocument(document));
     }
 
-    private boolean isSuggestedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
+    private boolean isSuggestedDraftOrderAdditionalAttachingHavingNonPdfOrWordDocument(DraftOrdersWrapper draftOrdersWrapper) {
         return emptyIfNull(draftOrdersWrapper.getUploadSuggestedDraftOrder().getUploadSuggestedDraftOrderCollection())
             .stream()
             .map(UploadSuggestedDraftOrderCollection::getValue)
@@ -105,7 +105,7 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .flatMap(order -> emptyIfNull(order.getAdditionalDocuments()).stream())
             .map(DocumentCollection::getValue)
             .filter(Objects::nonNull)
-            .anyMatch(document -> !FileUtils.isPdf(document));
+            .anyMatch(document -> !FileUtils.isPdf(document) && !FileUtils.isWordDocument(document));
     }
 
     private boolean isAgreedDraftOrderAdditionalAttachingHavingNonPdfDocument(DraftOrdersWrapper draftOrdersWrapper) {
@@ -116,6 +116,6 @@ public class UploadDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .flatMap(order -> emptyIfNull(order.getAdditionalDocuments()).stream())
             .map(DocumentCollection::getValue)
             .filter(Objects::nonNull)
-            .anyMatch(document -> !FileUtils.isPdf(document));
+            .anyMatch(document -> !FileUtils.isPdf(document) && !FileUtils.isWordDocument(document));
     }
 }
