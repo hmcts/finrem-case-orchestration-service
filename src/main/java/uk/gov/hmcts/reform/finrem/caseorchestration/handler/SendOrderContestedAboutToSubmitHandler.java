@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToSha
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -66,6 +67,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
+    private final DraftOrderService draftOrderService;
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
@@ -73,7 +75,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final SendOrdersCategoriser sendOrdersCategoriser;
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  GeneralOrderService generalOrderService,
+                                                  GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
                                                   List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
@@ -81,6 +83,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                   SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
+        this.draftOrderService = draftOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
@@ -139,7 +142,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
 
-            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = draftOrderService
+                .clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
             caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
 
         } catch (RuntimeException e) {
@@ -218,32 +222,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         });
 
         return Pair.of(removedPsaDocuments, removedDraftOrderDocuments);
-    }
-
-    private List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
-
-        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
-            return new ArrayList<>();
-        }
-
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
-            new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
-
-        //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
-        draftOrdersReviewCollection.removeIf(review ->
-            CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
-        );
-
-        // Check for unreviewedDocuments
-        boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
-            .anyMatch(review ->
-                !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                    || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
-
-        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
-
-        return draftOrdersReviewCollection;
     }
 
     private <T, C> void removeMatchingDocuments(List<C> collection, Function<C, T> valueExtractor, Function<T, CaseDocument> docExtractor,
