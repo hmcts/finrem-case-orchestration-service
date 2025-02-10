@@ -131,8 +131,8 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         // Check for unreviewedDocuments
         boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
             .anyMatch(review ->
-                !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                    || !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+                !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
 
         caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.forValue(hasUnreviewedDocuments));
 
