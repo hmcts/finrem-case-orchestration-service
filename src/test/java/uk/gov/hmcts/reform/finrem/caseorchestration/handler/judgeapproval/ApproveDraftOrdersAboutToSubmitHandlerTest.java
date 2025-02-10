@@ -195,7 +195,6 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
         List<DraftOrdersReviewCollection> remainingReviews = response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection();
         assertThat(remainingReviews).hasSize(2);
 
-        // Verify that each remaining review has at least one non-empty collection, either draft order or psa
         remainingReviews.forEach(review -> {
             DraftOrdersReview value = review.getValue();
             boolean hasNonEmptyCollection = !CollectionUtils.isEmpty(value.getDraftOrderDocReviewCollection())
@@ -205,7 +204,6 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
                 .isTrue();
         });
 
-        // The flag for unreviewed documents should be set to yes
         assertThat(draftOrdersWrapper.getIsUnreviewedDocumentPresent())
             .as("The unreviewed documents flag should be YES when a review with documents exists")
             .isEqualTo(YesOrNo.YES);
