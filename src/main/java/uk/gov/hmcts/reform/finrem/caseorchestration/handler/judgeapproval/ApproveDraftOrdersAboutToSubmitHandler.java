@@ -128,7 +128,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
                 !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
                     || !org.apache.commons.collections4.CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
 
-        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.forValue(hasUnreviewedDocuments));
 
         return draftOrdersReviewCollection;
     }
