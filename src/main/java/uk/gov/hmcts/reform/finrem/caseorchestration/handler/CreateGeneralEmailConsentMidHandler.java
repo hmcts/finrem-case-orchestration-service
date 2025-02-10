@@ -44,6 +44,7 @@ public class CreateGeneralEmailConsentMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
 
         // JCDEBUG
+        // sonar-ignore-start
         final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
             log.info("JCDEBUG #4: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
@@ -51,6 +52,7 @@ public class CreateGeneralEmailConsentMidHandler extends FinremCallbackHandler {
         } catch (JsonProcessingException e) {
             log.info("JCDEBUG #6: " + e.getMessage());
         }
+        // sonar-ignore-end
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());

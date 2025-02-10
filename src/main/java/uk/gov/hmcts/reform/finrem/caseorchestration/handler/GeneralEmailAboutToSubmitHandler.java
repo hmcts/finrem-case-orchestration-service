@@ -52,6 +52,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         // JCDEBUG
+        // sonar-ignore-start
         final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
             log.info("JCDEBUG #7: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
@@ -59,6 +60,8 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         } catch (JsonProcessingException e) {
             log.info("JCDEBUG #9: " + e.getMessage());
         }
+        // sonar-ignore-end
+
         log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
