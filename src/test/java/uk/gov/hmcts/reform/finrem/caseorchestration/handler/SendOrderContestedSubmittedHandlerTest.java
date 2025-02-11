@@ -21,33 +21,35 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremContestedSendOrderCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static java.util.List.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderContestedSubmittedHandlerTest {
-    private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
-    private static final String AUTH_TOKEN = "tokien:)";
+
+    private static final String UUID = java.util.UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
+
     @InjectMocks
     private SendOrderContestedSubmittedHandler sendOrderContestedSubmittedHandler;
-
     @Mock
     private GeneralOrderService generalOrderService;
     @Mock
@@ -55,55 +57,37 @@ class SendOrderContestedSubmittedHandlerTest {
     @Mock
     private FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
-
     @Test
-    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
-        assertThat(sendOrderContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_ORDER),
-            is(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
-        assertThat(sendOrderContestedSubmittedHandler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SEND_ORDER),
-            is(false));
+    void testCanHandle() {
+        assertCanHandle(sendOrderContestedSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SEND_ORDER);
     }
 
     private void setupData(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code(uuid)
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId(UUID).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
             .build();
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
     }
 
     private void setupGeneralOrderData(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         data.setPartiesOnCase(getParties());
 
-        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiSelectListElement.builder()
-                .code("app_docs.pdf")
-                .label("app_docs.pdf")
-                .build()))
-            .listItems(List.of(DynamicMultiSelectListElement.builder()
-                .code("app_docs.pdf")
-                .label("app_docs.pdf")
-                .build()))
+        OrderToShare selected1 = OrderToShare.builder().documentId("app_docs.pdf").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
+        OrdersToSend ordersToSend = OrdersToSend.builder()
+            .value(of(
+                OrderToShareCollection.builder().value(selected1).build()
+            ))
             .build();
 
-        data.getSendOrderWrapper().setOrdersToShare(selectedDocs);
+        data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
     }
 
     @Test
@@ -260,7 +244,7 @@ class SendOrderContestedSubmittedHandlerTest {
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         data.setUploadHearingOrder(of(DirectionOrderCollection.builder()
-            .id(uuid)
+            .id(UUID)
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(caseDocument())
                 .build())
@@ -286,7 +270,7 @@ class SendOrderContestedSubmittedHandlerTest {
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
         data.getSendOrderWrapper().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
         data.setUploadHearingOrder(of(DirectionOrderCollection.builder()
-            .id(uuid)
+            .id(UUID)
             .value(DirectionOrder.builder()
                 .uploadDraftDocument(caseDocument())
                 .build())
