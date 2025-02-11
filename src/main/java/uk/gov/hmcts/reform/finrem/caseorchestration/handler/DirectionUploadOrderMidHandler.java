@@ -86,7 +86,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
-        if (!processOrderService.areAllNewOrdersPdfFiles(caseDataBefore, caseData)) {
+        if (!processOrderService.areAllNewOrdersPdfFiles(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(List.of("You must upload a PDF file for new documents.")).build();
         }

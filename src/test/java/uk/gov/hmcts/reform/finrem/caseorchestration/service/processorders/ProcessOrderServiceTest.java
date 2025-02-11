@@ -152,8 +152,8 @@ class ProcessOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases")
-    void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.areAllNewOrdersPdfFiles(caseDataBefore, caseData);
+    void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseData, boolean expectedResult) {
+        boolean result = underTest.areAllNewOrdersPdfFiles(caseData);
         assertEquals(expectedResult, result);
     }
 
@@ -169,32 +169,22 @@ class ProcessOrderServiceTest {
         return Stream.of(
             // Valid Cases:
             // 1. All new documents are valid PDFs
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
-                createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
-                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
             // 2. No new documents
-            Arguments.of(createCaseData(List.of(existingWordOrder), false), createCaseData(List.of(existingWordOrder), false), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), createCaseData(List.of(legacyExistingPdfOrder), true), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), true),
 
             // Invalid cases:
             // New document(s) is/are not a PDF document
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
         );
     }
 

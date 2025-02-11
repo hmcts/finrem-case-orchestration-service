@@ -87,11 +87,10 @@ public class ProcessOrderService {
     /**
      * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
-     * @param caseDataBefore the case data before the operation.
      * @param caseData       the case data after the operation.
      * @return true if all newly uploaded orders are PDF documents; false otherwise.
      */
-    public boolean areAllNewOrdersPdfFiles(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+    public boolean areAllNewOrdersPdfFiles(FinremCaseData caseData) {
         return areAllNewDocumentsPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
             && areAllNewDocumentsPdf(caseData.getUploadHearingOrder()
         );
