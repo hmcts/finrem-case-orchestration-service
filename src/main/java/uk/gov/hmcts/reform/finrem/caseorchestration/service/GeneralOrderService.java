@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,9 +24,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAttachmentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DocumentIdProvider;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralOrderDocumentCategoriser;
 
@@ -32,8 +44,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +59,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
@@ -65,7 +80,6 @@ public class GeneralOrderService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
-    private final PartyService partyService;
     private final GeneralOrderDocumentCategoriser generalOrderDocumentCategoriser;
     private final Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
@@ -217,7 +231,7 @@ public class GeneralOrderService {
 
     public void setOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
-        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<OrderToShareCollection> orderToShareCollection = new ArrayList<>();
 
         List<ContestedGeneralOrderCollection> generalOrders = data.getGeneralOrderWrapper().getGeneralOrders();
 
@@ -226,7 +240,7 @@ public class GeneralOrderService {
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 if (order != null && order.getAdditionalDocument() != null) {
-                    appendDynamicListElement(dynamicListElements, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
+                    appendOrderToShareCollection(orderToShareCollection, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
                 }
             });
         }
@@ -234,32 +248,63 @@ public class GeneralOrderService {
         List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
         if (hearingOrderDocuments != null) {
             Collections.reverse(hearingOrderDocuments);
-            hearingOrderDocuments.forEach(obj ->
-                appendDynamicListElement(dynamicListElements, obj.getValue().getUploadDraftDocument(), "Case documents tab [Approved Order] - %s"));
+            hearingOrderDocuments.stream().map(DirectionOrderCollection::getValue).forEach(directionOrder ->
+                appendOrderToShareCollection(orderToShareCollection, directionOrder.getUploadDraftDocument(),
+                    "Case documents tab [Approved Order] - %s",
+                    emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)));
         }
 
-        populateProcessedAgreedDraftOrderToOrdersToShare(data, dynamicListElements);
-        populateFinalisedOrderToOrdersToShare(data, dynamicListElements);
+        populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
+        populateFinalisedOrderToOrdersToShare(data, orderToShareCollection);
 
-        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, new DynamicMultiSelectList());
-        data.getSendOrderWrapper().setOrdersToShare(dynamicOrderList);
+        if (data.getSendOrderWrapper().getOrdersToSend() == null) {
+            data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder().build());
+        }
+        data.getSendOrderWrapper().getOrdersToSend().setValue(orderToShareCollection);
     }
 
-    private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
+    private void populateProcessedAgreedDraftOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
         emptyIfNull(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).stream()
-            .filter(d -> PROCESSED == d.getValue().getOrderStatus())
-            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getTargetDocument(), "Approved order - %s"));
+            .map(AgreedDraftOrderCollection::getValue)
+            .filter(agreedDraftOrder -> PROCESSED == agreedDraftOrder.getOrderStatus())
+            .forEach(agreedDraftOrder ->
+                appendOrderToShareCollection(orderToShareCollection, agreedDraftOrder.getTargetDocument(), "Approved order - %s",
+                    emptyIfNull(agreedDraftOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)
+            ));
     }
 
-    private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<DynamicMultiSelectListElement> dynamicListElements) {
-        emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection())
-            .forEach(obj -> appendDynamicListElement(dynamicListElements, obj.getValue().getFinalisedDocument(), "Finalised order - %s"));
+    private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
+        emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).stream()
+            .map(FinalisedOrderCollection::getValue)
+            .forEach(finalisedOrder ->
+                appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s",
+                    emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)
+                ));
     }
 
-    private void appendDynamicListElement(List<DynamicMultiSelectListElement> dynamicListElements,
-                                          CaseDocument document, String format) {
-        dynamicListElements.add(partyService.getDynamicMultiSelectListElement(getDocumentId(document),
-            String.format(format, document.getDocumentFilename())));
+    private void appendOrderToShareCollection(List<OrderToShareCollection> orderToShareCollection,
+                                              CaseDocument document, String format, CaseDocument... attachments) {
+        OrderToShare.OrderToShareBuilder builder = OrderToShare.builder();
+        builder.hasSupportingDocuments(YesOrNo.forValue(!isEmpty(attachments)));
+        if (attachments != null) {
+            List<AttachmentToShareCollection> attachmentElements = Arrays.stream(attachments)
+                .map(attachment -> AttachmentToShareCollection.builder()
+                    .value(AttachmentToShare.builder()
+                        .documentId(getDocumentId(attachment))
+                        .attachmentName(attachment.getDocumentFilename())
+                        .documentToShare(YesOrNo.NO)
+                        .build())
+                    .build())
+                .toList();
+            builder.attachmentsToShare(attachmentElements);
+        }
+        orderToShareCollection.add(OrderToShareCollection.builder()
+            .value(builder
+                .documentToShare(YesOrNo.NO)
+                .documentId(getDocumentId(document))
+                .documentName(String.format(format, document.getDocumentFilename()))
+                .build())
+            .build());
     }
 
     private int getCompareTo(ContestedGeneralOrderCollection e1, ContestedGeneralOrderCollection e2) {
@@ -271,20 +316,6 @@ public class GeneralOrderService {
     private String getDocumentId(CaseDocument caseDocument) {
         String documentUrl = caseDocument.getDocumentUrl();
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
-    }
-
-    private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
-                                                       DynamicMultiSelectList selectedOrders) {
-        if (selectedOrders != null && selectedOrders.getValue() != null) {
-            return DynamicMultiSelectList.builder()
-                .value(selectedOrders.getValue())
-                .listItems(dynamicMultiSelectListElement)
-                .build();
-        } else {
-            return DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListElement)
-                .build();
-        }
     }
 
     public List<String> getParties(FinremCaseDetails caseDetails) {
@@ -329,35 +360,61 @@ public class GeneralOrderService {
             || parties.contains(CaseRole.INTVR_SOLICITOR_4.getCcdCode()));
     }
 
-    public Pair<List<CaseDocument>, List<CaseDocument>> hearingOrdersToShare(FinremCaseDetails caseDetails, DynamicMultiSelectList selectedDocs) {
+    /**
+     * Categorizes hearing orders to share into legacy orders, new orders, and a mapping of orders to their attachments.
+     *
+     * <p>This method processes selected orders and determines whether they belong to:
+     * <ul>
+     *   <li>Legacy orders: Previously uploaded hearing orders.</li>
+     *   <li>New orders: Finalized or processed draft orders.</li>
+     *   <li>Order-to-attachment map: A mapping between a case document and its related attachments.</li>
+     * </ul>
+     * It filters orders based on whether they are marked to be shared and logs a warning if an unexpected value is encountered.</p>
+     *
+     * @param caseDetails      the case details containing all relevant case data
+     * @param selectedOrders   the list of orders selected for sharing
+     * @return a {@link Triple} containing:
+     *         <ul>
+     *           <li>First: List of legacy hearing orders ({@code List<CaseDocument>}).</li>
+     *           <li>Second: List of new hearing orders ({@code List<CaseDocument>}).</li>
+     *           <li>Third: A mapping of orders to their corresponding attachments ({@code Map<CaseDocument, List<CaseDocument>>}).</li>
+     *         </ul>
+     */
+    public Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> hearingOrdersToShare(
+        FinremCaseDetails caseDetails, List<OrderToShare> selectedOrders) {
+
         FinremCaseData caseData = caseDetails.getData();
         final List<CaseDocument> legacyOrders = new ArrayList<>();
         final List<CaseDocument> newOrders = new ArrayList<>();
+        final Map<CaseDocument, List<CaseDocument>> order2AttachmentMap = new HashMap<>();
 
         List<DirectionOrderCollection> hearingOrders = caseData.getUploadHearingOrder();
         List<FinalisedOrderCollection> finalisedOrders = caseData.getDraftOrdersWrapper().getFinalisedOrdersCollection();
         List<AgreedDraftOrderCollection> agreedDraftOrderCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .stream().filter(a -> a.getValue().getOrderStatus() == PROCESSED).toList();
 
-        if (selectedDocs != null) {
-            List<DynamicMultiSelectListElement> selected = selectedDocs.getValue();
-            selected.forEach(checkboxSelected -> {
-                boolean addedToOrders = populateSelectedUploadHearingOrder(legacyOrders, hearingOrders, checkboxSelected);
-                if (!addedToOrders) { // if addedToOrders equals to true then break the loop
-                    addedToOrders = populateSelectedFinalisedOrders(newOrders, finalisedOrders, checkboxSelected);
+        if (selectedOrders != null) {
+            if (selectedOrders.stream().anyMatch(s -> !YesOrNo.isYes(s.getDocumentToShare()))) {
+                log.warn("It assumes that the provided selectedOrders should have a value of 'Yes' in documentToShare;"
+                    + " however, this logic filters them regardless.");
+            }
+            selectedOrders.stream().filter(o -> YesOrNo.isYes(o.getDocumentToShare())).forEach(selected -> {
+                boolean isProcessed = populateSelectedUploadHearingOrder(legacyOrders, order2AttachmentMap, hearingOrders, selected);
+                if (!isProcessed) {
+                    isProcessed = populateSelectedFinalisedOrders(newOrders, order2AttachmentMap, finalisedOrders, selected);
                 }
-                if (!addedToOrders) {
-                    populateSelectedProcessedOrders(newOrders, agreedDraftOrderCollection, checkboxSelected);
+                if (!isProcessed) {
+                    populateSelectedProcessedOrders(newOrders, order2AttachmentMap, agreedDraftOrderCollection, selected);
                 }
             });
         }
-        return Pair.of(legacyOrders, newOrders);
+        return Triple.of(legacyOrders, newOrders, order2AttachmentMap);
     }
 
-    public boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, ContestedGeneralOrder order) {
+    public boolean isSelectedOrderMatches(List<OrderToShare> selectedDocs, ContestedGeneralOrder order) {
         if (order != null) {
-            Optional<DynamicMultiSelectListElement> listElement = selectedDocs.getValue().stream()
-                .filter(e -> e.getCode().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
+            Optional<OrderToShare> listElement = selectedDocs.stream()
+                .filter(e -> e.getDocumentId().equals(getDocumentId(order.getAdditionalDocument()))).findAny();
             return listElement.isPresent();
         }
         return false;
@@ -379,29 +436,77 @@ public class GeneralOrderService {
         });
     }
 
-    private boolean populateSelectedUploadHearingOrder(List<CaseDocument> orders, List<DirectionOrderCollection> hearingOrders,
-                                                       DynamicMultiSelectListElement checkboxSelected) {
-        return addToOrders(checkboxSelected, hearingOrders, obj -> obj.getValue().getUploadDraftDocument(), orders);
+    private boolean populateSelectedUploadHearingOrder(List<CaseDocument> matchingOrders,
+                                                       Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                       List<DirectionOrderCollection> hearingOrders, OrderToShare selected) {
+        return populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap, hearingOrders,
+            hearingOrder -> ((DirectionOrder) hearingOrder.getValue()).getUploadDraftDocument(), selected);
     }
 
-    private boolean populateSelectedFinalisedOrders(List<CaseDocument> orders, List<FinalisedOrderCollection> finalisedOrders,
-                                                    DynamicMultiSelectListElement checkboxSelected) {
-        return addToOrders(checkboxSelected, finalisedOrders, obj -> obj.getValue().getFinalisedDocument(), orders);
+    private boolean populateSelectedFinalisedOrders(List<CaseDocument> matchingOrders,
+                                                    Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                    List<FinalisedOrderCollection> finalisedOrders, OrderToShare selected) {
+        return populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap, finalisedOrders,
+            finalisedOrder -> ((FinalisedOrder) finalisedOrder.getValue()).getFinalisedDocument(), selected);
     }
 
-    private void populateSelectedProcessedOrders(List<CaseDocument> orders, List<AgreedDraftOrderCollection> agreedDraftOrderCollection,
-                                                 DynamicMultiSelectListElement checkboxSelected) {
-        addToOrders(checkboxSelected, agreedDraftOrderCollection, obj -> obj.getValue().getTargetDocument(), orders);
+    private void populateSelectedProcessedOrders(List<CaseDocument> matchingOrders, Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                 List<AgreedDraftOrderCollection> agreedDraftOrderCollection, OrderToShare selected) {
+        populateSelectedOrdersWithAttachment(matchingOrders, matchingOrder2AttachmentMap,
+            agreedDraftOrderCollection, agreedDraftOrder -> ((AgreedDraftOrder) agreedDraftOrder.getValue()).getTargetDocument(), selected);
     }
 
-    private <T> boolean addToOrders(DynamicMultiSelectListElement doc, List<T> collection, Function<T, CaseDocument> documentExtractor,
-                                    List<CaseDocument> orders) {
+    private boolean populateSelectedOrdersWithAttachment(List<CaseDocument> matchingOrders,
+                                                         Map<CaseDocument, List<CaseDocument>> matchingOrder2AttachmentMap,
+                                                         List<? extends WithAttachmentsCollection> orderCollections,
+                                                         Function<WithAttachmentsCollection, CaseDocument> documentExtractor, OrderToShare selected) {
+        CaseDocument orderAdded = collectMatchingDocument(selected, orderCollections, documentExtractor, matchingOrders);
+
+        if (orderAdded != null && selected.shouldIncludeSupportingDocuments()) {
+            matchingOrder2AttachmentMap.put(orderAdded, new ArrayList<>());
+
+            emptyIfNull(selected.getAttachmentsToShare()).stream()
+                .map(AttachmentToShareCollection::getValue)
+                .filter(this::isAttachmentSelected)
+                .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections)
+                    .stream()
+                    .map(WithAttachmentsCollection::getValue)
+                    .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollection::getValue)
+                    .toList(), d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
+        }
+        return orderAdded != null;
+    }
+
+    /**
+     * Adds a matching document from the given collection to the matchingDocuments list.
+     *
+     * <p>Finds the first document in the collection that matches the selected document ID
+     * and adds it to the matchingDocuments list. If a matching document is found and added, it is returned;
+     * otherwise, returns {@code null}.</p>
+     *
+     * @param <T> the type of elements in the collection
+     * @param selected the document ID provider to match against
+     * @param collection the list of elements containing documents
+     * @param documentExtractor a function to extract a {@link CaseDocument} from an element
+     * @param matchingDocuments the list to which the matching document should be added
+     * @return the added {@link CaseDocument}, or {@code null} if no matching document is found
+     */
+    private <T> CaseDocument collectMatchingDocument(DocumentIdProvider selected, List<? extends T> collection,
+                                                     Function<T, CaseDocument> documentExtractor,
+                                                     List<CaseDocument> matchingDocuments) {
         return emptyIfNull(collection).stream()
             .map(documentExtractor)
             .filter(Objects::nonNull)
-            .filter(caseDocument -> getDocumentId(caseDocument).equals(doc.getCode()))
+            .filter(caseDocument -> getDocumentId(caseDocument).equals(selected.getDocumentId()))
             .findFirst()
-            .map(orders::add)
-            .orElse(false);
+            .map(caseDocument -> {
+                matchingDocuments.add(caseDocument);
+                return caseDocument;
+            })
+            .orElse(null);
+    }
+
+    private boolean isAttachmentSelected(AttachmentToShare attachmentToShare) {
+        return YesOrNo.isYes(attachmentToShare.getDocumentToShare());
     }
 }
