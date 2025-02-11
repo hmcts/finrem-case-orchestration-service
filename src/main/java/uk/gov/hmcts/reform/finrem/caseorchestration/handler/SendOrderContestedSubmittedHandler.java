@@ -23,7 +23,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private final CcdService ccdService;
     private final FinremContestedSendOrderCorresponder contestedSendOrderCorresponder;
 
-
     public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               GeneralOrderService generalOrderService,
                                               CcdService ccdService,
@@ -33,7 +32,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
         this.ccdService = ccdService;
         this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
     }
-
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -45,7 +43,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} submitted callback for Case ID: {}", callbackRequest.getEventType(), caseDetails.getId());
 
@@ -61,7 +58,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     }
 
     private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
-
         SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderWrapper().getSendOrderPostStateOption();
         if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
             caseDetails.getData().getSendOrderWrapper().setSendOrderPostStateOption(null);
@@ -77,7 +73,6 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
         return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
             || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
     }
-
 
     private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
