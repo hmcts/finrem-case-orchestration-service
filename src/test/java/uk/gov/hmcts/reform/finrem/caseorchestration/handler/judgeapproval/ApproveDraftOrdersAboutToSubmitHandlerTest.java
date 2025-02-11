@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
@@ -77,8 +76,7 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData))
-            .thenReturn(new ArrayList<>());
+
         when(approveOrderService.populateJudgeDecisions(any(FinremCaseDetails.class), any(DraftOrdersWrapper.class), eq(AUTH_TOKEN)))
             .thenReturn(Pair.of(FALSE, FALSE));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
@@ -127,8 +125,6 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
             .data(caseData)
             .build();
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData))
-            .thenReturn(new ArrayList<>());
         when(approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, AUTH_TOKEN)).thenReturn(statuses);
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Peter CHAPMAN");
 

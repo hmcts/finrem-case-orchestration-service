@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
@@ -142,10 +141,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
 
-            List<DraftOrdersReviewCollection> draftOrdersReviewCollection = draftOrderService
-                .clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
-            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
-
+            draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
         } catch (RuntimeException e) {
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`

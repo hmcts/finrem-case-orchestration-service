@@ -1262,9 +1262,9 @@ class DraftOrderServiceTest {
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .draftOrdersReviewCollection(new ArrayList<>()).build()).build();
 
-        List<DraftOrdersReviewCollection> result = draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
 
-        assertThat(result).isEmpty();
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).isEmpty();
     }
 
     @Test
@@ -1293,10 +1293,9 @@ class DraftOrderServiceTest {
                 .build())
             .build();
 
-        List<DraftOrdersReviewCollection> result = draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
 
-        assertThat(result)
-            .hasSize(1)
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
             .containsExactly(nonEmptyReview);
         assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
     }
@@ -1337,10 +1336,9 @@ class DraftOrderServiceTest {
                 .build())
             .build();
 
-        List<DraftOrdersReviewCollection> result = draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
 
-        assertThat(result)
-            .hasSize(2)
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
             .containsExactly(nonEmptyReview1, nonEmptyReview2);
         assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
     }

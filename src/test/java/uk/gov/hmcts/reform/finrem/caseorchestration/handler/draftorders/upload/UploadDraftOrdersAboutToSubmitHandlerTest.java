@@ -324,7 +324,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void testHandleClearsUploadedDraftOrders() {
+    void testHandleClearsUploadedDraftOrdersAndSetsIsUnreviewedDocumentPresent() {
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()

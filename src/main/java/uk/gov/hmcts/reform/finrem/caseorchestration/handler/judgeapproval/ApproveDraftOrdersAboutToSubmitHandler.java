@@ -15,14 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -73,10 +71,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
             generateAndStoreCoverLetter(caseDetails, userAuthorisation);
         }
         clearInputFields(draftOrdersWrapper);
-
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection = draftOrderService
-            .clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
-        draftOrdersWrapper.setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }

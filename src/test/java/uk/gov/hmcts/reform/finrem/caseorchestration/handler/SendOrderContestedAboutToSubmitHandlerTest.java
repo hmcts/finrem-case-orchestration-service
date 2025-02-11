@@ -153,8 +153,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenNoOrderAvailable_thenHandlerDoNothing() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(callbackRequest.getCaseDetails(), List.of()))
             .thenReturn(Triple.of(List.of(), List.of(), Map.of()));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
@@ -212,8 +210,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
@@ -264,8 +260,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollectionWithoutDoc());
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(new ArrayList<>());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(legacyDocs, List.of(),
             Map.of()));
@@ -313,8 +307,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2))).thenReturn(Triple.of(caseDocuments, List.of(),
             Map.of()));
@@ -432,8 +424,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .thenReturn(caseDocument("http://fakeurl/stampedDocument", "stampedDocument.pdf"));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(additionalDocument), eq(AUTH_TOKEN), anyString()))
             .thenReturn(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -476,8 +466,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(any(), any())).thenReturn(false);
         when(dateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(orderList);
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
 
         CaseDocument legacyDocCaseDocument = caseDocument("http://fakeurl/legacyDoc", "legacyDoc.pdf");
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1)))
@@ -538,8 +526,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument), List.of(),
             Map.of()));
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -599,8 +585,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>());
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1))).thenReturn(Triple.of(List.of(caseDocument()), List.of(),
             Map.of()));
@@ -724,7 +708,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(response.getErrors())
             .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
     }
-
     @Test
     void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
@@ -765,9 +748,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .isNull();
-        assertThat(response.getData().getDraftOrdersWrapper().getDraftOrdersReviewCollection())
-            .extracting(DraftOrdersReviewCollection::getValue)
-            .isEmpty();
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
                     .finalisedDocument(caseDocument1)
@@ -827,13 +807,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(finremCaseDataBuilder.build());
 
-        when(draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(callbackRequest.getCaseDetails().getData()))
-            .thenReturn(new ArrayList<>(of(
-                DraftOrdersReviewCollection.builder()
-                    .value(DraftOrdersReview.builder()
-                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
-                        .build())
-                    .build())));
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Triple.of(List.of(), List.of(caseDocument1), Map.of()));
 

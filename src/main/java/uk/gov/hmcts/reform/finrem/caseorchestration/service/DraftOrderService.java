@@ -293,29 +293,28 @@ public class DraftOrderService {
             && reviewable.getNotificationSentDate() == null;
     }
 
-    public List<DraftOrdersReviewCollection> clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+    public void clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
 
         if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
-            return new ArrayList<>();
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(new ArrayList<>());
+        } else {
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
+                new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
+
+            //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
+            draftOrdersReviewCollection.removeIf(review ->
+                CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+            );
+
+            // Check for unreviewedDocuments
+            boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
+                .anyMatch(review ->
+                    !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                        || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+
+            caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
         }
-
-        List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
-            new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
-
-        //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
-        draftOrdersReviewCollection.removeIf(review ->
-            CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
-        );
-
-        // Check for unreviewedDocuments
-        boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
-            .anyMatch(review ->
-                !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
-                    || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
-
-        caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
-
-        return draftOrdersReviewCollection;
     }
 }
