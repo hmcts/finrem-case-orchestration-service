@@ -287,7 +287,6 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         verify(generalOrderService, never()).isSelectedOrderMatches(eq(List.of(selected1, selected2)), any(ContestedGeneralOrder.class));
         verify(sendOrdersCategoriser).categorise(caseData);
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
-
     }
 
     @Test
@@ -799,7 +798,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .build())
                 .build()
         ));
-
+      
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
                 AgreedDraftOrderCollection.builder()
