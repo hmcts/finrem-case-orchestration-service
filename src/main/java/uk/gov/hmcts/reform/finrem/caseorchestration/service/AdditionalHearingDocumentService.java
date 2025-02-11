@@ -139,7 +139,6 @@ public class AdditionalHearingDocumentService {
         orderList.add(orderCollection);
     }
 
-
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails,
                                                                                           String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
@@ -156,7 +155,6 @@ public class AdditionalHearingDocumentService {
             });
     }
 
-
     public void sortDirectionDetailsCollection(FinremCaseData caseData) {
         List<DirectionDetailCollection> directionDetailsCollection
             = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
@@ -171,8 +169,9 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    private DirectionOrderCollection getDirectionOrderCollection(CaseDocument caseDocument, LocalDateTime orderDateTime) {
-        return DirectionOrderCollection.builder().value(DirectionOrder.builder()
+    private DirectionOrderCollection getDirectionOrderCollection(DirectionOrder originalDirectionOrder,
+                                                                 CaseDocument caseDocument, LocalDateTime orderDateTime) {
+        return DirectionOrderCollection.builder().value(originalDirectionOrder.toBuilder()
             .uploadDraftDocument(caseDocument)
             .orderDateTime(orderDateTime)
             .isOrderStamped(YesOrNo.YES)
@@ -203,11 +202,12 @@ public class AdditionalHearingDocumentService {
                         orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
                         caseData.setFinalOrderCollection(orderList);
                     }
-                    return getDirectionOrderCollection(stampedDocs, orderDateTime);
+                    return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
                 caseData.setFinalOrderCollection(finalOrderCollection);
                 //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
-                return getDirectionOrderCollection(getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument), orderDateTime);
+                return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
+                    orderDateTime);
             }).toList();
             caseData.setUploadHearingOrder(orderCollections);
             caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
@@ -306,7 +306,6 @@ public class AdditionalHearingDocumentService {
         data.getListForHearingWrapper().setAdditionalHearingDocuments(additionalHearingDocumentCollections);
     }
 
-
     protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
@@ -332,7 +331,6 @@ public class AdditionalHearingDocumentService {
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
-
         List<BulkPrintDocument> document = new ArrayList<>();
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             BulkPrintDocument additionalUploadedDoc
@@ -355,7 +353,6 @@ public class AdditionalHearingDocumentService {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         }
     }
-
 
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken, String caseId) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken, caseId);

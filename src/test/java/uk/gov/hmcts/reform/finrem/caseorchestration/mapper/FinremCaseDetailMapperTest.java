@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,7 +189,7 @@ class FinremCaseDetailMapperTest {
     }
 
     @Test
-    void mapBulkPrintDetails() throws JsonProcessingException {
+    void mapBulkPrintDetails() {
         caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);

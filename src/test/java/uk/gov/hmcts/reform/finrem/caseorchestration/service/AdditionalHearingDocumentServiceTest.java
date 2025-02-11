@@ -2,24 +2,30 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.LetterAddresseeGeneratorMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
@@ -32,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,21 +49,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -73,46 +78,65 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
-public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AdditionalHearingDocumentServiceTest {
 
-    @Autowired
     private AdditionalHearingDocumentService additionalHearingDocumentService;
-    @Autowired
     private ObjectMapper objectMapper;
-
     @Captor
     private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-
-    @MockitoBean
-    GenericDocumentService genericDocumentService;
-    @MockitoBean
-    BulkPrintService bulkPrintService;
-    @MockitoBean
+    @Mock
+    GenericDocumentService genericDocumentService;   
+    @Mock
+    BulkPrintService bulkPrintService;    
+    @Mock
     NotificationService notificationService;
-
-    @MockitoBean
+    @Mock
     OrderDateService orderDateService;
-
-    @MockitoBean
     FinremCaseDetailsMapper finremCaseDetailsMapper;
+    DocumentHelper documentHelper;
+    @Mock
+    FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
+    @Mock
+    DocumentConfiguration documentConfiguration;
+    @Mock
+    CaseDataService caseDataService;
+    @Mock
+    LetterAddresseeGeneratorMapper letterAddresseeGenerator;
+    @Mock
+    InternationalPostalService postalService;
 
-    @Before
-    public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
+
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, genericDocumentService, finremCaseDetailsMapper,
+            letterAddresseeGenerator, postalService);
+        additionalHearingDocumentService = new AdditionalHearingDocumentService(
+            genericDocumentService, documentConfiguration, documentHelper, objectMapper, bulkPrintService, caseDataService,
+            notificationService, finremAdditionalHearingCorresponder, finremCaseDetailsMapper, orderDateService);
+
+        lenient().when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
-    public void convertToPdf() {
+    void convertToPdf() {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
         CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
-        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, caseId);
+        CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, CASE_ID);
         assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
     }
 
     @Test
-    public void generateAndAddAdditionalHearingDocument() throws JsonProcessingException {
+    void generateAndAddAdditionalHearingDocument() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         caseDetails.getData().put(HEARING_DATE, "2021-01-01");
+
+        when(caseDataService.buildFullApplicantName(any(CaseDetails.class))).thenReturn("Test Applicant");
+        when(caseDataService.buildFullRespondentName(any(CaseDetails.class))).thenReturn("Name Respondent");
+
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
@@ -121,45 +145,42 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails captorCaseDetails = documentGenerationRequestCaseDetailsCaptor.getValue();
         Map<String, Object> data = captorCaseDetails.getData();
 
-        assertThat(data.get("CCDCaseNumber"), is(1234567890L));
-        assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
-        assertThat(data.get("ApplicantName"), is("Test Applicant"));
-        assertThat(data.get("RespondentName"), is("Name Respondent"));
+        assertThat(data).extracting("CCDCaseNumber").isEqualTo(1234567890L);
+        assertThat(data).extracting("DivorceCaseNumber").isEqualTo("AB01D23456");
+        assertThat(data).extracting("ApplicantName").isEqualTo("Test Applicant");
+        assertThat(data).extracting("RespondentName").isEqualTo("Name Respondent");
 
-        assertThat(data.get("HearingType"), is("Directions (DIR)"));
-        assertThat(data.get("HearingVenue"), is("Chesterfield County Court"));
-        assertThat(data.get("HearingDate"), is("2021-01-01"));
-        assertThat(data.get("HearingTime"), is("12:00"));
-        assertThat(data.get("HearingLength"), is("30 minutes"));
-        assertThat(data.get("AnyOtherDirections"), is("N/A"));
-        assertThat(data.get("AdditionalHearingDated"), is(notNullValue()));
+        assertThat(data).extracting("HearingType").isEqualTo("Directions (DIR)");
+        assertThat(data).extracting("HearingVenue").isEqualTo("Chesterfield County Court");
+        assertThat(data).extracting("HearingDate").isEqualTo("2021-01-01");
+        assertThat(data).extracting("HearingTime").isEqualTo("12:00");
+        assertThat(data).extracting("HearingLength").isEqualTo("30 minutes");
+        assertThat(data).extracting("AnyOtherDirections").isEqualTo("N/A");
+        assertThat(data).extracting("AdditionalHearingDated").isNotNull();
 
-        assertThat(data.get("CourtName"), is("Chesterfield County Court"));
-        assertThat(data.get("CourtAddress"), is("Tapton Lane, Chesterfield S41 7TW"));
-        assertThat(data.get("CourtPhone"), is("0115 910 3504"));
-        assertThat(data.get("CourtEmail"), is("FRCNottingham@justice.gov.uk"));
+        assertThat(data).extracting("CourtName").isEqualTo("Chesterfield County Court");
+        assertThat(data).extracting("CourtAddress").isEqualTo("Tapton Lane, Chesterfield S41 7TW");
+        assertThat(data).extracting("CourtPhone").isEqualTo("0115 910 3504");
+        assertThat(data).extracting("CourtEmail").isEqualTo("FRCNottingham@justice.gov.uk");
 
-        assertThat(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), is(notNullValue()));
+        assertThat(data).extracting(ADDITIONAL_HEARING_DOCUMENT_COLLECTION).isNotNull();
     }
 
     @Test
-    public void getHearingOrderAdditionalDocuments() {
+    void getHearingOrderAdditionalDocuments() {
         Map<String, Object> caseData = baseCaseData();
         caseData.put(HEARING_UPLOADED_DOCUMENT, Collections.EMPTY_LIST);
         List<HearingOrderAdditionalDocCollectionData> hearingOrderAdditionalDocuments
             = additionalHearingDocumentService.getHearingOrderAdditionalDocuments(caseData);
-        assertTrue(hearingOrderAdditionalDocuments.isEmpty());
+        assertThat(hearingOrderAdditionalDocuments).isEmpty();
     }
 
     @Test
-    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderCollIsEmpty_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-
-        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
@@ -187,24 +208,23 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        CaseDetails details = CaseDetails
-            .builder()
-            .id(1234567890L)
-            .data(caseData)
-            .build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        assertEquals(1, data.getFinalOrderCollection().size());
-        assertEquals(1, data.getUploadHearingOrder().size());
-        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getListForHearingWrapper()
-            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertThat(data.getFinalOrderCollection()).hasSize(1);
+        assertThat(data.getUploadHearingOrder()).hasSize(1);
+        assertThat(data.getLatestDraftHearingOrder()).extracting(CaseDocument::getDocumentFilename).isEqualTo(FILE_NAME);
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .isNotEmpty()
+            .allSatisfy(doc -> assertThat(doc.getValue()).isNotNull());
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .extracting(doc -> doc.getValue().getDocument())
+            .first()
+            .isEqualTo(caseDocument());
     }
 
     @Test
-    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderHasSameOrder_thenHandlerWillNotAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -243,24 +263,22 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        CaseDetails details = CaseDetails
-            .builder()
-            .id(1234567890L)
-            .data(caseData)
-            .build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
-
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        assertEquals(1, data.getFinalOrderCollection().size());
-        assertEquals(1, data.getUploadHearingOrder().size());
-        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getListForHearingWrapper()
-            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertThat(data.getFinalOrderCollection()).hasSize(1);
+        assertThat(data.getUploadHearingOrder()).hasSize(1);
+        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .isNotEmpty()
+            .extracting(AdditionalHearingDocumentCollection::getValue)
+            .isNotNull()
+            .extracting(AdditionalHearingDocument::getDocument)
+            .first()
+            .isEqualTo(caseDocument());
     }
 
     @Test
-    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrder_thenHandlerWillAddNewOrderToFinalOrder()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -301,24 +319,25 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        CaseDetails details = CaseDetails
-            .builder()
-            .id(1234567890L)
-            .data(caseData)
-            .build();
-        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(details);
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        assertEquals(2, data.getFinalOrderCollection().size());
-        assertEquals(1, data.getUploadHearingOrder().size());
-        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertEquals(caseDocument(), data.getListForHearingWrapper()
-            .getAdditionalHearingDocuments().get(0).getValue().getDocument());
+        assertThat(data.getFinalOrderCollection()).hasSize(2);
+        assertThat(data.getUploadHearingOrder()).hasSize(1);
+        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .isNotEmpty()
+            .allSatisfy(doc -> assertThat(doc.getValue()).isNotNull());
+
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments())
+            .extracting(doc -> doc.getValue().getDocument())
+            .first()
+            .isEqualTo(caseDocument());
+
     }
 
     @Test
-    public void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNotSameOrderAndNoAnotherHearing_thenHandle()
         throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -337,14 +356,14 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
         DirectionOrderCollection uploadOrderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+            .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime)
+            .additionalDocuments(List.of(DocumentCollection.builder().value(caseDocument("attachment", "attachment.pdf")).build())).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         data.setUploadHearingOrder(uploadOrderCollections);
         when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
-
 
         DirectionDetail directionDetail = DirectionDetail.builder()
             .isAnotherHearingYN(YesOrNo.NO)
@@ -363,14 +382,19 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        assertEquals(2, data.getFinalOrderCollection().size());
-        assertEquals(1, data.getUploadHearingOrder().size());
-        assertEquals(FILE_NAME, data.getLatestDraftHearingOrder().getDocumentFilename());
-        assertNull(data.getListForHearingWrapper().getAdditionalHearingDocuments());
+        assertThat(data.getFinalOrderCollection()).hasSize(2);
+        assertThat(data.getUploadHearingOrder()).hasSize(1);
+        // should retain the uploadHearingOrder additionalDocuments
+        assertThat(data.getUploadHearingOrder()).extracting(DirectionOrderCollection::getValue)
+            .map(DirectionOrder::getAdditionalDocuments).contains(List.of(
+                DocumentCollection.builder().value(caseDocument("attachment", "attachment.pdf")).build()
+            ));
+        assertThat(data.getLatestDraftHearingOrder().getDocumentFilename()).isEqualTo(FILE_NAME);
+        assertThat(data.getListForHearingWrapper().getAdditionalHearingDocuments()).isNull();
     }
 
     @Test
-    public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
+    void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails finremCaseDetails = request.getCaseDetails();
         CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl(BINARY_URL).documentFilename(FILE_NAME)
@@ -445,7 +469,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -461,7 +485,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -477,7 +501,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -493,7 +517,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
+    void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -509,25 +533,21 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledButNoHearingOrderAvailalle_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
 
         List<DirectionOrderCollection> approvedHearingOrders
             = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
 
-        assertTrue(approvedHearingOrders.isEmpty());
+        assertThat(approvedHearingOrders).isEmpty();
         verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
     }
 
-
     @Test
-    public void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
+    void givenCase_whenGetApprovedHearingOrdersCalledHearingOrderAvailalle_thenReturnEmptyList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-
 
         DirectionOrder directionOrder = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument()).build();
@@ -550,16 +570,18 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         List<DirectionOrderCollection> approvedHearingOrders
             = additionalHearingDocumentService.getApprovedHearingOrders(caseDetails, AUTH_TOKEN);
 
-        assertEquals(1, approvedHearingOrders.size());
-        assertEquals(YesOrNo.YES, approvedHearingOrders.get(0).getValue().getIsOrderStamped());
+        assertThat(approvedHearingOrders).hasSize(1);
+        assertThat(approvedHearingOrders)
+            .extracting(order -> order.getValue().getIsOrderStamped())
+            .first()
+            .isEqualTo(YesOrNo.YES);
         verify(orderDateService).addCreatedDateInUploadedOrder(any(),any());
     }
 
     @Test
-    public void givenCase_whenAddToFinalOrderCollection_thenReturnUpdatedList() {
+    void givenCase_whenAddToFinalOrderCollection_thenReturnUpdatedList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-
 
         DirectionOrder directionOrder = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
@@ -570,30 +592,22 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         FinremCaseData data = caseDetails.getData();
         data.setUploadHearingOrder(uploadHearingOrder);
 
-
-        DirectionOrder directionOrder1 = DirectionOrder.builder()
-            .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
-        DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
-        List<DirectionOrderCollection> mockOrder = new ArrayList<>();
-        mockOrder.add(orderCollection1);
-
-        when(orderDateService.addCreatedDateInFinalOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
-        DocumentHelper mockHelper = mock(DocumentHelper.class);
-        when(mockHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(false);
+        when(orderDateService.addCreatedDateInFinalOrder(isNull(), eq(AUTH_TOKEN))).thenReturn(new ArrayList<>());
 
         additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
 
-        assertEquals(1, data.getFinalOrderCollection().size());
-        assertEquals(YesOrNo.YES, data.getFinalOrderCollection().get(0).getValue().getIsOrderStamped());
+        assertThat(data.getFinalOrderCollection()).hasSize(1);
+        assertThat(data.getFinalOrderCollection())
+            .extracting(order -> order.getValue().getIsOrderStamped())
+            .first()
+            .isEqualTo(YesOrNo.YES);
         verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
     }
 
-
     @Test
-    public void givenCase_whenAddToFinalOrderCollectionCalledButOrderAlreadyInCollection_thenReturnOriginalList() {
+    void givenCase_whenAddToFinalOrderCollectionCalledButOrderAlreadyInCollection_thenReturnOriginalList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-
 
         DirectionOrder directionOrder = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
@@ -605,7 +619,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         data.setUploadHearingOrder(uploadHearingOrder);
         data.setFinalOrderCollection(uploadHearingOrder);
 
-
         DirectionOrder directionOrder1 = DirectionOrder.builder()
             .uploadDraftDocument(caseDocument()).orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build();
         DirectionOrderCollection orderCollection1 = DirectionOrderCollection.builder().value(directionOrder1).build();
@@ -613,18 +626,20 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         mockOrder.add(orderCollection1);
 
         when(orderDateService.addCreatedDateInFinalOrder(uploadHearingOrder, AUTH_TOKEN)).thenReturn(mockOrder);
-        DocumentHelper mockHelper = mock(DocumentHelper.class);
-        when(mockHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(true);
 
         additionalHearingDocumentService.addToFinalOrderCollection(caseDetails, AUTH_TOKEN);
 
-        assertEquals(1, data.getFinalOrderCollection().size());
-        assertEquals(YesOrNo.YES, data.getFinalOrderCollection().get(0).getValue().getIsOrderStamped());
+        assertThat(data.getFinalOrderCollection())
+            .hasSize(1)
+            .extracting(order -> order.getValue().getIsOrderStamped())
+            .first()
+            .isEqualTo(YesOrNo.YES);
+
         verify(orderDateService).addCreatedDateInFinalOrder(any(),any());
     }
 
     @Test
-    public void sortDirectionDetailsCollection() {
+    void sortDirectionDetailsCollection() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -670,12 +685,11 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         additionalHearingDocumentService.sortDirectionDetailsCollection(data);
 
         List<DirectionDetailCollection> directionDetailsCollection = data.getDirectionDetailsCollection();
-        assertEquals(5, directionDetailsCollection.size());
-        assertEquals(secondDate, directionDetailsCollection.get(0).getValue().getDateOfHearing());
-        assertEquals(fourthDate, directionDetailsCollection.get(1).getValue().getDateOfHearing());
-        assertEquals(firstDate, directionDetailsCollection.get(2).getValue().getDateOfHearing());
-        assertNull(directionDetailsCollection.get(3).getValue().getDateOfHearing());
-        assertNull(directionDetailsCollection.get(4).getValue().getDateOfHearing());
+        assertThat(directionDetailsCollection)
+            .hasSize(5);
+        assertThat(directionDetailsCollection)
+            .extracting(detail -> detail.getValue().getDateOfHearing())
+            .containsExactly(secondDate, fourthDate, firstDate, null, null);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
