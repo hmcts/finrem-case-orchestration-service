@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -272,6 +274,33 @@ class ProcessOrderServiceTest {
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
         }
+    }
+
+    @Test
+    void testAreAllModifyingUnprocessedOrdersWordDocumentsShouldExcludePsas() {
+        String draftOrderDocumentUrl = "http://example.xyz/draftOrder.docx";
+        String psaCaseDocumentUrl = "http://example.xyz/PSA-1.pdf";
+
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(List.of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().draftOrder(createCaseDocument(draftOrderDocumentUrl)).build())
+                    .build(),
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(createCaseDocument(psaCaseDocumentUrl)).build())
+                    .build()
+            ))
+            .unprocessedApprovedDocuments(List.of(
+                createDirectionOrder(draftOrderDocumentUrl, true),
+                createDirectionOrder(psaCaseDocumentUrl, true)
+            ))
+            .build();
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
+
+        // Call the method to test
+        boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
+        assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
     }
 
     private static String extractFileName(String url) {
