@@ -186,6 +186,7 @@ class NewUploadedDocumentsServiceTest {
                 uploadGeneralDocumentGetDocumentsFromCaseData(),
                 List.of(toCaseDocument("filename1.2"))
             ),
+
             // 1.3 without new doc - no change
             Arguments.of(
                 (Function<FinremCaseData.FinremCaseDataBuilder, FinremCaseData.FinremCaseDataBuilder>) finremCaseDataBuilder -> {
