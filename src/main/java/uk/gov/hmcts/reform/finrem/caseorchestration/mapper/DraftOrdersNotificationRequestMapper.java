@@ -121,8 +121,8 @@ public class DraftOrdersNotificationRequestMapper {
             return switch (refusedOrder.getOrderFiledBy()) {
                 case APPLICANT -> caseData.getContactDetailsWrapper().getApplicantSolicitorEmail();
                 case RESPONDENT -> caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
-                default -> throw new IllegalArgumentException("Case ID: " + caseDetails.getId()
-                    + "No refused order recipient email address found");
+                default -> throw new IllegalArgumentException("Case ID " + caseDetails.getId()
+                    + ": No refused order recipient email address found");
             };
         }
     }

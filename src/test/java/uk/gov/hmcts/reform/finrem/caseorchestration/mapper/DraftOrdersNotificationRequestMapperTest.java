@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.APPLICANT_BARRISTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
@@ -151,6 +153,23 @@ class DraftOrdersNotificationRequestMapperTest {
                 .build());
 
         verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "resp@solicitor.com");
+    }
+
+    @Test
+    void givenDraftOrderWithNoSubmittedEmail_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenThrowsException() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview());
+        RefusedOrder refusedOrder = RefusedOrder.builder()
+            .hearingDate(LocalDate.of(2024, 1, 5))
+            .refusalJudge("Peter Chapman")
+            .judgeFeedback("Judge Feedback")
+            .submittedBy("Mr. Uploader")
+            .orderFiledBy(APPLICANT_BARRISTER)
+            .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+            .build();
+
+        assertThatThrownBy(() -> mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, refusedOrder))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Case ID 123456789: No refused order recipient email address found");
     }
 
     private void verifyRefusedDraftOrderOrPsaNotificationRequest(NotificationRequest notificationRequest,
