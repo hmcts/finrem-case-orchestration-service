@@ -40,6 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrdersNotificationRequestMapperTest {
@@ -112,7 +116,46 @@ class DraftOrdersNotificationRequestMapperTest {
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
 
-        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "hello@world.com");
+    }
+
+    @Test
+    void givenDraftOrderUploadedOnBehalfOfApplicant_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenReturnNotificationRequest() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview(UPLOAD_PARTY_APPLICANT));
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
+                .orderFiledBy(APPLICANT)
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "app@solicitor.com");
+    }
+
+    @Test
+    void givenDraftOrderUploadedOnBehalfOfRespondent_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenReturnNotificationRequest() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview(UPLOAD_PARTY_RESPONDENT));
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
+                .orderFiledBy(RESPONDENT)
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "resp@solicitor.com");
+    }
+
+    private void verifyRefusedDraftOrderOrPsaNotificationRequest(NotificationRequest notificationRequest,
+                                                                 String expectedNotificationEmail) {
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(expectedNotificationEmail);
         assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
         assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
         assertThat(notificationRequest.getApplicantName()).isEqualTo("Hamzah Tahir");
@@ -146,10 +189,12 @@ class DraftOrdersNotificationRequestMapperTest {
 
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .solicitorReference("A_RANDOM_STRING")
+            .applicantSolicitorEmail("app@solicitor.com")
             .applicantFmName(applicantFirstName)
             .applicantLname(applicantLastName)
             .respondentFmName(respondentFirstName)
             .respondentLname(respondentLastName)
+            .respondentSolicitorEmail("resp@solicitor.com")
             .build();
 
         LocalDate hearingDate = LocalDate.of(1999, 8, 6);
@@ -188,10 +233,15 @@ class DraftOrdersNotificationRequestMapperTest {
     }
 
     private DraftOrdersReview createDraftOrdersReview() {
+        return createDraftOrdersReview(null);
+    }
+
+    private DraftOrdersReview createDraftOrdersReview(String uploadedOnBehalfOf) {
         DraftOrderDocReviewCollection draftOrderDocReviewCollection = DraftOrderDocReviewCollection.builder()
             .value(DraftOrderDocumentReview.builder()
                 .orderStatus(OrderStatus.TO_BE_REVIEWED)
                 .submittedDate(LocalDateTime.of(2024, 1, 10, 13, 12))
+                .uploadedOnBehalfOf(uploadedOnBehalfOf)
                 .build()
             )
             .build();
