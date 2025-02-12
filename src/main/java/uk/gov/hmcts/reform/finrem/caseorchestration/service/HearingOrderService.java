@@ -64,7 +64,8 @@ public class HearingOrderService {
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken, additionalDocs);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder, additionalDocs);
         } else {
-            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
+            throw new InvalidCaseDataException(BAD_REQUEST.value(),
+                "Missing data from callbackRequest for Case ID: " + caseDetails.getId());
         }
     }
 
