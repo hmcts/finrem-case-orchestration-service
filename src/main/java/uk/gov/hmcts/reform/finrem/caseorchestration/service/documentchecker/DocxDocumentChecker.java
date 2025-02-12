@@ -28,7 +28,7 @@ public class DocxDocumentChecker implements DocumentChecker {
     }
 
     @Override
-    public List<String> getWarnings(DocumentCheckContext context)  throws DocumentContentCheckerException {
+    public List<String> getWarnings(DocumentCheckContext context) throws DocumentContentCheckerException {
         String[] content = getContent(context.getBytes());
 
         return documentContentCheckers.stream()
