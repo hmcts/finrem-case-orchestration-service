@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
@@ -152,8 +154,8 @@ class ProcessOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases")
-    void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseDataBefore, FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.areAllNewOrdersPdfFiles(caseDataBefore, caseData);
+    void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseData, boolean expectedResult) {
+        boolean result = underTest.areAllNewOrdersPdfFiles(caseData);
         assertEquals(expectedResult, result);
     }
 
@@ -169,32 +171,22 @@ class ProcessOrderServiceTest {
         return Stream.of(
             // Valid Cases:
             // 1. All new documents are valid PDFs
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
-                createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder)),
-                createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newPdfOrder1, newPdfOrder2), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder1, newPdfOrder2), true), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), List.of(existingWordOrder, newPdfOrder1, newPdfOrder2)), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newPdfOrder2), List.of(existingWordOrder, newPdfOrder1)), true),
             // 2. No new documents
-            Arguments.of(createCaseData(List.of(existingWordOrder), false), createCaseData(List.of(existingWordOrder), false), true),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), createCaseData(List.of(legacyExistingPdfOrder), true), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true), true),
 
             // Invalid cases:
             // New document(s) is/are not a PDF document
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder), false),
-                createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder), true),
-                createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
         );
     }
 
@@ -282,6 +274,33 @@ class ProcessOrderServiceTest {
         } else {
             assertFalse(result, "Expected not all documents to have .doc or .docx extensions, but the method returned true.");
         }
+    }
+
+    @Test
+    void testAreAllModifyingUnprocessedOrdersWordDocumentsShouldExcludePsas() {
+        String draftOrderDocumentUrl = "http://example.xyz/draftOrder.docx";
+        String psaCaseDocumentUrl = "http://example.xyz/PSA-1.pdf";
+
+        DraftOrdersWrapper draftOrdersWrapper = DraftOrdersWrapper.builder()
+            .agreedDraftOrderCollection(List.of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().draftOrder(createCaseDocument(draftOrderDocumentUrl)).build())
+                    .build(),
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().pensionSharingAnnex(createCaseDocument(psaCaseDocumentUrl)).build())
+                    .build()
+            ))
+            .unprocessedApprovedDocuments(List.of(
+                createDirectionOrder(draftOrderDocumentUrl, true),
+                createDirectionOrder(psaCaseDocumentUrl, true)
+            ))
+            .build();
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
+
+        // Call the method to test
+        boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
+        assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
     }
 
     private static String extractFileName(String url) {
