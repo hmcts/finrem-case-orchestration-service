@@ -24,6 +24,7 @@ java:
     PAYMENT_API_URL: "http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     FEES_API_URL: "http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CASE_DOCUMENT_AM_URL: "http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    MANAGE_CASE_UI_BASE_URL: "https://manage-case.platform.hmcts.net"
   autoscaling:
     enabled: true
     maxReplicas: 4
