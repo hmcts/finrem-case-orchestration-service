@@ -84,6 +84,8 @@ public class HearingOrderController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
 
+        log.info("Received Draft Approved Order about to start callback for Case ID: {}", caseDetails.getId());
+
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -110,6 +112,8 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
+
+        log.info("Received Draft Approved Order about to submit callback for Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
 
