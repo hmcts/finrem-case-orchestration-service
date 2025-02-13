@@ -7,6 +7,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -37,6 +39,18 @@ class HearingServiceTest {
 
     @InjectMocks
     private HearingService hearingService;
+
+    static DirectionDetailCollection createDirectionDetailCollection(String id, HearingTypeDirection type, LocalDate date, String time) {
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .dateOfHearing(date)
+            .hearingTime(time)
+            .typeOfHearing(type)
+            .build();
+        return DirectionDetailCollection.builder()
+            .id(UUID.fromString(id))
+            .value(directionDetail)
+            .build();
+    }
 
     static InterimHearingCollection createInterimHearing(String id, InterimTypeOfHearing type, LocalDate date, String time) {
         // Create the InterimHearingItem using the provided parameters
@@ -276,6 +290,43 @@ class HearingServiceTest {
                                                  String topLevelHearingTime,
                                                  List<InterimHearingCollection> interimHearings,
                                                  DynamicList expectedDynamicList) {
+        generateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime, interimHearings,
+            null, expectedDynamicList);
+    }
+
+    static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
+        return Stream.of(
+            Arguments.of(
+                null, // Null Hearing Type
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM", // Example time for top-level hearing
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                List.of(
+                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", HearingTypeDirection.DIR, LocalDate.of(2024, 5, 1), "23:00")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-1111-0000-0000-000000000001", "1 May 2024 23:00 - Directions (DIR)"); // Hearing created from Process Order
+                    }
+                })
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingCasesWithHearingsCreatedFromProcessOrderEvent")
+    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                 LocalDate topLevelHearingDate,
+                                                 String topLevelHearingTime,
+                                                 List<InterimHearingCollection> interimHearings,
+                                                 List<DirectionDetailCollection> directionDetailCollection,
+                                                 DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
@@ -285,6 +336,7 @@ class HearingServiceTest {
             .hearingDate(topLevelHearingDate)
             .hearingTime(topLevelHearingTime)
             .build());
+        caseDataBuilder.directionDetailsCollection(directionDetailCollection);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData caseData = caseDataBuilder.build();
