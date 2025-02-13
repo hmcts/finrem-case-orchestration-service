@@ -283,17 +283,6 @@ class HearingServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("hearingCases")
-    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                 LocalDate topLevelHearingDate,
-                                                 String topLevelHearingTime,
-                                                 List<InterimHearingCollection> interimHearings,
-                                                 DynamicList expectedDynamicList) {
-        generateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime, interimHearings,
-            null, expectedDynamicList);
-    }
-
     static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
         return Stream.of(
             Arguments.of(
@@ -305,7 +294,8 @@ class HearingServiceTest {
                     createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
                 ),
                 List.of(
-                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", HearingTypeDirection.DIR, LocalDate.of(2024, 5, 1), "23:00")
+                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", HearingTypeDirection.DIR,
+                        LocalDate.of(2024, 5, 1), "23:00")
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
@@ -317,6 +307,17 @@ class HearingServiceTest {
                 })
             )
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingCases")
+    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                 LocalDate topLevelHearingDate,
+                                                 String topLevelHearingTime,
+                                                 List<InterimHearingCollection> interimHearings,
+                                                 DynamicList expectedDynamicList) {
+        generateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime, interimHearings,
+            null, expectedDynamicList);
     }
 
     @ParameterizedTest
