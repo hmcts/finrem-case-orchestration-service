@@ -125,9 +125,7 @@ public class HearingService {
     }
 
     DynamicList generateSelectableHearingsAsDynamicList(List<DynamicListElement> dynamicListElement) {
-        return DynamicList.builder()
-            .listItems(dynamicListElement)
-            .build();
+        return DynamicList.builder().listItems(dynamicListElement).build();
     }
 
     public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
