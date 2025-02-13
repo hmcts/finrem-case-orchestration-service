@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -42,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class UploadDocumentConsentedAboutToSubmitHandlerTest {
 
     @TestLogs
-    private final TestLogger logs = new TestLogger(UploadDocumentConsentedAboutToSubmitHandler.class);
+    private final TestLogger logs = new TestLogger(DocumentWarningsHelper.class);
 
     @Mock
     private DocumentCheckerService documentCheckerService;
@@ -55,7 +56,8 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @BeforeEach
     public void setUpTest() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, documentCheckerService, newUploadedDocumentsService);
+        underTest = new UploadDocumentConsentedAboutToSubmitHandler(finremCaseDetailsMapper, new DocumentWarningsHelper(documentCheckerService,
+            newUploadedDocumentsService));
     }
 
     @Test
@@ -65,11 +67,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseDataWithoutDocumentUploaded_thenNoWarningShouldBeReturned() {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadDocumentCollection.builder()
-                .value(UploadDocument.builder().documentEmailContent("<documentEmailContent>").build()) // no documentLink
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of());
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(List.of("whatever")); // never reach
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
@@ -82,11 +80,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseDataWithDocumentUpload_whenUnexpectedExceptionThrownInWarningChecking_thenNotBlockTheSubmission() {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadDocumentCollection.builder()
-                .value(UploadDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument()));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenThrow(new RuntimeException("unexpected exception"));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(
@@ -101,11 +95,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningIsDetected_thenPopulateWarning(boolean hasWarnings) {
         List<String> expectedWarnings = hasWarnings ? List.of("warnings") : List.of();
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadDocumentCollection.builder()
-                .value(UploadDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument()));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(expectedWarnings);
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetailsBuilderFactory.from(Long.valueOf(CASE_ID), CaseType.CONSENTED, FinremCaseData.builder()
@@ -137,11 +127,7 @@ class UploadDocumentConsentedAboutToSubmitHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenValidCaseData_whenWarningsAreDetected_thenPopulateSortedWarnings(boolean hasWarnings) {
-        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(
-            UploadDocumentCollection.builder()
-                .value(UploadDocument.builder().documentLink(caseDocument()).build())
-                .build()
-        ));
+        when(newUploadedDocumentsService.getNewUploadDocuments(any(), any(), any())).thenReturn(List.of(caseDocument()));
         when(documentCheckerService.getWarnings(any(), any(), any(), any())).thenReturn(hasWarnings ? List.of("2warnings", "1warnings", "1warnings",
             "abc", "Aae") : List.of());
 
