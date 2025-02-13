@@ -20,8 +20,16 @@ public class SendOrderWrapper {
 
     private CaseDocument additionalDocument;
 
-    private DynamicMultiSelectList ordersToShare;
+    private OrdersToSend ordersToSend;
 
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+
+    /**
+     * This field is no longer in use and is deprecated since new draft order flow release.
+     *
+     * @deprecated This field is no longer in use and is deprecated since new draft order flow release.
+     */
+    @Deprecated
+    private DynamicMultiSelectList ordersToShare;
 
 }

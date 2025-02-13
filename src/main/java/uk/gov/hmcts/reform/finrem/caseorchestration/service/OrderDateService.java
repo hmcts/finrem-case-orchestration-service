@@ -60,7 +60,8 @@ public class OrderDateService {
                     LocalDateTime createdOn = fileUploadResponse.getCreatedOn() != null ? fileUploadResponse.getCreatedOn() : LocalDateTime.now();
                     log.info("auditResponse filename {} original create on {} if null created on {}",
                         fileUploadResponse.getFileName(), fileUploadResponse.getCreatedOn(), createdOn);
-                    returnCollection.add(getDirectionOrderCollectionObj(order.getValue().getUploadDraftDocument(), createdOn, isStamped));
+                    returnCollection.add(getDirectionOrderCollectionObj(order.getValue(), order.getValue().getUploadDraftDocument(), createdOn,
+                        isStamped));
                     break;
                 }
             }
@@ -69,11 +70,10 @@ public class OrderDateService {
         }
     }
 
-
-    private DirectionOrderCollection getDirectionOrderCollectionObj(CaseDocument caseDocument,
+    private DirectionOrderCollection getDirectionOrderCollectionObj(DirectionOrder directionOrder, CaseDocument caseDocument,
                                                                     LocalDateTime createdOn,
                                                                     YesOrNo isStamped) {
-        return DirectionOrderCollection.builder().value(DirectionOrder.builder()
+        return DirectionOrderCollection.builder().value(directionOrder.toBuilder()
             .uploadDraftDocument(caseDocument)
             .orderDateTime(createdOn)
             .isOrderStamped(isStamped)
