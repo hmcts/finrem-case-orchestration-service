@@ -165,7 +165,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     @Test
     void shouldShowErrorMessageWhenNotAllNewOrdersPdfFiles() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
+        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("You must upload a PDF file for new documents."), res.getErrors());
@@ -174,7 +174,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     @Test
     void shouldShowErrorMessageWhenNotAllLegacyApprovedOrdersPdf() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -184,7 +184,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     @Test
     void shouldShowErrorMessageWhenNotAllModifyingUnprocessedOrdersWordDocuments() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(any(FinremCaseData.class))).thenReturn(false);
 
@@ -195,7 +195,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
 
     private void mockPassAllValidations() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(any(FinremCaseData.class))).thenReturn(true);
     }

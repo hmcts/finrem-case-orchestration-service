@@ -36,6 +36,9 @@ public class EmailService {
     @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
     private Map<String, Map<String, String>> contestedContactEmails;
 
+    @Value("${finrem.manageCase.baseurl}")
+    private String manageCaseBaseUrl;
+
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
     private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
@@ -56,6 +59,7 @@ public class EmailService {
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
+    private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -129,6 +133,7 @@ public class EmailService {
         if (EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE.name().equals(templateName)
             || EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN.name().equals(templateName)) {
             templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
+            templateVars.put(MANAGE_CASE_BASE_URL, manageCaseBaseUrl);
         }
 
         setIntervenerSolicitorDetails(notificationRequest, templateName, templateVars);
