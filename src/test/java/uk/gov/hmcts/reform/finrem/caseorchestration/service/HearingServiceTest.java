@@ -77,7 +77,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 1: One Interim Hearing
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -93,7 +92,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 2: Multiple Interim Hearings on the Same Date
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -111,7 +109,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 3: Multiple Interim Hearings on Different Dates
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -129,7 +126,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 4: Invalid Time Format for Interim Hearing
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -147,7 +143,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 5: Top-Level Hearing Date Later Than Interim Hearings
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -165,7 +160,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 6: Null Hearing Type, Null LocalDate, Null Hearing Time
             Arguments.of(
                 null, // Null Hearing Type
@@ -174,7 +168,6 @@ class HearingServiceTest {
                 List.of(),
                 createExpectedDynamicList(new LinkedHashMap<>()) // Empty LinkedHashMap for null case
             ),
-
             // Case 7: Null Interim Hearing with Null Hearing Type, Null LocalDate, and Null Hearing Time
             Arguments.of(
                 HearingTypeDirection.FH,
