@@ -383,7 +383,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidCase_whenWarningDetected_thenReturnWarnings() {
+    void givenCaseDataForUploadingAgreedDraftOrder_whenWarningDetected_thenReturnWarnings() {
         DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
         builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
         uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadedDraftOrder uploadAgreedDraftOrder;
@@ -416,6 +416,50 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             assertEquals(2, extractedDocuments.size());
             assertTrue(extractedDocuments.contains(uploadAgreedDraftOrder));
             assertTrue(extractedDocuments.contains(agreedPensionSharingAnnex));
+
+            // Return a sample warning message
+            return List.of("WARNING1");
+        }).when(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), lambdaCaptor.capture(), eq(AUTH_TOKEN));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+        assertThat(response.getWarnings()).containsExactly("WARNING1");
+        // Verify that the function was captured and executed
+        verify(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenCaseDataForUploadingSuggestedDraftOrder_whenWarningDetected_thenReturnWarnings() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+        UploadedDraftOrder uploadAgreedDraftOrder;
+        SuggestedPensionSharingAnnex suggestedPensionSharingAnnex;
+
+        builder.uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+            .uploadParty(DynamicRadioList.builder().value(DynamicRadioListElement.builder().code("theRespondent").build()).build())
+            .uploadSuggestedDraftOrderCollection(List.of(
+                UploadSuggestedDraftOrderCollection.builder().value(uploadAgreedDraftOrder
+                        = UploadedDraftOrder.builder().build())
+                    .build()
+            ))
+            .suggestedPsaCollection(List.of(
+                SuggestedPensionSharingAnnexCollection.builder()
+                    .value(suggestedPensionSharingAnnex = SuggestedPensionSharingAnnex.builder().build())
+                    .build()
+            ))
+            .build());
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        ArgumentCaptor<Function> lambdaCaptor = ArgumentCaptor.forClass(Function.class);
+        doAnswer(invocation -> {
+            // Capture the function passed into the method
+            Function<FinremCaseData, List<?>> capturedFunction = invocation.getArgument(1);
+
+            // Execute the function with mock data
+            List<?> extractedDocuments = capturedFunction.apply(caseData);
+
+            // Validate that the function correctly processes the collections
+            assertThat(extractedDocuments).containsOnly(uploadAgreedDraftOrder, suggestedPensionSharingAnnex);
 
             // Return a sample warning message
             return List.of("WARNING1");
