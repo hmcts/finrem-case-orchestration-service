@@ -459,7 +459,9 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             List<?> extractedDocuments = capturedFunction.apply(caseData);
 
             // Validate that the function correctly processes the collections
-            assertThat(extractedDocuments).containsOnly(uploadAgreedDraftOrder, suggestedPensionSharingAnnex);
+            assertEquals(2, extractedDocuments.size());
+            assertTrue(extractedDocuments.contains(uploadAgreedDraftOrder));
+            assertTrue(extractedDocuments.contains(suggestedPensionSharingAnnex));
 
             // Return a sample warning message
             return List.of("WARNING1");
