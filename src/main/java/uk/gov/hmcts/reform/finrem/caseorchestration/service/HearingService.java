@@ -138,7 +138,7 @@ public class HearingService {
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
-            d -> d.getHearingType() != null ? d.getHearingType().getId() : "",
+            e -> e.getHearingType() != null ? e.getHearingType().getId() : "",
             e -> e.getValue().getInterimHearingType().getId(),
             e -> e.getValue().getTypeOfHearing().getId());
     }
