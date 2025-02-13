@@ -131,37 +131,58 @@ public class HearingService {
     }
 
     public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate, ihc -> ihc.getValue().getInterimHearingDate());
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate,
+            e -> e.getValue().getInterimHearingDate(),
+            e -> e.getValue().getDateOfHearing());
     }
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, d -> d.getHearingType() == null ? "" : d.getHearingType().getId(),
-            ihc -> ihc.getValue().getInterimHearingType().getId());
+        return getHearingInfo(caseData, selected,
+            d -> d.getHearingType() != null ? d.getHearingType().getId() : "",
+            e -> e.getValue().getInterimHearingType().getId(),
+            e -> e.getValue().getTypeOfHearing().getId());
     }
 
     public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingTime, ihc -> ihc.getValue().getInterimHearingTime());
+        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingTime,
+            e -> e.getValue().getInterimHearingTime(),
+            e -> e.getValue().getHearingTime());
     }
 
-    // Helper method to get hearing information
     private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
                                  Function<ListForHearingWrapper, T> hearingExtractor,
-                                 Function<InterimHearingCollection, T> extractor) {
+                                 Function<InterimHearingCollection, T> interimHearingExtractor,
+                                 Function<DirectionDetailCollection, T> hearingCreatedFromProcessOrderExtractor) {
         if (StringUtils.isEmpty(selected.getCode())) {
             return null;
         }
 
-        // Return time estimate for top-level hearing
         if (TOP_LEVEL_HEARING_ID.equals(selected.getCode())) {
-            return hearingExtractor.apply(caseData.getListForHearingWrapper()); // Use hearingExtractor to get the value
+            return hearingExtractor.apply(caseData.getListForHearingWrapper());
         }
 
-        // Search for the matching InterimHearingCollection
+        // Search for the matching InterimHearingCollection; otherwise, search for the matching directionDetailCollection
+        return getHearingInfoFromInterimHearing(caseData, selected, interimHearingExtractor)
+            .orElse(
+                getHearingInfoFromHearingCreatedFromProcessOrder(caseData, selected, hearingCreatedFromProcessOrderExtractor).orElse(null)
+            );
+    }
+
+    private <T> Optional<T> getHearingInfoFromInterimHearing(FinremCaseData caseData, DynamicListElement selected,
+                                                             Function<InterimHearingCollection, T> interimHearingExtractor) {
         return ofNullable(caseData.getInterimWrapper().getInterimHearings()).orElse(List.of()).stream()
-            .filter(ihc -> ihc.getId().toString().equals(selected.getCode()) && ihc.getValue() != null)
-            .map(extractor)
-            .findFirst()
-            .orElse(null); // Return null if no match is found
+            .filter(i -> i.getId().toString().equals(selected.getCode()) && i.getValue() != null)
+            .map(interimHearingExtractor)
+            .findFirst();
+    }
+
+    private <T> Optional<T> getHearingInfoFromHearingCreatedFromProcessOrder(FinremCaseData caseData, DynamicListElement selected,
+                                                                             Function<DirectionDetailCollection, T>
+                                                                                 hearingCreatedFromProcessOrderExtractor) {
+        return ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).stream()
+            .filter(e -> e.getId().toString().equals(selected.getCode()) && e.getValue() != null)
+            .map(hearingCreatedFromProcessOrderExtractor)
+            .findFirst();
     }
 
     public String formatHearingInfo(String hearingType, LocalDate hearingDate, String hearingTime) {
