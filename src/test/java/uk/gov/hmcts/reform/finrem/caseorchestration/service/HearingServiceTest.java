@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWra
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -521,6 +523,40 @@ class HearingServiceTest {
 
             // Assert
             assertEquals(expectedTime, result);
+        });
+    }
+
+    @Test
+    void testGetHearingInfosFromHearingsCreatedFromProcessOrder() {
+        String selectedCode = "11000000-0000-0000-0000-000000000000";
+
+        LocalDate expectedDate = LocalDate.of(2024, 10, 22);
+        HearingTypeDirection expectedType = HearingTypeDirection.FDA;
+        String expectedTime = "9999";
+
+        Arrays.asList(true, false).forEach(isSingleEntry -> {
+            // Arrange
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            DynamicListElement selected = mock(DynamicListElement.class);
+            when(selected.getCode()).thenReturn(selectedCode);
+
+            caseData.setDirectionDetailsCollection(new ArrayList<>());
+            caseData.getDirectionDetailsCollection().add(
+                DirectionDetailCollection.builder()
+                    .id(UUID.fromString(selectedCode))
+                    .value(DirectionDetail.builder().dateOfHearing(expectedDate).typeOfHearing(expectedType).hearingTime(expectedTime).build())
+                    .build())
+            ;
+            if (!isSingleEntry) {
+                caseData.getDirectionDetailsCollection().add(DirectionDetailCollection.builder()
+                    .id(UUID.randomUUID())
+                    .value(DirectionDetail.builder().dateOfHearing(LocalDate.now()).typeOfHearing(HearingTypeDirection.DIR).hearingTime("XX").build())
+                    .build());
+            }
+
+            assertEquals(expectedDate, hearingService.getHearingDate(caseData, selected));
+            assertEquals(expectedType.getId(), hearingService.getHearingType(caseData, selected));
+            assertEquals(expectedTime, hearingService.getHearingTime(caseData, selected));
         });
     }
 
