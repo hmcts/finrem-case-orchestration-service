@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -27,9 +28,11 @@ public enum BenefitPaymentChecklist {
         return value;
     }
 
+    @JsonCreator
     public static BenefitPaymentChecklist forValue(String value) {
         return Arrays.stream(BenefitPaymentChecklist.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
-            .findFirst().orElseThrow(IllegalArgumentException::new);
+            .findFirst()
+            .orElseThrow(IllegalArgumentException::new);
     }
 }
