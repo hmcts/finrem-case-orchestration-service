@@ -1342,5 +1342,4 @@ class DraftOrderServiceTest {
             .containsExactly(nonEmptyReview1, nonEmptyReview2);
         assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
     }
-
 }
