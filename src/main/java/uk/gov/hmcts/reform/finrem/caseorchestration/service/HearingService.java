@@ -52,47 +52,6 @@ public class HearingService {
 
     private static final String UNKNOWN_TEXT = "unknown";
 
-    String toUnknownDisplayText() {
-        return (format("(%s)", UNKNOWN_TEXT));
-    }
-
-    String formatDynamicListElementLabel(String hearingTypeInString, LocalDate hearingDate, String hearingTime) {
-        return format("%s %s - %s",
-            hearingDate == null ? toUnknownDisplayText() : dateFormatter.format(hearingDate),
-            StringUtils.isEmpty(hearingTime) ? toUnknownDisplayText() : hearingTime,
-            StringUtils.isEmpty(hearingTypeInString) ? toUnknownDisplayText() : hearingTypeInString);
-    }
-
-    DynamicListElement buildTopLevelHearingDynamicListElement(HearingTypeDirection hearingType, LocalDate hearingDate, String hearingTime) {
-        if (hearingType == null && hearingDate == null && StringUtils.isEmpty(hearingTime)) {
-            return null;
-        }
-        return DynamicListElement.builder()
-            .code(TOP_LEVEL_HEARING_ID)
-            .label(formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime))
-            .build();
-    }
-
-    DynamicListElement buildInterimHearingDynamicListElement(InterimHearingCollection ihc) {
-        String code = ihc.getId().toString();
-        LocalDate hearingDate = ihc.getValue().getInterimHearingDate();
-        String hearingTime = ihc.getValue().getInterimHearingTime();
-        InterimTypeOfHearing hearingType = ihc.getValue().getInterimHearingType();
-
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
-        return DynamicListElement.builder().code(code).label(label).build();
-    }
-
-    DynamicListElement buildDirectionDetailDynamicListElement(DirectionDetailCollection directionDetailCollection) {
-        String code = directionDetailCollection.getId().toString();
-        LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
-        String hearingTime = directionDetailCollection.getValue().getHearingTime();
-        HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
-
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
-        return DynamicListElement.builder().code(code).label(label).build();
-    }
-
     /**
      * Generates a {@link DynamicList} containing selectable hearings for a given case.
      *
@@ -124,7 +83,7 @@ public class HearingService {
         return generateSelectableHearingsAsDynamicList(dynamicListElements);
     }
 
-    DynamicList generateSelectableHearingsAsDynamicList(List<DynamicListElement> dynamicListElement) {
+    protected DynamicList generateSelectableHearingsAsDynamicList(List<DynamicListElement> dynamicListElement) {
         return DynamicList.builder().listItems(dynamicListElement).build();
     }
 
@@ -240,4 +199,44 @@ public class HearingService {
         });
     }
 
+    private String toUnknownDisplayText() {
+        return (format("(%s)", UNKNOWN_TEXT));
+    }
+
+    private String formatDynamicListElementLabel(String hearingTypeInString, LocalDate hearingDate, String hearingTime) {
+        return format("%s %s - %s",
+            hearingDate == null ? toUnknownDisplayText() : dateFormatter.format(hearingDate),
+            StringUtils.isEmpty(hearingTime) ? toUnknownDisplayText() : hearingTime,
+            StringUtils.isEmpty(hearingTypeInString) ? toUnknownDisplayText() : hearingTypeInString);
+    }
+
+    private DynamicListElement buildTopLevelHearingDynamicListElement(HearingTypeDirection hearingType, LocalDate hearingDate, String hearingTime) {
+        if (hearingType == null && hearingDate == null && StringUtils.isEmpty(hearingTime)) {
+            return null;
+        }
+        return DynamicListElement.builder()
+            .code(TOP_LEVEL_HEARING_ID)
+            .label(formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime))
+            .build();
+    }
+
+    private DynamicListElement buildInterimHearingDynamicListElement(InterimHearingCollection ihc) {
+        String code = ihc.getId().toString();
+        LocalDate hearingDate = ihc.getValue().getInterimHearingDate();
+        String hearingTime = ihc.getValue().getInterimHearingTime();
+        InterimTypeOfHearing hearingType = ihc.getValue().getInterimHearingType();
+
+        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        return DynamicListElement.builder().code(code).label(label).build();
+    }
+
+    private DynamicListElement buildDirectionDetailDynamicListElement(DirectionDetailCollection directionDetailCollection) {
+        String code = directionDetailCollection.getId().toString();
+        LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
+        String hearingTime = directionDetailCollection.getValue().getHearingTime();
+        HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
+
+        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        return DynamicListElement.builder().code(code).label(label).build();
+    }
 }
