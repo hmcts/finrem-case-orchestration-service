@@ -708,6 +708,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(response.getErrors())
             .containsExactly("orderApprovedCoverLetter is missing unexpectedly");
     }
+
     @Test
     void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");

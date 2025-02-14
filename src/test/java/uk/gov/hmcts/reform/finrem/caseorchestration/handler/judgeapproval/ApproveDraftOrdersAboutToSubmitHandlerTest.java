@@ -76,7 +76,6 @@ class ApproveDraftOrdersAboutToSubmitHandlerTest {
                 .build())
             .build();
 
-
         when(approveOrderService.populateJudgeDecisions(any(FinremCaseDetails.class), any(DraftOrdersWrapper.class), eq(AUTH_TOKEN)))
             .thenReturn(Pair.of(FALSE, FALSE));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(
