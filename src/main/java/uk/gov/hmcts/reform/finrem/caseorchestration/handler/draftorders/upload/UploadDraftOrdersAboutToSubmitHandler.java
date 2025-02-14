@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -22,6 +23,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderF
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.UploadSuggestedDraftOrder;
@@ -35,7 +39,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Dr
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DRAFT_ORDERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.CASEWORKER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
 
@@ -49,24 +59,25 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private final DraftOrderService draftOrderService;
 
+    private final DocumentWarningsHelper documentWarningsHelper;
+
     public UploadDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, DraftOrdersCategoriser draftOrdersCategoriser,
-                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService) {
+                                                 CaseAssignedRoleService caseAssignedRoleService, DraftOrderService draftOrderService,
+                                                 DocumentWarningsHelper documentWarningsHelper) {
         super(finremCaseDetailsMapper);
         this.draftOrdersCategoriser = draftOrdersCategoriser;
         this.caseAssignedRoleService = caseAssignedRoleService;
         this.draftOrderService = draftOrderService;
+        this.documentWarningsHelper = documentWarningsHelper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.DRAFT_ORDERS.equals(eventType);
+        return ABOUT_TO_SUBMIT.equals(callbackType) && CONTESTED.equals(caseType) && DRAFT_ORDERS.equals(eventType);
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                              String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
@@ -75,18 +86,21 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         OrderFiledBy orderFiledBy = getOrderFiledBy(caseDetails, userAuthorisation);
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
+        List<String> warnings = new ArrayList<>();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
+            populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
+            populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         }
 
-        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
-        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null);
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null);
         caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
+        clearTemporaryFields(caseDetails);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
@@ -272,5 +286,47 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     private boolean isPsaSelected(List<String> uploadOrdersOrPsas) {
         return draftOrderService.isPsaSelected(uploadOrdersOrPsas);
+    }
+
+    private List<UploadAgreedDraftOrderCollection> getUploadAgreedDraftOrderCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+            .getUploadAgreedDraftOrderCollection());
+    }
+
+    private List<AgreedPensionSharingAnnexCollection> getAgreedPsaCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).orElse(UploadAgreedDraftOrder.builder().build())
+            .getAgreedPsaCollection());
+    }
+
+    private List<UploadSuggestedDraftOrderCollection> getUploadSuggestedDraftOrderCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+            .getUploadSuggestedDraftOrderCollection());
+    }
+
+    private List<SuggestedPensionSharingAnnexCollection> getSuggestedPsaCollection(FinremCaseData data) {
+        return emptyIfNull(ofNullable(data.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).orElse(UploadSuggestedDraftOrder.builder().build())
+            .getSuggestedPsaCollection());
+    }
+
+    private void populateSuggestedDraftOrderDocumentWarnings(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            data -> concat(
+                getUploadSuggestedDraftOrderCollection(data).stream().map(UploadSuggestedDraftOrderCollection::getValue),
+                getSuggestedPsaCollection(data).stream().map(SuggestedPensionSharingAnnexCollection::getValue)
+            ).toList(),
+            userAuthorisation));
+    }
+
+    private void populateAgreedDraftOrderDocumentWarnings(FinremCallbackRequest callbackRequest, String userAuthorisation, List<String> warnings) {
+        warnings.addAll(documentWarningsHelper.getDocumentWarnings(callbackRequest,
+            data -> concat(
+                getUploadAgreedDraftOrderCollection(data).stream().map(UploadAgreedDraftOrderCollection::getValue),
+                getAgreedPsaCollection(data).stream().map(AgreedPensionSharingAnnexCollection::getValue)
+            ).toList(), userAuthorisation));
+    }
+
+    private void clearTemporaryFields(FinremCaseDetails caseDetails) {
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
     }
 }
