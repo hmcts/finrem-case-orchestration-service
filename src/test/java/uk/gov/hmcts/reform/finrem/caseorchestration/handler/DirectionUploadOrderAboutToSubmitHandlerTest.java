@@ -454,7 +454,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .orderStatus(orderStatus)
                 .attachments(additionalDocument != null
                     ? List.of(DocumentCollection.builder().value(additionalDocument).build())
-                    : Collections.emptyList()) // Avoids List.of(null)
+                    : Collections.emptyList())
                 .build())
             .build();
     }
