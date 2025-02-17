@@ -50,7 +50,7 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
         log.info("Invoking amend application mid event for caseId {}", finremCaseDetails.getId());
         List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
         errors.addAll(postalService.validate(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseData(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
