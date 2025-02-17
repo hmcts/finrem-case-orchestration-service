@@ -235,6 +235,8 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     void shouldRemovePeriodicPaymentDetailsWithBenefitsForChildrenDecisionForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
+                // "benefitForChildrenDecision": "Yes",
+                //  "paymentForChildrenDecision": "Yes",
                 "/fixtures/contested/update-periodic-payment-details-with-benefits-for-children.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
@@ -249,6 +251,8 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     void shouldMaintainPeriodicPaymentDetailsWhenBenefitsForChildrenDecisionNotProvidedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
+                // "paymentForChildrenDecision": "Yes",
+                // "benefitForChildrenDecision": "No"
                 "/fixtures/contested/update-periodic-payment-details-without-benefits-for-children-decision.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
