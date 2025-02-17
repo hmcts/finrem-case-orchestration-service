@@ -78,9 +78,6 @@ public class UpdateContestedCaseController extends BaseController {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
-    private Map<String, Object> caseData;
-    private String typeOfApplication;
-
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
     @ApiResponses(value = {
@@ -97,26 +94,26 @@ public class UpdateContestedCaseController extends BaseController {
 
         validateCaseData(ccdRequest);
 
-        caseData = caseDetails.getData();
-        typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION),
+        Map<String, Object> caseData = caseDetails.getData();
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION),
             TYPE_OF_APPLICATION_DEFAULT_TO);
 
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
-            updateDivorceDetailsForContestedCase();
+            updateDivorceDetailsForContestedCase(caseData);
         }
         caseFlagsService.setCaseFlagInformation(caseDetails);
-        updateDivorceDetailsForContestedCase();
-        updateContestedRespondentDetails();
-        updateContestedPeriodicPaymentOrder();
+        updateDivorceDetailsForContestedCase(caseData);
+        updateContestedRespondentDetails(caseData);
+        updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
-            updateContestedPropertyAdjustmentOrder();
+            updateContestedPropertyAdjustmentOrder(caseData);
         }
-        updateContestedFastTrackProcedureDetail();
-        updateContestedComplexityDetails();
-        isApplicantsHomeCourt();
-        isAllocatedToBeHeardAtHighCourtJudgeLevel();
-        updateContestedMiamDetails();
-        cleanupAdditionalDocuments();
+        updateContestedFastTrackProcedureDetail(caseData);
+        updateContestedComplexityDetails(caseData);
+        isApplicantsHomeCourt(caseData);
+        isAllocatedToBeHeardAtHighCourtJudgeLevel(caseData);
+        updateContestedMiamDetails(caseData);
+        cleanupAdditionalDocuments(caseData);
 
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
@@ -131,68 +128,68 @@ public class UpdateContestedCaseController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
     }
 
-    private void cleanupAdditionalDocuments() {
+    private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("promptForAnyDocument"), NO_VALUE)) {
             caseData.put("uploadAdditionalDocument", null);
         }
     }
 
-    private void updateContestedFastTrackProcedureDetail() {
+    private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(FAST_TRACK_DECISION), NO_VALUE)) {
             caseData.put("fastTrackDecisionReason", null);
         }
     }
 
-    private void updateContestedComplexityDetails() {
+    private void updateContestedComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
             caseData.put("otherReasonForComplexityText", null);
         }
     }
 
-    private void isApplicantsHomeCourt() {
+    private void isApplicantsHomeCourt(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), NO_VALUE)) {
             caseData.put("reasonForLocalCourt", null);
         }
     }
 
-    private void isAllocatedToBeHeardAtHighCourtJudgeLevel() {
+    private void isAllocatedToBeHeardAtHighCourtJudgeLevel(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL), NO_VALUE)) {
             caseData.put(ALLOCATED_TO_BE_HEARD_AT_HIGH_COURT_JUDGE_LEVEL_TEXT, null);
         }
     }
 
-    private void updateContestedMiamDetails() {
+    private void updateContestedMiamDetails(Map<String, Object> caseData) {
         caseData.put(FAMILY_MEDIATOR_MIAM, null);
         if (equalsTo((String) caseData.get(APPLICANT_ATTENDED_MIAM), YES_VALUE)) {
-            removeAllMiamExceptionDetails();
-            removeMiamCertificationDetailsForApplicantAttendedMiam();
+            removeAllMiamExceptionDetails(caseData);
+            removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
-            removeMiamCertificationDetails();
+            removeMiamCertificationDetails(caseData);
         }
-        removeLegacyExemptions();
+        removeLegacyExemptions(caseData);
     }
 
-    private void removeMiamCertificationDetailsForApplicantAttendedMiam() {
+    private void removeMiamCertificationDetailsForApplicantAttendedMiam(Map<String, Object> caseData) {
         caseData.put("soleTraderName1", null);
         caseData.put("familyMediatorServiceName1", null);
         caseData.put("mediatorRegistrationNumber1", null);
     }
 
-    private void removeMiamCertificationDetails() {
-        removeMiamCertificationDetailsForApplicantAttendedMiam();
+    private void removeMiamCertificationDetails(Map<String, Object> caseData) {
+        removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         caseData.put("soleTraderName", null);
         caseData.put("familyMediatorServiceName", null);
         caseData.put("mediatorRegistrationNumber", null);
         caseData.put("uploadMediatorDocument", null);
     }
 
-    private void removeAllMiamExceptionDetails() {
+    private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
         caseData.put(CLAIMING_EXEMPTION_MIAM, null);
         caseData.put(FAMILY_MEDIATOR_MIAM, null);
-        removeMiamExceptionDetails();
+        removeMiamExceptionDetails(caseData);
     }
 
-    private void removeMiamExceptionDetails() {
+    private void removeMiamExceptionDetails(Map<String, Object> caseData) {
         caseData.put(MIAM_EXEMPTIONS_CHECKLIST, null);
         caseData.put(MIAM_DOMESTIC_VIOLENCE_CHECKLIST, null);
         caseData.put(MIAM_URGENCY_CHECKLIST, null);
@@ -205,33 +202,33 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put(MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX, null);
     }
 
-    private void removeLegacyExemptions() {
+    private void removeLegacyExemptions(Map<String, Object> caseData) {
         miamLegacyExemptionsService.removeLegacyExemptions(caseData);
     }
 
-    private void updateContestedPeriodicPaymentOrder() {
+    private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {
         ArrayList natureOfApplicationList = typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)
             ? (ArrayList) caseData.get("natureOfApplicationChecklist") : (ArrayList) caseData.get("natureOfApplicationChecklistSchedule");
         if (hasNotSelected(natureOfApplicationList, "periodicalPaymentOrder")) {
-            removeContestedPeriodicalPaymentOrderDetails();
+            removeContestedPeriodicalPaymentOrderDetails(caseData, typeOfApplication);
         } else {
-            updateContestedPeriodicPaymentDetails();
+            updateContestedPeriodicPaymentDetails(caseData, typeOfApplication);
         }
     }
 
-    private void updateContestedPeriodicPaymentDetails() {
+    private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData, String typeOfApplication) {
         String paymentForChildrenDecisionObj = Objects.toString(caseData.get("paymentForChildrenDecision"));
         String benefitsForChildrenDecisionObj = Objects.toString(caseData.get("benefitForChildrenDecision"));
 
         if (equalsTo(paymentForChildrenDecisionObj, NO_VALUE)) {
-            removeBenefitsDetails();
+            removeBenefitsDetails(caseData, typeOfApplication);
         } else if (equalsTo(paymentForChildrenDecisionObj, YES_VALUE)
             && equalsTo(benefitsForChildrenDecisionObj, YES_VALUE)) {
-            removeBenefitPaymentChecklist();
+            removeBenefitPaymentChecklist(caseData, typeOfApplication);
         }
     }
 
-    private void removeBenefitPaymentChecklist() {
+    private void removeBenefitPaymentChecklist(Map<String, Object> caseData, String typeOfApplication) {
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             caseData.put("benefitPaymentChecklist", null);
         } else {
@@ -239,7 +236,7 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
-    private void removeBenefitsDetails() {
+    private void removeBenefitsDetails(Map<String, Object> caseData, String typeOfApplication) {
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             caseData.put("benefitForChildrenDecision", null);
             caseData.put("benefitPaymentChecklist", null);
@@ -249,33 +246,33 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
-    private void removeContestedPeriodicalPaymentOrderDetails() {
+    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData, String typeOfApplication) {
         caseData.put("paymentForChildrenDecision", null);
-        removeBenefitsDetails();
+        removeBenefitsDetails(caseData, typeOfApplication);
     }
 
-    private void updateContestedPropertyAdjustmentOrder() {
+    private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {
         ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
         if (hasNotSelected(natureOfApplicationList, "propertyAdjustmentOrder")) {
-            removePropertyAdjustmentOrder();
+            removePropertyAdjustmentOrder(caseData);
         } else {
-            updatePropertyAdjustmentOrderDetails();
+            updatePropertyAdjustmentOrderDetails(caseData);
         }
     }
 
-    private void updatePropertyAdjustmentOrderDetails() {
+    private void updatePropertyAdjustmentOrderDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("additionalPropertyOrderDecision"), NO_VALUE)) {
             caseData.put("propertyAdjutmentOrderDetail", null);
         }
     }
 
-    private void removePropertyAdjustmentOrder() {
+    private void removePropertyAdjustmentOrder(Map<String, Object> caseData) {
         caseData.put("propertyAddress", null);
         caseData.put("mortgageDetail", null);
         caseData.put("propertyAdjutmentOrderDetail", null);
     }
 
-    private void updateDivorceDetailsForContestedCase() {
+    private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
             // remove Decree Absolute details
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
@@ -296,15 +293,15 @@ public class UpdateContestedCaseController extends BaseController {
         }
     }
 
-    private void updateContestedRespondentDetails() {
+    private void updateContestedRespondentDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED), NO_VALUE)) {
             removeRespondentSolicitorAddress(caseData);
         } else {
-            removeContestedRespondentAddress();
+            removeContestedRespondentAddress(caseData);
         }
     }
 
-    private void removeContestedRespondentAddress() {
+    private void removeContestedRespondentAddress(Map<String, Object> caseData) {
         caseData.put(RESPONDENT_ADDRESS, null);
         caseData.put(RESPONDENT_PHONE, null);
         caseData.put(RESPONDENT_EMAIL, null);
