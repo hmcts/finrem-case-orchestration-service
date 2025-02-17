@@ -160,7 +160,6 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                                 //Store additionalDoc and replace attachment in review collection
                                 additionalDocsConverted.put(attachment.getValue().getDocumentUrl(), convertedAttachment);
                                 attachment.setValue(additionalDocsConverted.get(attachment.getValue().getDocumentUrl()));
-
                             });
                         }
                     })
