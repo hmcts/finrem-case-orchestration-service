@@ -71,34 +71,6 @@ public class HearingOrderController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(path = "/hearing-order/store", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Handles conversion of hearing order if required and storage")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> storeHearingOrder(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
-        CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to store hearing order for Case ID: {}", caseDetails.getId());
-
-        validateCaseData(callback);
-
-        Map<String, Object> caseData = caseDetails.getData();
-        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        uploadedDraftOrderCategoriser.categorise(finremCaseDetails.getData());
-        CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsToReturn.getData()).build());
-
-    }
-
     @PostMapping(path = "/hearing-order/approval-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Starts hearing order approval")
     @ApiResponses(value = {
@@ -111,6 +83,8 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
+
+        log.info("Received Draft Approved Order about to start callback for Case ID: {}", caseDetails.getId());
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
@@ -138,6 +112,8 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
+
+        log.info("Received Draft Approved Order about to submit callback for Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
 

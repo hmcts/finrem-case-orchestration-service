@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinalisedOrderCollection implements HasCaseDocument {
+public class FinalisedOrderCollection implements HasCaseDocument, WithAttachmentsCollection {
 
     private UUID id;
 
