@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -89,10 +90,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         }
 
         Map<String, CaseDocument> stampedDocuments = getStampedDocuments(caseData, userAuthorisation, caseId);
+        Map<String, CaseDocument> additionalDocsConverted = new HashMap<>();
 
-        handleDraftOrderDocuments(caseData, stampedDocuments);
+        handleDraftOrderDocuments(caseData, stampedDocuments, userAuthorisation, additionalDocsConverted, caseId);
         handlePsaDocuments(caseData, stampedDocuments);
-        handleAgreedDraftOrdersCollection(caseData, stampedDocuments);
+        handleAgreedDraftOrdersCollection(caseData, stampedDocuments, additionalDocsConverted);
         clearTemporaryFields(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
@@ -131,9 +133,10 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         return stampedDocuments;
     }
 
-    private void handleDraftOrderDocuments(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments) {
-        List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
 
+    private void handleDraftOrderDocuments(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments,
+                                           String authorisation, Map<String, CaseDocument> additionalDocsConverted, String caseId) {
+        List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
         hasApprovableCollectionReader.filterAndCollectDraftOrderDocs(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection(),
             collector, APPROVED_BY_JUDGE::equals);
 
@@ -147,6 +150,19 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                         CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
                         draftOrderDocumentReview.setOrderStatus(PROCESSED);
                         draftOrderDocumentReview.setDraftOrderDocument(stampedDocument);
+
+                        // Process attachments
+                        if (!CollectionUtils.isEmpty(draftOrderDocumentReview.getAttachments())) {
+                            draftOrderDocumentReview.getAttachments().forEach(attachment -> {
+                                CaseDocument convertedAttachment = genericDocumentService.convertDocumentIfNotPdfAlready(
+                                    attachment.getValue(), authorisation, caseId);
+
+                                //Store additionalDoc and replace attachment in review collection
+                                additionalDocsConverted.put(attachment.getValue().getDocumentUrl(), convertedAttachment);
+                                attachment.setValue(additionalDocsConverted.get(attachment.getValue().getDocumentUrl()));
+
+                            });
+                        }
                     })
             );
     }
@@ -171,7 +187,8 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
             );
     }
 
-    private void handleAgreedDraftOrdersCollection(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments) {
+    private void handleAgreedDraftOrdersCollection(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments,
+                                                   Map<String, CaseDocument> additionalDocsConverted) {
         List<AgreedDraftOrderCollection> agreedOrderCollector = new ArrayList<>();
 
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
@@ -186,6 +203,15 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                         if (agreedDraftOrder.getDraftOrder() != null) {
                             CaseDocument originalDocument = agreedDraftOrder.getDraftOrder();
                             CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
+
+                            //Replace addiitonal documents with converted PDF
+                            if (!CollectionUtils.isEmpty(agreedDraftOrder.getAttachments())) {
+                                agreedDraftOrder.getAttachments().forEach(attachment -> {
+                                    CaseDocument convertedAdditionalDocument = additionalDocsConverted.get(attachment.getValue().getDocumentUrl());
+                                    attachment.setValue(convertedAdditionalDocument);
+                                });
+                            }
+
                             agreedDraftOrder.setOrderStatus(PROCESSED);
                             agreedDraftOrder.setDraftOrder(stampedDocument);
                         } else if (agreedDraftOrder.getPensionSharingAnnex() != null) {
