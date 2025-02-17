@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -34,6 +33,7 @@ import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -151,17 +151,16 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                         draftOrderDocumentReview.setOrderStatus(PROCESSED);
                         draftOrderDocumentReview.setDraftOrderDocument(stampedDocument);
 
-                        // Process attachments
-                        if (!CollectionUtils.isEmpty(draftOrderDocumentReview.getAttachments())) {
-                            draftOrderDocumentReview.getAttachments().forEach(attachment -> {
-                                CaseDocument convertedAttachment = genericDocumentService.convertDocumentIfNotPdfAlready(
-                                    attachment.getValue(), authorisation, caseId);
+                        //Process attachments
+                        emptyIfNull(draftOrderDocumentReview.getAttachments()).forEach(attachment -> {
+                            CaseDocument convertedAttachment = genericDocumentService.convertDocumentIfNotPdfAlready(
+                                attachment.getValue(), authorisation, caseId);
 
-                                //Store additionalDoc and replace attachment in review collection
-                                additionalDocsConverted.put(attachment.getValue().getDocumentUrl(), convertedAttachment);
-                                attachment.setValue(additionalDocsConverted.get(attachment.getValue().getDocumentUrl()));
-                            });
-                        }
+                            //Store additional document and replace attachment in review collection
+                            additionalDocsConverted.put(attachment.getValue().getDocumentUrl(), convertedAttachment);
+                            attachment.setValue(convertedAttachment);
+                        });
+
                     })
             );
     }
@@ -203,13 +202,11 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
                             CaseDocument originalDocument = agreedDraftOrder.getDraftOrder();
                             CaseDocument stampedDocument = stampedDocuments.get(originalDocument.getDocumentUrl());
 
-                            //Replace addiitonal documents with converted PDF
-                            if (!CollectionUtils.isEmpty(agreedDraftOrder.getAttachments())) {
-                                agreedDraftOrder.getAttachments().forEach(attachment -> {
-                                    CaseDocument convertedAdditionalDocument = additionalDocsConverted.get(attachment.getValue().getDocumentUrl());
-                                    attachment.setValue(convertedAdditionalDocument);
-                                });
-                            }
+                            //Replace additional documents with converted PDF
+                            emptyIfNull(agreedDraftOrder.getAttachments()).forEach(attachment -> {
+                                CaseDocument convertedAdditionalDocument = additionalDocsConverted.get(attachment.getValue().getDocumentUrl());
+                                attachment.setValue(convertedAdditionalDocument);
+                            });
 
                             agreedDraftOrder.setOrderStatus(PROCESSED);
                             agreedDraftOrder.setDraftOrder(stampedDocument);
