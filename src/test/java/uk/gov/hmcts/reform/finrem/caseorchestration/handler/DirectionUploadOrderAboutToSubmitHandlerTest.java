@@ -72,7 +72,6 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
     private static final CaseDocument CONVERTED_DOCUMENT_1 = CaseDocument.builder().documentFilename("additionalDoc1.pdf").build();
 
-
     private static final long CASE_ID = 12345678L;
 
     @InjectMocks
