@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -21,4 +23,7 @@ public class DraftDirectionOrder implements HasCaseDocument {
 
     @JsonProperty("uploadDraftDocument")
     CaseDocument uploadDraftDocument;
+
+    @JsonProperty("additionalDocuments")
+    private List<DocumentCollection> additionalDocuments;
 }

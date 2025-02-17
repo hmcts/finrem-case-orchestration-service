@@ -46,7 +46,7 @@ public class UpdateContactDetailsConsentedMidHandler extends FinremCallbackHandl
         List<String> errors = new ArrayList<>();
         FinremCaseData caseData = finremCaseDetails.getData();
         errors.addAll(postalService.validate(caseData));
-        errors.addAll(ContactDetailsValidator.validateCaseData(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();

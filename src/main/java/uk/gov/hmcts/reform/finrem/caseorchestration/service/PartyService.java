@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -31,16 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Slf4j
 public class PartyService {
 
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-
-    public DynamicMultiSelectList getAllActivePartyList(CaseDetails caseDetails) {
-        return getAllActivePartyList(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails));
-    }
-
-
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
-        log.info("Event {} fetching all parties solicitor case role for Case ID: {}",
-            EventType.SEND_ORDER, caseDetails.getId());
+        log.info("Case ID: {} Fetching all parties solicitor case role", caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
 
