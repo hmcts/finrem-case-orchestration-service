@@ -14,7 +14,7 @@ The CCD definitions supported by this service can be found [here](https://github
 </p>
 
 ## Prerequisites
-- [JDK 17](https://www.oracle.com/java)
+- [Open JDK 21](https://openjdk.java.net/)
 
 ## Getting Started
 
