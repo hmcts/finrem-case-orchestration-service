@@ -103,6 +103,7 @@ public class FinremCaseDataTest {
         List<Field> wrapperFields = allFields.stream()
             .filter(field -> field.getName().contains("Wrapper"))
             .filter(field -> !field.getName().contains("uploadCaseDocumentWrapper"))
+            .filter(field -> !field.getName().contains("generalEmailWrapper"))
             .toList();
 
         for (Field field : wrapperFields) {

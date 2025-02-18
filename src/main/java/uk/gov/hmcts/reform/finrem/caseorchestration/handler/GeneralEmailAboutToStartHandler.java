@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,16 @@ public class GeneralEmailAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+
+        // JCDEBUG
+        final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        try {
+            log.info("JCDEBUG #1: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+            log.info("JCDEBUG #2: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
+        } catch (JsonProcessingException e) {
+            log.info("JCDEBUG #3: " + e.getMessage());
+        }
+
         log.info("Handling general email about to start callback for Case ID: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());

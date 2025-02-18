@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,15 @@ public class CreateGeneralEmailConsentMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+
+        // JCDEBUG
+        final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        try {
+            log.info("JCDEBUG #4: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+            log.info("JCDEBUG #5: " + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
+        } catch (JsonProcessingException e) {
+            log.info("JCDEBUG #6: " + e.getMessage());
+        }
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
