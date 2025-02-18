@@ -261,6 +261,7 @@ public class DraftOrderService {
 
         return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
             .map(DraftOrdersReviewCollection::getValue) // Get DraftOrdersReview from collection
+            .filter(draftOrdersReview -> draftOrdersReview.getHearingJudge() != null)
             .filter(draftOrderReview -> draftOrderReview.getEarliestToBeReviewedOrderDate() != null
                 && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
             .toList();
