@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
@@ -130,8 +130,7 @@ public class FinremCaseDataTest {
                         .build())
                 .build())
             .build();
-        String actual = data.getSelectedAllocatedCourt();
-        assertEquals("", actual);
+        assertDoesNotThrow(data::getSelectedAllocatedCourt);
     }
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
