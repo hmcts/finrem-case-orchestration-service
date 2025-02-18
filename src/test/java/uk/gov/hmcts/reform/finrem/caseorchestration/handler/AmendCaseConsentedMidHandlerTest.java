@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -34,7 +33,7 @@ class AmendCaseConsentedMidHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.MID_EVENT, CONSENTED, EventType.AMEND_CASE);
+        assertCanHandle(handler, CallbackType.MID_EVENT, CONSENTED, AMEND_CASE);
     }
 
     @Test
