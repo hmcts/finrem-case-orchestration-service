@@ -118,7 +118,7 @@ class DraftOrdersNotificationRequestMapperTest {
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
 
-        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "hello@world.com");
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "hello@world.com", "Mr. Uploader");
     }
 
     @Test
@@ -135,7 +135,7 @@ class DraftOrdersNotificationRequestMapperTest {
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
 
-        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "app@solicitor.com");
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "app@solicitor.com", "Applicant Solicitor");
     }
 
     @Test
@@ -152,7 +152,7 @@ class DraftOrdersNotificationRequestMapperTest {
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
 
-        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "resp@solicitor.com");
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "resp@solicitor.com", "Respondent Solicitor");
     }
 
     @Test
@@ -173,7 +173,8 @@ class DraftOrdersNotificationRequestMapperTest {
     }
 
     private void verifyRefusedDraftOrderOrPsaNotificationRequest(NotificationRequest notificationRequest,
-                                                                 String expectedNotificationEmail) {
+                                                                 String expectedNotificationEmail,
+                                                                 String expectedName) {
         assertThat(notificationRequest.getNotificationEmail()).isEqualTo(expectedNotificationEmail);
         assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
         assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
@@ -184,7 +185,7 @@ class DraftOrdersNotificationRequestMapperTest {
         assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
         assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
         assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
-        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
+        assertThat(notificationRequest.getName()).isEqualTo(expectedName);
         assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
     }
 
@@ -209,11 +210,13 @@ class DraftOrdersNotificationRequestMapperTest {
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .solicitorReference("A_RANDOM_STRING")
             .applicantSolicitorEmail("app@solicitor.com")
+            .applicantSolicitorName("Applicant Solicitor")
             .applicantFmName(applicantFirstName)
             .applicantLname(applicantLastName)
             .respondentFmName(respondentFirstName)
             .respondentLname(respondentLastName)
             .respondentSolicitorEmail("resp@solicitor.com")
+            .respondentSolicitorName("Respondent Solicitor")
             .build();
 
         LocalDate hearingDate = LocalDate.of(1999, 8, 6);
