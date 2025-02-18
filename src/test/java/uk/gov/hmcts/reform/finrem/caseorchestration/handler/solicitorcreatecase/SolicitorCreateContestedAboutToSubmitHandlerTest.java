@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
@@ -42,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -110,8 +110,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
 
         expectedAdminResponseCaseData(responseCaseData);
 
-
-
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
 
@@ -172,6 +170,28 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             // Check that updateApplicantInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
+    }
+
+    @Test
+    void testGivenExpressPilotEnabled_ThenExpressPilotServiceCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressPilotService).setPilotEnrollmentStatus(caseData);
+    }
+
+    @Test
+    void testGivenExpressPilotDisabled_ThenExpressPilotServiceIsNotCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressPilotService, never()).setPilotEnrollmentStatus(caseData);
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {

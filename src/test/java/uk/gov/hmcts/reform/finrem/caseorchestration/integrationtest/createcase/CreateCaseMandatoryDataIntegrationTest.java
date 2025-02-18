@@ -20,8 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import static org.hamcrest.Matchers.empty;
@@ -56,6 +58,10 @@ class CreateCaseMandatoryDataIntegrationTest {
     private IdamService idamService;
     @MockitoBean
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
+    @MockitoBean
+    private ExpressPilotService expressPilotService;
 
     @Test
     void testCreateCaseValidateMandatoryData() throws Exception {

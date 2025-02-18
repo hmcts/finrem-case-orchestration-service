@@ -11,14 +11,14 @@ import java.util.List;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.ENROLLED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.VARIATION_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 
 @Service
 @RequiredArgsConstructor
 public class ExpressPilotService {
 
     @Value("${finrem.expressPilot.frcs}")
-    private List<String> expressPilotFrcs;
+    List<String> expressPilotFrcs;
 
     public void setPilotEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressPilotParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
@@ -31,7 +31,7 @@ public class ExpressPilotService {
 
         return expressPilotFrcs.contains(frcValue)
             && caseData.getEstimatedAssetsChecklistV2().equals(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
-            && !natureOfApplicationCheckList.contains(VARIATION_ORDER)
+            && !natureOfApplicationCheckList.contains(CONTESTED_VARIATION_ORDER)
             && caseData.getFastTrackDecision().isNoOrNull();
     }
 }

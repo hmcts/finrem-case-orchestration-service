@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +21,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -77,6 +78,8 @@ public class UpdateContestedCaseController extends BaseController {
     private final CaseFlagsService caseFlagsService;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
+    private final FeatureToggleService featureToggleService;
+    private final ExpressPilotService expressPilotService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -121,6 +124,10 @@ public class UpdateContestedCaseController extends BaseController {
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
         RefugeWrapperUtils.updateRespondentInRefugeTab(finremCaseDetails);
+
+        if (featureToggleService.isExpressPilotEnabled()) {
+            expressPilotService.setPilotEnrollmentStatus(finremCaseDetails.getData());
+        }
 
         CaseDetails caseDetailsToReturn = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
