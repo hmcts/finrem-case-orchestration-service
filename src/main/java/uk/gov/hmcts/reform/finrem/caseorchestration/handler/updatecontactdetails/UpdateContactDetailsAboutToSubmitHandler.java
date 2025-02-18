@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUt
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -44,8 +45,9 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+        Set<CaseType> validCaseTypes = Set.of(CaseType.CONTESTED, CaseType.CONSENTED);
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
+            && validCaseTypes.contains(caseType)
             && EventType.UPDATE_CONTACT_DETAILS.equals(eventType);
     }
 
@@ -53,8 +55,8 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested {} about to submit callback for Case ID: {}",
-            callbackRequest.getEventType(), finremCaseDetails.getId());
+        log.info("For case type: {} and event type: {}, invoking about to submit callback for Case ID: {}",
+            callbackRequest.getCaseDetails().getCaseType(), callbackRequest.getEventType(), finremCaseDetails.getId());
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         Optional<ContactDetailsWrapper> contactDetailsWrapper = Optional.ofNullable(finremCaseData.getContactDetailsWrapper());
@@ -63,21 +65,12 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
             .map(wrapper -> wrapper.getUpdateIncludesRepresentativeChange() == YesOrNo.YES)
             .orElse(false);
 
-        YesOrNo isRespondentAddressHidden = contactDetailsWrapper
-            .map(ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
-            .orElse(YesOrNo.NO);
-
-        YesOrNo isApplicantAddressHidden = contactDetailsWrapper
-            .map(ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent)
-            .orElse(YesOrNo.NO);
-
         if (includeRepresentationChange) {
             updateContactDetailsService.handleRepresentationChange(finremCaseData, finremCaseDetails.getCaseType());
         }
 
-        if (isRespondentAddressHidden == YesOrNo.YES || isApplicantAddressHidden == YesOrNo.YES) {
-            CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
-            finremCaseData.setMiniFormA(document);
+        if (CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())) {
+            considerContestedMiniFormA(finremCaseDetails, userAuthorisation);
         }
 
         RefugeWrapperUtils.updateApplicantInRefugeTab(finremCaseDetails);
@@ -99,5 +92,26 @@ public class UpdateContactDetailsAboutToSubmitHandler extends FinremCallbackHand
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
+    }
+
+    private void considerContestedMiniFormA(FinremCaseDetails finremCaseDetails,
+                                            String userAuthorisation) {
+
+        Optional<ContactDetailsWrapper> contactDetailsWrapper =
+                Optional.ofNullable(finremCaseDetails.getData().getContactDetailsWrapper());
+
+        YesOrNo isRespondentAddressHidden = contactDetailsWrapper
+                .map(ContactDetailsWrapper::getRespondentAddressHiddenFromApplicant)
+                .orElse(YesOrNo.NO);
+
+        YesOrNo isApplicantAddressHidden = contactDetailsWrapper
+                .map(ContactDetailsWrapper::getApplicantAddressHiddenFromRespondent)
+                .orElse(YesOrNo.NO);
+
+        if (isRespondentAddressHidden == YesOrNo.YES || isApplicantAddressHidden == YesOrNo.YES) {
+            CaseDocument document = onlineFormDocumentService.generateContestedMiniForm(userAuthorisation, finremCaseDetails);
+            finremCaseDetails.getData().setMiniFormA(document);
+
+        }
     }
 }
