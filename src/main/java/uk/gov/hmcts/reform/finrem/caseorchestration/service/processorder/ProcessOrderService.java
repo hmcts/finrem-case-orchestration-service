@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasApprovable;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -87,11 +89,10 @@ public class ProcessOrderService {
     /**
      * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
-     * @param caseDataBefore the case data before the operation.
      * @param caseData       the case data after the operation.
      * @return true if all newly uploaded orders are PDF documents; false otherwise.
      */
-    public boolean areAllNewOrdersPdfFiles(FinremCaseData caseDataBefore, FinremCaseData caseData) {
+    public boolean areAllNewOrdersPdfFiles(FinremCaseData caseData) {
         return areAllNewDocumentsPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
             && areAllNewDocumentsPdf(caseData.getUploadHearingOrder()
         );
@@ -111,7 +112,7 @@ public class ProcessOrderService {
     }
 
     /**
-     * Checks if all the documents in the unprocessed approved draft orders of the given case data
+     * Checks if all documents (excluding PSAs) in the unprocessed approved documents of the given case data
      * have filenames with extensions matching the specified Word document formats (.doc or .docx).
      *
      * @param caseData the FinremCaseData object containing the draft orders wrapper
@@ -120,8 +121,19 @@ public class ProcessOrderService {
      *         ".doc" or ".docx" (case-insensitive), {@code false} otherwise.
      */
     public boolean areAllModifyingUnprocessedOrdersWordDocuments(FinremCaseData caseData) {
-        return areAllDocumentsWithExtensions(nullSafeList(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+        return areAllDocumentsWithExtensions(getUnprocessedDraftOrders(caseData.getDraftOrdersWrapper())
             .stream().filter(doc -> doc.getValue().getOriginalDocument() != null).toList(), List.of("doc", "docx"));
+    }
+
+    private List<DirectionOrderCollection> getUnprocessedDraftOrders(DraftOrdersWrapper draftOrdersWrapper) {
+        return nullSafeList(draftOrdersWrapper.getUnprocessedApprovedDocuments()).stream().filter(doc -> !isPsa(doc, draftOrdersWrapper)).toList();
+    }
+
+    private boolean isPsa(DirectionOrderCollection doc, DraftOrdersWrapper draftOrdersWrapper) {
+        return nullSafeList(draftOrdersWrapper.getAgreedDraftOrderCollection()).stream()
+            .map(AgreedDraftOrderCollection::getValue)
+            .map(AgreedDraftOrder::getPensionSharingAnnex)
+            .toList().contains(doc.getValue().getUploadDraftDocument());
     }
 
     private boolean areAllDocumentsWithExtensions(List<DirectionOrderCollection> list, List<String> fileExtensions) {
@@ -134,7 +146,6 @@ public class ProcessOrderService {
     }
 
     private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> afterList) {
-
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
                 .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf"));
     }
