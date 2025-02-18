@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -20,11 +19,11 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class AmendCaseAboutToSubmitHandler extends FinremCallbackHandler {
+public class AmendCaseConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
 
     @Autowired
-    public AmendCaseAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
+    public AmendCaseConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
 
@@ -38,16 +37,11 @@ public class AmendCaseAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
-        List<String> errors = new ArrayList<>();
-
-        FinremCaseData caseData = caseDetails.getData();
-
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
     private void updatePeriodicPaymentData(FinremCaseData caseData) {

@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-public class AmendCaseAboutToSubmitHandlerTest {
+public class AmendCaseConsentedAboutToSubmitHandlerTest {
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String PERIODIC_PAYMENT_CHILD_JSON = "/fixtures/updatecase/amend-periodic-payment-order.json";
     private static final String PERIODIC_PAYMENT_JSON = "/fixtures/updatecase/amend-periodic-payment-order-without"
@@ -34,8 +34,8 @@ public class AmendCaseAboutToSubmitHandlerTest {
     private static final String PROPERTY_DETAILS_JSON = "/fixtures/updatecase/remove-property-adjustment-details.json";
     private static final String PAYMENT_UNCHECKED_JSON = "/fixtures/updatecase/amend-remove-periodic-payment-order.json";
 
-    private AmendCaseAboutToSubmitHandler handler;
-    private ObjectMapper objectMapper = JsonMapper
+    private AmendCaseConsentedAboutToSubmitHandler handler;
+    private final ObjectMapper objectMapper = JsonMapper
         .builder()
         .addModule(new JavaTimeModule())
         .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
@@ -46,7 +46,7 @@ public class AmendCaseAboutToSubmitHandlerTest {
     @BeforeEach
     void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        handler = new AmendCaseAboutToSubmitHandler(finremCaseDetailsMapper);
+        handler = new AmendCaseConsentedAboutToSubmitHandler(finremCaseDetailsMapper);
     }
 
     @Test
