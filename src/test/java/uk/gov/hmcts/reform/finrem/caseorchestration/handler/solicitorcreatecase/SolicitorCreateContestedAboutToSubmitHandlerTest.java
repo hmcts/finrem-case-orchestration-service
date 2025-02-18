@@ -24,8 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -59,6 +62,10 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CaseFlagsService caseFlagsService;
     @Mock
     IdamService idamService;
+    @Mock
+    FeatureToggleService featureToggleService;
+    @Mock
+    ExpressPilotService expressPilotService;
 
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
@@ -71,6 +78,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
+            featureToggleService,
+            expressPilotService,
             caseFlagsService,
             idamService,
             representationWorkflowService,
