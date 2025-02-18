@@ -6,9 +6,9 @@ plugins {
     id 'org.springframework.boot' version '3.4.2'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.65'
-    id 'au.com.dius.pact' version '4.6.16'
+    id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1573'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1582'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -50,7 +50,7 @@ def versions = [
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2024.0.0"
-    restAssuredBomVersion = "5.5.0"
+    restAssuredBomVersion = "5.5.1"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
