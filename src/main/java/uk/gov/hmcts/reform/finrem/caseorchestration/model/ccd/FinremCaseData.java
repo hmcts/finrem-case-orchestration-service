@@ -534,7 +534,6 @@ public class FinremCaseData implements HasCaseDocument {
         return List.of(getIntervenerOne(), getIntervenerTwo(), getIntervenerThree(), getIntervenerFour());
     }
 
-
     @JsonIgnore
     public IntervenerOne getIntervenerOne() {
         if (intervenerOne == null) {
@@ -582,7 +581,6 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return null;
     }
-
 
     @JsonIgnore
     public IntervenerFour getIntervenerFour() {
@@ -688,7 +686,6 @@ public class FinremCaseData implements HasCaseDocument {
     public boolean isConsentedInContestedCase() {
         return CaseType.CONTESTED.equals(ccdCaseType) && getConsentOrderWrapper().getConsentD81Question() != null;
     }
-
 
     @JsonIgnore
     public boolean isApplicantSolicitorResponsibleToDraftOrder() {
@@ -810,7 +807,6 @@ public class FinremCaseData implements HasCaseDocument {
         return getContactDetailsWrapper().getRespondentSolicitorName();
     }
 
-
     @JsonIgnore
     public boolean isRespondentSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
@@ -825,18 +821,17 @@ public class FinremCaseData implements HasCaseDocument {
     public String getSelectedAllocatedCourt() {
         AllocatedRegionWrapper allocatedRegionWrapper = getRegionWrapper().getAllocatedRegionWrapper();
         CourtListWrapper courtList = allocatedRegionWrapper.getDefaultCourtListWrapper();
-        return Map.of(Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList), Region.LONDON,
-                getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(), Region.NORTHEAST,
-                getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList), Region.NORTHWEST,
-                getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList), Region.SOUTHWEST,
-                getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList), Region.SOUTHEAST,
-                getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList), Region.WALES,
-                getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList), Region.HIGHCOURT,
-                getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(),
-                    courtList))
-            .get(allocatedRegionWrapper.getRegionList());
+        return Map.of(
+            Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList),
+            Region.LONDON, getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(),
+            Region.NORTHEAST, getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList),
+            Region.NORTHWEST, getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList),
+            Region.SOUTHWEST, getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList),
+            Region.SOUTHEAST, getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList),
+            Region.WALES, getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(), courtList)
+        ).get(allocatedRegionWrapper.getRegionList());
     }
-
 
     @JsonIgnore
     public String getGeneralApplicationSelectedCourt() {
@@ -867,11 +862,11 @@ public class FinremCaseData implements HasCaseDocument {
     private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
             return Map.of(
-                    RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
-                    RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
-                    RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
-                    RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
-                ).get(frc).getSelectedCourtId();
+                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
+                RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
