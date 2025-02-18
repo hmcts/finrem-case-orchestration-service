@@ -6,6 +6,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,6 +117,21 @@ public class FinremCaseDataTest {
             assertTrue(hasAnnotation,
                 "Field '" + fieldDeclaration + "' should have @JsonInclude(JsonInclude.Include.NON_NULL) inside the file");
         }
+    }
+
+    @Test
+    public void testGetSelectedAllocatedCourt() {
+        FinremCaseData data = FinremCaseData.builder()
+            .regionWrapper(RegionWrapper.builder()
+                .allocatedRegionWrapper(
+                    AllocatedRegionWrapper.builder()
+                        .regionList(Region.NORTHEAST)
+                        .northEastFrcList(RegionNorthEastFrc.CLEAVELAND)
+                        .build())
+                .build())
+            .build();
+        String actual = data.getSelectedAllocatedCourt();
+        assertEquals("", actual);
     }
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
