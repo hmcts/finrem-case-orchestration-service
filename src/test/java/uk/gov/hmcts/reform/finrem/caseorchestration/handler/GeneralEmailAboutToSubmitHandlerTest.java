@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.GovNotifyAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -28,11 +29,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -178,11 +179,27 @@ class GeneralEmailAboutToSubmitHandlerTest {
         inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
     }
 
+    @Test
+    void shouldReturnAnErrorIfAttachmentExceeds2MB() {
+        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
+        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
+        when(caseDetails.getData()).thenReturn(caseData);
+        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
+
+        // consented test
+        when(caseDetails.isConsentedApplication()).thenReturn(true);
+        doThrow(new GovNotifyAttachmentSizeExceededException(2)).when(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
+        var resp = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(resp.getErrors()).contains("You attached a document which exceeds the size limit: 2MB");
+    }
+
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(response.getData().getGeneralEmailWrapper().getGeneralEmailCollection().get(0)
-                .getValue().getGeneralEmailUploadedDocument().getCategoryId(),
-            is(category.getDocumentCategoryId()));
+                .getValue().getGeneralEmailUploadedDocument().getCategoryId()).isEqualTo(category.getDocumentCategoryId());
     }
 
     private void setIntervenerSolEmail(IntervenerWrapper wrapper) {
