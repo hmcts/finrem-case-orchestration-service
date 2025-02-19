@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.DOES_NOT_QUALIFY;
@@ -25,11 +26,12 @@ public class ExpressPilotService {
     }
 
     private boolean qualifiesForExpress(FinremCaseData caseData) {
-        String frcValue = caseData.getSelectedAllocatedCourt();
+        Optional<String> frcValue = Optional.ofNullable(caseData.getSelectedAllocatedCourt());
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
 
-        return expressPilotFrcs.contains(frcValue)
+        return frcValue.isPresent()
+            && expressPilotFrcs.contains(frcValue.get())
             && caseData.getEstimatedAssetsChecklistV2().equals(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             && !natureOfApplicationCheckList.contains(CONTESTED_VARIATION_ORDER)
             && caseData.getFastTrackDecision().isNoOrNull();
