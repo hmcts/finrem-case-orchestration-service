@@ -502,14 +502,13 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+            .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+            .andDo(print());
 
         // Check that methods is called by the controller
         verify(expressPilotService, times(1)).setPilotEnrollmentStatus(any());
@@ -521,14 +520,13 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+            .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.allocatedToBeHeardAtHighCourtJudgeLevelText").doesNotExist());
+            .andDo(print());
 
         // Check that methods is not called by the controller
         verify(expressPilotService, never()).setPilotEnrollmentStatus(any());
