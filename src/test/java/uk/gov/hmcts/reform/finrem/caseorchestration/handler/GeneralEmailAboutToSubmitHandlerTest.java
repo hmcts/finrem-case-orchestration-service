@@ -207,10 +207,10 @@ class GeneralEmailAboutToSubmitHandlerTest {
         assertThat(response.getData()
             .getGeneralEmailWrapper()
             .getGeneralEmailCollection()
-            .getFirst()
-            .getValue()
-            .getGeneralEmailUploadedDocument()
-            .getCategoryId())
+            .stream()
+            .findFirst()
+            .map(email -> email.getValue().getGeneralEmailUploadedDocument().getCategoryId())
+            .orElse(null))
             .isEqualTo(category.getDocumentCategoryId());
     }
 
