@@ -180,7 +180,8 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken)
         throws CourtDetailsParseException, JsonProcessingException {
-        log.info("Dealing with Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
         List<DirectionOrderCollection> finalOrderCollection
@@ -188,7 +189,6 @@ public class AdditionalHearingDocumentService {
         List<DirectionOrderCollection> uploadHearingOrder
             = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
-            String caseId = caseDetails.getId().toString();
             List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
                 CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
                 LocalDateTime orderDateTime = doc.getValue().getOrderDateTime();
@@ -222,15 +222,18 @@ public class AdditionalHearingDocumentService {
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
             if (NO_VALUE.equalsIgnoreCase(nullToEmpty(directionDetail.getIsAnotherHearingYN()))) {
-                log.info(ADDITIONAL_MESSAGE, caseDetails.getId());
+                log.info(ADDITIONAL_MESSAGE, caseId);
                 return;
             }
 
-            Map<String, Object> localCourt = convertToMap(directionDetail.getLocalCourt());
+            Map<String, Object> localCourtFieldSelections = convertToMap(directionDetail.getLocalCourt());
+            log.info("Case ID: {} localCourtFieldSelections: {}", caseId, localCourtFieldSelections.size());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
 
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
-                localCourt.get(CaseHearingFunctions.getSelectedCourtComplexType(localCourt)));
+            String selectedCourtListId = CaseHearingFunctions.getSelectedCourtComplexType(localCourtFieldSelections);
+            log.info("Case ID: {} selectedCourtListId: {}", caseId, selectedCourtListId);
+            Object selectedLocalCourt = localCourtFieldSelections.get(selectedCourtListId);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(selectedLocalCourt);
 
             CaseDetails mapToCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
             CaseDetails caseDetailsCopy = documentHelper.deepCopy(mapToCaseDetails, CaseDetails.class);
