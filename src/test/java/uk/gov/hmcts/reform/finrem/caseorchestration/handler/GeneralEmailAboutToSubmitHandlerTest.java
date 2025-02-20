@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.GovNotifyAttachmentSizeExceededException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -195,9 +195,9 @@ class GeneralEmailAboutToSubmitHandlerTest {
         // consented test
         when(caseDetails.isConsentedApplication()).thenReturn(consentedCase);
         lenient()
-            .doThrow(new GovNotifyAttachmentSizeExceededException(2)).when(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
+            .doThrow(new EmailAttachmentSizeExceededException(2)).when(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
         lenient()
-            .doThrow(new GovNotifyAttachmentSizeExceededException(2)).when(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
+            .doThrow(new EmailAttachmentSizeExceededException(2)).when(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
         var resp = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(resp.getErrors()).contains("You attached a document which exceeds the size limit: 2MB");
     }

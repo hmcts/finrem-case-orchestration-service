@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.GovNotifyAttachmentSizeExceededException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NotificationClientRuntimeException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
@@ -45,7 +45,7 @@ class EmailServiceTestJunit5 {
             .build();
 
         String template = emailTemplateNames.name();
-        assertThrows(GovNotifyAttachmentSizeExceededException.class, () -> emailService.buildTemplateVars(notificationRequest, template));
+        assertThrows(EmailAttachmentSizeExceededException.class, () -> emailService.buildTemplateVars(notificationRequest, template));
     }
 
     @Test

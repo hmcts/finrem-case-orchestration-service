@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.GovNotifyAttachmentSizeExceededException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -75,7 +75,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
                 notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
                 generalEmailCategoriser.categorise(caseDetails.getData());
             }
-        } catch (GovNotifyAttachmentSizeExceededException e) {
+        } catch (EmailAttachmentSizeExceededException e) {
             errors.add(format("You attached a document which exceeds the size limit: %sMB", e.getExceedFileSizeInMb()));
         }
 

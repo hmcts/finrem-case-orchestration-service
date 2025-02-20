@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.GovNotifyAttachmentSizeExceededException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NotificationClientRuntimeException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -208,7 +208,7 @@ public class EmailService {
             }
         } catch (NotificationClientException e) {
             if (e.getHttpResult() == 413 && ofNullable(e.getMessage()).orElse("").contains("File is larger than 2MB")) {
-                throw new GovNotifyAttachmentSizeExceededException(2);
+                throw new EmailAttachmentSizeExceededException(2);
             }
             log.warn("Failed to attach document to email", e);
             throw new NotificationClientRuntimeException(e.getMessage());
