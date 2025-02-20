@@ -6,9 +6,9 @@ plugins {
     id 'org.springframework.boot' version '3.4.2'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.65'
-    id 'au.com.dius.pact' version '4.6.17'
+    id 'au.com.dius.pact' version '4.6.16'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1583'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1582'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -21,10 +21,11 @@ def versions = [
         commonsIo            : '2.18.0',
         commonsLang3         : '3.17.0',
         hmctsNotify          : '4.1.1-RELEASE',
-        junit                : '4.13.2',
+        junit                : '5.10.3',
+        junitPlatform        : '1.10.3',
         lombok               : '1.18.36',
-        mockito              : '3.12.4',
-        pact                 : '4.6.17',
+        mockito              : '5.11.0',
+        pact                 : '4.6.16',
         pdfbox               : '3.0.4',
         reformLogging        : '6.1.8',
         serenity             : '4.2.16',
@@ -50,7 +51,7 @@ def versions = [
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2024.0.0"
-    restAssuredBomVersion = "5.5.1"
+    restAssuredBomVersion = "5.5.0"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -68,7 +69,7 @@ build.dependsOn jacocoTestReport
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -461,11 +462,16 @@ dependencies {
 
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.7:all')
-    testImplementation("org.junit.vintage:junit-vintage-engine") {
-        exclude group: "org.hamcrest", module: "hamcrest-core"
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    testImplementation('com.github.hmcts:fortify-client:1.4.7:all')
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
 
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
