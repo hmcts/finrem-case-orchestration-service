@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_T
 @ConfigurationProperties(prefix = "feature")
 @Configuration
 @Getter
-@Slf4j
 public class FeatureToggleService {
 
     @NotNull

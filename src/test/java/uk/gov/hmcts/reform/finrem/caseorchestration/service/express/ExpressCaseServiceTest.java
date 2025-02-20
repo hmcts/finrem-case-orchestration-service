@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedR
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 
 
 import java.util.List;
@@ -36,6 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureAppli
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt.BOSTON_COUNTY_COURT_AND_FAMILY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region.MIDLANDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989;
 
 class ExpressCaseServiceTest {
 
@@ -53,8 +56,50 @@ class ExpressCaseServiceTest {
 
     @Test
     void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
+        FinremCaseData caseData = createCaseData();
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+    }
 
-        FinremCaseData caseData = FinremCaseData.builder()
+    @ParameterizedTest
+    @MethodSource("provideInvalidCaseData")
+    void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
+    }
+
+    private static Stream<FinremCaseData> provideInvalidCaseData() {
+        FinremCaseData hasVariationOrder = createCaseData();
+        hasVariationOrder.getNatureApplicationWrapper()
+            .setNatureOfApplicationChecklist(List.of(CONTESTED_VARIATION_ORDER));
+
+        FinremCaseData isNotInParticipatingFRC = createCaseData();
+        isNotInParticipatingFRC.getRegionWrapper().getAllocatedRegionWrapper()
+            .getDefaultCourtListWrapper().setNottinghamCourtList(BOSTON_COUNTY_COURT_AND_FAMILY_COURT);
+
+        FinremCaseData isNotUnder250k = createCaseData();
+        isNotUnder250k.setEstimatedAssetsChecklistV2(UNABLE_TO_QUANTIFY);
+
+        FinremCaseData isFastTrackApplication = createCaseData();
+        isFastTrackApplication.setFastTrackDecision(YesOrNo.YES);
+
+        FinremCaseData isNotMatrimonialApplication = createCaseData();
+        isNotMatrimonialApplication.getScheduleOneWrapper().setTypeOfApplication(SCHEDULE_1_CHILDREN_ACT_1989);
+
+        return Stream.of(
+            hasVariationOrder,
+            isNotInParticipatingFRC,
+            isNotUnder250k,
+            isFastTrackApplication,
+            isNotMatrimonialApplication
+        );
+    }
+
+    private static FinremCaseData createCaseData() {
+        return FinremCaseData.builder()
+            .scheduleOneWrapper(ScheduleOneWrapper.builder()
+                .typeOfApplication(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)
+                .build())
             .regionWrapper(RegionWrapper.builder()
                 .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
                     .courtListWrapper(DefaultCourtListWrapper.builder()
@@ -80,96 +125,5 @@ class ExpressCaseServiceTest {
             .fastTrackDecision(YesOrNo.NO)
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
-
-        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideInvalidCaseData")
-    void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
-        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
-    }
-
-    private static Stream<FinremCaseData> provideInvalidCaseData() {
-        return Stream.of(
-            // Has contested variation order
-            FinremCaseData.builder()
-            .regionWrapper(RegionWrapper.builder()
-                .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                    .courtListWrapper(DefaultCourtListWrapper.builder()
-                        .nottinghamCourtList(NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT)
-                        .build())
-                    .regionList(MIDLANDS)
-                    .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
-                    .build())
-                .build())
-            .natureApplicationWrapper(NatureApplicationWrapper.builder()
-                .natureOfApplicationChecklist(List.of(
-                   CONTESTED_VARIATION_ORDER
-                ))
-                .build())
-            .fastTrackDecision(YesOrNo.NO)
-            .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
-            .build(),
-            // Is not in participating FRC
-            FinremCaseData.builder()
-                .regionWrapper(RegionWrapper.builder()
-                    .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
-                            .nottinghamCourtList(BOSTON_COUNTY_COURT_AND_FAMILY_COURT)
-                            .build())
-                        .regionList(MIDLANDS)
-                        .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
-                        .build())
-                    .build())
-                .natureApplicationWrapper(NatureApplicationWrapper.builder()
-                    .natureOfApplicationChecklist(List.of(
-                        MAINTENANCE_PENDING_SUIT
-                    ))
-                    .build())
-                .fastTrackDecision(YesOrNo.NO)
-                .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
-                .build(),
-            // Is not under £250,000
-            FinremCaseData.builder()
-                .regionWrapper(RegionWrapper.builder()
-                    .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
-                            .nottinghamCourtList(NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT)
-                            .build())
-                        .regionList(MIDLANDS)
-                        .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
-                        .build())
-                    .build())
-                .natureApplicationWrapper(NatureApplicationWrapper.builder()
-                    .natureOfApplicationChecklist(List.of(
-                        MAINTENANCE_PENDING_SUIT
-                    ))
-                    .build())
-                .fastTrackDecision(YesOrNo.NO)
-                .estimatedAssetsChecklistV2(UNABLE_TO_QUANTIFY)
-                .build(),
-            // Is a Fast Track Application
-            FinremCaseData.builder()
-                .regionWrapper(RegionWrapper.builder()
-                    .allocatedRegionWrapper(AllocatedRegionWrapper.builder()
-                        .courtListWrapper(DefaultCourtListWrapper.builder()
-                            .nottinghamCourtList(NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT)
-                            .build())
-                        .regionList(MIDLANDS)
-                        .midlandsFrcList(RegionMidlandsFrc.NOTTINGHAM)
-                        .build())
-                    .build())
-                .natureApplicationWrapper(NatureApplicationWrapper.builder()
-                    .natureOfApplicationChecklist(List.of(
-                        MAINTENANCE_PENDING_SUIT
-                    ))
-                    .build())
-                .fastTrackDecision(YesOrNo.YES)
-                .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
-                .build()
-        );
     }
 }
