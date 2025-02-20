@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.DOES_NOT_QUALIFY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.LUMP_SUM_ORDER;
@@ -37,22 +37,22 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region.MIDLANDS;
 
-class ExpressPilotServiceTest {
+class ExpressCaseServiceTest {
 
     @Mock
     private FinremCaseData caseData;
 
     @BeforeEach
     public void setUp() {
-        expressPilotService = new ExpressPilotService();
-        expressPilotService.expressPilotFrcs = List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2");
+        expressCaseService = new ExpressCaseService();
+        expressCaseService.expressCaseFrcs = List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2");
     }
 
     @InjectMocks
-    private ExpressPilotService expressPilotService;
+    private ExpressCaseService expressCaseService;
 
     @Test
-    void shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
+    void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .regionWrapper(RegionWrapper.builder()
@@ -81,15 +81,15 @@ class ExpressPilotServiceTest {
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
 
-        expressPilotService.setPilotEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressPilotParticipation());
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
     }
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
     void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
-        expressPilotService.setPilotEnrollmentStatus(caseData);
-        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressPilotParticipation());
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
     }
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {

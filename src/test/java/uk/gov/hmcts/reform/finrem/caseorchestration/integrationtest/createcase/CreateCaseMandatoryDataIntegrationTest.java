@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import static org.hamcrest.Matchers.empty;
@@ -61,7 +61,7 @@ class CreateCaseMandatoryDataIntegrationTest {
     @MockitoBean
     private FeatureToggleService featureToggleService;
     @MockitoBean
-    private ExpressPilotService expressPilotService;
+    private ExpressCaseService expressCaseService;
 
     @Test
     void testCreateCaseValidateMandatoryData() throws Exception {

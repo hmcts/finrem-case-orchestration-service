@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -65,7 +65,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     @Mock
     FeatureToggleService featureToggleService;
     @Mock
-    ExpressPilotService expressPilotService;
+    ExpressCaseService expressCaseService;
 
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
@@ -79,7 +79,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             featureToggleService,
-            expressPilotService,
+                expressCaseService,
             caseFlagsService,
             idamService,
             representationWorkflowService,
@@ -173,25 +173,25 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    void testGivenExpressPilotEnabled_ThenExpressPilotServiceCalled() {
+    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressPilotService).setPilotEnrollmentStatus(caseData);
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
     @Test
-    void testGivenExpressPilotDisabled_ThenExpressPilotServiceIsNotCalled() {
+    void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressPilotService, never()).setPilotEnrollmentStatus(caseData);
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {

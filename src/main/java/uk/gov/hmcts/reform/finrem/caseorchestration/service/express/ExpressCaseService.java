@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,19 +9,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.DOES_NOT_QUALIFY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressPilotParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 
 @Service
 @RequiredArgsConstructor
-public class ExpressPilotService {
+public class ExpressCaseService {
 
-    @Value("${finrem.expressPilot.frcs}")
-    List<String> expressPilotFrcs;
+    @Value("${finrem.expressCase.frcs}")
+    List<String> expressCaseFrcs;
 
-    public void setPilotEnrollmentStatus(FinremCaseData caseData) {
-        caseData.setExpressPilotParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+    public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
+        caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
     }
 
     private boolean qualifiesForExpress(FinremCaseData caseData) {
@@ -29,7 +29,7 @@ public class ExpressPilotService {
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
 
-        return expressPilotFrcs.contains(frcValue)
+        return expressCaseFrcs.contains(frcValue)
             && caseData.getEstimatedAssetsChecklistV2().equals(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             && !natureOfApplicationCheckList.contains(CONTESTED_VARIATION_ORDER)
             && caseData.getFastTrackDecision().isNoOrNull();

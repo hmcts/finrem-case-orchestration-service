@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -31,7 +31,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
     private final OnlineFormDocumentService service;
     private final FeatureToggleService featureToggleService;
-    private final ExpressPilotService expressPilotService;
+    private final ExpressCaseService expressCaseService;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
@@ -42,14 +42,14 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         FeatureToggleService featureToggleService,
-                                                        ExpressPilotService expressPilotService,
+                                                        ExpressCaseService expressCaseService,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
                                                         CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.service = service;
-        this.expressPilotService = expressPilotService;
+        this.expressCaseService = expressCaseService;
         this.featureToggleService = featureToggleService;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
@@ -95,7 +95,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         if (featureToggleService.isExpressPilotEnabled()) {
-            expressPilotService.setPilotEnrollmentStatus(caseData);
+            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.expresspilot.ExpressPilotService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -69,7 +69,7 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @MockitoBean
     private CaseFlagsService caseFlagsService;
     @MockitoBean
-    private ExpressPilotService expressPilotService;
+    private ExpressCaseService expressCaseService;
     @MockitoBean
     private FeatureToggleService featureToggleService;
     @Autowired
@@ -511,7 +511,7 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print());
 
         // Check that methods is called by the controller
-        verify(expressPilotService, times(1)).setPilotEnrollmentStatus(any());
+        verify(expressCaseService, times(1)).setExpressCaseEnrollmentStatus(any());
     }
 
     @Test
@@ -529,7 +529,7 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print());
 
         // Check that methods is not called by the controller
-        verify(expressPilotService, never()).setPilotEnrollmentStatus(any());
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(any());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum ExpressPilotParticipation {
+public enum ExpressCaseParticipation {
 
     ENROLLED("Enrolled"),
     DOES_NOT_QUALIFY("Does not qualify"),
@@ -22,8 +22,8 @@ public enum ExpressPilotParticipation {
         return value;
     }
 
-    public static ExpressPilotParticipation forValue(String value) {
-        return Arrays.stream(ExpressPilotParticipation.values())
+    public static ExpressCaseParticipation forValue(String value) {
+        return Arrays.stream(ExpressCaseParticipation.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
