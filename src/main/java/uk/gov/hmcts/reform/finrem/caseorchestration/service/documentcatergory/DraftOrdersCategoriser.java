@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.suggested.SuggestedPensionSharingAnnex;
@@ -81,10 +81,10 @@ public class DraftOrdersCategoriser {
             .ifPresent(additionalDocs -> additionalDocs.forEach(doc -> setAdditionalDocumentsCategory(doc, category)));
     }
 
-    private void setAdditionalDocumentsCategory(DocumentCollection additionalDoc, DocumentCategory category) {
-        if (additionalDoc != null && additionalDoc.getValue() != null
-            && additionalDoc.getValue().getCategoryId() == null) {
-            additionalDoc.getValue().setCategoryId(category.getDocumentCategoryId());
+    private void setAdditionalDocumentsCategory(AdditionalDocumentsCollection additionalDoc, DocumentCategory category) {
+        if (additionalDoc != null && additionalDoc.getValue().getOrderAttachment() != null
+            && additionalDoc.getValue().getOrderAttachment().getCategoryId() == null) {
+            additionalDoc.getValue().getOrderAttachment().setCategoryId(category.getDocumentCategoryId());
         }
     }
 
