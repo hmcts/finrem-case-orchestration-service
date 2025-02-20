@@ -210,7 +210,6 @@ public class EmailService {
             if (e.getHttpResult() == 413 && ofNullable(e.getMessage()).orElse("").contains("File is larger than 2MB")) {
                 throw new EmailAttachmentSizeExceededException(2);
             }
-            log.warn("Failed to attach document to email", e);
             throw new NotificationClientRuntimeException(e.getMessage());
         }
         return null;
