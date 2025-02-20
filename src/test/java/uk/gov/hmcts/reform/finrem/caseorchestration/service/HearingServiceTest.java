@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
@@ -42,11 +43,22 @@ class HearingServiceTest {
     @InjectMocks
     private HearingService hearingService;
 
+    static DirectionDetailCollection createEmptyDirectionDetailCollection(String id) {
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.NO)
+            .build();
+        return DirectionDetailCollection.builder()
+            .id(UUID.fromString(id))
+            .value(directionDetail)
+            .build();
+    }
+
     static DirectionDetailCollection createDirectionDetailCollection(String id, HearingTypeDirection type, LocalDate date, String time) {
         DirectionDetail directionDetail = DirectionDetail.builder()
             .dateOfHearing(date)
             .hearingTime(time)
             .typeOfHearing(type)
+            .isAnotherHearingYN(YesOrNo.YES)
             .build();
         return DirectionDetailCollection.builder()
             .id(UUID.fromString(id))
@@ -287,6 +299,25 @@ class HearingServiceTest {
 
     static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
         return Stream.of(
+            Arguments.of(
+                null, // Null Hearing Type
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM", // Example time for top-level hearing
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                List.of(
+                    createEmptyDirectionDetailCollection("00000000-1111-0000-0000-000000000001")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                    }
+                })
+            ),
             Arguments.of(
                 null, // Null Hearing Type
                 LocalDate.of(2024, 1, 1), // Example date for top-level hearing
