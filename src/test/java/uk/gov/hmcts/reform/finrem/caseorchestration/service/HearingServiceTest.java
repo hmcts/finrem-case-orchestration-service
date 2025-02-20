@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -7,6 +8,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWra
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +41,18 @@ class HearingServiceTest {
 
     @InjectMocks
     private HearingService hearingService;
+
+    static DirectionDetailCollection createDirectionDetailCollection(String id, HearingTypeDirection type, LocalDate date, String time) {
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .dateOfHearing(date)
+            .hearingTime(time)
+            .typeOfHearing(type)
+            .build();
+        return DirectionDetailCollection.builder()
+            .id(UUID.fromString(id))
+            .value(directionDetail)
+            .build();
+    }
 
     static InterimHearingCollection createInterimHearing(String id, InterimTypeOfHearing type, LocalDate date, String time) {
         // Create the InterimHearingItem using the provided parameters
@@ -77,7 +93,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 1: One Interim Hearing
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -93,7 +108,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 2: Multiple Interim Hearings on the Same Date
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -111,7 +125,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 3: Multiple Interim Hearings on Different Dates
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -129,7 +142,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 4: Invalid Time Format for Interim Hearing
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -147,7 +159,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 5: Top-Level Hearing Date Later Than Interim Hearings
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -165,7 +176,6 @@ class HearingServiceTest {
                     }
                 })
             ),
-
             // Case 6: Null Hearing Type, Null LocalDate, Null Hearing Time
             Arguments.of(
                 null, // Null Hearing Type
@@ -174,7 +184,6 @@ class HearingServiceTest {
                 List.of(),
                 createExpectedDynamicList(new LinkedHashMap<>()) // Empty LinkedHashMap for null case
             ),
-
             // Case 7: Null Interim Hearing with Null Hearing Type, Null LocalDate, and Null Hearing Time
             Arguments.of(
                 HearingTypeDirection.FH,
@@ -276,12 +285,50 @@ class HearingServiceTest {
         );
     }
 
+    static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
+        return Stream.of(
+            Arguments.of(
+                null, // Null Hearing Type
+                LocalDate.of(2024, 1, 1), // Example date for top-level hearing
+                "10:00 AM", // Example time for top-level hearing
+                List.of(
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
+                ),
+                List.of(
+                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", HearingTypeDirection.DIR,
+                        LocalDate.of(2024, 5, 1), "23:00")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
+                        put("00000000-1111-0000-0000-000000000001", "1 May 2024 23:00 - Directions (DIR)"); // Hearing created from Process Order
+                    }
+                })
+            )
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("hearingCases")
     void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
                                                  LocalDate topLevelHearingDate,
                                                  String topLevelHearingTime,
                                                  List<InterimHearingCollection> interimHearings,
+                                                 DynamicList expectedDynamicList) {
+        generateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime, interimHearings,
+            null, expectedDynamicList);
+    }
+
+    @ParameterizedTest
+    @MethodSource("hearingCasesWithHearingsCreatedFromProcessOrderEvent")
+    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                 LocalDate topLevelHearingDate,
+                                                 String topLevelHearingTime,
+                                                 List<InterimHearingCollection> interimHearings,
+                                                 List<DirectionDetailCollection> directionDetailCollection,
                                                  DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
@@ -292,6 +339,7 @@ class HearingServiceTest {
             .hearingDate(topLevelHearingDate)
             .hearingTime(topLevelHearingTime)
             .build());
+        caseDataBuilder.directionDetailsCollection(directionDetailCollection);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData caseData = caseDataBuilder.build();
@@ -475,6 +523,40 @@ class HearingServiceTest {
 
             // Assert
             assertEquals(expectedTime, result);
+        });
+    }
+
+    @Test
+    void testGetHearingInfosFromHearingsCreatedFromProcessOrder() {
+        String selectedCode = "11000000-0000-0000-0000-000000000000";
+
+        LocalDate expectedDate = LocalDate.of(2024, 10, 22);
+        HearingTypeDirection expectedType = HearingTypeDirection.FDA;
+        String expectedTime = "9999";
+
+        Arrays.asList(true, false).forEach(isSingleEntry -> {
+            // Arrange
+            FinremCaseData caseData = spy(FinremCaseData.class);
+            DynamicListElement selected = mock(DynamicListElement.class);
+            when(selected.getCode()).thenReturn(selectedCode);
+
+            caseData.setDirectionDetailsCollection(new ArrayList<>());
+            caseData.getDirectionDetailsCollection().add(
+                DirectionDetailCollection.builder()
+                    .id(UUID.fromString(selectedCode))
+                    .value(DirectionDetail.builder().dateOfHearing(expectedDate).typeOfHearing(expectedType).hearingTime(expectedTime).build())
+                    .build())
+            ;
+            if (!isSingleEntry) {
+                caseData.getDirectionDetailsCollection().add(DirectionDetailCollection.builder()
+                    .id(UUID.randomUUID())
+                    .value(DirectionDetail.builder().dateOfHearing(LocalDate.now()).typeOfHearing(HearingTypeDirection.DIR).hearingTime("XX").build())
+                    .build());
+            }
+
+            assertEquals(expectedDate, hearingService.getHearingDate(caseData, selected));
+            assertEquals(expectedType.getId(), hearingService.getHearingType(caseData, selected));
+            assertEquals(expectedTime, hearingService.getHearingTime(caseData, selected));
         });
     }
 

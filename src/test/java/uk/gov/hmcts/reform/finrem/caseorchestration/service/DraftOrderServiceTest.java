@@ -85,6 +85,11 @@ class DraftOrderServiceTest {
     @Mock
     private HearingService hearingService;
 
+    private static final LocalDate OVERDUE_DATE = LocalDate.of(2024, 10, 20);
+    private static final LocalDate TODAY = LocalDate.of(2024, 11, 4);
+    private static final LocalDate NOT_OVERDUE_DATE = LocalDate.of(2024, 11, 1);
+    private static final String HEARING_JUDGE = "judge@hmcts.net";
+
     @ParameterizedTest
     @CsvSource({
         "'orders,pensionSharingAnnexes', true",
@@ -921,6 +926,7 @@ class DraftOrderServiceTest {
                             .value(DraftOrdersReview.builder()
                                 .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
                                 .psaDocReviewCollection(psaDocReviewCollection)
+                                .hearingJudge(HEARING_JUDGE)
                                 .build()
                             ).build()
                     )).build())).build();
@@ -935,11 +941,13 @@ class DraftOrderServiceTest {
                         DraftOrdersReviewCollection.builder()
                             .value(DraftOrdersReview.builder()
                                 .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
+                                .hearingJudge(HEARING_JUDGE)
                                 .build()
                             ).build(),
                         DraftOrdersReviewCollection.builder()
                             .value(DraftOrdersReview.builder()
                                 .psaDocReviewCollection(psaDocReviewCollection)
+                                .hearingJudge(HEARING_JUDGE)
                                 .build()
                             ).build()
                     )).build())).build();
@@ -956,10 +964,8 @@ class DraftOrderServiceTest {
                 assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
                 break;
             case 1:
-                assertEquals(List.of(DraftOrdersReview.builder()
-                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
-                    .psaDocReviewCollection(psaDocReviewCollection)
-                    .build()), actual);
+                assertEquals(draftOrderDocReviewCollection, actual.get(0).getDraftOrderDocReviewCollection());
+                assertEquals(psaDocReviewCollection, actual.get(0).getPsaDocReviewCollection());
                 break;
             default:
                 fail(String.format("Unexpected expectedSituationForCase1: %s", expectedSituationForCase1));
@@ -975,24 +981,14 @@ class DraftOrderServiceTest {
                 assertArrayEquals(new DraftOrdersReview[]{}, actual.toArray());
                 break;
             case 1:
-                assertEquals(List.of(DraftOrdersReview.builder()
-                    .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
-                    .build()), actual);
+                assertEquals(draftOrderDocReviewCollection, actual.get(0).getDraftOrderDocReviewCollection());
                 break;
             case 2:
-                assertEquals(List.of(DraftOrdersReview.builder()
-                    .psaDocReviewCollection(psaDocReviewCollection)
-                    .build()), actual);
+                assertEquals(psaDocReviewCollection, actual.get(0).getPsaDocReviewCollection());
                 break;
             case 3:
-                assertEquals(List.of(
-                    DraftOrdersReview.builder()
-                        .draftOrderDocReviewCollection(draftOrderDocReviewCollection)
-                        .build(),
-                    DraftOrdersReview.builder()
-                        .psaDocReviewCollection(psaDocReviewCollection)
-                        .build()
-                ), actual);
+                assertEquals(draftOrderDocReviewCollection, actual.get(0).getDraftOrderDocReviewCollection());
+                assertEquals(psaDocReviewCollection, actual.get(1).getPsaDocReviewCollection());
                 break;
             default:
                 fail(String.format("Unexpected expectedSituationForCase2: %s", expectedSituationForCase2));
@@ -1115,11 +1111,12 @@ class DraftOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("testIsDraftOrderReviewOverdue")
-    void testIsDraftOrderReviewOverdue(LocalDate submissionDate, boolean expected) {
+    void testIsDraftOrderReviewOverdue(LocalDate submissionDate, String hearingJudge, boolean expected) {
         DraftOrdersReview draftOrdersReview = DraftOrdersReview.builder()
             .draftOrderDocReviewCollection(List.of(
                 createDraftOrder(OrderStatus.TO_BE_REVIEWED, submissionDate, null)
             ))
+            .hearingJudge(hearingJudge)
             .build();
         List<DraftOrdersReviewCollection> draftOrdersReviewCollection = List.of(
             DraftOrdersReviewCollection.builder()
@@ -1134,9 +1131,9 @@ class DraftOrderServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(caseData)
             .build();
-        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
+
         try (MockedStatic<LocalDate> mockedStatic = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedStatic.when(LocalDate::now).thenReturn(fixedDate);
+            mockedStatic.when(LocalDate::now).thenReturn(TODAY);
             boolean actual = draftOrderService.isDraftOrderReviewOverdue(caseDetails, 14);
             assertThat(actual).isEqualTo(expected);
         }
@@ -1144,8 +1141,12 @@ class DraftOrderServiceTest {
 
     static Stream<Arguments> testIsDraftOrderReviewOverdue() {
         return Stream.of(
-            Arguments.of(LocalDate.of(2024, 10, 20), true),
-            Arguments.of(LocalDate.of(2024, 11, 4), false)
+            Arguments.of(OVERDUE_DATE, HEARING_JUDGE, true),
+            Arguments.of(OVERDUE_DATE, null, false),
+            Arguments.of(NOT_OVERDUE_DATE, HEARING_JUDGE, false),
+            Arguments.of(NOT_OVERDUE_DATE, null, false),
+            Arguments.of(TODAY, HEARING_JUDGE, false),
+            Arguments.of(TODAY, null, false)
         );
     }
 
