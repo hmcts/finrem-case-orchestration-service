@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
@@ -46,9 +47,9 @@ public class ExpressCaseService {
         EstimatedAssetV2 assetValue = caseData.getEstimatedAssetsChecklistV2();
 
         return expressCaseFrcs.contains(frcValue)
-            && typeOfApplication.equals(MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS)
-            && assetValue.equals(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
-            && !natureOfApplicationCheckList.contains(CONTESTED_VARIATION_ORDER)
+            && MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.equals(typeOfApplication)
+            && UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(assetValue)
+            && !ListUtils.emptyIfNull(natureOfApplicationCheckList).contains(CONTESTED_VARIATION_ORDER)
             && caseData.getFastTrackDecision().isNoOrNull();
     }
 }
