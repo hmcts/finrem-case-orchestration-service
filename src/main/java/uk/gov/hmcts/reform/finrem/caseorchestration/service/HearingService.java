@@ -220,7 +220,6 @@ public class HearingService {
         }
         if (hearingType == null) {
             throwIllegalStateExceptionIfHearingTypeIsNull();
-            return null;
         }
         return DynamicListElement.builder()
             .code(TOP_LEVEL_HEARING_ID)
@@ -236,7 +235,6 @@ public class HearingService {
 
         if (hearingType == null) {
             throwIllegalStateExceptionIfHearingTypeIsNull();
-            return null;
         }
         String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
@@ -249,7 +247,6 @@ public class HearingService {
         HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
         if (hearingType == null) {
             throwIllegalStateExceptionIfHearingTypeIsNull();
-            return null;
         }
         String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
