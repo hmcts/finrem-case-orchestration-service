@@ -38,7 +38,7 @@ class EmailServiceTestJunit5 {
 
     @ParameterizedTest
     @EnumSource(value = EmailTemplateNames.class, names = {"FR_CONSENT_GENERAL_EMAIL_ATTACHMENT", "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT"})
-    void shouldThrowAnExceptionForGeneralEmailAttachmentConsentedWithAttachmentExceeded2MB(EmailTemplateNames emailTemplateNames) {
+    void shouldThrowAnExceptionForGeneralEmailAttachment+WithAttachmentExceeded2MB(EmailTemplateNames emailTemplateNames) {
         NotificationRequest notificationRequest = NotificationRequest.builder()
             .generalEmailBody("test email body")
             .documentContents(new byte[2 * 1024 * 1024 + 1])
