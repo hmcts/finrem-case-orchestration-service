@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.google.common.collect.Maps;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
@@ -38,15 +39,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_T
 @ConfigurationProperties(prefix = "feature")
 @Configuration
 @Getter
+@Slf4j
 public class FeatureToggleService {
 
     @NotNull
     private Map<String, String> toggle = new HashMap<>();
 
     private boolean isFeatureEnabled(Features feature) {
-        return Optional.ofNullable(toggle.get(feature.getName()))
+        boolean isEnabled = Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
+
+        log.info("Feature {} is {}", feature.getName(), isEnabled ? "enabled" : "disabled");
+
+        return isEnabled;
     }
 
     /*
