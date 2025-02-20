@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.helper.DocumentWarningsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -217,18 +218,18 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         // Add additional attachments for orders only
         if (!ObjectUtils.isEmpty(uploadDraftOrder.getAdditionalDocuments())) {
             List<DocumentCollection> attachments = new ArrayList<>();
-            for (DocumentCollection additionalDoc :
+            for (AdditionalDocumentsCollection additionalDoc :
                 uploadDraftOrder.getAdditionalDocuments()) {
-                if (additionalDoc.getValue() != null) {
+                if (additionalDoc.getValue().getOrderAttachment() != null) {
                     attachments.add(DocumentCollection.builder()
-                        .value(additionalDoc.getValue())
+                        .value(additionalDoc.getValue().getOrderAttachment())
                         .build());
                 }
             }
             suggestedDraftOrderBuilder.attachments(attachments);
         }
 
-        return applySubmittedInfo(userAuthorisation, suggestedDraftOrderBuilder.build());
+            return applySubmittedInfo(userAuthorisation, suggestedDraftOrderBuilder.build());
     }
 
     private SuggestedDraftOrder mapToSuggestedDraftOrderForPsa(
