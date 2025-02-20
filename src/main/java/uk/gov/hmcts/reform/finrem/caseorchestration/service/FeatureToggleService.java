@@ -46,13 +46,9 @@ public class FeatureToggleService {
     private Map<String, String> toggle = new HashMap<>();
 
     private boolean isFeatureEnabled(Features feature) {
-        boolean isEnabled = Optional.ofNullable(toggle.get(feature.getName()))
+        return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
-
-        log.info("Feature {} is {}", feature.getName(), isEnabled ? "enabled" : "disabled");
-
-        return isEnabled;
     }
 
     /*

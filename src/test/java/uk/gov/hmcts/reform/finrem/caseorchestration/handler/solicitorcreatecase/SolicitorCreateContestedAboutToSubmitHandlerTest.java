@@ -79,7 +79,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             finremCaseDetailsMapper,
             onlineFormDocumentService,
             featureToggleService,
-                expressCaseService,
+            expressCaseService,
             caseFlagsService,
             idamService,
             representationWorkflowService,
