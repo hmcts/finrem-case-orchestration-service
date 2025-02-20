@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -202,13 +203,12 @@ class HearingServiceTest {
                 LocalDate.of(2024, 1, 1), // Example date for top-level hearing
                 "10:00 AM",
                 List.of(
-                    // Interim hearing with null type
-                    createInterimHearing("00000000-0000-0000-0000-000000000002", null, LocalDate.of(2024, 2, 1), "2:00 AM")
+                    createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 1), "2:00 AM")
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
                         put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
-                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - (unknown)"); // UUID for interim hearing with null type
+                        put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Final Hearing (FH)");
                     }
                 })
             ),
@@ -267,19 +267,20 @@ class HearingServiceTest {
                 "10:00 AM",
                 List.of(
                     createInterimHearing("00000000-0000-0000-0000-000000000002", InterimTypeOfHearing.DIR, LocalDate.of(2024, 2, 1), "2:00 AM"),
-                    createInterimHearing("00000000-0000-0000-0000-000000000003", null, LocalDate.of(2024, 2, 2), "4:00 PM")
+                    createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.MPS, LocalDate.of(2024, 2, 2), "4:00 PM")
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
                         put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)"); // UUID for top-level hearing
                         put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // UUID for interim hearing 1
-                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - (unknown)"); // Interim hearing 2 with null type
+                        put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Maintenance Pending Suit (MPS)");
                     }
                 })
             ),
             // Case 12: Null Top-Level Hearing Type with Valid Interim Hearings
             Arguments.of(
-                null, // Null Hearing Type
+
+                HearingTypeDirection.FH,
                 LocalDate.of(2024, 1, 1), // Example date for top-level hearing
                 "10:00 AM", // Example time for top-level hearing
                 List.of(
@@ -288,7 +289,7 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)");
                         put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
                         put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
@@ -300,7 +301,7 @@ class HearingServiceTest {
     static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
         return Stream.of(
             Arguments.of(
-                null, // Null Hearing Type
+                HearingTypeDirection.FH,
                 LocalDate.of(2024, 1, 1), // Example date for top-level hearing
                 "10:00 AM", // Example time for top-level hearing
                 List.of(
@@ -312,14 +313,14 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)");
                         put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
                         put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                     }
                 })
             ),
             Arguments.of(
-                null, // Null Hearing Type
+                HearingTypeDirection.FH,
                 LocalDate.of(2024, 1, 1), // Example date for top-level hearing
                 "10:00 AM", // Example time for top-level hearing
                 List.of(
@@ -332,7 +333,7 @@ class HearingServiceTest {
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
-                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - (unknown)"); // Top-level hearing with null type
+                        put("00000000-0000-0000-0000-000000000000", "1 Jan 2024 10:00 AM - Final Hearing (FH)");
                         put("00000000-0000-0000-0000-000000000002", "1 Feb 2024 2:00 AM - Directions (DIR)"); // Interim hearing 1
                         put("00000000-0000-0000-0000-000000000003", "2 Feb 2024 4:00 PM - Final Hearing (FH)"); // Interim hearing 2
                         put("00000000-1111-0000-0000-000000000001", "1 May 2024 23:00 - Directions (DIR)"); // Hearing created from Process Order
@@ -382,6 +383,44 @@ class HearingServiceTest {
         // Assert
         assertEquals(expectedDynamicList.getListItems().size(), dynamicList.getListItems().size());
         assertDynamicListEquals(expectedDynamicList, dynamicList);
+    }
+
+    static Stream<Arguments> provideShouldThrowIllegalStateExceptionData() {
+        return Stream.of(
+            Arguments.of(null, List.of(), List.of()),
+            Arguments.of(HearingTypeDirection.FH,
+                List.of(createInterimHearing("00000000-0000-0000-0000-000000000002", null, LocalDate.of(2024, 2, 1), "2:00 AM")),
+                List.of()),
+            Arguments.of(HearingTypeDirection.FH,
+                List.of(),
+                List.of(
+                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", null, LocalDate.of(2024, 5, 1), "23:00")
+                ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideShouldThrowIllegalStateExceptionData")
+    void shouldThrowIllegalStateException(HearingTypeDirection topLevelHearingType,
+                                          List<InterimHearingCollection> interimHearings,
+                                          List<DirectionDetailCollection> directionDetailCollection) {
+        FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
+            .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
+
+        caseDataBuilder.listForHearingWrapper(ListForHearingWrapper.builder()
+            .hearingType(topLevelHearingType)
+            .hearingDate(LocalDate.of(2025, 1, 1))
+            .hearingTime("anyHearingTimeString")
+            .build());
+        caseDataBuilder.directionDetailsCollection(directionDetailCollection);
+
+        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = caseDataBuilder.build();
+        when(caseDetails.getData()).thenReturn(caseData);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+            () -> hearingService.generateSelectableHearingsAsDynamicList(caseDetails));
+        assertEquals("hearingType is unexpectedly null", e.getMessage());
     }
 
     // Helper method to assert that two DynamicLists are equal

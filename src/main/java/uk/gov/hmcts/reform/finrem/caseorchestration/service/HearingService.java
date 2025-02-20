@@ -96,7 +96,7 @@ public class HearingService {
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
-            e -> e.getHearingType() != null ? e.getHearingType().getId() : "",
+            e -> e.getHearingType().getId(),
             e -> e.getValue().getInterimHearingType().getId(),
             e -> e.getValue().getTypeOfHearing().getId());
     }
@@ -163,8 +163,7 @@ public class HearingService {
         DynamicListElement topLevelDynamicListElement = buildTopLevelHearingDynamicListElement(hearingType, hearingDate, hearingTime);
         if (topLevelDynamicListElement != null) {
             dynamicListElements.add(topLevelDynamicListElement);
-            elementToSortingKeyMap.put(topLevelDynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType == null
-                ? null : hearingType.getId()));
+            elementToSortingKeyMap.put(topLevelDynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType.getId()));
         }
     }
 
@@ -219,9 +218,13 @@ public class HearingService {
         if (hearingType == null && hearingDate == null && StringUtils.isEmpty(hearingTime)) {
             return null;
         }
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+            return null;
+        }
         return DynamicListElement.builder()
             .code(TOP_LEVEL_HEARING_ID)
-            .label(formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime))
+            .label(formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime))
             .build();
     }
 
@@ -231,7 +234,11 @@ public class HearingService {
         String hearingTime = ihc.getValue().getInterimHearingTime();
         InterimTypeOfHearing hearingType = ihc.getValue().getInterimHearingType();
 
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+            return null;
+        }
+        String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
     }
 
@@ -240,8 +247,15 @@ public class HearingService {
         LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
         String hearingTime = directionDetailCollection.getValue().getHearingTime();
         HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
-
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+            return null;
+        }
+        String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
+    }
+
+    private void throwIllegalStateExceptionIfHearingTypeIsNull() {
+        throw new IllegalStateException("hearingType is unexpectedly null");
     }
 }
