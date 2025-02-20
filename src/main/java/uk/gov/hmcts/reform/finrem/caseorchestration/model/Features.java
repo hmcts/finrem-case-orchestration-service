@@ -13,6 +13,8 @@ public enum Features {
     SEND_LETTER_RECIPIENT_CHECK("send_letter_recipient_check"),
     SECURE_DOC_ENABLED("secure_doc_enabled"),
     INTERVENER_ENABLED("intervener_enabled"),
-    CASE_FILE_VIEW_ENABLED("case_file_view_enabled");
+    CASE_FILE_VIEW_ENABLED("case_file_view_enabled"),
+    EXPRESS_PILOT_ENABLED("express_pilot_enabled");
+
     private final String name;
 }
