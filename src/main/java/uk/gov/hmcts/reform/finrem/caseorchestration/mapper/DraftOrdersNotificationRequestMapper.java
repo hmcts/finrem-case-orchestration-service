@@ -86,7 +86,7 @@ public class DraftOrdersNotificationRequestMapper {
      */
     public NotificationRequest buildRefusedDraftOrderOrPsaNotificationRequest(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
         FinremCaseData caseData = caseDetails.getData();
-        String notificationEmail = refusedOrder.getSubmittedByEmail();
+        String notificationEmail = getRefusedOrderEmail(caseDetails, refusedOrder);
         String documentName = ofNullable(refusedOrder.getRefusedDocument()).map(CaseDocument::getDocumentFilename)
             .orElseThrow(IllegalArgumentException::new);
 
@@ -102,12 +102,44 @@ public class DraftOrdersNotificationRequestMapper {
             .judgeFeedback(refusedOrder.getJudgeFeedback())
             .documentName(documentName)
             .solicitorReferenceNumber(nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference()))
-            .name(refusedOrder.getSubmittedBy())
+            .name(getRefusedOrderName(caseDetails, refusedOrder))
             .build();
     }
 
     private String getCourtAdminEmail(FinremCaseData caseData) {
         String selectedAllocatedCourt = caseData.getSelectedAllocatedCourt();
         return courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt).getEmail();
+    }
+
+    private String getRefusedOrderEmail(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
+        if (refusedOrder.getSubmittedByEmail() != null) {
+            return refusedOrder.getSubmittedByEmail();
+        } else {
+            // If the refused order does not have a submitted by email then it was uploaded by a
+            // caseworker on behalf of either the applicant or respondent.
+            FinremCaseData caseData = caseDetails.getData();
+            return switch (refusedOrder.getOrderFiledBy()) {
+                case APPLICANT -> caseData.getContactDetailsWrapper().getApplicantSolicitorEmail();
+                case RESPONDENT -> caseData.getContactDetailsWrapper().getRespondentSolicitorEmail();
+                default -> throw new IllegalArgumentException("Case ID " + caseDetails.getId()
+                    + ": No refused order recipient email address found");
+            };
+        }
+    }
+
+    private String getRefusedOrderName(FinremCaseDetails caseDetails, RefusedOrder refusedOrder) {
+        if (refusedOrder.getSubmittedByEmail() != null) {
+            return refusedOrder.getSubmittedBy();
+        } else {
+            // If the refused order does not have a submitted by email then it was uploaded by a
+            // caseworker on behalf of either the applicant or respondent.
+            FinremCaseData caseData = caseDetails.getData();
+            return switch (refusedOrder.getOrderFiledBy()) {
+                case APPLICANT -> caseData.getContactDetailsWrapper().getApplicantSolicitorName();
+                case RESPONDENT -> caseData.getContactDetailsWrapper().getRespondentSolicitorName();
+                default -> throw new IllegalArgumentException("Case ID " + caseDetails.getId()
+                    + ": No refused order recipient name found");
+            };
+        }
     }
 }
