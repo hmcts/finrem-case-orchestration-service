@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -12,15 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 
 @Slf4j
 @Service
 public class AmendCaseConsentedAboutToSubmitHandler extends FinremCallbackHandler {
-
 
     @Autowired
     public AmendCaseConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
@@ -31,12 +28,14 @@ public class AmendCaseConsentedAboutToSubmitHandler extends FinremCallbackHandle
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_CASE.equals(eventType));
+            && EventType.AMEND_CASE.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info("Invoking consent {} about to start callback for Case ID: {}", callbackRequest.getEventType(),
+            callbackRequest.getCaseDetails().getId());
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
@@ -45,8 +44,8 @@ public class AmendCaseConsentedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void updatePeriodicPaymentData(FinremCaseData caseData) {
-        List<NatureApplication> natureOfApplication2 =
-            Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
+        List<NatureApplication> natureOfApplication2 = ListUtils.emptyIfNull(caseData.getNatureApplicationWrapper()
+            .getNatureOfApplication2());
 
         if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER)) {
             removePeriodicPaymentData(caseData);
@@ -60,8 +59,8 @@ public class AmendCaseConsentedAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void updatePropertyDetails(FinremCaseData caseData) {
-        List<NatureApplication> natureOfApplication2 =
-            Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
+        List<NatureApplication> natureOfApplication2 = ListUtils.emptyIfNull(caseData.getNatureApplicationWrapper()
+            .getNatureOfApplication2());
 
         if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER)) {
             removePropertyAdjustmentDetails(caseData);

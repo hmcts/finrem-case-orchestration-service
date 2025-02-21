@@ -6,15 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
-import static org.mockito.Mockito.verify;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
@@ -42,10 +50,24 @@ class AmendCaseConsentedMidHandlerTest {
     }
 
     @Test
-    void givenCase_whenCaseNatureOfApplicaftionUpdated_handleMidEvent() {
+    void givenCase_whenServiceReturnsNoErrors_handleMidEvent() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(consentOrderService).performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), AUTH_TOKEN);
+        when(consentOrderService.performCheck(any(), anyString())).thenReturn(Collections.emptyList());
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors().size(), is(0));
+    }
+
+    @Test
+    void givenCase_whenServiceReturnsMultipleErrors_handleMidEvent() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        List<String> errors = Arrays.asList("Error 1", "Error 2");
+        when(consentOrderService.performCheck(any(), anyString())).thenReturn(errors);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors(), is(errors));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
