@@ -55,7 +55,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.send_letter_recipient_check=false",
         "feature.toggle.secure_doc_enabled=false",
         "feature.toggle.intervener_enabled=false",
-        "feature.toggle.case_file_view_enabled=false"
+        "feature.toggle.case_file_view_enabled=false",
+        "feature.toggle.express_pilot_enabled=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -101,6 +102,11 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void isCaseFileViewEnabled() {
+            assertThat(featureToggleService.isCaseFileViewEnabled(), is(false));
+        }
+
+        @Test
+        public void isExpressPilotEnabled() {
             assertThat(featureToggleService.isCaseFileViewEnabled(), is(false));
         }
 

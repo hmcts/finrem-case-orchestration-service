@@ -86,6 +86,10 @@ public class FeatureToggleService {
         return isFeatureEnabled(CASE_FILE_VIEW_ENABLED);
     }
 
+    public boolean isExpressPilotEnabled() {
+        return isFeatureEnabled(Features.EXPRESS_PILOT_ENABLED);
+    }
+
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
      * serialised to JSON).
