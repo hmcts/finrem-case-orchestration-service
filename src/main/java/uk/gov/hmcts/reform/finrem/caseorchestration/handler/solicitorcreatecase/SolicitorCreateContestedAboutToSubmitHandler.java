@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -23,6 +26,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUt
 
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
+
 @Slf4j
 @Service
 public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallbackHandler {
@@ -34,19 +41,23 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
+    private final CourtDetailsConfiguration courtDetailsConfiguration;
+
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
-                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
+                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator,
+                                                        CourtDetailsConfiguration courtDetailsConfiguration) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
         this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
+        this.courtDetailsConfiguration = courtDetailsConfiguration;
     }
 
 
@@ -85,6 +96,37 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
+
+        // new - refactor into something  that can bre reused across other handlers later.
+
+        String selectedAllocatedCourt = caseDetails.getData().getSelectedAllocatedCourt();
+
+        String getEmailForSelectedCourt =
+                ofNullable(courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt))
+                .map(CourtDetails::getEmail)
+                .orElse("");
+
+        String getNameForSelectedCourt =
+                ofNullable(courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt))
+                        .map(CourtDetails::getCourtName)
+                        .orElse("");
+
+        String getAddressForSelectedCourt =
+                ofNullable(courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt))
+                        .map(CourtDetails::getCourtAddress)
+                        .orElse("");
+
+        String getPhoneForSelectedCourt =
+                ofNullable(courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt))
+                        .map(CourtDetails::getPhoneNumber)
+                        .orElse("");
+
+        caseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcName(getNameForSelectedCourt);
+        caseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcAddress(getAddressForSelectedCourt);
+        caseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcEmail(getEmailForSelectedCourt);
+        caseDetails.getData().getConsentOrderWrapper().setConsentOrderFrcPhone(getPhoneForSelectedCourt);
+
+        // end new
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
