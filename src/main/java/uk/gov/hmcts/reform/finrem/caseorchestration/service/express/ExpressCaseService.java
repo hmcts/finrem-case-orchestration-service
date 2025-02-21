@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
 
@@ -50,6 +51,6 @@ public class ExpressCaseService {
             && MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.equals(typeOfApplication)
             && UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(assetValue)
             && !ListUtils.emptyIfNull(natureOfApplicationCheckList).contains(CONTESTED_VARIATION_ORDER)
-            && caseData.getFastTrackDecision().isNoOrNull();
+            && YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
     }
 }

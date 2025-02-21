@@ -2,10 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -40,19 +44,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region.MIDL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989;
 
+@ExtendWith(MockitoExtension.class)
 class ExpressCaseServiceTest {
 
-    @Mock
-    private FinremCaseData caseData;
+    private ExpressCaseService expressCaseService;
 
     @BeforeEach
     public void setUp() {
         expressCaseService = new ExpressCaseService();
         expressCaseService.expressCaseFrcs = List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2");
     }
-
-    @InjectMocks
-    private ExpressCaseService expressCaseService;
 
     @Test
     void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
