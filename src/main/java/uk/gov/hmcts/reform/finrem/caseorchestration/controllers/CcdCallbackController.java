@@ -140,7 +140,8 @@ public class CcdCallbackController {
         GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
 
-        log.info("Financial Remedy Case CCD callback `{}` handled for Case ID: `{}`",
+        log.info("Financial Remedy Case CCD {} callback `{}` handled for Case ID: `{}`",
+            callbackType,
             callbackRequest.getEventId(),
             callbackRequest.getCaseDetails().getId());
 
