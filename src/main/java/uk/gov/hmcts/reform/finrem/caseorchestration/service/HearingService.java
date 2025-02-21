@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
 import java.time.LocalDate;
@@ -95,7 +96,7 @@ public class HearingService {
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
-            e -> e.getHearingType() != null ? e.getHearingType().getId() : "",
+            e -> e.getHearingType().getId(),
             e -> e.getValue().getInterimHearingType().getId(),
             e -> e.getValue().getTypeOfHearing().getId());
     }
@@ -162,8 +163,7 @@ public class HearingService {
         DynamicListElement topLevelDynamicListElement = buildTopLevelHearingDynamicListElement(hearingType, hearingDate, hearingTime);
         if (topLevelDynamicListElement != null) {
             dynamicListElements.add(topLevelDynamicListElement);
-            elementToSortingKeyMap.put(topLevelDynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType == null
-                ? null : hearingType.getId()));
+            elementToSortingKeyMap.put(topLevelDynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType.getId()));
         }
     }
 
@@ -185,13 +185,13 @@ public class HearingService {
 
     private void populateHearingsCreatedFromProcessOrder(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
                                                          Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
-        ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).forEach(directionDetailCollection -> {
-            DynamicListElement dynamicListElement = buildDirectionDetailDynamicListElement(directionDetailCollection);
+        ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).stream().filter(this::hasAnotherHearing).forEach(collection -> {
+            DynamicListElement dynamicListElement = buildDirectionDetailDynamicListElement(collection);
             if (dynamicListElement != null) {
-                LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
-                String hearingTime = directionDetailCollection.getValue().getHearingTime();
-                String hearingType = directionDetailCollection.getValue().getTypeOfHearing() != null
-                    ? directionDetailCollection.getValue().getTypeOfHearing().getId() : null;
+                LocalDate hearingDate = collection.getValue().getDateOfHearing();
+                String hearingTime = collection.getValue().getHearingTime();
+                String hearingType = collection.getValue().getTypeOfHearing() != null
+                    ? collection.getValue().getTypeOfHearing().getId() : null;
 
                 dynamicListElements.add(dynamicListElement);
                 elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType));
@@ -199,8 +199,12 @@ public class HearingService {
         });
     }
 
+    private boolean hasAnotherHearing(DirectionDetailCollection directionDetailCollection) {
+        return directionDetailCollection.getValue().getIsAnotherHearingYN() == YesOrNo.YES;
+    }
+
     private String toUnknownDisplayText() {
-        return (format("(%s)", UNKNOWN_TEXT));
+        return format("(%s)", UNKNOWN_TEXT);
     }
 
     private String formatDynamicListElementLabel(String hearingTypeInString, LocalDate hearingDate, String hearingTime) {
@@ -214,9 +218,12 @@ public class HearingService {
         if (hearingType == null && hearingDate == null && StringUtils.isEmpty(hearingTime)) {
             return null;
         }
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+        }
         return DynamicListElement.builder()
             .code(TOP_LEVEL_HEARING_ID)
-            .label(formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime))
+            .label(formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime))
             .build();
     }
 
@@ -226,7 +233,10 @@ public class HearingService {
         String hearingTime = ihc.getValue().getInterimHearingTime();
         InterimTypeOfHearing hearingType = ihc.getValue().getInterimHearingType();
 
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+        }
+        String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
     }
 
@@ -235,8 +245,14 @@ public class HearingService {
         LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
         String hearingTime = directionDetailCollection.getValue().getHearingTime();
         HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
-
-        String label = formatDynamicListElementLabel(hearingType == null ? "" : hearingType.getId(), hearingDate, hearingTime);
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+        }
+        String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
         return DynamicListElement.builder().code(code).label(label).build();
+    }
+
+    private void throwIllegalStateExceptionIfHearingTypeIsNull() {
+        throw new IllegalStateException("hearingType is unexpectedly null");
     }
 }
