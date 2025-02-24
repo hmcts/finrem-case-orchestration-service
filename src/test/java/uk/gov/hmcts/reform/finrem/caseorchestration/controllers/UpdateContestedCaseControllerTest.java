@@ -16,7 +16,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -30,7 +32,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -64,6 +68,10 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @MockitoBean
     private CaseFlagsService caseFlagsService;
+    @MockitoBean
+    private ExpressCaseService expressCaseService;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
     @Autowired
     private MiamLegacyExemptionsService miamLegacyExemptionsService;
 
@@ -486,6 +494,42 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(any()), times(1));
             mockedStatic.verify(() -> RefugeWrapperUtils.updateRespondentInRefugeTab(any()), times(1));
         }
+    }
+
+    @Test
+    void testIsExpressPilotEnabledCalledOn() throws Exception {
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print());
+
+        // Check that methods is called by the controller
+        verify(expressCaseService, times(1)).setExpressCaseEnrollmentStatus(any());
+    }
+
+    @Test
+    void testIsExpressPilotEnabledCalledOff() throws Exception {
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print());
+
+        // Check that methods is not called by the controller
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(any());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

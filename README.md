@@ -14,7 +14,7 @@ The CCD definitions supported by this service can be found [here](https://github
 </p>
 
 ## Prerequisites
-- [JDK 17](https://www.oracle.com/java)
+- [JDK 21](https://openjdk.java.net/)
 
 ## Getting Started
 
@@ -104,13 +104,13 @@ TASK_NAME=AddApplicationTypeTask java -jar finrem-case-orchestration-service.jar
 TASK_NAME=AddApplicationTypeTask ./gradlew bootRun
 ```
 
-### Running functional tests locally pointing to AAT
-1. Make a copy of `src/main/resources/example-application-aat.properties` as `src/main/resources/application-aat.properties`
-2. Make a copy of `src/functionalTests/resources/example-application-local.properties` as `src/functionalTests/resources/application-local.properties`
-3. Replace the `replace_me` secrets in both of the _newly created_ files.
-   You can get the values from SCM and Azure secrets key vault (the new files are in .gitignore and should ***not*** be committed to git)
-4. Start the app with AAT config using `./gradlew clean bootRunAat`
-5. Start the test with AAT config using `./gradlew clean functional`
+### Running functional tests locally using CftLib
+Ensure you have the following environment variables set:
+- `FINREM_CLIENT_SECRET_AAT`
+- `AUTH_PROVIDER_SERVICE_CLIENT_KEY`
+
+1. From a terminal window run `./gradlew bootWithCCD`
+2. From a separate terminal window run `./gradlew functional`
 
 ### Running additional tests in the Jenkins PR Pipeline
 1. Add one or more appropriate labels to your PR in GitHub. Valid labels are:
