@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -472,6 +474,42 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         assertThat(response.getWarnings()).containsExactly("WARNING1");
         // Verify that the function was captured and executed
         verify(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenCaseData_whenUploadingSuggestedDraftOrder_thenNoCaseStateChange() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+        builder.uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(State.APPLICATION_ISSUED),
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(State.REVIEW_ORDER).data(caseData)
+            ), AUTH_TOKEN);
+        assertThat(response.getState()).isEqualTo(State.APPLICATION_ISSUED.getStateId());
+    }
+
+    @Test
+    void givenCaseData_whenUploadingAgreedDraftOrder_thenNoCaseStateChange() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(State.APPLICATION_ISSUED),
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(State.REVIEW_ORDER).data(caseData)
+            ), AUTH_TOKEN);
+        assertThat(response.getState()).isEqualTo(State.REVIEW_ORDER.getStateId());
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
