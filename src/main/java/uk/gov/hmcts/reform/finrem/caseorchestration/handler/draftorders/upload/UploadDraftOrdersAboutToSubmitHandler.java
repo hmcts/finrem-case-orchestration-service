@@ -77,6 +77,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
@@ -86,9 +87,11 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
         List<String> warnings = new ArrayList<>();
+        String state = caseDetails.getState().getStateId();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
             populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
+            state = caseDetailsBefore.getState().getStateId();
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
@@ -96,7 +99,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         clearTemporaryFields(caseDetails);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).state(state).data(finremCaseData).build();
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
