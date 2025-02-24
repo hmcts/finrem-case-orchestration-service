@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
