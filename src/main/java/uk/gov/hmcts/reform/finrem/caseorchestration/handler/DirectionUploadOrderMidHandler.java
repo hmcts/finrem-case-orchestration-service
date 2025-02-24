@@ -88,7 +88,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
         if (!processOrderService.areAllNewOrdersWordOrPdfFiles(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Word or a PDF file for new documents.")).build();
+                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for new documents.")).build();
         }
         // Validate the modifying legacy approved orders
         if (!processOrderService.areAllLegacyApprovedOrdersPdf(caseData)) {
