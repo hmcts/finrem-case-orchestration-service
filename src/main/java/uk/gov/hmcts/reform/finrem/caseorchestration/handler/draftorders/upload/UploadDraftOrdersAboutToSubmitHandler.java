@@ -91,7 +91,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
             populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
-            state = caseDetailsBefore.getState() == null ? null : caseDetails.getState().getStateId();
+            state = caseDetailsBefore.getState() == null ? null : caseDetailsBefore.getState().getStateId();
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
