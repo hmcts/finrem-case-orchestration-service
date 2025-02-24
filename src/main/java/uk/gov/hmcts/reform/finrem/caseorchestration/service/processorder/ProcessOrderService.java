@@ -80,7 +80,7 @@ public class ProcessOrderService {
      * @param caseDataBefore the case data before the update, used to check if legacy orders existed
      * @param caseData       the case data after the update, used to check if legacy orders have been removed
      * @return {@code true} if the "upload hearing order" was not empty in {@code caseDataBefore}
-     * and is empty in {@code caseData}, otherwise {@code false}
+     *          and is empty in {@code caseData}, otherwise {@code false}
      */
     public boolean areAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
         return !isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData);
@@ -118,7 +118,7 @@ public class ProcessOrderService {
      * @param caseData the FinremCaseData object containing the draft orders wrapper
      *                 with unprocessed approved documents.
      * @return {@code true} if all unprocessed approved documents have filenames ending with
-     * ".doc" or ".docx" or "pdf" (case-insensitive), {@code false} otherwise.
+     *          ".doc" or ".docx" or "pdf" (case-insensitive), {@code false} otherwise.
      */
     public boolean areAllModifyingUnprocessedOrdersWordOrPdfDocuments(FinremCaseData caseData) {
         return areAllDocumentsWithExtensions(getUnprocessedDraftOrders(caseData.getDraftOrdersWrapper())
