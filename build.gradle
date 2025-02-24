@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '6.0.1.5171'
-    id 'org.springframework.boot' version '3.4.2'
+    id 'org.springframework.boot' version '3.4.3'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.65'
     id 'au.com.dius.pact' version '4.6.17'
@@ -34,7 +34,6 @@ def versions = [
         apacheLogging        : '2.24.3',
         idamClient           : '3.0.3',
         jjwt                 : '0.12.6',
-        skyscreamer          : '1.5.3',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
         tika                 : '3.1.0',
@@ -488,7 +487,6 @@ dependencies {
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.skyscreamer
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
@@ -501,6 +499,10 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer'
+
+    configurations.configureEach {
+        exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
 }
 
 tasks.withType(Jar) {
