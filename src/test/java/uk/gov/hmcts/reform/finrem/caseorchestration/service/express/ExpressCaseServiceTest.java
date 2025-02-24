@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.springframework.test.util.ReflectionTestUtils;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
@@ -48,7 +49,7 @@ class ExpressCaseServiceTest {
     @BeforeEach
     public void setUp() {
         expressCaseService = new ExpressCaseService();
-        expressCaseService.expressCaseFrcs = List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2");
+        ReflectionTestUtils.setField(expressCaseService, "expressCaseFrcs", List.of("FR_s_NottinghamList_1", "FR_s_NottinghamList_2"));
     }
 
     @Test

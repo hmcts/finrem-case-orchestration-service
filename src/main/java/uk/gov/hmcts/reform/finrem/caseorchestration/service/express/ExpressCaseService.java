@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1Or
 public class ExpressCaseService {
 
     @Value("${finrem.expressCase.frcs}")
-    List<String> expressCaseFrcs;
+    private List<String> expressCaseFrcs;
 
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
