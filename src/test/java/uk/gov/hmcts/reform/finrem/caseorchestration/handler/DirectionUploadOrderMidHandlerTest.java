@@ -168,7 +168,7 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(List.of("You must upload a Word or a PDF file for new documents."), res.getErrors());
+        assertEquals(List.of("You must upload a Microsoft Word file or PDF for new documents."), res.getErrors());
     }
 
     @Test
