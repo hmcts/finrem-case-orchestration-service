@@ -495,7 +495,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenCaseData_whenUploadingAgreedDraftOrder_thenNoCaseStateChange() {
+    void givenCaseData_whenUploadingAgreedDraftOrder_thenCaseStateChanges() {
         DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
         builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
         builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
