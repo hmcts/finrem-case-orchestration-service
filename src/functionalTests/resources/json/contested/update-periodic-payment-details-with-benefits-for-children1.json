@@ -8,7 +8,9 @@
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "regionList": "london",
       "cfcCourtList": "FR_s_CFCList_2",
+      "londonFRCList": "cfc",
       "applicantLName": "Ramisetti0012",
       "dateOfMarriage": "2012-01-11",
       "mortgageDetail": "HSBC",
