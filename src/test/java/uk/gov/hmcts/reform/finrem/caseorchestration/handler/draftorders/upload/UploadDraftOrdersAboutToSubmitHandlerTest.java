@@ -59,6 +59,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -512,6 +513,23 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(REVIEW_ORDER).data(caseData)
             ), AUTH_TOKEN);
         assertThat(response.getState()).isEqualTo(REVIEW_ORDER.getStateId());
+    }
+
+    @Test
+    void givenCaseData_whenStateIsMissing_thenThrowIllegalStateException() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(null).data(caseData)
+        );
+
+        assertThat(assertThrows(IllegalStateException.class, () -> handler.handle(request, AUTH_TOKEN)).getMessage())
+            .isEqualTo("Unexpected null in state");
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {
