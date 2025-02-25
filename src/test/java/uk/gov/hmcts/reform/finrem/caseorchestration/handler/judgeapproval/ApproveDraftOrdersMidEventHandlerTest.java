@@ -186,7 +186,6 @@ class ApproveDraftOrdersMidEventHandlerTest {
 
     @Test
     void givenUserDoesNotRequireAnotherHearing_whenHandle_shouldClearHearingInstruction() {
-        // Arrange
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .id(12345L)
