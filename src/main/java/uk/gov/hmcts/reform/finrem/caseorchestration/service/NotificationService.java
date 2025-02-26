@@ -724,24 +724,33 @@ public class NotificationService {
         final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
-        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
+        final EmailTemplateNames templateName = hasAttachment ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
-    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
-                                                         NotificationRequest notificationRequest,
-                                                         String auth) {
+    /**
+     * Downloads the document from the given CaseDocument and returns its content as a byte array.
+     *
+     * @param caseDocument the CaseDocument containing the URL of the document to download
+     * @param auth the authentication token
+     * @return the content of the document as a byte array
+     * @throws HttpClientErrorException if the download fails
+     */
+    public byte[] getByteArray(CaseDocument caseDocument, String auth) {
+        String documentBinaryUrl = caseDocument.getDocumentBinaryUrl();
+        ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(documentBinaryUrl, auth);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.error("Download failed for url {}", documentBinaryUrl);
+            throw new HttpClientErrorException(response.getStatusCode());
+        }
+        ByteArrayResource resource = (ByteArrayResource) response.getBody();
+        return (resource != null) ? resource.getByteArray() : new byte[0];
+    }
+
+    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
-            ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(caseDocument.getDocumentBinaryUrl(),
-                auth);
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
-                    caseDocument.getDocumentFilename(), caseDetails.getId());
-                throw new HttpClientErrorException(response.getStatusCode());
-            }
-            ByteArrayResource resource = (ByteArrayResource) response.getBody();
-            notificationRequest.setDocumentContents((resource != null) ? resource.getByteArray() : new byte[0]);
+            notificationRequest.setDocumentContents(getByteArray(caseDocument, auth));
             return true;
         }
         return false;
@@ -770,7 +779,7 @@ public class NotificationService {
         final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
-        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+        final EmailTemplateNames templateName = hasAttachment ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
