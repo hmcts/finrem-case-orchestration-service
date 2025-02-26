@@ -2,13 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -728,29 +723,10 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
-    /**
-     * Downloads the document from the given CaseDocument and returns its content as a byte array.
-     *
-     * @param caseDocument the CaseDocument containing the URL of the document to download
-     * @param auth the authentication token
-     * @return the content of the document as a byte array
-     * @throws HttpClientErrorException if the download fails
-     */
-    public byte[] getByteArray(CaseDocument caseDocument, String auth) {
-        String documentBinaryUrl = caseDocument.getDocumentBinaryUrl();
-        ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(documentBinaryUrl, auth);
-        if (response.getStatusCode() != HttpStatus.OK) {
-            log.error("Download failed for url {}", documentBinaryUrl);
-            throw new HttpClientErrorException(response.getStatusCode());
-        }
-        ByteArrayResource resource = (ByteArrayResource) response.getBody();
-        return (resource != null) ? resource.getByteArray() : new byte[0];
-    }
-
     private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
-            notificationRequest.setDocumentContents(getByteArray(caseDocument, auth));
+            notificationRequest.setDocumentContents(evidenceManagementDownloadService.getByteArray(caseDocument, auth));
             return true;
         }
         return false;
