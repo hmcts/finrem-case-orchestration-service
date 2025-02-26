@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +67,11 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private static final CaseDocument TARGET_DOCUMENT_4 = CaseDocument.builder().documentUrl("targetDoc4.docx").build();
     private static final CaseDocument STAMPED_DOCUMENT_1 = CaseDocument.builder().documentFilename("stamped1.pdf").build();
     private static final CaseDocument STAMPED_DOCUMENT_2 = CaseDocument.builder().documentFilename("stamped2.pdf").build();
+
+    private static final CaseDocument ADDITIONAL_DOCUMENT_1 = CaseDocument.builder().documentUrl("additionalDoc1.docx").build();
+
+    private static final CaseDocument CONVERTED_DOCUMENT_1 = CaseDocument.builder().documentFilename("additionalDoc1.pdf").build();
+
     private static final long CASE_ID = 12345678L;
 
     @InjectMocks
@@ -183,10 +190,14 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    void shouldMarkDraftOrdersReviewCollectionProcessed() {
+    void givenUnprocessedOrdersWithAdditionalAttachments_whenHandle_shouldProcessAndConvertDocumentsToPdf() {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
         mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
+
+        //mock additional document conversion
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(ADDITIONAL_DOCUMENT_1, AUTH_TOKEN, String.valueOf(CASE_ID)))
+            .thenReturn(CONVERTED_DOCUMENT_1);
 
         DraftOrderDocReviewCollection test1;
         DraftOrderDocReviewCollection test2;
@@ -204,7 +215,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                         .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
                 ))
                 .agreedDraftOrderCollection(List.of(
-                    test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT_1)
+                    test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
+                        .draftOrder(TARGET_DOCUMENT_1)
+                        .attachments(List.of(DocumentCollection.builder().value(ADDITIONAL_DOCUMENT_1).build()))
                         .orderStatus(APPROVED_BY_JUDGE).build()).build(),
                     test4 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT_2)
                         .orderStatus(APPROVED_BY_JUDGE).build()).build(),
@@ -217,7 +230,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                     DraftOrdersReviewCollection.builder().value(
                         DraftOrdersReview.builder()
                             .draftOrderDocReviewCollection(List.of(
-                                test1 = buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_1),
+                                test1 = buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_1, ADDITIONAL_DOCUMENT_1),
                                 buildDraftOrderDocReviewCollection(TO_BE_REVIEWED)
                             ))
                             .build()).build(),
@@ -225,7 +238,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                         DraftOrdersReview.builder()
                             .draftOrderDocReviewCollection(List.of(
                                 buildDraftOrderDocReviewCollection(PROCESSED),
-                                test2 = buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_2)
+                                test2 = buildDraftOrderDocReviewCollection(APPROVED_BY_JUDGE, TARGET_DOCUMENT_2, CONVERTED_DOCUMENT_1)
                             ))
                             .build()).build()
                 ))
@@ -239,12 +252,14 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         //Check DraftOrderDocReviewCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
+        assertEquals(CONVERTED_DOCUMENT_1, test1.getValue().getAttachments().get(0).getValue());
         assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
 
         //Check AgreedDraftOrderCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getDraftOrder());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
+        assertEquals(CONVERTED_DOCUMENT_1, test3.getValue().getAttachments().get(0).getValue());
         assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getDraftOrder());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
 
@@ -426,12 +441,20 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     }
 
     private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus) {
-        return buildDraftOrderDocReviewCollection(orderStatus, null);
+        return buildDraftOrderDocReviewCollection(orderStatus, null, null);
     }
 
-    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(OrderStatus orderStatus, CaseDocument document) {
+    private DraftOrderDocReviewCollection buildDraftOrderDocReviewCollection(
+        OrderStatus orderStatus, CaseDocument document, CaseDocument additionalDocument) {
+
         return DraftOrderDocReviewCollection.builder()
-            .value(DraftOrderDocumentReview.builder().draftOrderDocument(document).orderStatus(orderStatus).build())
+            .value(DraftOrderDocumentReview.builder()
+                .draftOrderDocument(document)
+                .orderStatus(orderStatus)
+                .attachments(additionalDocument != null
+                    ? List.of(DocumentCollection.builder().value(additionalDocument).build())
+                    : Collections.emptyList())
+                .build())
             .build();
     }
 
