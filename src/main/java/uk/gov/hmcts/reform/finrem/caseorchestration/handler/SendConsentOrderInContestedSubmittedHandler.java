@@ -28,7 +28,6 @@ import java.util.List;
 public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackHandler {
     private final GeneralOrderService generalOrderService;
     private final GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final FinremConsentInContestedSendOrderCorresponder contestedSendOrderCorresponder;
     private final ContestedConsentOrderApprovedCorresponder contestedConsentOrderApprovedCorresponder;
     private final ContestedConsentOrderNotApprovedCorresponder contestedConsentOrderNotApprovedCorresponder;
@@ -46,7 +45,6 @@ public class SendConsentOrderInContestedSubmittedHandler extends FinremCallbackH
                                                        ) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
         this.contestedSendOrderCorresponder = contestedSendOrderCorresponder;
         this.contestedConsentOrderApprovedCorresponder = contestedConsentOrderApprovedCorresponder;
         this.generalOrderRaisedCorresponder = generalOrderRaisedCorresponder;

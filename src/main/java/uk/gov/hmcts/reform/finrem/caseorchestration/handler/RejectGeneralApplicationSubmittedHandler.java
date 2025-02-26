@@ -37,7 +37,6 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
     private final PaperNotificationService paperNotificationService;
     private final ObjectMapper objectMapper;
     private final GeneralApplicationHelper generalApplicationHelper;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public RejectGeneralApplicationSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     NotificationService notificationService,
@@ -49,7 +48,6 @@ public class RejectGeneralApplicationSubmittedHandler extends FinremCallbackHand
         this.paperNotificationService = paperNotificationService;
         this.objectMapper = objectMapper;
         this.generalApplicationHelper = generalApplicationHelper;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
     }
 
     @Override
