@@ -33,6 +33,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadDraftOrderAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -177,8 +179,10 @@ class DraftOrderServiceTest {
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
                         .additionalDocuments(List.of(
-                            DocumentCollection.builder()
-                                .value(attachment1)
+                            AdditionalDocumentsCollection.builder()
+                                .value(UploadDraftOrderAdditionalDocument.builder()
+                                    .orderAttachment(attachment1)
+                                    .build())
                                 .build()
                         ))
                         .build())
@@ -215,11 +219,15 @@ class DraftOrderServiceTest {
                         .resubmission(List.of(YesOrNo.YES.getYesOrNo()))
                         .agreedDraftOrderDocument(draftOrder1)
                         .additionalDocuments(List.of(
-                            DocumentCollection.builder()
-                                .value(attachment1)
+                            AdditionalDocumentsCollection.builder()
+                                .value(UploadDraftOrderAdditionalDocument.builder()
+                                    .orderAttachment(attachment1)
+                                    .build())
                                 .build(),
-                            DocumentCollection.builder()
-                                .value(attachment2)
+                            AdditionalDocumentsCollection.builder()
+                                .value(UploadDraftOrderAdditionalDocument.builder()
+                                    .orderAttachment(attachment2)
+                                    .build())
                                 .build()
                         ))
                         .build())
