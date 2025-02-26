@@ -2,13 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -32,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.LocalDateTimeExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +57,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @ExtendWith(MockitoExtension.class)
 class JudgeApprovalResolverTest {
+
+    @RegisterExtension
+    LocalDateTimeExtension timeExtension = new LocalDateTimeExtension(FIXED_DATE_TIME);
 
     private static final String APPROVED_JUDGE_NAME = "Mary Chapman";
     private static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
@@ -134,18 +137,15 @@ class JudgeApprovalResolverTest {
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
 
-        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
-            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(), draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval,
-                AUTH_TOKEN);
+        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(), draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval,
+            AUTH_TOKEN);
 
-            if (approvablesToBeExamined != null) {
-                for (Approvable approvable : approvablesToBeExamined) {
-                    assertEquals(TO_BE_REVIEWED, approvable.getOrderStatus());
-                    assertNull(approvable.getApprovalDate());
-                    assertNull(approvable.getApprovalJudge());
-                    assertNull(approvable.getFinalOrder());
-                }
+        if (approvablesToBeExamined != null) {
+            for (Approvable approvable : approvablesToBeExamined) {
+                assertEquals(TO_BE_REVIEWED, approvable.getOrderStatus());
+                assertNull(approvable.getApprovalDate());
+                assertNull(approvable.getApprovalJudge());
+                assertNull(approvable.getFinalOrder());
             }
         }
     }
@@ -174,34 +174,31 @@ class JudgeApprovalResolverTest {
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
 
-        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
-            judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
-                draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
+        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
+            draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
 
-            boolean approvedDocument = false;
-            if (approvablesToBeExamined != null) {
-                for (Approvable approvable : approvablesToBeExamined) {
-                    if (approvable.match(expectedAmendedDocument != null ? expectedAmendedDocument : TARGET_DOCUMENT)) {
-                        assertEquals(APPROVED_BY_JUDGE, approvable.getOrderStatus());
-                        if (!(approvable instanceof AgreedDraftOrder)) {
-                            assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
-                            assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
-                            assertEquals(expectedFinalOrder, approvable.getFinalOrder());
-                        } else {
-                            assertNull(approvable.getApprovalDate());
-                            assertNull(approvable.getApprovalJudge());
-                            assertNull(approvable.getFinalOrder());
-                        }
-                        if (expectedAmendedDocument != null) {
-                            assertEquals(expectedAmendedDocument, approvable.getTargetDocument());
-                        }
-                        approvedDocument = true;
+        boolean approvedDocument = false;
+        if (approvablesToBeExamined != null) {
+            for (Approvable approvable : approvablesToBeExamined) {
+                if (approvable.match(expectedAmendedDocument != null ? expectedAmendedDocument : TARGET_DOCUMENT)) {
+                    assertEquals(APPROVED_BY_JUDGE, approvable.getOrderStatus());
+                    if (!(approvable instanceof AgreedDraftOrder)) {
+                        assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
+                        assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
+                        assertEquals(expectedFinalOrder, approvable.getFinalOrder());
+                    } else {
+                        assertNull(approvable.getApprovalDate());
+                        assertNull(approvable.getApprovalJudge());
+                        assertNull(approvable.getFinalOrder());
                     }
+                    if (expectedAmendedDocument != null) {
+                        assertEquals(expectedAmendedDocument, approvable.getTargetDocument());
+                    }
+                    approvedDocument = true;
                 }
             }
-            assertTrue(approvedDocument, "One of the approvables should be got approved");
         }
+        assertTrue(approvedDocument, "One of the approvables should be got approved");
     }
 
     static DraftOrderDocumentReview createDraftOrderDocumentReview() {
@@ -264,7 +261,7 @@ class JudgeApprovalResolverTest {
                                                         DraftOrderDocumentReview draftReview, PsaDocumentReview psaReview,
                                                         AgreedDraftOrder agreedDraftOrder,
                                                         CaseDocument amendedDocument, Boolean isFinalOrder) {
-        JudgeApproval judgeApproval = null;
+        JudgeApproval judgeApproval;
         if (isFinalOrder == null) {
             judgeApproval = judgeApprovalBuilder.build();
         } else {
@@ -321,8 +318,8 @@ class JudgeApprovalResolverTest {
 
     @Test
     void shouldProcessRefusedApprovablesAndUpdateTheirState() {
-        AgreedDraftOrder sample1 = null;
-        DraftOrderDocumentReview sample2 = null;
+        AgreedDraftOrder sample1;
+        DraftOrderDocumentReview sample2;
         DraftOrdersWrapper.DraftOrdersWrapperBuilder dowBuilder = DraftOrdersWrapper.builder();
         dowBuilder.agreedDraftOrderCollection(List.of(
             AgreedDraftOrderCollection.builder().value(sample1 = AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT).build()).build()
@@ -340,30 +337,27 @@ class JudgeApprovalResolverTest {
         ));
 
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().build();
-        DraftOrdersWrapper draftOrdersWrapper = null;
-        JudgeApproval ja = null;
+        DraftOrdersWrapper draftOrdersWrapper;
+        JudgeApproval ja;
 
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
 
-        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
-            judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
-                draftOrdersWrapper = dowBuilder.build(), TARGET_DOCUMENT, ja = JudgeApproval.builder()
-                    .judgeDecision(JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
-                    .document(TARGET_DOCUMENT)
-                    .changesRequestedByJudge("FEEDBACK")
-                    .build(), AUTH_TOKEN);
+        judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
+            draftOrdersWrapper = dowBuilder.build(), TARGET_DOCUMENT, ja = JudgeApproval.builder()
+                .judgeDecision(JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
+                .document(TARGET_DOCUMENT)
+                .changesRequestedByJudge("FEEDBACK")
+                .build(), AUTH_TOKEN);
 
-            assertEquals(OrderStatus.REFUSED, sample1.getOrderStatus());
-            assertEquals(OrderStatus.REFUSED, sample2.getOrderStatus());
-            assertEquals(FIXED_DATE_TIME, sample2.getRefusedDate());
-            assertNull(sample1.getApprovalDate());
-            assertNull(sample2.getApprovalDate());
-            assertNull(sample1.getApprovalJudge()); // AgreedDraftOrder doesn't store approvalJudge
-            assertEquals(APPROVED_JUDGE_NAME, sample2.getApprovalJudge());
-            verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
-            verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
-        }
+        assertEquals(OrderStatus.REFUSED, sample1.getOrderStatus());
+        assertEquals(OrderStatus.REFUSED, sample2.getOrderStatus());
+        assertEquals(FIXED_DATE_TIME, sample2.getRefusedDate());
+        assertNull(sample1.getApprovalDate());
+        assertNull(sample2.getApprovalDate());
+        assertNull(sample1.getApprovalJudge()); // AgreedDraftOrder doesn't store approvalJudge
+        assertEquals(APPROVED_JUDGE_NAME, sample2.getApprovalJudge());
+        verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
+        verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
     }
 }
