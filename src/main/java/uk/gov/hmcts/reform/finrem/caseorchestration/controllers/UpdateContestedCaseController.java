@@ -98,12 +98,13 @@ public class UpdateContestedCaseController extends BaseController {
         validateCaseData(ccdRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
-        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION),
+            TYPE_OF_APPLICATION_DEFAULT_TO);
+
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateDivorceDetailsForContestedCase(caseData);
         }
         caseFlagsService.setCaseFlagInformation(caseDetails);
-
         updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
@@ -224,13 +225,13 @@ public class UpdateContestedCaseController extends BaseController {
 
     private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData, String typeOfApplication) {
         String paymentForChildrenDecisionObj = Objects.toString(caseData.get("paymentForChildrenDecision"));
+        String benefitsForChildrenDecisionObj = Objects.toString(caseData.get("benefitForChildrenDecision"));
 
         if (equalsTo(paymentForChildrenDecisionObj, NO_VALUE)) {
             removeBenefitsDetails(caseData, typeOfApplication);
-        } else {
-            if (equalsTo(paymentForChildrenDecisionObj, YES_VALUE)) {
-                removeBenefitPaymentChecklist(caseData, typeOfApplication);
-            }
+        } else if (equalsTo(paymentForChildrenDecisionObj, YES_VALUE)
+            && equalsTo(benefitsForChildrenDecisionObj, YES_VALUE)) {
+            removeBenefitPaymentChecklist(caseData, typeOfApplication);
         }
     }
 

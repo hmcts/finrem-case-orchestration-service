@@ -240,9 +240,11 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void shouldUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() throws Exception {
+    void shouldRemovePeriodicPaymentDetailsWithBenefitsForChildrenDecisionForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
+                // "benefitForChildrenDecision": "Yes",
+                //  "paymentForChildrenDecision": "Yes",
                 "/fixtures/contested/update-periodic-payment-details-with-benefits-for-children.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
                 .content(requestContent.toString())
@@ -251,6 +253,22 @@ class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.benefitPaymentChecklist").doesNotExist());
+    }
+
+    @Test
+    void shouldMaintainPeriodicPaymentDetailsWhenBenefitsForChildrenDecisionNotProvidedForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(
+                // "paymentForChildrenDecision": "Yes",
+                // "benefitForChildrenDecision": "No"
+                "/fixtures/contested/update-periodic-payment-details-without-benefits-for-children-decision.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.benefitPaymentChecklist").exists());
     }
 
     @Test

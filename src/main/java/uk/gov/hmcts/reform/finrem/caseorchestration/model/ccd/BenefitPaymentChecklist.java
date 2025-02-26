@@ -30,6 +30,7 @@ public enum BenefitPaymentChecklist {
     public static BenefitPaymentChecklist forValue(String value) {
         return Arrays.stream(BenefitPaymentChecklist.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
-            .findFirst().orElseThrow(IllegalArgumentException::new);
+            .findFirst()
+            .orElseThrow(IllegalArgumentException::new);
     }
 }
