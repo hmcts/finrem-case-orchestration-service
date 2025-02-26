@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 public class FinremCallbackRequestFactory {
 
@@ -21,11 +22,19 @@ public class FinremCallbackRequestFactory {
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData caseData) {
-        return from(id, null, caseData);
+        return from(id, null, caseData, null);
+    }
+
+    public static FinremCallbackRequest from(Long id, FinremCaseData caseData, State state) {
+        return from(id, null, caseData, state);
     }
 
     public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData) {
         return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData));
+    }
+
+    public static FinremCallbackRequest from(Long id, CaseType caseType, FinremCaseData caseData, State state) {
+        return from(FinremCaseDetailsBuilderFactory.from(id, caseType, caseData, state));
     }
 
     public static FinremCallbackRequest from(Long id, FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
