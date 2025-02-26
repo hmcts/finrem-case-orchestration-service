@@ -68,13 +68,10 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
             .map(HearingInstruction::getRequireAnotherHearing)
             .orElse(YesOrNo.YES) == YesOrNo.NO) {
             draftOrdersWrapper.setHearingInstruction(null);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(finremCaseData)
-                .build();
+        } else {
+            setupHearingInstruction(draftOrdersWrapper);
+            setupExtraReportFieldsInput(draftOrdersWrapper);
         }
-
-        setupHearingInstruction(draftOrdersWrapper);
-        setupExtraReportFieldsInput(draftOrdersWrapper);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
