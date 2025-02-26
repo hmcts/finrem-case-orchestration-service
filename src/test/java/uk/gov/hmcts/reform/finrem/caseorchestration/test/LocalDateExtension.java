@@ -9,6 +9,17 @@ import org.mockito.Mockito;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 
+/**
+ * JUnit 5 extension to mock LocalDate.now() to return a fixed date.
+ *
+ * <p>
+ * Usage: Add the following annotation to your test class:
+ * <pre>
+ *      {@code @RegisterExtension LocalDateExtension dateExtension = new LocalDateExtension(LocalDate.of(1970, 1, 1);}
+ * </pre>
+ * This will set the return value of any calls to LocalDate.now() to 1st January 1970 for all tests in the class
+ * </p>
+ */
 public class LocalDateExtension implements InvocationInterceptor {
 
     private final LocalDate fixed;
