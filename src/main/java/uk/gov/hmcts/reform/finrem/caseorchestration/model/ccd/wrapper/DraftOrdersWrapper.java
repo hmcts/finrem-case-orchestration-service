@@ -103,6 +103,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
 
     private YesOrNo isUnprocessedApprovedDocumentPresent;
 
+    private YesOrNo isUnreviewedDocumentPresent;
+
     @JsonProperty("finalisedOrdersCollection")
     private List<FinalisedOrderCollection> finalisedOrdersCollection;
 

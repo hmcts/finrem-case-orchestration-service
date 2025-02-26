@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToSha
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShareCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrdersToSend;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderDateService;
@@ -65,6 +66,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final GeneralOrderService generalOrderService;
+    private final DraftOrderService draftOrderService;
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList;
@@ -72,7 +74,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
     private final SendOrdersCategoriser sendOrdersCategoriser;
 
     public SendOrderContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                  GeneralOrderService generalOrderService,
+                                                  GeneralOrderService generalOrderService, DraftOrderService draftOrderService,
                                                   GenericDocumentService genericDocumentService,
                                                   DocumentHelper documentHelper,
                                                   List<SendOrderPartyDocumentHandler> sendOrderPartyDocumentList,
@@ -80,6 +82,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                                                   SendOrdersCategoriser sendOrdersCategoriser) {
         super(finremCaseDetailsMapper);
         this.generalOrderService = generalOrderService;
+        this.draftOrderService = draftOrderService;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.sendOrderPartyDocumentList = sendOrderPartyDocumentList;
@@ -137,6 +140,8 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             resetFields(caseData.getDraftOrdersWrapper());
             clearTemporaryFields(caseData);
             sendOrdersCategoriser.categorise(caseDetails.getData());
+
+            draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
         } catch (RuntimeException e) {
             // The purpose of this catch block is to make the exception message available in the error message box
             // And it doesn't let CCD to retry if we populate the exception message to `errors`
