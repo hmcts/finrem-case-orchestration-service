@@ -16,9 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -29,6 +31,8 @@ import java.util.List;
 public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final OnlineFormDocumentService service;
+    private final FeatureToggleService featureToggleService;
+    private final ExpressCaseService expressCaseService;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
@@ -38,6 +42,8 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                         OnlineFormDocumentService service,
+                                                        FeatureToggleService featureToggleService,
+                                                        ExpressCaseService expressCaseService,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
@@ -45,6 +51,8 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                                                         MetricsService metricsService) {
         super(finremCaseDetailsMapper);
         this.service = service;
+        this.expressCaseService = expressCaseService;
+        this.featureToggleService = featureToggleService;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
@@ -90,6 +98,10 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
         metricsService.setCourtMetrics(caseData);
+
+        if (featureToggleService.isExpressPilotEnabled()) {
+            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

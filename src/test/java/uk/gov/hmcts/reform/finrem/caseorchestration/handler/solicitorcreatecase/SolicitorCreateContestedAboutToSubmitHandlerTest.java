@@ -24,9 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +63,10 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CaseFlagsService caseFlagsService;
     @Mock
     IdamService idamService;
+    @Mock
+    FeatureToggleService featureToggleService;
+    @Mock
+    ExpressCaseService expressCaseService;
 
     @Mock
     MetricsService metricsService;
@@ -75,6 +82,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         handler = new SolicitorCreateContestedAboutToSubmitHandler(
             finremCaseDetailsMapper,
             onlineFormDocumentService,
+            featureToggleService,
+            expressCaseService,
             caseFlagsService,
             idamService,
             representationWorkflowService,
@@ -105,8 +114,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         FinremCaseData responseCaseData = handler.handle(callbackRequest, AUTH_TOKEN).getData();
 
         expectedAdminResponseCaseData(responseCaseData);
-
-
 
         verify(representationWorkflowService).persistDefaultOrganisationPolicy(any(FinremCaseData.class));
     }
@@ -179,6 +186,28 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(metricsService, times(1)).setCourtMetrics(caseData);
+    }
+
+    @Test
+    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+    }
+
+    @Test
+    void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {
