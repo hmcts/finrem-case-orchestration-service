@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresentedPaper;
@@ -52,16 +50,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FastTrackReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Gender;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailHolder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
@@ -138,19 +130,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrd
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 class FinremCaseDetailMapperTest {
 
@@ -222,7 +210,6 @@ class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
     }
 
-
     @Test
     void givenCaseFlagsFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsOnlyFromJson();
@@ -231,7 +218,7 @@ class FinremCaseDetailMapperTest {
     }
 
     @Test
-    void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+    void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(SOL_CONTEST_CALLBACK_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         FinremCaseData caseData = finremCaseDetails.getData();
@@ -290,7 +277,6 @@ class FinremCaseDetailMapperTest {
         assertMiam(caseData);
     }
 
-
     private void assertAmendedConsentOrderCollection(FinremCaseData caseData) {
         List<AmendedConsentOrderCollection> expected = List.of(
             AmendedConsentOrderCollection.builder()
@@ -301,12 +287,6 @@ class FinremCaseDetailMapperTest {
                 .build());
         assertNotNull(caseData.getAmendedConsentOrderCollection());
         assertTrue(caseData.getAmendedConsentOrderCollection().containsAll(expected));
-    }
-
-    private Date convertToDateViaInstant(LocalDate dateToConvert) {
-        return java.util.Date.from(dateToConvert.atStartOfDay()
-            .atZone(ZoneId.systemDefault())
-            .toInstant());
     }
 
     private void assertCaseNotesCollection(FinremCaseData caseData) {
@@ -506,15 +486,6 @@ class FinremCaseDetailMapperTest {
     }
 
     private void assertAdditionalHearingDocuments(FinremCaseData caseData) {
-        List<AdditionalHearingDocumentCollection> expected = List.of(
-            AdditionalHearingDocumentCollection.builder()
-                .value(AdditionalHearingDocument.builder()
-                    .document(getTestDocument())
-                    .additionalHearingDocumentDate(LocalDateTime.now())
-                    .build())
-                .build()
-        );
-
         assertEquals(1, caseData.getListForHearingWrapper().getAdditionalHearingDocuments().size());
     }
 
@@ -620,7 +591,7 @@ class FinremCaseDetailMapperTest {
                             .value(HearingBundleDocument.builder()
                                 .bundleDocuments(getTestDocument())
                                 .bundleUploadDate(LocalDateTime.of(LocalDate.of(2022, 6, 20),
-                                    LocalTime.of(15, 00)))
+                                    LocalTime.of(15, 0)))
                                 .build())
                             .build()
                     ))
@@ -657,22 +628,6 @@ class FinremCaseDetailMapperTest {
         assertEquals(caseData.getDivorceUploadEvidence2(), getTestDocument());
         assertEquals(caseData.getMiniFormA(), getTestDocument());
 
-    }
-
-    private void assertGeneralOrderCollection(FinremCaseData caseData) {
-        List<GeneralOrderCollectionItem> expected = List.of(
-            GeneralOrderCollectionItem.builder()
-                .value(GeneralOrder.builder()
-                    .generalOrderJudgeType(JudgeType.DISTRICT_JUDGE)
-                    .generalOrderDateOfOrder(LocalDate.of(2010, 1, 2))
-                    .generalOrderOrder("order1")
-                    .generalOrderDocumentUpload(getTestDocument())
-                    .generalOrderComments("comment1")
-                    .build())
-                .build()
-        );
-
-        assertTrue(caseData.getGeneralOrderWrapper().getGeneralOrderCollection().containsAll(expected));
     }
 
     private void assertOrderRefusalCollection(FinremCaseData caseData) {
@@ -788,26 +743,10 @@ class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralApplicationsCollection(FinremCaseData caseData) {
-        List<GeneralApplicationCollection> expected = List.of(
-            GeneralApplicationCollection.builder()
-                .value(GeneralApplication.builder()
-                    .generalApplicationDocument(getTestDocument())
-                    .build())
-                .build()
-        );
-
         assertEquals(1, caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection().size());
     }
 
     private void assertGeneralLetterCollection(FinremCaseData caseData) {
-        List<GeneralLetterCollection> expected = List.of(
-            GeneralLetterCollection.builder()
-                .value(GeneralLetter.builder()
-                    .generatedLetter(getTestDocument())
-                    .build())
-                .build()
-        );
-
         assertEquals(1, caseData.getGeneralLetterWrapper().getGeneralLetterCollection().size());
     }
 
