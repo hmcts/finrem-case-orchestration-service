@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
     private final PfdNcdrDocumentService pfdNcdrDocumentService;
+    private final ExpressCaseService expressCaseService;
 
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
@@ -68,8 +70,15 @@ public class HearingDocumentService {
     }
 
     private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
+        Optional<Object> expressParticipation =
+            Optional.ofNullable(pair.getLeft().getData().get(EXPRESS_CASE_PARTICIPATION));
+
         CaseDocument formCNonFastTrack;
-        if (isExpressCase(pair.getLeft())) {
+        if (expressParticipation
+            .map(Object::toString)
+            .map(ExpressCaseParticipation::forValue)
+            .map(expressCaseService::isExpressCase)
+            .orElse(false)) {
             formCNonFastTrack = genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCExpressCaseTemplate(), documentConfiguration.getFormCFileName());
         } else {
@@ -123,13 +132,6 @@ public class HearingDocumentService {
 
     private boolean isFastTrackApplication(Pair<CaseDetails, String> pair) {
         return isFastTrackApplication.apply(pair.getLeft().getData());
-    }
-
-    private boolean isExpressCase(CaseDetails caseDetails) {
-        return featureToggleService.isExpressPilotEnabled()
-            &&  ExpressCaseParticipation.ENROLLED.getValue().equals(
-            caseDetails.getData().get(EXPRESS_CASE_PARTICIPATION)
-        );
     }
 
     CaseDetails addHearingCourtFields(CaseDetails caseDetails) {

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
 import java.time.LocalDate;
@@ -113,7 +114,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @MockitoBean
     BulkPrintService bulkPrintService;
     @MockitoBean
-    private FeatureToggleService featureToggleService;
+    private ExpressCaseService expressCaseService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
@@ -165,26 +166,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void generateNonFastTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
         boolean respondentDigital = false;
         mockPfdNcdrDocuments(respondentDigital);
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
         settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.DOES_NOT_QUALIFY);
-
-        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
-
-        assertCaseDocument(result.get(FORM_C));
-        assertCaseDocument(result.get(FORM_G));
-        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
-        verifyPfdNcdrDocuments(result, respondentDigital);
-        verifyCommonNonFastTrackAndExpressCaseFields(false);
-    }
-
-    @Test
-    public void generateFormCExpressPilotDisabledAndFormGAndOutOfFamilyCourtResolution() {
-        boolean respondentDigital = false;
-        mockPfdNcdrDocuments(respondentDigital);
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
-        CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
-        settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.ENROLLED);
+        when(expressCaseService.isExpressCase(ExpressCaseParticipation.DOES_NOT_QUALIFY)).thenReturn(false);
 
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -199,10 +183,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void generateExpressCaseFormCTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
         boolean respondentDigital = false;
         mockPfdNcdrDocuments(respondentDigital);
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
 
         CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
         settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.ENROLLED);
+        when(expressCaseService.isExpressCase(ExpressCaseParticipation.ENROLLED)).thenReturn(true);
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         assertCaseDocument(result.get(FORM_C));
