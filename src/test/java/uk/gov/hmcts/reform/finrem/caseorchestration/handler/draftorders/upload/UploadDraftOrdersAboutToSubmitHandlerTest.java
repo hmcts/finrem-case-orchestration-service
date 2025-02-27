@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -32,6 +31,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadDraftOrderAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -142,8 +143,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .suggestedPensionSharingAnnexes(mock(CaseDocument.class))
                 .build())
             .build();
-        DocumentCollection additionalDocumentCollection = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocumentCollection = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
         UploadSuggestedDraftOrderCollection orderCollection = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
@@ -220,14 +223,20 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
-        DocumentCollection additionalDocument1 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument1 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
-        DocumentCollection additionalDocument2 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument2 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
-        DocumentCollection additionalDocument3 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument3 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
         UploadSuggestedDraftOrderCollection orderCollection1 = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
@@ -274,11 +283,11 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult1 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult1.getDraftOrder()).isNotNull();
-        assertEquals(2, draftOrderResult1.getAttachments().size());
+        assertThat(draftOrderResult1.getAttachments()).isNotEmpty().hasSize(2);
 
         SuggestedDraftOrder draftOrderResult2 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(draftOrderResult2.getDraftOrder()).isNotNull();
-        assertEquals(1, draftOrderResult2.getAttachments().size());
+        assertThat(draftOrderResult2.getAttachments()).isNotEmpty().hasSize(1);
 
         SuggestedDraftOrder draftOrderResult3 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(2).getValue();
         assertThat(draftOrderResult3.getDraftOrder()).isNotNull();

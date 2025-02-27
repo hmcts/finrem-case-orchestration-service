@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderF
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrderCollection;
@@ -225,11 +226,11 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         // Add additional attachments for orders only
         if (!ObjectUtils.isEmpty(uploadDraftOrder.getAdditionalDocuments())) {
             List<DocumentCollection> attachments = new ArrayList<>();
-            for (DocumentCollection additionalDoc :
+            for (AdditionalDocumentsCollection additionalDoc :
                 uploadDraftOrder.getAdditionalDocuments()) {
-                if (additionalDoc.getValue() != null) {
+                if (additionalDoc.getValue().getOrderAttachment() != null) {
                     attachments.add(DocumentCollection.builder()
-                        .value(additionalDoc.getValue())
+                        .value(additionalDoc.getValue().getOrderAttachment())
                         .build());
                 }
             }
