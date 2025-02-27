@@ -23,7 +23,7 @@ public class MetricsService {
     *
     * @param caseData instance of FinremCaseData
     */
-    public void  setCourtMetrics(FinremCaseData caseData) {
+    public void setCourtMetrics(FinremCaseData caseData) {
 
         String selectedCourtId = caseData.getSelectedAllocatedCourt();
 
