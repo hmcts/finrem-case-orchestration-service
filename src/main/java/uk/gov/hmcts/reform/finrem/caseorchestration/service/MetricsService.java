@@ -1,16 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MetricsService {
 
@@ -27,16 +30,37 @@ public class MetricsService {
 
         String selectedCourtId = caseData.getSelectedAllocatedCourt();
 
-        Optional<CourtDetails> selectedCourtDetails = ofNullable(courtDetailsConfiguration.getCourts().get(selectedCourtId));
+        Optional<CourtDetails> selectedCourtDetails =
+                ofNullable(courtDetailsConfiguration.getCourts().get(selectedCourtId));
 
-        String getEmailForSelectedCourt = selectedCourtDetails.map(CourtDetails::getEmail).orElse("");
-        String getNameForSelectedCourt = selectedCourtDetails.map(CourtDetails::getCourtName).orElse("");
-        String getAddressForSelectedCourt = selectedCourtDetails.map(CourtDetails::getCourtAddress).orElse("");
-        String getPhoneForSelectedCourt = selectedCourtDetails.map(CourtDetails::getPhoneNumber).orElse("");
+        setIfPresent(caseData.getConsentOrderWrapper()::setConsentOrderFrcName,
+                selectedCourtDetails.map(CourtDetails::getCourtName),
+                "Court Name",
+                selectedCourtId);
 
-        caseData.getConsentOrderWrapper().setConsentOrderFrcName(getNameForSelectedCourt);
-        caseData.getConsentOrderWrapper().setConsentOrderFrcAddress(getAddressForSelectedCourt);
-        caseData.getConsentOrderWrapper().setConsentOrderFrcEmail(getEmailForSelectedCourt);
-        caseData.getConsentOrderWrapper().setConsentOrderFrcPhone(getPhoneForSelectedCourt);
+        setIfPresent(caseData.getConsentOrderWrapper()::setConsentOrderFrcAddress,
+                selectedCourtDetails.map(CourtDetails::getCourtAddress),
+                "Court Address",
+                selectedCourtId);
+
+        setIfPresent(caseData.getConsentOrderWrapper()::setConsentOrderFrcEmail,
+                selectedCourtDetails.map(CourtDetails::getEmail),
+                "Court Email",
+                selectedCourtId);
+
+        setIfPresent(caseData.getConsentOrderWrapper()::setConsentOrderFrcPhone,
+                selectedCourtDetails.map(CourtDetails::getPhoneNumber),
+                "Court Phone",
+                selectedCourtId);
+    }
+
+    private <T> void setIfPresent(Consumer<T> setter, Optional<T> value, String fieldName, String selectedCourtId) {
+        if (value.isPresent()) {
+            setter.accept(value.get());
+        } else {
+            log.warn("Warning: {} is missing a value for {} so the consentOrderFRC value will not be set.",
+                    selectedCourtId,
+                    fieldName);
+        }
     }
 }

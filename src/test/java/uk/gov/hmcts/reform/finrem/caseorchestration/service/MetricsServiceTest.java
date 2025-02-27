@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.Map;
 
@@ -17,6 +19,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 
 @ExtendWith(MockitoExtension.class)
 class MetricsServiceTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(MetricsService.class);
 
     private MetricsService metricsService;
     @Mock
@@ -58,20 +63,19 @@ class MetricsServiceTest {
     }
 
     /*
-     * The courtDetailsConfiguration is set up to return EMPTY data when asked for information about
+     * The courtDetailsConfiguration is set up to return null when asked for information about
      * a court with the id FR_s_NottinghamList_7.
      *
      * defaultContestedFinremCaseDetails is used because the case it builds includes a court list for Nottingham
      * containing court FR_s_NottinghamList_7.
+     *
+     * Test confirms that no metrics data is set, but that a Warning is logged.
      */
     @Test
-    void shouldSetCourtMetricsWhenCourtDataEmpty() {
+    void shouldNotCourtMetricsWhenCourtDataEmpty() {
 
         Map<String, CourtDetails> courtDetailsMap = Map.of(
-                "FR_s_NottinghamList_7", CourtDetails.builder().email("")
-                        .courtAddress("")
-                        .courtName("")
-                        .phoneNumber("").build()
+                "FR_s_NottinghamList_7", CourtDetails.builder().build()
         );
 
         when(courtDetailsConfiguration.getCourts()).thenReturn(courtDetailsMap);
@@ -80,9 +84,16 @@ class MetricsServiceTest {
 
         metricsService.setCourtMetrics(caseDetails.getData());
 
-        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcName()).isEmpty();
-        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcAddress()).isEmpty();
-        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcEmail()).isEmpty();
-        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcPhone()).isEmpty();
+        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcName()).isNull();
+        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcAddress()).isNull();
+        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcEmail()).isNull();
+        assertThat(caseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcPhone()).isNull();
+
+        assertThat(logs.getWarns()).contains(
+                "Warning: FR_s_NottinghamList_7 is missing a value for Court Name so the consentOrderFRC value will not be set.",
+                "Warning: FR_s_NottinghamList_7 is missing a value for Court Address so the consentOrderFRC value will not be set.",
+                "Warning: FR_s_NottinghamList_7 is missing a value for Court Email so the consentOrderFRC value will not be set.",
+                "Warning: FR_s_NottinghamList_7 is missing a value for Court Phone so the consentOrderFRC value will not be set."
+        );
     }
 }
