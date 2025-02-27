@@ -18,9 +18,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 @ExtendWith(MockitoExtension.class)
 class MetricsServiceTest {
 
+    private MetricsService metricsService;
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
-    private MetricsService metricsService;
 
     @BeforeEach
     void setUp() {
