@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -30,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.RefusedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.LocalDateTimeExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +54,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders
 
 @ExtendWith(MockitoExtension.class)
 class RefusedOrderProcessorTest {
+
+    @RegisterExtension
+    LocalDateTimeExtension timeExtension = new LocalDateTimeExtension(FIXED_DATE_TIME);
 
     private static final CaseDocument TARGET_DOCUMENT = CaseDocument.builder().documentUrl("targetUrl").build();
     private static final CaseDocument GENERATED_REFUSED_ORDER = CaseDocument.builder().documentUrl("generatedRefusedOrder.pdf").build();
@@ -101,54 +104,50 @@ class RefusedOrderProcessorTest {
             eq(APPROVED_JUDGE_NAME), extraReportFieldsInput == null ? isNull() : eq(extraReportFieldsInput.getJudgeType()), eq(AUTH_TOKEN)))
             .thenReturn(GENERATED_REFUSED_ORDER);
 
-        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedStatic.when(LocalDateTime::now).thenReturn(FIXED_DATE_TIME);
+        underTest.processRefusedOrders(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(FinremCaseData.builder()
+                    .draftOrdersWrapper(draftOrdersWrapper)
+                    .build())
+                .build(),
+            draftOrdersWrapper, judgeApproval, AUTH_TOKEN);
 
-            underTest.processRefusedOrders(FinremCaseDetails.builder()
-                    .id(Long.valueOf(CASE_ID))
-                    .data(FinremCaseData.builder()
-                        .draftOrdersWrapper(draftOrdersWrapper)
-                        .build())
-                    .build(),
-                draftOrdersWrapper, judgeApproval, AUTH_TOKEN);
+        assertNull(draftOrdersWrapper.getGeneratedOrderReason());
+        assertNull(draftOrdersWrapper.getGeneratedOrderRefusedDate());
+        assertNull(draftOrdersWrapper.getGeneratedOrderJudgeName());
+        assertNull(draftOrdersWrapper.getGeneratedOrderJudgeType());
 
-            assertNull(draftOrdersWrapper.getGeneratedOrderReason());
-            assertNull(draftOrdersWrapper.getGeneratedOrderRefusedDate());
-            assertNull(draftOrdersWrapper.getGeneratedOrderJudgeName());
-            assertNull(draftOrdersWrapper.getGeneratedOrderJudgeType());
+        // expected refusal order count
+        int result = Stream.of(
+            Optional.ofNullable(targetAgreedDraftOrderCollection),
+            Optional.ofNullable(targetDraftOrderDocReviewCollection),
+            Optional.ofNullable(targetPsaDocReviewCollection)
+        ).allMatch(Optional::isEmpty) ? 0 : 1;
 
-            // expected refusal order count
-            int result = Stream.of(
-                Optional.ofNullable(targetAgreedDraftOrderCollection),
-                Optional.ofNullable(targetDraftOrderDocReviewCollection),
-                Optional.ofNullable(targetPsaDocReviewCollection)
-            ).allMatch(Optional::isEmpty) ? 0 : 1;
+        if (result == 0) {
+            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).isNull();
+        } else {
+            assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(expectedRefusedOrdersSize);
+            assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
+            // verify agreedDraftOrderToBeExamined is removed
+            assertTrue(isAgreedDraftOrderAbsent(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetAgreedDraftOrderCollection));
 
-            if (result == 0) {
-                assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).isNull();
-            } else {
-                assertThat(draftOrdersWrapper.getRefusedOrdersCollection()).hasSize(expectedRefusedOrdersSize);
-                assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
-                // verify agreedDraftOrderToBeExamined is removed
-                assertTrue(isAgreedDraftOrderAbsent(draftOrdersWrapper.getAgreedDraftOrderCollection(), targetAgreedDraftOrderCollection));
-
-                List<DraftOrdersReviewCollection> newDraftOrdersReviewCollections = draftOrdersWrapper.getDraftOrdersReviewCollection();
-                if (targetDraftOrderDocReviewCollection != null) {
-                    targetDraftOrderDocReviewCollection.forEach(a ->
-                        assertTrue(isDraftOrderDocumentReviewAbsent(newDraftOrdersReviewCollections, a)));
-                }
-                if (targetPsaDocReviewCollection != null) {
-                    assertTrue(isPsaDocumentReviewAbsent(newDraftOrdersReviewCollections, targetPsaDocReviewCollection));
-                }
-                draftOrdersWrapper.getRefusedOrdersCollection().stream()
-                    .max(Comparator.comparing(r -> r.getValue().getRefusedDate(), Comparator.nullsFirst(Comparator.naturalOrder())))
-                    .ifPresentOrElse(r -> {
-                        assertEquals(expectedRefusedOrder, r.getValue());
-                        assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
-                        draftOrdersWrapper.getRefusalOrderIdsToBeSent().stream().findFirst()
-                            .ifPresentOrElse(u -> assertEquals(r.getId(), u.getValue()), () -> fail("Unexpected missing refused order id"));
-                    }, () -> fail("Unexpected missing refused order"));
+            List<DraftOrdersReviewCollection> newDraftOrdersReviewCollections = draftOrdersWrapper.getDraftOrdersReviewCollection();
+            if (targetDraftOrderDocReviewCollection != null) {
+                targetDraftOrderDocReviewCollection.forEach(a ->
+                    assertTrue(isDraftOrderDocumentReviewAbsent(newDraftOrdersReviewCollections, a)));
             }
+            if (targetPsaDocReviewCollection != null) {
+                assertTrue(isPsaDocumentReviewAbsent(newDraftOrdersReviewCollections, targetPsaDocReviewCollection));
+            }
+            draftOrdersWrapper.getRefusedOrdersCollection().stream()
+                .max(Comparator.comparing(r -> r.getValue().getRefusedDate(), Comparator.nullsFirst(Comparator.naturalOrder())))
+                .ifPresentOrElse(r -> {
+                    assertEquals(expectedRefusedOrder, r.getValue());
+                    assertThat(draftOrdersWrapper.getRefusalOrderIdsToBeSent()).hasSize(expectedRefusedOrderIdsSize);
+                    draftOrdersWrapper.getRefusalOrderIdsToBeSent().stream().findFirst()
+                        .ifPresentOrElse(u -> assertEquals(r.getId(), u.getValue()), () -> fail("Unexpected missing refused order id"));
+                }, () -> fail("Unexpected missing refused order"));
         }
     }
 
