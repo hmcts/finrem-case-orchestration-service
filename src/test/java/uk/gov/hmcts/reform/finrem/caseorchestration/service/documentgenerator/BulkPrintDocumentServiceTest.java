@@ -22,11 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +58,7 @@ class BulkPrintDocumentServiceTest {
             .build();
 
         List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
-        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
+        assertThat(result).containsExactly(someFlattenedBytes);
     }
 
     @Test
@@ -76,7 +72,7 @@ class BulkPrintDocumentServiceTest {
 
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
-        assertTrue(errors.get(0).contains("Failed to parse the documents for abc.docx"));
+        assertThat(errors).first().matches(str -> str.startsWith("Failed to parse the documents for abc.docx"));
     }
 
     @Test
@@ -92,12 +88,11 @@ class BulkPrintDocumentServiceTest {
             .build();
 
         List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
-        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
+        assertThat(result).containsExactly(someFlattenedBytes);
 
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
-        assertEquals("Failed to parse the documents for abc.pdf; Error: End-of-File, expected line at offset 11",
-            errors.get(0));
+        assertThat(errors).first().isEqualTo("Failed to parse the documents for abc.pdf; Error: End-of-File, expected line at offset 11");
     }
 
     @Test
@@ -110,8 +105,10 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
 
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
-        assertEquals("Uploaded document 'abc.pdf' contains some kind of encryption. "
-            + "Please remove encryption before uploading or upload another document.", errors.get(0));
+        assertThat(errors).first().isEqualTo(
+            "Uploaded document 'abc.pdf' contains some kind of encryption. "
+                + "Please remove encryption before uploading or upload another document."
+        );
     }
 
     @Test
@@ -124,12 +121,14 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
 
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
-        assertEquals("Uploaded document 'abc.pdf' is password protected. "
-            + "Please remove password and try uploading again.", errors.get(0));
+        assertThat(errors).first().isEqualTo(
+            "Uploaded document 'abc.pdf' is password protected. "
+                + "Please remove password and try uploading again."
+        );
     }
 
     @Test
-    void validateEmptyUploadedFileThenDisplayMessage() throws IOException {
+    void validateEmptyUploadedFileThenDisplayMessage() {
         byte[] bytes = null;
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
@@ -137,7 +136,7 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
 
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
-        assertEquals("Uploaded document abc.pdf is empty.", errors.get(0));
+        assertThat(errors).first().isEqualTo("Uploaded document abc.pdf is empty.");
     }
 
     private byte[] loadResource(String testPdf) throws IOException {
@@ -164,7 +163,8 @@ class BulkPrintDocumentServiceTest {
             .fileName(filename)
             .build();
 
-        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
+        String lowerCaseFilename = filename.toLowerCase();
+        if (lowerCaseFilename.endsWith(".doc") || lowerCaseFilename.endsWith(".docx")) {
             when(documentConversionService.convertDocumentToPdf(document, AUTH_TOKEN)).thenReturn(someBytes);
         } else {
             when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(someBytes);
@@ -173,7 +173,7 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
 
-        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
+        if (lowerCaseFilename.endsWith(".doc") || lowerCaseFilename.endsWith(".docx")) {
             verify(documentConversionService).convertDocumentToPdf(document, AUTH_TOKEN);
         } else {
             verify(evidenceManagementService).download(caseDocument.getDocumentBinaryUrl(), AUTH_TOKEN);
