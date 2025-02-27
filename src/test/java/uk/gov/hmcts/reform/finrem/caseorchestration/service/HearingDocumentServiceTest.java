@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
@@ -110,6 +112,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private GenericDocumentService genericDocumentService;
     @MockitoBean
     BulkPrintService bulkPrintService;
+    @MockitoBean
+    private FeatureToggleService featureToggleService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
@@ -161,14 +165,51 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void generateNonFastTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
         boolean respondentDigital = false;
         mockPfdNcdrDocuments(respondentDigital);
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+        CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
+        settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.DOES_NOT_QUALIFY);
 
-        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         assertCaseDocument(result.get(FORM_C));
         assertCaseDocument(result.get(FORM_G));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         verifyPfdNcdrDocuments(result, respondentDigital);
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
+    }
+
+    @Test
+    public void generateFormCExpressPilotDisabledAndFormGAndOutOfFamilyCourtResolution() {
+        boolean respondentDigital = false;
+        mockPfdNcdrDocuments(respondentDigital);
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+        CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
+        settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.ENROLLED);
+
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(FORM_G));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result, respondentDigital);
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
+    }
+
+    @Test
+    public void generateExpressCaseFormCTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
+        boolean respondentDigital = false;
+        mockPfdNcdrDocuments(respondentDigital);
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+
+        CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
+        settExpressCaseParticipant(caseDetails, ExpressCaseParticipation.ENROLLED);
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(FORM_G));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+        verifyPfdNcdrDocuments(result, respondentDigital);
+        verifyCommonNonFastTrackAndExpressCaseFields(true);
     }
 
     @Test
@@ -182,7 +223,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(result.get(FORM_G));
         assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         verifyPfdNcdrDocuments(result, respondentDigital);
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
     }
 
     @Test
@@ -220,7 +261,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             WALES, HEARING_WALES_FRC_LIST, SWANSEA, HEARING_SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
@@ -232,7 +273,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             WALES, HEARING_WALES_FRC_LIST, NEWPORT, HEARING_NEWPORT_COURT_LIST, "FR_newport_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
@@ -244,7 +285,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             WALES, HEARING_SOUTHEAST_FRC_LIST, SWANSEA, HEARING_SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -254,7 +295,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, KENT, HEARING_KENT_SURREY_COURT_LIST, "FR_kent_surrey_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
@@ -266,7 +307,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             SOUTHEAST, HEARING_WALES_FRC_LIST, KENT, HEARING_KENT_SURREY_COURT_LIST, "FR_kent_surrey_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -276,7 +317,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHEAST, HEARING_NORTHEAST_FRC_LIST, CLEAVELAND, HEARING_CLEAVELAND_COURT_LIST, "FR_cleaveland_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Newcastle Civil and Family Courts and Tribunals Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
@@ -288,7 +329,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHEAST, HEARING_NORTHEAST_FRC_LIST, NWYORKSHIRE, HEARING_NWYORKSHIRE_COURT_LIST, "FR_nw_yorkshire_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
@@ -300,7 +341,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHEAST, HEARING_NORTHEAST_FRC_LIST, HSYORKSHIRE, HEARING_HUMBER_COURT_LIST, "FR_humber_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
@@ -312,7 +353,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHEAST, HEARING_NORTHWEST_FRC_LIST, HSYORKSHIRE, HEARING_NWYORKSHIRE_COURT_LIST, "FR_humber_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -322,7 +363,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHWEST, HEARING_NORTHWEST_FRC_LIST, LIVERPOOL, HEARING_LIVERPOOL_COURT_LIST, "FR_liverpool_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
@@ -334,7 +375,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHWEST, HEARING_NORTHWEST_FRC_LIST, MANCHESTER, HEARING_MANCHESTER_COURT_LIST, "FR_manchester_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
@@ -346,7 +387,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             NORTHWEST, HEARING_NORTHEAST_FRC_LIST, MANCHESTER, HEARING_MANCHESTER_COURT_LIST, "FR_manchester_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -356,7 +397,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             LONDON, HEARING_LONDON_FRC_LIST, CFC, HEARING_CFC_COURT_LIST, "FR_s_CFCList_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
@@ -368,7 +409,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             LONDON, HEARING_MIDLANDS_FRC_LIST, CFC, HEARING_CFC_COURT_LIST, "FR_s_CFCList_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -378,7 +419,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             MIDLANDS, HEARING_MIDLANDS_FRC_LIST, NOTTINGHAM, HEARING_NOTTINGHAM_COURT_LIST, "FR_s_NottinghamList_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
@@ -390,7 +431,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             MIDLANDS, HEARING_MIDLANDS_FRC_LIST, BIRMINGHAM, HEARING_BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
@@ -402,7 +443,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             MIDLANDS, HEARING_LONDON_FRC_LIST, BIRMINGHAM, HEARING_BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -412,7 +453,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             MIDLANDS, HEARING_MIDLANDS_FRC_LIST, BIRMINGHAM, HEARING_BIRMINGHAM_COURT_LIST, "invalid_court"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -422,7 +463,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithHearingCourtDetails(
             MIDLANDS, HEARING_MIDLANDS_FRC_LIST, BIRMINGHAM, NEWPORT_COURTLIST, "FR_birmingham_hc_list_1"));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
@@ -431,13 +472,17 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void verifyNoRegionProvided() {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails(NO_VALUE));
 
-        verifyAdditionalNonFastTrackFields();
+        verifyCommonNonFastTrackAndExpressCaseFields(false);
 
         verifyCourtDetailsFieldsNotSet();
     }
 
     private CaseDetails makeItNonFastTrackDecisionCase() {
         return caseDetails(NO_VALUE);
+    }
+
+    private void settExpressCaseParticipant(CaseDetails caseDetails, ExpressCaseParticipation expressCaseParticipation) {
+        caseDetails.getData().put(EXPRESS_CASE_PARTICIPATION, expressCaseParticipation.getValue());
     }
 
     private CaseDetails makeItFastTrackDecisionCase() {
@@ -528,18 +573,22 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertTrue(ObjectUtils.isEmpty(data.get("courtDetails")));
     }
 
-    private void verifyAdditionalNonFastTrackFields() {
+    private void verifyCommonNonFastTrackAndExpressCaseFields(boolean isExpressCase) {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())),
+            eq(isExpressCase ? documentConfiguration.getFormCExpressCaseTemplate() :
+                documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())),
             eq(documentConfiguration.getFormCFileName()));
+
         verify(genericDocumentService, never())
             .generateDocument(any(), any(),
                 eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())), any());
+
         verify(genericDocumentService)
             .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate(CaseDetails.builder().build())),
                 eq(documentConfiguration.getFormGFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
