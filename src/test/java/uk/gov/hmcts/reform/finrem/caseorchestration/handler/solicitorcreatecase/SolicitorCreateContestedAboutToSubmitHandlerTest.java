@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -36,12 +37,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
@@ -61,6 +63,9 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     IdamService idamService;
 
     @Mock
+    MetricsService metricsService;
+
+    @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
 
     @Mock
@@ -74,7 +79,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             caseFlagsService,
             idamService,
             representationWorkflowService,
-            createCaseMandatoryDataValidator);
+            createCaseMandatoryDataValidator,
+            metricsService);
     }
 
     @Test
@@ -163,6 +169,17 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             // Check that updateApplicantInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
+    }
+
+    @Test
+    void testThatSetCourtMetricsIsCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(metricsService, times(1)).setCourtMetrics(caseData);
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {

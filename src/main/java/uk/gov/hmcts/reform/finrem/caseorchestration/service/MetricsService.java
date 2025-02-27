@@ -25,16 +25,16 @@ public class MetricsService {
     *
     * @param caseData instance of FinremCaseData
     */
-    public void  setCourtMetrics (FinremCaseData caseData) {
+    public void  setCourtMetrics(FinremCaseData caseData) {
 
-        String selectedAllocatedCourt = caseData.getSelectedAllocatedCourt();
+        String selectedCourtId = caseData.getSelectedAllocatedCourt();
 
-        Optional<CourtDetails> courtDetails = ofNullable(courtDetailsConfiguration.getCourts().get(selectedAllocatedCourt));
+        Optional<CourtDetails> selectedCourtDetails = ofNullable(courtDetailsConfiguration.getCourts().get(selectedCourtId));
 
-        String getEmailForSelectedCourt = courtDetails.map(CourtDetails::getEmail).orElse("");
-        String getNameForSelectedCourt = courtDetails.map(CourtDetails::getCourtName).orElse("");
-        String getAddressForSelectedCourt = courtDetails.map(CourtDetails::getCourtAddress).orElse("");
-        String getPhoneForSelectedCourt = courtDetails.map(CourtDetails::getPhoneNumber).orElse("");
+        String getEmailForSelectedCourt = selectedCourtDetails.map(CourtDetails::getEmail).orElse("");
+        String getNameForSelectedCourt = selectedCourtDetails.map(CourtDetails::getCourtName).orElse("");
+        String getAddressForSelectedCourt = selectedCourtDetails.map(CourtDetails::getCourtAddress).orElse("");
+        String getPhoneForSelectedCourt = selectedCourtDetails.map(CourtDetails::getPhoneNumber).orElse("");
 
         caseData.getConsentOrderWrapper().setConsentOrderFrcName(getNameForSelectedCourt);
         caseData.getConsentOrderWrapper().setConsentOrderFrcAddress(getAddressForSelectedCourt);
