@@ -2,12 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.LocalDateExtension;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -47,6 +47,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 @ExtendWith(MockitoExtension.class)
 class ContestedOrderApprovedLetterServiceTest {
 
+    @RegisterExtension
+    LocalDateExtension dateExtension = new LocalDateExtension(FIXED_DATE);
+
     @InjectMocks
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
 
@@ -65,6 +68,8 @@ class ContestedOrderApprovedLetterServiceTest {
     @Mock
     private DocumentHelper documentHelper;
 
+    private static final LocalDate FIXED_DATE = LocalDate.of(2024, 11, 4);
+
     @Test
     void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {
         CaseDocument expectedCaseDocument = caseDocument();
@@ -72,24 +77,20 @@ class ContestedOrderApprovedLetterServiceTest {
 
         CaseDetails caseDetails = testCaseDetails();
 
-        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
-        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
-            when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
-            when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
-            when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
 
-            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
 
-            verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq("FL-FRM-LET-ENG-HC-00666.docx"),
-                eq("contestedOrderApprovedCoverLetter.pdf"));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq("FL-FRM-LET-ENG-HC-00666.docx"),
+            eq("contestedOrderApprovedCoverLetter.pdf"));
 
-            verifyTemplateVariablesArePopulated();
-            assertThat(caseDetails.getData()).extracting(CONTESTED_ORDER_APPROVED_COVER_LETTER).isEqualTo(expectedCaseDocument);
-        }
+        verifyTemplateVariablesArePopulated();
+        assertThat(caseDetails.getData()).extracting(CONTESTED_ORDER_APPROVED_COVER_LETTER).isEqualTo(expectedCaseDocument);
     }
 
     @Test
@@ -100,25 +101,21 @@ class ContestedOrderApprovedLetterServiceTest {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetails = testCaseDetails();
 
-        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
-        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
-            when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
-            when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
-            when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
-            when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
 
-            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, AUTH_TOKEN);
 
-            verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq("FL-FRM-LET-ENG-HC-00666.docx"),
-                eq("contestedOrderApprovedCoverLetter.pdf"));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq("FL-FRM-LET-ENG-HC-00666.docx"),
+            eq("contestedOrderApprovedCoverLetter.pdf"));
 
-            verifyTemplateVariablesArePopulated();
-            assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
-        }
+        verifyTemplateVariablesArePopulated();
+        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
     }
 
     @Test
@@ -130,29 +127,25 @@ class ContestedOrderApprovedLetterServiceTest {
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
 
-        LocalDate fixedDate = LocalDate.of(2024, 11, 4);
-        try (MockedStatic<LocalDate> mockedLocalDate = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-            mockedLocalDate.when(LocalDate::now).thenReturn(fixedDate);
-            when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-            when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
-            when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
-            when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
-            when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
+        when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)).thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()).thenReturn("contestedOrderApprovedCoverLetter.pdf");
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
 
-            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, "District Judge Peter Chapman",
-                AUTH_TOKEN);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, "District Judge Peter Chapman",
+            AUTH_TOKEN);
 
-            verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq("FL-FRM-LET-ENG-HC-00666.docx"),
-                eq("contestedOrderApprovedCoverLetter.pdf"));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq("FL-FRM-LET-ENG-HC-00666.docx"),
+            eq("contestedOrderApprovedCoverLetter.pdf"));
 
-            verifyTemplateVariablesArePopulatedIfJudgeDetailsProvided();
-            assertThat(finremCaseData.getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
-        }
+        verifyTemplateVariablesArePopulatedIfJudgeDetailsProvided();
+        assertThat(finremCaseData.getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
     }
 
-    protected FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.SEND_ORDER)
