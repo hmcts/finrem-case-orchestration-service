@@ -9,8 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasUploadingDocuments;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadDraftOrderAdditionalDocument;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +31,7 @@ public class UploadedDraftOrder implements HasUploadingDocuments {
     private CaseDocument suggestedDraftOrderDocument;
 
     @JsonProperty("additionalDocuments")
-    private List<DocumentCollection> additionalDocuments;
+    private List<AdditionalDocumentsCollection> additionalDocuments;
 
     @JsonIgnore
     @Override
@@ -40,8 +41,10 @@ public class UploadedDraftOrder implements HasUploadingDocuments {
             Optional.ofNullable(additionalDocuments)
                 .stream()
                 .flatMap(Collection::stream)
-                .map(DocumentCollection::getValue)
+                .map(AdditionalDocumentsCollection::getValue)
+                .map(UploadDraftOrderAdditionalDocument::getOrderAttachment)
                 .filter(Objects::nonNull)
         ).toList();
     }
+
 }

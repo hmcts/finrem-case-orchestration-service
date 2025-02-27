@@ -73,6 +73,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CaseType ccdCaseType;
 
+    private ExpressCaseParticipation expressCaseParticipation;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
@@ -534,7 +535,6 @@ public class FinremCaseData implements HasCaseDocument {
         return List.of(getIntervenerOne(), getIntervenerTwo(), getIntervenerThree(), getIntervenerFour());
     }
 
-
     @JsonIgnore
     public IntervenerOne getIntervenerOne() {
         if (intervenerOne == null) {
@@ -582,7 +582,6 @@ public class FinremCaseData implements HasCaseDocument {
         }
         return null;
     }
-
 
     @JsonIgnore
     public IntervenerFour getIntervenerFour() {
@@ -688,7 +687,6 @@ public class FinremCaseData implements HasCaseDocument {
     public boolean isConsentedInContestedCase() {
         return CaseType.CONTESTED.equals(ccdCaseType) && getConsentOrderWrapper().getConsentD81Question() != null;
     }
-
 
     @JsonIgnore
     public boolean isApplicantSolicitorResponsibleToDraftOrder() {
@@ -810,7 +808,6 @@ public class FinremCaseData implements HasCaseDocument {
         return getContactDetailsWrapper().getRespondentSolicitorName();
     }
 
-
     @JsonIgnore
     public boolean isRespondentSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
@@ -825,39 +822,42 @@ public class FinremCaseData implements HasCaseDocument {
     public String getSelectedAllocatedCourt() {
         AllocatedRegionWrapper allocatedRegionWrapper = getRegionWrapper().getAllocatedRegionWrapper();
         CourtListWrapper courtList = allocatedRegionWrapper.getDefaultCourtListWrapper();
-        return Map.of(Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList), Region.LONDON,
-                getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(), Region.NORTHEAST,
-                getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList), Region.NORTHWEST,
-                getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList), Region.SOUTHWEST,
-                getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList), Region.SOUTHEAST,
-                getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList), Region.WALES,
-                getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList), Region.HIGHCOURT,
-                getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(),
-                    courtList))
-            .get(allocatedRegionWrapper.getRegionList());
+        return Map.of(
+            Region.MIDLANDS, getMidlandsCourt(allocatedRegionWrapper.getMidlandsFrcList(), courtList),
+            Region.LONDON, getCourtListIdOrDefault(allocatedRegionWrapper.getDefaultCourtListWrapper().getCfcCourtList()).getSelectedCourtId(),
+            Region.NORTHEAST, getNorthEastCourt(allocatedRegionWrapper.getNorthEastFrcList(), courtList),
+            Region.NORTHWEST, getNorthWestCourt(allocatedRegionWrapper.getNorthWestFrcList(), courtList),
+            Region.SOUTHWEST, getSouthWestCourt(allocatedRegionWrapper.getSouthWestFrcList(), courtList),
+            Region.SOUTHEAST, getSouthEastCourt(allocatedRegionWrapper.getSouthEastFrcList(), courtList),
+            Region.WALES, getWalesCourt(allocatedRegionWrapper.getWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(allocatedRegionWrapper.getHighCourtFrcList(), courtList)
+        ).get(allocatedRegionWrapper.getRegionList());
     }
-
 
     @JsonIgnore
     public String getGeneralApplicationSelectedCourt() {
         GeneralApplicationRegionWrapper regionWrapper = getRegionWrapper().getGeneralApplicationRegionWrapper();
         CourtListWrapper courtList = regionWrapper.getCourtListWrapper();
-        return Map.of(Region.MIDLANDS, getMidlandsCourt(regionWrapper.getGeneralApplicationDirectionsMidlandsFrcList(), courtList), Region.LONDON,
-                getCourtListIdOrDefault(regionWrapper.getCourtListWrapper().getGeneralApplicationDirectionsCfcCourtList()).getSelectedCourtId(),
-                Region.NORTHEAST, getNorthEastCourt(regionWrapper.getGeneralApplicationDirectionsNorthEastFrcList(), courtList), Region.NORTHWEST,
-                getNorthWestCourt(regionWrapper.getGeneralApplicationDirectionsNorthWestFrcList(), courtList), Region.SOUTHWEST,
-                getSouthWestCourt(regionWrapper.getGeneralApplicationDirectionsSouthWestFrcList(), courtList), Region.SOUTHEAST,
-                getSouthEastCourt(regionWrapper.getGeneralApplicationDirectionsSouthEastFrcList(), courtList), Region.WALES,
-                getWalesCourt(regionWrapper.getGeneralApplicationDirectionsWalesFrcList(), courtList), Region.HIGHCOURT,
-                getHighCourt(regionWrapper.getGeneralApplicationDirectionsHighCourtFrcList(), courtList))
-            .get(regionWrapper.getGeneralApplicationDirectionsRegionList());
+        return Map.of(
+            Region.MIDLANDS, getMidlandsCourt(regionWrapper.getGeneralApplicationDirectionsMidlandsFrcList(), courtList),
+            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getCourtListWrapper().getGeneralApplicationDirectionsCfcCourtList())
+                .getSelectedCourtId(),
+            Region.NORTHEAST, getNorthEastCourt(regionWrapper.getGeneralApplicationDirectionsNorthEastFrcList(), courtList),
+            Region.NORTHWEST, getNorthWestCourt(regionWrapper.getGeneralApplicationDirectionsNorthWestFrcList(), courtList),
+            Region.SOUTHWEST, getSouthWestCourt(regionWrapper.getGeneralApplicationDirectionsSouthWestFrcList(), courtList),
+            Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getGeneralApplicationDirectionsSouthEastFrcList(), courtList),
+            Region.WALES, getWalesCourt(regionWrapper.getGeneralApplicationDirectionsWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(regionWrapper.getGeneralApplicationDirectionsHighCourtFrcList(), courtList)
+        ).get(regionWrapper.getGeneralApplicationDirectionsRegionList());
     }
 
     @JsonIgnore
     private String getMidlandsCourt(RegionMidlandsFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()), RegionMidlandsFrc.BIRMINGHAM,
-                getCourtListIdOrDefault(courtList.getBirminghamCourt())).get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()),
+                RegionMidlandsFrc.BIRMINGHAM, getCourtListIdOrDefault(courtList.getBirminghamCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -866,9 +866,12 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
-                RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()), RegionNorthEastFrc.NW_YORKSHIRE,
-                getCourtListIdOrDefault(courtList.getNwYorkshireCourt())).get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionNorthEastFrc.CLEAVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList.getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
+                RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -877,9 +880,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getNorthWestCourt(RegionNorthWestFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()), RegionNorthWestFrc.LANCASHIRE,
-                getCourtListIdOrDefault(courtList.getLancashireCourt()), RegionNorthWestFrc.LIVERPOOL,
-                getCourtListIdOrDefault(courtList.getLiverpoolCourt())).get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()),
+                RegionNorthWestFrc.LANCASHIRE, getCourtListIdOrDefault(courtList.getLancashireCourt()),
+                RegionNorthWestFrc.LIVERPOOL, getCourtListIdOrDefault(courtList.getLiverpoolCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -888,10 +893,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getSouthWestCourt(RegionSouthWestFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()), RegionSouthWestFrc.DEVON,
-                    getCourtListIdOrDefault(courtList.getDevonCourt()), RegionSouthWestFrc.DORSET,
-                    getCourtListIdOrDefault(courtList.getDorsetCourt()))
-                .get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()),
+                RegionSouthWestFrc.DEVON, getCourtListIdOrDefault(courtList.getDevonCourt()),
+                RegionSouthWestFrc.DORSET, getCourtListIdOrDefault(courtList.getDorsetCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -900,10 +906,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getSouthEastCourt(RegionSouthEastFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
-                    RegionSouthEastFrc.KENT_FRC, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
-                    RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt()))
-                .get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                RegionSouthEastFrc.KENT_FRC, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -912,10 +919,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getWalesCourt(RegionWalesFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()), RegionWalesFrc.NEWPORT,
-                    getCourtListIdOrDefault(courtList.getNewportCourt()), RegionWalesFrc.SWANSEA,
-                    getCourtListIdOrDefault(courtList.getSwanseaCourt()))
-                .get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
+                RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
+                RegionWalesFrc.SWANSEA, getCourtListIdOrDefault(courtList.getSwanseaCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }
@@ -924,7 +932,9 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private String getHighCourt(RegionHighCourtFrc frc, CourtListWrapper courtList) {
         if (frc != null) {
-            return Map.of(RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())).get(frc).getSelectedCourtId();
+            return Map.of(
+                RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
+            ).get(frc).getSelectedCourtId();
         } else {
             return StringUtils.EMPTY;
         }

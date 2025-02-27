@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -121,9 +122,9 @@ public class DraftOrderService {
         // Add additional attachments for orders only
         List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAdditionalDocuments())
             .orElse(List.of()).stream()
-            .map(DocumentCollection::getValue)
+            .map(AdditionalDocumentsCollection::getValue)
             .filter(Objects::nonNull)
-            .map(value -> DocumentCollection.builder().value(value).build())
+            .map(value -> DocumentCollection.builder().value(value.getOrderAttachment()).build())
             .toList();
         if (!attachments.isEmpty()) {
             builder.attachments(attachments);
@@ -261,6 +262,7 @@ public class DraftOrderService {
 
         return ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection()).orElse(List.of()).stream()
             .map(DraftOrdersReviewCollection::getValue) // Get DraftOrdersReview from collection
+            .filter(draftOrdersReview -> draftOrdersReview.getHearingJudge() != null)
             .filter(draftOrderReview -> draftOrderReview.getEarliestToBeReviewedOrderDate() != null
                 && draftOrderReview.getEarliestToBeReviewedOrderDate().isBefore(thresholdDate)) // Check the date condition
             .toList();
