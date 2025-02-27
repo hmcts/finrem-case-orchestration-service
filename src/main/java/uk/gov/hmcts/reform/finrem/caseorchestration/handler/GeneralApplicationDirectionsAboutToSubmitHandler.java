@@ -39,7 +39,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
     private final GeneralApplicationService gaService;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     private final GeneralApplicationsCategoriser generalApplicationsCategoriser;
 
@@ -52,7 +51,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler extends FinremCall
         this.helper = helper;
         this.service = service;
         this.gaService = gaService;
-        this.finremCaseDetailsMapper = finremCaseDetailsMapper;
         this.generalApplicationsCategoriser = generalApplicationsCategoriser;
     }
 
