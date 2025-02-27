@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -16,11 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralEmailDocumentCategoriser;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -67,20 +61,15 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         }
         generalEmailService.storeGeneralEmail(caseDetails);
 
-        List<String> errors = new ArrayList<>();
-        try {
-            if (caseDetails.isConsentedApplication()) {
-                notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
-            } else {
-                notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
-                generalEmailCategoriser.categorise(caseDetails.getData());
-            }
-        } catch (EmailAttachmentSizeExceededException e) {
-            errors.add(format("You attached a document which exceeds the size limit: %sMB", e.getExceedFileSizeInMb()));
+        if (caseDetails.isConsentedApplication()) {
+            notificationService.sendConsentGeneralEmail(caseDetails, userAuthorisation);
+        } else {
+            notificationService.sendContestedGeneralEmail(caseDetails, userAuthorisation);
+            generalEmailCategoriser.categorise(caseDetails.getData());
         }
 
         caseDetails.getData().getGeneralEmailWrapper().setGeneralEmailValuesToNull();
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 }

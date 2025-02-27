@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.EmailAttachmentSizeExceededException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -174,38 +173,6 @@ class GeneralEmailAboutToSubmitHandlerTest {
         InOrder inOrderContested = inOrder(notificationService, generalEmailWrapper);
         inOrderContested.verify(notificationService, times(1)).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
         inOrderContested.verify(generalEmailWrapper, times(1)).setGeneralEmailValuesToNull();
-    }
-
-    @Test
-    void givenConsentCase_shouldReturnAnErrorIfAttachmentExceeds2MB() {
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getData()).thenReturn(caseData);
-        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
-
-        when(caseDetails.isConsentedApplication()).thenReturn(true);
-        doThrow(new EmailAttachmentSizeExceededException(2)).when(notificationService).sendConsentGeneralEmail(caseDetails, AUTH_TOKEN);
-        var resp = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(resp.getErrors()).contains("You attached a document which exceeds the size limit: 2MB");
-    }
-
-    @Test
-    void givenContestedCase_shouldReturnAnErrorIfAttachmentExceeds2MB() {
-        FinremCallbackRequest callbackRequest = mock(FinremCallbackRequest.class);
-        FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
-        FinremCaseData caseData = mock(FinremCaseData.class);
-        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
-        when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getData()).thenReturn(caseData);
-        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
-
-        when(caseDetails.isConsentedApplication()).thenReturn(false);
-        doThrow(new EmailAttachmentSizeExceededException(2)).when(notificationService).sendContestedGeneralEmail(caseDetails, AUTH_TOKEN);
-        var resp = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(resp.getErrors()).contains("You attached a document which exceeds the size limit: 2MB");
     }
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
