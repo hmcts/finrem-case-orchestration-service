@@ -38,7 +38,7 @@ public class AmendExpressCaseAboutToSubmitHandler extends FinremCallbackHandler 
         log.info(
                 "Requesting that {} is no longer an Express case. {} about to submit callback",
                 caseDetails.getId(),
-                EventType.NEW_PAPER_CASE
+                EventType.AMEND_EXPRESS_CASE
         );
 
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
