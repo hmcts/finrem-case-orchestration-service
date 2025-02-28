@@ -15,6 +15,7 @@ import java.util.List;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
@@ -24,6 +25,15 @@ public class ExpressCaseService {
 
     @Value("${finrem.expressCase.frcs}")
     private List<String> expressCaseFrcs;
+
+    /**
+     * Used to withdraw a case from being processed as an Express case.
+     *
+     * @param caseData the case data
+     */
+    public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
+        caseData.setExpressCaseParticipation(WITHDRAWN);
+    }
 
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
