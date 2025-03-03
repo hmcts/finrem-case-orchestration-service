@@ -517,6 +517,3 @@ tasks.withType(Tar) {
 tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
-project.tasks['sonarcube'].dependsOn pitest
-

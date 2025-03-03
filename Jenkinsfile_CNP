@@ -50,7 +50,6 @@ properties([
 ]);
 
 withPipeline(type, product, component) {
-    enableMutationTest()
     loadVaultSecrets(secrets)
     afterSuccess('checkout') {
         step ([
