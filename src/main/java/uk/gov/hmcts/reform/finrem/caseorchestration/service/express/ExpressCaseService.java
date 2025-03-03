@@ -5,10 +5,12 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
@@ -25,8 +27,15 @@ public class ExpressCaseService {
     @Value("${finrem.expressCase.frcs}")
     private List<String> expressCaseFrcs;
 
+    private final FeatureToggleService featureToggleService;
+
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+    }
+
+    public boolean isExpressCase(ExpressCaseParticipation expressCaseParticipation) {
+        return featureToggleService.isExpressPilotEnabled()
+            && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
     /**
