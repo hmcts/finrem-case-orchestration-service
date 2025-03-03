@@ -50,6 +50,7 @@ properties([
 ]);
 
 withPipeline(type, product, component) {
+    enableMutationTest()
     loadVaultSecrets(secrets)
     afterSuccess('checkout') {
         step ([
@@ -91,7 +92,6 @@ withPipeline(type, product, component) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        enableMutationTest()
         env.CCD_DEFS = getProjectName()
         env.JENKINS_BRANCH = "preview"
         println "Using CCD definitions from: " + env.CCD_DEFS
