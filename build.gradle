@@ -277,6 +277,7 @@ pitest {
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
     mutationThreshold.set(50)
+    junit5PluginVersion.set('1.2.2')
 }
 
 bootJar {
@@ -516,4 +517,3 @@ tasks.withType(Tar) {
 tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
