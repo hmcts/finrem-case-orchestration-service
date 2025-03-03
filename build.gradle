@@ -280,8 +280,6 @@ pitest {
     junit5PluginVersion.set('1.2.2')
 }
 
-build.dependsOn 'pitest'
-
 bootJar {
     archiveFileName = 'finrem-case-orchestration.jar'
     manifest {
