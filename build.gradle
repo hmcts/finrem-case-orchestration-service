@@ -280,7 +280,7 @@ pitest {
     junit5PluginVersion.set('1.2.2')
 }
 
-project.tasks['sonarcube'].dependsOn 'pitest'
+project.tasks['sonarqube'].dependsOn 'pitest'
 
 bootJar {
     archiveFileName = 'finrem-case-orchestration.jar'
