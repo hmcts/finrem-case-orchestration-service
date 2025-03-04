@@ -276,7 +276,7 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(50)
+    mutationThreshold.set(80)
     junit5PluginVersion.set('1.2.2')
 }
 
