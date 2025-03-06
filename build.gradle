@@ -249,7 +249,7 @@ sonarqube {
 }
 
 pitest {
-    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.service.*'])
+    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.handler.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
@@ -279,8 +279,6 @@ pitest {
     mutationThreshold.set(80)
     junit5PluginVersion.set('1.2.2')
 }
-
-project.tasks['sonarqube'].dependsOn 'pitest'
 
 bootJar {
     archiveFileName = 'finrem-case-orchestration.jar'
