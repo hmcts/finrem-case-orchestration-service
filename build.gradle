@@ -249,7 +249,7 @@ sonarqube {
 }
 
 pitest {
-    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.handler.*'])
+    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.service.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
