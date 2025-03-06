@@ -35,6 +35,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
+
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Autowired

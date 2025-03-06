@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -67,9 +66,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     FeatureToggleService featureToggleService;
     @Mock
     ExpressCaseService expressCaseService;
-
-    @Mock
-    SelectedCourtService selectedCourtService;
 
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
