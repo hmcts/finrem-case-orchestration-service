@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
@@ -69,7 +69,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     ExpressCaseService expressCaseService;
 
     @Mock
-    MetricsService metricsService;
+    SelectedCourtService selectedCourtService;
 
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
@@ -87,8 +87,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             caseFlagsService,
             idamService,
             representationWorkflowService,
-            createCaseMandatoryDataValidator,
-            metricsService);
+            createCaseMandatoryDataValidator);
     }
 
     @Test
@@ -175,17 +174,6 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             // Check that updateApplicantInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
-    }
-
-    @Test
-    void testThatSetCourtMetricsIsCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData caseData = caseDetails.getData();
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(metricsService, times(1)).setCourtMetrics(caseData);
     }
 
     @Test

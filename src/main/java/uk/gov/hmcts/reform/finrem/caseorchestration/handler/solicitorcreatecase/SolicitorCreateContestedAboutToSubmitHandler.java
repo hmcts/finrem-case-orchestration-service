@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -37,7 +36,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
-    private final MetricsService metricsService;
 
     @Autowired
     public SolicitorCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -47,8 +45,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
-                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator,
-                                                        MetricsService metricsService) {
+                                                        CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.service = service;
         this.expressCaseService = expressCaseService;
@@ -57,7 +54,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
         this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
-        this.metricsService = metricsService;
     }
 
 
@@ -96,8 +92,6 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
-
-        metricsService.setCourtMetrics(caseData);
 
         if (featureToggleService.isExpressPilotEnabled()) {
             expressCaseService.setExpressCaseEnrollmentStatus(caseData);

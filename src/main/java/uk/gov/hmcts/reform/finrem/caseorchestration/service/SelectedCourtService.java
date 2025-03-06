@@ -15,18 +15,25 @@ import static java.util.Optional.ofNullable;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MetricsService {
+public class SelectedCourtService {
 
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
     /**
-    * Sets PowerBI fields used for tracking and gather statistics.
-    * Though the fields are prefixed Consent_Order_FRC, these tracking fields are used for both consented and
-    * contested applications.
-    *
-    * @param caseData instance of FinremCaseData
+     * Sets fields used for Power BI Metrics and showing the User Court information.
+     * Though the fields are prefixed Consent_Order_FRC, these fields are used for both consented and
+     * contested applications.
+     * Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication
+     * that the User has selected their court.  Without that, mapping in getSelectedAllocatedCourt fails.
+     * Logs a warning if any information missing for the selected court.
+     *
+     * @param caseData instance of FinremCaseData
     */
-    public void setCourtMetrics(FinremCaseData caseData) {
+    public void setSelectedCourtDetailsIfPresent(FinremCaseData caseData) {
+
+        if (caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList() == null) {
+            return;
+        }
 
         String selectedCourtId = caseData.getSelectedAllocatedCourt();
 

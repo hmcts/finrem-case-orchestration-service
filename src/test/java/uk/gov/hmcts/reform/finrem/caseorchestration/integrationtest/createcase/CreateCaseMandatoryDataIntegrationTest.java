@@ -22,8 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MetricsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -64,7 +64,7 @@ class CreateCaseMandatoryDataIntegrationTest {
     @MockitoBean
     private ExpressCaseService expressCaseService;
     @MockitoBean
-    private MetricsService metricsService;
+    private SelectedCourtService selectedCourtService;
 
     @Test
     void testCreateCaseValidateMandatoryData() throws Exception {
