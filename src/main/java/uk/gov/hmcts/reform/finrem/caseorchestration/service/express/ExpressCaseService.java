@@ -44,7 +44,7 @@ public class ExpressCaseService {
      */
     public boolean isExpressCase(CaseDetails caseDetails) {
         ExpressCaseParticipation expressCaseParticipation =
-            ExpressCaseParticipation.valueOf(
+            ExpressCaseParticipation.forValue(
                 Optional.ofNullable(caseDetails.getData().get(EXPRESS_CASE_PARTICIPATION))
                 .map(Object::toString).orElse(DOES_NOT_QUALIFY.toString()));
 
