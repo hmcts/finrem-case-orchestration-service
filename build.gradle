@@ -42,7 +42,7 @@ def versions = [
         elasticSearch        : '7.17.28',
         jacksonDatabind      : '2.18.3',
         retry                : '1.3.4',
-        snakeyaml            : '2.3',
+        snakeyaml            : '2.4',
         loadbalancer         : '4.2.0'
 ]
 
