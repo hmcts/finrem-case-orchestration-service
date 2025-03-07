@@ -80,7 +80,7 @@ public class ProcessOrderService {
      * @param caseDataBefore the case data before the update, used to check if legacy orders existed
      * @param caseData       the case data after the update, used to check if legacy orders have been removed
      * @return {@code true} if the "upload hearing order" was not empty in {@code caseDataBefore}
-     *         and is empty in {@code caseData}, otherwise {@code false}
+     *          and is empty in {@code caseData}, otherwise {@code false}
      */
     public boolean areAllLegacyApprovedOrdersRemoved(FinremCaseData caseDataBefore, FinremCaseData caseData) {
         return !isUploadHearingOrderEmpty(caseDataBefore) && isUploadHearingOrderEmpty(caseData);
@@ -89,12 +89,12 @@ public class ProcessOrderService {
     /**
      * Checks if all newly uploaded orders in the given case data are PDF documents.
      *
-     * @param caseData       the case data after the operation.
+     * @param caseData the case data after the operation.
      * @return true if all newly uploaded orders are PDF documents; false otherwise.
      */
-    public boolean areAllNewOrdersPdfFiles(FinremCaseData caseData) {
-        return areAllNewDocumentsPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
-            && areAllNewDocumentsPdf(caseData.getUploadHearingOrder()
+    public boolean areAllNewOrdersWordOrPdfFiles(FinremCaseData caseData) {
+        return areAllNewDocumentsWordOrPdf(caseData.getDraftOrdersWrapper().getUnprocessedApprovedDocuments())
+            && areAllNewDocumentsWordOrPdf(caseData.getUploadHearingOrder()
         );
     }
 
@@ -113,16 +113,16 @@ public class ProcessOrderService {
 
     /**
      * Checks if all documents (excluding PSAs) in the unprocessed approved documents of the given case data
-     * have filenames with extensions matching the specified Word document formats (.doc or .docx).
+     * have filenames with extensions matching the specified Word document formats (.doc or .docx) or PDF.
      *
      * @param caseData the FinremCaseData object containing the draft orders wrapper
      *                 with unprocessed approved documents.
      * @return {@code true} if all unprocessed approved documents have filenames ending with
-     *         ".doc" or ".docx" (case-insensitive), {@code false} otherwise.
+     *          ".doc" or ".docx" or "pdf" (case-insensitive), {@code false} otherwise.
      */
-    public boolean areAllModifyingUnprocessedOrdersWordDocuments(FinremCaseData caseData) {
+    public boolean areAllModifyingUnprocessedOrdersWordOrPdfDocuments(FinremCaseData caseData) {
         return areAllDocumentsWithExtensions(getUnprocessedDraftOrders(caseData.getDraftOrdersWrapper())
-            .stream().filter(doc -> doc.getValue().getOriginalDocument() != null).toList(), List.of("doc", "docx"));
+            .stream().filter(doc -> doc.getValue().getOriginalDocument() != null).toList(), List.of("doc", "docx", "pdf"));
     }
 
     private List<DirectionOrderCollection> getUnprocessedDraftOrders(DraftOrdersWrapper draftOrdersWrapper) {
@@ -145,9 +145,9 @@ public class ProcessOrderService {
                 .matches(String.format("(?i).*\\.(%s)$", String.join("|", fileExtensions))));
     }
 
-    private boolean areAllNewDocumentsPdf(List<DirectionOrderCollection> afterList) {
+    private boolean areAllNewDocumentsWordOrPdf(List<DirectionOrderCollection> afterList) {
         return areAllDocumentsWithExtensions(nullSafeList(afterList).stream()
-                .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf"));
+            .filter(doc -> doc.getValue().getOriginalDocument() == null).toList(), List.of("pdf", "doc", "docx"));
     }
 
     private boolean isUploadHearingOrderEmpty(FinremCaseData caseData) {

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -86,9 +86,9 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
 
         processOrderService.populateUnprocessedApprovedDocuments(caseDataBefore);
-        if (!processOrderService.areAllNewOrdersPdfFiles(caseData)) {
+        if (!processOrderService.areAllNewOrdersWordOrPdfFiles(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a PDF file for new documents.")).build();
+                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for new documents.")).build();
         }
         // Validate the modifying legacy approved orders
         if (!processOrderService.areAllLegacyApprovedOrdersPdf(caseData)) {
@@ -96,9 +96,9 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
                 .data(caseData).errors(List.of("You must upload a PDF file for modifying legacy approved documents.")).build();
         }
         // Validate the modifying unprocessed approved orders are word documents (except PSA)
-        if (!processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(caseData)) {
+        if (!processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).errors(List.of("You must upload a Microsoft Word file for modifying an unprocessed approved documents."))
+                .data(caseData).errors(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."))
                 .build();
         }
 
@@ -114,8 +114,8 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
     }
 
     private <T> List<T> filterNewItems(List<T> currentList, List<T> previousList) {
-        List<T> safePreviousList = ListUtils.emptyIfNull(previousList);
-        return ListUtils.emptyIfNull(currentList)
+        List<T> safePreviousList = emptyIfNull(previousList);
+        return emptyIfNull(currentList)
             .stream()
             .filter(item -> safePreviousList.stream().noneMatch(item::equals))
             .toList();
