@@ -249,7 +249,7 @@ sonarqube {
 }
 
 pitest {
-    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.*'])
+    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.handler.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
@@ -276,7 +276,7 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(50)
+    mutationThreshold.set(80)
     junit5PluginVersion.set('1.2.2')
 }
 
