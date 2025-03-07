@@ -53,9 +53,11 @@ public class GeneralEmailMidHandler extends FinremCallbackHandler {
         CaseDocument uploadedDocument = caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
 
         List<String> errors = new ArrayList<>();
-        bulkPrintDocumentService.validateEncryptionOnUploadedDocument(uploadedDocument, caseId, errors, userAuthorisation);
-        if (doesUploadedFileExceeds2MB(caseData, userAuthorisation)) {
-            errors.add(UPLOADED_FILE_EXCEEDS_2MB_MESSAGE);
+        if (uploadedDocument != null) { // uploadedDocument is an optional field.
+            bulkPrintDocumentService.validateEncryptionOnUploadedDocument(uploadedDocument, caseId, errors, userAuthorisation);
+            if (doesUploadedFileExceeds2MB(caseData, userAuthorisation)) {
+                errors.add(UPLOADED_FILE_EXCEEDS_2MB_MESSAGE);
+            }
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(errors).data(caseData).build();
