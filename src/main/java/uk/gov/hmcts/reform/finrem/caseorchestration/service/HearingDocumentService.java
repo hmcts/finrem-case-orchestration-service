@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -70,15 +68,8 @@ public class HearingDocumentService {
     }
 
     private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
-        Optional<Object> expressParticipation =
-            Optional.ofNullable(pair.getLeft().getData().get(EXPRESS_CASE_PARTICIPATION));
-
         CaseDocument formCNonFastTrack;
-        if (expressParticipation
-            .map(Object::toString)
-            .map(ExpressCaseParticipation::forValue)
-            .map(expressCaseService::isExpressCase)
-            .orElse(false)) {
+        if (expressCaseService.isExpressCase(pair.getLeft())) {
             formCNonFastTrack = genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCExpressCaseTemplate(), documentConfiguration.getFormCFileName());
         } else {

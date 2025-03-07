@@ -168,7 +168,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         mockPfdNcdrDocuments(respondentDigital);
         CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
         setExpressCaseParticipant(caseDetails, ExpressCaseParticipation.DOES_NOT_QUALIFY);
-        when(expressCaseService.isExpressCase(ExpressCaseParticipation.DOES_NOT_QUALIFY)).thenReturn(false);
+        when(expressCaseService.isExpressCase(any(CaseDetails.class))).thenReturn(false);
 
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -186,7 +186,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = makeItNonFastTrackDecisionCase();
         setExpressCaseParticipant(caseDetails, ExpressCaseParticipation.ENROLLED);
-        when(expressCaseService.isExpressCase(ExpressCaseParticipation.ENROLLED)).thenReturn(true);
+        when(expressCaseService.isExpressCase(any(CaseDetails.class))).thenReturn(true);
         final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         assertCaseDocument(result.get(FORM_C));

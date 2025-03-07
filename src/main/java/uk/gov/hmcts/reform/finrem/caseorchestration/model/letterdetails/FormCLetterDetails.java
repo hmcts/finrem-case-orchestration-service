@@ -24,7 +24,10 @@ public class FormCLetterDetails implements DocumentTemplateDetails {
     @JsonProperty("rSolicitorReference")
     private String respondentSolicitorReference;
     private String hearingDateLess35Days;
+    private String hearingDateLess28Days;
+    private String hearingDateLess21Days;
     private String hearingDateLess14Days;
+    private String hearingDateLess7Days;
     private String hearingDate;
     private String hearingTime;
     private String timeEstimate;
