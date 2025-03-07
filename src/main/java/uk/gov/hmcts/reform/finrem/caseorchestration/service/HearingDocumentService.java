@@ -8,13 +8,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -32,6 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class HearingDocumentService {
 
+    private final FeatureToggleService featureToggleService;
+
     protected static final String HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE = "This listing notice must be sent to the applicant and respondent"
         + " as default. If this listing needs to be sent to only one of these parties please use the general order event.";
     private final GenericDocumentService genericDocumentService;
@@ -39,6 +44,8 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
     private final PfdNcdrDocumentService pfdNcdrDocumentService;
+    private final ExpressCaseService expressCaseService;
+
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -63,9 +70,21 @@ public class HearingDocumentService {
     }
 
     private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
-        CaseDocument formCNonFastTrack =
-            genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
+        Optional<Object> expressParticipation =
+            Optional.ofNullable(pair.getLeft().getData().get(EXPRESS_CASE_PARTICIPATION));
+
+        CaseDocument formCNonFastTrack;
+        if (expressParticipation
+            .map(Object::toString)
+            .map(ExpressCaseParticipation::forValue)
+            .map(expressCaseService::isExpressCase)
+            .orElse(false)) {
+            formCNonFastTrack = genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
+                documentConfiguration.getFormCExpressCaseTemplate(), documentConfiguration.getFormCFileName());
+        } else {
+            formCNonFastTrack = genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCNonFastTrackTemplate(pair.getLeft()), documentConfiguration.getFormCFileName());
+        }
 
         CaseDocument formG = genericDocumentService.generateDocument(pair.getRight(), pair.getLeft(),
             documentConfiguration.getFormGTemplate(pair.getLeft()), documentConfiguration.getFormGFileName());
