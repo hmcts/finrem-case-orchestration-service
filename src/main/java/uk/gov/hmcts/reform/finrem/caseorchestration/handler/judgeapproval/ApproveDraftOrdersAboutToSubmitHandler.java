@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
 
@@ -30,15 +31,19 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
     private final ApproveOrderService approveOrderService;
 
+    private final DraftOrderService draftOrderService;
+
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
 
     private final IdamService idamService;
 
     public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService,
+                                                  DraftOrderService draftOrderService,
                                                   ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
                                                   IdamService idamService) {
         super(finremCaseDetailsMapper);
         this.approveOrderService = approveOrderService;
+        this.draftOrderService = draftOrderService;
         this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
         this.idamService = idamService;
     }
@@ -66,6 +71,7 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
             generateAndStoreCoverLetter(caseDetails, userAuthorisation);
         }
         clearInputFields(draftOrdersWrapper);
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
