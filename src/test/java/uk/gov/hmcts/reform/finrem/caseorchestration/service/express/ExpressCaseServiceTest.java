@@ -100,7 +100,7 @@ class ExpressCaseServiceTest {
 
     private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
         return CaseDetails.builder().data(
-            Map.of(EXPRESS_CASE_PARTICIPATION, participation.toString())).build();
+            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
     }
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {

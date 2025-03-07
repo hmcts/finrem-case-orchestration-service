@@ -43,10 +43,10 @@ public class ExpressCaseService {
      * @return true if the case is enrolled in the express case pilot and the express pilot feature is enabled, false otherwise
      */
     public boolean isExpressCase(CaseDetails caseDetails) {
-        ExpressCaseParticipation expressCaseParticipation =
-            ExpressCaseParticipation.forValue(
-                Optional.ofNullable(caseDetails.getData().get(EXPRESS_CASE_PARTICIPATION))
-                .map(Object::toString).orElse(DOES_NOT_QUALIFY.toString()));
+        ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseDetails.getData().get(EXPRESS_CASE_PARTICIPATION))
+            .map(Object::toString)
+            .map(ExpressCaseParticipation::forValue)
+            .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
