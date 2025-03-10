@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
@@ -34,6 +35,14 @@ public class ExpressCaseService {
     }
 
     public boolean isExpressCase(ExpressCaseParticipation expressCaseParticipation) {
+        return featureToggleService.isExpressPilotEnabled()
+            && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
+    }
+
+    public boolean isExpressCase(FinremCaseData caseData) {
+        ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseData.getExpressCaseParticipation())
+            .orElse(DOES_NOT_QUALIFY);
+
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }

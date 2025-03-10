@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,9 +21,15 @@ public class ValidateHearingService {
 
     public static final String DATE_BETWEEN_6_AND_10_WEEKS =
         "Date of the Fast Track hearing must be between 6 and 10 weeks.";
-    public static final String DATE_BETWEEN_12_AND_16_WEEKS = "Date of the hearing must be between 12 and 16 weeks.";
-    public static final String REQUIRED_FIELD_EMPTY_ERROR = "Issue Date, fast track decision or hearingDate is empty";
+    public static final String DATE_BETWEEN_12_AND_16_WEEKS =
+        "Date of the hearing must be between 12 and 16 weeks.";
+    public static final String DATE_BETWEEN_16_AND_20_WEEKS =
+        "Date of the express pilot hearing should be between 16 and 20 weeks.";
+    public static final String REQUIRED_FIELD_EMPTY_ERROR =
+        "Issue Date, fast track decision or hearingDate is empty";
+
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+    private final ExpressCaseService expressCaseService;
 
     //TODO: Refactor as it is always used inverted
     private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
@@ -52,14 +59,15 @@ public class ValidateHearingService {
         LocalDate issueDate = caseData.getIssueDate();
         LocalDate hearingDate = caseData.getListForHearingWrapper().getHearingDate();
 
-        boolean fastTrackApplication = caseData.isFastTrackApplication();
-        if (fastTrackApplication) {
-            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(6), issueDate.plusWeeks(10),
-                hearingDate)) {
+        if (caseData.isFastTrackApplication()) {
+            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(12), issueDate.plusWeeks(16),
-            hearingDate)) {
+        } else if (expressCaseService.isExpressCase(caseData)) {
+            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
+                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
+            }
+        } else if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return List.of();
