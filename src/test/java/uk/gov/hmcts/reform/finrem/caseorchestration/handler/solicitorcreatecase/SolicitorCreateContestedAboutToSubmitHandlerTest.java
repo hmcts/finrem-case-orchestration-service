@@ -172,6 +172,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         }
     }
 
+    // take out
     @Test
     void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
@@ -183,6 +184,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
         verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
+    // take out
     @Test
     void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();

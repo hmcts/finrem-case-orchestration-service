@@ -94,6 +94,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
 
+        // This should go, in mid event now.
         if (featureToggleService.isExpressPilotEnabled()) {
             expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         }
