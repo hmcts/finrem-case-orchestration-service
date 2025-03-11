@@ -1184,12 +1184,12 @@ class NotificationServiceTest {
     void shouldEmailRespondentSolicitorWhenRespondentSolicitorIsRegisteredAndAcceptingEmails() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(caseData).build();
 
         when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
         when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
 
+        CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(caseData).build();
         assertTrue(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
