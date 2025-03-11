@@ -84,11 +84,29 @@ class ExpressCaseServiceTest {
         assertEquals(expected, expressCaseService.isExpressCase(participation));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideIsExpressCaseFinRemCaseDate")
+    void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
+                                                                              FinremCaseData caseData,
+                                                                              boolean expected) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
+        assertEquals(expected, expressCaseService.isExpressCase(caseData));
+    }
+
     private static Stream<Arguments> provideIsExpressCase() {
         return Stream.of(
             Arguments.of(false, ENROLLED, false),
             Arguments.of(true, ENROLLED, true),
             Arguments.of(true, DOES_NOT_QUALIFY, false)
+        );
+    }
+
+
+    private static Stream<Arguments> provideIsExpressCaseFinRemCaseDate() {
+        return Stream.of(
+            Arguments.of(false, createFinRemEpCaseData(ENROLLED), false),
+            Arguments.of(true, createFinRemEpCaseData(ENROLLED), true),
+            Arguments.of(true, createFinRemEpCaseData(DOES_NOT_QUALIFY), false)
         );
     }
 
@@ -149,5 +167,9 @@ class ExpressCaseServiceTest {
             .fastTrackDecision(YesOrNo.NO)
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
+    }
+
+    private static FinremCaseData createFinRemEpCaseData(ExpressCaseParticipation epParticipation) {
+        return FinremCaseData.builder().expressCaseParticipation(epParticipation).build();
     }
 }
