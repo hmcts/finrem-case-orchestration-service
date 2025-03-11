@@ -31,12 +31,6 @@ public class ValidateHearingService {
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
     private final ExpressCaseService expressCaseService;
 
-    //TODO: Refactor as it is always used inverted
-    private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
-                                                             final LocalDate date) {
-        return !(date.isBefore(min) || date.isAfter(max));
-    }
-
     public List<String> validateHearingErrors(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
 
@@ -60,16 +54,21 @@ public class ValidateHearingService {
         LocalDate hearingDate = caseData.getListForHearingWrapper().getHearingDate();
 
         if (caseData.isFastTrackApplication()) {
-            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
+            if (isHearingOutsideOfTimeline(issueDate.plusWeeks(6), issueDate.plusWeeks(10), hearingDate)) {
                 return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
         } else if (expressCaseService.isExpressCase(caseData)) {
-            if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
+            if (isHearingOutsideOfTimeline(issueDate.plusWeeks(16), issueDate.plusWeeks(20), hearingDate)) {
                 return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
+        } else if (isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return List.of();
+    }
+
+    private boolean isHearingOutsideOfTimeline(final LocalDate min, final LocalDate max,
+                                                      final LocalDate date) {
+        return date.isBefore(min) || date.isAfter(max);
     }
 }

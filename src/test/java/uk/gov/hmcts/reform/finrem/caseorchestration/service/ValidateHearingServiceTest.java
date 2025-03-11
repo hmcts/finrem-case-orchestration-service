@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -12,78 +13,90 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_16_AND_20_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
-public class ValidateHearingServiceTest extends BaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ValidateHearingServiceTest {
 
     private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY =
         "Issue Date, fast track decision or hearingDate is empty";
 
-    private ValidateHearingService service = new ValidateHearingService(new SelectablePartiesCorrespondenceService(
-        new FinremCaseDetailsMapper(new ObjectMapper())));
+    @InjectMocks
+    private ValidateHearingService service;
+
+    @Mock
+    private SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
+    @Mock
+    private ExpressCaseService expressCaseService;
+
     private FinremCaseDetails caseDetails;
     private FinremCaseData caseData;
 
-    @Before
+    @BeforeEach
     public void setup() {
         caseDetails = getCaseDetails();
         caseData = caseDetails.getData();
     }
 
     @Test
-    public void issueDateEmpty() {
+    void issueDateEmpty() {
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.setIssueDate(null);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestErrors();
-        caseData.setPartiesOnCase(getPartiesOnCase());
 
-        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
+        caseData.setPartiesOnCase(getPartiesOnCase());
+        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
-    public void fastTrackDecisionEmpty() {
+    void fastTrackDecisionEmpty() {
         caseData.setIssueDate(LocalDate.now());
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         caseData.setFastTrackDecisionReason(null);
         caseData.setPartiesOnCase(getPartiesOnCase());
 
         List<String> errors = doTestErrors();
-        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
+        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
-    public void hearingDateEmpty() {
+    void hearingDateEmpty() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(null);
         caseData.setPartiesOnCase(getPartiesOnCase());
+
         List<String> errors = doTestErrors();
-        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
+        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
-    public void givenHearingWithNoAppRespNotificationSelected_whenValidate_thenThrowErrorCustomMessage() {
+    void givenHearingWithNoAppRespNotificationSelected_whenValidate_thenThrowErrorCustomMessage() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
 
         DynamicMultiSelectList partiesOnCase = getPartiesOnCaseMissingSelectedAppAndResp();
+        when(selectablePartiesCorrespondenceService.validateApplicantAndRespondentCorrespondenceAreSelected(
+            caseData, HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE)).thenReturn(List.of(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
 
 
         caseData.setPartiesOnCase(partiesOnCase);
         List<String> errors = doTestErrors();
-        assertThat(errors, hasItem(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE));
+        assertThat(errors).contains(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
     }
 
     private DynamicMultiSelectList getPartiesOnCase() {
@@ -124,58 +137,82 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void noErrors() {
+    void noErrors() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestErrors();
-        assertThat(errors, hasSize(0));
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    public void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
+    void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(null);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         caseData.setCaseAllocatedTo(YesOrNo.YES);
         List<String> errors = doTestWarnings();
-        assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
+        assertThat(errors).contains(DATE_BETWEEN_6_AND_10_WEEKS);
     }
 
     @Test
-    public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
+    void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
-        assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
+        assertThat(errors).contains(DATE_BETWEEN_6_AND_10_WEEKS);
     }
 
     @Test
-    public void fastTrackHearingDatesNoWarning() {
+    void fastTrackHearingDatesNoWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(7));
         List<String> errors = doTestWarnings();
-        assertThat(errors, hasSize(0));
+        assertThat(errors).isEmpty();
     }
 
     @Test
-    public void nonFastTrackHearingDatesWarning() {
+    void expressPilotDatesWarningWithoutJudiciaryOutcome() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.setExpressCaseParticipation(ENROLLED);
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = doTestWarnings();
+        assertThat(errors).contains(DATE_BETWEEN_16_AND_20_WEEKS);
+    }
+
+    @Test
+    void expressPilotDatesNoWarning() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.setExpressCaseParticipation(ENROLLED);
+        caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(17));
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = doTestWarnings();
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void nonFastTrackHearingDatesWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
-        assertThat(errors, hasItem(DATE_BETWEEN_12_AND_16_WEEKS));
+        assertThat(errors).contains(DATE_BETWEEN_12_AND_16_WEEKS);
     }
 
     @Test
-    public void nonFastTrackHearingDatesNoWarning() {
+    void nonFastTrackHearingDatesNoWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(13));
         List<String> errors = doTestWarnings();
-        assertThat(errors, hasSize(0));
+        assertThat(errors).isEmpty();
     }
 
     private List<String> doTestWarnings() {
