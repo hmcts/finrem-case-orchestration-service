@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
@@ -42,9 +45,16 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+
         selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
+        List<String> errors = new ArrayList<>();
+        if (selectedCourtService.royalCourtOrHighCourtChosen(caseData)) {
+            errors.add("You cannot select High Court or Royal Court of Justice. Please select another court.");
+        }
+        errors.addAll(postalService.validate(caseData));
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(postalService.validate(caseData)).build();
+            .data(caseData).errors(errors).build();
     }
 }
