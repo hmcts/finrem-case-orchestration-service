@@ -150,6 +150,40 @@ class BulkPrintDocumentServiceTest {
         assertTrue(errors.isEmpty());
     }
 
+    @Test
+    void validateEncryptionOnUploadedDocumentWhenPdfFile() throws IOException {
+        String fixture = "/fixtures/general-application.pdf";
+        byte[] bytes = loadResource(fixture);
+
+        CaseDocument caseDocument = CaseDocument.builder()
+            .documentUrl(FILE_URL)
+            .documentBinaryUrl(FILE_BINARY_URL)
+            .documentFilename(fixture)
+            .build();
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+
+        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH);
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void validateEncryptionOnUploadedDocumentWhenOtherFile() {
+        CaseDocument caseDocument = CaseDocument.builder()
+            .documentUrl(FILE_URL)
+            .documentBinaryUrl(FILE_BINARY_URL)
+            .documentFilename(XLS_FILE_NAME)
+            .build();
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+
+        assertTrue(errors.isEmpty());
+    }
+
     private byte[] loadResource(String testPdf) throws IOException {
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPdf)) {

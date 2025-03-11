@@ -43,20 +43,11 @@ public class BulkPrintDocumentService {
         if (caseDocument != null) {
             String documentFilename = caseDocument.getDocumentFilename();
             log.info("checking encryption for file {} for Case ID: {}", documentFilename, caseId);
+
             if (documentFilename.toLowerCase().endsWith(".doc") || documentFilename.toLowerCase().endsWith(".docx")) {
                 handleDocFile(caseDocument, auth, errors, documentFilename);
-            } else if (documentFilename.toLowerCase().endsWith(".xls") || documentFilename.toLowerCase().endsWith(".xlsx")) {
-                return;
-            } else {
-                byte[] pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
-
-                if (pdfBytes != null) {
-                    checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
-                } else {
-                    String errorMessage = "Uploaded document " + documentFilename + " is empty.";
-                    log.error("Uploaded document {} for Case ID: {} is empty", documentFilename, caseId);
-                    errors.add(errorMessage);
-                }
+            } else if (documentFilename.toLowerCase().endsWith(".pdf")) {
+                handlePdfFile(caseDocument, auth, errors, documentFilename, caseId);
             }
         }
     }
@@ -69,6 +60,18 @@ public class BulkPrintDocumentService {
 
         byte[] pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
         checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
+    }
+
+    private void handlePdfFile(CaseDocument caseDocument, String auth, List<String> errors, String documentFilename, String caseId) {
+        byte[] pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
+
+        if (pdfBytes != null) {
+            checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
+        } else {
+            String errorMessage = "Uploaded document " + documentFilename + " is empty.";
+            log.error("Uploaded document {} for Case ID: {} is empty", documentFilename, caseId);
+            errors.add(errorMessage);
+        }
     }
 
     private void checkIfPdfIsEncrypted(List<String> errors, String documentFilename, byte[] pdfBytes) {
@@ -88,5 +91,4 @@ public class BulkPrintDocumentService {
             log.error(exc.getMessage());
         }
     }
-
 }
