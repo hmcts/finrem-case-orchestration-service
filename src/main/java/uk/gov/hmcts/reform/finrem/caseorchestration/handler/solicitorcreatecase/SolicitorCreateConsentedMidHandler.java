@@ -7,8 +7,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 
@@ -20,6 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<String, Object>> {
 
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final ConsentOrderService consentOrderService;
     private final InternationalPostalService postalService;
 
@@ -38,6 +42,9 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
         List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
         List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
         errors.addAll(validate);
+
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+        errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseDetails.getData()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();
