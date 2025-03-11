@@ -175,7 +175,7 @@ class BulkPrintDocumentServiceTest {
         CaseDocument caseDocument = CaseDocument.builder()
             .documentUrl(FILE_URL)
             .documentBinaryUrl(FILE_BINARY_URL)
-            .documentFilename(XLS_FILE_NAME)
+            .documentFilename("abc.png")
             .build();
 
         List<String> errors = new ArrayList<>();
