@@ -26,7 +26,7 @@ public class ValidateHearingService {
     public static final String DATE_BETWEEN_16_AND_20_WEEKS =
         "Date of the express pilot hearing should be between 16 and 20 weeks.";
     public static final String REQUIRED_FIELD_EMPTY_ERROR =
-        "Issue Date, fast track decision or hearingDate is empty";
+        "Issue Date, fast track decision or hearing date is empty";
 
     private final SelectablePartiesCorrespondenceService selectablePartiesCorrespondenceService;
     private final ExpressCaseService expressCaseService;

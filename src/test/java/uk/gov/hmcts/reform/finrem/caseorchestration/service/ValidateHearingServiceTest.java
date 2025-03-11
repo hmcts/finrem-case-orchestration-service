@@ -58,7 +58,7 @@ class ValidateHearingServiceTest {
         List<String> errors = doTestErrors();
 
         caseData.setPartiesOnCase(getPartiesOnCase());
-        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
@@ -69,7 +69,7 @@ class ValidateHearingServiceTest {
         caseData.setPartiesOnCase(getPartiesOnCase());
 
         List<String> errors = doTestErrors();
-        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
@@ -80,7 +80,7 @@ class ValidateHearingServiceTest {
         caseData.setPartiesOnCase(getPartiesOnCase());
 
         List<String> errors = doTestErrors();
-        assertThat(errors).contains(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
     }
 
     @Test
@@ -96,7 +96,7 @@ class ValidateHearingServiceTest {
 
         caseData.setPartiesOnCase(partiesOnCase);
         List<String> errors = doTestErrors();
-        assertThat(errors).contains(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
+        assertThat(errors).containsExactly(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
     }
 
     private DynamicMultiSelectList getPartiesOnCase() {
@@ -152,7 +152,7 @@ class ValidateHearingServiceTest {
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         caseData.setCaseAllocatedTo(YesOrNo.YES);
         List<String> errors = doTestWarnings();
-        assertThat(errors).contains(DATE_BETWEEN_6_AND_10_WEEKS);
+        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
     }
 
     @Test
@@ -161,7 +161,7 @@ class ValidateHearingServiceTest {
         caseData.setFastTrackDecision(YesOrNo.YES);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
-        assertThat(errors).contains(DATE_BETWEEN_6_AND_10_WEEKS);
+        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
     }
 
     @Test
@@ -182,7 +182,7 @@ class ValidateHearingServiceTest {
         when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
 
         List<String> errors = doTestWarnings();
-        assertThat(errors).contains(DATE_BETWEEN_16_AND_20_WEEKS);
+        assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
     }
 
     @Test
@@ -203,7 +203,7 @@ class ValidateHearingServiceTest {
         caseData.setFastTrackDecision(YesOrNo.NO);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         List<String> errors = doTestWarnings();
-        assertThat(errors).contains(DATE_BETWEEN_12_AND_16_WEEKS);
+        assertThat(errors).containsExactly(DATE_BETWEEN_12_AND_16_WEEKS);
     }
 
     @Test

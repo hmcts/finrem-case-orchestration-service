@@ -85,7 +85,7 @@ class ExpressCaseServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideIsExpressCaseFinRemCaseDate")
+    @MethodSource("provideIsExpressCaseFinRemCaseData")
     void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
                                                                               FinremCaseData caseData,
                                                                               boolean expected) {
@@ -102,7 +102,7 @@ class ExpressCaseServiceTest {
     }
 
 
-    private static Stream<Arguments> provideIsExpressCaseFinRemCaseDate() {
+    private static Stream<Arguments> provideIsExpressCaseFinRemCaseData() {
         return Stream.of(
             Arguments.of(false, createFinRemEpCaseData(ENROLLED), false),
             Arguments.of(true, createFinRemEpCaseData(ENROLLED), true),
