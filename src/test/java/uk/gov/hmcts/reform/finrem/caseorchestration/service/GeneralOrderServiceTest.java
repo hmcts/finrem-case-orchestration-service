@@ -768,6 +768,7 @@ class GeneralOrderServiceTest {
                         .attachmentsToShare(List.of(
                             AttachmentToShareCollection.builder()
                                 .value(AttachmentToShare.builder()
+                                    .attachment(caseDocument("https://fakeurl/attachment1", "attachment1.pdf", "attachment1"))
                                     .attachmentName("attachment1.pdf")
                                     .documentId("attachment1")
                                     .documentToShare(YesOrNo.NO)

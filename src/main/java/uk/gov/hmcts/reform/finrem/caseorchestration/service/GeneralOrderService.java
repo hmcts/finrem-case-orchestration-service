@@ -291,6 +291,7 @@ public class GeneralOrderService {
                 .map(attachment -> AttachmentToShareCollection.builder()
                     .value(AttachmentToShare.builder()
                         .documentId(getDocumentId(attachment))
+                        .attachment(attachment)
                         .attachmentName(attachment.getDocumentFilename())
                         .documentToShare(YesOrNo.NO)
                         .build())
