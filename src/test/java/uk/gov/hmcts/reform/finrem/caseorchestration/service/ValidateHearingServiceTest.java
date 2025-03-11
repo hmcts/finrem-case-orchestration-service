@@ -26,12 +26,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_16_AND_20_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 class ValidateHearingServiceTest {
-
-    private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY =
-        "Issue Date, fast track decision or hearingDate is empty";
 
     @InjectMocks
     private ValidateHearingService service;
@@ -58,7 +56,7 @@ class ValidateHearingServiceTest {
         List<String> errors = doTestErrors();
 
         caseData.setPartiesOnCase(getPartiesOnCase());
-        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
     }
 
     @Test
@@ -69,7 +67,7 @@ class ValidateHearingServiceTest {
         caseData.setPartiesOnCase(getPartiesOnCase());
 
         List<String> errors = doTestErrors();
-        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
     }
 
     @Test
@@ -80,7 +78,7 @@ class ValidateHearingServiceTest {
         caseData.setPartiesOnCase(getPartiesOnCase());
 
         List<String> errors = doTestErrors();
-        assertThat(errors).containsExactly(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY);
+        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
     }
 
     @Test
