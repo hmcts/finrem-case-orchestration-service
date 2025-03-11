@@ -18,7 +18,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class SelectedCourtService {
 
-    private static final String ROYAL_COURT = "THE ROYAL COURT OF JUSTICE";
+    private static final String ROYAL_COURT = "THE ROYAL COURTS OF JUSTICE";
     private static final String HIGH_COURT = "HIGH COURT FAMILY DIVISION";
 
     private final CourtDetailsConfiguration courtDetailsConfiguration;

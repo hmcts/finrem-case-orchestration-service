@@ -140,7 +140,7 @@ class SelectedCourtServiceTest {
         finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("High Court Family Division");
         assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isTrue();
 
-        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("The Royal Court of Justice");
+        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("The Royal Courts of Justice");
         assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isTrue();
 
         finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("Central Family Court");
