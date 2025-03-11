@@ -22,15 +22,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.suggested.SuggestedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.AdditionalDocumentsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.UploadDraftOrderAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnex;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.AgreedPensionSharingAnnexCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.upload.agreed.UploadAgreedDraftOrder;
@@ -58,6 +60,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -72,6 +75,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.APPLICATION_ISSUED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.REVIEW_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State.SCHEDULING_AND_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.AGREED_DRAFT_ORDER_OPTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.PSA_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.SUGGESTED_DRAFT_ORDER_OPTION;
@@ -137,8 +143,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .suggestedPensionSharingAnnexes(mock(CaseDocument.class))
                 .build())
             .build();
-        DocumentCollection additionalDocumentCollection = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocumentCollection = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
         UploadSuggestedDraftOrderCollection orderCollection = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
@@ -166,7 +174,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
         // Then
         List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
@@ -215,14 +223,20 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         final Long caseID = 1727874196328932L;
         FinremCaseData caseData = spy(new FinremCaseData());
 
-        DocumentCollection additionalDocument1 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument1 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
-        DocumentCollection additionalDocument2 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument2 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
-        DocumentCollection additionalDocument3 = DocumentCollection.builder()
-            .value(mock(CaseDocument.class))
+        AdditionalDocumentsCollection additionalDocument3 = AdditionalDocumentsCollection.builder()
+            .value(UploadDraftOrderAdditionalDocument.builder()
+                .orderAttachment(mock(CaseDocument.class))
+                .build())
             .build();
         UploadSuggestedDraftOrderCollection orderCollection1 = UploadSuggestedDraftOrderCollection.builder()
             .value(UploadedDraftOrder.builder()
@@ -261,7 +275,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         // When
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
         // Then
         List<SuggestedDraftOrderCollection> collectionResult = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection();
@@ -269,11 +283,11 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         SuggestedDraftOrder draftOrderResult1 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(0).getValue();
         assertThat(draftOrderResult1.getDraftOrder()).isNotNull();
-        assertEquals(2, draftOrderResult1.getAttachments().size());
+        assertThat(draftOrderResult1.getAttachments()).isNotEmpty().hasSize(2);
 
         SuggestedDraftOrder draftOrderResult2 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(1).getValue();
         assertThat(draftOrderResult2.getDraftOrder()).isNotNull();
-        assertEquals(1, draftOrderResult2.getAttachments().size());
+        assertThat(draftOrderResult2.getAttachments()).isNotEmpty().hasSize(1);
 
         SuggestedDraftOrder draftOrderResult3 = response.getData().getDraftOrdersWrapper().getSuggestedDraftOrderCollection().get(2).getValue();
         assertThat(draftOrderResult3.getDraftOrder()).isNotNull();
@@ -294,7 +308,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData), AUTH_TOKEN);
+                handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
@@ -351,7 +365,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .build())
             .build();
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
-            CaseType.CONTESTED, caseData);
+            CaseType.CONTESTED, caseData, SCHEDULING_AND_HEARING);
 
         handler.handle(request, AUTH_TOKEN);
 
@@ -422,7 +436,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         }).when(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), lambdaCaptor.capture(), eq(AUTH_TOKEN));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
         assertThat(response.getWarnings()).containsExactly("WARNING1");
         // Verify that the function was captured and executed
         verify(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), any(), eq(AUTH_TOKEN));
@@ -468,10 +482,63 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         }).when(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), lambdaCaptor.capture(), eq(AUTH_TOKEN));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(Long.valueOf(CASE_ID), caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
         assertThat(response.getWarnings()).containsExactly("WARNING1");
         // Verify that the function was captured and executed
         verify(documentWarningsHelper).getDocumentWarnings(any(FinremCallbackRequest.class), any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    void givenCaseData_whenUploadingSuggestedDraftOrder_thenNoCaseStateChange() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
+        builder.uploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(APPLICATION_ISSUED),
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(REVIEW_ORDER).data(caseData)
+            ), AUTH_TOKEN);
+        assertThat(response.getState()).isEqualTo(APPLICATION_ISSUED.getStateId());
+    }
+
+    @Test
+    void givenCaseData_whenUploadingAgreedDraftOrder_thenCaseStateChanges() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(APPLICATION_ISSUED),
+                FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(REVIEW_ORDER).data(caseData)
+            ), AUTH_TOKEN);
+        assertThat(response.getState()).isEqualTo(REVIEW_ORDER.getStateId());
+    }
+
+    @Test
+    void givenCaseData_whenStateIsMissing_thenThrowIllegalStateException() {
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build());
+
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(
+            FinremCaseDetails.builder().id(Long.valueOf(CASE_ID)).state(null).data(caseData)
+        );
+
+        assertThat(assertThrows(IllegalStateException.class, () -> handler.handle(request, AUTH_TOKEN)).getMessage())
+            .isEqualTo("Unexpected null in state");
     }
 
     private void mockCaseRole(String caseId, CaseRole userCaseRole) {

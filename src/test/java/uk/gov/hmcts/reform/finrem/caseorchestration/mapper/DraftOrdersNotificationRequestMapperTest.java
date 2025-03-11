@@ -36,10 +36,16 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.APPLICANT_BARRISTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class DraftOrdersNotificationRequestMapperTest {
@@ -112,7 +118,64 @@ class DraftOrdersNotificationRequestMapperTest {
                 .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
                 .build());
 
-        assertThat(notificationRequest.getNotificationEmail()).isEqualTo("hello@world.com");
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "hello@world.com", "Mr. Uploader");
+    }
+
+    @Test
+    void givenDraftOrderUploadedOnBehalfOfApplicant_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenReturnNotificationRequest() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview(UPLOAD_PARTY_APPLICANT));
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
+                .orderFiledBy(APPLICANT)
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "app@solicitor.com", "Applicant Solicitor");
+    }
+
+    @Test
+    void givenDraftOrderUploadedOnBehalfOfRespondent_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenReturnNotificationRequest() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview(UPLOAD_PARTY_RESPONDENT));
+
+        NotificationRequest notificationRequest = mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails,
+            RefusedOrder.builder()
+                .hearingDate(LocalDate.of(2024, 1, 5))
+                .refusalJudge("Peter Chapman")
+                .judgeFeedback("Judge Feedback")
+                .submittedBy("Mr. Uploader")
+                .orderFiledBy(RESPONDENT)
+                .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+                .build());
+
+        verifyRefusedDraftOrderOrPsaNotificationRequest(notificationRequest, "resp@solicitor.com", "Respondent Solicitor");
+    }
+
+    @Test
+    void givenDraftOrderWithNoSubmittedEmail_whenBuildRefusedDraftOrderOrPsaNotificationRequest_thenThrowsException() {
+        FinremCaseDetails caseDetails = createCaseDetails(createDraftOrdersReview());
+        RefusedOrder refusedOrder = RefusedOrder.builder()
+            .hearingDate(LocalDate.of(2024, 1, 5))
+            .refusalJudge("Peter Chapman")
+            .judgeFeedback("Judge Feedback")
+            .submittedBy("Mr. Uploader")
+            .orderFiledBy(APPLICANT_BARRISTER)
+            .refusedDocument(CaseDocument.builder().documentFilename("abc.pdf").build())
+            .build();
+
+        assertThatThrownBy(() -> mapper.buildRefusedDraftOrderOrPsaNotificationRequest(caseDetails, refusedOrder))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Case ID 123456789: No refused order recipient email address found");
+    }
+
+    private void verifyRefusedDraftOrderOrPsaNotificationRequest(NotificationRequest notificationRequest,
+                                                                 String expectedNotificationEmail,
+                                                                 String expectedName) {
+        assertThat(notificationRequest.getNotificationEmail()).isEqualTo(expectedNotificationEmail);
         assertThat(notificationRequest.getCaseReferenceNumber()).isEqualTo("123456789");
         assertThat(notificationRequest.getCaseType()).isEqualTo(EmailService.CONTESTED);
         assertThat(notificationRequest.getApplicantName()).isEqualTo("Hamzah Tahir");
@@ -122,7 +185,7 @@ class DraftOrdersNotificationRequestMapperTest {
         assertThat(notificationRequest.getDocumentName()).isEqualTo("abc.pdf");
         assertThat(notificationRequest.getJudgeFeedback()).isEqualTo("Judge Feedback");
         assertThat(notificationRequest.getJudgeName()).isEqualTo("Peter Chapman");
-        assertThat(notificationRequest.getName()).isEqualTo("Mr. Uploader");
+        assertThat(notificationRequest.getName()).isEqualTo(expectedName);
         assertThat(notificationRequest.getSolicitorReferenceNumber()).isEqualTo("A_RANDOM_STRING");
     }
 
@@ -146,10 +209,14 @@ class DraftOrdersNotificationRequestMapperTest {
 
         ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
             .solicitorReference("A_RANDOM_STRING")
+            .applicantSolicitorEmail("app@solicitor.com")
+            .applicantSolicitorName("Applicant Solicitor")
             .applicantFmName(applicantFirstName)
             .applicantLname(applicantLastName)
             .respondentFmName(respondentFirstName)
             .respondentLname(respondentLastName)
+            .respondentSolicitorEmail("resp@solicitor.com")
+            .respondentSolicitorName("Respondent Solicitor")
             .build();
 
         LocalDate hearingDate = LocalDate.of(1999, 8, 6);
@@ -188,10 +255,15 @@ class DraftOrdersNotificationRequestMapperTest {
     }
 
     private DraftOrdersReview createDraftOrdersReview() {
+        return createDraftOrdersReview(null);
+    }
+
+    private DraftOrdersReview createDraftOrdersReview(String uploadedOnBehalfOf) {
         DraftOrderDocReviewCollection draftOrderDocReviewCollection = DraftOrderDocReviewCollection.builder()
             .value(DraftOrderDocumentReview.builder()
                 .orderStatus(OrderStatus.TO_BE_REVIEWED)
                 .submittedDate(LocalDateTime.of(2024, 1, 10, 13, 12))
+                .uploadedOnBehalfOf(uploadedOnBehalfOf)
                 .build()
             )
             .build();
