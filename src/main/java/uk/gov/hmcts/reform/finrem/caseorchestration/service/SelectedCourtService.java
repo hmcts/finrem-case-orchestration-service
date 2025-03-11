@@ -66,7 +66,7 @@ public class SelectedCourtService {
     }
 
     /**
-     * Contested Form A creation does not permit these courts to chosen.
+     * Contested Form A creation does not permit these courts to be chosen.
      * This simple check returns true if caseData shows that a User has picked either of
      * these courts.
      *

@@ -126,8 +126,6 @@ class SelectedCourtServiceTest {
      * Returns true if "High Court Family Division" or "The Royal Court of Justice" are chosen
      * Returns false if another court is chosen
      * Returns false if a court has not been selected yet.
-     *
-     * Test confirms that no fields are set and no warnings are logged.
      */
     @Test
     void royalCourtOrHighCourtChosenHandlesCourtsAndNull() {
