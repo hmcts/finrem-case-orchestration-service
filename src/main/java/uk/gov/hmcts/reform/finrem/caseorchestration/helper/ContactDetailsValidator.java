@@ -25,6 +25,7 @@ public class ContactDetailsValidator {
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
         if (caseData.getCcdCaseType() == CaseType.CONTESTED
+            && caseData.isApplicantRepresentedByASolicitor()
             && wrapper.getApplicantSolicitorAddress() != null
             && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
             errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
