@@ -992,9 +992,9 @@ class NotificationServiceTest {
         notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
+        lenient().when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
@@ -1008,10 +1008,10 @@ class NotificationServiceTest {
     void givenConsentedCaseAndRequestedByNonDigitalRespondentSolicitor_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
         notificationRequest = new NotificationRequest();
         notificationRequest.setName(TEST_RESP_SOLICITOR_NAME);
-        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(false);
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
+        lenient().when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(false);
+        lenient().when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
 
         notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
@@ -1150,7 +1150,7 @@ class NotificationServiceTest {
             ContactDetailsWrapper.builder().respondentSolicitorEmail(APPLICANT_EMAIL).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
 
         assertFalse(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails));
     }
@@ -1174,8 +1174,8 @@ class NotificationServiceTest {
 
     @Test
     void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotDigital() {
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
+        lenient().when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
         assertFalse(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails.builder()
             .id(1234567890L).build()));
     }
@@ -1261,7 +1261,7 @@ class NotificationServiceTest {
                 .intervenerSolName("name").build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+        lenient().when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(true);
         assertTrue(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOne()));
     }
@@ -1314,7 +1314,7 @@ class NotificationServiceTest {
             IntervenerThree.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+        lenient().when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
             CaseRole.INTVR_SOLICITOR_3.getCcdCode())).thenReturn(false);
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerThree()));
     }
@@ -1362,26 +1362,26 @@ class NotificationServiceTest {
 
     @Test
     void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
+        lenient().when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        lenient().when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
 
         assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(any()));
     }
 
     @Test
     void givenAppIsNotContestedAndApplicantSolicitorIsRegisteredAndAcceptingEmails_shouldNotSendLetters() {
-        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
+        lenient().when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(false);
+        lenient().when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
-        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
-        when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
-        when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(any())).thenReturn(true);
+        lenient().when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+        lenient().when(caseDataService.isPaperApplication(any(FinremCaseData.class))).thenReturn(false);
+        lenient().when(caseDataService.isRespondentRepresentedByASolicitor(anyMap())).thenReturn(true);
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
@@ -1542,9 +1542,9 @@ class NotificationServiceTest {
         callbackRequest.getCaseDetails().getData().put("intervener1SolEmail", TEST_SOLICITOR_EMAIL);
         IntervenerOne intervenerWrapper = IntervenerOne.builder()
             .intervenerSolEmail(TEST_SOLICITOR_EMAIL).build();
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
+        lenient().when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
+        lenient().when(caseDataService.isNotEmpty(anyString(), anyMap())).thenReturn(true);
+        lenient().when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(anyString(), anyString())).thenReturn(true);
 
         boolean actual = notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper,
             callbackRequest.getCaseDetails());
