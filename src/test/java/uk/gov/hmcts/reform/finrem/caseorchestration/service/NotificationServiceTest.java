@@ -1211,7 +1211,7 @@ class NotificationServiceTest {
 
         Map<String, Object> caseData = new HashMap<>();
 
-        //when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
+        lenient().when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
 
