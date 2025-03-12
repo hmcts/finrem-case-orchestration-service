@@ -196,11 +196,11 @@ public class AdditionalHearingDocumentService {
                     CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
                     log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
                     if (!finalOrderCollection.isEmpty()) {
-                        caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
+                        finalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocs));
                     } else {
                         List<DirectionOrderCollection> orderList = new ArrayList<>();
                         orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
-                        caseData.setFinalOrderCollection(orderList);
+                        finalOrderCollection.addAll(orderList);
                     }
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
