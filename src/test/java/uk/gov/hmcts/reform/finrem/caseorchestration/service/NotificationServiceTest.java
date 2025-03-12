@@ -841,6 +841,7 @@ class NotificationServiceTest {
     @Test
     void shouldNotEmailContestedAppSolicitor() {
         when(caseDataService.isPaperApplication(anyMap())).thenReturn(true);
+        lenient().when(caseDataService.isApplicantRepresentedByASolicitor(anyMap())).thenReturn(false);
 
         assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(anyMap()));
     }
