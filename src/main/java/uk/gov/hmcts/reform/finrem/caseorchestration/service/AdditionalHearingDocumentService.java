@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
@@ -189,26 +190,22 @@ public class AdditionalHearingDocumentService {
         List<DirectionOrderCollection> uploadHearingOrder
             = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
+            List<DirectionOrderCollection> newStampedDocs = new ArrayList<>();
             List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
                 CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
                 LocalDateTime orderDateTime = doc.getValue().getOrderDateTime();
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
                     CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
                     log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
-                    if (!finalOrderCollection.isEmpty()) {
-                        caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
-                    } else {
-                        List<DirectionOrderCollection> orderList = new ArrayList<>();
-                        orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
-                        caseData.setFinalOrderCollection(orderList);
-                    }
+                    newStampedDocs.add(documentHelper.prepareFinalOrder(stampedDocs));
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
-                caseData.setFinalOrderCollection(finalOrderCollection);
+
                 //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
                 return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
                     orderDateTime);
             }).toList();
+            caseData.setFinalOrderCollection(Stream.concat(finalOrderCollection.stream(), newStampedDocs.stream()).toList());
             caseData.setUploadHearingOrder(orderCollections);
             caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
         }
