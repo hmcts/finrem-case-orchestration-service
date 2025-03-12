@@ -1,15 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -17,18 +16,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-
-import java.util.stream.Stream;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CLOSE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SOLICITOR_CREATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
@@ -37,36 +32,33 @@ class SolicitorCreateContestedMidHandlerTest {
     private SolicitorCreateContestedMidHandler handler;
 
     @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
     private InternationalPostalService postalService;
+
+    @Mock
+    private SelectedCourtService selectedCourtService;
 
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
-    @ParameterizedTest
-    @MethodSource
-    void testCanHandle(CallbackType callbackType, CaseType caseType, EventType eventType, boolean expected) {
-        assertThat(handler.canHandle(callbackType, caseType, eventType)).isEqualTo(expected);
-    }
-
-    private static Stream<Arguments> testCanHandle() {
-        return Stream.of(
-            Arguments.of(MID_EVENT, CONTESTED, CLOSE, false),
-            Arguments.of(MID_EVENT, CONTESTED, SOLICITOR_CREATE, true),
-            Arguments.of(MID_EVENT, CONSENTED, SOLICITOR_CREATE, false),
-            Arguments.of(SUBMITTED, CONTESTED, CLOSE, false)
-        );
+    @BeforeEach
+    public void init() {
+        handler = new SolicitorCreateContestedMidHandler(
+            finremCaseDetailsMapper,
+            postalService,
+            selectedCourtService);
     }
 
     @Test
-    void testHandle() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(postalService).validate(callbackRequest.getCaseDetails().getData());
+    void testHandlerCanHandle() {
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE);
     }
 
-    private FinremCallbackRequest buildCallbackRequest() {
+    private FinremCallbackRequest buildFinremCallbackRequest() {
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.SOLICITOR_CREATE)
@@ -76,9 +68,25 @@ class SolicitorCreateContestedMidHandlerTest {
     }
 
     @Test
+    void testPostalServiceValidationCalled() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(postalService, times(1))
+            .validate(finremCallbackRequest.getCaseDetails().getData());
+    }
+
+    @Test
+    void testSetSelectedCourtDetailsIfPresentCalled() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(selectedCourtService, times(1))
+            .setSelectedCourtDetailsIfPresent(finremCallbackRequest.getCaseDetails().getData());
+    }
+
+    @Test
     void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
@@ -132,7 +140,7 @@ class SolicitorCreateContestedMidHandlerTest {
     @Test
     void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
@@ -144,13 +152,13 @@ class SolicitorCreateContestedMidHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertThat(handle.getErrors())
-                .containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            .containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
     }
 
     @Test
     void givenContestedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowErrorMessage() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
@@ -176,7 +184,7 @@ class SolicitorCreateContestedMidHandlerTest {
     @Test
     void givenContestedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowErrorMessage() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
@@ -194,7 +202,7 @@ class SolicitorCreateContestedMidHandlerTest {
     @Test
     void givenContestedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowErrorMessage() {
 
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
