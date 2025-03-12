@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
@@ -22,6 +23,13 @@ public class ContactDetailsValidator {
 
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        if (caseData.getCcdCaseType() == CaseType.CONTESTED
+            && wrapper.getApplicantSolicitorAddress() != null
+            && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
+            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            return errors;
+        }
 
         if (caseData.isApplicantRepresentedByASolicitor()
             && wrapper.getSolicitorAddress() != null
