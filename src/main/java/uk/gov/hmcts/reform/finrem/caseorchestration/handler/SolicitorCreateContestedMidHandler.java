@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
 import java.util.List;
 
@@ -19,11 +20,14 @@ import java.util.List;
 public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
 
     private final InternationalPostalService postalService;
+    private final SelectedCourtService selectedCourtService;
 
     public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              InternationalPostalService postalService) {
+                                              InternationalPostalService postalService,
+                                              SelectedCourtService selectedCourtService) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
+        this.selectedCourtService = selectedCourtService;
     }
 
     @Override
@@ -43,6 +47,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         errors.addAll(validate);
+        selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(errors).build();
