@@ -1272,8 +1272,6 @@ class NotificationServiceTest {
             IntervenerOne.builder().intervenerRepresented(YesOrNo.NO).build()).build();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
 
-        when(checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
-            CaseRole.INTVR_SOLICITOR_1.getCcdCode())).thenReturn(false);
         assertFalse(notificationService.isIntervenerSolicitorEmailPopulated(caseData.getIntervenerOne()));
     }
 
