@@ -38,7 +38,7 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
-        log.info("Invoking Solicitor Create mid event");
+        log.info("Invoking Solicitor Create Consented mid event");
         List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
         List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
         errors.addAll(validate);
