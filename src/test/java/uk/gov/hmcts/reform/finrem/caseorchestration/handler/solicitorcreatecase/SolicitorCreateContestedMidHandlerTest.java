@@ -16,8 +16,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +67,31 @@ class SolicitorCreateContestedMidHandlerTest {
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(selectedCourtService, times(1))
                 .setSelectedCourtDetailsIfPresent(finremCallbackRequest.getCaseDetails().getData());
+    }
+
+    @Test
+    void testRoyalCourtOrHighCourtChosenCalled() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(selectedCourtService, times(1))
+                .royalCourtOrHighCourtChosen(finremCallbackRequest.getCaseDetails().getData());
+    }
+
+    /*
+     * handler can add errors that stem from either postalService.validate or
+     * selectedCourtService.royalCourtOrHighCourtChosen.
+     * This checks that any errors from each service are present in the callback response.
+     */
+    @Test
+    void testThatErrorsReturned() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        when(selectedCourtService.royalCourtOrHighCourtChosen(any())).thenReturn(true);
+        when(postalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
+        assertThat(handler.handle(finremCallbackRequest, AUTH_TOKEN).getErrors()).contains(
+                "You cannot select High Court or Royal Court of Justice. Please select another court.",
+                "post err 1",
+                "post err 2"
+        );
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
