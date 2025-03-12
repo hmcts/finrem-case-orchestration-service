@@ -161,7 +161,10 @@ public final class CaseHearingFunctions {
 
         data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
         data.put("hearingDateLess35Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(35)));
+        data.put("hearingDateLess28Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(28)));
+        data.put("hearingDateLess21Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(21)));
         data.put("hearingDateLess14Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(14)));
+        data.put("hearingDateLess7Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(7)));
 
         return caseDetails;
     };
