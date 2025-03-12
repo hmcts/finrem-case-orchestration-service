@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
@@ -22,11 +23,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
@@ -77,11 +81,11 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
-    void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabled(boolean isExpressPilotEnabled,
-                                                                         ExpressCaseParticipation participation,
+    void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledCaseDetails(boolean isExpressPilotEnabled,
+                                                                         CaseDetails caseDetails,
                                                                          boolean expected) {
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
-        assertEquals(expected, expressCaseService.isExpressCase(participation));
+        assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
 
     @ParameterizedTest
@@ -95,12 +99,13 @@ class ExpressCaseServiceTest {
 
     private static Stream<Arguments> provideIsExpressCase() {
         return Stream.of(
-            Arguments.of(false, ENROLLED, false),
-            Arguments.of(true, ENROLLED, true),
-            Arguments.of(true, DOES_NOT_QUALIFY, false)
+            Arguments.of(false, createCaseDetailsWithParticipation(ENROLLED), false),
+            Arguments.of(true, createCaseDetailsWithParticipation(ENROLLED), true),
+            Arguments.of(true, createCaseDetailsWithParticipation(DOES_NOT_QUALIFY), false),
+            // Test EP flag not set
+            Arguments.of(true, CaseDetails.builder().data(new HashMap<>()).build(), false)
         );
     }
-
 
     private static Stream<Arguments> provideIsExpressCaseFinRemCaseData() {
         return Stream.of(
@@ -167,6 +172,11 @@ class ExpressCaseServiceTest {
             .fastTrackDecision(YesOrNo.NO)
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
+    }
+  
+    private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
+        return CaseDetails.builder().data(
+            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
     }
 
     private static FinremCaseData createFinRemEpCaseData(ExpressCaseParticipation epParticipation) {
