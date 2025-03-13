@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -99,6 +100,9 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         }
 
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null);
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null);
+        caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
         clearTemporaryFields(caseDetails);
 
         if (state == null) {
@@ -334,5 +338,4 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
     }
-
 }
