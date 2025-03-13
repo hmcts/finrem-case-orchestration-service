@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.Approv
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType.DRAFT_ORDER;
@@ -64,14 +63,9 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         DraftOrdersWrapper draftOrdersWrapper = finremCaseData.getDraftOrdersWrapper();
 
-        if (Optional.ofNullable(draftOrdersWrapper.getHearingInstruction())
-            .map(HearingInstruction::getRequireAnotherHearing)
-            .orElse(YesOrNo.YES) == YesOrNo.NO) {
-            draftOrdersWrapper.setHearingInstruction(null);
-        } else {
-            setupHearingInstruction(draftOrdersWrapper);
-            setupExtraReportFieldsInput(draftOrdersWrapper);
-        }
+        setupHearingInstruction(draftOrdersWrapper);
+        setupExtraReportFieldsInput(draftOrdersWrapper);
+
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }

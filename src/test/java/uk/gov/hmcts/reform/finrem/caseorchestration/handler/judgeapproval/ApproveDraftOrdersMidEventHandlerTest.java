@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApprovalDocType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -182,28 +181,5 @@ class ApproveDraftOrdersMidEventHandlerTest {
         assertEquals(NO, responseDraftOrdersWrapper.getHearingInstruction().getShowRequireAnotherHearingQuestion());
         assertNotNull(extraReportFieldsInput, "extraReportFieldsInput should not be null");
         assertEquals(YES, extraReportFieldsInput.getShowRequireExtraReportFieldsInputQuestion());
-    }
-
-    @Test
-    void givenUserDoesNotRequireAnotherHearing_whenHandle_shouldClearHearingInstruction() {
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(12345L)
-                .data(FinremCaseData.builder()
-                    .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                        .hearingInstruction(HearingInstruction.builder()
-                            .requireAnotherHearing(NO)
-                            .build())
-                        .build())
-                    .build())
-                .build())
-            .build();
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-
-        assertNotNull(response);
-        FinremCaseData responseData = response.getData();
-        DraftOrdersWrapper responseDraftOrdersWrapper = responseData.getDraftOrdersWrapper();
-        assertNull(responseDraftOrdersWrapper.getHearingInstruction());
     }
 }
