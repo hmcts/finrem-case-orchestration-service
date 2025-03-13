@@ -485,9 +485,9 @@ public class GeneralApplicationServiceTest {
     }
 
     @Test
-    public void givenNonWordOrPDFDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
-        String OTHER_FORMAT_EXTENSION = ".anyother";
-        CaseDocument caseDocument = getCaseDocument(OTHER_FORMAT_EXTENSION);
+    public void givenNonWordOrPdfDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
+        String otherFilenameExtension = ".anyother";
+        CaseDocument caseDocument = getCaseDocument(otherFilenameExtension);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
 
         GeneralApplicationSupportingDocumentData generalApplicationSupportingDocumentData =
@@ -498,16 +498,6 @@ public class GeneralApplicationServiceTest {
                     .build())
                 .build();
         List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = List.of(generalApplicationSupportingDocumentData);
-
-        GeneralApplicationsCollection generalApplicationsCollection = GeneralApplicationsCollection.builder()
-            .id(UUID.randomUUID()).build();
-        GeneralApplicationItems generalApplicationItems = GeneralApplicationItems.builder()
-            .generalApplicationCreatedBy("Claire Mumford")
-            .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
-            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now())
-            .generalApplicationSender(buildDynamicList(APPLICANT))
-            .build();
-        generalApplicationsCollection.setValue(generalApplicationItems);
 
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
