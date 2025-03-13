@@ -490,13 +490,13 @@ public class GeneralApplicationServiceTest {
         CaseDocument caseDocument = getCaseDocument(OTHER_FORMAT_EXTENSION);
         caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
 
-        GeneralApplicationSupportingDocumentData generalApplicationSupportingDocumentData = GeneralApplicationSupportingDocumentData.builder()
-            .id(String.valueOf(UUID.randomUUID()))
-            .value(
-                GeneralApplicationSuportingDocumentItems.builder()
+        GeneralApplicationSupportingDocumentData generalApplicationSupportingDocumentData =
+            GeneralApplicationSupportingDocumentData.builder()
+                .id(String.valueOf(UUID.randomUUID()))
+                .value(GeneralApplicationSuportingDocumentItems.builder()
                     .supportDocument(caseDocument)
                     .build())
-            .build();
+                .build();
         List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = List.of(generalApplicationSupportingDocumentData);
 
         GeneralApplicationsCollection generalApplicationsCollection = GeneralApplicationsCollection.builder()
@@ -521,7 +521,7 @@ public class GeneralApplicationServiceTest {
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
 
         CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
-            .getGeneralApplications().get(0).getValue()
+            .getGeneralApplications().get(1).getValue()
             .getGaSupportDocuments().get(0).getValue().getSupportDocument();
         assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
     }
