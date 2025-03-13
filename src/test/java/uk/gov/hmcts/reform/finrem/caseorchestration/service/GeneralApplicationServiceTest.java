@@ -513,20 +513,7 @@ public class GeneralApplicationServiceTest {
         when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
-        wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
-        wrapper.setGeneralApplications(List.of(wrapper.getGeneralApplications().get(0)));
-        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
-
-        wrapper.getAppRespGeneralApplications().forEach(
-            ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(APPLICANT));
-        wrapper.getAppRespGeneralApplications().forEach(
-            ga -> ga.getValue().setGaSupportDocuments(gaSupportDocuments));
-
-        wrapperBefore.getGeneralApplications().forEach(
-            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicList(APPLICANT)));
-        wrapperBefore.getAppRespGeneralApplications().forEach(
-            ga -> ga.getValue().setGaSupportDocuments(gaSupportDocuments));
-
+        wrapper.getGeneralApplications().get(0).getValue().setGaSupportDocuments(gaSupportDocuments);
         callbackRequest.getCaseDetails().getData().setGeneralApplicationWrapper(wrapper);
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
