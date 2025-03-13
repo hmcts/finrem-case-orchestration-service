@@ -120,4 +120,31 @@ class SelectedCourtServiceTest {
 
         assertThat(logs.getWarns()).isEmpty();
     }
+
+    /*
+     * Test that royalCourtOrHighCourtChosen does the following:
+     * Returns true if "High Court Family Division" or "The Royal Court of Justice" are chosen
+     * Returns false if another court is chosen
+     * Returns false if a court has not been selected yet.
+     */
+    @Test
+    void royalCourtOrHighCourtChosenHandlesCourtsAndNull() {
+
+        FinremCaseDetails caseDetails = new FinremCaseDetails();
+
+        caseDetails.setData(FinremCaseData.builder().build());
+        FinremCaseData finremCaseData = caseDetails.getData();
+
+        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("High Court Family Division");
+        assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isTrue();
+
+        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("The Royal Courts of Justice");
+        assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isTrue();
+
+        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName("Central Family Court");
+        assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isFalse();
+
+        finremCaseData.getConsentOrderWrapper().setConsentOrderFrcName(null);
+        assertThat(selectedCourtService.royalCourtOrHighCourtChosen(caseDetails.getData())).isFalse();
+    }
 }

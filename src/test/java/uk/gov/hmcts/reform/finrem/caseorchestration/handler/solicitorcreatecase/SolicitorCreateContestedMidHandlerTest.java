@@ -17,6 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+
+import java.util.Arrays;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -94,6 +98,31 @@ class SolicitorCreateContestedMidHandlerTest {
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
+    }
+
+    @Test
+    void testRoyalCourtOrHighCourtChosenCalled() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(selectedCourtService, times(1))
+                .royalCourtOrHighCourtChosen(finremCallbackRequest.getCaseDetails().getData());
+    }
+
+    /*
+     * handler can add errors that stem from either postalService.validate or
+     * selectedCourtService.royalCourtOrHighCourtChosen.
+     * This checks that any errors from each service are present in the callback response.
+     */
+    @Test
+    void testThatErrorsReturned() {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
+        when(selectedCourtService.royalCourtOrHighCourtChosen(any())).thenReturn(true);
+        when(postalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
+        assertThat(handler.handle(finremCallbackRequest, AUTH_TOKEN).getErrors()).contains(
+                "You cannot select High Court or Royal Court of Justice. Please select another court.",
+                "post err 1",
+                "post err 2"
+        );
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
