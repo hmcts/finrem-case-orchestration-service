@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -38,6 +40,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -479,6 +482,59 @@ public class GeneralApplicationServiceTest {
         assertEquals("48 hours", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationTimeEstimate());
         assertEquals("72 hours", wrapper.getGeneralApplicationIntvrOrders().get(1).getValue().getGeneralApplicationTimeEstimate());
         assertEquals(2, wrapper.getGeneralApplicationIntvrOrders().size());
+    }
+
+    @Test
+    public void givenNonWordOrPDFDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
+        String OTHER_FORMAT_EXTENSION = ".anyother";
+        CaseDocument caseDocument = getCaseDocument(OTHER_FORMAT_EXTENSION);
+        caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
+
+        GeneralApplicationSupportingDocumentData generalApplicationSupportingDocumentData = GeneralApplicationSupportingDocumentData.builder()
+            .id(String.valueOf(UUID.randomUUID()))
+            .value(
+                GeneralApplicationSuportingDocumentItems.builder()
+                    .supportDocument(caseDocument)
+                    .build())
+            .build();
+        List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = List.of(generalApplicationSupportingDocumentData);
+
+        GeneralApplicationsCollection generalApplicationsCollection = GeneralApplicationsCollection.builder()
+            .id(UUID.randomUUID()).build();
+        GeneralApplicationItems generalApplicationItems = GeneralApplicationItems.builder()
+            .generalApplicationCreatedBy("Claire Mumford")
+            .generalApplicationHearingRequired("No").generalApplicationTimeEstimate("48 hours")
+            .generalApplicationSpecialMeasures("Special measure").generalApplicationCreatedDate(LocalDate.now())
+            .generalApplicationSender(buildDynamicList(APPLICANT))
+            .build();
+        generalApplicationsCollection.setValue(generalApplicationItems);
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
+
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        wrapper.setAppRespGeneralApplications(wrapper.getGeneralApplications());
+        wrapper.setGeneralApplications(List.of(wrapper.getGeneralApplications().get(0)));
+        GeneralApplicationWrapper wrapperBefore = callbackRequest.getCaseDetailsBefore().getData().getGeneralApplicationWrapper();
+
+        wrapper.getAppRespGeneralApplications().forEach(
+            ga -> ga.getValue().setAppRespGeneralApplicationReceivedFrom(APPLICANT));
+        wrapper.getAppRespGeneralApplications().forEach(
+            ga -> ga.getValue().setGaSupportDocuments(gaSupportDocuments));
+
+        wrapperBefore.getGeneralApplications().forEach(
+            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicList(APPLICANT)));
+        wrapperBefore.getAppRespGeneralApplications().forEach(
+            ga -> ga.getValue().setGaSupportDocuments(gaSupportDocuments));
+
+        callbackRequest.getCaseDetails().getData().setGeneralApplicationWrapper(wrapper);
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications().get(0).getValue()
+            .getGaSupportDocuments().get(0).getValue().getSupportDocument();
+        assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
     }
 
     public DynamicRadioList buildDynamicList(String role) {
