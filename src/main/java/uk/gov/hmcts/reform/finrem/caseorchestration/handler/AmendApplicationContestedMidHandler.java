@@ -9,18 +9,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 @Slf4j
 @Service
 public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
 
     private final InternationalPostalService postalService;
+    private final ExpressCaseService expressCaseService;
+    private final FeatureToggleService featureToggleService;
 
     public AmendApplicationContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                               InternationalPostalService postalService) {
+                                               InternationalPostalService postalService,
+                                               ExpressCaseService expressCaseService,
+                                               FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
+        this.expressCaseService = expressCaseService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -34,10 +42,15 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+
         log.info("Invoking contested event {} mid event callback for Case ID: {}",
             EventType.AMEND_CONTESTED_APP_DETAILS, caseDetails.getId());
 
-        FinremCaseData caseData = caseDetails.getData();
+        if (featureToggleService.isExpressPilotEnabled()) {
+            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(postalService.validate(caseData)).build();
     }
