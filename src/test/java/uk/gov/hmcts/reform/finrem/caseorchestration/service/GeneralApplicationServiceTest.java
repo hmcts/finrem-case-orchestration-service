@@ -514,6 +514,8 @@ public class GeneralApplicationServiceTest {
 
         GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
         wrapper.getGeneralApplications().get(0).getValue().setGaSupportDocuments(gaSupportDocuments);
+        wrapper.getGeneralApplications().forEach(
+            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicList(APPLICANT)));
         callbackRequest.getCaseDetails().getData().setGeneralApplicationWrapper(wrapper);
 
         FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
