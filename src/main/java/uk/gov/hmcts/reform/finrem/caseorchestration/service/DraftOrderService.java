@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
@@ -292,5 +293,30 @@ public class DraftOrderService {
         return OrderStatus.TO_BE_REVIEWED.equals(reviewable.getOrderStatus())
             && reviewable.getSubmittedDate().isBefore(thresholdDate.atStartOfDay())
             && reviewable.getNotificationSentDate() == null;
+    }
+
+    public void clearEmptyOrdersInDraftOrdersReviewCollection(FinremCaseData caseData) {
+
+        if (CollectionUtils.isEmpty(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())) {
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(new ArrayList<>());
+        } else {
+            List<DraftOrdersReviewCollection> draftOrdersReviewCollection =
+                new ArrayList<>(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection());
+
+            //Remove any empty reviews that don't contain any draft orders or pension sharing annexes
+            draftOrdersReviewCollection.removeIf(review ->
+                CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                    && CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection())
+            );
+
+            // Check for unreviewedDocuments
+            boolean hasUnreviewedDocuments = caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection().stream()
+                .anyMatch(review ->
+                    !CollectionUtils.isEmpty(review.getValue().getDraftOrderDocReviewCollection())
+                        || !CollectionUtils.isEmpty(review.getValue().getPsaDocReviewCollection()));
+
+            caseData.getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(hasUnreviewedDocuments ? YesOrNo.YES : YesOrNo.NO);
+            caseData.getDraftOrdersWrapper().setDraftOrdersReviewCollection(draftOrdersReviewCollection);
+        }
     }
 }
