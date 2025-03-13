@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -156,10 +157,10 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
             .build();
 
         caseData.getDraftOrdersWrapper().setUploadSuggestedDraftOrder(UploadSuggestedDraftOrder.builder()
-                .uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE))
-                .uploadParty(buildUploadParty(uploadOnBehalfOf))
-                .uploadSuggestedDraftOrderCollection(List.of(orderCollection))
-                .suggestedPsaCollection(List.of(psaCollection))
+            .uploadOrdersOrPsas(List.of(ORDER_TYPE, PSA_TYPE))
+            .uploadParty(buildUploadParty(uploadOnBehalfOf))
+            .uploadSuggestedDraftOrderCollection(List.of(orderCollection))
+            .suggestedPsaCollection(List.of(psaCollection))
             .build());
         caseData.getDraftOrdersWrapper().setTypeOfDraftOrder(SUGGESTED_DRAFT_ORDER_OPTION);
 
@@ -308,51 +309,51 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         when(draftOrderService.processAgreedDraftOrders(uado, AUTH_TOKEN)).thenReturn(expectedAgreedDraftOrderCollection);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-                handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
 
         verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado, expectedAgreedDraftOrderCollection);
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
-                .containsAll(expectedAgreedDraftOrderCollection);
+            .containsAll(expectedAgreedDraftOrderCollection);
     }
 
     private static Stream<Arguments> provideAgreedDraftOrders() {
         UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
-                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
-                .build();
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
         AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
 
         UploadAgreedDraftOrder uado2 = UploadAgreedDraftOrder.builder()
-                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
-                .build();
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
         AgreedDraftOrderCollection draftOrder2 = AgreedDraftOrderCollection.builder()
-                .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
 
         UploadAgreedDraftOrder uado3 = UploadAgreedDraftOrder.builder()
-                .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
-                .build();
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
 
         UploadAgreedDraftOrder uado4 = UploadAgreedDraftOrder.builder()
-                .uploadParty(buildUploadParty(UPLOAD_PARTY_RESPONDENT))
-                .build();
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_RESPONDENT))
+            .build();
 
         return Stream.of(
-                // Single draft order on behalf of applicant added to an empty collection
-                Arguments.of(uado1, List.of(), List.of(draftOrder1)),
+            // Single draft order on behalf of applicant added to an empty collection
+            Arguments.of(uado1, List.of(), List.of(draftOrder1)),
 
-                // Adding a draft order to a non-empty collection
-                Arguments.of(uado2, List.of(draftOrder1), List.of(draftOrder1, draftOrder2)),
+            // Adding a draft order to a non-empty collection
+            Arguments.of(uado2, List.of(draftOrder1), List.of(draftOrder1, draftOrder2)),
 
-                // Empty input and empty expected output
-                Arguments.of(uado3, List.of(), List.of()),
+            // Empty input and empty expected output
+            Arguments.of(uado3, List.of(), List.of()),
 
-                // Single draft order on behalf of respondent added to an empty collection
-                Arguments.of(uado4, List.of(), List.of(draftOrder1))
+            // Single draft order on behalf of respondent added to an empty collection
+            Arguments.of(uado4, List.of(), List.of(draftOrder1))
         );
     }
 
     @Test
-    void testHandleClearsUploadedDraftOrders() {
+    void testHandleClearsUploadedDraftOrdersAndSetsIsUnreviewedDocumentPresent() {
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -362,6 +363,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                     .build())
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
                 .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
+                .isUnreviewedDocumentPresent(YesOrNo.NO)
                 .build())
             .build();
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
@@ -371,6 +373,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
 
         assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
         assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
+        assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
     }
 
     @Test
@@ -555,12 +558,12 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     private static List<AgreedDraftOrderCollection> agreedDraftOrdersCollection(
-            List<LocalDateTime> agreedDraftOrderSubmittedDates) {
+        List<LocalDateTime> agreedDraftOrderSubmittedDates) {
 
         return agreedDraftOrderSubmittedDates.stream()
-                .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
-                .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
-                .toList();
+            .map(dateTime -> AgreedDraftOrder.builder().submittedDate(dateTime).build())
+            .map(value -> AgreedDraftOrderCollection.builder().value(value).build())
+            .toList();
     }
 
     private static DynamicRadioList buildUploadParty(String code) {
