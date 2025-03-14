@@ -74,6 +74,7 @@ public class FinremCaseData implements HasCaseDocument {
     private CaseType ccdCaseType;
 
     private ExpressCaseParticipation expressCaseParticipation;
+    private YesOrNo amendedExpressCaseCriteriaNotMet;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;

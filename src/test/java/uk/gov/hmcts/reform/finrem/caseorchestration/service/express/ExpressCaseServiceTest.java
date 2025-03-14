@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,22 +80,34 @@ class ExpressCaseServiceTest {
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
     }
 
+    /*
+     * Only one scenario sets amendedExpressCaseCriteriaNotMet to Yes; when a Case was enrolled,
+     * but the answers have changed in amendment so express criteria is no longer met.
+     */
     @Test
-    void amendExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
-        FinremCaseData caseData = createCaseData();
-        expressCaseService.amendExpressCaseEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+    void setWhetherDisqualifiedFromExpress_shouldSetYes_WhenCaseAmendedToDisqualifyFromExpress() {
+        FinremCaseData caseDataOnceAmended = new FinremCaseData();
+        caseDataOnceAmended.setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
+        FinremCaseData caseDataBeforeAmending = new FinremCaseData();
+        caseDataBeforeAmending.setExpressCaseParticipation(ENROLLED);
+
+        expressCaseService.setWhetherDisqualifiedFromExpress(caseDataOnceAmended, caseDataBeforeAmending);
+        assertEquals(YesOrNo.YES, caseDataOnceAmended.getAmendedExpressCaseCriteriaNotMet());
     }
 
     @ParameterizedTest
-    @MethodSource("provideInvalidCaseData")
-    void amendExpressCaseEnrollmentStatus_shouldNotEnroll_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
-        expressCaseService.amendExpressCaseEnrollmentStatus(caseData);
-        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
+    @MethodSource("provideAmendedExpressCaseParticipation")
+    void setWhetherDisqualifiedFromExpress_shouldSetNo_WhenCaseAmendmentDoesNotDisqualify(
+            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+
+        FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
+        FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
+
+        expressCaseService.setWhetherDisqualifiedFromExpress(amendedData, dataBeforeAmending);
+
+        assertEquals(YesOrNo.NO, amendedData.getAmendedExpressCaseCriteriaNotMet());
     }
-
-    // and withdrawn
-
 
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
@@ -177,5 +190,25 @@ class ExpressCaseServiceTest {
             .fastTrackDecision(YesOrNo.NO)
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
+    }
+
+    /*
+     * Creates pairs of FinremCaseData.  Case data now and case data before.
+     * Each of these has expressCaseParticipation states set
+     * These sets, when checked, should not cause getAmendedExpressCaseCriteriaNotMet
+     * to be set to "Yes".
+     */
+    private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseParticipation() {
+
+        // Both enrolled
+        FinremCaseData dataBeforeAmending = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
+        FinremCaseData dataAfterAmending = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
+        Pair<FinremCaseData, FinremCaseData> bothEnrolled = Pair.of(dataBeforeAmending, dataAfterAmending);
+
+
+
+        return Stream.of(
+                bothEnrolled
+        );
     }
 }

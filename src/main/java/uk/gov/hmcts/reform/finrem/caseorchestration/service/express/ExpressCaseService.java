@@ -20,7 +20,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
@@ -45,24 +44,23 @@ public class ExpressCaseService {
     }
 
    /**
-     * Sets the Express Case participation status based on qualifying criteria.
-     * If the Case is suitable to process as an Express Case, then the status is set to ENROLLED
-     * If the Case is unsuitable to process as an Express Case, then the status is set to DOES_NOT_QUALIFY
-     * If the Case had a status of ENROLLED, submitted on a previous event, but now the case DOES_NOT_QUALIFY,
-     * then the status is WITHDRAWN
-     *
-     * @param caseData the case data as an instance of FinremCaseDate
+     * Considers whether a change has disqualified a case for Express processing.
+     * Sets the temporary expressCaseAmendedCriteriaNotMet value.
+     * If the Case was suitable to process as an Express Case, but isn't now, then
+     * setExpressCaseAmendedCriteriaNotMet is set to "Yes" Otherwise set to "No".
+     * The expressCaseAmendedCriteriaNotMet field is temporary, and only used to
+     * show the right content to a user.
+     * @param amendedCaseData newly amended case data
+     * @param caseDataBeforeAmending the data after the last submitted event
     */
-    public void amendExpressCaseEnrollmentStatus(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+    public void setWhetherDisqualifiedFromExpress(FinremCaseData amendedCaseData, FinremCaseData caseDataBeforeAmending) {
 
-        ExpressCaseParticipation statusBefore = caseDataBefore.getExpressCaseParticipation();
-        ExpressCaseParticipation statusNow = qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY;
+        ExpressCaseParticipation statusBefore = caseDataBeforeAmending.getExpressCaseParticipation();
+        ExpressCaseParticipation statusNow = amendedCaseData.getExpressCaseParticipation();
 
-        if (ENROLLED.equals(statusBefore) && DOES_NOT_QUALIFY.equals(statusNow)) {
-            caseData.setExpressCaseParticipation(WITHDRAWN);
-        } else {
-            caseData.setExpressCaseParticipation(statusNow);
-        }
+        amendedCaseData.setAmendedExpressCaseCriteriaNotMet(
+            (ENROLLED.equals(statusBefore) && DOES_NOT_QUALIFY.equals(statusNow)) ? YesOrNo.YES : YesOrNo.NO
+        );
     }
 
     /**
