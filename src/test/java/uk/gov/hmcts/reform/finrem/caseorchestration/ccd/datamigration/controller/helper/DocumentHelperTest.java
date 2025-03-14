@@ -744,7 +744,6 @@ class DocumentHelperTest {
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
-        when(postalService.isRecipientResideOutsideOfUK(caseDetails.getData(), INTERVENER_FOUR.toString())).thenReturn(true);
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_FOUR);
 
         assertEquals(result.getData().get(ADDRESSEE), expected);
