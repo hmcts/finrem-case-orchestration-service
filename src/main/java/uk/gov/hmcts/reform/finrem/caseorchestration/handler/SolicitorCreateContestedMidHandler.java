@@ -42,7 +42,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info("Invoking contested event {} mid event callback", EventType.SOLICITOR_CREATE);
+        log.info("Invoking contested event {} mid event callback for Case ID: {}", EventType.SOLICITOR_CREATE, caseDetails.getId());
 
         List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);

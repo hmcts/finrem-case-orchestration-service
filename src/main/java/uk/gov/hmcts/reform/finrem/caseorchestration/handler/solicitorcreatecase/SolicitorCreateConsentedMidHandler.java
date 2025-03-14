@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
@@ -38,12 +39,13 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
-        log.info("Invoking Solicitor Create Consented mid event");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Invoking consented event {} mid event callback for Case ID: {}", EventType.SOLICITOR_CREATE, caseDetails.getId());
         List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
-        List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
+        List<String> validate = postalService.validate(caseDetails.getData());
         errors.addAll(validate);
 
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseDetails.getData()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
