@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
+
 @Slf4j
 @Service
 public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
