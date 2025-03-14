@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
-class PaperCaseCreateContestedMidHandlerTest  {
+class PaperCaseCreateContestedMidHandlerTest {
 
     @InjectMocks
     private PaperCaseCreateContestedMidHandler handler;
