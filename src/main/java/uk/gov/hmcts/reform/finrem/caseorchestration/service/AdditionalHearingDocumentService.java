@@ -70,7 +70,7 @@ public class AdditionalHearingDocumentService {
     private final NotificationService notificationService;
     private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private final OrderDateService dateService;
+    private final OrderDateService orderDateService;
     private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for Case ID: {}";
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
@@ -141,7 +141,7 @@ public class AdditionalHearingDocumentService {
 
     public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
-        return dateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
+        return orderDateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
     }
 
     public List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
@@ -179,10 +179,11 @@ public class AdditionalHearingDocumentService {
         log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection = caseData.getFinalOrderCollection();
+        List<DirectionOrderCollection> finalOrderCollection = orderDateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(),
+            authorisationToken);
         List<DirectionOrderCollection> newFinalOrderCollection = new ArrayList<>(emptyIfNull(caseData.getFinalOrderCollection()));
         List<DirectionOrderCollection> uploadHearingOrder
-            = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
+            = orderDateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
             List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
                 CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
@@ -358,7 +359,7 @@ public class AdditionalHearingDocumentService {
     public void addToFinalOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> finalOrderCollection
-            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+            = orderDateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         if (!uploadHearingOrders.isEmpty()) {

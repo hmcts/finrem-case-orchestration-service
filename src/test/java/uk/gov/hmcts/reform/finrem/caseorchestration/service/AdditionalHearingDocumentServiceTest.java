@@ -236,6 +236,7 @@ class AdditionalHearingDocumentServiceTest {
             .builder().uploadDraftDocument(caseDocument()).isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
         orderCollections.add(orderCollection);
         data.setFinalOrderCollection(orderCollections);
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
@@ -290,6 +291,7 @@ class AdditionalHearingDocumentServiceTest {
             .isOrderStamped(YesOrNo.YES).orderDateTime(orderDateTime).build()).build();
         orderCollections.add(orderCollection);
         data.setFinalOrderCollection(orderCollections);
+        when(orderDateService.addCreatedDateInFinalOrder(orderCollections, AUTH_TOKEN)).thenReturn(orderCollections);
 
         List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
@@ -344,11 +346,13 @@ class AdditionalHearingDocumentServiceTest {
         LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
         DirectionOrderCollection uploadOrderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("newDoc1", "newDoc1")).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+            .builder().uploadDraftDocument(caseDocument("newDoc1", "newDoc1")).isOrderStamped(YesOrNo.YES)
+            .orderDateTime(uploadOrderDateTime).build()).build();
         uploadOrderCollections.add(uploadOrderCollection);
         DirectionOrderCollection uploadOrderCollection2
             = DirectionOrderCollection.builder().value(DirectionOrder
-            .builder().uploadDraftDocument(caseDocument("newDoc2", "newDoc2")).isOrderStamped(YesOrNo.YES).orderDateTime(uploadOrderDateTime).build()).build();
+            .builder().uploadDraftDocument(caseDocument("newDoc2", "newDoc2")).isOrderStamped(YesOrNo.YES)
+            .orderDateTime(uploadOrderDateTime).build()).build();
         uploadOrderCollections.add(uploadOrderCollection2);
         data.setUploadHearingOrder(uploadOrderCollections);
 
@@ -365,6 +369,7 @@ class AdditionalHearingDocumentServiceTest {
         directionDetailsCollection.add(detailCollection);
         data.setDirectionDetailsCollection(directionDetailsCollection);
 
+        when(orderDateService.addCreatedDateInFinalOrder(isNull(), eq(AUTH_TOKEN))).thenReturn(List.of());
         when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
         when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
 
