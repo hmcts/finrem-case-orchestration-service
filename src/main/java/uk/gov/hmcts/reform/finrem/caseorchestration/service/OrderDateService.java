@@ -52,8 +52,7 @@ public class OrderDateService {
                                                            List<DirectionOrderCollection> returnCollection,
                                                            List<FileUploadResponse> auditResponse,
                                                            DirectionOrderCollection order) {
-        YesOrNo isOrderStamped = order.getValue().getIsOrderStamped();
-        if (isOrderStamped == null || isOrderStamped.equals(YesOrNo.NO)) {
+        if (isOrderNotStamped(order)) {
             String filename = order.getValue().getUploadDraftDocument().getDocumentFilename();
             for (FileUploadResponse fileUploadResponse : auditResponse) {
                 if (filename.equals(fileUploadResponse.getFileName())) {
@@ -79,5 +78,10 @@ public class OrderDateService {
             .isOrderStamped(isStamped)
             .build()).build();
     }
+
+    private boolean isOrderNotStamped(DirectionOrderCollection order) {
+        return !YesOrNo.YES.equals(order.getValue().getIsOrderStamped());
+    }
+
 }
 
