@@ -210,7 +210,7 @@ public class AdditionalHearingDocumentService {
                     orderDateTime);
             }).toList();
             caseData.setUploadHearingOrder(orderCollections);
-            caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
+            caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
         }
 
         List<DirectionDetailCollection> directionDetailsCollection
@@ -218,7 +218,7 @@ public class AdditionalHearingDocumentService {
 
         //check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollection.isEmpty()) {
-            DirectionDetail directionDetail = directionDetailsCollection.get(directionDetailsCollection.size() - 1).getValue();
+            DirectionDetail directionDetail = directionDetailsCollection.getLast().getValue();
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
             if (NO_VALUE.equalsIgnoreCase(nullToEmpty(directionDetail.getIsAnotherHearingYN()))) {
