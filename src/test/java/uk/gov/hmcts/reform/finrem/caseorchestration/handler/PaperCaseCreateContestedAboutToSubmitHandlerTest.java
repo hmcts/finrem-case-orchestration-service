@@ -21,9 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,10 +47,6 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     private CaseFlagsService caseFlagsService;
     @Mock
     private CaseDataService caseDataService;
-    @Mock
-    FeatureToggleService featureToggleService;
-    @Mock
-    ExpressCaseService expressCaseService;
 
     @Spy
     private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
@@ -163,27 +156,5 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         handler.handle(callbackRequest, AUTH_TOKEN);
         // Verify call to caseDataService to set PowerBI tracking fields.
         verify(caseDataService,times(1)).setFinancialRemediesCourtDetails(any(CaseDetails.class));
-    }
-
-    @Test
-    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
-    }
-
-    @Test
-    void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
     }
 }

@@ -14,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -28,21 +26,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallbackHandler {
 
-    private final FeatureToggleService featureToggleService;
-    private final ExpressCaseService expressCaseService;
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
 
     public PaperCaseCreateContestedAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                        FeatureToggleService featureToggleService,
-                                                        ExpressCaseService expressCaseService,
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         CaseDataService caseDataService) {
         super(finremCaseDetailsMapper);
-        this.featureToggleService = featureToggleService;
-        this.expressCaseService = expressCaseService;
         this.caseFlagsService = caseFlagsService;
         this.idamService = idamService;
         this.caseDataService = caseDataService;
@@ -100,10 +92,6 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
         caseDataService.setFinancialRemediesCourtDetails(oldCaseDetails);
 
         caseData = finremCaseDetailsMapper.mapToFinremCaseData(oldCaseDetails.getData());
-
-        if (featureToggleService.isExpressPilotEnabled()) {
-            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
