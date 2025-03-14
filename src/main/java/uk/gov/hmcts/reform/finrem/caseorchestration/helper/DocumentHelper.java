@@ -69,6 +69,8 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.defaultIfNull;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -799,7 +801,7 @@ public class DocumentHelper {
      * @return {@code true} if the document's filename is found in the collection, otherwise {@code false}
      */
     public boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument caseDocument) {
-        return finalOrderCollection.stream()
+        return emptyIfNull(finalOrderCollection).stream()
             .map(obj -> obj.getValue().getUploadDraftDocument().getDocumentFilename())
             .anyMatch(filename -> filename.equals(caseDocument.getDocumentFilename()));
     }
