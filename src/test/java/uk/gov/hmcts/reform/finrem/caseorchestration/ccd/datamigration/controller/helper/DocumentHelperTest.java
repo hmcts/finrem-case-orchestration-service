@@ -311,8 +311,8 @@ class DocumentHelperTest {
         when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
 
         List<CaseDocument> hearingDocuments2 = documentHelper.getHearingDocumentsAsPdfDocuments(caseDetails, AUTHORIZATION_HEADER);
-        assertEquals("app_docs.pdf", hearingDocuments2.get(0).getDocumentFilename());
-        assertEquals(BINARY_URL, hearingDocuments2.get(0).getDocumentBinaryUrl());
+        assertEquals("app_docs.pdf", hearingDocuments2.getFirst().getDocumentFilename());
+        assertEquals(BINARY_URL, hearingDocuments2.getFirst().getDocumentBinaryUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any(), anyString());
     }
