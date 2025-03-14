@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,7 +85,6 @@ class SolicitorCreateConsentedMidHandlerTest {
 
         verify(consentOrderService).performCheck(callbackRequest, AUTH_TOKEN);
         verify(postalService).validate(callbackRequest.getCaseDetails().getData());
-
     }
 
     private CallbackRequest buildCallbackRequest() {
@@ -97,7 +95,6 @@ class SolicitorCreateConsentedMidHandlerTest {
         return CallbackRequest.builder().eventId(EventType.SOLICITOR_CREATE.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
-
 
     @Test
     void givenConsentedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
@@ -153,8 +150,7 @@ class SolicitorCreateConsentedMidHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
-
-        assertEquals(0, handle.getErrors().size());
+        assertThat(handle.getErrors()).isEmpty();
     }
 
     @Test

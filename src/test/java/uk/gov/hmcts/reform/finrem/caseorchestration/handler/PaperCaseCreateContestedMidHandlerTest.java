@@ -21,8 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalS
 
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -44,7 +43,6 @@ class PaperCaseCreateContestedMidHandlerTest {
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
-
 
     @ParameterizedTest
     @MethodSource
@@ -119,7 +117,7 @@ class PaperCaseCreateContestedMidHandlerTest {
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, handle.getErrors().size());
+        assertThat(handle.getErrors()).isEmpty();
     }
 
     @Test

@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -147,7 +146,7 @@ class SolicitorCreateContestedMidHandlerTest {
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, handle.getErrors().size());
+        assertThat(handle.getErrors()).isEmpty();
     }
 
     @Test
