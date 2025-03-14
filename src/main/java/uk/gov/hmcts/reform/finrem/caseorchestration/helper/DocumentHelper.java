@@ -69,7 +69,6 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.ListUtils.defaultIfNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
