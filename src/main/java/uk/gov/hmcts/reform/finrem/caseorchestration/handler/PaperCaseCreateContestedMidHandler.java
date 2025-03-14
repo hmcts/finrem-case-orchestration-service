@@ -38,9 +38,8 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested event {} mid event callback", EventType.NEW_PAPER_CASE);
-        List<String> validate = postalService.validate(callbackRequest.getCaseDetails().getData());
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData());
-        errors.addAll(validate);
+        errors.addAll(postalService.validate(callbackRequest.getCaseDetails().getData()));
 
         FinremCaseData caseData = caseDetails.getData();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

@@ -42,8 +42,7 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking consented event {} mid event callback for Case ID: {}", EventType.SOLICITOR_CREATE, caseDetails.getId());
         List<String> errors = consentOrderService.performCheck(callbackRequest, userAuthorisation);
-        List<String> validate = postalService.validate(caseDetails.getData());
-        errors.addAll(validate);
+        errors.addAll(postalService.validate(caseDetails.getData()));
 
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseDetails.getData()));
