@@ -43,12 +43,13 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
 
         log.info("Invoking contested event {} mid event callback for Case ID: {}",
             EventType.AMEND_CONTESTED_APP_DETAILS, caseDetails.getId());
 
         if (featureToggleService.isExpressPilotEnabled()) {
-            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+            expressCaseService.amendExpressCaseEnrollmentStatus(caseData, caseDataBefore);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

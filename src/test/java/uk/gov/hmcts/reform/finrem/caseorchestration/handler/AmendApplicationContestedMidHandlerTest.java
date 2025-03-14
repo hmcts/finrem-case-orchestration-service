@@ -50,22 +50,24 @@ class AmendApplicationContestedMidHandlerTest {
     void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+        verify(expressCaseService).amendExpressCaseEnrollmentStatus(caseData, caseDataBefore);
     }
 
     @Test
     void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
+        verify(expressCaseService, never()).amendExpressCaseEnrollmentStatus(caseData, caseDataBefore);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
@@ -73,6 +75,8 @@ class AmendApplicationContestedMidHandlerTest {
             .builder()
             .eventType(EventType.AMEND_CONTESTED_APP_DETAILS)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
+            .caseDetailsBefore(FinremCaseDetails.builder().id(456L).caseType(CONTESTED)
                 .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
             .build();
     }

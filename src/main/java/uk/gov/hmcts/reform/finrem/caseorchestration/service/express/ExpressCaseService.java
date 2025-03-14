@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
@@ -32,8 +33,36 @@ public class ExpressCaseService {
 
     private final FeatureToggleService featureToggleService;
 
+    /**
+     * Sets the Express Case participation status based on qualifying criteria.
+     * If the Case is suitable to process as an Express Case, then the status is set to ENROLLED
+     * If the Case is unsuitable to process as an Express Case, then the status is set to DOES_NOT_QUALIFY
+     *
+     * @param caseData the case data as an instance of FinremCaseDate
+     */
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+    }
+
+   /**
+     * Sets the Express Case participation status based on qualifying criteria.
+     * If the Case is suitable to process as an Express Case, then the status is set to ENROLLED
+     * If the Case is unsuitable to process as an Express Case, then the status is set to DOES_NOT_QUALIFY
+     * If the Case had a status of ENROLLED, submitted on a previous event, but now the case DOES_NOT_QUALIFY,
+     * then the status is WITHDRAWN
+     *
+     * @param caseData the case data as an instance of FinremCaseDate
+    */
+    public void amendExpressCaseEnrollmentStatus(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+
+        ExpressCaseParticipation statusBefore = caseDataBefore.getExpressCaseParticipation();
+        ExpressCaseParticipation statusNow = qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY;
+
+        if (ENROLLED.equals(statusBefore) && DOES_NOT_QUALIFY.equals(statusNow)) {
+            caseData.setExpressCaseParticipation(WITHDRAWN);
+        } else {
+            caseData.setExpressCaseParticipation(statusNow);
+        }
     }
 
     /**

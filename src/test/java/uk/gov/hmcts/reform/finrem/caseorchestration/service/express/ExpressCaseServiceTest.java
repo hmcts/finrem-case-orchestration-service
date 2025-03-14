@@ -66,7 +66,7 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
+    void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
         FinremCaseData caseData = createCaseData();
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
@@ -74,10 +74,27 @@ class ExpressCaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
-    void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
+    void setExpressCaseEnrollmentStatus_shouldNotEnroll_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
     }
+
+    @Test
+    void amendExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
+        FinremCaseData caseData = createCaseData();
+        expressCaseService.amendExpressCaseEnrollmentStatus(caseData);
+        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidCaseData")
+    void amendExpressCaseEnrollmentStatus_shouldNotEnroll_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
+        expressCaseService.amendExpressCaseEnrollmentStatus(caseData);
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
+    }
+
+    // and withdrawn
+
 
     @ParameterizedTest
     @MethodSource("provideIsExpressCase")
