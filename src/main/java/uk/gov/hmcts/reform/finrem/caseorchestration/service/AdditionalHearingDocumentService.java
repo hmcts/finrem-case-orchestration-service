@@ -193,7 +193,6 @@ public class AdditionalHearingDocumentService {
                     newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocs));
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
-                caseData.setFinalOrderCollection(finalOrderCollection);
                 // This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
                 return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
                     orderDateTime);
@@ -203,8 +202,7 @@ public class AdditionalHearingDocumentService {
             caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
         }
 
-        List<DirectionDetailCollection> directionDetailsCollection
-            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        List<DirectionDetailCollection> directionDetailsCollection = emptyIfNull(caseData.getDirectionDetailsCollection());
 
         // check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollection.isEmpty()) {
