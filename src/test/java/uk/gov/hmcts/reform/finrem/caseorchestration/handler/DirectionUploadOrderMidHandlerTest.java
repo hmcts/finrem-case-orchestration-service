@@ -158,46 +158,46 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
     void shouldShowErrorMessageWhenAllLegacyApprovedOrdersRemoved() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(true);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("Upload Approved Order is required."), res.getErrors());
     }
 
     @Test
-    void shouldShowErrorMessageWhenNotAllNewOrdersPdfFiles() {
+    void shouldShowErrorMessageWhenNotAllNewOrdersWordOrPdfFiles() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(false);
+        when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(List.of("You must upload a PDF file for new documents."), res.getErrors());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertEquals(List.of("You must upload a Microsoft Word file or PDF for new documents."), res.getErrors());
     }
 
     @Test
     void shouldShowErrorMessageWhenNotAllLegacyApprovedOrdersPdf() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(false);
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
         assertEquals(List.of("You must upload a PDF file for modifying legacy approved documents."), res.getErrors());
     }
 
     @Test
-    void shouldShowErrorMessageWhenNotAllModifyingUnprocessedOrdersWordDocuments() {
+    void shouldShowErrorMessageWhenNotAllModifyingUnprocessedOrdersWordDocumentsOrPdf() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
-        when(processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(any(FinremCaseData.class))).thenReturn(false);
+        when(processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class))).thenReturn(false);
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(FinremCaseData.builder().build());
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData>  res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(List.of("You must upload a Microsoft Word file for modifying an unprocessed approved documents."), res.getErrors());
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> res = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertEquals(List.of("You must upload a Microsoft Word file or PDF for modifying an unprocessed approved documents."), res.getErrors());
     }
 
     private void mockPassAllValidations() {
         when(processOrderService.areAllLegacyApprovedOrdersRemoved(any(FinremCaseData.class), any(FinremCaseData.class))).thenReturn(false);
-        when(processOrderService.areAllNewOrdersPdfFiles(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllNewOrdersWordOrPdfFiles(any(FinremCaseData.class))).thenReturn(true);
         when(processOrderService.areAllLegacyApprovedOrdersPdf(any(FinremCaseData.class))).thenReturn(true);
-        when(processOrderService.areAllModifyingUnprocessedOrdersWordDocuments(any(FinremCaseData.class))).thenReturn(true);
+        when(processOrderService.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(any(FinremCaseData.class))).thenReturn(true);
     }
 
     @Test
