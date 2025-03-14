@@ -270,6 +270,7 @@ public class GeneralApplicationHelper {
         }
         existingAppRespGeneralApplications.add(ga);
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(existingAppRespGeneralApplications);
+        log.info("Added {} existing AppResp GA", existingAppRespGeneralApplications.size());
     }
 
     public void populateGeneralApplicationDataSender(FinremCaseData caseData,

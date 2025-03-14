@@ -73,7 +73,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
         DynamicRadioListElement listElement = DynamicRadioListElement.builder().build();
         switch (loggedInUserCaseRole) {
             case APPLICANT, RESPONDENT -> {
-                log.info("Mapping applicant/respondent GAs");
+                log.info("Case ID: {} Mapping applicant/respondent GAs", caseId);
                 generalApplications = wrapper.getAppRespGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getAppRespGeneralApplications();
                 listElement.setCode(loggedInUserCaseRole);
@@ -83,11 +83,12 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                     .listItems(List.of(listElement))
                     .build();
                 if (generalApplications != null && !generalApplications.isEmpty()) {
+                    log.info("Case ID: {} applicant/respondent GAs size: {}", caseId, generalApplications.size());
                     generalApplications.forEach(ga -> ga.getValue().setGeneralApplicationSender(radioList));
                 }
             }
             case INTERVENER1 -> {
-                log.info("Mapping Intervener1 GAs");
+                log.info("Case ID: {} Mapping Intervener1 GAs", caseId);
                 generalApplications = wrapper.getIntervener1GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener1GeneralApplications();
                 listElement.setCode(INTERVENER1);
@@ -101,7 +102,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER2 -> {
-                log.info("Mapping Intervener2 GAs");
+                log.info("Case ID: {} Mapping Intervener2 GAs", caseId);
                 generalApplications = wrapper.getIntervener2GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener2GeneralApplications();
                 listElement.setCode(INTERVENER2);
@@ -115,7 +116,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER3 -> {
-                log.info("Mapping Intervener3 GAs");
+                log.info("Case ID: {} Mapping Intervener3 GAs", caseId);
                 generalApplications = wrapper.getIntervener3GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener3GeneralApplications();
                 listElement.setCode(INTERVENER3);
@@ -129,7 +130,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             case INTERVENER4 -> {
-                log.info("Mapping Intervener4 GAs");
+                log.info("Case ID: {} Mapping Intervener4 GAs", caseId);
                 generalApplications = wrapper.getIntervener4GeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getIntervener4GeneralApplications();
                 listElement.setCode(INTERVENER4);
@@ -143,6 +144,7 @@ public class GeneralApplicationMidHandler extends FinremCallbackHandler {
                 }
             }
             default -> {
+                log.info("Case ID: {} Mapping GAs", caseId);
                 generalApplications = wrapper.getGeneralApplications();
                 generalApplicationsBefore = wrapperBefore.getGeneralApplications();
             }
