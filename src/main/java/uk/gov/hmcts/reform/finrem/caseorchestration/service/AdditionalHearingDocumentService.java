@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -139,14 +138,9 @@ public class AdditionalHearingDocumentService {
         orderList.add(orderCollection);
     }
 
-    public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails,
-                                                                                          String authorisationToken) {
+    public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
         return dateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
-    }
-
-    public List<HearingOrderCollectionData> getApprovedHearingOrderCollection(CaseDetails caseDetail) {
-        return documentHelper.getHearingOrderDocuments(caseDetail.getData());
     }
 
     public List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
@@ -205,7 +199,7 @@ public class AdditionalHearingDocumentService {
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
                 caseData.setFinalOrderCollection(finalOrderCollection);
-                //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
+                // This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
                 return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
                     orderDateTime);
             }).toList();
@@ -216,11 +210,11 @@ public class AdditionalHearingDocumentService {
         List<DirectionDetailCollection> directionDetailsCollection
             = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
 
-        //check that the list contains one or more values for the court hearing information
+        // check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollection.isEmpty()) {
             DirectionDetail directionDetail = directionDetailsCollection.getLast().getValue();
 
-            //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
+            // if the latest court hearing has specified another hearing as No, don't create an additional hearing document
             if (NO_VALUE.equalsIgnoreCase(nullToEmpty(directionDetail.getIsAnotherHearingYN()))) {
                 log.info(ADDITIONAL_MESSAGE, caseId);
                 return;
