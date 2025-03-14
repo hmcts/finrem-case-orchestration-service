@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedMidHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -15,8 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +43,13 @@ class SolicitorCreateContestedMidHandlerTest {
     @Mock
     private SelectedCourtService selectedCourtService;
 
+    @Mock
+    private ExpressCaseService expressCaseService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
+
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     private static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
@@ -50,7 +60,10 @@ class SolicitorCreateContestedMidHandlerTest {
         handler = new SolicitorCreateContestedMidHandler(
             finremCaseDetailsMapper,
             postalService,
-            selectedCourtService);
+            selectedCourtService,
+            expressCaseService,
+            featureToggleService
+        );
     }
 
     @Test
