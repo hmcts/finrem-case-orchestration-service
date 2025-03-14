@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -178,8 +179,8 @@ public class AdditionalHearingDocumentService {
         log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection
-            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+        List<DirectionOrderCollection> finalOrderCollection = caseData.getFinalOrderCollection();
+        List<DirectionOrderCollection> newFinalOrderCollection = new ArrayList<>(emptyIfNull(caseData.getFinalOrderCollection()));
         List<DirectionOrderCollection> uploadHearingOrder
             = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
@@ -189,13 +190,7 @@ public class AdditionalHearingDocumentService {
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
                     CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
                     log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
-                    if (!finalOrderCollection.isEmpty()) {
-                        caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
-                    } else {
-                        List<DirectionOrderCollection> orderList = new ArrayList<>();
-                        orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
-                        caseData.setFinalOrderCollection(orderList);
-                    }
+                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocs));
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
                 caseData.setFinalOrderCollection(finalOrderCollection);
@@ -203,6 +198,7 @@ public class AdditionalHearingDocumentService {
                 return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
                     orderDateTime);
             }).toList();
+            caseData.setFinalOrderCollection(newFinalOrderCollection);
             caseData.setUploadHearingOrder(orderCollections);
             caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
         }
