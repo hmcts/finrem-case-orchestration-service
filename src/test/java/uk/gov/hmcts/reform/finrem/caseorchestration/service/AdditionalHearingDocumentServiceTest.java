@@ -333,7 +333,49 @@ class AdditionalHearingDocumentServiceTest {
             .extracting(doc -> doc.getValue().getDocument())
             .first()
             .isEqualTo(caseDocument());
+    }
 
+    @Test
+    void givenCreateAndStoreAdditionalHearingDocumentsWhenFinalOrderIsNull_thenHandlerWillAddMultipleNewOrdersToFinalOrder()
+        throws JsonProcessingException {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionOrderCollection> uploadOrderCollections = new ArrayList<>();
+        LocalDateTime uploadOrderDateTime = LocalDateTime.of(2023, 12, 1, 17, 10, 10);
+        DirectionOrderCollection uploadOrderCollection
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument("newDoc1", "newDoc1")).isOrderStamped(YesOrNo.YES)
+            .orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection);
+        DirectionOrderCollection uploadOrderCollection2
+            = DirectionOrderCollection.builder().value(DirectionOrder
+            .builder().uploadDraftDocument(caseDocument("newDoc2", "newDoc2")).isOrderStamped(YesOrNo.YES)
+            .orderDateTime(uploadOrderDateTime).build()).build();
+        uploadOrderCollections.add(uploadOrderCollection2);
+        data.setUploadHearingOrder(uploadOrderCollections);
+
+        List<DirectionDetailCollection> directionDetailsCollection = new ArrayList<>();
+
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.YES)
+            .typeOfHearing(HearingTypeDirection.FH)
+            .hearingTime("12")
+            .timeEstimate("12")
+            .dateOfHearing(LocalDate.of(2020, 1, 1))
+            .localCourt(getTestCourt()).build();
+        DirectionDetailCollection detailCollection = DirectionDetailCollection.builder().value(directionDetail).build();
+        directionDetailsCollection.add(detailCollection);
+        data.setDirectionDetailsCollection(directionDetailsCollection);
+
+        when(orderDateService.addCreatedDateInFinalOrder(isNull(), eq(AUTH_TOKEN))).thenReturn(List.of());
+        when(orderDateService.addCreatedDateInUploadedOrder(uploadOrderCollections, AUTH_TOKEN)).thenReturn(uploadOrderCollections);
+        when(genericDocumentService.stampDocument(any(), any(), any(), any())).thenReturn(caseDocument("stampedDoc1", "stampedDoc1"));
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        assertThat(data.getFinalOrderCollection()).hasSize(2);
     }
 
     @Test

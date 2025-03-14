@@ -133,7 +133,6 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
         return stampedDocuments;
     }
 
-
     private void handleDraftOrderDocuments(FinremCaseData caseData, Map<String, CaseDocument> stampedDocuments,
                                            String authorisation, Map<String, CaseDocument> additionalDocsConverted, String caseId) {
         List<DraftOrderDocReviewCollection> collector = new ArrayList<>();
