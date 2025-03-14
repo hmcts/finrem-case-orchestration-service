@@ -24,12 +24,8 @@ public class ContactDetailsValidator {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (caseData.getCcdCaseType() == CaseType.CONTESTED
-            && caseData.isApplicantRepresentedByASolicitor()
-            && wrapper.getApplicantSolicitorAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
-            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-            return errors;
+        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
+            validateContestedCasePostcode(caseData, wrapper, errors);
         }
 
         if (caseData.isApplicantRepresentedByASolicitor()
@@ -64,5 +60,13 @@ public class ContactDetailsValidator {
             return errors;
         }
         return errors;
+    }
+
+    private static void validateContestedCasePostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+        if (caseData.isApplicantRepresentedByASolicitor()
+            && wrapper.getApplicantSolicitorAddress() != null
+            && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
+            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+        }
     }
 }
