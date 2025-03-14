@@ -5,6 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -48,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -900,25 +904,25 @@ class DocumentHelperTest {
         assertNull(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
     }
 
-    @Test
-    void checkIfOrderAlreadyInFinalOrderCollection() {
-        List<DirectionOrderCollection> list = new ArrayList<>();
+    @ParameterizedTest
+    @MethodSource("provideOrderCollections")
+    void checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> list, CaseDocument document, boolean expected) {
+        assertEquals(expected, documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, document));
+    }
 
-        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+    private static Stream<Arguments> provideOrderCollections() {
+        CaseDocument doc1 = caseDocument();
+        CaseDocument doc2 = caseDocument("url", "name.pdf", "binary");
+        DirectionOrderCollection orderCollection = DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().uploadDraftDocument(doc2).build())
+            .build();
 
-        DirectionOrderCollection orderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build()).build();
-        list.add(orderCollection);
-
-        assertTrue(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
-
-        list = new ArrayList<>();
-        CaseDocument caseDocument = caseDocument("url", "name.pdf", "binary");
-        orderCollection
-            = DirectionOrderCollection.builder().value(DirectionOrder.builder().uploadDraftDocument(caseDocument).build()).build();
-        list.add(orderCollection);
-
-        assertFalse(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, caseDocument()));
+        return Stream.of(
+            Arguments.of(null, doc1, false),
+            Arguments.of(new ArrayList<>(), doc1, false),
+            Arguments.of(List.of(orderCollection), doc1, false),
+            Arguments.of(List.of(orderCollection), doc2, true)
+        );
     }
 
     @Test
