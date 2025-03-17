@@ -24,12 +24,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
+
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
-    public static final String AUTH_TOKEN = "tokien:)";
     @InjectMocks
     private SolicitorCreateContestedMidHandler handler;
 
@@ -47,7 +48,6 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
-
 
     private static final String APPLICANT_POSTCODE_ERROR = "Postcode field is required for applicant address.";
     private static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
