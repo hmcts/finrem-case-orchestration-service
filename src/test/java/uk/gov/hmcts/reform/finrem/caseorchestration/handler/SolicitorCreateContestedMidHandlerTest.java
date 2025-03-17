@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
     @InjectMocks
@@ -88,7 +87,6 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Test
     void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -142,7 +140,6 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Test
     void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -160,11 +157,9 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Test
     void givenContestedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowErrorMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-
 
         data.getContactDetailsWrapper().setApplicantAddress(new Address(
             "AddressLine1",
@@ -186,7 +181,6 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Test
     void givenContestedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowErrorMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -204,7 +198,6 @@ class SolicitorCreateContestedMidHandlerTest {
 
     @Test
     void givenContestedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowErrorMessage() {
-
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
