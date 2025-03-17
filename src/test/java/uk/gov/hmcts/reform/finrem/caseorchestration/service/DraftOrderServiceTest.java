@@ -1264,4 +1264,91 @@ class DraftOrderServiceTest {
                 .build())
             .build();
     }
+
+    @Test
+    void shouldReturnEmptyListWhenDraftOrdersReviewCollectionIsEmpty() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(new ArrayList<>()).build()).build();
+
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection()).isEmpty();
+    }
+
+    @Test
+    void shouldRemoveEmptyDraftOrdersReviewCollections() {
+        DraftOrdersReviewCollection emptyReview = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(new ArrayList<>())
+                .psaDocReviewCollection(new ArrayList<>())
+                .build())
+            .build();
+
+        DraftOrdersReviewCollection nonEmptyReview = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(List.of(
+                    DraftOrderDocReviewCollection.builder()
+                        .value(DraftOrderDocumentReview.builder()
+                            .build())
+                        .build()
+                ))
+                .build())
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(emptyReview, nonEmptyReview))
+                .build())
+            .build();
+
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .containsExactly(nonEmptyReview);
+        assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
+    }
+
+    @Test
+    void shouldNotRemoveReviewIfItContainsDocuments() {
+        DraftOrdersReviewCollection nonEmptyReview1 = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(List.of(
+                    DraftOrderDocReviewCollection.builder()
+                        .value(DraftOrderDocumentReview.builder()
+                            .build())
+                        .build()
+                ))
+                .psaDocReviewCollection(List.of(
+                    PsaDocReviewCollection.builder()
+                        .value(PsaDocumentReview.builder()
+                            .build())
+                        .build()
+                ))
+                .build())
+            .build();
+
+        DraftOrdersReviewCollection nonEmptyReview2 = DraftOrdersReviewCollection.builder()
+            .value(DraftOrdersReview.builder()
+                .draftOrderDocReviewCollection(List.of(
+                    DraftOrderDocReviewCollection.builder()
+                        .value(DraftOrderDocumentReview.builder()
+                            .build())
+                        .build()
+                ))
+                .build())
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .draftOrdersReviewCollection(List.of(nonEmptyReview1, nonEmptyReview2))
+                .build())
+            .build();
+
+        draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(caseData);
+
+        assertThat(caseData.getDraftOrdersWrapper().getDraftOrdersReviewCollection())
+            .containsExactly(nonEmptyReview1, nonEmptyReview2);
+        assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.YES);
+    }
 }

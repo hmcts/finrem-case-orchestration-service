@@ -64,16 +64,34 @@ public class ExpressCaseService {
      * @return true if the case qualifies for express case participation, false otherwise
      */
     private boolean qualifiesForExpress(FinremCaseData caseData) {
-        String frcValue = caseData.getSelectedAllocatedCourt();
+
         List<NatureApplication> natureOfApplicationCheckList = caseData
             .getNatureApplicationWrapper().getNatureOfApplicationChecklist();
+
         Schedule1OrMatrimonialAndCpList typeOfApplication = caseData.getScheduleOneWrapper().getTypeOfApplication();
+
         EstimatedAssetV2 assetValue = caseData.getEstimatedAssetsChecklistV2();
 
-        return expressCaseFrcs.contains(frcValue)
+        return caseHasExpressParticipatingCourt(caseData)
             && MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS.equals(typeOfApplication)
             && UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS.equals(assetValue)
             && !ListUtils.emptyIfNull(natureOfApplicationCheckList).contains(CONTESTED_VARIATION_ORDER)
             && YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
+    }
+
+    /* Checks that a region has been selected before calling getSelectedAllocatedCourt, as an indication
+     * that the User has selected their court.  Without that, mapping in getSelectedAllocatedCourt fails.
+     */
+    private boolean caseHasExpressParticipatingCourt(FinremCaseData caseData) {
+
+        if (caseData.getRegionWrapper().getAllocatedRegionWrapper().getRegionList() == null) {
+            return false;
+        }
+
+        String selectedCourtId = caseData.getSelectedAllocatedCourt();
+
+        return selectedCourtId != null && expressCaseFrcs.stream()
+               .map(String::trim)
+               .anyMatch(court -> court.equalsIgnoreCase(selectedCourtId.trim()));
     }
 }

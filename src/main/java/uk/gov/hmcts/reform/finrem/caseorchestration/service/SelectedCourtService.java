@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
@@ -16,6 +17,9 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 @RequiredArgsConstructor
 public class SelectedCourtService {
+
+    private static final String ROYAL_COURT = "THE ROYAL COURTS OF JUSTICE";
+    private static final String HIGH_COURT = "HIGH COURT FAMILY DIVISION";
 
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
@@ -59,6 +63,18 @@ public class SelectedCourtService {
                 selectedCourtDetails.map(CourtDetails::getPhoneNumber),
                 "Court Phone",
                 selectedCourtId);
+    }
+
+    /**
+     * Contested Form A creation does not permit these courts to be chosen.
+     * This simple check returns true if caseData shows that a User has picked either of
+     * these courts.
+     *
+     * @param caseData instance of FinremCaseData
+     */
+    public boolean royalCourtOrHighCourtChosen(FinremCaseData caseData) {
+        String courtName = caseData.getConsentOrderWrapper().getConsentOrderFrcName();
+        return courtName != null && Set.of(HIGH_COURT, ROYAL_COURT).contains(courtName.toUpperCase());
     }
 
     private <T> void setIfPresent(Consumer<T> setter, Optional<T> value, String fieldName, String selectedCourtId) {
