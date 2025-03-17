@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.65'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1588'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1612'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -23,11 +23,11 @@ def versions = [
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.36',
-        mockito              : '5.15.2',
+        mockito              : '5.16.0',
         pact                 : '4.6.17',
         pdfbox               : '3.0.4',
         reformLogging        : '6.1.8',
-        serenity             : '4.2.16',
+        serenity             : '4.2.17',
         serviceTokenGenerator: '5.3.0',
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
@@ -39,10 +39,10 @@ def versions = [
         tika                 : '3.1.0',
         amClient             : '1.7.3',
         sendLetterClient     : '4.0.4',
-        elasticSearch        : '7.17.27',
-        jacksonDatabind      : '2.18.2',
+        elasticSearch        : '7.17.28',
+        jacksonDatabind      : '2.18.3',
         retry                : '1.3.4',
-        snakeyaml            : '2.3',
+        snakeyaml            : '2.4',
         loadbalancer         : '4.2.0'
 ]
 
@@ -58,7 +58,7 @@ mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationA
 
 checkstyle {
     maxWarnings = 0
-    toolVersion = '10.21.3'
+    toolVersion = '10.21.4'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -249,7 +249,7 @@ sonarqube {
 }
 
 pitest {
-    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.*'])
+    targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.handler.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.health.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.mapper.*',
@@ -276,7 +276,8 @@ pitest {
     threads.set(15)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(50)
+    mutationThreshold.set(80)
+    junit5PluginVersion.set('1.2.2')
 }
 
 bootJar {
@@ -516,4 +517,3 @@ tasks.withType(Tar) {
 tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-

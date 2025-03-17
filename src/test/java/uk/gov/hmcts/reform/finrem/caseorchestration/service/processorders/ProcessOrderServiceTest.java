@@ -155,7 +155,7 @@ class ProcessOrderServiceTest {
     @ParameterizedTest
     @MethodSource("provideAreAllNewUploadedOrdersPdfDocumentsPresentTestCases")
     void testAreAllNewUploadedOrdersPdfDocumentsPresent(FinremCaseData caseData, boolean expectedResult) {
-        boolean result = underTest.areAllNewOrdersPdfFiles(caseData);
+        boolean result = underTest.areAllNewOrdersWordOrPdfFiles(caseData);
         assertEquals(expectedResult, result);
     }
 
@@ -167,6 +167,7 @@ class ProcessOrderServiceTest {
         DirectionOrderCollection newPdfOrder2 = createDirectionOrder("http://example.com/document3.pdf");
         DirectionOrderCollection newWordOrder2 = createDirectionOrder("http://example.com/document4.doc");
         DirectionOrderCollection newWordOrder3 = createDirectionOrder("http://example.com/document5.docx");
+        DirectionOrderCollection excelFile = createDirectionOrder("http://example.com/document4.xlxs");
 
         return Stream.of(
             // Valid Cases:
@@ -181,12 +182,13 @@ class ProcessOrderServiceTest {
 
             // Invalid cases:
             // New document(s) is/are not a PDF document
-            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), false),
-            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), false),
-            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), false)
+            Arguments.of(createCaseData(List.of(existingWordOrder, excelFile), false), false),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2), true), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder3), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder3), true), true),
+            Arguments.of(createCaseData(List.of(existingWordOrder, newWordOrder2, newWordOrder3), false), true),
+            Arguments.of(createCaseData(List.of(legacyExistingPdfOrder, newWordOrder2, newWordOrder3), true), true)
         );
     }
 
@@ -266,7 +268,7 @@ class ProcessOrderServiceTest {
 
 
         // Call the method to test
-        boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
+        boolean result = underTest.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData);
 
         // Assert the expected result
         if (expectedTrue) {
@@ -299,7 +301,7 @@ class ProcessOrderServiceTest {
         when(caseData.getDraftOrdersWrapper()).thenReturn(draftOrdersWrapper);
 
         // Call the method to test
-        boolean result = underTest.areAllModifyingUnprocessedOrdersWordDocuments(caseData);
+        boolean result = underTest.areAllModifyingUnprocessedOrdersWordOrPdfDocuments(caseData);
         assertTrue(result, "Expected all draft orders (excluding PSA) to have .doc or .docx extensions");
     }
 

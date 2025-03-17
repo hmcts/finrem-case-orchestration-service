@@ -36,6 +36,7 @@ public class DocumentConfiguration {
     @Getter(AccessLevel.NONE)
     private String formCNonFastTrackTemplate;
     private String formCNonFastTrackHighCourtTemplate;
+    private String formCExpressCaseTemplate;
     private String formCFileName;
     @Getter(AccessLevel.NONE)
     private String formGTemplate;
@@ -220,7 +221,6 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? hearingNoticeConsentedHighCourtTemplate
             : hearingNoticeConsentedTemplate;
     }
-
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
         if (caseDetails != null && caseDetails.getData() != null

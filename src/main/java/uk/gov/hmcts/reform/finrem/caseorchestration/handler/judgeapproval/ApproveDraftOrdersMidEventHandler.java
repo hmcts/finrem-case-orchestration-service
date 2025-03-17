@@ -66,6 +66,7 @@ public class ApproveDraftOrdersMidEventHandler extends FinremCallbackHandler {
         setupHearingInstruction(draftOrdersWrapper);
         setupExtraReportFieldsInput(draftOrdersWrapper);
 
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 

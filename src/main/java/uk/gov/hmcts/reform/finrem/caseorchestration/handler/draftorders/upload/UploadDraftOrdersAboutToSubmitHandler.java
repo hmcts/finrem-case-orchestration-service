@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
@@ -78,6 +80,7 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest, String userAuthorisation) {
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseDetails.getId());
@@ -87,17 +90,26 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         String typeOfDraftOrder = finremCaseData.getDraftOrdersWrapper().getTypeOfDraftOrder();
         List<String> warnings = new ArrayList<>();
+        State state = caseDetails.getState();
         if (SUGGESTED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleSuggestedDraftOrders(finremCaseData, userAuthorisation, orderFiledBy);
             populateSuggestedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
+            state = caseDetailsBefore.getState();
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
         }
 
+        caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null);
+        caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null);
+        caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
         clearTemporaryFields(caseDetails);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).build();
+        if (state == null) {
+            throw new IllegalStateException("Unexpected null in state");
+        }
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().warnings(warnings).data(finremCaseData).state(state.getStateId())
+            .build();
     }
 
     private OrderFiledBy getOrderFiledBy(FinremCaseDetails caseDetails, String userAuthorisation) {
@@ -326,5 +338,4 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null); // Clear the temporary field
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null); // Clear the temporary field
     }
-
 }
