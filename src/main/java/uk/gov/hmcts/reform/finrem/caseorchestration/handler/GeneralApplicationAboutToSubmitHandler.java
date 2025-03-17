@@ -12,9 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
-import java.util.Collections;
-import java.util.Optional;
-
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
@@ -68,12 +65,10 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void logNoChangeInAppRespCollection(String caseId, FinremCaseData caseDataBefore, FinremCaseData caseData) {
-        int size = Optional.ofNullable(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications())
-            .orElse(Collections.emptyList())
+        int size = emptyIfNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications())
             .size();
 
-        int sizeBefore = Optional.ofNullable(caseDataBefore.getGeneralApplicationWrapper().getAppRespGeneralApplications())
-            .orElse(Collections.emptyList())
+        int sizeBefore = emptyIfNull(caseDataBefore.getGeneralApplicationWrapper().getAppRespGeneralApplications())
             .size();
 
         if (size == sizeBefore) {
