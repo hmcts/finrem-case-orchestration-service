@@ -24,10 +24,6 @@ public class ContactDetailsValidator {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
-        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
-            checkForEmptyPostcodeOnContestedCase(caseData, wrapper, errors);
-        }
-
         checkForEmptyApplicantSolicitorPostcode(caseData, wrapper, errors);
         checkForEmptyApplicantPostcode(wrapper, errors);
         checkForEmptyRespondentSolicitorPostcode(caseData, wrapper, errors);
@@ -36,19 +32,19 @@ public class ContactDetailsValidator {
         return errors;
     }
 
-    private static void checkForEmptyPostcodeOnContestedCase(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
-        if (caseData.isApplicantRepresentedByASolicitor()
-            && wrapper.getApplicantSolicitorAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
-            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
-        }
-    }
-
     private static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
-        if (caseData.isApplicantRepresentedByASolicitor()
+        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
+            if (caseData.isApplicantRepresentedByASolicitor()
+                && wrapper.getApplicantSolicitorAddress() != null
+                && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
+                errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            }
+        } else {
+            if (caseData.isApplicantRepresentedByASolicitor()
                 && wrapper.getSolicitorAddress() != null
                 && ObjectUtils.isEmpty(wrapper.getSolicitorAddress().getPostCode())) {
-            errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+                errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+            }
         }
     }
 
