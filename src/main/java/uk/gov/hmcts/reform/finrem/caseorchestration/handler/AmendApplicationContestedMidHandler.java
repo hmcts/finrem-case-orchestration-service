@@ -50,7 +50,7 @@ public class AmendApplicationContestedMidHandler extends FinremCallbackHandler {
 
         if (featureToggleService.isExpressPilotEnabled()) {
             expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-            expressCaseService.setWhetherDisqualifiedFromExpress(caseData, caseDataBefore);
+            expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
