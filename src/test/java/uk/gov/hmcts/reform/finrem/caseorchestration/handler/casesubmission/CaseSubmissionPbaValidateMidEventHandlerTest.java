@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,17 +38,22 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
 
     @Test
     void testHandle_ValidPbaNumber_thenHandlerCanHandle() {
-        FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
         caseData.setHelpWithFeesQuestion(NO);
         caseData.setPbaNumber("ValidPbaNumber");
-        caseDetails.setData(caseData);
-
-        Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "ValidPbaNumber")).thenReturn(true);
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(1L)
+            .data(caseData)
+            .caseType(CaseType.CONTESTED)
+            .build();
 
         FinremCallbackRequest request = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventType(EventType.APPLICATION_PAYMENT_SUBMISSION)
             .build();
+
+        Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "ValidPbaNumber")).thenReturn(true);
+
         var response = handler.handle(request, "userAuthorisation");
 
         assertThat(response.getErrors()).isEmpty();
@@ -59,23 +62,24 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
 
     @Test
     void testHandle_InvalidPbaNumber_thenReturnError() {
-        FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
         caseData.setHelpWithFeesQuestion(NO);
         caseData.setPbaNumber("InvalidPbaNumber");
-        caseDetails.setData(caseData);
-
-        Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "InvalidPbaNumber")).thenReturn(false);
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(1L)
+            .data(caseData)
+            .caseType(CaseType.CONTESTED)
+            .build();
 
         FinremCallbackRequest request = FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventType(EventType.APPLICATION_PAYMENT_SUBMISSION)
             .build();
+
+        Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "InvalidPbaNumber")).thenReturn(false);
+
         var response = handler.handle(request, "userAuthorisation");
 
-        assertThat(response).isNotNull();
-        assertThat(response.getErrors().size(), is(1));
-        assertThat(response.getErrors().get(0)).isEqualTo("PBA Account Number is not valid, please enter a valid one.");
+        assertThat(response.getErrors()).containsExactly("PBA Account Number is not valid, please enter a valid one.");
     }
-
 }
-
