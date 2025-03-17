@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
@@ -45,6 +46,7 @@ public class CaseOrchestrationApplication  implements CommandLineRunner {
     }
 
     @Bean
+    @Profile("local")
     public CommonsRequestLoggingFilter requestLoggingFilter() {
         CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
         loggingFilter.setIncludeClientInfo(false);
