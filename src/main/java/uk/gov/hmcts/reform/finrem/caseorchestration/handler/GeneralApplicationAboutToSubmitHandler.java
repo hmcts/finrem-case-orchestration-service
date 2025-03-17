@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationSe
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+
 @Slf4j
 @Service
 public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandler {
@@ -59,8 +61,7 @@ public class GeneralApplicationAboutToSubmitHandler extends FinremCallbackHandle
     }
 
     private void logAppRespCollection(String caseId, FinremCaseData caseData, String message) {
-        int size = Optional.ofNullable(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications())
-            .orElse(Collections.emptyList())
+        int size = emptyIfNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications())
             .size();
 
         log.info("Case ID: {} AppResp GA {} {}", caseId, message, size);
