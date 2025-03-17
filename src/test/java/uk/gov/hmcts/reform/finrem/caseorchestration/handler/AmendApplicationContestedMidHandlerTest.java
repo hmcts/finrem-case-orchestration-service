@@ -55,6 +55,7 @@ class AmendApplicationContestedMidHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
+        verify(expressCaseService, times(1)).setExpressCaseEnrollmentStatus(caseData);
         verify(expressCaseService, times(1)).setWhetherDisqualifiedFromExpress(caseData, caseDataBefore);
     }
 
@@ -67,6 +68,7 @@ class AmendApplicationContestedMidHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
+        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
         verify(expressCaseService, never()).setWhetherDisqualifiedFromExpress(caseData, caseDataBefore);
     }
 

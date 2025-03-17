@@ -43,7 +43,7 @@ public class ExpressCaseService {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
     }
 
-   /**
+    /**
      * Considers whether a change has disqualified a case for Express processing.
      * Sets the temporary expressCaseAmendedCriteriaNotMet value.
      * If the Case was suitable to process as an Express Case, but isn't now, then
@@ -52,7 +52,7 @@ public class ExpressCaseService {
      * show the right content to a user.
      * @param amendedCaseData newly amended case data
      * @param caseDataBeforeAmending the data after the last submitted event
-    */
+     */
     public void setWhetherDisqualifiedFromExpress(FinremCaseData amendedCaseData, FinremCaseData caseDataBeforeAmending) {
 
         ExpressCaseParticipation statusBefore = caseDataBeforeAmending.getExpressCaseParticipation();
