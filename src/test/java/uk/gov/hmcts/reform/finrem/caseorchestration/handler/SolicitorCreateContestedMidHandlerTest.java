@@ -70,15 +70,6 @@ class SolicitorCreateContestedMidHandlerTest {
         assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE);
     }
 
-    private FinremCallbackRequest buildFinremCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.SOLICITOR_CREATE)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
-            .build();
-    }
-
     @Test
     void testPostalServiceValidationCalled() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
@@ -235,5 +226,11 @@ class SolicitorCreateContestedMidHandlerTest {
 
         assertThat(handle.getErrors())
             .containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
+    }
+
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        return FinremCallbackRequestFactory.from(EventType.SOLICITOR_CREATE,
+            FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()));
     }
 }
