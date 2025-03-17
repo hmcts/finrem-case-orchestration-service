@@ -136,6 +136,14 @@ class SolicitorCreateConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        data.getContactDetailsWrapper().setSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            null));
         data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
         when(finremCaseDetailsMapper.mapToFinremCaseDetails(any(CaseDetails.class)))
