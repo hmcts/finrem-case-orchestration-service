@@ -13,11 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 @Slf4j
 @Service
-public class AmendExpressCaseAboutToSubmitHandler extends FinremCallbackHandler {
+public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler {
     private final ExpressCaseService expressCaseService;
 
-    public AmendExpressCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                ExpressCaseService expressCaseService) {
+    public ManageExpressCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                 ExpressCaseService expressCaseService) {
         super(finremCaseDetailsMapper);
         this.expressCaseService = expressCaseService;
     }
@@ -26,7 +26,7 @@ public class AmendExpressCaseAboutToSubmitHandler extends FinremCallbackHandler 
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.AMEND_EXPRESS_CASE.equals(eventType);
+            && EventType.MANAGE_EXPRESS_CASE.equals(eventType);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class AmendExpressCaseAboutToSubmitHandler extends FinremCallbackHandler 
         log.info(
                 "Requesting that {} is no longer an Express case. {} about to submit callback",
                 caseDetails.getId(),
-                EventType.AMEND_EXPRESS_CASE
+                EventType.MANAGE_EXPRESS_CASE
         );
 
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);

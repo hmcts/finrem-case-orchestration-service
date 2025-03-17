@@ -13,28 +13,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_EXPRESS_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_EXPRESS_CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class AmendExpressCaseAboutToSubmitHandlerTest {
+class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @Mock
     private ExpressCaseService expressCaseService;
 
     @InjectMocks
-    private AmendExpressCaseAboutToSubmitHandler underTest;
+    private ManageExpressCaseAboutToSubmitHandler underTest;
 
     @Test
     void testHandlerCanHandle() {
-        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, AMEND_EXPRESS_CASE);
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, MANAGE_EXPRESS_CASE);
     }
 
     @Test
     void shouldPopulateDefaultOrganisationPolicyData() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(
-            AMEND_EXPRESS_CASE, FinremCaseDetailsBuilderFactory.from(123L, CONTESTED));
+            MANAGE_EXPRESS_CASE, FinremCaseDetailsBuilderFactory.from(123L, CONTESTED));
         underTest.handle(callbackRequest, AUTH_TOKEN);
         verify(expressCaseService).setExpressCaseEnrollmentStatusToWithdrawn(callbackRequest.getCaseDetails().getData());
     }
