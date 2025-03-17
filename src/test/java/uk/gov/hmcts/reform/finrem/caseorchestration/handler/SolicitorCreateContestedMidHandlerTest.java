@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.SolicitorCreateContestedMidHandler;
@@ -22,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
@@ -74,7 +74,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testPostalServiceValidationCalled() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(postalService, times(1))
+        verify(postalService)
             .validate(finremCallbackRequest.getCaseDetails().getData());
     }
 
@@ -82,7 +82,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testSetSelectedCourtDetailsIfPresentCalled() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(selectedCourtService, times(1))
+        verify(selectedCourtService)
             .setSelectedCourtDetailsIfPresent(finremCallbackRequest.getCaseDetails().getData());
     }
 
