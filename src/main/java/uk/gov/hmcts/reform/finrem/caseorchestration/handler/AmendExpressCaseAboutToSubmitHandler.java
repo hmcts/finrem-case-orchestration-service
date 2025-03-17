@@ -26,7 +26,7 @@ public class AmendExpressCaseAboutToSubmitHandler extends FinremCallbackHandler 
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.AMEND_EXPRESS_CASE.equals(eventType));
+            && EventType.AMEND_EXPRESS_CASE.equals(eventType);
     }
 
     @Override
