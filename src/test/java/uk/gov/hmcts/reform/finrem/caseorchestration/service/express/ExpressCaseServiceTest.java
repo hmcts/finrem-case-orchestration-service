@@ -96,6 +96,11 @@ class ExpressCaseServiceTest {
         assertEquals(YesOrNo.YES, caseDataOnceAmended.getAmendedExpressCaseCriteriaNotMet());
     }
 
+    /*
+     * All scenarios set amendedExpressCaseCriteriaNotMet to No, except when the case was enrolled and
+     * the answers have changed in amendment so express criteria is no longer met.
+     * This is the test that checks the 'No' scenarios.
+     */
     @ParameterizedTest
     @MethodSource("provideAmendedExpressCaseParticipation")
     void setWhetherDisqualifiedFromExpress_shouldSetNo_WhenCaseAmendmentDoesNotDisqualify(
@@ -193,22 +198,41 @@ class ExpressCaseServiceTest {
     }
 
     /*
-     * Creates pairs of FinremCaseData.  Case data now and case data before.
+     * Creates pairs of FinremCaseData.
+     * Left is case data before. Right is case data now, having been amended.
      * Each of these has expressCaseParticipation states set
      * These sets, when checked, should not cause getAmendedExpressCaseCriteriaNotMet
      * to be set to "Yes".
+     * Enrollment value of WITHDRAWN not considered.  This is only applicable after submission.
      */
     private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseParticipation() {
 
         // Both enrolled
-        FinremCaseData dataBeforeAmending = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
-        FinremCaseData dataAfterAmending = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
-        Pair<FinremCaseData, FinremCaseData> bothEnrolled = Pair.of(dataBeforeAmending, dataAfterAmending);
+        FinremCaseData dataQualifies = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
+        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().expressCaseParticipation(DOES_NOT_QUALIFY).build();
+        FinremCaseData nullEnrollmentData = FinremCaseData.builder().build();
 
+        // Case qualified for enrollment on creation, and still does following amendment,
+        Pair<FinremCaseData, FinremCaseData> bothEnrolled = Pair.of(dataQualifies, dataQualifies);
 
+        // Case did not qualify for enrollment, but it does upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedNowQualifies = Pair.of(dataDoesNotQualify, dataQualifies);
+
+        // Case did not qualify for enrollment, and still doesn't upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedDataStillDoesNotQualify = Pair.of(dataDoesNotQualify, dataDoesNotQualify);
+
+        // Case did not qualify for enrollment, and still doesn't upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedDataWasNullNowDoesNotQualify = Pair.of(nullEnrollmentData, dataDoesNotQualify);
+
+        // Case did not qualify for enrollment, and still doesn't upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedDataWasNullNowQualifies = Pair.of(nullEnrollmentData, dataQualifies);
 
         return Stream.of(
-                bothEnrolled
+                bothEnrolled,
+                amendedNowQualifies,
+                amendedDataStillDoesNotQualify,
+                amendedDataWasNullNowDoesNotQualify,
+                amendedDataWasNullNowQualifies
         );
     }
 }
