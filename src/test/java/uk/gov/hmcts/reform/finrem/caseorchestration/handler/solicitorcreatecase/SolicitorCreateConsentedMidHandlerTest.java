@@ -24,20 +24,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateConsentedMidHandlerTest {
 
     @InjectMocks
     private SolicitorCreateConsentedMidHandler handler;
-    static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
 
     @Mock
     private ConsentOrderService consentOrderService;
@@ -54,23 +53,8 @@ class SolicitorCreateConsentedMidHandlerTest {
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
     @Test
-    void given_case_whenEvent_type_is_amendApp_thenCanHandle() {
-        assertTrue(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CREATE));
-    }
-
-    @Test
-    void given_case_when_wrong_callback_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE));
-    }
-
-    @Test
-    void given_case_when_wrong_casetype_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE));
-    }
-
-    @Test
-    void given_case_when_wrong_eventtype_then_case_can_not_handle() {
-        assertFalse(handler.canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CLOSE));
+    void testHandlerCanHandle() {
+        assertCanHandle(handler, CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.SOLICITOR_CREATE);
     }
 
     @Test
