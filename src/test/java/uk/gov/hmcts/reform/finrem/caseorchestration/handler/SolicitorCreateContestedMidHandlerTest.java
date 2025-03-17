@@ -55,7 +55,7 @@ class SolicitorCreateContestedMidHandlerTest {
     private static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
 
     @BeforeEach
-    public void init() {
+    void init() {
         handler = new SolicitorCreateContestedMidHandler(
             finremCaseDetailsMapper,
             postalService,
