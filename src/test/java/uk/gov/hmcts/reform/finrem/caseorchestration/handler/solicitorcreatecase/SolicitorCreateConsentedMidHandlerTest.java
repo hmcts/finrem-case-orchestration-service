@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -29,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,15 +69,6 @@ class SolicitorCreateConsentedMidHandlerTest {
 
         verify(consentOrderService).performCheck(callbackRequest, AUTH_TOKEN);
         verify(postalService).validate(callbackRequest.getCaseDetails().getData());
-    }
-
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetails.setData(caseData);
-        return CallbackRequest.builder().eventId(EventType.SOLICITOR_CREATE.getCcdType())
-            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
     @Test
@@ -233,11 +224,17 @@ class SolicitorCreateConsentedMidHandlerTest {
     }
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.SOLICITOR_CREATE)
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
-            .build();
+        return FinremCallbackRequestFactory.from(EventType.SOLICITOR_CREATE,
+            FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
+                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()));
+    }
+
+    private CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(EventType.SOLICITOR_CREATE.getCcdType())
+            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 }
