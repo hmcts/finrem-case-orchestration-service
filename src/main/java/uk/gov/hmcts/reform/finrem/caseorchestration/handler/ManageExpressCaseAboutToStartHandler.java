@@ -7,28 +7,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressPilotWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+
+import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
 
 @Slf4j
 @Service
-public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler {
-    private final ExpressCaseService expressCaseService;
+public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler {
 
-    public ManageExpressCaseAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                 ExpressCaseService expressCaseService) {
+    public ManageExpressCaseAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
-        this.expressCaseService = expressCaseService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.MANAGE_EXPRESS_CASE.equals(eventType);
     }
@@ -36,22 +35,24 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        ExpressPilotWrapper expressPilotWrapper = caseData.getExpressPilotWrapper();
 
-        if (caseData.getExpressCaseParticipation() == ExpressCaseParticipation.ENROLLED
-            && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
-            && isUserConfirmed(expressPilotWrapper)) {
-            expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
-        }
+        caseData.getExpressPilotWrapper().setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
+        caseData.getExpressPilotWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private boolean isUserConfirmed(ExpressPilotWrapper expressPilotWrapper) {
-        return expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot().getValue().stream().map(DynamicMultiSelectListElement::getCode)
-            .anyMatch(YesOrNo::isYes);
+    private YesOrNo getDefaultAnswerForExpressPilotQuestion(FinremCaseData caseData) {
+        return YesOrNo.forValue(ENROLLED == caseData.getExpressCaseParticipation());
+    }
+
+    private DynamicMultiSelectList buildConfirmRemoveCaseFromExpressPilotEntry() {
+        return DynamicMultiSelectList.builder().listItems(List.of(DynamicMultiSelectListElement.builder()
+            .code(YesOrNo.YES.getYesOrNo())
+            .label("Confirm that this case should no longer be in the Express Financial Remedy Pilot")
+            .build())).build();
     }
 }
