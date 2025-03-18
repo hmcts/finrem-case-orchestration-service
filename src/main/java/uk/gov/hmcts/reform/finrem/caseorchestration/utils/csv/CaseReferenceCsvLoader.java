@@ -6,6 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.security.Key;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +19,9 @@ import java.util.List;
 @NoArgsConstructor
 @Component
 public class CaseReferenceCsvLoader {
+
+    private static final String ALGORITHM = "AES";
+    private static final String TRANSFORMATION = "AES";
 
     @SuppressWarnings({"java:S3740", "java:S1488"})
     public List<CaseReference> loadCaseReferenceList(String fileName) {
@@ -31,4 +40,23 @@ public class CaseReferenceCsvLoader {
         }
     }
 
+    public List<CaseReference> loadCaseReferenceList(String fileName, String secret) throws Exception {
+        File encryptedFile = new File(fileName);
+        File decryptedFile = new File("decrypted-" + fileName);
+
+        decryptFile(secret, encryptedFile, decryptedFile);
+
+        return loadCaseReferenceList(decryptedFile.getPath());
+    }
+
+    private void decryptFile(String key, File inputFile, File outputFile) throws Exception {
+        Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
+        byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
+        byte[] outputBytes = cipher.doFinal(inputBytes);
+
+        Files.write(outputFile.toPath(), outputBytes);
+    }
 }
