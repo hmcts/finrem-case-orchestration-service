@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.stream.Stream;
 
@@ -25,7 +26,9 @@ class CallbackHandlerLoggerTest {
             Arguments.of(FinremCallbackRequestFactory.from(3575975624441189L, CaseType.CONTESTED, AMEND_APP_DETAILS),
                 "===> Case ID 3575975624441189: Handling CONTESTED About To Start callback for event FR_amendApplicationDetails"),
             Arguments.of(FinremCallbackRequestFactory.from(5437803016442134L, CaseType.CONSENTED, EventType.DRAFT_ORDERS),
-                "===> Case ID 5437803016442134: Handling CONSENTED About To Start callback for event FR_draftOrders")
+                "===> Case ID 5437803016442134: Handling CONSENTED About To Start callback for event FR_draftOrders"),
+            Arguments.of(createNullLogValuesRequest(),
+                "===> Case ID null: Handling null About To Start callback for event null")
         );
     }
 
@@ -40,7 +43,9 @@ class CallbackHandlerLoggerTest {
             Arguments.of(FinremCallbackRequestFactory.from(3575975624441189L, CaseType.CONTESTED, AMEND_APP_DETAILS),
                 "===> Case ID 3575975624441189: Handling CONTESTED Mid-Event callback for event FR_amendApplicationDetails"),
             Arguments.of(FinremCallbackRequestFactory.from(5437803016442134L, CaseType.CONSENTED, EventType.DRAFT_ORDERS),
-                "===> Case ID 5437803016442134: Handling CONSENTED Mid-Event callback for event FR_draftOrders")
+                "===> Case ID 5437803016442134: Handling CONSENTED Mid-Event callback for event FR_draftOrders"),
+            Arguments.of(createNullLogValuesRequest(),
+                "===> Case ID null: Handling null Mid-Event callback for event null")
         );
     }
 
@@ -55,7 +60,9 @@ class CallbackHandlerLoggerTest {
             Arguments.of(FinremCallbackRequestFactory.from(3575975624441189L, CaseType.CONTESTED, AMEND_APP_DETAILS),
                 "===> Case ID 3575975624441189: Handling CONTESTED About To Submit callback for event FR_amendApplicationDetails"),
             Arguments.of(FinremCallbackRequestFactory.from(5437803016442134L, CaseType.CONSENTED, EventType.DRAFT_ORDERS),
-                "===> Case ID 5437803016442134: Handling CONSENTED About To Submit callback for event FR_draftOrders")
+                "===> Case ID 5437803016442134: Handling CONSENTED About To Submit callback for event FR_draftOrders"),
+            Arguments.of(createNullLogValuesRequest(),
+                "===> Case ID null: Handling null About To Submit callback for event null")
         );
     }
 
@@ -70,7 +77,16 @@ class CallbackHandlerLoggerTest {
             Arguments.of(FinremCallbackRequestFactory.from(3575975624441189L, CaseType.CONTESTED, AMEND_APP_DETAILS),
                 "===> Case ID 3575975624441189: Handling CONTESTED Submitted callback for event FR_amendApplicationDetails"),
             Arguments.of(FinremCallbackRequestFactory.from(5437803016442134L, CaseType.CONSENTED, EventType.DRAFT_ORDERS),
-                "===> Case ID 5437803016442134: Handling CONSENTED Submitted callback for event FR_draftOrders")
+                "===> Case ID 5437803016442134: Handling CONSENTED Submitted callback for event FR_draftOrders"),
+            Arguments.of(createNullLogValuesRequest(),
+                "===> Case ID null: Handling null Submitted callback for event null")
         );
+    }
+
+    private static FinremCallbackRequest createNullLogValuesRequest() {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .build())
+            .build();
     }
 }

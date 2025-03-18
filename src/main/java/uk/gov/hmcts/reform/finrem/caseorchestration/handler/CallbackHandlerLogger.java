@@ -53,9 +53,10 @@ public class CallbackHandlerLogger {
     private static String createLogMessage(String callbackType, FinremCallbackRequest callbackRequest) {
         CaseType caseType = callbackRequest.getCaseDetails().getCaseType();
         EventType eventType = callbackRequest.getEventType();
+        String ccdEventType = eventType == null ? "null" : eventType.getCcdType();
         String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
 
         return String.format("===> Case ID %s: Handling %s %s callback for event %s",
-            caseId, caseType, callbackType, eventType.getCcdType());
+                caseId, caseType, callbackType, ccdEventType);
     }
 }
