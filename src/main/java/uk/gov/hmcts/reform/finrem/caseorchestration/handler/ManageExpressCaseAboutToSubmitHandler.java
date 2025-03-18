@@ -32,14 +32,9 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-
-        log.info(
-                "Requesting that {} is no longer an Express case. {} about to submit callback",
-                caseDetails.getId(),
-                EventType.MANAGE_EXPRESS_CASE
-        );
 
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
 
