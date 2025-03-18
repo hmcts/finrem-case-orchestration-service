@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
@@ -69,8 +70,7 @@ public class UploadDraftOrdersSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest finremCallbackRequest, String userAuthorisation) {
-        log.info("Invoking contested {} submitted callback for Case ID: {}",
-            finremCallbackRequest.getEventType(), finremCallbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.submitted(finremCallbackRequest));
 
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         String caseReference = String.valueOf(caseDetails.getId());
