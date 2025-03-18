@@ -5,7 +5,13 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
@@ -35,7 +41,7 @@ public class ExpressCaseService {
      * @param caseData the case data as an instance of FinremCaseDate
      */
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
-        caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
     }
 
     /**
@@ -55,15 +61,15 @@ public class ExpressCaseService {
      */
     public void setWhichExpressCaseAmendmentLabelToShow(FinremCaseData amendedCaseData, FinremCaseData caseDataBeforeAmending) {
 
-        ExpressCaseParticipation statusBefore = caseDataBeforeAmending.getExpressCaseParticipation();
-        ExpressCaseParticipation statusNow = amendedCaseData.getExpressCaseParticipation();
+        ExpressCaseParticipation statusBefore = caseDataBeforeAmending.getExpressCaseWrapper().getExpressCaseParticipation();
+        ExpressCaseParticipation statusNow = amendedCaseData.getExpressCaseWrapper().getExpressCaseParticipation();
 
         if (ENROLLED.equals(statusNow)) {
-            amendedCaseData.setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL);
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL);
         } else if (ENROLLED.equals(statusBefore) && DOES_NOT_QUALIFY.equals(statusNow)) {
-            amendedCaseData.setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL);
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL);
         } else {
-            amendedCaseData.setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL);
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL);
         }
     }
 

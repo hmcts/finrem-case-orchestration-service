@@ -49,9 +49,11 @@ class AmendApplicationContestedMidHandlerTest {
     @Test
     void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
+
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -62,9 +64,11 @@ class AmendApplicationContestedMidHandlerTest {
     @Test
     void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 

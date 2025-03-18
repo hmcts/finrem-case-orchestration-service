@@ -12,7 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
@@ -67,14 +71,14 @@ class ExpressCaseServiceTest {
     void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
         FinremCaseData caseData = createCaseData();
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
     void setExpressCaseEnrollmentStatus_shouldNotEnroll_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     /*
@@ -84,13 +88,14 @@ class ExpressCaseServiceTest {
     @Test
     void setWhichExpressCaseAmendmentLabelToShow_shouldSetUnsuitable_WhenCaseAmendedToDisqualifyFromExpress() {
         FinremCaseData caseDataOnceAmended = new FinremCaseData();
-        caseDataOnceAmended.setExpressCaseParticipation(DOES_NOT_QUALIFY);
+        caseDataOnceAmended.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
 
         FinremCaseData caseDataBeforeAmending = new FinremCaseData();
-        caseDataBeforeAmending.setExpressCaseParticipation(ENROLLED);
+        caseDataBeforeAmending.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseDataOnceAmended, caseDataBeforeAmending);
-        assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL, caseDataOnceAmended.getLabelForExpressCaseAmendment());
+        assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL,
+                caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     /*
@@ -107,7 +112,7 @@ class ExpressCaseServiceTest {
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(amendedData, dataBeforeAmending);
 
-        assertEquals(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL, amendedData.getLabelForExpressCaseAmendment());
+        assertEquals(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL, amendedData.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     /*
@@ -125,7 +130,7 @@ class ExpressCaseServiceTest {
 
         expressCaseService.setWhichExpressCaseAmendmentLabelToShow(amendedData, dataBeforeAmending);
 
-        assertEquals(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL, amendedData.getLabelForExpressCaseAmendment());
+        assertEquals(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL, amendedData.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     @ParameterizedTest
@@ -218,8 +223,12 @@ class ExpressCaseServiceTest {
      */
     private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseSuitableScenarios() {
 
-        FinremCaseData dataQualifies = FinremCaseData.builder().expressCaseParticipation(ENROLLED).build();
-        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().expressCaseParticipation(DOES_NOT_QUALIFY).build();
+        FinremCaseData dataQualifies = FinremCaseData.builder().build();
+        dataQualifies.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+
+        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().build();
+        dataDoesNotQualify.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
         FinremCaseData nullEnrollmentData = FinremCaseData.builder().build();
 
         // Case qualified for enrollment on creation, and still does following amendment,
@@ -246,7 +255,9 @@ class ExpressCaseServiceTest {
     private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseScenariosNeedingNoLabel() {
 
         // Both enrolled
-        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().expressCaseParticipation(DOES_NOT_QUALIFY).build();
+        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().build();
+        dataDoesNotQualify.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
         FinremCaseData nullEnrollmentData = FinremCaseData.builder().build();
 
         // Case qualified for enrollment on creation, and still does following amendment,

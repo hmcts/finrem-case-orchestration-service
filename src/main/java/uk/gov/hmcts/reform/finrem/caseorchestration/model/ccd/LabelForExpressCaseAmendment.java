@@ -17,6 +17,10 @@ public enum LabelForExpressCaseAmendment {
 
     private final String value;
 
+    /*
+     * This value will be a label name.  It will match a label in CCD definitions, for when amending a case.
+     * The value is used by a show condition, to determine whether the label should be shown,
+     */
     @JsonValue
     public String getValue() {
         return value;
