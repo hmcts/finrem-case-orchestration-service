@@ -39,13 +39,16 @@ public class ExpressCaseService {
     }
 
     /**
-     * CHANGEME
-     *
-     * Considers whether a change has disqualified a case for Express processing.
-     * Sets the temporary expressCaseAmendedCriteriaNotMet value.
+     * Picks the label that a User should see, depending on how they have changed
+     * their case with regard to the express pilot.
      * If the Case was suitable to process as an Express Case, but isn't now, then
-     * setExpressCaseAmendedCriteriaNotMet is set to "Yes" Otherwise set to "No".
-     * The expressCaseAmendedCriteriaNotMet field is temporary, and only used to
+     * labelForExpressCaseAmendment is set to UNSUITABLE_FOR_EXPRESS_LABEL.
+     * If the Case becomes or remains suitable to process as an Express Case, then
+     * labelForExpressCaseAmendment is set to SUITABLE_FOR_EXPRESS_LABEL.
+     * If was never suitable to process as an Express Case and still isn't, then
+     * labelForExpressCaseAmendment is set to SHOW_NEITHER_PAGE_NOR_LABEL.
+     * If the Case remains, or becomes suitable to process as an Express Case, then
+
      * show the right content to a user.
      * @param amendedCaseData newly amended case data
      * @param caseDataBeforeAmending the data after the last submitted event
