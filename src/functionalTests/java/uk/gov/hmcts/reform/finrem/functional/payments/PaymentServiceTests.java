@@ -117,14 +117,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
         if (journeyType.equals(consentedDir)) {
             String feeAmount = utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount").toString();
-            assertThat(feeAmount).isNotEmpty();
             assertThat(feeAmount).matches("\\d+");
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
                 .toString().equalsIgnoreCase("FEE0228"));
         } else {
             String feeAmount = utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount").toString();
-            assertThat(feeAmount).isNotEmpty();
             assertThat(feeAmount).matches("\\d+");
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
