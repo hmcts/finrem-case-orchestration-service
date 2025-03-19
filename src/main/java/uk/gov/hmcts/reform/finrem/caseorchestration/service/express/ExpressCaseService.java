@@ -45,6 +45,7 @@ public class ExpressCaseService {
     }
 
     /**
+     * Used when amending an application.
      * Picks the label that a User should see, depending on how they have changed
      * their case with regard to the express pilot.
      * If the Case was suitable to process as an Express Case, but isn't now, then
@@ -53,7 +54,6 @@ public class ExpressCaseService {
      * labelForExpressCaseAmendment is set to SUITABLE_FOR_EXPRESS_LABEL.
      * If was never suitable to process as an Express Case and still isn't, then
      * labelForExpressCaseAmendment is set to SHOW_NEITHER_PAGE_NOR_LABEL.
-     * If the Case remains, or becomes suitable to process as an Express Case, then
 
      * show the right content to a user.
      * @param amendedCaseData newly amended case data
