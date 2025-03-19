@@ -142,6 +142,15 @@ class ExpressCaseServiceTest {
         assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideIsExpressCaseFinRemCaseData")
+    void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
+                                                                              FinremCaseData caseData,
+                                                                              boolean expected) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
+        assertEquals(expected, expressCaseService.isExpressCase(caseData));
+    }
+
     private static Stream<Arguments> provideIsExpressCase() {
         return Stream.of(
             Arguments.of(false, createCaseDetailsWithParticipation(ENROLLED), false),
@@ -152,9 +161,12 @@ class ExpressCaseServiceTest {
         );
     }
 
-    private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
-        return CaseDetails.builder().data(
-            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
+    private static Stream<Arguments> provideIsExpressCaseFinRemCaseData() {
+        return Stream.of(
+            Arguments.of(false, createFinRemEpCaseData(ENROLLED), false),
+            Arguments.of(true, createFinRemEpCaseData(ENROLLED), true),
+            Arguments.of(true, createFinRemEpCaseData(DOES_NOT_QUALIFY), false)
+        );
     }
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {
@@ -271,5 +283,16 @@ class ExpressCaseServiceTest {
                 amendedStillDoesNotQualify,
                 amendedWasNullStillDoesNotQualify
         );
+    }
+
+    private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
+        return CaseDetails.builder().data(
+            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
+    }
+
+    private static FinremCaseData createFinRemEpCaseData(ExpressCaseParticipation epParticipation) {
+        FinremCaseData data = FinremCaseData.builder().build();
+        data.getExpressCaseWrapper().setExpressCaseParticipation(epParticipation);
+        return data;
     }
 }
