@@ -51,16 +51,19 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
     @Override
     protected List<CaseReference> getCaseReferences() {
         log.info("Getting case references for GeneralEmailDataFieldTask migration");
-        String caseListFileName = getCaseListFileName();
+        String caseListFileName = "caserefs-for-dfr-3639.csv"; //getCaseListFileName();
 
         CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
+        /*
         List<CaseReference> caseReferences;
-        try {
+       try {
             caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
         } catch (Exception e) {
             log.error("Error decrypting and loading case references from {} Exception: {}", caseListFileName, e);
             throw new RuntimeException(e);
-        }
+        }*/
+
+        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName);
 
         log.info("CaseReferences has {} cases.", caseReferences.size());
         return caseReferences;
@@ -98,7 +101,11 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
         if (caseData.getGeneralEmailWrapper() != null
             && caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             log.info("Case {} will have generalEmailUploadedDocument set to null", finremCaseDetails.getId());
+            caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument().setDocumentFilename(" ");
+            caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument().setDocumentFilename(" ");
+
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
+
         } else {
             log.info("Case {} has empty generalEmailUploadedDocument field", finremCaseDetails.getId());
         }

@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
@@ -16,26 +18,43 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SpringBootTest
 @TestPropertySource("classpath:application.properties")
 class ClearGeneralEmailDataFieldTaskTest {
 
     @Mock
     private CcdService ccdService;
+
     @Mock
     private SystemUserService systemUserService;
+
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @Mock
+    private CaseReferenceCsvLoader caseReferenceCsvLoader;
+
+    @InjectMocks
     private ClearGeneralEmailDataFieldTask task;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        task = new ClearGeneralEmailDataFieldTask(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+    }
+
+    @Test
+    void testGetCaseListFileName() {
+        task = new ClearGeneralEmailDataFieldTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+
+
+        String expectedFileName = "caserefs-for-dfr-3639-encrypted.csv";
+        String actualFileName = task.getCaseListFileName();
+        assertEquals(expectedFileName, actualFileName);
     }
 
     @Test
     void testLoadCaseReferencesFromFile() {
+
         List<CaseReference> caseReferences = task.getCaseReferences();
         System.out.println("Case References:.............");
         caseReferences.forEach(System.out::println);

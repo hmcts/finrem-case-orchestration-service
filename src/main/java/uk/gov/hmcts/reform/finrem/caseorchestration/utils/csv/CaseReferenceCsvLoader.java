@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import java.io.File;
 import java.nio.file.Files;
-import java.security.Key;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,22 +43,48 @@ public class CaseReferenceCsvLoader {
     }
 
     public List<CaseReference> loadCaseReferenceList(String fileName, String secret) throws Exception {
-        File encryptedFile = new File(fileName);
-        File decryptedFile = new File("decrypted-" + fileName);
-
-        decryptFile(secret, encryptedFile, decryptedFile);
-
-        return loadCaseReferenceList(decryptedFile.getPath());
+        String decryptedFileName = "decrypted-" + fileName;
+        decryptFile(fileName, decryptedFileName, getKeyFromString(secret));
+        return loadCaseReferenceList(decryptedFileName);
     }
 
-    private void decryptFile(String key, File inputFile, File outputFile) throws Exception {
-        Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
+    public static SecretKey getKeyFromString(String key) throws Exception {
+        SecretKeySpec secretKey = generateKey(key);
+        return secretKey;
+    }
+
+    public static String encrypt(String data, SecretKey key) throws Exception {
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encryptedBytes = cipher.doFinal(data.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
 
-        byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
-        byte[] outputBytes = cipher.doFinal(inputBytes);
+    public static String decrypt(String encryptedData, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
+        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+        return new String(decryptedBytes);
+    }
 
-        Files.write(outputFile.toPath(), outputBytes);
+    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        String encryptedContent = encrypt(content, key);
+        Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
+    }
+
+    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        String decryptedContent = decrypt(encryptedContent, key);
+        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
+    }
+
+    private static SecretKeySpec generateKey(String key) throws Exception {
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = key.getBytes("UTF-8");
+        keyBytes = sha.digest(keyBytes);
+        keyBytes = Arrays.copyOf(keyBytes, 16); // Use first 16 bytes for AES-128
+        return new SecretKeySpec(keyBytes, ALGORITHM);
     }
 }
