@@ -54,6 +54,14 @@ public class ExpressCaseService {
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
+    public boolean isExpressCase(FinremCaseData caseData) {
+        ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseData.getExpressCaseParticipation())
+            .orElse(DOES_NOT_QUALIFY);
+
+        return featureToggleService.isExpressPilotEnabled()
+            && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
+    }
+
     /**
      * Determines if the case qualifies for express case participation based on several conditions.
      *  - is within a participating FRC
