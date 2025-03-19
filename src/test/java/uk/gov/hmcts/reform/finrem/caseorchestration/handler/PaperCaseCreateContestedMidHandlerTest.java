@@ -13,16 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
@@ -37,8 +34,6 @@ class PaperCaseCreateContestedMidHandlerTest {
     @InjectMocks
     private PaperCaseCreateContestedMidHandler handler;
 
-    @Mock
-    FeatureToggleService featureToggleService;
     @Mock
     ExpressCaseService expressCaseService;
     @Mock
@@ -77,32 +72,15 @@ class PaperCaseCreateContestedMidHandlerTest {
 
     @Test
     void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
-    }
-
-    @Test
-    void testGivenExpressPilotDisabled_ThenExpressCaseServiceIsNotCalled() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(expressCaseService, never()).setExpressCaseEnrollmentStatus(caseData);
-    }
-
-    private FinremCallbackRequest buildFinremCallbackRequest() {
-        return FinremCallbackRequest.builder().caseDetails(
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(
             FinremCaseDetails.builder().data(
                 FinremCaseData.builder().ccdCaseType(CONTESTED).build()
             ).build()
         ).build();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 }

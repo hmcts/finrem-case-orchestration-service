@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -31,6 +32,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
+    private final ExpressCaseService expressCaseService;
 
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
@@ -40,6 +42,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
+                                                        ExpressCaseService expressCaseService,
                                                         CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.service = service;
@@ -47,6 +50,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
         this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
+        this.expressCaseService = expressCaseService;
     }
 
 
@@ -85,6 +89,8 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
+
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

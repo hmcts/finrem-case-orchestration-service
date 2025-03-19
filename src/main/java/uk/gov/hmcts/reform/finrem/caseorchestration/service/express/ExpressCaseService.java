@@ -33,7 +33,9 @@ public class ExpressCaseService {
     private final FeatureToggleService featureToggleService;
 
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
-        caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+        if (featureToggleService.isExpressPilotEnabled()) {
+            caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+        }
     }
 
     /**

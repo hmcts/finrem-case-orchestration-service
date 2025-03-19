@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +48,8 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     private CaseFlagsService caseFlagsService;
     @Mock
     private CaseDataService caseDataService;
+    @Mock
+    ExpressCaseService expressCaseService;
 
     @Spy
     private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
@@ -156,5 +159,15 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
         handler.handle(callbackRequest, AUTH_TOKEN);
         // Verify call to caseDataService to set PowerBI tracking fields.
         verify(caseDataService,times(1)).setFinancialRemediesCourtDetails(any(CaseDetails.class));
+    }
+
+    @Test
+    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 }

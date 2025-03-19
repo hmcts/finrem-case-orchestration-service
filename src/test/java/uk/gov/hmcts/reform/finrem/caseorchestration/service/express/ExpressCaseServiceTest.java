@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXPRESS_CASE_PARTICIPATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNABLE_TO_QUANTIFY;
@@ -68,13 +69,23 @@ class ExpressCaseServiceTest {
     @Test
     void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
         FinremCaseData caseData = createCaseData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+    }
+
+    @Test
+    void shouldENotEnrollInExpressPilot_WhenFeatureGateOff() {
+        FinremCaseData caseData = createCaseData();
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+        assertNull(caseData.getExpressCaseParticipation());
     }
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
     void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(true);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
         assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
     }
