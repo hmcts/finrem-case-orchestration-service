@@ -59,8 +59,8 @@ public class PaperCaseCreateContestedAboutToSubmitHandler extends FinremCallback
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info("Setting default values for contested paper case journey caseid {} event {} about to submit callback",
-            caseDetails.getId(), EventType.NEW_PAPER_CASE);
+
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         if (idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.getContactDetailsWrapper().setIsAdmin(YES_VALUE);

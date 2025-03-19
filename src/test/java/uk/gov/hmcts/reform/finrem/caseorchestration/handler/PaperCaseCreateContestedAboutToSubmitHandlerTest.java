@@ -162,7 +162,7 @@ class PaperCaseCreateContestedAboutToSubmitHandlerTest extends BaseHandlerTestSe
     }
 
     @Test
-    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
+    void testExpressCaseServiceCalled() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest(CONTESTED_HWF_JSON);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 

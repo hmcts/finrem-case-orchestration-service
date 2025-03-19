@@ -38,7 +38,7 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} mid event callback", EventType.NEW_PAPER_CASE);
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
 

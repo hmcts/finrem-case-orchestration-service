@@ -75,7 +75,7 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void shouldENotEnrollInExpressPilot_WhenFeatureGateOff() {
+    void shouldNotEnrollInExpressPilot_WhenFeatureGateOff() {
         FinremCaseData caseData = createCaseData();
         when(featureToggleService.isExpressPilotEnabled()).thenReturn(false);
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
@@ -184,7 +184,7 @@ class ExpressCaseServiceTest {
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
     }
-  
+
     private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
         return CaseDetails.builder().data(
             Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
@@ -63,8 +64,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callback, String authorisationToken) {
-        log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
-            callback.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToSubmit(callback));
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         caseFlagsService.setCaseFlagInformation(caseDetails);
