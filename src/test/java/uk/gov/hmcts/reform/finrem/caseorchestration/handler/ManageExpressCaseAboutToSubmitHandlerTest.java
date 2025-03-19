@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCasePartici
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressPilotWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
@@ -43,18 +43,18 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     private FinremCallbackRequest callbackRequest;
     private FinremCaseData caseData;
-    private ExpressPilotWrapper expressPilotWrapper;
+    private ExpressCaseWrapper expressCaseWrapper;
 
     @BeforeEach
     void setUp() {
         callbackRequest = mock(FinremCallbackRequest.class);
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         caseData = mock(FinremCaseData.class);
-        expressPilotWrapper = mock(ExpressPilotWrapper.class);
+        expressCaseWrapper = mock(ExpressCaseWrapper.class);
 
         lenient().when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         lenient().when(caseDetails.getData()).thenReturn(caseData);
-        lenient().when(caseData.getExpressPilotWrapper()).thenReturn(expressPilotWrapper);
+        lenient().when(caseData.getExpressCaseWrapper()).thenReturn(expressCaseWrapper);
     }
 
     @Test
@@ -65,8 +65,8 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Test
     void shouldWithdrawExpressCase_whenEnrolledAndUserConfirmed() {
         when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
-        when(expressPilotWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
-        when(expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot())
+        when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
+        when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
                 DynamicMultiSelectList.builder().value(List.of(DynamicMultiSelectListElement.builder().code(YesOrNo.YES.name()).build())).build()
             );
@@ -90,7 +90,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Test
     void shouldNotWithdrawExpressCase_whenExpressPilotQuestionIsYes() {
         when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
-        when(expressPilotWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.YES);
+        when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.YES);
 
         underTest.handle(callbackRequest, AUTH_TOKEN);
 
@@ -100,8 +100,8 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Test
     void shouldNotWithdrawExpressCase_whenUserDidNotConfirm() {
         when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
-        when(expressPilotWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
-        when(expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot())
+        when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
+        when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
                 DynamicMultiSelectList.builder().value(
                     List.of(
@@ -118,8 +118,8 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @Test
     void shouldNotWithdrawExpressCase_whenUserConfirmationListIsEmpty() {
         when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
-        when(expressPilotWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
-        when(expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot())
+        when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
+        when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
                 DynamicMultiSelectList.builder().value(List.of()).build()
             );

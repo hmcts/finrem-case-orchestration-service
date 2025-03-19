@@ -47,8 +47,8 @@ class ManageExpressCaseAboutToStartHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertEquals(YesOrNo.YES, response.getData().getExpressPilotWrapper().getExpressPilotQuestion());
-        assertNotNull(response.getData().getExpressPilotWrapper().getConfirmRemoveCaseFromExpressPilot());
+        assertEquals(YesOrNo.YES, response.getData().getExpressCaseWrapper().getExpressPilotQuestion());
+        assertNotNull(response.getData().getExpressCaseWrapper().getConfirmRemoveCaseFromExpressPilot());
     }
 
     @ParameterizedTest
@@ -62,6 +62,6 @@ class ManageExpressCaseAboutToStartHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertEquals(YesOrNo.NO, response.getData().getExpressPilotWrapper().getExpressPilotQuestion());
+        assertEquals(YesOrNo.NO, response.getData().getExpressCaseWrapper().getExpressPilotQuestion());
     }
 }

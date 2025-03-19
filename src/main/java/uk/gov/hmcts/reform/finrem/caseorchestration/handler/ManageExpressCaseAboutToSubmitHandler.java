@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCasePartici
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressPilotWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        ExpressPilotWrapper expressPilotWrapper = caseData.getExpressPilotWrapper();
+        ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
 
         if (caseData.getExpressCaseParticipation() == ExpressCaseParticipation.ENROLLED
             && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
@@ -49,7 +49,7 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private boolean isUserConfirmed(ExpressPilotWrapper expressPilotWrapper) {
+    private boolean isUserConfirmed(ExpressCaseWrapper expressPilotWrapper) {
         return expressPilotWrapper.getConfirmRemoveCaseFromExpressPilot().getValue().stream().map(DynamicMultiSelectListElement::getCode)
             .anyMatch(YesOrNo::isYes);
     }

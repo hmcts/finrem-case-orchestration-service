@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExpressPilotWrapper {
+public class ExpressCaseWrapper {
 
     private YesOrNo expressPilotQuestion;
 

@@ -39,8 +39,8 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        caseData.getExpressPilotWrapper().setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
-        caseData.getExpressPilotWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
+        caseData.getExpressCaseWrapper().setConfirmRemoveCaseFromExpressPilot(buildConfirmRemoveCaseFromExpressPilotEntry());
+        caseData.getExpressCaseWrapper().setExpressPilotQuestion(getDefaultAnswerForExpressPilotQuestion(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
