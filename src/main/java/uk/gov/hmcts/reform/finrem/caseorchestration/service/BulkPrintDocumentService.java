@@ -68,8 +68,7 @@ public class BulkPrintDocumentService {
         if (pdfBytes != null) {
             checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
         } else {
-            String errorMessage = "Uploaded document " + documentFilename + " is empty.";
-            log.error("Uploaded document {} for Case ID: {} is empty", documentFilename, caseId);
+            String errorMessage = String.format("Uploaded document %s is empty.", documentFilename);
             errors.add(errorMessage);
         }
     }
@@ -77,18 +76,17 @@ public class BulkPrintDocumentService {
     private void checkIfPdfIsEncrypted(List<String> errors, String documentFilename, byte[] pdfBytes) {
         try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
             if (doc.isEncrypted()) {
-                errors.add("Uploaded document '" + documentFilename + "' contains some kind of encryption. "
-                    + "Please remove encryption before uploading or upload another document.");
+                String errorMessage = String.format("Uploaded document '%s' contains some kind of encryption. "
+                    + "Please remove encryption before uploading or upload another document.", documentFilename);
+                errors.add(errorMessage);
             }
         } catch (InvalidPasswordException ipe) {
-            String errorMessage = "Uploaded document '" + documentFilename + "' is password protected."
-                + " Please remove password and try uploading again.";
+            String errorMessage = String.format("Uploaded document '%s' is password protected. "
+                + "Please remove password and try uploading again.", documentFilename);
             errors.add(errorMessage);
-            log.error(ipe.getMessage());
         } catch (IOException exc) {
-            String errorMessage = "Failed to parse the documents for " + documentFilename;
+            String errorMessage = String.format("Failed to parse the documents for %s", documentFilename);
             errors.add(errorMessage + "; " + exc.getMessage());
-            log.error(exc.getMessage());
         }
     }
 }

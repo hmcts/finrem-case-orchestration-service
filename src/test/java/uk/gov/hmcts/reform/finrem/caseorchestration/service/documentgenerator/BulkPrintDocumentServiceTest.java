@@ -130,7 +130,7 @@ class BulkPrintDocumentServiceTest {
     }
 
     @Test
-    void validateEmptyUploadedFileThenDisplayMessage() throws IOException {
+    void validateEmptyUploadedFileThenDisplayMessage() {
         byte[] bytes = null;
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
@@ -181,7 +181,7 @@ class BulkPrintDocumentServiceTest {
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
 
-        assertTrue(errors.isEmpty());
+        assertThat(errors.size(), is(equalTo(0)));
     }
 
     private byte[] loadResource(String testPdf) throws IOException {
