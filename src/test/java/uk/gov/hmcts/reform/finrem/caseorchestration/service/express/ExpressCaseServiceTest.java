@@ -79,7 +79,7 @@ class ExpressCaseServiceTest {
     void shouldSetExpressEnrollmentStatusToWithdrawn() {
         FinremCaseData caseData = createCaseData();
         expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
-        assertEquals(WITHDRAWN, caseData.getExpressCaseParticipation());
+        assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest
