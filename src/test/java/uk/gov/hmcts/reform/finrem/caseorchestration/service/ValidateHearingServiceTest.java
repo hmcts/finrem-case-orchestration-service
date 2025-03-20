@@ -175,7 +175,7 @@ class ValidateHearingServiceTest {
     void expressPilotDatesWarningWithoutJudiciaryOutcome() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.setExpressCaseParticipation(ENROLLED);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(3));
         when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
 
@@ -187,7 +187,7 @@ class ValidateHearingServiceTest {
     void expressPilotDatesNoWarning() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.NO);
-        caseData.setExpressCaseParticipation(ENROLLED);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
         caseData.getListForHearingWrapper().setHearingDate(LocalDate.now().plusWeeks(17));
         when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
 

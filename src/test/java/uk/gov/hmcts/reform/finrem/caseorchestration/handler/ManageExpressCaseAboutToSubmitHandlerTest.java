@@ -64,7 +64,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @Test
     void shouldWithdrawExpressCase_whenEnrolledAndUserConfirmed() {
-        when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
+        when(caseData.getExpressCaseWrapper().getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
         when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
         when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
@@ -80,7 +80,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
     @EnumSource(value = ExpressCaseParticipation.class, names = {"DOES_NOT_QUALIFY", "WITHDRAWN"})
     @NullSource
     void shouldNotWithdrawExpressCase_whenNotEnrolled(ExpressCaseParticipation notEnrolledEnum) {
-        when(caseData.getExpressCaseParticipation()).thenReturn(notEnrolledEnum);
+        when(caseData.getExpressCaseWrapper().getExpressCaseParticipation()).thenReturn(notEnrolledEnum);
 
         underTest.handle(callbackRequest, AUTH_TOKEN);
 
@@ -89,7 +89,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @Test
     void shouldNotWithdrawExpressCase_whenExpressPilotQuestionIsYes() {
-        when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
+        when(caseData.getExpressCaseWrapper().getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
         when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.YES);
 
         underTest.handle(callbackRequest, AUTH_TOKEN);
@@ -99,7 +99,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @Test
     void shouldNotWithdrawExpressCase_whenUserDidNotConfirm() {
-        when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
+        when(caseData.getExpressCaseWrapper().getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
         when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
         when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
@@ -117,7 +117,7 @@ class ManageExpressCaseAboutToSubmitHandlerTest {
 
     @Test
     void shouldNotWithdrawExpressCase_whenUserConfirmationListIsEmpty() {
-        when(caseData.getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
+        when(caseData.getExpressCaseWrapper().getExpressCaseParticipation()).thenReturn(ExpressCaseParticipation.ENROLLED);
         when(expressCaseWrapper.getExpressPilotQuestion()).thenReturn(YesOrNo.NO);
         when(expressCaseWrapper.getConfirmRemoveCaseFromExpressPilot())
             .thenReturn(
