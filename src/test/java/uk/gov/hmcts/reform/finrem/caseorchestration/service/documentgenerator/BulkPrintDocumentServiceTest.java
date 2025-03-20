@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -147,7 +148,7 @@ class BulkPrintDocumentServiceTest {
 
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertTrue(errors.isEmpty());
+        assertThat(errors).isEmpty();
     }
 
     @Test
@@ -167,7 +168,7 @@ class BulkPrintDocumentServiceTest {
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
 
         verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH);
-        assertTrue(errors.isEmpty());
+        assertThat(errors).isEmpty();
     }
 
     @Test
@@ -180,8 +181,7 @@ class BulkPrintDocumentServiceTest {
 
         List<String> errors = new ArrayList<>();
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-
-        assertThat(errors.size(), is(equalTo(0)));
+        assertThat(errors).isEmpty();
     }
 
     private byte[] loadResource(String testPdf) throws IOException {
