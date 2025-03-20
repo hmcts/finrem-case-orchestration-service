@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.express;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
@@ -35,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAs
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.LUMP_SUM_ORDER;
@@ -66,17 +69,76 @@ class ExpressCaseServiceTest {
     }
 
     @Test
-    void shouldEnrolledInExpressPilot_WhenCaseDataMeetsRequirements() {
+    void setExpressCaseEnrollmentStatus_shouldEnrollInExpressPilot_WhenCaseDataMeetsRequirements() {
         FinremCaseData caseData = createCaseData();
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
+        assertEquals(ENROLLED, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    @Test
+    void shouldSetExpressEnrollmentStatusToWithdrawn() {
+        FinremCaseData caseData = createCaseData();
+        expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
+        assertEquals(WITHDRAWN, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
-    void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
+    void setExpressCaseEnrollmentStatus_shouldNotEnroll_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
         expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseParticipation());
+        assertEquals(DOES_NOT_QUALIFY, caseData.getExpressCaseWrapper().getExpressCaseParticipation());
+    }
+
+    /*
+     * This is the only scenario where a User amending Form A contested case sees the UNSUITABLE_FOR_EXPRESS_LABEL,
+     * when a Case was enrolled, but the answers have changed in amendment so express criteria is no longer met.
+     */
+    @Test
+    void setWhichExpressCaseAmendmentLabelToShow_shouldSetUnsuitable_WhenCaseAmendedToDisqualifyFromExpress() {
+        FinremCaseData caseDataOnceAmended = new FinremCaseData();
+        caseDataOnceAmended.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
+        FinremCaseData caseDataBeforeAmending = new FinremCaseData();
+        caseDataBeforeAmending.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+
+        expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseDataOnceAmended, caseDataBeforeAmending);
+        assertEquals(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL,
+                caseDataOnceAmended.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
+    }
+
+    /*
+     * These are the scenarios when a User amending Form A contested case sees the SUITABLE_FOR_EXPRESS_LABEL,
+     * essentially whenever setExpressCaseParticipation has been set to ENROLLED
+     */
+    @ParameterizedTest
+    @MethodSource("provideAmendedExpressCaseSuitableScenarios")
+    void setWhichExpressCaseAmendmentLabelToShow_shouldSetSuitable_WhenCaseAmendmentDoesNotDisqualify(
+            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+
+        FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
+        FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
+
+        expressCaseService.setWhichExpressCaseAmendmentLabelToShow(amendedData, dataBeforeAmending);
+
+        assertEquals(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL, amendedData.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
+    }
+
+    /*
+     * These are the scenarios when the User sees no dynamic page related to Express Case processing,
+     * whenever setExpressCaseParticipation.  Essentially, when the case was not set to ENROLLED and still
+     * isn't eligible for enrollment.
+     */
+    @ParameterizedTest
+    @MethodSource("provideAmendedExpressCaseScenariosNeedingNoLabel")
+    void setWhetherDisqualifiedFromExpress_shouldSetNoLabel_WhenCaseRemainsUnsuitableForExpress(
+            Pair<FinremCaseData, FinremCaseData> caseDataBeforeAndAfterAmending) {
+
+        FinremCaseData dataBeforeAmending = caseDataBeforeAndAfterAmending.getLeft();
+        FinremCaseData amendedData = caseDataBeforeAndAfterAmending.getRight();
+
+        expressCaseService.setWhichExpressCaseAmendmentLabelToShow(amendedData, dataBeforeAmending);
+
+        assertEquals(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL, amendedData.getExpressCaseWrapper().getLabelForExpressCaseAmendment());
     }
 
     @ParameterizedTest
@@ -173,13 +235,72 @@ class ExpressCaseServiceTest {
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
     }
-  
+
+    /*
+     * Creates pairs of FinremCaseData.
+     * Left is case data before. Right is case data now, having been amended.
+     * Each Pair represents a scenario where a case becomes suitable for Express processing upon amendment.
+     */
+    private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseSuitableScenarios() {
+
+        FinremCaseData dataQualifies = FinremCaseData.builder().build();
+        dataQualifies.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+
+        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().build();
+        dataDoesNotQualify.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
+        FinremCaseData nullEnrollmentData = FinremCaseData.builder().build();
+
+        // Case qualified for enrollment on creation, and still does following amendment,
+        Pair<FinremCaseData, FinremCaseData> amendedStillEnrolled = Pair.of(dataQualifies, dataQualifies);
+
+        // Case did not qualify for enrollment during creation, but it does upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedNowQualifies = Pair.of(dataDoesNotQualify, dataQualifies);
+
+        // Case created before Express Cases went live, but qualify as an express case upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedWasNullNowQualifies = Pair.of(nullEnrollmentData, dataQualifies);
+
+        return Stream.of(
+                amendedStillEnrolled,
+                amendedNowQualifies,
+                amendedWasNullNowQualifies
+        );
+    }
+
+    /*
+     * Creates pairs of FinremCaseData.
+     * Left is case data before. Right is case data now, having been amended.
+     * Each Pair represents a scenario where a User needs to see no label regarding Express processing.
+     */
+    private static Stream<Pair<FinremCaseData, FinremCaseData>> provideAmendedExpressCaseScenariosNeedingNoLabel() {
+
+        // Both enrolled
+        FinremCaseData dataDoesNotQualify = FinremCaseData.builder().build();
+        dataDoesNotQualify.getExpressCaseWrapper().setExpressCaseParticipation(DOES_NOT_QUALIFY);
+
+        FinremCaseData nullEnrollmentData = FinremCaseData.builder().build();
+
+        // Case qualified for enrollment on creation, and still does following amendment,
+        Pair<FinremCaseData, FinremCaseData> amendedStillDoesNotQualify = Pair.of(dataDoesNotQualify, dataDoesNotQualify);
+
+        // Case did not qualify for enrollment, but it does upon amendment
+        Pair<FinremCaseData, FinremCaseData> amendedWasNullStillDoesNotQualify = Pair.of(nullEnrollmentData, dataDoesNotQualify);
+
+        // Case did not qualify for enrollment, and still doesn't upon amendment
+        return Stream.of(
+                amendedStillDoesNotQualify,
+                amendedWasNullStillDoesNotQualify
+        );
+    }
+
     private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
         return CaseDetails.builder().data(
             Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
     }
 
     private static FinremCaseData createFinRemEpCaseData(ExpressCaseParticipation epParticipation) {
-        return FinremCaseData.builder().expressCaseParticipation(epParticipation).build();
+        FinremCaseData data = FinremCaseData.builder().build();
+        data.getExpressCaseWrapper().setExpressCaseParticipation(epParticipation);
+        return data;
     }
 }
