@@ -332,6 +332,9 @@ public class FinremCaseData implements HasCaseDocument {
     private DraftOrdersWrapper draftOrdersWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
+    private ExpressCaseWrapper expressCaseWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private FormAScannedDocWrapper formAScannedDocWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -1026,6 +1029,14 @@ public class FinremCaseData implements HasCaseDocument {
             this.draftOrdersWrapper = new DraftOrdersWrapper();
         }
         return draftOrdersWrapper;
+    }
+
+    @JsonIgnore
+    public ExpressCaseWrapper getExpressCaseWrapper() {
+        if (expressCaseWrapper == null) {
+            this.expressCaseWrapper = new ExpressCaseWrapper();
+        }
+        return expressCaseWrapper;
     }
 
     @JsonIgnore

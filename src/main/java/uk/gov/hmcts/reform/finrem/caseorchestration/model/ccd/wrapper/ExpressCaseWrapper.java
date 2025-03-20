@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -19,4 +21,7 @@ public class ExpressCaseWrapper {
 
     private ExpressCaseParticipation expressCaseParticipation;
     private LabelForExpressCaseAmendment labelForExpressCaseAmendment;
+    private YesOrNo expressPilotQuestion;
+
+    private DynamicMultiSelectList confirmRemoveCaseFromExpressPilot;
 }
