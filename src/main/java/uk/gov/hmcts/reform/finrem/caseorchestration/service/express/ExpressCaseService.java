@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS;
 
@@ -31,6 +32,15 @@ public class ExpressCaseService {
     private List<String> expressCaseFrcs;
 
     private final FeatureToggleService featureToggleService;
+
+    /**
+     * Used to withdraw a case from being processed as an Express case.
+     *
+     * @param caseData the case data
+     */
+    public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
+        caseData.setExpressCaseParticipation(WITHDRAWN);
+    }
 
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
         caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
@@ -46,6 +56,14 @@ public class ExpressCaseService {
         ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseDetails.getData().get(EXPRESS_CASE_PARTICIPATION))
             .map(Object::toString)
             .map(ExpressCaseParticipation::forValue)
+            .orElse(DOES_NOT_QUALIFY);
+
+        return featureToggleService.isExpressPilotEnabled()
+            && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
+    }
+
+    public boolean isExpressCase(FinremCaseData caseData) {
+        ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseData.getExpressCaseParticipation())
             .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()

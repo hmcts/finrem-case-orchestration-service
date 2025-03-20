@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.65'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1612'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1618'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -23,7 +23,7 @@ def versions = [
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.36',
-        mockito              : '5.16.0',
+        mockito              : '5.16.1',
         pact                 : '4.6.17',
         pdfbox               : '3.0.4',
         reformLogging        : '6.1.8',

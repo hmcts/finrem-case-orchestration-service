@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAs
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2.UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.DOES_NOT_QUALIFY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.ENROLLED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation.WITHDRAWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.CONTESTED_VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication.LUMP_SUM_ORDER;
@@ -72,6 +73,13 @@ class ExpressCaseServiceTest {
         assertEquals(ENROLLED, caseData.getExpressCaseParticipation());
     }
 
+    @Test
+    void shouldSetExpressEnrollmentStatusToWithdrawn() {
+        FinremCaseData caseData = createCaseData();
+        expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
+        assertEquals(WITHDRAWN, caseData.getExpressCaseParticipation());
+    }
+
     @ParameterizedTest
     @MethodSource("provideInvalidCaseData")
     void shouldNotQualify_WhenCaseDataDoesNotMeetCriteria(FinremCaseData caseData) {
@@ -88,6 +96,15 @@ class ExpressCaseServiceTest {
         assertEquals(expected, expressCaseService.isExpressCase(caseDetails));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideIsExpressCaseFinRemCaseData")
+    void shouldReturnIfCaseIsExpressEnrolledAndReturnFalseIfExpressIsDisabledFinRemCaseData(boolean isExpressPilotEnabled,
+                                                                              FinremCaseData caseData,
+                                                                              boolean expected) {
+        when(featureToggleService.isExpressPilotEnabled()).thenReturn(isExpressPilotEnabled);
+        assertEquals(expected, expressCaseService.isExpressCase(caseData));
+    }
+
     private static Stream<Arguments> provideIsExpressCase() {
         return Stream.of(
             Arguments.of(false, createCaseDetailsWithParticipation(ENROLLED), false),
@@ -98,9 +115,12 @@ class ExpressCaseServiceTest {
         );
     }
 
-    private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
-        return CaseDetails.builder().data(
-            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
+    private static Stream<Arguments> provideIsExpressCaseFinRemCaseData() {
+        return Stream.of(
+            Arguments.of(false, createFinRemEpCaseData(ENROLLED), false),
+            Arguments.of(true, createFinRemEpCaseData(ENROLLED), true),
+            Arguments.of(true, createFinRemEpCaseData(DOES_NOT_QUALIFY), false)
+        );
     }
 
     private static Stream<FinremCaseData> provideInvalidCaseData() {
@@ -160,5 +180,14 @@ class ExpressCaseServiceTest {
             .fastTrackDecision(YesOrNo.NO)
             .estimatedAssetsChecklistV2(UNDER_TWO_HUNDRED_AND_FIFTY_THOUSAND_POUNDS)
             .build();
+    }
+  
+    private static CaseDetails createCaseDetailsWithParticipation(ExpressCaseParticipation participation) {
+        return CaseDetails.builder().data(
+            Map.of(EXPRESS_CASE_PARTICIPATION, participation.getValue())).build();
+    }
+
+    private static FinremCaseData createFinRemEpCaseData(ExpressCaseParticipation epParticipation) {
+        return FinremCaseData.builder().expressCaseParticipation(epParticipation).build();
     }
 }
