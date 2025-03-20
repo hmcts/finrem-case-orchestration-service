@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -31,6 +33,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
     private final CaseFlagsService caseFlagsService;
     private final IdamService idamService;
     private final UpdateRepresentationWorkflowService representationWorkflowService;
+    private final ExpressCaseService expressCaseService;
 
     private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
@@ -40,6 +43,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
                                                         CaseFlagsService caseFlagsService,
                                                         IdamService idamService,
                                                         UpdateRepresentationWorkflowService representationWorkflowService,
+                                                        ExpressCaseService expressCaseService,
                                                         CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(finremCaseDetailsMapper);
         this.service = service;
@@ -47,6 +51,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
         this.idamService = idamService;
         this.representationWorkflowService = representationWorkflowService;
         this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
+        this.expressCaseService = expressCaseService;
     }
 
 
@@ -59,8 +64,7 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callback, String authorisationToken) {
-        log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
-            callback.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToSubmit(callback));
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         caseFlagsService.setCaseFlagInformation(caseDetails);
@@ -85,6 +89,8 @@ public class SolicitorCreateContestedAboutToSubmitHandler extends FinremCallback
 
         RefugeWrapperUtils.updateRespondentInRefugeTab(caseDetails);
         RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails);
+
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();

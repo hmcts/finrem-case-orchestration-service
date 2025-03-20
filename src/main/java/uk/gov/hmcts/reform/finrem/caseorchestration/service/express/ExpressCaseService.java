@@ -51,7 +51,9 @@ public class ExpressCaseService {
      * @param caseData the case data as an instance of FinremCaseDate
      */
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
-        caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
+        if (featureToggleService.isExpressPilotEnabled()) {
+            caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
+        }
     }
 
     /**

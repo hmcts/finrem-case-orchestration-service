@@ -14,11 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.CLOSE;
@@ -28,12 +30,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CO
 
 @ExtendWith(MockitoExtension.class)
 class PaperCaseCreateContestedMidHandlerTest {
-    public static final String AUTH_TOKEN = "tokien:)";
+
     @InjectMocks
     private PaperCaseCreateContestedMidHandler handler;
 
     @Mock
-    private InternationalPostalService postalService;
+    ExpressCaseService expressCaseService;
+    @Mock
+    InternationalPostalService postalService;
 
     @ParameterizedTest
     @MethodSource
@@ -64,5 +68,19 @@ class PaperCaseCreateContestedMidHandlerTest {
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
             .build();
+    }
+
+    @Test
+    void testGivenExpressPilotEnabled_ThenExpressCaseServiceCalled() {
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(
+            FinremCaseDetails.builder().data(
+                FinremCaseData.builder().ccdCaseType(CONTESTED).build()
+            ).build()
+        ).build();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 }
