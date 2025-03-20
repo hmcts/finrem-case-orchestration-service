@@ -74,7 +74,6 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CaseType ccdCaseType;
 
-    private ExpressCaseParticipation expressCaseParticipation;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
@@ -1029,14 +1028,6 @@ public class FinremCaseData implements HasCaseDocument {
     }
 
     @JsonIgnore
-    public ExpressCaseWrapper getExpressCaseWrapper() {
-        if (expressCaseWrapper == null) {
-            this.expressCaseWrapper = new ExpressCaseWrapper();
-        }
-        return expressCaseWrapper;
-    }
-
-    @JsonIgnore
     public RefugeWrapper getRefugeWrapper() {
         if (refugeWrapper == null) {
             this.refugeWrapper = new RefugeWrapper();
@@ -1058,5 +1049,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.sendOrderWrapper = new SendOrderWrapper();
         }
         return sendOrderWrapper;
+    }
+
+    @JsonIgnore
+    public ExpressCaseWrapper getExpressCaseWrapper() {
+        if (expressCaseWrapper == null) {
+            this.expressCaseWrapper = new ExpressCaseWrapper();
+        }
+        return expressCaseWrapper;
     }
 }

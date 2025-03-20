@@ -40,7 +40,7 @@ public class ManageExpressCaseAboutToSubmitHandler extends FinremCallbackHandler
         FinremCaseData caseData = caseDetails.getData();
         ExpressCaseWrapper expressPilotWrapper = caseData.getExpressCaseWrapper();
 
-        if (caseData.getExpressCaseParticipation() == ExpressCaseParticipation.ENROLLED
+        if (caseData.getExpressCaseWrapper().getExpressCaseParticipation() == ExpressCaseParticipation.ENROLLED
             && YesOrNo.isNo(expressPilotWrapper.getExpressPilotQuestion())
             && isUserConfirmed(expressPilotWrapper)) {
             expressCaseService.setExpressCaseEnrollmentStatusToWithdrawn(caseData);
