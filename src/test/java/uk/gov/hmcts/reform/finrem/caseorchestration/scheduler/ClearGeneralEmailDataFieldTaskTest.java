@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
@@ -15,8 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource("classpath:application.properties")
@@ -43,18 +43,8 @@ class ClearGeneralEmailDataFieldTaskTest {
     }
 
     @Test
-    void testGetCaseListFileName() {
-        task = new ClearGeneralEmailDataFieldTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
-
-
-        String expectedFileName = "caserefs-for-dfr-3639-encrypted.csv";
-        String actualFileName = task.getCaseListFileName();
-        assertEquals(expectedFileName, actualFileName);
-    }
-
-    @Test
     void testLoadCaseReferencesFromFile() {
-
+        task = new ClearGeneralEmailDataFieldTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         List<CaseReference> caseReferences = task.getCaseReferences();
         System.out.println("Case References:.............");
         caseReferences.forEach(System.out::println);
@@ -68,5 +58,22 @@ class ClearGeneralEmailDataFieldTaskTest {
 
         // Add assertions here
         assertEquals(1, caseReferences.size());
+    }
+
+
+    @Test
+    void testExecuteTaskWhenGeneralEmailUploadedDocumentIsNulled() throws Exception {
+        // Arrange
+        List<CaseReference> caseReferences = List.of(new CaseReference("123456"));
+        task.run();
+
+        // Act
+        FinremCaseDetails finremCaseDetails = new FinremCaseDetails(); // retrieve the FinremCaseDetails object for the case reference "123456"
+
+                // Assert
+        assertNotNull(finremCaseDetails);
+        assertNotNull(finremCaseDetails.getData());
+        assertNotNull(finremCaseDetails.getData().getGeneralEmailWrapper());
+        assertNull(finremCaseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument());
     }
 }

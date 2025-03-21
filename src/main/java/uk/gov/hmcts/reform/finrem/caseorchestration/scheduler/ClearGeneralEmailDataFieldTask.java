@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,9 +30,6 @@ import java.util.List;
 @Slf4j
 public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
 
-    @Value("${cron.clearGeneralEmailDataFieldTask.csvfile:caserefs-for-dfr-3639.csv")
-    private String csvfile;
-
     @Value("${cron.clearGeneralEmailDataFieldTask.secret:DUMMY_SECRET}")
     private String secret;
 
@@ -51,7 +50,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
     @Override
     protected List<CaseReference> getCaseReferences() {
         log.info("Getting case references for GeneralEmailDataFieldTask migration");
-        String caseListFileName = "caserefs-for-dfr-3639.csv"; //getCaseListFileName();
+        String caseListFileName = getCaseListFileName();
 
         CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
         /*
@@ -71,7 +70,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
 
     @Override
     protected String getCaseListFileName() {
-        return csvfile;
+        return "caserefs-for-dfr-3639.csv";
     }
 
     @Override
@@ -97,15 +96,28 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
+        ObjectMapper mapper = new ObjectMapper();
 
         if (caseData.getGeneralEmailWrapper() != null
             && caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
-            log.info("Case {} will have generalEmailUploadedDocument set to null", finremCaseDetails.getId());
-            caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument().setDocumentFilename(" ");
-            caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument().setDocumentFilename(" ");
-
+            try {
+                log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
+                        .writerWithDefaultPrettyPrinter() // enable pretty print
+                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
+                log.info("Case {} GeneralEmailCollection: {}", finremCaseDetails.getId(), mapper
+                        .writerWithDefaultPrettyPrinter() // enable pretty print
+                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailCollection()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            log.info("Case {} generalEmailUploadedDocument set to null", finremCaseDetails.getId());
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
-
+            try {
+                log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
+                        .writerWithDefaultPrettyPrinter().writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             log.info("Case {} has empty generalEmailUploadedDocument field", finremCaseDetails.getId());
         }
