@@ -6,6 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +21,9 @@ import java.util.List;
 @NoArgsConstructor
 @Component
 public class CaseReferenceCsvLoader {
+
+    private static final String ALGORITHM = "AES";
+    private static final String TRANSFORMATION = "AES";
 
     @SuppressWarnings({"java:S3740", "java:S1488"})
     public List<CaseReference> loadCaseReferenceList(String fileName) {
@@ -31,4 +42,49 @@ public class CaseReferenceCsvLoader {
         }
     }
 
+    public List<CaseReference> loadCaseReferenceList(String fileName, String secret) throws Exception {
+        String decryptedFileName = "decrypted-" + fileName;
+        decryptFile(fileName, decryptedFileName, getKeyFromString(secret));
+        return loadCaseReferenceList(decryptedFileName);
+    }
+
+    public static SecretKey getKeyFromString(String key) throws Exception {
+        SecretKeySpec secretKey = generateKey(key);
+        return secretKey;
+    }
+
+    public static String encrypt(String data, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encryptedBytes = cipher.doFinal(data.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    public static String decrypt(String encryptedData, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
+        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+        return new String(decryptedBytes);
+    }
+
+    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        String encryptedContent = encrypt(content, key);
+        Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
+    }
+
+    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        String decryptedContent = decrypt(encryptedContent, key);
+        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
+    }
+
+    private static SecretKeySpec generateKey(String key) throws Exception {
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = key.getBytes("UTF-8");
+        keyBytes = sha.digest(keyBytes);
+        keyBytes = Arrays.copyOf(keyBytes, 16); // Use first 16 bytes for AES-128
+        return new SecretKeySpec(keyBytes, ALGORITHM);
+    }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
