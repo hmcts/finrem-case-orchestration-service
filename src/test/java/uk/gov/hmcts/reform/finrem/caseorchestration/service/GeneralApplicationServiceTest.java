@@ -2,11 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSuportingDocumentItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationSupportingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
@@ -38,9 +41,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -64,7 +68,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GeneralApplicationServiceTest {
 
     private static final String AUTH_TOKEN = "token";
@@ -79,6 +83,7 @@ public class GeneralApplicationServiceTest {
         "http://document-management-store:8080/documents/0fbf044e-3d01-85eb-b792-c36d1e6344ee";
     public static final String USER_NAME = "Tony";
 
+    @InjectMocks
     private GeneralApplicationService generalApplicationService;
     @Mock
     private IdamService idamService;
@@ -98,7 +103,7 @@ public class GeneralApplicationServiceTest {
     private CaseDetails caseDetailsBefore;
     private final String caseId = "123123123";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         objectMapper = new ObjectMapper();
         caseDetailsBefore = getApplicationIssuedCaseDetailsBefore();
@@ -107,11 +112,6 @@ public class GeneralApplicationServiceTest {
         generalApplicationService = new GeneralApplicationService(documentHelper,
             objectMapper, idamService, genericDocumentService, accessService, helper, service,
             generalApplicationsCategoriser);
-
-        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
-            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
     }
 
     @Test
@@ -289,6 +289,11 @@ public class GeneralApplicationServiceTest {
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT, documentMapInWordFormat);
 
+        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
+            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
+
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
@@ -309,6 +314,11 @@ public class GeneralApplicationServiceTest {
 
         Map<String, String> documentMapInWordFormat = getCcdDocumentMap();
         caseDetails.getData().put(GENERAL_APPLICATION_DRAFT_ORDER, documentMapInWordFormat);
+
+        CaseDocument pdfCaseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(pdfCaseDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
+            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
         CaseDocument caseDocument = getCaseDocument(WORD_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(documentMapInWordFormat)).thenReturn(caseDocument);
@@ -337,6 +347,10 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDataListHasUploadedDoc() {
+        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
+            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
@@ -352,6 +366,10 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void givenGeneralApplication_whenUpdateCaseDataSubmit_thenGenAppDocLatestIsUploadedDoc() {
+        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
+            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
 
@@ -362,6 +380,11 @@ public class GeneralApplicationServiceTest {
 
     @Test
     public void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
+
+        CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString(), any()))
+            .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
 
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN, caseId);
@@ -479,6 +502,38 @@ public class GeneralApplicationServiceTest {
         assertEquals("48 hours", wrapper.getGeneralApplicationIntvrOrders().get(0).getValue().getGeneralApplicationTimeEstimate());
         assertEquals("72 hours", wrapper.getGeneralApplicationIntvrOrders().get(1).getValue().getGeneralApplicationTimeEstimate());
         assertEquals(2, wrapper.getGeneralApplicationIntvrOrders().size());
+    }
+
+    @Test
+    public void givenNonWordOrPdfDocument_whenUpdateGeneralApplication_thenDoNotConvertSupportingDocToPdf() {
+        String otherFilenameExtension = ".anyother";
+        CaseDocument caseDocument = getCaseDocument(otherFilenameExtension);
+        caseDocument.setDocumentUrl(DOC_IN_EXISTING_COLLECTION_URL);
+
+        GeneralApplicationSupportingDocumentData generalApplicationSupportingDocumentData =
+            GeneralApplicationSupportingDocumentData.builder()
+                .id(String.valueOf(UUID.randomUUID()))
+                .value(GeneralApplicationSuportingDocumentItems.builder()
+                    .supportDocument(caseDocument)
+                    .build())
+                .build();
+        List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = List.of(generalApplicationSupportingDocumentData);
+
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(accessService.getActiveUser(any(), any())).thenReturn("Applicant");
+
+        GeneralApplicationWrapper wrapper = callbackRequest.getCaseDetails().getData().getGeneralApplicationWrapper();
+        wrapper.getGeneralApplications().get(0).getValue().setGaSupportDocuments(gaSupportDocuments);
+        wrapper.getGeneralApplications().forEach(
+            ga -> ga.getValue().setGeneralApplicationSender(buildDynamicList(APPLICANT)));
+        callbackRequest.getCaseDetails().getData().setGeneralApplicationWrapper(wrapper);
+
+        FinremCaseData caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        CaseDocument gaSupportingDocument = caseData.getGeneralApplicationWrapper()
+            .getGeneralApplications().get(1).getValue()
+            .getGaSupportDocuments().get(0).getValue().getSupportDocument();
+        assertThat(gaSupportingDocument.getDocumentFilename(), not(containsString(PDF_FORMAT_EXTENSION)));
     }
 
     public DynamicRadioList buildDynamicList(String role) {
