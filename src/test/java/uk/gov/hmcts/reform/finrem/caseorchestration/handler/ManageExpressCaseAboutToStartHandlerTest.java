@@ -41,7 +41,7 @@ class ManageExpressCaseAboutToStartHandlerTest {
     @Test
     void shouldHandleSuccessfully() {
         FinremCaseData caseData = FinremCaseData.builder().build();
-        caseData.setExpressCaseParticipation(ExpressCaseParticipation.ENROLLED);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ExpressCaseParticipation.ENROLLED);
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 
@@ -56,7 +56,7 @@ class ManageExpressCaseAboutToStartHandlerTest {
     @NullSource
     void shouldSetDefaultAnswerForExpressPilotQuestionToNo(ExpressCaseParticipation expressCaseParticipation) {
         FinremCaseData caseData = FinremCaseData.builder().build();
-        caseData.setExpressCaseParticipation(expressCaseParticipation);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(expressCaseParticipation);
 
         var response = underTest.handle(FinremCallbackRequestFactory.from(caseData), AUTH_TOKEN);
 

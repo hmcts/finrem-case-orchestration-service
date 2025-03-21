@@ -46,7 +46,7 @@ public class ManageExpressCaseAboutToStartHandler extends FinremCallbackHandler 
     }
 
     private YesOrNo getDefaultAnswerForExpressPilotQuestion(FinremCaseData caseData) {
-        return YesOrNo.forValue(ENROLLED == caseData.getExpressCaseParticipation());
+        return YesOrNo.forValue(ENROLLED == caseData.getExpressCaseWrapper().getExpressCaseParticipation());
     }
 
     private DynamicMultiSelectList buildConfirmRemoveCaseFromExpressPilotEntry() {
