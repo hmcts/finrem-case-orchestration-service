@@ -28,8 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ge
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,13 +44,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 class GeneralEmailAboutToSubmitHandlerTest {
 
     private GeneralEmailAboutToSubmitHandler handler;
-
     @Mock
     private GeneralEmailService generalEmailService;
-
     @Mock
     private NotificationService notificationService;
-
     @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
@@ -72,8 +68,8 @@ class GeneralEmailAboutToSubmitHandlerTest {
     @Test
     void shouldHandleAllCaseTypes() {
         assertCanHandle(handler,
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_EMAIL),
-                Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL)
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CREATE_GENERAL_EMAIL),
+            Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CREATE_GENERAL_EMAIL)
         );
     }
 
@@ -180,9 +176,14 @@ class GeneralEmailAboutToSubmitHandlerTest {
 
     private void verifyDocumentCategory(FinremCallbackRequest callbackRequest, DocumentCategory category) {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(response.getData().getGeneralEmailWrapper().getGeneralEmailCollection().get(0)
-                .getValue().getGeneralEmailUploadedDocument().getCategoryId(),
-            is(category.getDocumentCategoryId()));
+        assertThat(response.getData()
+            .getGeneralEmailWrapper()
+            .getGeneralEmailCollection()
+            .stream()
+            .findFirst()
+            .map(email -> email.getValue().getGeneralEmailUploadedDocument().getCategoryId())
+            .orElse(null))
+            .isEqualTo(category.getDocumentCategoryId());
     }
 
     private void setIntervenerSolEmail(IntervenerWrapper wrapper) {
