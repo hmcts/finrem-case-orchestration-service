@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -72,8 +71,8 @@ class AmendPaperCaseContestedMidHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(expressCaseService, times(1)).setExpressCaseEnrollmentStatus(caseData);
-        verify(expressCaseService, times(1)).setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
+        verify(expressCaseService).setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
     }
 
     @Test
