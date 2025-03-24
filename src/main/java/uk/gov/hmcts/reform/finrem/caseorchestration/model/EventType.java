@@ -89,6 +89,7 @@ public enum EventType {
     REMOVE_USER_CASE_ACCESS("FR_removeUserCaseAccess"),
     DRAFT_ORDERS("FR_draftOrders"),
     APPROVE_ORDERS("FR_approveOrders"),
+    MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
     @JsonEnumDefaultValue
     NONE("");
 
