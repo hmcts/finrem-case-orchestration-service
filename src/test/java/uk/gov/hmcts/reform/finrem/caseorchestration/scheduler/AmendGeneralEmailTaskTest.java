@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @TestPropertySource("classpath:application.properties")
-class ClearGeneralEmailDataFieldTaskTest {
+class AmendGeneralEmailTaskTest {
 
     @Mock
     private CcdService ccdService;
@@ -39,7 +39,7 @@ class ClearGeneralEmailDataFieldTaskTest {
     private CaseReferenceCsvLoader caseReferenceCsvLoader;
 
     @InjectMocks
-    private ClearGeneralEmailDataFieldTask task;
+    private AmendGeneralEmailTask task;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +48,7 @@ class ClearGeneralEmailDataFieldTaskTest {
 
     @Test
     void testLoadCaseReferencesFromFile() {
-        task = new ClearGeneralEmailDataFieldTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+        task = new AmendGeneralEmailTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         task.setSecret("DUMMY_SECRET");
         List<CaseReference> caseReferences = task.getCaseReferences();
         System.out.println("Case References:.............");

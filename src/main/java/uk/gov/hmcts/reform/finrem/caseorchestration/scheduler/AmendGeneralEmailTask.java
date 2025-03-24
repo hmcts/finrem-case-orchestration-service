@@ -26,29 +26,29 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferen
  * To enable the task to execute set environment variables:
  * <ul>
  *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_ENABLED=true</li>
- *     <li>TASK_NAME=ClearGeneralEmailDataFieldTask</li>
+ *     <li>TASK_NAME=AmendGeneralEmailTask</li>
  *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
  *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_BATCH_SIZE=number of cases to search for</li>
  * </ul>
  */
 @Component
 @Slf4j
-public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
+public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
-    @Value("${cron.clearGeneralEmailDataFieldTask.secret:DUMMY_SECRET}")
+    @Value("${cron.csvFile.decrypt.key:DUMMY_SECRET}")
     private String secret;
 
     private static final String TASK_NAME = "AmendGeneralEmailCron";
     private static final String SUMMARY = "DFR-3639";
-    @Value("${cron.clearGeneralEmailDataFieldTask.enabled:true}")
+    @Value("${cron.amendGeneralEmail.enabled:true}")
     private boolean taskEnabled;
-    @Value("${cron.clearGeneralEmailDataFieldTask.caseTypeId:FinancialRemedyContested}")
+    @Value("${cron.amendGeneralEmail.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
-    @Value("${cron.clearGeneralEmailDataFieldTask.batchSize:500}")
+    @Value("${cron.amendGeneralEmail.batchSize:500}")
     private int batchSize;
 
-    protected ClearGeneralEmailDataFieldTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
-                                             FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    protected AmendGeneralEmailTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
+                                    FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
     }
 
@@ -145,7 +145,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            System.out.println("Usage: java ClearGeneralEmailDataFieldTask <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
+            System.out.println("Usage: java amendGeneralEmail <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
             return;
         }
 
