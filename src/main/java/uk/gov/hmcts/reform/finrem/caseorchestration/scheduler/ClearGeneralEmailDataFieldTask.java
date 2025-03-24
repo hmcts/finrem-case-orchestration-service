@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
+
 /**
  * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
  * To enable the task to execute set environment variables:
@@ -139,5 +141,29 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
         CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
         String decryptedContent = csvLoader.decrypt(encryptedContent, key);
         Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length < 4) {
+            System.out.println("Usage: java ClearGeneralEmailDataFieldTask <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
+            return;
+        }
+
+        String operation = args[0];
+        String inputFilePath = args[1];
+        String outputFilePath = args[2];
+        String secretKeyString = args[3];
+
+        SecretKey key = getKeyFromString(secretKeyString);
+
+        if ("encrypt".equalsIgnoreCase(operation)) {
+            encryptFile(inputFilePath, outputFilePath, key);
+            System.out.println("File encrypted successfully.");
+        } else if ("decrypt".equalsIgnoreCase(operation)) {
+            decryptFile(inputFilePath, outputFilePath, key);
+            System.out.println("File decrypted successfully.");
+        } else {
+            System.out.println("Invalid operation. Use 'encrypt' or 'decrypt'.");
+        }
     }
 }
