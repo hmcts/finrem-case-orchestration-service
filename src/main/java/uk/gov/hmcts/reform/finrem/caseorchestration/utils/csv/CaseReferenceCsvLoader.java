@@ -42,10 +42,23 @@ public class CaseReferenceCsvLoader {
         }
     }
 
-    public List<CaseReference> loadCaseReferenceList(String fileName, String secret) throws Exception {
-        String decryptedFileName = "decrypted-" + fileName;
-        decryptFile(fileName, decryptedFileName, getKeyFromString(secret));
-        return loadCaseReferenceList(decryptedFileName);
+    public List<CaseReference> loadCaseReferenceList(String fileName, String secret) {
+        try {
+            String encryptedContent = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(fileName).toURI())));
+            SecretKey key = getKeyFromString(secret);
+            String decryptedContent = decrypt(encryptedContent, key);
+
+            CsvMapper csvMapper = new CsvMapper();
+            CsvSchema csvSchema = csvMapper.typedSchemaFor(CaseReference.class).withHeader();
+            List list = new CsvMapper().readerFor(CaseReference.class)
+                    .with(csvSchema)
+                    .readValues(decryptedContent)
+                    .readAll();
+            return list;
+        } catch (Exception e) {
+            log.error("Error occurred while loading object list from file " + fileName, e);
+            return Collections.emptyList();
+        }
     }
 
     public static SecretKey getKeyFromString(String key) throws Exception {
@@ -66,18 +79,6 @@ public class CaseReferenceCsvLoader {
         byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
         byte[] decryptedBytes = cipher.doFinal(decodedBytes);
         return new String(decryptedBytes);
-    }
-
-    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
-        String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        String encryptedContent = encrypt(content, key);
-        Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
-    }
-
-    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
-        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        String decryptedContent = decrypt(encryptedContent, key);
-        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
     }
 
     private static SecretKeySpec generateKey(String key) throws Exception {

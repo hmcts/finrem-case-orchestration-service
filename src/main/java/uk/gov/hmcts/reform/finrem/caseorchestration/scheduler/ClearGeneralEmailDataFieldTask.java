@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
+import javax.crypto.SecretKey;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -33,7 +36,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
     @Value("${cron.clearGeneralEmailDataFieldTask.secret:DUMMY_SECRET}")
     private String secret;
 
-    private static final String TASK_NAME = "ClearGeneralEmailDataFieldTask";
+    private static final String TASK_NAME = "AmendGeneralEmailCron";
     private static final String SUMMARY = "DFR-3639";
     @Value("${cron.clearGeneralEmailDataFieldTask.enabled:true}")
     private boolean taskEnabled;
@@ -53,16 +56,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
         String caseListFileName = getCaseListFileName();
 
         CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        /*
-        List<CaseReference> caseReferences;
-       try {
-            caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
-        } catch (Exception e) {
-            log.error("Error decrypting and loading case references from {} Exception: {}", caseListFileName, e);
-            throw new RuntimeException(e);
-        }*/
-
-        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName);
+        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
 
         log.info("CaseReferences has {} cases.", caseReferences.size());
         return caseReferences;
@@ -70,7 +64,7 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
 
     @Override
     protected String getCaseListFileName() {
-        return "caserefs-for-dfr-3639.csv";
+        return "caserefs-for-dfr-3639-encrypted.csv";
     }
 
     @Override
@@ -102,11 +96,8 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
             && caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             try {
                 log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
-                        .writerWithDefaultPrettyPrinter() // enable pretty print
+                        .writerWithDefaultPrettyPrinter()
                         .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
-                log.info("Case {} GeneralEmailCollection: {}", finremCaseDetails.getId(), mapper
-                        .writerWithDefaultPrettyPrinter() // enable pretty print
-                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailCollection()));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -114,7 +105,8 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
             try {
                 log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
-                        .writerWithDefaultPrettyPrinter().writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
+                        .writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -123,11 +115,29 @@ public class ClearGeneralEmailDataFieldTask extends CsvFileProcessingTask {
         }
     }
 
+    void setSecret(String secret) {
+        this.secret = secret;
+    }
+
     void setTaskEnabled(boolean taskEnabled) {
         this.taskEnabled = taskEnabled;
     }
 
     void setCaseTypeContested() {
         this.caseTypeId = CaseType.CONTESTED.getCcdType();
+    }
+
+    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
+        String encryptedContent = csvLoader.encrypt(content, key);
+        Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
+    }
+
+    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
+        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
+        String decryptedContent = csvLoader.decrypt(encryptedContent, key);
+        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
     }
 }

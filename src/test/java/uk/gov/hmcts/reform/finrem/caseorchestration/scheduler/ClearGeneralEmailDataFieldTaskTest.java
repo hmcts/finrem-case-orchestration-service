@@ -8,7 +8,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
@@ -16,7 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @TestPropertySource("classpath:application.properties")
@@ -45,6 +49,7 @@ class ClearGeneralEmailDataFieldTaskTest {
     @Test
     void testLoadCaseReferencesFromFile() {
         task = new ClearGeneralEmailDataFieldTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+        task.setSecret("DUMMY_SECRET");
         List<CaseReference> caseReferences = task.getCaseReferences();
         System.out.println("Case References:.............");
         caseReferences.forEach(System.out::println);
@@ -52,28 +57,17 @@ class ClearGeneralEmailDataFieldTaskTest {
     }
 
     @Test
-    void testExecuteTask() throws Exception {
-        List<CaseReference> caseReferences = List.of(new CaseReference("123456"));
-        task.run();
+    void testExecuteTask() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        GeneralEmailWrapper generalEmailWrapper = mock(GeneralEmailWrapper.class);
 
-        // Add assertions here
-        assertEquals(1, caseReferences.size());
-    }
+        when(finremCaseDetails.getData()).thenReturn(caseData);
+        when(caseData.getGeneralEmailWrapper()).thenReturn(generalEmailWrapper);
+        when(generalEmailWrapper.getGeneralEmailUploadedDocument()).thenReturn(new CaseDocument());
 
+        task.executeTask(finremCaseDetails);
 
-    @Test
-    void testExecuteTaskWhenGeneralEmailUploadedDocumentIsNulled() throws Exception {
-        // Arrange
-        List<CaseReference> caseReferences = List.of(new CaseReference("123456"));
-        task.run();
-
-        // Act
-        FinremCaseDetails finremCaseDetails = new FinremCaseDetails(); // retrieve the FinremCaseDetails object for the case reference "123456"
-
-                // Assert
-        assertNotNull(finremCaseDetails);
-        assertNotNull(finremCaseDetails.getData());
-        assertNotNull(finremCaseDetails.getData().getGeneralEmailWrapper());
-        assertNull(finremCaseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument());
+        verify(generalEmailWrapper).setGeneralEmailUploadedDocument(null);
     }
 }
