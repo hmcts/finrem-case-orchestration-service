@@ -49,7 +49,7 @@ public abstract class BaseTask implements Runnable {
             int count = 0;
             int batchCount = 1;
             String eventType = EventType.AMEND_CASE_CRON.getCcdType();
-            if(getTaskName().equalsIgnoreCase("AmendGeneralEmailCron")) {
+            if (getTaskName().equalsIgnoreCase("AmendGeneralEmailCron")) {
                 eventType = EventType.CREATE_GENERAL_EMAIL.getCcdType();
             }
             for (CaseReference caseReference : caseReferences) {
