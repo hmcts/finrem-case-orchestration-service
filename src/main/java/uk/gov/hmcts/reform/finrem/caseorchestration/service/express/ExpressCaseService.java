@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EstimatedAssetV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LabelForExpressCaseAmendment;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -39,11 +40,49 @@ public class ExpressCaseService {
      * @param caseData the case data
      */
     public void setExpressCaseEnrollmentStatusToWithdrawn(FinremCaseData caseData) {
-        caseData.setExpressCaseParticipation(WITHDRAWN);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(WITHDRAWN);
     }
 
+    /**
+     * Sets the Express Case participation status based on qualifying criteria.
+     * If the Case is suitable to process as an Express Case, then the status is set to ENROLLED
+     * If the Case is unsuitable to process as an Express Case, then the status is set to DOES_NOT_QUALIFY
+     *
+     * @param caseData the case data as an instance of FinremCaseDate
+     */
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
-        caseData.setExpressCaseParticipation(qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY);
+        if (featureToggleService.isExpressPilotEnabled()) {
+            caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
+        }
+    }
+
+    /**
+     * Used when amending an application.
+     * Picks the label that a User should see, depending on how they have changed
+     * their case with regard to the express pilot.
+     * If the Case was suitable to process as an Express Case, but isn't now, then
+     * labelForExpressCaseAmendment is set to UNSUITABLE_FOR_EXPRESS_LABEL.
+     * If the Case becomes or remains suitable to process as an Express Case, then
+     * labelForExpressCaseAmendment is set to SUITABLE_FOR_EXPRESS_LABEL.
+     * If was never suitable to process as an Express Case and still isn't, then
+     * labelForExpressCaseAmendment is set to SHOW_NEITHER_PAGE_NOR_LABEL.
+
+     * show the right content to a user.
+     * @param amendedCaseData newly amended case data
+     * @param caseDataBeforeAmending the data after the last submitted event
+     */
+    public void setWhichExpressCaseAmendmentLabelToShow(FinremCaseData amendedCaseData, FinremCaseData caseDataBeforeAmending) {
+
+        ExpressCaseParticipation statusBefore = caseDataBeforeAmending.getExpressCaseWrapper().getExpressCaseParticipation();
+        ExpressCaseParticipation statusNow = amendedCaseData.getExpressCaseWrapper().getExpressCaseParticipation();
+
+        if (ENROLLED.equals(statusNow)) {
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SUITABLE_FOR_EXPRESS_LABEL);
+        } else if (ENROLLED.equals(statusBefore) && DOES_NOT_QUALIFY.equals(statusNow)) {
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.UNSUITABLE_FOR_EXPRESS_LABEL);
+        } else {
+            amendedCaseData.getExpressCaseWrapper().setLabelForExpressCaseAmendment(LabelForExpressCaseAmendment.SHOW_NEITHER_PAGE_NOR_LABEL);
+        }
     }
 
     /**
@@ -63,8 +102,9 @@ public class ExpressCaseService {
     }
 
     public boolean isExpressCase(FinremCaseData caseData) {
-        ExpressCaseParticipation expressCaseParticipation = Optional.ofNullable(caseData.getExpressCaseParticipation())
-            .orElse(DOES_NOT_QUALIFY);
+        ExpressCaseParticipation expressCaseParticipation =
+                Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
+                        .orElse(DOES_NOT_QUALIFY);
 
         return featureToggleService.isExpressPilotEnabled()
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
