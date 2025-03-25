@@ -93,8 +93,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         ObjectMapper mapper = new ObjectMapper();
 
-        if (caseData.getGeneralEmailWrapper() != null
-            && caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
+        if (caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             try {
                 log.info("Case {} GeneralEmailUploadedDocument before: {}", finremCaseDetails.getId(), mapper
                         .writerWithDefaultPrettyPrinter()
