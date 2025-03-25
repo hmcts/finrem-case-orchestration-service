@@ -14,9 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
-import javax.crypto.SecretKey;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -120,19 +117,5 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     void setCaseTypeContested() {
         this.caseTypeId = CaseType.CONTESTED.getCcdType();
-    }
-
-    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
-        String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        String encryptedContent = csvLoader.encrypt(content, key);
-        Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
-    }
-
-    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
-        String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        String decryptedContent = csvLoader.decrypt(encryptedContent, key);
-        Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
     }
 }
