@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,8 +25,9 @@ import java.util.List;
 public class CaseReferenceCsvLoader {
 
     private static final String ALGORITHM = "AES";
-    private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
-    private static final int IV_SIZE = 16;
+    private static final String TRANSFORMATION = "AES/GCM/NoPadding";
+    private static final int IV_SIZE = 12; // GCM recommended IV size
+    private static final int TAG_LENGTH_BIT = 128;
 
     @SuppressWarnings({"java:S3740", "java:S1488"})
     public List<CaseReference> loadCaseReferenceList(String fileName) {
@@ -71,17 +72,19 @@ public class CaseReferenceCsvLoader {
 
     public static String encrypt(String data, SecretKey key) throws Exception {
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-        IvParameterSpec iv = generateIv();
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        byte[] iv = generateIv();
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(TAG_LENGTH_BIT, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key, gcmParameterSpec);
         byte[] encryptedBytes = cipher.doFinal(data.getBytes());
-        return Base64.getEncoder().encodeToString(iv.getIV()) + ":" + Base64.getEncoder().encodeToString(encryptedBytes);
+        return Base64.getEncoder().encodeToString(iv) + ":" + Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     public static String decrypt(String encryptedData, SecretKey key) throws Exception {
         String[] parts = encryptedData.split(":");
-        IvParameterSpec iv = new IvParameterSpec(Base64.getDecoder().decode(parts[0]));
+        byte[] iv = Base64.getDecoder().decode(parts[0]);
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(TAG_LENGTH_BIT, iv);
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
         byte[] decodedBytes = Base64.getDecoder().decode(parts[1]);
         byte[] decryptedBytes = cipher.doFinal(decodedBytes);
         return new String(decryptedBytes);
@@ -95,9 +98,9 @@ public class CaseReferenceCsvLoader {
         return new SecretKeySpec(keyBytes, ALGORITHM);
     }
 
-    private static IvParameterSpec generateIv() {
+    private static byte[] generateIv() {
         byte[] iv = new byte[IV_SIZE];
         new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
+        return iv;
     }
 }
