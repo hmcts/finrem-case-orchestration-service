@@ -53,8 +53,6 @@ class AmendGeneralEmailTaskTest {
         task = new AmendGeneralEmailTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         task.setSecret("DUMMY_SECRET");
         List<CaseReference> caseReferences = task.getCaseReferences();
-        System.out.println("Case References:.............");
-        caseReferences.forEach(System.out::println);
         assertNotNull(caseReferences);
     }
 

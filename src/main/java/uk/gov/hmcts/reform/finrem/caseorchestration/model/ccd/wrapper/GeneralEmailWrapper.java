@@ -17,11 +17,12 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private CaseDocument generalEmailUploadedDocument;
     private List<GeneralEmailCollection> generalEmailCollection;
 

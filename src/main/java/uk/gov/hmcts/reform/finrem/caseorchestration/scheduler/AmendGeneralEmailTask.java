@@ -25,10 +25,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferen
  * Scheduled task to find cases where GeneralEmailDataField is not empty and clear the field.
  * To enable the task to execute set environment variables:
  * <ul>
- *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_ENABLED=true</li>
+ *     <li>CRON_AMEND_GENERAL_EMAIL_ENABLED=true</li>
  *     <li>TASK_NAME=AmendGeneralEmailTask</li>
- *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
- *     <li>CRON_NULL_CASEROLEIDS_WHERE_EMPTY_BATCH_SIZE=number of cases to search for</li>
+ *     <li>CRON_AMEND_GENERAL_EMAIL_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
+ *     <li>CRON_AMEND_GENERAL_EMAIL_BATCH_SIZE=number of cases to search for</li>
  * </ul>
  */
 @Component
@@ -37,7 +37,6 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Value("${cron.csvFile.decrypt.key:DUMMY_SECRET}")
     private String secret;
-
     private static final String TASK_NAME = "AmendGeneralEmailCron";
     private static final String SUMMARY = "DFR-3639";
     @Value("${cron.amendGeneralEmail.enabled:true}")
@@ -66,7 +65,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Override
     protected String getCaseListFileName() {
-        return "caserefs-for-dfr-3639-encrypted.csv";
+        return "caserefs-encrypted.csv";
     }
 
     @Override
@@ -97,21 +96,16 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
         if (caseData.getGeneralEmailWrapper() != null
             && caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             try {
-                log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
+                log.info("Case {} GeneralEmailUploadedDocument before: {}", finremCaseDetails.getId(), mapper
                         .writerWithDefaultPrettyPrinter()
                         .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            log.info("Case {} generalEmailUploadedDocument set to null", finremCaseDetails.getId());
+
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
-            try {
-                log.info("Case {} GeneralEmailUploadedDocument: {}", finremCaseDetails.getId(), mapper
-                        .writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            log.info("Case {} generalEmailUploadedDocument set to null", finremCaseDetails.getId());
+
         } else {
             log.info("Case {} has empty generalEmailUploadedDocument field", finremCaseDetails.getId());
         }
