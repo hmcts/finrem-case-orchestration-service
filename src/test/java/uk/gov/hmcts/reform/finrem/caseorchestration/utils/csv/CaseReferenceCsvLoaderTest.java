@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import javax.crypto.SecretKey;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -50,7 +51,7 @@ class CaseReferenceCsvLoaderTest {
         List<CaseReference> caseReferences = caseReferenceCsvLoader.loadCaseReferenceList(fileName, secret);
 
         assertThat(caseReferences.isEmpty(), equalTo(Boolean.FALSE));
-        assertThat(caseReferences.size() > 0, equalTo(Boolean.TRUE));
+        assertEquals(3, caseReferences.size());
     }
 
     @Test
@@ -60,5 +61,25 @@ class CaseReferenceCsvLoaderTest {
 
         assertNotNull(key);
         assertArrayEquals(CaseReferenceCsvLoader.getKeyFromString(secret).getEncoded(), key.getEncoded());
+    }
+
+    @Test
+    void shouldReturnEmptyListForEncryptedCsvFileWithIncorrectSecret() {
+        String secret = "incorrect-secret";
+        String fileName = "caserefs-test-encrypted.csv";
+
+        List<CaseReference> caseReferences = caseReferenceCsvLoader.loadCaseReferenceList(fileName, secret);
+
+        assertThat(caseReferences).isEmpty();
+    }
+
+    @Test
+    void shouldThrowExceptionOnInvalidCsvFile() {
+        String secret = "invalid-secret";
+        String fileName = "invalid-csv-file.csv";
+
+        List<CaseReference> caseReferences = caseReferenceCsvLoader.loadCaseReferenceList(fileName, secret);
+
+        assertThat(caseReferences).isEmpty();
     }
 }
