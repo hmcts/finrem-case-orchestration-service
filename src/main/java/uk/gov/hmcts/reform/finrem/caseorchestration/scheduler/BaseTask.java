@@ -48,10 +48,6 @@ public abstract class BaseTask implements Runnable {
             List<CaseReference> caseReferences = getCaseReferences();
             int count = 0;
             int batchCount = 1;
-            String eventType = EventType.AMEND_CASE_CRON.getCcdType();
-            if (getTaskName().equalsIgnoreCase("AmendGeneralEmailCron")) {
-                eventType = EventType.CREATE_GENERAL_EMAIL.getCcdType();
-            }
             for (CaseReference caseReference : caseReferences) {
                 count++;
                 try {
@@ -81,7 +77,7 @@ public abstract class BaseTask implements Runnable {
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseDetails.getId().toString(),
                             getCaseType().getCcdType(),
-                            eventType,
+                            EventType.AMEND_CASE_CRON.getCcdType(),
                             getSummary(),
                             getSummary());
                         log.info("Updated {} for Case ID: {}", getTaskName(), caseDetails.getId());
