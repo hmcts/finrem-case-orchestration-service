@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
 
 @Slf4j
-public class CaseMigrationEncryptionUtil implements CommandLineRunner {
+class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
