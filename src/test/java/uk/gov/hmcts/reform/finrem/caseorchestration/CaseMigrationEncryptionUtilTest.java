@@ -4,38 +4,40 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CaseMigrationEncryptionUtilTest {
 
     private static final String SECRET_KEY = "mySecretKey";
     private static final String INPUT_FILE_PATH = "src/test/resources/input.txt";
+    private static final String EMPTY_FILE_PATH = "src/test/resources/empty.txt";
     private static final String ENCRYPTED_FILE_PATH = "src/test/resources/encrypted.txt";
     private static final String DECRYPTED_FILE_PATH = "src/test/resources/decrypted.txt";
 
     @BeforeEach
     void setUp() throws Exception {
         Files.write(Paths.get(INPUT_FILE_PATH), "This is a test string".getBytes());
+        Files.write(Paths.get(EMPTY_FILE_PATH), new byte[0]);
     }
 
     @AfterEach
     void tearDown() throws Exception {
         Files.deleteIfExists(Paths.get(INPUT_FILE_PATH));
+        Files.deleteIfExists(Paths.get(EMPTY_FILE_PATH));
         Files.deleteIfExists(Paths.get(ENCRYPTED_FILE_PATH));
         Files.deleteIfExists(Paths.get(DECRYPTED_FILE_PATH));
     }
 
     @Test
-    void encryptFile() throws Exception {
-        SecretKey key = getKeyFromString(SECRET_KEY);
-        CaseMigrationEncryptionUtil.encryptFile(INPUT_FILE_PATH, ENCRYPTED_FILE_PATH, key);
+    void testProcessFileEncrypt() throws Exception {
+        CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "encrypt", INPUT_FILE_PATH, ENCRYPTED_FILE_PATH);
 
         String encryptedContent = new String(Files.readAllBytes(Paths.get(ENCRYPTED_FILE_PATH)));
         assertNotNull(encryptedContent);
@@ -43,12 +45,23 @@ class CaseMigrationEncryptionUtilTest {
     }
 
     @Test
-    void decryptFile() throws Exception {
-        SecretKey key = getKeyFromString(SECRET_KEY);
-        CaseMigrationEncryptionUtil.encryptFile(INPUT_FILE_PATH, ENCRYPTED_FILE_PATH, key);
-        CaseMigrationEncryptionUtil.decryptFile(ENCRYPTED_FILE_PATH, DECRYPTED_FILE_PATH, key);
+    void testProcessFileDecrypt() throws Exception {
+        CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "encrypt", INPUT_FILE_PATH, ENCRYPTED_FILE_PATH);
+        CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "decrypt", ENCRYPTED_FILE_PATH, DECRYPTED_FILE_PATH);
 
         String decryptedContent = new String(Files.readAllBytes(Paths.get(DECRYPTED_FILE_PATH)));
         assertEquals("This is a test string", decryptedContent);
+    }
+
+    @Test
+    void testProcessFileInvalidOperation() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            CaseMigrationEncryptionUtil.processFile(SECRET_KEY, "invalid", INPUT_FILE_PATH, ENCRYPTED_FILE_PATH);
+        });
+
+        String expectedMessage = "Invalid operation. Use 'encrypt' or 'decrypt'.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 }

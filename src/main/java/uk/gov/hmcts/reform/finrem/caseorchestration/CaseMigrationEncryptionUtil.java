@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import javax.crypto.SecretKey;
@@ -11,8 +12,11 @@ import java.nio.file.Paths;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
 
+@SpringBootApplication(scanBasePackages = {
+        "uk.gov.hmcts.reform.finrem"
+})
 @Slf4j
-class CaseMigrationEncryptionUtil implements CommandLineRunner {
+public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
@@ -25,6 +29,15 @@ class CaseMigrationEncryptionUtil implements CommandLineRunner {
         String outputFilePath = args[2];
         String secretKeyString = args[3];
 
+        processFile(secretKeyString, operation, inputFilePath, outputFilePath);
+    }
+
+    @Override
+    public void run(String... args) {
+        SpringApplication.run(CaseMigrationEncryptionUtil.class, args);
+    }
+
+    static void processFile(String secretKeyString, String operation, String inputFilePath, String outputFilePath) throws Exception {
         SecretKey key = getKeyFromString(secretKeyString);
 
         if ("encrypt".equalsIgnoreCase(operation)) {
@@ -34,22 +47,19 @@ class CaseMigrationEncryptionUtil implements CommandLineRunner {
             decryptFile(inputFilePath, outputFilePath, key);
             log.info("File decrypted successfully.");
         } else {
-            log.error("Invalid operation. Use 'encrypt' or 'decrypt'.");
+            String errorMessage = "Invalid operation. Use 'encrypt' or 'decrypt'.";
+            log.error(errorMessage);
+            throw new Exception(errorMessage);
         }
     }
 
-    @Override
-    public void run(String... args) {
-        SpringApplication.run(CaseMigrationEncryptionUtil.class, args);
-    }
-
-    public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+    static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
         String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
         String encryptedContent = CaseReferenceCsvLoader.encrypt(content, key);
         Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
     }
 
-    public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
+    static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
         String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
         String decryptedContent = CaseReferenceCsvLoader.decrypt(encryptedContent, key);
         Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
