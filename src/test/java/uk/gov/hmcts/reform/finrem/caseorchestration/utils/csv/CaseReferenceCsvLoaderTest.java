@@ -16,7 +16,7 @@ public class CaseReferenceCsvLoaderTest {
     CaseReferenceCsvLoader caseReferenceCsvLoader = new CaseReferenceCsvLoader();
 
     @Test
-    public void shouldLoadCaseRefsCsvFile() {
+    void shouldLoadCaseRefsCsvFile() {
         List<CaseReference> caseReferences = caseReferenceCsvLoader.loadCaseReferenceList("caserefs-test.csv");
 
         assertThat(caseReferences.isEmpty(), equalTo(Boolean.FALSE));
@@ -24,14 +24,14 @@ public class CaseReferenceCsvLoaderTest {
     }
 
     @Test
-    public void shouldReturnEmptyCollectionWhenFileNotFound() {
+    void shouldReturnEmptyCollectionWhenFileNotFound() {
         List<CaseReference> caseReferences = caseReferenceCsvLoader.loadCaseReferenceList("caserefs-test-file-does-not-exist.csv");
 
         assertThat(caseReferences.isEmpty(), equalTo(Boolean.TRUE));
     }
 
     @Test
-    public void testEncryptDecrypt() throws Exception {
+    void testEncryptDecrypt() throws Exception {
         String originalString = "This is a test string";
         String secret = "mySecretKey";
 
@@ -43,7 +43,7 @@ public class CaseReferenceCsvLoaderTest {
     }
 
     @Test
-    public void shouldLoadEncryptedCaseRefsCsvFile() {
+    void shouldLoadEncryptedCaseRefsCsvFile() {
         String secret = "DUMMY_SECRET";
         String fileName = "caserefs-test-encrypted.csv";
 
@@ -54,7 +54,7 @@ public class CaseReferenceCsvLoaderTest {
     }
 
     @Test
-    public void testGetKeyFromString() throws Exception {
+    void testGetKeyFromString() throws Exception {
         String secret = "mySecretKey";
         SecretKey key = CaseReferenceCsvLoader.getKeyFromString(secret);
 

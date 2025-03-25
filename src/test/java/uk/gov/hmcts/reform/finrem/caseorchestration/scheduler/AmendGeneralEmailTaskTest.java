@@ -56,9 +56,9 @@ class AmendGeneralEmailTaskTest {
         List<CaseReference> caseReferences = task.getCaseReferences();
 
         assertNotNull(caseReferences);
-        assertEquals(caseReferences.get(0).getCaseReference(), "1742295478386789");
-        assertEquals(caseReferences.get(1).getCaseReference(), "1740575141552996");
-        assertEquals(caseReferences.get(2).getCaseReference(), "1715676071321260");
+        assertEquals("1742295478386789", caseReferences.get(0).getCaseReference());
+        assertEquals("1740575141552996", caseReferences.get(1).getCaseReference());
+        assertEquals("1715676071321260", caseReferences.get(2).getCaseReference());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
@@ -10,11 +11,12 @@ import java.nio.file.Paths;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
 
+@Slf4j
 public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            System.out.println("Usage: java amendGeneralEmail <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
+            log.info("Usage: java amendGeneralEmail <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
             return;
         }
 
@@ -27,12 +29,12 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
         if ("encrypt".equalsIgnoreCase(operation)) {
             encryptFile(inputFilePath, outputFilePath, key);
-            System.out.println("File encrypted successfully.");
+            log.info("File encrypted successfully.");
         } else if ("decrypt".equalsIgnoreCase(operation)) {
             decryptFile(inputFilePath, outputFilePath, key);
-            System.out.println("File decrypted successfully.");
+            log.info("File decrypted successfully.");
         } else {
-            System.out.println("Invalid operation. Use 'encrypt' or 'decrypt'.");
+            log.error("Invalid operation. Use 'encrypt' or 'decrypt'.");
         }
     }
 

@@ -10,6 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -92,7 +93,7 @@ public class CaseReferenceCsvLoader {
 
     private static SecretKeySpec generateKey(String key) throws Exception {
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
-        byte[] keyBytes = key.getBytes("UTF-8");
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
         keyBytes = sha.digest(keyBytes);
         keyBytes = Arrays.copyOf(keyBytes, 16); // Use first 16 bytes for AES-128
         return new SecretKeySpec(keyBytes, ALGORITHM);
