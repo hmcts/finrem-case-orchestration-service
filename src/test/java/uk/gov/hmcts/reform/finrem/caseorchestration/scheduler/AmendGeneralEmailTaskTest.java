@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -53,7 +54,11 @@ class AmendGeneralEmailTaskTest {
         task = new AmendGeneralEmailTask(caseReferenceCsvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
         task.setSecret("DUMMY_SECRET");
         List<CaseReference> caseReferences = task.getCaseReferences();
+
         assertNotNull(caseReferences);
+        assertEquals(caseReferences.get(0).getCaseReference(), "1742295478386789");
+        assertEquals(caseReferences.get(1).getCaseReference(), "1740575141552996");
+        assertEquals(caseReferences.get(2).getCaseReference(), "1715676071321260");
     }
 
     @Test
