@@ -45,15 +45,13 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void encryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
         String content = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        String encryptedContent = csvLoader.encrypt(content, key);
+        String encryptedContent = CaseReferenceCsvLoader.encrypt(content, key);
         Files.write(Paths.get(outputFilePath), encryptedContent.getBytes());
     }
 
     public static void decryptFile(String inputFilePath, String outputFilePath, SecretKey key) throws Exception {
         String encryptedContent = new String(Files.readAllBytes(Paths.get(inputFilePath)));
-        CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
-        String decryptedContent = csvLoader.decrypt(encryptedContent, key);
+        String decryptedContent = CaseReferenceCsvLoader.decrypt(encryptedContent, key);
         Files.write(Paths.get(outputFilePath), decryptedContent.getBytes());
     }
 }
