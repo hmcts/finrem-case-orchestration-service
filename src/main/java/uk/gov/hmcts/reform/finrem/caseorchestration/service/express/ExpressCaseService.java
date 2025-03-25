@@ -101,6 +101,12 @@ public class ExpressCaseService {
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
+    /**
+     * Checks if the case is enrolled in the express case pilot.
+     *
+     * @param caseData the FinRem case data
+     * @return true if the case is enrolled in the express case pilot and the express pilot feature is enabled, false otherwise
+     */
     public boolean isExpressCase(FinremCaseData caseData) {
         ExpressCaseParticipation expressCaseParticipation =
                 Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
