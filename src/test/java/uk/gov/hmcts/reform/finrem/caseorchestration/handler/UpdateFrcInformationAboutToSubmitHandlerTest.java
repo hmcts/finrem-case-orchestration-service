@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateFrcInformationAboutToSubmitHandlerTest {
 
@@ -29,14 +28,10 @@ public class UpdateFrcInformationAboutToSubmitHandlerTest {
     @Mock
     private CourtDetailsMapper courtDetailsMapper;
 
-    private ObjectMapper objectMapper;
-
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
-
     @Before
     public void setUp() {
-        objectMapper = new ObjectMapper();
-        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+        ObjectMapper objectMapper = new ObjectMapper();
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
         handler = new UpdateFrcInformationAboutToSubmitHandler(finremCaseDetailsMapper, courtDetailsMapper);
     }
 
