@@ -41,7 +41,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
     @Value("${cron.amendGeneralEmail.batchSize:500}")
     private int batchSize;
     @Value("${cron.amendGeneralEmail.caseListFileName:caserefs-encrypted.csv}")
-    private String csvFile = "caserefs-encrypted.csv";
+    private String csvFile;
 
     protected AmendGeneralEmailTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
                                     FinremCaseDetailsMapper finremCaseDetailsMapper) {
@@ -117,5 +117,13 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     void setCaseTypeContested() {
         this.caseTypeId = CaseType.CONTESTED.getCcdType();
+    }
+
+    public String getCsvFile() {
+        return csvFile;
+    }
+
+    public void setCsvFile(String csvFile) {
+        this.csvFile = csvFile;
     }
 }
