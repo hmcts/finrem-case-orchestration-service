@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
 import javax.crypto.SecretKey;
@@ -12,9 +11,6 @@ import java.nio.file.Paths;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
 
-@SpringBootApplication(scanBasePackages = {
-        "uk.gov.hmcts.reform.finrem"
-})
 @Slf4j
 public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
