@@ -10,18 +10,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
 @Slf4j
 @Service
 public class UpdateFrcInformationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final CourtDetailsMapper courtDetailsMapper;
+    private final SelectedCourtService selectedCourtService;
 
     @Autowired
     public UpdateFrcInformationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                    CourtDetailsMapper courtDetailsMapper) {
+                                                    CourtDetailsMapper courtDetailsMapper,
+                                                    SelectedCourtService selectedCourtService) {
         super(mapper);
         this.courtDetailsMapper = courtDetailsMapper;
+        this.selectedCourtService = selectedCourtService;
     }
 
     @Override
@@ -43,6 +47,7 @@ public class UpdateFrcInformationAboutToSubmitHandler extends FinremCallbackHand
                     callbackRequest.getCaseDetailsBefore().getData().getRegionWrapper().getAllocatedRegionWrapper(),
                     caseData.getRegionWrapper().getAllocatedRegionWrapper(),
                     false));
+        selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
