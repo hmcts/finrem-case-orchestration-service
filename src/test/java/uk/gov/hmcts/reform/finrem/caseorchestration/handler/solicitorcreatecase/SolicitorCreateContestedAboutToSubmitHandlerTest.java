@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.refuge.RefugeWrapperUtils;
 
@@ -59,6 +60,8 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
     CaseFlagsService caseFlagsService;
     @Mock
     IdamService idamService;
+    @Mock
+    ExpressCaseService expressCaseService;
 
     @Mock
     UpdateRepresentationWorkflowService representationWorkflowService;
@@ -74,6 +77,7 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             caseFlagsService,
             idamService,
             representationWorkflowService,
+            expressCaseService,
             createCaseMandatoryDataValidator);
     }
 
@@ -161,6 +165,16 @@ class SolicitorCreateContestedAboutToSubmitHandlerTest {
             // Check that updateApplicantInRefugeTab is called with our case details instance
             mockedStatic.verify(() -> RefugeWrapperUtils.updateApplicantInRefugeTab(caseDetails), times(1));
         }
+    }
+
+    @Test
+    void testExpressCaseServiceCalled() {
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(expressCaseService).setExpressCaseEnrollmentStatus(caseData);
     }
 
     private void expectedAdminResponseCaseData(FinremCaseData responseCaseData) {

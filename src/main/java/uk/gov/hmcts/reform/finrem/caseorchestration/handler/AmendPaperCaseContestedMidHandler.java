@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.EventRecordingLogger;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -9,18 +10,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 @Slf4j
 @Service
 public class AmendPaperCaseContestedMidHandler extends FinremCallbackHandler {
 
     private final InternationalPostalService postalService;
+    private final ExpressCaseService expressCaseService;
+    private final FeatureToggleService featureToggleService;
 
     public AmendPaperCaseContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                             InternationalPostalService postalService) {
+                                             InternationalPostalService postalService,
+                                             ExpressCaseService expressCaseService, FeatureToggleService featureToggleService) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
+        this.expressCaseService = expressCaseService;
+        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -34,10 +42,16 @@ public class AmendPaperCaseContestedMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} mid event callback for Case ID: {}",
-            EventType.AMEND_CONTESTED_PAPER_APP_DETAILS, caseDetails.getId());
-
         FinremCaseData caseData = caseDetails.getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+
+        if (featureToggleService.isExpressPilotEnabled()) {
+            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
+            expressCaseService.setWhichExpressCaseAmendmentLabelToShow(caseData, caseDataBefore);
+        }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).errors(postalService.validate(caseData)).build();
     }
