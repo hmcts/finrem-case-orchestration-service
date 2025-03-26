@@ -14,9 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -37,9 +36,8 @@ public class UpdateFrcInformationAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenEventIsGiveAllocationDirection_thenCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPDATE_FRC_INFORMATION),
-            is(true));
+        Assertions.assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
+            EventType.UPDATE_FRC_INFORMATION);
     }
 
     @Test
