@@ -32,7 +32,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Value("${cron.csvFile.decrypt.key:DUMMY_SECRET}")
     private String secret;
-    private static final String TASK_NAME = "AmendGeneralEmailCron";
+    private static final String TASK_NAME = "AmendGeneralEmailTask";
     private static final String SUMMARY = "DFR-3639";
     @Value("${cron.amendGeneralEmail.enabled:true}")
     private boolean taskEnabled;
