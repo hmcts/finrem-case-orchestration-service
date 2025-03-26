@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { CaseOrchestrationApplication.class })
 @TestPropertySource(value = "classpath:application.properties")
@@ -43,7 +42,7 @@ public class UpdateFrcInformationAboutToSubmitHandlerIT {
     private CallbackRequest request;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(REQUEST_JSON_PAYLOAD)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
@@ -51,8 +50,7 @@ public class UpdateFrcInformationAboutToSubmitHandlerIT {
     }
 
     @Test
-    public void givenWac_whenServletContext_thenItProvidesGreetController() throws Exception {
-
+    void givenWac_whenServletContext_thenItProvidesGreetController() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_SUBMIT_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -63,6 +61,7 @@ public class UpdateFrcInformationAboutToSubmitHandlerIT {
             .andExpect(jsonPath("$.data.londonFRCList").doesNotExist())
             .andExpect(jsonPath("$.data.regionList").value("midlands"))
             .andExpect(jsonPath("$.data.midlandsFRCList").value("birmingham"))
-            .andExpect(jsonPath("$.data.birminghamCourtList").value("FR_birmingham_hc_list_1"));
+            .andExpect(jsonPath("$.data.birminghamCourtList").value("FR_birmingham_hc_list_1"))
+            .andExpect(jsonPath("$.data.consentOrderFRCName").value("Birmingham Civil And Family Justice Centre"));
     }
 }
