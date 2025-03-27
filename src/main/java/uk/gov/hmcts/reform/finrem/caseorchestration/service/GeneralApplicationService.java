@@ -367,7 +367,7 @@ public class GeneralApplicationService {
             GeneralApplicationSupportingDocumentData.builder();
         builder.id(UUID.randomUUID().toString());
         builder.value(GeneralApplicationSuportingDocumentItems.builder()
-            .supportDocument(convertToPdf(sdItems.getSupportDocument(), userAuthorisation, caseId))
+            .supportDocument(sdItems.getSupportDocument())
             .build());
         return builder.build();
     }
