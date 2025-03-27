@@ -52,4 +52,3 @@ public class GeneralApplicationReferToJudgeSubmittedHandler extends FinremCallba
     }
 }
 
-
