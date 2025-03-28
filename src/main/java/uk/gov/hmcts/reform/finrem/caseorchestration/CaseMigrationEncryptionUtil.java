@@ -16,7 +16,7 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            log.info("Usage: java amendGeneralEmail <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
+            log.info("Usage: java caseMigrationEncryptionUtil <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>");
             return;
         }
 

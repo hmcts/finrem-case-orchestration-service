@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,16 +90,10 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
         ObjectMapper mapper = new ObjectMapper();
 
         if (caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
-            try {
-                log.info("Case {} GeneralEmailUploadedDocument before: {}", finremCaseDetails.getId(), mapper
-                        .writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument()));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
 
+            log.info("Case {} generalEmailUploadedDocument setting to null", finremCaseDetails.getId());
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
-            log.info("Case {} generalEmailUploadedDocument set to null", finremCaseDetails.getId());
+            log.info("Case {} generalEmailUploadedDocument set to null successfully", finremCaseDetails.getId());
 
         } else {
             log.info("Case {} has empty generalEmailUploadedDocument field", finremCaseDetails.getId());
