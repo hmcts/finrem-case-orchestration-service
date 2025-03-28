@@ -155,24 +155,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send general application refer to judge email")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(caseDetails);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
     @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send general application outcome email")
     @ApiResponses(value = {
