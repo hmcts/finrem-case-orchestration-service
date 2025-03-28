@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
@@ -77,6 +78,7 @@ public class HearingService {
         populateTopLevelHearings(caseData, dynamicListElements, elementToSortingKeyMap);
         populateInterimHearings(caseData, dynamicListElements, elementToSortingKeyMap);
         populateHearingsCreatedFromProcessOrder(caseData, dynamicListElements, elementToSortingKeyMap);
+        populateAdditionalHearings(caseData, dynamicListElements, elementToSortingKeyMap);
 
         // Sort the dynamicListElements using the sorting keys from the map
         dynamicListElements.sort(Comparator.comparing(elementToSortingKeyMap::get));
@@ -91,26 +93,34 @@ public class HearingService {
     public LocalDate getHearingDate(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingDate,
             e -> e.getValue().getInterimHearingDate(),
-            e -> e.getValue().getDateOfHearing());
+            e -> e.getValue().getDateOfHearing(),
+            e -> e.getValue().getDateOfHearing()
+        );
     }
 
     public String getHearingType(FinremCaseData caseData, DynamicListElement selected) {
         return getHearingInfo(caseData, selected,
             e -> e.getHearingType().getId(),
             e -> e.getValue().getInterimHearingType().getId(),
-            e -> e.getValue().getTypeOfHearing().getId());
+            e -> e.getValue().getTypeOfHearing().getId(),
+            e -> e.getValue().getTypeOfHearing().getId()
+        );
     }
 
     public String getHearingTime(FinremCaseData caseData, DynamicListElement selected) {
-        return getHearingInfo(caseData, selected, ListForHearingWrapper::getHearingTime,
+        return getHearingInfo(caseData, selected,
+            ListForHearingWrapper::getHearingTime,
             e -> e.getValue().getInterimHearingTime(),
-            e -> e.getValue().getHearingTime());
+            e -> e.getValue().getHearingTime(),
+            e -> e.getValue().getHearingTime()
+        );
     }
 
     private <T> T getHearingInfo(FinremCaseData caseData, DynamicListElement selected,
                                  Function<ListForHearingWrapper, T> hearingExtractor,
                                  Function<InterimHearingCollection, T> interimHearingExtractor,
-                                 Function<DirectionDetailCollection, T> hearingCreatedFromProcessOrderExtractor) {
+                                 Function<DirectionDetailCollection, T> hearingCreatedFromProcessOrderExtractor,
+                                 Function<HearingDirectionDetailsCollection, T> additionalHearingExtractor) {
         if (StringUtils.isEmpty(selected.getCode())) {
             return null;
         }
@@ -119,10 +129,12 @@ public class HearingService {
             return hearingExtractor.apply(caseData.getListForHearingWrapper());
         }
 
-        // Search for the matching InterimHearingCollection; otherwise, search for the matching directionDetailCollection
+        // Search for the hearing in InterimHearingCollection, directionDetailCollection or hearingDirectionDetailsCollection
         return getHearingInfoFromInterimHearing(caseData, selected, interimHearingExtractor)
-            .orElse(
-                getHearingInfoFromHearingCreatedFromProcessOrder(caseData, selected, hearingCreatedFromProcessOrderExtractor).orElse(null)
+            .orElse(getHearingInfoFromHearingCreatedFromProcessOrder(caseData, selected, hearingCreatedFromProcessOrderExtractor)
+                .orElse(getHearingInfoFromAdditionalHearing(caseData, selected, additionalHearingExtractor)
+                    .orElse(null)
+                )
             );
     }
 
@@ -140,6 +152,15 @@ public class HearingService {
         return ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).stream()
             .filter(e -> e.getId().toString().equals(selected.getCode()) && e.getValue() != null)
             .map(hearingCreatedFromProcessOrderExtractor)
+            .findFirst();
+    }
+
+    private <T> Optional<T> getHearingInfoFromAdditionalHearing(FinremCaseData caseData, DynamicListElement selected,
+                                                                             Function<HearingDirectionDetailsCollection, T>
+                                                                                 additionalHearingExtractor) {
+        return ofNullable(caseData.getHearingDirectionDetailsCollection()).orElse(List.of()).stream()
+            .filter(e -> e.getId().toString().equals(selected.getCode()) && e.getValue() != null)
+            .map(additionalHearingExtractor)
             .findFirst();
     }
 
@@ -199,8 +220,30 @@ public class HearingService {
         });
     }
 
+    private void populateAdditionalHearings(FinremCaseData caseData, List<DynamicListElement> dynamicListElements,
+                                            Map<DynamicListElement, HearingSortingKey> elementToSortingKeyMap) {
+        ofNullable(caseData.getHearingDirectionDetailsCollection()).orElse(List.of()).stream()
+            .filter(this::hasAnotherHearing)
+            .forEach(collection -> {
+                DynamicListElement dynamicListElement = buildDirectionDetailDynamicListElement(collection);
+                if (dynamicListElement != null) {
+                    LocalDate hearingDate = collection.getValue().getDateOfHearing();
+                    String hearingTime = collection.getValue().getHearingTime();
+                    String hearingType = collection.getValue().getTypeOfHearing() != null
+                        ? collection.getValue().getTypeOfHearing().getId() : null;
+
+                    dynamicListElements.add(dynamicListElement);
+                    elementToSortingKeyMap.put(dynamicListElement, new HearingSortingKey(hearingDate, hearingTime, hearingType));
+                }
+            });
+    }
+
     private boolean hasAnotherHearing(DirectionDetailCollection directionDetailCollection) {
         return directionDetailCollection.getValue().getIsAnotherHearingYN() == YesOrNo.YES;
+    }
+
+    private boolean hasAnotherHearing(HearingDirectionDetailsCollection hearingDirectionDetailsCollection) {
+        return hearingDirectionDetailsCollection.getValue().getIsAnotherHearingYN() == YesOrNo.YES;
     }
 
     private String toUnknownDisplayText() {
@@ -245,6 +288,18 @@ public class HearingService {
         LocalDate hearingDate = directionDetailCollection.getValue().getDateOfHearing();
         String hearingTime = directionDetailCollection.getValue().getHearingTime();
         HearingTypeDirection hearingType = directionDetailCollection.getValue().getTypeOfHearing();
+        if (hearingType == null) {
+            throwIllegalStateExceptionIfHearingTypeIsNull();
+        }
+        String label = formatDynamicListElementLabel(hearingType.getId(), hearingDate, hearingTime);
+        return DynamicListElement.builder().code(code).label(label).build();
+    }
+
+    private DynamicListElement buildDirectionDetailDynamicListElement(HearingDirectionDetailsCollection hearingDirectionDetailsCollection) {
+        String code = hearingDirectionDetailsCollection.getId().toString();
+        LocalDate hearingDate = hearingDirectionDetailsCollection.getValue().getDateOfHearing();
+        String hearingTime = hearingDirectionDetailsCollection.getValue().getHearingTime();
+        HearingTypeDirection hearingType = hearingDirectionDetailsCollection.getValue().getTypeOfHearing();
         if (hearingType == null) {
             throwIllegalStateExceptionIfHearingTypeIsNull();
         }
