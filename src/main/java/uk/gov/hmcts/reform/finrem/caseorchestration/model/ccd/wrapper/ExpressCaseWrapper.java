@@ -22,6 +22,6 @@ public class ExpressCaseWrapper {
     private ExpressCaseParticipation expressCaseParticipation;
     private LabelForExpressCaseAmendment labelForExpressCaseAmendment;
     private YesOrNo expressPilotQuestion;
-
+    private YesOrNo judgeAgreesCaseIsExpress;
     private DynamicMultiSelectList confirmRemoveCaseFromExpressPilot;
 }

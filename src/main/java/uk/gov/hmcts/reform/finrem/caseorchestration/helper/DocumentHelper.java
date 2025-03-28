@@ -123,12 +123,10 @@ public class DocumentHelper {
     public static final String VARIATION = "variation";
     public static final String CONSENT = "consent";
 
-
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
         INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
     }
-
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
@@ -171,7 +169,6 @@ public class DocumentHelper {
             .orElseGet(caseData::getLatestConsentOrder);
     }
 
-
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
         if (caseData == null || caseData.isEmpty()) {
             return new ArrayList<>();
@@ -196,7 +193,6 @@ public class DocumentHelper {
             .toList();
     }
 
-
     /**
      * Return List Object for given Case with the given indentation used.
      *
@@ -217,7 +213,6 @@ public class DocumentHelper {
             .filter(Objects::nonNull)
             .toList();
     }
-
 
     /**
      * Return List Object for given Case with the given indentation used.
@@ -354,7 +349,6 @@ public class DocumentHelper {
         });
     }
 
-
     public List<String> convertToList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
@@ -369,7 +363,6 @@ public class DocumentHelper {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
-
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
@@ -472,7 +465,6 @@ public class DocumentHelper {
             addresseeDetails.getFinremAddressToSendTo(), recipientResideOutsideOfUK);
     }
 
-
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      *
@@ -522,7 +514,6 @@ public class DocumentHelper {
 
         return caseDetailsCopy;
     }
-
 
     private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
                                                   Address addressToSendTo,
@@ -600,7 +591,6 @@ public class DocumentHelper {
             && StringUtils.isNotEmpty(address.getAddressLine1())
             && StringUtils.isNotEmpty(address.getPostCode());
     }
-
 
     public <T> T deepCopy(T object, Class<T> objectClass) {
         try {
@@ -754,7 +744,6 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
         });
     }
-
 
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
