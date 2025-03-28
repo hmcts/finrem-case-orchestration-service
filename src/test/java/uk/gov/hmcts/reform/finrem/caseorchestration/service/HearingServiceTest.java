@@ -738,7 +738,7 @@ class HearingServiceTest {
     }
 
     static HearingDirectionDetailsCollection createAdditionalHearing(String id, HearingTypeDirection typeOfHearing,
-                                                                             LocalDate hearingDate, String hearingTime) {
+                                                                     LocalDate hearingDate, String hearingTime) {
         return HearingDirectionDetailsCollection.builder()
             .id(UUID.fromString(id))
             .value(HearingDirectionDetail.builder()
