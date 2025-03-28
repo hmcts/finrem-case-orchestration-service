@@ -171,7 +171,6 @@ class FinremCaseDetailMapperTest {
     @Test
     void mapFinremCaseDetailsToCaseDetails() {
         caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
-        caseDetails.getData().put("generalEmailUploadedDocument", null);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         CaseDetails caseDetailsFromPojo = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
         assertEquals(caseDetails, caseDetailsFromPojo);
