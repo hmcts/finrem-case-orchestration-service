@@ -44,52 +44,15 @@ class HearingServiceTest {
     @InjectMocks
     private HearingService hearingService;
 
-    static DirectionDetailCollection createEmptyDirectionDetailCollection(String id) {
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .isAnotherHearingYN(YesOrNo.NO)
-            .build();
-        return DirectionDetailCollection.builder()
-            .id(UUID.fromString(id))
-            .value(directionDetail)
-            .build();
-    }
-
-    static DirectionDetailCollection createDirectionDetailCollection(String id, HearingTypeDirection type, LocalDate date, String time) {
-        DirectionDetail directionDetail = DirectionDetail.builder()
-            .dateOfHearing(date)
-            .hearingTime(time)
-            .typeOfHearing(type)
-            .isAnotherHearingYN(YesOrNo.YES)
-            .build();
-        return DirectionDetailCollection.builder()
-            .id(UUID.fromString(id))
-            .value(directionDetail)
-            .build();
-    }
-
-    static InterimHearingCollection createInterimHearing(String id, InterimTypeOfHearing type, LocalDate date, String time) {
-        // Create the InterimHearingItem using the provided parameters
-        InterimHearingItem hearingItem = InterimHearingItem.builder()
-            .interimHearingType(type)
-            .interimHearingDate(date)
-            .interimHearingTime(time)
-            .build();
-
-        // Create and return the InterimHearingCollection
-        return InterimHearingCollection.builder()
-            .id(UUID.fromString(id)) // Convert the string ID to a UUID
-            .value(hearingItem) // Set the value to the created InterimHearingItem
-            .build();
-    }
-
-    static DynamicList createExpectedDynamicList(Map<String, String> itemsWithIds) {
-        // Create a DynamicList using the builder pattern
-        return DynamicList.builder()
-            .listItems(itemsWithIds.entrySet().stream()
-                .map(entry -> DynamicListElement.builder().code(entry.getKey()).label(entry.getValue()).build())
-                .toList()
-            )
-            .build();
+    @ParameterizedTest
+    @MethodSource("hearingCases")
+    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                 LocalDate topLevelHearingDate,
+                                                 String topLevelHearingTime,
+                                                 List<InterimHearingCollection> interimHearings,
+                                                 DynamicList expectedDynamicList) {
+        testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
+            interimHearings, null, expectedDynamicList);
     }
 
     static Stream<Arguments> hearingCases() {
@@ -298,6 +261,18 @@ class HearingServiceTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("hearingCasesWithHearingsCreatedFromProcessOrderEvent")
+    void generateSelectableHearingsAsDynamicListFromProcessOrder(HearingTypeDirection topLevelHearingType,
+                                                 LocalDate topLevelHearingDate,
+                                                 String topLevelHearingTime,
+                                                 List<InterimHearingCollection> interimHearings,
+                                                 List<DirectionDetailCollection> directionDetailCollection,
+                                                 DynamicList expectedDynamicList) {
+        testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
+            interimHearings, directionDetailCollection, expectedDynamicList);
+    }
+
     static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
         return Stream.of(
             Arguments.of(
@@ -309,7 +284,7 @@ class HearingServiceTest {
                     createInterimHearing("00000000-0000-0000-0000-000000000003", InterimTypeOfHearing.FH, LocalDate.of(2024, 2, 2), "4:00 PM")
                 ),
                 List.of(
-                    createEmptyDirectionDetailCollection("00000000-1111-0000-0000-000000000001")
+                    createEmptyDirectionDetailCollection()
                 ),
                 createExpectedDynamicList(new LinkedHashMap<>() {
                     {
@@ -343,25 +318,12 @@ class HearingServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("hearingCases")
-    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                 LocalDate topLevelHearingDate,
-                                                 String topLevelHearingTime,
-                                                 List<InterimHearingCollection> interimHearings,
-                                                 DynamicList expectedDynamicList) {
-        generateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime, interimHearings,
-            null, expectedDynamicList);
-    }
-
-    @ParameterizedTest
-    @MethodSource("hearingCasesWithHearingsCreatedFromProcessOrderEvent")
-    void generateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
-                                                 LocalDate topLevelHearingDate,
-                                                 String topLevelHearingTime,
-                                                 List<InterimHearingCollection> interimHearings,
-                                                 List<DirectionDetailCollection> directionDetailCollection,
-                                                 DynamicList expectedDynamicList) {
+    private void testGenerateSelectableHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                     LocalDate topLevelHearingDate,
+                                                     String topLevelHearingTime,
+                                                     List<InterimHearingCollection> interimHearings,
+                                                     List<DirectionDetailCollection> directionDetailCollection,
+                                                     DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
             .interimWrapper(InterimWrapper.builder().interimHearings(interimHearings).build());
@@ -383,20 +345,6 @@ class HearingServiceTest {
         // Assert
         assertEquals(expectedDynamicList.getListItems().size(), dynamicList.getListItems().size());
         assertDynamicListEquals(expectedDynamicList, dynamicList);
-    }
-
-    static Stream<Arguments> provideShouldThrowIllegalStateExceptionData() {
-        return Stream.of(
-            Arguments.of(null, List.of(), List.of()),
-            Arguments.of(HearingTypeDirection.FH,
-                List.of(createInterimHearing("00000000-0000-0000-0000-000000000002", null, LocalDate.of(2024, 2, 1), "2:00 AM")),
-                List.of()),
-            Arguments.of(HearingTypeDirection.FH,
-                List.of(),
-                List.of(
-                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", null, LocalDate.of(2024, 5, 1), "23:00")
-                ))
-        );
     }
 
     @ParameterizedTest
@@ -423,45 +371,17 @@ class HearingServiceTest {
         assertEquals("hearingType is unexpectedly null", e.getMessage());
     }
 
-    // Helper method to assert that two DynamicLists are equal
-    private void assertDynamicListEquals(DynamicList expected, DynamicList actual) {
-        assertEquals(expected.getListItems().size(), actual.getListItems().size(), "Dynamic list sizes are not equal.");
-
-        for (int i = 0; i < expected.getListItems().size(); i++) {
-            assertEquals(expected.getListItems().get(i).getLabel(), actual.getListItems().get(i).getLabel(),
-                "Label at index " + i + " does not match.");
-            assertEquals(expected.getListItems().get(i).getCode(), actual.getListItems().get(i).getCode(),
-                "Code at index " + i + " does not match.");
-        }
-    }
-
-    static Stream<Arguments> hearingDateCases() {
+    static Stream<Arguments> provideShouldThrowIllegalStateExceptionData() {
         return Stream.of(
-            Arguments.of("", null), // Edge case: empty selected code
-            Arguments.of(TOP_LEVEL_HEARING_ID, LocalDate.of(2024, 10, 21)), // Top-level hearing
-            Arguments.of("11000000-0000-0000-0000-000000000000", LocalDate.of(2024, 10, 22)), // Valid interim hearing date
-            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
-            Arguments.of(null, null) // Case with null value in Interim Hearing
-        );
-    }
-
-    static Stream<Arguments> hearingTypeCases() {
-        return Stream.of(
-            Arguments.of("", null), // Edge case: empty selected code
-            Arguments.of(TOP_LEVEL_HEARING_ID, HearingTypeDirection.FH.getId()), // Top-level hearing type
-            Arguments.of("11000000-0000-0000-0000-000000000000", InterimTypeOfHearing.DIR.getId()), // Valid interim hearing type
-            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
-            Arguments.of(null, null) // Case with null value in Interim Hearing
-        );
-    }
-
-    static Stream<Arguments> hearingTimeCases() {
-        return Stream.of(
-            Arguments.of("", null), // Edge case: empty selected code
-            Arguments.of(TOP_LEVEL_HEARING_ID, "09:00 AM"), // Top-level hearing time
-            Arguments.of("11000000-0000-0000-0000-000000000000", "10:30 AM"), // Valid interim hearing time
-            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
-            Arguments.of(null, null) // Case with null value in Interim Hearing
+            Arguments.of(null, List.of(), List.of()),
+            Arguments.of(HearingTypeDirection.FH,
+                List.of(createInterimHearing("00000000-0000-0000-0000-000000000002", null, LocalDate.of(2024, 2, 1), "2:00 AM")),
+                List.of()),
+            Arguments.of(HearingTypeDirection.FH,
+                List.of(),
+                List.of(
+                    createDirectionDetailCollection("00000000-1111-0000-0000-000000000001", null, LocalDate.of(2024, 5, 1), "23:00")
+                ))
         );
     }
 
@@ -508,6 +428,16 @@ class HearingServiceTest {
         });
     }
 
+    static Stream<Arguments> hearingDateCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, LocalDate.of(2024, 10, 21)), // Top-level hearing
+            Arguments.of("11000000-0000-0000-0000-000000000000", LocalDate.of(2024, 10, 22)), // Valid interim hearing date
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("hearingTypeCases")
     void testGetHearingType(String selectedCode, String expectedType) {
@@ -552,6 +482,16 @@ class HearingServiceTest {
         });
     }
 
+    static Stream<Arguments> hearingTypeCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, HearingTypeDirection.FH.getId()), // Top-level hearing type
+            Arguments.of("11000000-0000-0000-0000-000000000000", InterimTypeOfHearing.DIR.getId()), // Valid interim hearing type
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("hearingTimeCases")
     void testGetHearingTime(String selectedCode, String expectedTime) {
@@ -594,6 +534,16 @@ class HearingServiceTest {
             // Assert
             assertEquals(expectedTime, result);
         });
+    }
+
+    static Stream<Arguments> hearingTimeCases() {
+        return Stream.of(
+            Arguments.of("", null), // Edge case: empty selected code
+            Arguments.of(TOP_LEVEL_HEARING_ID, "09:00 AM"), // Top-level hearing time
+            Arguments.of("11000000-0000-0000-0000-000000000000", "10:30 AM"), // Valid interim hearing time
+            Arguments.of("22000000-0000-0000-0000-000000000000", null), // Non-matching ID
+            Arguments.of(null, null) // Case with null value in Interim Hearing
+        );
     }
 
     @Test
@@ -647,5 +597,65 @@ class HearingServiceTest {
 
         String actualOutput = hearingService.formatHearingInfo(parsedHearingType, parsedHearingDate, parsedHearingTime);
         assertEquals(expectedOutput, actualOutput);
+    }
+
+    static DirectionDetailCollection createEmptyDirectionDetailCollection() {
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .isAnotherHearingYN(YesOrNo.NO)
+            .build();
+        return DirectionDetailCollection.builder()
+            .id(UUID.fromString("00000000-1111-0000-0000-000000000001"))
+            .value(directionDetail)
+            .build();
+    }
+
+    static DirectionDetailCollection createDirectionDetailCollection(String id, HearingTypeDirection type, LocalDate date, String time) {
+        DirectionDetail directionDetail = DirectionDetail.builder()
+            .dateOfHearing(date)
+            .hearingTime(time)
+            .typeOfHearing(type)
+            .isAnotherHearingYN(YesOrNo.YES)
+            .build();
+        return DirectionDetailCollection.builder()
+            .id(UUID.fromString(id))
+            .value(directionDetail)
+            .build();
+    }
+
+    static InterimHearingCollection createInterimHearing(String id, InterimTypeOfHearing type, LocalDate date, String time) {
+        // Create the InterimHearingItem using the provided parameters
+        InterimHearingItem hearingItem = InterimHearingItem.builder()
+            .interimHearingType(type)
+            .interimHearingDate(date)
+            .interimHearingTime(time)
+            .build();
+
+        // Create and return the InterimHearingCollection
+        return InterimHearingCollection.builder()
+            .id(UUID.fromString(id)) // Convert the string ID to a UUID
+            .value(hearingItem) // Set the value to the created InterimHearingItem
+            .build();
+    }
+
+    static DynamicList createExpectedDynamicList(Map<String, String> itemsWithIds) {
+        // Create a DynamicList using the builder pattern
+        return DynamicList.builder()
+            .listItems(itemsWithIds.entrySet().stream()
+                .map(entry -> DynamicListElement.builder().code(entry.getKey()).label(entry.getValue()).build())
+                .toList()
+            )
+            .build();
+    }
+
+    // Helper method to assert that two DynamicLists are equal
+    private void assertDynamicListEquals(DynamicList expected, DynamicList actual) {
+        assertEquals(expected.getListItems().size(), actual.getListItems().size(), "Dynamic list sizes are not equal.");
+
+        for (int i = 0; i < expected.getListItems().size(); i++) {
+            assertEquals(expected.getListItems().get(i).getLabel(), actual.getListItems().get(i).getLabel(),
+                "Label at index " + i + " does not match.");
+            assertEquals(expected.getListItems().get(i).getCode(), actual.getListItems().get(i).getCode(),
+                "Code at index " + i + " does not match.");
+        }
     }
 }
