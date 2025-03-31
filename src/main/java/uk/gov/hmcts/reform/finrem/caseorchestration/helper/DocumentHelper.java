@@ -59,18 +59,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -123,12 +122,10 @@ public class DocumentHelper {
     public static final String VARIATION = "variation";
     public static final String CONSENT = "consent";
 
-
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
         INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
     }
-
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
@@ -171,7 +168,6 @@ public class DocumentHelper {
             .orElseGet(caseData::getLatestConsentOrder);
     }
 
-
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
         if (caseData == null || caseData.isEmpty()) {
             return new ArrayList<>();
@@ -196,7 +192,6 @@ public class DocumentHelper {
             .toList();
     }
 
-
     /**
      * Return List Object for given Case with the given indentation used.
      *
@@ -217,7 +212,6 @@ public class DocumentHelper {
             .filter(Objects::nonNull)
             .toList();
     }
-
 
     /**
      * Return List Object for given Case with the given indentation used.
@@ -354,7 +348,6 @@ public class DocumentHelper {
         });
     }
 
-
     public List<String> convertToList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
@@ -369,7 +362,6 @@ public class DocumentHelper {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
-
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
@@ -472,7 +464,6 @@ public class DocumentHelper {
             addresseeDetails.getFinremAddressToSendTo(), recipientResideOutsideOfUK);
     }
 
-
     /**
      * Return CaseDetails Object for given Case with the given indentation used.
      *
@@ -522,7 +513,6 @@ public class DocumentHelper {
 
         return caseDetailsCopy;
     }
-
 
     private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
                                                   Address addressToSendTo,
@@ -601,7 +591,6 @@ public class DocumentHelper {
             && StringUtils.isNotEmpty(address.getPostCode());
     }
 
-
     public <T> T deepCopy(T object, Class<T> objectClass) {
         try {
             return objectMapper.readValue(objectMapper.writeValueAsString(object), objectClass);
@@ -657,7 +646,6 @@ public class DocumentHelper {
     public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
                                                                            String authorisationToken,
                                                                            String caseId) {
-
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
         List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
@@ -755,7 +743,6 @@ public class DocumentHelper {
         });
     }
 
-
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
             new TypeReference<>() {
@@ -805,13 +792,17 @@ public class DocumentHelper {
         return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
     }
 
+    /**
+     * Checks if the given case document's filename exists in the final order collection.
+     *
+     * @param finalOrderCollection the collection of final orders to check
+     * @param caseDocument the document to be checked
+     * @return {@code true} if the document's filename is found in the collection, otherwise {@code false}
+     */
     public boolean checkIfOrderAlreadyInFinalOrderCollection(List<DirectionOrderCollection> finalOrderCollection, CaseDocument caseDocument) {
-        if (!finalOrderCollection.isEmpty()) {
-            Set<String> filenames = new HashSet<>();
-            finalOrderCollection.forEach(obj -> filenames.add(obj.getValue().getUploadDraftDocument().getDocumentFilename()));
-            return filenames.contains(caseDocument.getDocumentFilename());
-        }
-        return false;
+        return emptyIfNull(finalOrderCollection).stream()
+            .map(obj -> obj.getValue().getUploadDraftDocument().getDocumentFilename())
+            .anyMatch(filename -> filename.equals(caseDocument.getDocumentFilename()));
     }
 
     public DirectionOrderCollection prepareFinalOrder(CaseDocument document) {
