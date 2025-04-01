@@ -23,6 +23,7 @@ import java.util.List;
  *     <li>TASK_NAME=AmendGeneralEmailTask</li>
  *     <li>CRON_AMEND_GENERAL_EMAIL_CASE_TYPE_ID=FinancialRemedyContested | FinancialRemedyMVP2</li>
  *     <li>CRON_AMEND_GENERAL_EMAIL_BATCH_SIZE=number of cases to search for</li>
+ *     <li>CRON_CSV_FILE_DECRYPT_KEY=secret key to decrypt the csv file</li>
  * </ul>
  */
 @Component
@@ -33,11 +34,11 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
     private String secret;
     private static final String TASK_NAME = "AmendGeneralEmailTask";
     private static final String SUMMARY = "DFR-3639";
-    @Value("${cron.amendGeneralEmail.enabled:true}")
+    @Value("${cron.amendGeneralEmail.enabled:false}")
     private boolean taskEnabled;
     @Value("${cron.amendGeneralEmail.caseTypeId:FinancialRemedyContested}")
     private String caseTypeId;
-    @Value("${cron.amendGeneralEmail.batchSize:500}")
+    @Value("${cron.amendGeneralEmail.batchSize:100}")
     private int batchSize;
     @Value("${cron.amendGeneralEmail.caseListFileName:caserefs-encrypted.csv}")
     private String csvFile;
@@ -90,11 +91,8 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
         ObjectMapper mapper = new ObjectMapper();
 
         if (caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
-
-            log.info("Case {} generalEmailUploadedDocument setting to null", finremCaseDetails.getId());
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
             log.info("Case {} generalEmailUploadedDocument set to null successfully", finremCaseDetails.getId());
-
         } else {
             log.info("Case {} has empty generalEmailUploadedDocument field", finremCaseDetails.getId());
         }
@@ -108,8 +106,8 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
         this.taskEnabled = taskEnabled;
     }
 
-    void setCaseTypeContested() {
-        this.caseTypeId = CaseType.CONTESTED.getCcdType();
+    void setCaseTypeContested(String caseTypeId) {
+        this.caseTypeId = caseTypeId;
     }
 
     public String getCsvFile() {

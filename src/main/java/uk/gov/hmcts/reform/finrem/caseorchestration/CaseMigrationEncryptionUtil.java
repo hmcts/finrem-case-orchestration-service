@@ -11,6 +11,15 @@ import java.nio.file.Paths;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader.getKeyFromString;
 
+/**
+ * Utility class to encrypt/decrypt a file using AES encryption.
+ * <p>
+ * Usage:
+ * <pre>
+ * java CaseMigrationEncryptionUtil <encrypt|decrypt> <inputFilePath> <outputFilePath> <secretKey>
+ * </pre>
+ */
+
 @Slf4j
 public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
