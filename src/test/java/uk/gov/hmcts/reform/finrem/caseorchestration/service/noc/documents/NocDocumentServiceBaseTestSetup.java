@@ -96,7 +96,7 @@ public class NocDocumentServiceBaseTestSetup {
         Map courtDetailsMap = (Map) caseDataMap.get("courtDetails");
         assertThat(courtDetailsMap.get("courtName"), is("Family Court at the Courts and Tribunal Service Centre"));
         assertThat(courtDetailsMap.get("courtAddress"), is("PO Box 12746, Harlow, CM20 9QZ"));
-        assertThat(courtDetailsMap.get("phoneNumber"), is("0300 303 0642"));
+        assertThat(courtDetailsMap.get("phoneNumber"), is("0300 123 5577"));
         assertThat(courtDetailsMap.get("email"), is("contactFinancialRemedy@justice.gov.uk"));
 
         Map addresseeMap = (Map) caseDataMap.get("addressee");
