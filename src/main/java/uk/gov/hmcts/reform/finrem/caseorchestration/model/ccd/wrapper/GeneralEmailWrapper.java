@@ -22,6 +22,7 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private CaseDocument generalEmailUploadedDocument;
     private List<GeneralEmailCollection> generalEmailCollection;
 
