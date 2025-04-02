@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -26,18 +25,15 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
     private final InternationalPostalService postalService;
     private final SelectedCourtService selectedCourtService;
     private final ExpressCaseService expressCaseService;
-    private final FeatureToggleService featureToggleService;
 
     public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                               InternationalPostalService postalService,
                                               SelectedCourtService selectedCourtService,
-                                              ExpressCaseService expressCaseService,
-                                              FeatureToggleService featureToggleService) {
+                                              ExpressCaseService expressCaseService) {
         super(finremCaseDetailsMapper);
         this.postalService = postalService;
         this.selectedCourtService = selectedCourtService;
         this.expressCaseService = expressCaseService;
-        this.featureToggleService = featureToggleService;
     }
 
     @Override
@@ -58,9 +54,7 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
 
         selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
 
-        if (featureToggleService.isExpressPilotEnabled()) {
-            expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-        }
+        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
 
         List<String> errors = new ArrayList<>();
         if (selectedCourtService.royalCourtOrHighCourtChosen(caseData)) {

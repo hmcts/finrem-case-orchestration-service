@@ -51,7 +51,9 @@ public class ExpressCaseService {
      * @param caseData the case data as an instance of FinremCaseDate
      */
     public void setExpressCaseEnrollmentStatus(FinremCaseData caseData) {
-        caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
+        if (featureToggleService.isExpressPilotEnabled()) {
+            caseData.getExpressCaseWrapper().setExpressCaseParticipation((qualifiesForExpress(caseData) ? ENROLLED : DOES_NOT_QUALIFY));
+        }
     }
 
     /**
@@ -99,6 +101,12 @@ public class ExpressCaseService {
             && ExpressCaseParticipation.ENROLLED.equals(expressCaseParticipation);
     }
 
+    /**
+     * Checks if the case is enrolled in the express case pilot.
+     *
+     * @param caseData the FinRem case data
+     * @return true if the case is enrolled in the express case pilot and the express pilot feature is enabled, false otherwise
+     */
     public boolean isExpressCase(FinremCaseData caseData) {
         ExpressCaseParticipation expressCaseParticipation =
                 Optional.ofNullable(caseData.getExpressCaseWrapper().getExpressCaseParticipation())
