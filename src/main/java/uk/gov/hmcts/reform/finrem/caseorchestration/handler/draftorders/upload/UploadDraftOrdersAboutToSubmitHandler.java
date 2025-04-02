@@ -99,11 +99,11 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         } else if (AGREED_DRAFT_ORDER_OPTION.equals(typeOfDraftOrder)) {
             handleAgreedDraftOrder(finremCaseData, userAuthorisation, orderFiledBy);
             populateAgreedDraftOrderDocumentWarnings(callbackRequest, userAuthorisation, warnings);
+            caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
         }
 
         caseDetails.getData().getDraftOrdersWrapper().setUploadSuggestedDraftOrder(null);
         caseDetails.getData().getDraftOrdersWrapper().setUploadAgreedDraftOrder(null);
-        caseDetails.getData().getDraftOrdersWrapper().setIsUnreviewedDocumentPresent(YesOrNo.YES);
         clearTemporaryFields(caseDetails);
 
         if (state == null) {
