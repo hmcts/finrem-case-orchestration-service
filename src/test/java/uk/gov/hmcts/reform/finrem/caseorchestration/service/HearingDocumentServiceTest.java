@@ -283,7 +283,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01227 819200", "Family.canterbury.countycourt@justice.gov.uk");
+            "0300 123 5577", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -305,7 +305,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Newcastle Civil and Family Courts and Tribunals Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
-            "0191 2058750", "Family.newcastle.countycourt@justice.gov.uk");
+            "0300 123 5577", "Family.newcastle.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -329,7 +329,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
-            "0114 2812522", "FRCSheffield@justice.gov.uk");
+            "0300 123 5577", "FRCSheffield@justice.gov.uk");
     }
 
     @Test
@@ -351,7 +351,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
-            "0151 296 2225", "FRCLiverpool@Justice.gov.uk");
+            "0300 123 5577", "FRCLiverpool@Justice.gov.uk");
     }
 
     @Test
