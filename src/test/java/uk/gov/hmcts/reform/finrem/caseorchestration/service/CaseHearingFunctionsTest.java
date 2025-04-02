@@ -292,7 +292,7 @@ class CaseHearingFunctionsTest {
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Thanet Family Court Hearing Centre"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("2nd Floor, The Courthouse, Cecil Square, Margate, Kent CT9 1RL"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 123 5577"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01227 819200"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("Family.canterbury.countycourt@justice.gov.uk"));
     }
 
