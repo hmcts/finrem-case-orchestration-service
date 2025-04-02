@@ -249,7 +249,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
-            "01792 485 800", "FRCswansea@justice.gov.uk");
+            "0300 123 5577", "FRCswansea@justice.gov.uk");
     }
 
     @Test
@@ -363,7 +363,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5424", "manchesterdivorce@justice.gov.uk");
+            "0300 123 5577", "manchesterdivorce@justice.gov.uk");
     }
 
     @Test
