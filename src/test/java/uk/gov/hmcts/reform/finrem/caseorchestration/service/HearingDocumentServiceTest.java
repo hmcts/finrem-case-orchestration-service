@@ -261,7 +261,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
-            "01633 258946", "FRCNewport@justice.gov.uk");
+            "0300 123 5577", "FRCNewport@justice.gov.uk");
     }
 
     @Test
@@ -317,7 +317,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
-            "01423 503921", "enquiries.harrogate.countycourt@Justice.gov.uk");
+            "0300 123 5577", "enquiries.harrogate.countycourt@Justice.gov.uk");
     }
 
     @Test
@@ -407,7 +407,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
-            "0115 910 3504", "FRCNottingham@justice.gov.uk");
+            "0300 123 5577", "FRCNottingham@justice.gov.uk");
     }
 
     @Test
