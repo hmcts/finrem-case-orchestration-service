@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
@@ -52,7 +54,7 @@ class HearingServiceTest {
                                                  List<InterimHearingCollection> interimHearings,
                                                  DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
-            interimHearings, null, expectedDynamicList);
+            interimHearings, null, null, expectedDynamicList);
     }
 
     static Stream<Arguments> hearingCases() {
@@ -270,7 +272,7 @@ class HearingServiceTest {
                                                  List<DirectionDetailCollection> directionDetailCollection,
                                                  DynamicList expectedDynamicList) {
         testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
-            interimHearings, directionDetailCollection, expectedDynamicList);
+            interimHearings, directionDetailCollection, null, expectedDynamicList);
     }
 
     static Stream<Arguments> hearingCasesWithHearingsCreatedFromProcessOrderEvent() {
@@ -323,6 +325,7 @@ class HearingServiceTest {
                                                      String topLevelHearingTime,
                                                      List<InterimHearingCollection> interimHearings,
                                                      List<DirectionDetailCollection> directionDetailCollection,
+                                                     List<HearingDirectionDetailsCollection> additionalHearings,
                                                      DynamicList expectedDynamicList) {
         // Arrange
         FinremCaseData.FinremCaseDataBuilder caseDataBuilder = FinremCaseData.builder()
@@ -334,6 +337,7 @@ class HearingServiceTest {
             .hearingTime(topLevelHearingTime)
             .build());
         caseDataBuilder.directionDetailsCollection(directionDetailCollection);
+        caseDataBuilder.hearingDirectionDetailsCollection(additionalHearings);
 
         FinremCaseDetails caseDetails = mock(FinremCaseDetails.class);
         FinremCaseData caseData = caseDataBuilder.build();
@@ -345,6 +349,78 @@ class HearingServiceTest {
         // Assert
         assertEquals(expectedDynamicList.getListItems().size(), dynamicList.getListItems().size());
         assertDynamicListEquals(expectedDynamicList, dynamicList);
+    }
+
+    @ParameterizedTest
+    @MethodSource("additionalHearings")
+    void generateSelectableAdditionalHearingsAsDynamicList(HearingTypeDirection topLevelHearingType,
+                                                           LocalDate topLevelHearingDate,
+                                                           String topLevelHearingTime,
+                                                           List<InterimHearingCollection> interimHearings,
+                                                           List<DirectionDetailCollection> directionDetailCollection,
+                                                           List<HearingDirectionDetailsCollection> additionalHearings,
+                                                           DynamicList expectedDynamicList) {
+        testGenerateSelectableHearingsAsDynamicList(topLevelHearingType, topLevelHearingDate, topLevelHearingTime,
+            interimHearings, directionDetailCollection, additionalHearings, expectedDynamicList);
+    }
+
+    private static Stream<Arguments> additionalHearings() {
+        return Stream.of(
+            // Single additional hearing
+            Arguments.of(
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(createAdditionalHearing("00000000-1234-0000-0000-000000000003",
+                    HearingTypeDirection.FH, LocalDate.of(2025, 3,27), "09:45")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-1234-0000-0000-000000000003", "27 Mar 2025 09:45 - Final Hearing (FH)");
+                    }
+                })
+            ),
+            // Multiple additional hearings
+            Arguments.of(
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(
+                    createAdditionalHearing("00000000-1234-0000-0000-000000000003", HearingTypeDirection.FH, LocalDate.of(2025, 3,27), "09:45"),
+                    createAdditionalHearing("00000000-0000-1000-0000-000000000005", HearingTypeDirection.DIR, LocalDate.of(2025, 1,21), "14:00"),
+                    createAdditionalHearing("00000032-1234-0000-0100-000000000027", HearingTypeDirection.FDA, LocalDate.of(2024, 2,12), "10:00")
+
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000032-1234-0000-0100-000000000027", "12 Feb 2024 10:00 - First Directions Appointment (FDA)");
+                        put("00000000-0000-1000-0000-000000000005", "21 Jan 2025 14:00 - Directions (DIR)");
+                        put("00000000-1234-0000-0000-000000000003", "27 Mar 2025 09:45 - Final Hearing (FH)");
+                    }
+                })
+            ),
+            // Single additional hearing with another type of hearing
+            Arguments.of(
+                HearingTypeDirection.FDA,
+                LocalDate.of(2023, 10, 13),
+                "10:00 AM",
+                null,
+                null,
+                List.of(createAdditionalHearing("00000000-1234-0000-0000-000000000003",
+                    HearingTypeDirection.FH, LocalDate.of(2025, 3,27), "09:45")
+                ),
+                createExpectedDynamicList(new LinkedHashMap<>() {
+                    {
+                        put("00000000-0000-0000-0000-000000000000", "13 Oct 2023 10:00 AM - First Directions Appointment (FDA)");
+                        put("00000000-1234-0000-0000-000000000003", "27 Mar 2025 09:45 - Final Hearing (FH)");
+                    }
+                })
+            )
+        );
     }
 
     @ParameterizedTest
@@ -580,6 +656,30 @@ class HearingServiceTest {
         });
     }
 
+    @Test
+    void testGetHearingInfosFromAdditionalHearings() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .hearingDirectionDetailsCollection(List.of(
+                HearingDirectionDetailsCollection.builder()
+                    .id(UUID.fromString("11000000-0000-0000-0000-000000000000"))
+                    .value(HearingDirectionDetail.builder()
+                        .isAnotherHearingYN(YesOrNo.YES)
+                        .typeOfHearing(HearingTypeDirection.FDA)
+                        .dateOfHearing(LocalDate.of(2024, 10, 22))
+                        .hearingTime("15:27")
+                        .build())
+                    .build()
+            ))
+            .build();
+
+        DynamicListElement selected = mock(DynamicListElement.class);
+        when(selected.getCode()).thenReturn("11000000-0000-0000-0000-000000000000");
+
+        assertEquals(LocalDate.of(2024, 10, 22), hearingService.getHearingDate(caseData, selected));
+        assertEquals(HearingTypeDirection.FDA.getId(), hearingService.getHearingType(caseData, selected));
+        assertEquals("15:27", hearingService.getHearingTime(caseData, selected));
+    }
+
     @ParameterizedTest
     @CsvSource({
         "'Civil', '2024-11-10', '10:30 AM', 'Civil on 10 November 2024 10:30 AM'",
@@ -634,6 +734,19 @@ class HearingServiceTest {
         return InterimHearingCollection.builder()
             .id(UUID.fromString(id)) // Convert the string ID to a UUID
             .value(hearingItem) // Set the value to the created InterimHearingItem
+            .build();
+    }
+
+    static HearingDirectionDetailsCollection createAdditionalHearing(String id, HearingTypeDirection typeOfHearing,
+                                                                     LocalDate hearingDate, String hearingTime) {
+        return HearingDirectionDetailsCollection.builder()
+            .id(UUID.fromString(id))
+            .value(HearingDirectionDetail.builder()
+                .isAnotherHearingYN(YesOrNo.YES)
+                .hearingTime(hearingTime)
+                .dateOfHearing(hearingDate)
+                .typeOfHearing(typeOfHearing)
+                .build())
             .build();
     }
 
