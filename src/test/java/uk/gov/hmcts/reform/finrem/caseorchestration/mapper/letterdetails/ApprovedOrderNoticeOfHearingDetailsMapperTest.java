@@ -27,7 +27,6 @@ public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends AbstractLette
             .buildDocumentTemplateDetails(caseDetails, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
         ApprovedOrderNoticeOfHearingDetails expected = getExpectedApprovedOrderNoticeOfHearingDetails(actual.getAdditionalHearingDated());
 
-
         assertEquals(expected, actual);
     }
 
@@ -59,7 +58,7 @@ public class ApprovedOrderNoticeOfHearingDetailsMapperTest extends AbstractLette
             .hearingTime("1pm")
             .applicantName("Poor Guy")
             .respondentName("test Korivi")
-            .courtPhone("0300 1235577")
+            .courtPhone("0300 123 5577")
             .courtEmail("hastingsfamily@justice.gov.uk")
             .courtAddress("The Law Courts, Bohemia Road, Hastings, TN34 1QX")
             .courtName("Hastings County Court And Family Court Hearing Centre")

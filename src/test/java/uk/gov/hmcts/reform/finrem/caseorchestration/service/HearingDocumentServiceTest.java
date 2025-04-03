@@ -249,7 +249,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
-            "01792 485 800", "FRCswansea@justice.gov.uk");
+            "0300 123 5577", "FRCswansea@justice.gov.uk");
     }
 
     @Test
@@ -261,7 +261,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
-            "01633 258946", "FRCNewport@justice.gov.uk");
+            "0300 123 5577", "FRCNewport@justice.gov.uk");
     }
 
     @Test
@@ -283,7 +283,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01227 819200", "Family.canterbury.countycourt@justice.gov.uk");
+            "0300 123 5577", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -305,7 +305,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Newcastle Civil and Family Courts and Tribunals Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
-            "0191 2058750", "Family.newcastle.countycourt@justice.gov.uk");
+            "0300 123 5577", "Family.newcastle.countycourt@justice.gov.uk");
     }
 
     @Test
@@ -317,7 +317,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
-            "01423 503921", "enquiries.harrogate.countycourt@Justice.gov.uk");
+            "0300 123 5577", "enquiries.harrogate.countycourt@Justice.gov.uk");
     }
 
     @Test
@@ -329,7 +329,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
-            "0114 2812522", "FRCSheffield@justice.gov.uk");
+            "0300 123 5577", "FRCSheffield@justice.gov.uk");
     }
 
     @Test
@@ -351,7 +351,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
-            "0151 296 2225", "FRCLiverpool@Justice.gov.uk");
+            "0300 123 5577", "FRCLiverpool@Justice.gov.uk");
     }
 
     @Test
@@ -363,7 +363,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5424", "manchesterdivorce@justice.gov.uk");
+            "0300 123 5577", "manchesterdivorce@justice.gov.uk");
     }
 
     @Test
@@ -407,7 +407,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
-            "0115 910 3504", "FRCNottingham@justice.gov.uk");
+            "0300 123 5577", "FRCNottingham@justice.gov.uk");
     }
 
     @Test
