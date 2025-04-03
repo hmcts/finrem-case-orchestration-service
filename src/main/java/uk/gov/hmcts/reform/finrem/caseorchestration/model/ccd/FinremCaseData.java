@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.FormAScannedDocWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
@@ -73,7 +74,6 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CaseType ccdCaseType;
 
-    private ExpressCaseParticipation expressCaseParticipation;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
@@ -330,6 +330,9 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private DraftOrdersWrapper draftOrdersWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ExpressCaseWrapper expressCaseWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private FormAScannedDocWrapper formAScannedDocWrapper;
@@ -1046,5 +1049,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.sendOrderWrapper = new SendOrderWrapper();
         }
         return sendOrderWrapper;
+    }
+
+    @JsonIgnore
+    public ExpressCaseWrapper getExpressCaseWrapper() {
+        if (expressCaseWrapper == null) {
+            this.expressCaseWrapper = new ExpressCaseWrapper();
+        }
+        return expressCaseWrapper;
     }
 }

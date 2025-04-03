@@ -10,16 +10,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 @Slf4j
 @Service
 public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
 
+    private final ExpressCaseService expressCaseService;
     private final InternationalPostalService postalService;
 
     public PaperCaseCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              ExpressCaseService expressCaseService,
                                               InternationalPostalService postalService) {
         super(finremCaseDetailsMapper);
+        this.expressCaseService = expressCaseService;
         this.postalService = postalService;
     }
 
@@ -34,7 +38,9 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} mid event callback", EventType.NEW_PAPER_CASE);
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+
+        expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
 
         FinremCaseData caseData = caseDetails.getData();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
