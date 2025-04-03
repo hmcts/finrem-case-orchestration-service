@@ -53,7 +53,6 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenHandleAllocationDirection_thenCourtDetailsMapperCalled() {
-
         FinremCaseDetails caseDetails =
             FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
         FinremCaseDetails caseDetailsBefore =
