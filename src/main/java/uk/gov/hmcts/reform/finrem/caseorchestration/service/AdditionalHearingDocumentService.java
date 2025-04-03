@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderAdditionalDocCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
@@ -38,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -70,7 +70,7 @@ public class AdditionalHearingDocumentService {
     private final NotificationService notificationService;
     private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
-    private final OrderDateService dateService;
+    private final OrderDateService orderDateService;
     private static final String ADDITIONAL_MESSAGE = "Additional hearing document not required for Case ID: {}";
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
@@ -139,14 +139,9 @@ public class AdditionalHearingDocumentService {
         orderList.add(orderCollection);
     }
 
-    public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails,
-                                                                                          String authorisationToken) {
+    public List<DirectionOrderCollection> getApprovedHearingOrders(FinremCaseDetails caseDetails, String authorisationToken) {
         List<DirectionOrderCollection> uploadHearingOrder = caseDetails.getData().getUploadHearingOrder();
-        return dateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
-    }
-
-    public List<HearingOrderCollectionData> getApprovedHearingOrderCollection(CaseDetails caseDetail) {
-        return documentHelper.getHearingOrderDocuments(caseDetail.getData());
+        return orderDateService.addCreatedDateInUploadedOrder(uploadHearingOrder, authorisationToken);
     }
 
     public List<HearingOrderAdditionalDocCollectionData> getHearingOrderAdditionalDocuments(Map<String, Object> caseData) {
@@ -184,10 +179,11 @@ public class AdditionalHearingDocumentService {
         log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection
-            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+        List<DirectionOrderCollection> finalOrderCollection = orderDateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(),
+            authorisationToken);
+        List<DirectionOrderCollection> newFinalOrderCollection = new ArrayList<>(emptyIfNull(caseData.getFinalOrderCollection()));
         List<DirectionOrderCollection> uploadHearingOrder
-            = dateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
+            = orderDateService.addCreatedDateInUploadedOrder(caseData.getUploadHearingOrder(), authorisationToken);
         if (!uploadHearingOrder.isEmpty()) {
             List<DirectionOrderCollection> orderCollections = uploadHearingOrder.stream().map(doc -> {
                 CaseDocument uploadDraftDocument = doc.getValue().getUploadDraftDocument();
@@ -195,32 +191,25 @@ public class AdditionalHearingDocumentService {
                 if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalOrderCollection, uploadDraftDocument)) {
                     CaseDocument stampedDocs = getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument);
                     log.info("Stamped Documents = {} for Case ID: {}", stampedDocs, caseId);
-                    if (!finalOrderCollection.isEmpty()) {
-                        caseData.getFinalOrderCollection().add(documentHelper.prepareFinalOrder(stampedDocs));
-                    } else {
-                        List<DirectionOrderCollection> orderList = new ArrayList<>();
-                        orderList.add(documentHelper.prepareFinalOrder(stampedDocs));
-                        caseData.setFinalOrderCollection(orderList);
-                    }
+                    newFinalOrderCollection.add(documentHelper.prepareFinalOrder(stampedDocs));
                     return getDirectionOrderCollection(doc.getValue(), stampedDocs, orderDateTime);
                 }
-                caseData.setFinalOrderCollection(finalOrderCollection);
-                //This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
+                // This scenario should not come - when uploaded same order again then stamp order instead leaving unstamped.
                 return getDirectionOrderCollection(doc.getValue(), getStampedDocs(authorisationToken, caseData, caseId, uploadDraftDocument),
                     orderDateTime);
             }).toList();
+            caseData.setFinalOrderCollection(newFinalOrderCollection);
             caseData.setUploadHearingOrder(orderCollections);
-            caseData.setLatestDraftHearingOrder(orderCollections.get(orderCollections.size() - 1).getValue().getUploadDraftDocument());
+            caseData.setLatestDraftHearingOrder(orderCollections.getLast().getValue().getUploadDraftDocument());
         }
 
-        List<DirectionDetailCollection> directionDetailsCollection
-            = Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(new ArrayList<>());
+        List<DirectionDetailCollection> directionDetailsCollection = emptyIfNull(caseData.getDirectionDetailsCollection());
 
-        //check that the list contains one or more values for the court hearing information
+        // check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollection.isEmpty()) {
-            DirectionDetail directionDetail = directionDetailsCollection.get(directionDetailsCollection.size() - 1).getValue();
+            DirectionDetail directionDetail = directionDetailsCollection.getLast().getValue();
 
-            //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
+            // if the latest court hearing has specified another hearing as No, don't create an additional hearing document
             if (NO_VALUE.equalsIgnoreCase(nullToEmpty(directionDetail.getIsAnotherHearingYN()))) {
                 log.info(ADDITIONAL_MESSAGE, caseId);
                 return;
@@ -370,7 +359,7 @@ public class AdditionalHearingDocumentService {
     public void addToFinalOrderCollection(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getData();
         List<DirectionOrderCollection> finalOrderCollection
-            = dateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
+            = orderDateService.addCreatedDateInFinalOrder(caseData.getFinalOrderCollection(), authorisationToken);
 
         List<DirectionOrderCollection> uploadHearingOrders = caseData.getUploadHearingOrder();
         if (!uploadHearingOrders.isEmpty()) {
