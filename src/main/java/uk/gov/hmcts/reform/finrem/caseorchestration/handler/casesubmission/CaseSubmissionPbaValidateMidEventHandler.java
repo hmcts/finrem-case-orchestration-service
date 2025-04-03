@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -38,12 +39,9 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(
         FinremCallbackRequest callbackRequestWithFinremCaseDetails, String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequestWithFinremCaseDetails));
 
         FinremCaseDetails caseDetails = callbackRequestWithFinremCaseDetails.getCaseDetails();
-
-        log.info("Received request to validate PBA number for Case ID: {}",
-            caseDetails.getId());
-
         validateCaseData(callbackRequestWithFinremCaseDetails);
 
         FinremCaseData caseData = caseDetails.getData();

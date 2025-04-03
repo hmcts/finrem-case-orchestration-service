@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 
@@ -18,11 +19,14 @@ import java.util.List;
 @Service
 public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
 
+    private final ExpressCaseService expressCaseService;
     private final InternationalPostalService postalService;
 
     public PaperCaseCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              ExpressCaseService expressCaseService,
                                               InternationalPostalService postalService) {
         super(finremCaseDetailsMapper);
+        this.expressCaseService = expressCaseService;
         this.postalService = postalService;
     }
 
@@ -37,10 +41,12 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Invoking contested event {} mid event callback for Case ID: {}", EventType.NEW_PAPER_CASE, caseDetails.getId());
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
 
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData());
         errors.addAll(postalService.validate(callbackRequest.getCaseDetails().getData()));
+
+        expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());
 
         FinremCaseData caseData = caseDetails.getData();
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

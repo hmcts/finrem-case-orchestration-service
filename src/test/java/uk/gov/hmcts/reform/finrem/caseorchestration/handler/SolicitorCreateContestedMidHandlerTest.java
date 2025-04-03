@@ -59,8 +59,7 @@ class SolicitorCreateContestedMidHandlerTest {
             finremCaseDetailsMapper,
             postalService,
             selectedCourtService,
-            expressCaseService,
-            featureToggleService
+            expressCaseService
         );
     }
 

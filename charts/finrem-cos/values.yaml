@@ -6,8 +6,8 @@ java:
   aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
-  spotInstances:  
-    enabled: false 
+  spotInstances:
+    enabled: false
   image: 'hmctspublic.azurecr.io/finrem-cos:latest'
   environment:
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL : "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
@@ -52,3 +52,5 @@ java:
           alias: PDF_SERVICE_BASEURL
         - name: gov-uk-notification-key
           alias: UK_GOV_NOTIFY_API_KEY
+        - name: cron-csv-file-decrypt-key
+          alias: CRON_CSV_FILE_DECRYPT_KEY

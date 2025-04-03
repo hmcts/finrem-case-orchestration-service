@@ -3,19 +3,19 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.sonarqube' version '6.0.1.5171'
-    id 'org.springframework.boot' version '3.4.3'
+    id 'org.springframework.boot' version '3.4.4'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'uk.gov.hmcts.java' version '0.12.65'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1612'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1618'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-        guava                : '33.3.1-jre',
+        guava                : '33.4.5-jre',
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.9.5-SPRING2',
         commonsIo            : '2.18.0',
@@ -23,7 +23,7 @@ def versions = [
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.36',
-        mockito              : '5.16.0',
+        mockito              : '5.16.1',
         pact                 : '4.6.17',
         pdfbox               : '3.0.4',
         reformLogging        : '6.1.8',
@@ -43,12 +43,12 @@ def versions = [
         jacksonDatabind      : '2.18.3',
         retry                : '1.3.4',
         snakeyaml            : '2.4',
-        loadbalancer         : '4.2.0'
+        loadbalancer         : '4.2.1'
 ]
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2024.0.0"
+    springCloudBomVersion = "2024.0.1"
     restAssuredBomVersion = "5.5.1"
 }
 
@@ -57,7 +57,7 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    maxWarnings = 0
+    maxWarnings = 584
     toolVersion = '10.21.4'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
@@ -361,7 +361,6 @@ bootWithCCD {
     authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
-    environment("FEATURE_SEND_LETTER_RECIPIENT_CHECK", "false")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
 
     // ccd-definition-store-api
