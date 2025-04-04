@@ -13,11 +13,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class BulkPrintDocumentService {
+
+    private static final Set<String> PDF_CONVERTIBLE_EXTENSIONS = Set.of(".doc", ".docx", ".pdf");
+    private static final Set<String> WORD_DOCUMENT_EXTENSIONS = Set.of(".doc", ".docx");
 
     private final EvidenceManagementDownloadService service;
     private final DocumentConversionService documentConversionService;
@@ -43,8 +47,13 @@ public class BulkPrintDocumentService {
         if (caseDocument != null) {
             String documentFilename = caseDocument.getDocumentFilename();
             log.info("checking encryption for file {} for Case ID: {}", documentFilename, caseId);
+
+            if (!isPdfConvertible(documentFilename)) {
+                return;
+            }
+
             byte[] pdfBytes;
-            if (documentFilename.toLowerCase().endsWith(".doc") || documentFilename.toLowerCase().endsWith(".docx")) {
+            if (isWordDocument(documentFilename)) {
                 Document document = Document.builder().url(caseDocument.getDocumentUrl())
                     .binaryUrl(caseDocument.getDocumentBinaryUrl())
                     .fileName(caseDocument.getDocumentFilename())
@@ -77,5 +86,13 @@ public class BulkPrintDocumentService {
                 errors.add(errorMessage);
             }
         }
+    }
+
+    private boolean isPdfConvertible(String documentFilename) {
+        return PDF_CONVERTIBLE_EXTENSIONS.stream().anyMatch(documentFilename.toLowerCase()::endsWith);
+    }
+
+    private boolean isWordDocument(String documentFilename) {
+        return WORD_DOCUMENT_EXTENSIONS.stream().anyMatch(documentFilename.toLowerCase()::endsWith);
     }
 }

@@ -1120,7 +1120,7 @@ class NotificationServiceTest {
         notificationService.sendConsentGeneralEmail(finremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
-        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
     }
 
@@ -1130,7 +1130,7 @@ class NotificationServiceTest {
         notificationService.sendContestedGeneralEmail(finremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
-        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
+        verify(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
     }
 
