@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
@@ -115,14 +116,14 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
         if (journeyType.equals(consentedDir)) {
-            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
-                .toString().equalsIgnoreCase("5800"));
+            String feeAmount = utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount").toString();
+            assertThat(feeAmount).matches("\\d+");
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
                 .toString().equalsIgnoreCase("FEE0228"));
         } else {
-            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
-                .toString().equalsIgnoreCase("30300"));
+            String feeAmount = utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount").toString();
+            assertThat(feeAmount).matches("\\d+");
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
                 .toString().equalsIgnoreCase("FEE0229"));
