@@ -152,7 +152,6 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
         draftOrderService.populateDraftOrdersReviewCollection(finremCaseData, draftOrdersWrapper.getUploadAgreedDraftOrder(),
             newAgreedDraftOrderCollections);
 
-        draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
         if (OrderFiledBy.isIntervener(orderFiledBy)) {
             draftOrdersWrapper.appendIntvAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
         }
