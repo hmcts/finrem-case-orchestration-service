@@ -153,6 +153,10 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
             newAgreedDraftOrderCollections);
 
         draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
+        if (OrderFiledBy.isIntervener(orderFiledBy)) {
+            draftOrdersWrapper.appendIntvAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
+        }
+        draftOrdersWrapper.appendAgreedDraftOrderCollection(newAgreedDraftOrderCollections);
     }
 
     private void handleSuggestedDraftOrders(FinremCaseData finremCaseData, String userAuthorisation,
