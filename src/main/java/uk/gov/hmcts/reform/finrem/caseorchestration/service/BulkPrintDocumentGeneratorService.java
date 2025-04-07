@@ -38,8 +38,6 @@ public class BulkPrintDocumentGeneratorService {
     /**
      * Note: the order of documents you send to this service is the order in which they will print.
      */
-
-
     public UUID send(final BulkPrintRequest bulkPrintRequest,
                      final String recipient,
                      boolean isInternational,
@@ -62,7 +60,6 @@ public class BulkPrintDocumentGeneratorService {
         return sendLetterResponse.letterId;
     }
 
-
     private Map<String, Object> getAdditionalData(final String caseId,
                                                   final String recipient,
                                                   final boolean isInternational,
@@ -77,9 +74,9 @@ public class BulkPrintDocumentGeneratorService {
         log.info("isSendLetterDuplicateCheckEnabled {}, recipient is {} for Case ID: {}",
             featureToggleService.isSendLetterDuplicateCheckEnabled(), recipient, caseId);
         if (featureToggleService.isSendLetterDuplicateCheckEnabled()) {
-            additionalData.put(RECIPIENTS, new String[]{recipient});
+            additionalData.put(RECIPIENTS, List.of("%s:%s:%d".formatted(recipient, caseId, System.nanoTime())));
         } else {
-            additionalData.put(RECIPIENTS, new String[]{"%s:%d".formatted(recipient, System.nanoTime())});
+            additionalData.put(RECIPIENTS, List.of(recipient));
         }
         additionalData.put(IS_INTERNATIONAL, isInternational);
         log.info("sending additional data {}  party is {}, isInternational {}, and Case ID: {}",
