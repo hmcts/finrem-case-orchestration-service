@@ -42,8 +42,9 @@ public class FinremCaseDataTest {
 
     @Before
     public void setUpDefinitionFiles() {
+        log.info("Starting FinremCaseDataTest...");
         String branch = System.getenv("JENKINS_BRANCH");
-        if (isMaster(branch) || localMode) {
+        if (isMaster(branch)) {
             testEnabled = false;
         }
         if (!localMode) {
@@ -55,6 +56,10 @@ public class FinremCaseDataTest {
             if (contestedFileNameWithPath == null) {
                 contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
+        }
+        else {
+            consentedFileNameWithPath = retrieveFileName("ccd-config-local-consented", "definitions/consented/xlsx/ccd-config-local-consented-base.xlsx");
+            contestedFileNameWithPath = retrieveFileName("ccd-config-local-contested", "definitions/contested/xlsx/ccd-config-local-contested-base.xlsx");
         }
     }
 
