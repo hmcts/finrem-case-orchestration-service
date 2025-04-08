@@ -61,7 +61,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
                 batchSize,
                 caseTypeId,
                 getCaseListFileName(),
-                !secret.isEmpty());
+                secret!=null && !secret.isEmpty());
     }
 
     @Override
