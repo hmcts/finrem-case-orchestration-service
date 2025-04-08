@@ -50,8 +50,13 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        log.info("Getting case references for GeneralEmailDataFieldTask migration");
         String caseListFileName = getCaseListFileName();
+        log.info("Getting case references for GeneralEmailDataFieldTask migration from csv file {}", caseListFileName);
+        log.info("Decrypting csv file with secret key {}", secret);
+        if(secret.isEmpty()) {
+            log.error("Secret key is empty. Unable to decrypt the csv file. Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
+            return List.of();
+        }
 
         CaseReferenceCsvLoader csvLoader = new CaseReferenceCsvLoader();
         List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
