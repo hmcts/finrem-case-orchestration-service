@@ -58,8 +58,8 @@ public class FinremCaseDataTest {
             }
         }
         else {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-local-consented", "definitions/consented/xlsx/ccd-config-local-consented-base.xlsx");
-            contestedFileNameWithPath = retrieveFileName("ccd-config-local-contested", "definitions/contested/xlsx/ccd-config-local-contested-base.xlsx");
+            consentedFileNameWithPath = retrieveFileName("ccd-config-local-consented", "build/definitionsToBeImported");
+            contestedFileNameWithPath = retrieveFileName("ccd-config-local-contested", "build/definitionsToBeImported");
         }
     }
 
