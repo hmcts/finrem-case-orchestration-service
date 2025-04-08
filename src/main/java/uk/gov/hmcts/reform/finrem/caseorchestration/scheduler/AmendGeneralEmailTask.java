@@ -46,6 +46,23 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
     protected AmendGeneralEmailTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService, SystemUserService systemUserService,
                                     FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(csvLoader, ccdService, systemUserService, finremCaseDetailsMapper);
+
+        log.info("Starting AmendGeneralEmailTask Cron....\n" +
+                "TASK_NAME: {}\n" +
+                "SUMMARY: {}\n" +
+                "TASK_ENABLED: {}\n" +
+                "BATCH_SIZE: {}\n" +
+                "CASE_TYPE_ID: {}\n" +
+                "CSV_FILE: {}" +
+                "SECRET KEY EXIST: {}"
+                ,getTaskName(),
+                getSummary(),
+                taskEnabled,
+                batchSize,
+                getCaseType().getCcdType(),
+                getCaseListFileName(),
+                !secret.isEmpty());
+
     }
 
     @Override
