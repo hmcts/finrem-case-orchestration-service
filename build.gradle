@@ -361,7 +361,6 @@ bootWithCCD {
     authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
-    environment("FEATURE_SEND_LETTER_RECIPIENT_CHECK", "false")
     environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
 
     // ccd-definition-store-api
@@ -462,7 +461,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.7:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.8:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }

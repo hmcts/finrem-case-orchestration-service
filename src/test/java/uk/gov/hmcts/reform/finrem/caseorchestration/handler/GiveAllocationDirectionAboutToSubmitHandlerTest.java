@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -29,6 +30,9 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
     @Mock
     private CourtDetailsMapper courtDetailsMapper;
 
+    @Mock
+    private SelectedCourtService selectedCourtService;
+
     private ObjectMapper objectMapper;
 
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -37,7 +41,7 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
     public void setUp() {
         objectMapper = new ObjectMapper();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
-        handler = new GiveAllocationDirectionAboutToSubmitHandler(finremCaseDetailsMapper, courtDetailsMapper);
+        handler = new GiveAllocationDirectionAboutToSubmitHandler(finremCaseDetailsMapper, courtDetailsMapper, selectedCourtService);
     }
 
     @Test
@@ -49,7 +53,6 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenHandleAllocationDirection_thenCourtDetailsMapperCalled() {
-
         FinremCaseDetails caseDetails =
             FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
         FinremCaseDetails caseDetailsBefore =
@@ -61,5 +64,6 @@ public class GiveAllocationDirectionAboutToSubmitHandlerTest {
         handler.handle(callbackRequest, "AUTH");
 
         verify(courtDetailsMapper).getLatestAllocatedCourt(any(), any(), any());
+        verify(selectedCourtService).setSelectedCourtDetailsIfPresent(any(FinremCaseData.class));
     }
 }
