@@ -53,7 +53,7 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
                 "TASK_ENABLED: {}\n" +
                 "BATCH_SIZE: {}\n" +
                 "CASE_TYPE_ID: {}\n" +
-                "CSV_FILE: {}" +
+                "CSV_FILE: {}\n" +
                 "SECRET KEY EXIST: {}",
                 getTaskName(),
                 getSummary(),
