@@ -91,30 +91,30 @@ public class FinremCaseDataTest {
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
+            getFile(consentedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile(consentedFileNameWithPath),
+            getFile(contestedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath);
+        File configFile = getFile(consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
+        File configFile = getFile(contestedFileNameWithPath);
         validateState(configFile);
     }
 
@@ -174,9 +174,8 @@ public class FinremCaseDataTest {
         assert errors.isEmpty();
     }
 
-    private File getFile(String name, String fileNameWithPath) {
-        return localMode ? new File(classLoader.getResource(name).getFile())
-            : new File(fileNameWithPath);
+    private File getFile(String fileNameWithPath) {
+        return new File(fileNameWithPath);
     }
 
     private List<Field> getAllFields(Class<?> clazz) {
