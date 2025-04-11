@@ -30,8 +30,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
+
+    public static String CCD_CONFIG_CONTESTED_XLSX;
+
+    public static String CCD_CONFIG_CONSENTED_XLSX;
+
     public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
     public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
+    public static final String  CCD_CONFIG_LOCAL_CONSENTED_XLSX = "ccd-config-local-consented-base.xlsx";
+    public static final String  CCD_CONFIG_LOCAL_CONTESTED_XLSX = "ccd-config-local-contested-base.xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
 
@@ -42,19 +49,26 @@ public class FinremCaseDataTest {
 
     @Before
     public void setUpDefinitionFiles() {
+        log.info("Starting FinremCaseDataTest...");
         String branch = System.getenv("JENKINS_BRANCH");
-        if (isMaster(branch) || localMode) {
+        if (isMaster(branch)) {
             testEnabled = false;
         }
         if (!localMode) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-aat-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            if (consentedFileNameWithPath == null) {
-                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (branch != null && branch.contains("preview")) {
+                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-preview-consented.xlsx";
+                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-preview-contested.xlsx";
+            } else {
+                CCD_CONFIG_CONSENTED_XLSX = CCD_CONFIG_PROD_CONSENTED_XLSX;
+                CCD_CONFIG_CONTESTED_XLSX = CCD_CONFIG_PROD_CONTESTED_XLSX;
             }
-            contestedFileNameWithPath = retrieveFileName("ccd-config-aat-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            if (contestedFileNameWithPath == null) {
-                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            }
+            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+        } else {
+            CCD_CONFIG_CONSENTED_XLSX = CCD_CONFIG_LOCAL_CONSENTED_XLSX;
+            CCD_CONFIG_CONTESTED_XLSX = CCD_CONFIG_LOCAL_CONTESTED_XLSX;
+            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONSENTED_XLSX, "build/definitionsToBeImported");
+            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONTESTED_XLSX, "build/definitionsToBeImported");
         }
     }
 
@@ -77,30 +91,34 @@ public class FinremCaseDataTest {
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
+        log.error("contestedFileNameWithPath: {}", contestedFileNameWithPath);
+        log.error("CCD_CONFIG_CONTESTED_XLSX: {}", CCD_CONFIG_CONTESTED_XLSX);
+        System.out.println("contestedFileNameWithPath: " + contestedFileNameWithPath);
+        System.out.println("CCD_CONFIG_CONTESTED_XLSX: " + CCD_CONFIG_CONTESTED_XLSX);
+        List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
+            getFile(consentedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath),
-            getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile(consentedFileNameWithPath),
+            getFile(contestedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath);
+        File configFile = getFile(consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
+        File configFile = getFile(contestedFileNameWithPath);
         validateState(configFile);
     }
 
@@ -160,9 +178,8 @@ public class FinremCaseDataTest {
         assert errors.isEmpty();
     }
 
-    private File getFile(String name, String fileNameWithPath) {
-        return localMode ? new File(classLoader.getResource(name).getFile())
-            : new File(fileNameWithPath);
+    private File getFile(String fileNameWithPath) {
+        return new File(fileNameWithPath);
     }
 
     private List<Field> getAllFields(Class<?> clazz) {
