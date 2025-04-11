@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.UPLOAD_PARTY_RESPONDENT;
 
@@ -41,5 +43,9 @@ public enum OrderFiledBy {
         } else {
             throw new IllegalArgumentException("Unknown upload party: " + uploadParty);
         }
+    }
+
+    public static boolean isIntervener(OrderFiledBy orderFiledBy) {
+        return Arrays.asList(INTERVENER_1, INTERVENER_2, INTERVENER_3, INTERVENER_4).contains(orderFiledBy);
     }
 }

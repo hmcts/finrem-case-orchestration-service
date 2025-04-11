@@ -156,6 +156,10 @@ class JudgeApprovalResolver {
             .ifPresent(agreedDraftOrderCollections ->
                 processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
                     judgeApproval, userAuthorisation));
+        ofNullable(draftOrdersWrapper.getIntvAgreedDraftOrderCollection())
+            .ifPresent(agreedDraftOrderCollections ->
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
+                    judgeApproval, userAuthorisation));
     }
 
     private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
