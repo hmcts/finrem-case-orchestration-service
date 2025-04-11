@@ -353,7 +353,7 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
     }
 
     @Test
-    void testHandleClearsUploadedDraftOrdersAndSetsIsUnreviewedDocumentPresent() {
+    void givenSuggestedDraftoOrderUploaded_whenHandle_isUnreviewedDocumentDoesntChange() {
         String caseReference = "1727874196328932";
         FinremCaseData caseData = FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -364,6 +364,28 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
                 .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder().build())
                 .agreedDraftOrderCollection(agreedDraftOrdersCollection(List.of(LocalDateTime.now())))
                 .isUnreviewedDocumentPresent(YesOrNo.NO)
+                .build())
+            .build();
+        FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
+            CaseType.CONTESTED, caseData, SCHEDULING_AND_HEARING);
+
+        handler.handle(request, AUTH_TOKEN);
+
+        assertThat(caseData.getDraftOrdersWrapper().getUploadSuggestedDraftOrder()).isNull();
+        assertThat(caseData.getDraftOrdersWrapper().getUploadAgreedDraftOrder()).isNull();
+        assertThat(caseData.getDraftOrdersWrapper().getIsUnreviewedDocumentPresent()).isEqualTo(YesOrNo.NO);
+    }
+
+    @Test
+    void givenAgreedDraftoOrderUploaded_whenHandle_isUnreviewedDocumentIsSetToYes() {
+        String caseReference = "1727874196328932";
+        FinremCaseData caseData = FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION)
+                .uploadAgreedDraftOrder(UploadAgreedDraftOrder.builder()
+                    .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+                    .build())
+                .isUnreviewedDocumentPresent(null)
                 .build())
             .build();
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
