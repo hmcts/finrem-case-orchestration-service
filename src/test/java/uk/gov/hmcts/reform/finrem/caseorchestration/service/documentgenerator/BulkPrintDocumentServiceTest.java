@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -37,6 +38,7 @@ class BulkPrintDocumentServiceTest {
     private static final String FILE_BINARY_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ/binary";
     private static final String FILE_NAME = "abc.pdf";
     private static final String DOC_FILE_NAME = "abc.docx";
+    private static final String XLS_FILE_NAME = "abc.xlsx";
     public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
     private final byte[] someFlattenedBytes = "ainhsdcnoih_flattened".getBytes();
@@ -129,7 +131,7 @@ class BulkPrintDocumentServiceTest {
     }
 
     @Test
-    void validateEmptyUploadedFileThenDisplayMessage() throws IOException {
+    void validateEmptyUploadedFileThenDisplayMessage() {
         byte[] bytes = null;
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
@@ -138,6 +140,48 @@ class BulkPrintDocumentServiceTest {
 
         service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
         assertEquals("Uploaded document abc.pdf is empty.", errors.get(0));
+    }
+
+    @Test
+    void validateEncryptionOnUploadedDocumentWhenXlsFile() {
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, XLS_FILE_NAME, FILE_BINARY_URL);
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void validateEncryptionOnUploadedDocumentWhenPdfFile() throws IOException {
+        String fixture = "/fixtures/general-application.pdf";
+        byte[] bytes = loadResource(fixture);
+
+        CaseDocument caseDocument = CaseDocument.builder()
+            .documentUrl(FILE_URL)
+            .documentBinaryUrl(FILE_BINARY_URL)
+            .documentFilename(fixture)
+            .build();
+
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+
+        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH);
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void validateEncryptionOnUploadedDocumentWhenOtherFile() {
+        CaseDocument caseDocument = CaseDocument.builder()
+            .documentUrl(FILE_URL)
+            .documentBinaryUrl(FILE_BINARY_URL)
+            .documentFilename("abc.png")
+            .build();
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        assertThat(errors).isEmpty();
     }
 
     private byte[] loadResource(String testPdf) throws IOException {
