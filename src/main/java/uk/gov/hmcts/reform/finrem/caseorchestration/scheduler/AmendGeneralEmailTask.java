@@ -66,7 +66,6 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
                 getCaseListFileName(),
                 secret!=null && !secret.isEmpty());
 
-        log.info("Decrypting csv file with secret key {}", secret);
         if(secret.isEmpty()) {
             log.error("Secret key is empty. Unable to decrypt the csv file. Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
             return List.of();
