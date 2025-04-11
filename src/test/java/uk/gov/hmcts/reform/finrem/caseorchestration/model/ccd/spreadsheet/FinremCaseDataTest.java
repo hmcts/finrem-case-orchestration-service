@@ -91,6 +91,8 @@ public class FinremCaseDataTest {
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
+        System.out.println("contestedFileNameWithPath: " + contestedFileNameWithPath);
+        System.out.println("CCD_CONFIG_CONTESTED_XLSX: " + CCD_CONFIG_CONTESTED_XLSX);
         List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
             getFile(consentedFileNameWithPath));
         validateConfig(configFiles);
