@@ -32,11 +32,11 @@ public class UploadAgreedDraftOrder {
     @JsonProperty("judgeKnownAtHearing")
     private YesOrNo judgeKnownAtHearing;
 
-    @JsonProperty("test")
+    @JsonProperty("modifyPrevious")
     private String judge;
 
-    @JsonProperty("randomjavafield")
-    private DynamicRadioList randomjavafield;
+    @JsonProperty("randomJavaField")
+    private DynamicRadioList randomJavaField;
 
     @JsonProperty("uploadParty")
     private DynamicRadioList uploadParty;

@@ -99,8 +99,8 @@ public class FinremCaseDataTest {
         assumeTrue(testEnabled);
         log.error("contestedFileNameWithPath: {}", contestedFileNameWithPath);
         log.error("CCD_CONFIG_CONTESTED_XLSX: {}", CCD_CONFIG_CONTESTED_XLSX);
-        System.out.println("contestedFileNameWithPath: " + contestedFileNameWithPath);
-        System.out.println("CCD_CONFIG_CONTESTED_XLSX: " + CCD_CONFIG_CONTESTED_XLSX);
+        log.info("contestedFileNameWithPath: " + contestedFileNameWithPath);
+        log.info("CCD_CONFIG_CONTESTED_XLSX: " + CCD_CONFIG_CONTESTED_XLSX);
         List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
             getFile(consentedFileNameWithPath));
         validateConfig(configFiles);
