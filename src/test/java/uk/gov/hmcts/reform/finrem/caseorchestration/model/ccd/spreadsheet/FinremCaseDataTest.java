@@ -49,7 +49,6 @@ public class FinremCaseDataTest {
 
     @Before
     public void setUpDefinitionFiles() {
-        log.info("Starting FinremCaseDataTest...");
         String branch = System.getenv("JENKINS_BRANCH");
         if (isMaster(branch)) {
             testEnabled = false;
@@ -97,10 +96,6 @@ public class FinremCaseDataTest {
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
-        log.error("contestedFileNameWithPath: {}", contestedFileNameWithPath);
-        log.error("CCD_CONFIG_CONTESTED_XLSX: {}", CCD_CONFIG_CONTESTED_XLSX);
-        log.info("contestedFileNameWithPath: " + contestedFileNameWithPath);
-        log.info("CCD_CONFIG_CONTESTED_XLSX: " + CCD_CONFIG_CONTESTED_XLSX);
         List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
             getFile(consentedFileNameWithPath));
         validateConfig(configFiles);
