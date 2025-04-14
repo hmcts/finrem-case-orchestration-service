@@ -55,15 +55,21 @@ public class FinremCaseDataTest {
             testEnabled = false;
         }
         if (!localMode) {
-            if (branch != null && branch.contains("preview")) {
-                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-preview-consented.xlsx";
-                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-preview-contested.xlsx";
+            consentedFileNameWithPath = retrieveFileName("ccd-config-aat-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath != null) {
+                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-aat-consented";
             } else {
-                CCD_CONFIG_CONSENTED_XLSX = CCD_CONFIG_PROD_CONSENTED_XLSX;
-                CCD_CONFIG_CONTESTED_XLSX = CCD_CONFIG_PROD_CONTESTED_XLSX;
+                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-preview-consented";
             }
-            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+
+            contestedFileNameWithPath = retrieveFileName("ccd-config-aat-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath != null) {
+                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-aat-contested";
+            } else {
+                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-preview-contested";
+            }
         } else {
             CCD_CONFIG_CONSENTED_XLSX = CCD_CONFIG_LOCAL_CONSENTED_XLSX;
             CCD_CONFIG_CONTESTED_XLSX = CCD_CONFIG_LOCAL_CONTESTED_XLSX;
@@ -203,4 +209,3 @@ public class FinremCaseDataTest {
         return false;
     }
 }
-
