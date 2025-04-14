@@ -41,8 +41,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
@@ -1122,26 +1120,6 @@ public class NotificationService {
         log.info("Received request for notification email for Contested general order, Case ID : {}",
             notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
-    }
-
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendContestedGeneralApplicationReferToJudgeEmail(CaseDetails caseDetails) {
-        NotificationRequest judgeNotificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        judgeNotificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
-        if (caseDetails.getData().get(GENERAL_APPLICATION_REFERRED_DETAIL) != null) {
-            judgeNotificationRequest.setGeneralEmailBody(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REFERRED_DETAIL)));
-        }
-        log.info("Received request for notification email for Contested general application refer to judge, Case ID : {}",
-            judgeNotificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(judgeNotificationRequest, FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE);
     }
 
     public void sendContestedGeneralApplicationReferToJudgeEmail(FinremCaseDetails caseDetails) {
