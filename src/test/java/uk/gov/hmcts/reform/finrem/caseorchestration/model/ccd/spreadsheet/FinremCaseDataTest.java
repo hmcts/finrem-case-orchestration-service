@@ -29,11 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 public class FinremCaseDataTest {
 
-    ClassLoader classLoader = this.getClass().getClassLoader();
+    public static final String CCD_CONFIG_AAT_CONTESTED_XLSX = "ccd-config-aat-contested";
+    public static final String CCD_CONFIG_AAT_CONSENTED_XLSX = "ccd-config-aat-consented";
 
-    public static String CCD_CONFIG_CONTESTED_XLSX;
-
-    public static String CCD_CONFIG_CONSENTED_XLSX;
+    public static final String CCD_CONFIG_PREVIEW_CONTESTED_XLSX = "ccd-config-preview-contested";
+    public static final String CCD_CONFIG_PREVIEW_CONSENTED_XLSX = "ccd-config-preview-consented";
 
     public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
     public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
@@ -44,7 +44,7 @@ public class FinremCaseDataTest {
 
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = System.getenv("JENKINS_BRANCH") == null;
+    private final boolean localMode = System.getenv("JENKINS_BRANCH") == null;
     private boolean testEnabled = true;
 
     @Before
@@ -54,26 +54,17 @@ public class FinremCaseDataTest {
             testEnabled = false;
         }
         if (!localMode) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-aat-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            if (consentedFileNameWithPath != null) {
-                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-aat-consented";
-            } else {
-                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-                CCD_CONFIG_CONSENTED_XLSX = "ccd-config-preview-consented";
+            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_AAT_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath == null) {
+                consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             }
-
-            contestedFileNameWithPath = retrieveFileName("ccd-config-aat-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            if (contestedFileNameWithPath != null) {
-                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-aat-contested";
-            } else {
-                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-                CCD_CONFIG_CONTESTED_XLSX = "ccd-config-preview-contested";
+            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_AAT_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath == null) {
+                contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
         } else {
-            CCD_CONFIG_CONSENTED_XLSX = CCD_CONFIG_LOCAL_CONSENTED_XLSX;
-            CCD_CONFIG_CONTESTED_XLSX = CCD_CONFIG_LOCAL_CONTESTED_XLSX;
-            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONSENTED_XLSX, "build/definitionsToBeImported");
-            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_CONTESTED_XLSX, "build/definitionsToBeImported");
+            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONSENTED_XLSX, "build/definitionsToBeImported");
+            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONTESTED_XLSX, "build/definitionsToBeImported");
         }
     }
 
