@@ -34,7 +34,6 @@ public class FinremCaseDataTest {
 
     public static final String CCD_CONFIG_PREVIEW_CONTESTED_XLSX = "ccd-config-preview-contested";
     public static final String CCD_CONFIG_PREVIEW_CONSENTED_XLSX = "ccd-config-preview-consented";
-
     public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
     public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
     public static final String  CCD_CONFIG_LOCAL_CONSENTED_XLSX = "ccd-config-local-consented-base.xlsx";
