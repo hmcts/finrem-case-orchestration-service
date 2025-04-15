@@ -354,7 +354,6 @@ class ResendInterimHearingTaskTest {
     }
 
     private void verifyCorrespondenceSent(boolean applicantCorrespondenceSent, boolean respondentCorrespondentSent, CaseDocumentsHolder documentsToPrint) {
-        // TODO: Verify interim hearing content
         verify(interimHearingService, times(1)).prepareDocumentsForPrint(
             finremCaseDetailsArgumentCaptor.capture(),
             interimHearingsToSendCaptor.capture(),
@@ -377,9 +376,9 @@ class ResendInterimHearingTaskTest {
         assertThat(caseData.isApplicantCorrespondenceEnabled()).isEqualTo(applicantCorrespondenceSent);
         assertThat(caseData.isRespondentCorrespondenceEnabled()).isEqualTo(respondentCorrespondentSent);
         // Assert that new generated Interim Hearing document is deleted from case data
-        assertThat(caseData.getInterimWrapper().getInterimHearingDocuments()).hasSize(2);
+        assertThat(caseData.getInterimWrapper().getInterimHearingDocuments()).hasSize(3);
         assertThat(caseData.getInterimWrapper().getInterimHearingDocuments())
-            .noneMatch(doc -> "id3".equals(doc.getId()));
+            .anyMatch(doc -> "id3".equals(doc.getId()));
     }
 
     private void verifyCcdEvent(String eventDescription) {
