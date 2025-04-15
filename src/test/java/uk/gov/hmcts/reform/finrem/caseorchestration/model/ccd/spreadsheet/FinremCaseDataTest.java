@@ -54,24 +54,38 @@ public class FinremCaseDataTest {
             testEnabled = false;
         }
         if (!localMode) {
-            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_AAT_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            if (consentedFileNameWithPath == null) {
-                consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            }
-            if (consentedFileNameWithPath == null) {
-                consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_PROD_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            }
-            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_AAT_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            if (contestedFileNameWithPath == null) {
-                contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            }
-            if (contestedFileNameWithPath == null) {
-                contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_PROD_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            }
+            consentedFileNameWithPath = retrieveFirstAvailableFile(
+                new String[] {
+                    CCD_CONFIG_AAT_CONSENTED_XLSX,
+                    CCD_CONFIG_PREVIEW_CONSENTED_XLSX,
+                    CCD_CONFIG_PROD_CONSENTED_XLSX
+                },
+                DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX
+            );
+
+            contestedFileNameWithPath = retrieveFirstAvailableFile(
+                new String[] {
+                    CCD_CONFIG_AAT_CONTESTED_XLSX,
+                    CCD_CONFIG_PREVIEW_CONTESTED_XLSX,
+                    CCD_CONFIG_PROD_CONTESTED_XLSX
+                },
+                DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX
+            );
         } else {
-            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONSENTED_XLSX, "build/definitionsToBeImported");
-            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONTESTED_XLSX, "build/definitionsToBeImported");
+            String localPath = "build/definitionsToBeImported";
+            consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONSENTED_XLSX, localPath);
+            contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONTESTED_XLSX, localPath);
         }
+    }
+
+    private String retrieveFirstAvailableFile(String[] configNames, String path) {
+        for (String config : configNames) {
+            String result = retrieveFileName(config, path);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private static boolean isMaster(String branch) {
