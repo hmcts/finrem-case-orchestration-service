@@ -58,9 +58,15 @@ public class FinremCaseDataTest {
             if (consentedFileNameWithPath == null) {
                 consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             }
+            if (consentedFileNameWithPath == null) {
+                consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_PROD_CONSENTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            }
             contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_AAT_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             if (contestedFileNameWithPath == null) {
                 contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_PREVIEW_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            }
+            if (contestedFileNameWithPath == null) {
+                contestedFileNameWithPath = retrieveFileName(CCD_CONFIG_PROD_CONTESTED_XLSX, DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
         } else {
             consentedFileNameWithPath = retrieveFileName(CCD_CONFIG_LOCAL_CONSENTED_XLSX, "build/definitionsToBeImported");
