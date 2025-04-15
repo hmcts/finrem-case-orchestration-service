@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <cve>CVE-2024-45772</cve>
+        <notes>Lucene used via Elasticsearch 7.17.28; known and controlled usage</notes>
+    </suppress>
 </suppressions>
