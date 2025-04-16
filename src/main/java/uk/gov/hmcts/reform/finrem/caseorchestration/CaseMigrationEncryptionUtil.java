@@ -47,10 +47,10 @@ public class CaseMigrationEncryptionUtil implements CommandLineRunner {
 
         if ("encrypt".equalsIgnoreCase(operation)) {
             encryptFile(inputFilePath, outputFilePath, key);
-            log.info("File encrypted successfully.");
+            log.info("File encrypted successfully. {} -> {}", inputFilePath, outputFilePath);
         } else if ("decrypt".equalsIgnoreCase(operation)) {
             decryptFile(inputFilePath, outputFilePath, key);
-            log.info("File decrypted successfully.");
+            log.info("File decrypted successfully. {} -> {}", inputFilePath, outputFilePath);
         } else {
             String errorMessage = "Invalid operation. Use 'encrypt' or 'decrypt'.";
             log.error(errorMessage);
