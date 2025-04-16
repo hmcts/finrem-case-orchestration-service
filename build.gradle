@@ -346,15 +346,6 @@ task buildCCDXlsx(type: Exec) {
 }
 
 bootWithCCD {
-    //Run FinremCaseDataTest
-    dependsOn(tasks.create("runFinremCaseDataTest", Test) {
-        useJUnitPlatform()
-        include '**/FinremCaseDataTest.class'
-        testLogging {
-            exceptionFormat = 'full'
-        }
-    })
-
     dependsOn(buildCCDXlsx)
 
     doFirst() {
