@@ -30,9 +30,9 @@ import java.util.Objects;
  * To enable the task to execute set environment variables:
  * <ul>
  *     <li>CRON_RESEND_LIST_FOR_HEARING_ENABLED=true</li>
- *     <li>TASK_NAME=ResendListForHearingTask</li>
- *     <li>CRON_RESEND_LIST_FOR_HEARING_CASE_TYPE_ID=Case type for cases in the file</li>
- *     <li>CRON_RESEND_LIST_FOR_HEARING_CASE_LIST_FILENAME=The encrypted case references filename</li>
+ *     <li>TASK_NAME=ResendInterimHearingTask</li>
+ *     <li>CRON_RESEND_INTERIM_HEARING_CASE_TYPE_ID=Case type for cases in the file</li>
+ *     <li>CRON_RESEND_INTERIM_HEARING_CASE_LIST_FILENAME=The encrypted case references filename</li>
  *     <li>CRON_CSV_FILE_DECRYPT_KEY=Key to decrypted case references file</li>
  * </ul>
  */
