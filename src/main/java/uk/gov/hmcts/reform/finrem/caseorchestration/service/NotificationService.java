@@ -2,13 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
@@ -722,24 +717,14 @@ public class NotificationService {
         final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for consented general email for Case ID: {}",
             caseDetails.getId());
-        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
+        final EmailTemplateNames templateName = hasAttachment ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
-    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
-                                                         NotificationRequest notificationRequest,
-                                                         String auth) {
+    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest, String auth) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
-            ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(caseDocument.getDocumentBinaryUrl(),
-                auth);
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
-                    caseDocument.getDocumentFilename(), caseDetails.getId());
-                throw new HttpClientErrorException(response.getStatusCode());
-            }
-            ByteArrayResource resource = (ByteArrayResource) response.getBody();
-            notificationRequest.setDocumentContents((resource != null) ? resource.getByteArray() : new byte[0]);
+            notificationRequest.setDocumentContents(evidenceManagementDownloadService.getByteArray(caseDocument, auth));
             return true;
         }
         return false;
@@ -768,7 +753,7 @@ public class NotificationService {
         final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for contested general email for Case ID: {}",
             caseDetails.getId());
-        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+        final EmailTemplateNames templateName = hasAttachment ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
         emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
