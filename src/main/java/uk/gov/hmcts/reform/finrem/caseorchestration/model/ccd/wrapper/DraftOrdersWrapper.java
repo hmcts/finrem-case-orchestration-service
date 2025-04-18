@@ -59,6 +59,8 @@ public class DraftOrdersWrapper implements HasCaseDocument {
     private List<AgreedDraftOrderCollection> agreedDraftOrderCollection;
     @JsonProperty("suggestedDraftOrderCollection")
     private List<SuggestedDraftOrderCollection> suggestedDraftOrderCollection;
+    @JsonProperty("intvAgreedDraftOrderCollection")
+    private List<AgreedDraftOrderCollection> intvAgreedDraftOrderCollection;
 
     private YesOrNo showWarningMessageToJudge;
 
@@ -113,6 +115,13 @@ public class DraftOrdersWrapper implements HasCaseDocument {
             agreedDraftOrderCollection = new ArrayList<>();
         }
         agreedDraftOrderCollection.addAll(newAgreedDraftOrderCollection);
+    }
+
+    public void appendIntvAgreedDraftOrderCollection(List<AgreedDraftOrderCollection> newAgreedDraftOrderCollection) {
+        if (intvAgreedDraftOrderCollection == null) {
+            intvAgreedDraftOrderCollection = new ArrayList<>();
+        }
+        intvAgreedDraftOrderCollection.addAll(newAgreedDraftOrderCollection);
     }
 
     public void appendDraftOrdersReviewCollection(List<DraftOrdersReviewCollection> newDraftOrdersReviewCollection) {

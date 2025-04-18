@@ -190,6 +190,8 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
         hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getAgreedDraftOrderCollection(),
             agreedOrderCollector, APPROVED_BY_JUDGE::equals);
+        hasApprovableCollectionReader.collectAgreedDraftOrders(caseData.getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection(),
+            agreedOrderCollector, APPROVED_BY_JUDGE::equals);
 
         getApprovedDocumentsToProcess(caseData)
             .forEach(unprocessedApprovedOrder ->
