@@ -160,7 +160,7 @@ class AdditionalHearingDocumentServiceTest {
 
         assertThat(data).extracting("CourtName").isEqualTo("Chesterfield County Court");
         assertThat(data).extracting("CourtAddress").isEqualTo("Tapton Lane, Chesterfield S41 7TW");
-        assertThat(data).extracting("CourtPhone").isEqualTo("0115 910 3504");
+        assertThat(data).extracting("CourtPhone").isEqualTo("0300 123 5577");
         assertThat(data).extracting("CourtEmail").isEqualTo("FRCNottingham@justice.gov.uk");
 
         assertThat(data).extracting(ADDITIONAL_HEARING_DOCUMENT_COLLECTION).isNotNull();
