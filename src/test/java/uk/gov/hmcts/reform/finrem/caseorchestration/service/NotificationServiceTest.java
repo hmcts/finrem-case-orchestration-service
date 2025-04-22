@@ -130,7 +130,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER_REVIEW_OVERDUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
@@ -1645,14 +1644,6 @@ class NotificationServiceTest {
             eq(FR_CONTESTED_DRAFT_ORDER_READY_FOR_REVIEW_ADMIN));
         NotificationRequest actual = argumentCaptor.getValue();
         assertEquals("fr_applicant_solicitor1@mailinator.com", actual.getNotificationEmail());
-    }
-
-    @Test
-    void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
-        CallbackRequest request = getConsentedCallbackRequest();
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(request.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(request.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(any(), eq(FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE));
     }
 
     @Test
