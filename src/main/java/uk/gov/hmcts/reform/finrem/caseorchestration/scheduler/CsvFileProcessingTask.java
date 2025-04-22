@@ -9,8 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 import java.util.List;
 
 public abstract class CsvFileProcessingTask extends BaseTask {
-
-    private final CaseReferenceCsvLoader csvLoader;
+    protected final CaseReferenceCsvLoader csvLoader;
 
     protected CsvFileProcessingTask(CaseReferenceCsvLoader csvLoader,
                                     CcdService ccdService,
@@ -21,8 +20,7 @@ public abstract class CsvFileProcessingTask extends BaseTask {
     }
 
     protected List<CaseReference> getCaseReferences() {
-        List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(getCaseListFileName());
-        return caseReferences;
+        return csvLoader.loadCaseReferenceList(getCaseListFileName());
     }
 
     protected abstract String getCaseListFileName();
