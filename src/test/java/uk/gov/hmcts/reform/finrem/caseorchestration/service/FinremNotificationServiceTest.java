@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
@@ -44,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -412,8 +412,6 @@ class FinremNotificationServiceTest {
 
     @Test
     void sendGeneralEmailConsented() {
-        lenient().when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
-            .thenReturn(ResponseEntity.ok().build());
         notificationService.sendConsentGeneralEmail(consentedFinremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(consentedFinremCaseDetails);
@@ -426,8 +424,6 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
-        lenient().when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
-            .thenReturn(ResponseEntity.ok().build());
         notificationService.sendConsentGeneralEmail(caseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -440,8 +436,8 @@ class FinremNotificationServiceTest {
         defaultFinremCaseData.getGeneralEmailWrapper()
             .setGeneralEmailUploadedDocument(CaseDocument.builder().documentBinaryUrl("binaryUrl").build());
         FinremCaseDetails caseDetails = getConsentedFinremCaseDetails(defaultFinremCaseData);
-        lenient().when(evidenceManagementDownloadService.downloadInResponseEntity(anyString(), anyString()))
-            .thenReturn(ResponseEntity.badRequest().build());
+        doThrow(HttpClientErrorException.class)
+            .when(evidenceManagementDownloadService).getByteArray(any(CaseDocument.class), anyString());
 
         assertThatThrownBy(() -> notificationService.sendConsentGeneralEmail(caseDetails, AUTH_TOKEN))
             .isInstanceOf(HttpClientErrorException.class);
