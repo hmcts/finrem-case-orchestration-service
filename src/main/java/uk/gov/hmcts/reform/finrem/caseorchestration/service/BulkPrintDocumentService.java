@@ -55,7 +55,7 @@ public class BulkPrintDocumentService {
             if (isWordDocument(documentFilename)) {
                 handleDocFile(caseDocument, auth, errors, documentFilename);
             } else if (documentFilename.toLowerCase().endsWith(".pdf")) {
-                handlePdfFile(caseDocument, auth, errors, documentFilename, caseId);
+                handlePdfFile(caseDocument, auth, errors, documentFilename);
             }
         }
     }
@@ -70,7 +70,7 @@ public class BulkPrintDocumentService {
         checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
     }
 
-    private void handlePdfFile(CaseDocument caseDocument, String auth, List<String> errors, String documentFilename, String caseId) {
+    private void handlePdfFile(CaseDocument caseDocument, String auth, List<String> errors, String documentFilename) {
         byte[] pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
 
         if (pdfBytes != null) {
