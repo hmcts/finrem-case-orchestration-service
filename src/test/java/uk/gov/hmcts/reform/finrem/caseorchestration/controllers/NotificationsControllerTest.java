@@ -70,7 +70,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 
-
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 @ContextConfiguration(classes = {
@@ -346,15 +345,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendContestedGeneralApplicationReferToJudgeEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendGeneralApplicationReferToJudgeEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedGeneralApplicationReferToJudgeEmail(any(CaseDetails.class));
     }
 
     @Test

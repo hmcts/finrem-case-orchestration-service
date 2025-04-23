@@ -28,8 +28,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class BulkPrintDocumentServiceTest {
@@ -50,10 +52,9 @@ class BulkPrintDocumentServiceTest {
     @Mock
     private DocumentConversionService documentConversionService;
 
-
     @Test
     void downloadDocuments() {
-        when(evidenceManagementService.download(FILE_URL, AUTH)).thenReturn(someBytes);
+        when(evidenceManagementService.download(FILE_URL, AUTH_TOKEN)).thenReturn(someBytes);
         when(documentConversionService.flattenPdfDocument(someBytes)).thenReturn(someFlattenedBytes);
 
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
@@ -63,8 +64,8 @@ class BulkPrintDocumentServiceTest {
                 .build()))
             .build();
 
-        List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH);
-        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
+        List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
+        assertThat(result).containsExactly(someFlattenedBytes);
     }
 
     @Test
@@ -73,17 +74,17 @@ class BulkPrintDocumentServiceTest {
             .binaryUrl(FILE_BINARY_URL)
             .fileName(DOC_FILE_NAME)
             .build();
-        when(documentConversionService.convertDocumentToPdf(document, AUTH)).thenReturn(someBytes);
+        when(documentConversionService.convertDocumentToPdf(document, AUTH_TOKEN)).thenReturn(someBytes);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, DOC_FILE_NAME, FILE_BINARY_URL);
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertTrue(errors.get(0).contains("Failed to parse the documents for abc.docx"));
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+        assertThat(errors).first().matches(str -> str.startsWith("Failed to parse the documents for abc.docx"));
     }
 
     @Test
     void validateEncryptionOnUploadedDocumentWhenInvalidByteSupplied() {
-        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(someBytes);
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(someBytes);
         when(documentConversionService.flattenPdfDocument(someBytes)).thenReturn(someFlattenedBytes);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
         BulkPrintRequest bulkPrintRequest = BulkPrintRequest.builder()
@@ -93,13 +94,12 @@ class BulkPrintDocumentServiceTest {
                 .build()))
             .build();
 
-        List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH);
-        assertThat(result.get(0), is(equalTo(someFlattenedBytes)));
+        List<byte[]> result = service.downloadDocuments(bulkPrintRequest, AUTH_TOKEN);
+        assertThat(result).containsExactly(someFlattenedBytes);
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Failed to parse the documents for abc.pdf; Error: End-of-File, expected line at offset 11",
-            errors.get(0));
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+        assertThat(errors).first().isEqualTo("Failed to parse the documents for abc.pdf; Error: End-of-File, expected line at offset 11");
     }
 
     @Test
@@ -108,12 +108,14 @@ class BulkPrintDocumentServiceTest {
         byte[] bytes = loadResource(fixture);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
-        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(bytes);
         List<String> errors = new ArrayList<>();
 
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Uploaded document 'abc.pdf' contains some kind of encryption. "
-            + "Please remove encryption before uploading or upload another document.", errors.get(0));
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+        assertThat(errors).first().isEqualTo(
+            "Uploaded document 'abc.pdf' contains some kind of encryption. "
+                + "Please remove encryption before uploading or upload another document."
+        );
     }
 
     @Test
@@ -122,12 +124,14 @@ class BulkPrintDocumentServiceTest {
         byte[] bytes = loadResource(fixture);
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
-        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(bytes);
         List<String> errors = new ArrayList<>();
 
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Uploaded document 'abc.pdf' is password protected. "
-            + "Please remove password and try uploading again.", errors.get(0));
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+        assertThat(errors).first().isEqualTo(
+            "Uploaded document 'abc.pdf' is password protected. "
+                + "Please remove password and try uploading again."
+        );
     }
 
     @Test
@@ -135,11 +139,11 @@ class BulkPrintDocumentServiceTest {
         byte[] bytes = null;
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
-        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(bytes);
         List<String> errors = new ArrayList<>();
 
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
-        assertEquals("Uploaded document abc.pdf is empty.", errors.get(0));
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+        assertThat(errors).first().isEqualTo("Uploaded document abc.pdf is empty.");
     }
 
     @Test
@@ -202,26 +206,47 @@ class BulkPrintDocumentServiceTest {
         "test.PDF"
     })
     void validateEncryptionOnUploadedDocumentGivenMixedFilenameExtensions(String filename) {
-
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, filename, FILE_BINARY_URL);
         Document document = Document.builder().url(FILE_URL)
             .binaryUrl(FILE_BINARY_URL)
             .fileName(filename)
             .build();
 
-        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
-            when(documentConversionService.convertDocumentToPdf(document, AUTH)).thenReturn(someBytes);
+        String lowerCaseFilename = filename.toLowerCase();
+        if (lowerCaseFilename.endsWith(".doc") || lowerCaseFilename.endsWith(".docx")) {
+            when(documentConversionService.convertDocumentToPdf(document, AUTH_TOKEN)).thenReturn(someBytes);
         } else {
-            when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(someBytes);
+            when(evidenceManagementService.download(FILE_BINARY_URL, AUTH_TOKEN)).thenReturn(someBytes);
         }
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
 
-        if (filename.toLowerCase().endsWith(".doc") || filename.toLowerCase().endsWith(".docx")) {
-            verify(documentConversionService).convertDocumentToPdf(document, AUTH);
+        if (lowerCaseFilename.endsWith(".doc") || lowerCaseFilename.endsWith(".docx")) {
+            verify(documentConversionService).convertDocumentToPdf(document, AUTH_TOKEN);
         } else {
-            verify(evidenceManagementService).download(caseDocument.getDocumentBinaryUrl(), AUTH);
+            verify(evidenceManagementService).download(caseDocument.getDocumentBinaryUrl(), AUTH_TOKEN);
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "test.png",
+        "test.jpg",
+        "test.PNG",
+        "test.JPG"
+    })
+    void shouldNotValidateEncryptionOnUploadedDocumentGivenMixedFilenameExtensions(String filename) {
+        CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, filename, FILE_BINARY_URL);
+        Document document = Document.builder().url(FILE_URL)
+            .binaryUrl(FILE_BINARY_URL)
+            .fileName(filename)
+            .build();
+
+        List<String> errors = new ArrayList<>();
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH_TOKEN);
+
+        verify(documentConversionService, never()).convertDocumentToPdf(document, AUTH_TOKEN);
+        verify(evidenceManagementService, never()).download(caseDocument.getDocumentBinaryUrl(), AUTH_TOKEN);
     }
 }
