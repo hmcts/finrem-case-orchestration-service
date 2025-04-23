@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -23,11 +24,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +37,6 @@ class BulkPrintDocumentServiceTest {
     private static final String FILE_NAME = "abc.pdf";
     private static final String DOC_FILE_NAME = "abc.docx";
     private static final String XLS_FILE_NAME = "abc.xlsx";
-    public static final String AUTH = "auth";
     private final byte[] someBytes = "ainhsdcnoih".getBytes();
     private final byte[] someFlattenedBytes = "ainhsdcnoih_flattened".getBytes();
     @InjectMocks
@@ -151,7 +146,7 @@ class BulkPrintDocumentServiceTest {
         CaseDocument caseDocument = TestSetUpUtils.caseDocument(FILE_URL, XLS_FILE_NAME, FILE_BINARY_URL);
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, TestConstants.AUTH_TOKEN);
         assertThat(errors).isEmpty();
     }
 
@@ -166,12 +161,12 @@ class BulkPrintDocumentServiceTest {
             .documentFilename(fixture)
             .build();
 
-        when(evidenceManagementService.download(FILE_BINARY_URL, AUTH)).thenReturn(bytes);
+        when(evidenceManagementService.download(FILE_BINARY_URL, TestConstants.AUTH_TOKEN)).thenReturn(bytes);
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, TestConstants.AUTH_TOKEN);
 
-        verify(evidenceManagementService).download(FILE_BINARY_URL, AUTH);
+        verify(evidenceManagementService).download(FILE_BINARY_URL, TestConstants.AUTH_TOKEN);
         assertThat(errors).isEmpty();
     }
 
@@ -184,7 +179,7 @@ class BulkPrintDocumentServiceTest {
             .build();
 
         List<String> errors = new ArrayList<>();
-        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, AUTH);
+        service.validateEncryptionOnUploadedDocument(caseDocument, "1234", errors, TestConstants.AUTH_TOKEN);
         assertThat(errors).isEmpty();
     }
 
