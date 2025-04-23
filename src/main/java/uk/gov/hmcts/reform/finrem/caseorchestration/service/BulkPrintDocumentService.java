@@ -58,6 +58,7 @@ public class BulkPrintDocumentService {
                     .binaryUrl(caseDocument.getDocumentBinaryUrl())
                     .fileName(caseDocument.getDocumentFilename())
                     .build();
+            }
 
             if (documentFilename.toLowerCase().endsWith(".doc") || documentFilename.toLowerCase().endsWith(".docx")) {
                 handleDocFile(caseDocument, auth, errors, documentFilename);
