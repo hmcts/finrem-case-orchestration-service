@@ -51,7 +51,6 @@ public class BulkPrintDocumentService {
             if (!isPdfConvertible(documentFilename)) {
                 return;
             }
-
             if (isWordDocument(documentFilename)) {
                 handleDocFile(caseDocument, auth, errors, documentFilename);
             } else if (documentFilename.toLowerCase().endsWith(".pdf")) {
