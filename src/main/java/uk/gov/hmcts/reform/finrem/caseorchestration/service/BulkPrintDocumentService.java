@@ -52,15 +52,7 @@ public class BulkPrintDocumentService {
                 return;
             }
 
-            byte[] pdfBytes;
             if (isWordDocument(documentFilename)) {
-                Document document = Document.builder().url(caseDocument.getDocumentUrl())
-                    .binaryUrl(caseDocument.getDocumentBinaryUrl())
-                    .fileName(caseDocument.getDocumentFilename())
-                    .build();
-            }
-
-            if (documentFilename.toLowerCase().endsWith(".doc") || documentFilename.toLowerCase().endsWith(".docx")) {
                 handleDocFile(caseDocument, auth, errors, documentFilename);
             } else if (documentFilename.toLowerCase().endsWith(".pdf")) {
                 handlePdfFile(caseDocument, auth, errors, documentFilename, caseId);
