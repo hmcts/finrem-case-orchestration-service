@@ -1,0 +1,27 @@
+#!/bin/bash
+
+start_time=$(date +%s)
+echo "Running pre-push checks..."
+
+#Run the definitions script
+./bin/build-finrem-xlxs-definitions.sh
+if [[ $? -ne 0 ]]; then
+    echo "Build script failed. Aborting push."
+    exit 1
+fi
+
+#Run the tests in FinremCaseDataTest
+./gradlew test --tests "uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest"
+if [[ $? -ne 0 ]]; then
+    echo "Tests failed in FinremCaseDataTest. Aborting push. Please check the test results."
+    end_time=$(date +%s)
+    elapsed_time=$((end_time - start_time))
+    echo "Pre-push checks failed. Total time taken: ${elapsed_time} seconds."
+    exit 1
+fi
+
+end_time=$(date +%s)
+elapsed_time=$((end_time - start_time))
+echo "Pre-push checks passed. Total time taken: ${elapsed_time} seconds."
+
+exit 0
