@@ -71,7 +71,7 @@ public class AdditionalHearingDetailsMapperTest extends AbstractLetterDetailsMap
             .hearingTime("12:00")
             .courtName("Nottingham County Court And Family Court")
             .courtAddress("60 Canal Street, Nottingham NG1 7EJ")
-            .courtPhone("0115 910 3504")
+            .courtPhone("0300 123 5577")
             .courtEmail("FRCNottingham@justice.gov.uk")
             .hearingLength("30 minutes")
             .hearingVenue("Nottingham County Court And Family Court")
