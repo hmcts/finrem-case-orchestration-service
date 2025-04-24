@@ -139,7 +139,7 @@ public class InterimHearingService {
 
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
-    private void sendToBulkPrint(FinremCaseDetails finremCaseDetails, String authorisationToken,
+    public void sendToBulkPrint(FinremCaseDetails finremCaseDetails, String authorisationToken,
                                  CaseDocumentsHolder caseDocumentsHolder) {
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(finremCaseDetails)) {
@@ -190,7 +190,7 @@ public class InterimHearingService {
     }
 
     @SuppressWarnings("java:S6204")
-    private CaseDocumentsHolder prepareDocumentsForPrint(FinremCaseDetails caseDetails,
+    public CaseDocumentsHolder prepareDocumentsForPrint(FinremCaseDetails caseDetails,
                                                          List<InterimHearingCollection> newInterimHearingList,
                                                          String authorisationToken) {
 
