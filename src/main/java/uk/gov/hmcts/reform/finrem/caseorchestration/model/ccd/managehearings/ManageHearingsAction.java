@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Getter;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Getter
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public enum ManageHearingsAction {
-    ADD_HEARING("addHearing");
+    ADD_HEARING("Add_Hearing");
 
     @JsonValue
     private final String value;
