@@ -876,7 +876,7 @@ class GeneralOrderServiceTest {
 
         assertEquals("Nottingham County Court And Family Court", court.get("courtName"));
         assertEquals("60 Canal Street, Nottingham NG1 7EJ", court.get("courtAddress"));
-        assertEquals("0115 910 3504", court.get("phoneNumber"));
+        assertEquals("0300 123 5577", court.get("phoneNumber"));
         assertEquals("FRCNottingham@justice.gov.uk", court.get("email"));
     }
 
