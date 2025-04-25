@@ -11,7 +11,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum EventType {
 
-    MANAGE_HEARINGS("FR_ManageHearings"),
+    MANAGE_HEARINGS("FR_manageHearings"),
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
