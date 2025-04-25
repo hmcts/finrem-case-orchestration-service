@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidUriException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 
@@ -49,6 +50,25 @@ public class EvidenceManagementDownloadService {
         } else {
             return downloadFromDmStore(binaryFileUrl).getBody();
         }
+    }
+
+    /**
+     * Downloads the document from the given CaseDocument and returns its content as a byte array.
+     *
+     * @param caseDocument the CaseDocument containing the URL of the document to download
+     * @param auth the authentication token
+     * @return the content of the document as a byte array
+     * @throws HttpClientErrorException if the download fails
+     */
+    public byte[] getByteArray(CaseDocument caseDocument, String auth) {
+        String documentBinaryUrl = caseDocument.getDocumentBinaryUrl();
+        ResponseEntity<Resource> response = downloadInResponseEntity(documentBinaryUrl, auth);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.error("Download failed for url {}", documentBinaryUrl);
+            throw new HttpClientErrorException(response.getStatusCode());
+        }
+        ByteArrayResource resource = (ByteArrayResource) response.getBody();
+        return (resource != null) ? resource.getByteArray() : new byte[0];
     }
 
     public ResponseEntity<Resource> downloadInResponseEntity(String binaryFileUrl, String auth) throws HttpClientErrorException {
