@@ -52,39 +52,49 @@ public class BulkPrintDocumentService {
                 return;
             }
 
-            byte[] pdfBytes;
             if (isWordDocument(documentFilename)) {
-                Document document = Document.builder().url(caseDocument.getDocumentUrl())
-                    .binaryUrl(caseDocument.getDocumentBinaryUrl())
-                    .fileName(caseDocument.getDocumentFilename())
-                    .build();
-
-                pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
-            } else {
-                pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
+                handleDocFile(caseDocument, auth, errors, documentFilename);
+            } else if (documentFilename.toLowerCase().endsWith(".pdf")) {
+                handlePdfFile(caseDocument, auth, errors, documentFilename);
             }
+        }
+    }
 
-            if (pdfBytes != null) {
-                try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
-                    if (doc.isEncrypted()) {
-                        errors.add("Uploaded document '" + documentFilename + "' contains some kind of encryption. "
-                            + "Please remove encryption before uploading or upload another document.");
-                    }
-                } catch (InvalidPasswordException ipe) {
-                    String errorMessage = "Uploaded document '" + documentFilename + "' is password protected."
-                        + " Please remove password and try uploading again.";
-                    errors.add(errorMessage);
-                    log.error(ipe.getMessage());
-                } catch (IOException exc) {
-                    String errorMessage = "Failed to parse the documents for " + documentFilename;
-                    errors.add(errorMessage + "; " + exc.getMessage());
-                    log.error(exc.getMessage());
-                }
-            } else {
-                String errorMessage = "Uploaded document " + documentFilename + " is empty.";
-                log.error("Uploaded document {} for Case ID: {} is empty", documentFilename, caseId);
+    private void handleDocFile(CaseDocument caseDocument, String auth, List<String> errors, String documentFilename) {
+        Document document = Document.builder().url(caseDocument.getDocumentUrl())
+            .binaryUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
+
+        byte[] pdfBytes = documentConversionService.convertDocumentToPdf(document, auth);
+        checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
+    }
+
+    private void handlePdfFile(CaseDocument caseDocument, String auth, List<String> errors, String documentFilename) {
+        byte[] pdfBytes = service.download(caseDocument.getDocumentBinaryUrl(), auth);
+
+        if (pdfBytes != null) {
+            checkIfPdfIsEncrypted(errors, documentFilename, pdfBytes);
+        } else {
+            String errorMessage = String.format("Uploaded document %s is empty.", documentFilename);
+            errors.add(errorMessage);
+        }
+    }
+
+    private void checkIfPdfIsEncrypted(List<String> errors, String documentFilename, byte[] pdfBytes) {
+        try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
+            if (doc.isEncrypted()) {
+                String errorMessage = String.format("Uploaded document '%s' contains some kind of encryption. "
+                    + "Please remove encryption before uploading or upload another document.", documentFilename);
                 errors.add(errorMessage);
             }
+        } catch (InvalidPasswordException ipe) {
+            String errorMessage = String.format("Uploaded document '%s' is password protected. "
+                + "Please remove password and try uploading again.", documentFilename);
+            errors.add(errorMessage);
+        } catch (IOException exc) {
+            String errorMessage = String.format("Failed to parse the documents for %s", documentFilename);
+            errors.add(errorMessage + "; " + exc.getMessage());
         }
     }
 
