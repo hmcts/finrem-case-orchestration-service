@@ -7,11 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
 
+import java.util.UUID;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ManageHearingsCollectionItem {
+    private UUID id;
     private ManageHearing value;
 }
