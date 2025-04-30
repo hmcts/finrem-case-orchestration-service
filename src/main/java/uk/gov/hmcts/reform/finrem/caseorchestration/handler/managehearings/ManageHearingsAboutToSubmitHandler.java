@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,20 +41,19 @@ public class ManageHearingsAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = caseDetails.getData();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
-        ManageHearing hearingToAdd = finremCaseData.getManageHearingsWrapper().getHearingToAdd();
         List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
-            finremCaseData.getManageHearingsWrapper().getManageHearings())
-            .orElse(new ArrayList<>(1));
+            manageHearingsWrapper.getManageHearings())
+            .orElseGet(ArrayList::new);
 
-        ManageHearingsCollectionItem manageHearingsCollectionItem =
-            ManageHearingsCollectionItem.builder()
-            .value(hearingToAdd).build();
-        manageHearingsCollectionItemList.add(manageHearingsCollectionItem);
+        manageHearingsCollectionItemList.add(
+            ManageHearingsCollectionItem.builder().value(manageHearingsWrapper.getHearingToAdd()).build()
+        );
 
-        finremCaseData.getManageHearingsWrapper().setManageHearings(manageHearingsCollectionItemList);
-        finremCaseData.getManageHearingsWrapper().setHearingToAdd(null);
-        finremCaseData.getManageHearingsWrapper().setManageHearingsActionSelection(null);
+        manageHearingsWrapper.setManageHearings(manageHearingsCollectionItemList);
+        manageHearingsWrapper.setHearingToAdd(null);
+        manageHearingsWrapper.setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
