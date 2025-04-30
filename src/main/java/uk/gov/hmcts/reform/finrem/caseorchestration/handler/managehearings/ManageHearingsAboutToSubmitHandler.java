@@ -13,21 +13,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
-public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
-    private final PartyService partyService;
+public class ManageHearingsAboutToSubmitHandler extends FinremCallbackHandler {
 
-    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService) {
+    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
-        this.partyService = partyService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.MANAGE_HEARINGS.equals(eventType);
     }
@@ -36,19 +37,24 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
 
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = caseDetails.getData();
 
-        // Reset any previous Manage Hearings action selection
-        finremCaseData.getManageHearingsWrapper()
-            .setManageHearingsActionSelection(null);
+        ManageHearing hearingToAdd = finremCaseData.getManageHearingsWrapper().getHearingToAdd();
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+            finremCaseData.getManageHearingsWrapper().getManageHearings())
+            .orElse(new ArrayList<>(1));
 
-        finremCaseData.getManageHearingsWrapper().setHearingToAdd(
-            ManageHearing.builder()
-                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
-                .build());
+        ManageHearingsCollectionItem manageHearingsCollectionItem =
+            ManageHearingsCollectionItem.builder()
+            .value(hearingToAdd).build();
+        manageHearingsCollectionItemList.add(manageHearingsCollectionItem);
+
+        finremCaseData.getManageHearingsWrapper().setManageHearings(manageHearingsCollectionItemList);
+        finremCaseData.getManageHearingsWrapper().setHearingToAdd(null);
+        finremCaseData.getManageHearingsWrapper().setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
