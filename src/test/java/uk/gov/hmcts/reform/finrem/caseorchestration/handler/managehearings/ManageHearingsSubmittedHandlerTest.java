@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -31,17 +32,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-class ManageHearingsAboutToSubmitHandlerTest {
+class ManageHearingsSubmittedHandlerTest {
 
     @InjectMocks
-    private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
+    private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;
 
     @Mock
     private HearingService hearingService;
 
     @Test
     void testCanHandle() {
-        Assertions.assertCanHandle(manageHearingsAboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
+        Assertions.assertCanHandle(manageHearingsSubmittedHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
             EventType.MANAGE_HEARINGS);
     }
 
@@ -59,7 +60,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
-        var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+        var response = manageHearingsSubmittedHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
 
         assertThat(responseManageHearingsWrapper.getManageHearings())

@@ -29,6 +29,7 @@ public class ManageHearing implements HasCaseDocument {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate manageHearingDate;
+    //TODO: Switch to new hearing types
     private InterimTypeOfHearing manageHearingType;
     private String manageHearingTimeEstimate;
     private String manageHearingTime;
@@ -37,6 +38,7 @@ public class ManageHearing implements HasCaseDocument {
     private String manageHearingAdditionalInformation;
     private YesOrNo manageHearingNoticePrompt;
     private YesOrNo manageHearingAdditionalDocPrompt;
+    //TODO: Make this multiple documents
     public CaseDocument manageHearingUploadAdditionalDoc;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 }
