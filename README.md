@@ -122,6 +122,16 @@ Ensure you have the following environment variables set:
 - Check the Blue Ocean view for live monitoring, and review the logs once complete for any issues.
 - As Fortify scans execute during the Static Checks/Container Build step, you will need to ensure this is triggered by making a minor change to the PR, such as bumping the chart version.
 
+## Setting Up Git Hooks
+
+To ensure pre-push checks are run before pushing changes, configure Git to use the custom hooks directory:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This will enable the pre-push hook located in the `.githooks` directory to run automatically before every push.
+
 ## Versioning
 We use [SemVer](http://semver.org/) for versioning.
 For the versions available, see the tags on this repository.
