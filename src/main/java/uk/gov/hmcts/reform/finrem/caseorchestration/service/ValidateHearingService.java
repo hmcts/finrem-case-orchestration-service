@@ -75,31 +75,33 @@ public class ValidateHearingService {
     }
 
     public List<String> validateManageHearingErrors(FinremCaseData caseData) {
-        if (caseData.getIssueDate() == null
+        boolean isAnyFieldEmpty = caseData.getIssueDate() == null
             || caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate() == null
-            || caseData.getFastTrackDecision() == null) {
-            return List.of(REQUIRED_FIELD_EMPTY_ERROR);
-        }
-        return List.of();
+            || caseData.getFastTrackDecision() == null;
+
+        return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, ManageHearingType hearingType) {
         Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate();
 
-       if (issueDate.isPresent() && (hearingType.equals(ManageHearingType.FDA) || hearingType.equals(ManageHearingType.FDR))){
-           if (caseData.isFastTrackApplication()) {
-               if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
-                   return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
-               }
-           } else if (expressCaseService.isExpressCase(caseData)) {
-               if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
-                   return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
-               }
-           } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
-               return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
-           }
-       }
+        if (issueDate.isEmpty() || !(hearingType.equals(ManageHearingType.FDA) || hearingType.equals(ManageHearingType.FDR))) {
+            return List.of();
+        }
+
+        if (caseData.isFastTrackApplication() && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+            return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
+        }
+
+        if (expressCaseService.isExpressCase(caseData) && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
+            return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
+        }
+
+        if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
+            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+        }
+
         return List.of();
     }
 
