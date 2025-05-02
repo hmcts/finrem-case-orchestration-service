@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHeari
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
@@ -74,7 +75,7 @@ class ManageHearingsSubmittedHandlerTest {
          return ManageHearing
              .builder()
              .manageHearingDate(LocalDate.now())
-             .manageHearingType(InterimTypeOfHearing.DIR)
+             .manageHearingType(ManageHearingType.DIR)
              .manageHearingTimeEstimate("30mins")
              .manageHearingTime("10:00")
              .manageHearingMode(HearingMode.IN_PERSON)

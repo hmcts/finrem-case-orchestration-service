@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -44,10 +45,12 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
-        List<String> warnings = validateHearingService.validateManageHearingWarnings(finremCaseData,
-            manageHearingsWrapper.getHearingToAdd().getManageHearingType());
+        List<String> errors = new ArrayList<>(validateHearingService.validateManageHearingErrors(finremCaseData));
+
+        List<String> warnings = new ArrayList<>(validateHearingService.validateManageHearingWarnings(finremCaseData,
+            manageHearingsWrapper.getHearingToAdd().getManageHearingType()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).warnings(warnings).build();
+            .data(finremCaseData).errors(errors).warnings(warnings).build();
     }
 }
