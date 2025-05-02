@@ -90,15 +90,15 @@ public class ValidateHearingService {
             return List.of();
         }
 
-        if (caseData.isFastTrackApplication() && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
-            return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
-        }
-
-        if (expressCaseService.isExpressCase(caseData) && isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
-            return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
-        }
-
-        if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
+        if (caseData.isFastTrackApplication()) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+                return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
+            }
+        } else if (expressCaseService.isExpressCase(caseData)) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
+                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
+            }
+        } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
 
