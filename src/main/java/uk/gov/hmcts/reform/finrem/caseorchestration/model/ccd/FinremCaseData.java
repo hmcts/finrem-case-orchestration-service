@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
@@ -327,6 +328,10 @@ public class FinremCaseData implements HasCaseDocument {
     @Getter(AccessLevel.NONE)
     @JsonProperty("intervener4")
     private IntervenerFour intervenerFour;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ManageHearingsWrapper manageHearingsWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private DraftOrdersWrapper draftOrdersWrapper;
@@ -1025,6 +1030,14 @@ public class FinremCaseData implements HasCaseDocument {
             this.draftOrdersWrapper = new DraftOrdersWrapper();
         }
         return draftOrdersWrapper;
+    }
+
+    @JsonIgnore
+    public ManageHearingsWrapper getManageHearingsWrapper() {
+        if (manageHearingsWrapper == null) {
+            this.manageHearingsWrapper = new ManageHearingsWrapper();
+        }
+        return manageHearingsWrapper;
     }
 
     @JsonIgnore

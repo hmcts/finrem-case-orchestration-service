@@ -5,12 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import javax.swing.text.html.Option;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
@@ -64,6 +71,37 @@ public class ValidateHearingService {
         } else if (isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
+        return List.of();
+    }
+
+    public List<String> validateManageHearingErrors(FinremCaseData caseData) {
+        boolean isAnyFieldEmpty = caseData.getIssueDate() == null
+            || caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate() == null
+            || caseData.getFastTrackDecision() == null;
+
+        return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
+    }
+
+    public List<String> validateManageHearingWarnings(FinremCaseData caseData, ManageHearingType hearingType) {
+        Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
+        LocalDate hearingDate = caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate();
+
+        if (issueDate.isEmpty() || !(hearingType.equals(ManageHearingType.FDA) || hearingType.equals(ManageHearingType.FDR))) {
+            return List.of();
+        }
+
+        if (caseData.isFastTrackApplication()) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+                return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
+            }
+        } else if (expressCaseService.isExpressCase(caseData)) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
+                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
+            }
+        } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
+            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+        }
+
         return List.of();
     }
 
