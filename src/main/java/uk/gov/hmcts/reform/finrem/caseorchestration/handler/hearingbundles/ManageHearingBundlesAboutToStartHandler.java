@@ -17,13 +17,8 @@ import java.util.ArrayList;
 @Slf4j
 @Service
 public class ManageHearingBundlesAboutToStartHandler extends FinremCallbackHandler {
-
-    private HearingDatePopulatedValidator hearingDatePopulatedValidator;
-
-    public ManageHearingBundlesAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   HearingDatePopulatedValidator hearingDatePopulatedValidator) {
+    public ManageHearingBundlesAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
-        this.hearingDatePopulatedValidator = hearingDatePopulatedValidator;
     }
 
     @Override
