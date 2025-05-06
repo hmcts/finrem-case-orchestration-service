@@ -43,7 +43,7 @@ class ManageHearingsSubmittedHandlerTest {
 
     @Test
     void testCanHandle() {
-        Assertions.assertCanHandle(manageHearingsSubmittedHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
+        Assertions.assertCanHandle(manageHearingsSubmittedHandler, CallbackType.SUBMITTED, CaseType.CONTESTED,
             EventType.MANAGE_HEARINGS);
     }
 
