@@ -56,7 +56,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         manageHearingsWrapper.setHearingToAdd(null);
         manageHearingsWrapper.setManageHearingsActionSelection(null);
 
-        // TODO: Generate documents and send notification (look at
+        // TODO: Generate documents and send notification (look at interim about to submit handler for reference)
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
