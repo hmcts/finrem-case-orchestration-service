@@ -58,7 +58,7 @@ mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationA
 
 checkstyle {
     maxWarnings = 584
-    toolVersion = '10.21.4'
+    toolVersion = '10.23.1'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
