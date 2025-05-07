@@ -81,7 +81,7 @@ For example:
 CFTLIB_EXTRA_COMPOSE_FILES=docker-compose.yml
 ```
 
-The environment variable can be set in the `.aat-env` file or in your shell before running cftlib.
+The environment variable can be set in the `.aat-env` file or in your shell before running `bootWithCCD`.
 
 For more details see:
 

@@ -9,9 +9,9 @@ import java.util.Objects;
 import static java.io.File.separator;
 
 /**
- * Utility class to start docker compose processes in a local development environment.
+ * Utility class to start Docker Compose processes in a local development environment.
  * This class is not intended to be instantiated.
- * The docker compose files are expected to be specified in the CFTLIB_EXTRA_COMPOSE_FILES environment variable.
+ * The Docker Compose files are expected to be specified in the CFTLIB_EXTRA_COMPOSE_FILES environment variable.
  * The files should be located in the "compose" directory in the classpath.
  * The files should be separated by commas.
  */
