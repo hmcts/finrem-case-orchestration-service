@@ -12,7 +12,8 @@ import java.util.Arrays;
 public enum HearingMode {
     IN_PERSON("In_Person"),
     VIDEO_CALL("Video_Call"),
-    PHONE_CALL("Phone_Call");
+    PHONE_CALL("Phone_Call"),
+    HYBRID("Hybrid"),;
 
     private final String value;
 
