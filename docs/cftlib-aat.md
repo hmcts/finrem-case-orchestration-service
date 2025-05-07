@@ -73,8 +73,8 @@ To reindex the Elasticsearch data you can use the following command:
 It is possible to mock the responses from dependent services such as the payment-api service.
 [WireMock](https://wiremock.org/) can be incorporated into the local development environment via docker compose.
 
-This is done by setting the CFTLIB_EXTRA_COMPOSE_FILES environment variable to a comma-separate list of docker-compose files.
-Any compose files will be run on cftlib startup.
+This is done by setting the CFTLIB_EXTRA_COMPOSE_FILES environment variable to a comma-separated list of Docker Compose files.
+If configured then Docker Compose will run on cftlib startup.
 
 For example:
 ```
