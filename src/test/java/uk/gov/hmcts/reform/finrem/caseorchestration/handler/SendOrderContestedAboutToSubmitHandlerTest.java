@@ -722,6 +722,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .value(AgreedDraftOrder.builder().draftOrder(caseDocument1).build())
                     .build()
             )))
+            .intvAgreedDraftOrderCollection(new ArrayList<>(of(
+                AgreedDraftOrderCollection.builder()
+                    .value(AgreedDraftOrder.builder().draftOrder(caseDocument1).build())
+                    .build()
+            )))
             .draftOrdersReviewCollection(new ArrayList<>(of(
                 DraftOrdersReviewCollection.builder()
                     .value(DraftOrdersReview.builder()
@@ -749,6 +754,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
             .isNull();
+        assertThat(response.getData().getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection())
+            .isEmpty();
         assertThat(response.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
             .containsExactly(FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
                     .finalisedDocument(caseDocument1)
