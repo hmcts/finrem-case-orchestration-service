@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -38,25 +39,11 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
 
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = caseDetails.getData();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-
-        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
-            manageHearingsWrapper.getManageHearings())
-            .orElseGet(ArrayList::new);
-
-        manageHearingsCollectionItemList.add(
-            ManageHearingsCollectionItem.builder().value(manageHearingsWrapper.getHearingToAdd()).build()
-        );
-
-        manageHearingsWrapper.setManageHearings(manageHearingsCollectionItemList);
-        manageHearingsWrapper.setHearingToAdd(null);
-        manageHearingsWrapper.setManageHearingsActionSelection(null);
-
-        // TODO: Generate documents and send notification (look at interim about to submit handler for reference)
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)

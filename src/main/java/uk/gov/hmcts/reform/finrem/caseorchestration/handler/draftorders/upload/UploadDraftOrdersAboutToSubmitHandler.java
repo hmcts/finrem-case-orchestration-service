@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
@@ -230,11 +230,11 @@ public class UploadDraftOrdersAboutToSubmitHandler extends FinremCallbackHandler
 
         // Add additional attachments for orders only
         if (!ObjectUtils.isEmpty(uploadDraftOrder.getAdditionalDocuments())) {
-            List<DocumentCollection> attachments = new ArrayList<>();
+            List<DocumentCollectionItem> attachments = new ArrayList<>();
             for (AdditionalDocumentsCollection additionalDoc :
                 uploadDraftOrder.getAdditionalDocuments()) {
                 if (additionalDoc.getValue().getOrderAttachment() != null) {
-                    attachments.add(DocumentCollection.builder()
+                    attachments.add(DocumentCollectionItem.builder()
                         .value(additionalDoc.getValue().getOrderAttachment())
                         .build());
                 }

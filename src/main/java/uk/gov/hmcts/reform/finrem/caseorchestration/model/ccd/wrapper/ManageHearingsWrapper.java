@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 
 import java.util.List;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -25,4 +26,5 @@ public class ManageHearingsWrapper {
     private ManageHearing hearingToAdd;
     private List<ManageHearingsCollectionItem> manageHearings;
     private List<ManageHearingDocumentsCollectionItem> manageHearingDocumentsCollection;
+    private UUID workingManageHearingId;
 }

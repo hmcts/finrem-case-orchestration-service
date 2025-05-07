@@ -12,11 +12,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -49,6 +52,20 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         List<String> warnings = new ArrayList<>(validateHearingService.validateManageHearingWarnings(finremCaseData,
             manageHearingsWrapper.getHearingToAdd().getManageHearingType()));
+
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+                manageHearingsWrapper.getManageHearings())
+            .orElseGet(ArrayList::new);
+
+        UUID manageHearingID = UUID.randomUUID();
+        manageHearingsCollectionItemList.add(
+            ManageHearingsCollectionItem.builder().id(manageHearingID).value(manageHearingsWrapper.getHearingToAdd()).build()
+        );
+        manageHearingsWrapper.setWorkingManageHearingId(manageHearingID);
+        manageHearingsWrapper.setManageHearings(manageHearingsCollectionItemList);
+
+        manageHearingsWrapper.setHearingToAdd(null);
+        manageHearingsWrapper.setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).errors(errors).warnings(warnings).build();

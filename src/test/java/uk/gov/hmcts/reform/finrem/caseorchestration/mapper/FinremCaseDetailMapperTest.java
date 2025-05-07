@@ -38,7 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailInt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailInterimCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentPurpose;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsHolder;
@@ -530,7 +530,7 @@ class FinremCaseDetailMapperTest {
         assertTrue(caseData.getUploadHearingOrder().contains(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(getTestDocument()).build())
             .build()));
-        assertTrue(caseData.getHearingOrderOtherDocuments().contains(DocumentCollection.builder()
+        assertTrue(caseData.getHearingOrderOtherDocuments().contains(DocumentCollectionItem.builder()
             .value(getTestDocument())
             .build()));
         assertTrue(caseData.getFinalOrderCollection().contains(DirectionOrderCollection.builder()

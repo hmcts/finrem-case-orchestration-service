@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
@@ -647,12 +647,12 @@ public class DocumentHelper {
                                                                            String authorisationToken,
                                                                            String caseId) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<DocumentCollection> pdfDocuments = new ArrayList<>();
-        List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
-        documentCollections.forEach(doc -> {
+        List<DocumentCollectionItem> pdfDocuments = new ArrayList<>();
+        List<DocumentCollectionItem> documentCollectionItems = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
+        documentCollectionItems.forEach(doc -> {
             CaseDocument caseDocument = doc.getValue();
             CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            pdfDocuments.add(DocumentCollection
+            pdfDocuments.add(DocumentCollectionItem
                 .builder()
                 .value(pdfDocument)
                 .build());
@@ -663,7 +663,7 @@ public class DocumentHelper {
         return bulkPrintDocuments;
     }
 
-    private List<DocumentCollection> covertDocumentCollections(Object object) {
+    private List<DocumentCollectionItem> covertDocumentCollections(Object object) {
         if (object == null) {
             return Collections.emptyList();
         }
@@ -674,15 +674,15 @@ public class DocumentHelper {
     public List<CaseDocument> getHearingDocumentsAsPdfDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
-        List<DocumentCollection> pdfDocuments = new ArrayList<>();
-        List<DocumentCollection> documentCollections
+        List<DocumentCollectionItem> pdfDocuments = new ArrayList<>();
+        List<DocumentCollectionItem> documentCollectionItems
             = Optional.ofNullable(data.getHearingOrderOtherDocuments()).orElse(new ArrayList<>());
-        if (!documentCollections.isEmpty()) {
-            documentCollections.forEach(doc -> {
+        if (!documentCollectionItems.isEmpty()) {
+            documentCollectionItems.forEach(doc -> {
                 CaseDocument caseDocument = doc.getValue();
                 CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken,
                     String.valueOf(caseDetails.getId()));
-                pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                pdfDocuments.add(DocumentCollectionItem.builder().value(pdfDocument).build());
                 documents.add(pdfDocument);
             });
             data.setHearingOrderOtherDocuments(pdfDocuments);
