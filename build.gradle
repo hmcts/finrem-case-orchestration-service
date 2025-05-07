@@ -22,8 +22,8 @@ def versions = [
         commonsLang3         : '3.17.0',
         hmctsNotify          : '4.1.1-RELEASE',
         junit                : '4.13.2',
-        lombok               : '1.18.36',
-        mockito              : '5.16.1',
+        lombok               : '1.18.38',
+        mockito              : '5.17.0',
         pact                 : '4.6.17',
         pdfbox               : '3.0.4',
         reformLogging        : '6.1.8',
@@ -421,7 +421,7 @@ dependencies {
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.pdfbox', name: 'pdfbox-io', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.0'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.13.1'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
     implementation group: 'org.elasticsearch', name: 'elasticsearch', version: versions.elasticSearch
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: versions.jacksonDatabind
@@ -430,10 +430,10 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jacksonDatabind
     developmentOnly group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.loadbalancer
 
-    implementation("org.apache.poi:poi:5.4.0") {
+    implementation("org.apache.poi:poi:5.4.1") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
-    implementation("org.apache.poi:poi-ooxml:5.4.0") {
+    implementation("org.apache.poi:poi-ooxml:5.4.1") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
 
