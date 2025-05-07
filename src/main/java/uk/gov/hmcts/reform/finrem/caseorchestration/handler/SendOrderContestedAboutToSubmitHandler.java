@@ -242,6 +242,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
             .filter(d -> !hearingOrders.contains(d.getValue().getTargetDocument()))
             .toList();
         caseData.getDraftOrdersWrapper().setAgreedDraftOrderCollection(updatedCollection);
+
+        updatedCollection = emptyIfNull(caseData.getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection())
+            .stream()
+            .filter(d -> !hearingOrders.contains(d.getValue().getTargetDocument()))
+            .toList();
+        caseData.getDraftOrdersWrapper().setIntvAgreedDraftOrderCollection(updatedCollection);
     }
 
     private void moveApprovedDocumentsToFinalisedOrder(FinremCaseData caseData, List<CaseDocument> hearingOrders) {

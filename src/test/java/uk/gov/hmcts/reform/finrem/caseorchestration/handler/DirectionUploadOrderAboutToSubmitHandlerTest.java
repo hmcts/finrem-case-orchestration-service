@@ -67,6 +67,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private static final CaseDocument TARGET_DOCUMENT_4 = CaseDocument.builder().documentUrl("targetDoc4.docx").build();
     private static final CaseDocument STAMPED_DOCUMENT_1 = CaseDocument.builder().documentFilename("stamped1.pdf").build();
     private static final CaseDocument STAMPED_DOCUMENT_2 = CaseDocument.builder().documentFilename("stamped2.pdf").build();
+    private static final CaseDocument STAMPED_DOCUMENT_3 = CaseDocument.builder().documentFilename("stamped3.pdf").build();
 
     private static final CaseDocument ADDITIONAL_DOCUMENT_1 = CaseDocument.builder().documentUrl("additionalDoc1.docx").build();
 
@@ -194,8 +195,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
         mockDocumentStamping(TARGET_DOCUMENT_1, STAMPED_DOCUMENT_1);
         mockDocumentStamping(TARGET_DOCUMENT_2, STAMPED_DOCUMENT_2);
+        mockDocumentStamping(TARGET_DOCUMENT_3, STAMPED_DOCUMENT_3);
 
-        //mock additional document conversion
         when(genericDocumentService.convertDocumentIfNotPdfAlready(ADDITIONAL_DOCUMENT_1, AUTH_TOKEN, String.valueOf(CASE_ID)))
             .thenReturn(CONVERTED_DOCUMENT_1);
 
@@ -205,6 +206,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         AgreedDraftOrderCollection test4;
         AgreedDraftOrderCollection test5;
         AgreedDraftOrderCollection test6;
+        AgreedDraftOrderCollection test7;
 
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
@@ -212,7 +214,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
                         .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
                     DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
-                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
+                        .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build(),
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_3)
+                        .uploadDraftDocument(TARGET_DOCUMENT_3).build()).build()
                 ))
                 .agreedDraftOrderCollection(List.of(
                     test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
@@ -225,6 +229,10 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                         .orderStatus(APPROVED_BY_JUDGE).build()).build(),
                     test6 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().pensionSharingAnnex(TARGET_DOCUMENT_4)
                         .orderStatus(TO_BE_REVIEWED).build()).build()
+                ))
+                .intvAgreedDraftOrderCollection(List.of(
+                    test7 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT_3)
+                        .orderStatus(APPROVED_BY_JUDGE).build()).build()
                 ))
                 .draftOrdersReviewCollection(List.of(
                     DraftOrdersReviewCollection.builder().value(
@@ -247,24 +255,30 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
 
         underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
+        verify(genericDocumentService, times(3)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN),
             eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
-        //Check DraftOrderDocReviewCollection is updated
+
+        //check DraftOrderDocReviewCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test1.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test1.getValue().getOrderStatus());
         assertEquals(CONVERTED_DOCUMENT_1, test1.getValue().getAttachments().get(0).getValue());
         assertEquals(STAMPED_DOCUMENT_2, test2.getValue().getDraftOrderDocument());
         assertEquals(PROCESSED, test2.getValue().getOrderStatus());
 
-        //Check AgreedDraftOrderCollection is updated
+        //check AgreedDraftOrderCollection is updated
         assertEquals(STAMPED_DOCUMENT_1, test3.getValue().getDraftOrder());
         assertEquals(PROCESSED, test3.getValue().getOrderStatus());
         assertEquals(CONVERTED_DOCUMENT_1, test3.getValue().getAttachments().get(0).getValue());
         assertEquals(STAMPED_DOCUMENT_2, test4.getValue().getDraftOrder());
         assertEquals(PROCESSED, test4.getValue().getOrderStatus());
+        assertEquals(STAMPED_DOCUMENT_3, test5.getValue().getDraftOrder());
+        assertEquals(PROCESSED, test5.getValue().getOrderStatus());
 
-        assertEquals(APPROVED_BY_JUDGE, test5.getValue().getOrderStatus());
         assertEquals(TO_BE_REVIEWED, test6.getValue().getOrderStatus());
+
+        //check Intervener AgreedDraftOrderCollection is updated
+        assertEquals(STAMPED_DOCUMENT_3, test7.getValue().getDraftOrder());
+        assertEquals(PROCESSED, test7.getValue().getOrderStatus());
     }
 
     @Test
@@ -281,11 +295,9 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.from(CASE_ID, FinremCaseData.builder()
             .draftOrdersWrapper(DraftOrdersWrapper.builder()
                 .unprocessedApprovedDocuments(List.of(
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
-                        .originalDocument(TARGET_DOCUMENT_1)
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_1)
                         .uploadDraftDocument(TARGET_DOCUMENT_1).build()).build(),
-                    DirectionOrderCollection.builder().value(DirectionOrder.builder()
-                        .originalDocument(TARGET_DOCUMENT_2)
+                    DirectionOrderCollection.builder().value(DirectionOrder.builder().originalDocument(TARGET_DOCUMENT_2)
                         .uploadDraftDocument(TARGET_DOCUMENT_2).build()).build()
                 ))
                 .agreedDraftOrderCollection(List.of(
