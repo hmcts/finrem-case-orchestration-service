@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ManageHearingsWrapper {
 
     private ManageHearingsAction manageHearingsActionSelection;
-    private ManageHearing hearingToAdd;
+    private ManageHearing workingManageHearing;
     private List<ManageHearingsCollectionItem> manageHearings;
     private List<ManageHearingDocumentsCollectionItem> manageHearingDocumentsCollection;
     private UUID workingManageHearingId;

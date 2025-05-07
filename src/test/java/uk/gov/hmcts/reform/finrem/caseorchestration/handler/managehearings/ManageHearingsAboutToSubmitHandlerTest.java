@@ -53,7 +53,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void givenValidCaseData_whenHandle_thenReturnsResponseWithErrorsAndWarnings() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .hearingToAdd(ManageHearing.builder()
+                .workingManageHearing(ManageHearing.builder()
                     .manageHearingType(ManageHearingType.DIR)
                     .build())
                 .build())
@@ -88,7 +88,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .hearingToAdd(hearingToAdd)
+                .workingManageHearing(hearingToAdd)
                 .build())
             .build();
 
@@ -101,7 +101,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
         assertThat(responseManageHearingsWrapper.getManageHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
-        assertThat(responseManageHearingsWrapper.getHearingToAdd()).isNull();
+        assertThat(responseManageHearingsWrapper.getWorkingManageHearing()).isNull();
         assertThat(responseManageHearingsWrapper.getManageHearingsActionSelection()).isNull();
     }
 

@@ -51,7 +51,7 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         List<String> errors = new ArrayList<>(validateHearingService.validateManageHearingErrors(finremCaseData));
 
         List<String> warnings = new ArrayList<>(validateHearingService.validateManageHearingWarnings(finremCaseData,
-            manageHearingsWrapper.getHearingToAdd().getManageHearingType()));
+            manageHearingsWrapper.getWorkingManageHearing().getManageHearingType()));
 
         List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
                 manageHearingsWrapper.getManageHearings())
@@ -59,12 +59,12 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         UUID manageHearingID = UUID.randomUUID();
         manageHearingsCollectionItemList.add(
-            ManageHearingsCollectionItem.builder().id(manageHearingID).value(manageHearingsWrapper.getHearingToAdd()).build()
+            ManageHearingsCollectionItem.builder().id(manageHearingID).value(manageHearingsWrapper.getWorkingManageHearing()).build()
         );
         manageHearingsWrapper.setWorkingManageHearingId(manageHearingID);
         manageHearingsWrapper.setManageHearings(manageHearingsCollectionItemList);
 
-        manageHearingsWrapper.setHearingToAdd(null);
+        manageHearingsWrapper.setWorkingManageHearing(null);
         manageHearingsWrapper.setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

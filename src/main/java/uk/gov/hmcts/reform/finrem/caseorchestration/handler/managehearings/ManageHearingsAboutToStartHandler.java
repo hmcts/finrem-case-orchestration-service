@@ -45,7 +45,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         finremCaseData.getManageHearingsWrapper()
             .setManageHearingsActionSelection(null);
 
-        finremCaseData.getManageHearingsWrapper().setHearingToAdd(
+        finremCaseData.getManageHearingsWrapper().setWorkingManageHearing(
             ManageHearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
                 .build());

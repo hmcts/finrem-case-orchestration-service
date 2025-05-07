@@ -5,17 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import javax.swing.text.html.Option;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,7 +71,7 @@ public class ValidateHearingService {
 
     public List<String> validateManageHearingErrors(FinremCaseData caseData) {
         boolean isAnyFieldEmpty = caseData.getIssueDate() == null
-            || caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate() == null
+            || caseData.getManageHearingsWrapper().getWorkingManageHearing().getManageHearingDate() == null
             || caseData.getFastTrackDecision() == null;
 
         return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
@@ -84,7 +79,7 @@ public class ValidateHearingService {
 
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, ManageHearingType hearingType) {
         Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
-        LocalDate hearingDate = caseData.getManageHearingsWrapper().getHearingToAdd().getManageHearingDate();
+        LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingManageHearing().getManageHearingDate();
 
         if (issueDate.isEmpty() || !(hearingType.equals(ManageHearingType.FDA) || hearingType.equals(ManageHearingType.FDR))) {
             return List.of();
