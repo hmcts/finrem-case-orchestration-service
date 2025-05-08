@@ -1,25 +1,41 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
+
+import java.util.List;
 
 @Slf4j
 @Service
 public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbackHandler {
     private final ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser;
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentHelper documentHelper;
 
     public AmendApprovedConsentOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                         ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser) {
+                                                         ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser,
+                                                         GenericDocumentService genericDocumentService,
+                                                         DocumentHelper documentHelper) {
         super(finremCaseDetailsMapper);
         this.approvedConsentOrderCategoriser = approvedConsentOrderCategoriser;
+        this.genericDocumentService = genericDocumentService;
+        this.documentHelper = documentHelper;
     }
 
     @Override
