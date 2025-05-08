@@ -202,17 +202,6 @@ class ValidateHearingServiceTest {
     }
 
     @Test
-    void mangeHearingHearingDateEmpty() {
-        caseData.setIssueDate(LocalDate.now());
-        caseData.setFastTrackDecision(YesOrNo.YES);
-        setUpManageHearingToAdd(caseData, null, HearingType.FDR);
-        caseData.setPartiesOnCase(getPartiesOnCase());
-
-        List<String> errors = service.validateManageHearingErrors(caseData);
-        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
-    }
-
-    @Test
     void mangeHearingHearingNoErrors() {
         caseData.setIssueDate(LocalDate.now());
         caseData.setFastTrackDecision(YesOrNo.YES);

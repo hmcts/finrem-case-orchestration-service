@@ -77,7 +77,6 @@ public class ValidateHearingService {
      */
     public List<String> validateManageHearingErrors(FinremCaseData caseData) {
         boolean isAnyFieldEmpty = caseData.getIssueDate() == null
-            || caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate() == null
             || caseData.getFastTrackDecision() == null;
 
         return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
