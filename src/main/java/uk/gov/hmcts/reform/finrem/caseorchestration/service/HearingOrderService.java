@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -60,7 +60,7 @@ public class HearingOrderService {
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
                 authorisationToken, documentHelper.getStampType(caseDetails.getData()), caseId);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
-            List<DocumentCollection> additionalDocs = order.getAdditionalDocuments();
+            List<DocumentCollectionItem> additionalDocs = order.getAdditionalDocuments();
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder, authorisationToken, additionalDocs);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder, additionalDocs);
         } else {
@@ -157,7 +157,7 @@ public class HearingOrderService {
             : draftDirectionOrderCollectionTail;
     }
 
-    private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document, List<DocumentCollection> additionalDocs) {
+    private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document, List<DocumentCollectionItem> additionalDocs) {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<CollectionElement<DirectionOrder>> directionOrders = Optional.ofNullable(caseData.get(HEARING_ORDER_COLLECTION))
@@ -177,7 +177,7 @@ public class HearingOrderService {
     public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData,
                                                               CaseDocument stampedHearingOrder,
                                                               String authorisationToken,
-                                                              List<DocumentCollection> additionalDocs) {
+                                                              List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = documentHelper.getFinalOrderCollection(caseData);
         List<DirectionOrderCollection> finalDatedCollection = orderDateService.addCreatedDateInFinalOrder(finalOrderCollection, authorisationToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {

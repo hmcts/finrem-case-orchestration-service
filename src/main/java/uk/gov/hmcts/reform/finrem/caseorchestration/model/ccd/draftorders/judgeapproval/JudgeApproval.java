@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -52,7 +52,7 @@ public class JudgeApproval {
     private JudgeDecision judgeDecision;
 
     @JsonProperty("attachments")
-    private List<DocumentCollection> attachments;
+    private List<DocumentCollectionItem> attachments;
 
     @JsonProperty("isFinalOrder")
     private DynamicMultiSelectList isFinalOrder;

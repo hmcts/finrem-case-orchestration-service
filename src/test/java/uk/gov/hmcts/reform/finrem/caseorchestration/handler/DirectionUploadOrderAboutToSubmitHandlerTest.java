@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
@@ -221,7 +221,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .agreedDraftOrderCollection(List.of(
                     test3 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder()
                         .draftOrder(TARGET_DOCUMENT_1)
-                        .attachments(List.of(DocumentCollection.builder().value(ADDITIONAL_DOCUMENT_1).build()))
+                        .attachments(List.of(DocumentCollectionItem.builder().value(ADDITIONAL_DOCUMENT_1).build()))
                         .orderStatus(APPROVED_BY_JUDGE).build()).build(),
                     test4 = AgreedDraftOrderCollection.builder().value(AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT_2)
                         .orderStatus(APPROVED_BY_JUDGE).build()).build(),
@@ -464,7 +464,7 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
                 .draftOrderDocument(document)
                 .orderStatus(orderStatus)
                 .attachments(additionalDocument != null
-                    ? List.of(DocumentCollection.builder().value(additionalDocument).build())
+                    ? List.of(DocumentCollectionItem.builder().value(additionalDocument).build())
                     : Collections.emptyList())
                 .build())
             .build();

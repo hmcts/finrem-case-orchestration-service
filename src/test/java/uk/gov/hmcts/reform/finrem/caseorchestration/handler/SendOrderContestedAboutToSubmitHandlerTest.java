@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -487,7 +487,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(caseData.getFinalOrderCollection())
             .map(DirectionOrderCollection::getValue)
             .flatMap(o -> emptyIfNull(o.getAdditionalDocuments()))
-            .map(DocumentCollection::getValue)
+            .map(DocumentCollectionItem::getValue)
             .map(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder("http://fakeurl/legacyAttachment");
 

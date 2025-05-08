@@ -22,5 +22,5 @@ public class GeneralLetter implements HasCaseDocument {
     @JsonProperty("generalLetterUploadedDocument")
     private CaseDocument generalLetterUploadedDocument;
     @JsonProperty("generalLetterUploadedDocuments")
-    private List<DocumentCollection> generalLetterUploadedDocuments;
+    private List<DocumentCollectionItem> generalLetterUploadedDocuments;
 }

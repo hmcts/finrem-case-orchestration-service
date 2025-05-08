@@ -12,27 +12,29 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
-public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
-    private final PartyService partyService;
+public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
+
     private final ValidateHearingService validateHearingService;
 
-    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService, ValidateHearingService validateHearingService) {
-        super(finremCaseDetailsMapper);
-        this.partyService = partyService;
+    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finreCaseDetailsMapper, ValidateHearingService validateHearingService) {
+        super(finreCaseDetailsMapper);
         this.validateHearingService = validateHearingService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.MANAGE_HEARINGS.equals(eventType);
     }
@@ -40,31 +42,30 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = caseDetails.getData();
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
-        List<String> errors = validateHearingService.validateManageHearingErrors(finremCaseData);
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(finremCaseData)
-                .errors(errors)
-                .build();
-        }
+        List<String> warnings = validateHearingService.validateManageHearingWarnings(finremCaseData,
+            manageHearingsWrapper.getWorkingHearing().getHearingType());
 
-        // Reset any previous Manage Hearings action selection
-        finremCaseData.getManageHearingsWrapper()
-            .setManageHearingsActionSelection(null);
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+                manageHearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new);
 
-        finremCaseData.getManageHearingsWrapper().setWorkingHearing(
-            Hearing.builder()
-                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
-                .build());
+        UUID manageHearingID = UUID.randomUUID();
+        manageHearingsCollectionItemList.add(
+            ManageHearingsCollectionItem.builder().id(manageHearingID).value(manageHearingsWrapper.getWorkingHearing()).build()
+        );
+        manageHearingsWrapper.setWorkingHearingId(manageHearingID);
+        manageHearingsWrapper.setHearings(manageHearingsCollectionItemList);
+
+        manageHearingsWrapper.setWorkingHearing(null);
+        manageHearingsWrapper.setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
-            .build();
+            .data(finremCaseData).warnings(warnings).build();
     }
 }

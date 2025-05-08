@@ -28,7 +28,7 @@ public class ConsentInContestedApprovedOrder implements HasCaseDocument {
     private List<PensionTypeCollection> pensionDocuments;
 
     @JsonProperty("additionalConsentDocuments")
-    private List<DocumentCollection> additionalConsentDocuments;
+    private List<DocumentCollectionItem> additionalConsentDocuments;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderReceivedAt;

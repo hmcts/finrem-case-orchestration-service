@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -169,7 +169,7 @@ class DraftOrderServiceTest {
             .submittedByEmail("jamesbond@fake.com")
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
-            .attachments(List.of(DocumentCollection.builder().value(attachment1).build()))
+            .attachments(List.of(DocumentCollectionItem.builder().value(attachment1).build()))
             .build();
 
         UploadAgreedDraftOrder uploadOrder1 = UploadAgreedDraftOrder.builder()
@@ -207,8 +207,8 @@ class DraftOrderServiceTest {
             .submittedDate(LocalDateTime.of(2024, 10, 18, 10, 0))
             .uploadedOnBehalfOf(UPLOAD_PARTY_APPLICANT)
             .attachments(List.of(
-                DocumentCollection.builder().value(attachment1).build(),
-                DocumentCollection.builder().value(attachment2).build()
+                DocumentCollectionItem.builder().value(attachment1).build(),
+                DocumentCollectionItem.builder().value(attachment2).build()
             ))
             .build();
 

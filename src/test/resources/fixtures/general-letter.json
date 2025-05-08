@@ -121,7 +121,7 @@
       "generalLetterBody": "Test content for the letter body",
       "generalLetterUploadedDocuments": [
         {
-          "id": "1",
+          "id": "a69e85ac-6a4e-41c3-85b6-27a066a776b4",
           "value": {
             "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
             "document_filename": "example_document.pdf",
@@ -131,7 +131,7 @@
       ],
       "generalLetterCollection": [
         {
-          "id": "1",
+          "id": "9e5adb16-27ba-4bc8-bb2f-9b08182543f9",
           "value": {
             "generatedLetter": {
               "document_url": "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64",

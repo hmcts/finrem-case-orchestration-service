@@ -30,11 +30,11 @@ public class DirectionOrder implements HasCaseDocument, WithAttachments {
     @JsonProperty("originalDocument")
     CaseDocument originalDocument;
     @JsonProperty("additionalDocuments")
-    private List<DocumentCollection> additionalDocuments;
+    private List<DocumentCollectionItem> additionalDocuments;
 
     @Override
     @JsonIgnore
-    public List<DocumentCollection> getAttachments() {
+    public List<DocumentCollectionItem> getAttachments() {
         return additionalDocuments;
     }
 }

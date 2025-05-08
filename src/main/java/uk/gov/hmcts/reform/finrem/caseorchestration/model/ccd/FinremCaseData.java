@@ -126,7 +126,7 @@ public class FinremCaseData implements HasCaseDocument {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
-    private List<DocumentCollection> additionalCicDocuments;
+    private List<DocumentCollectionItem> additionalCicDocuments;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -172,7 +172,7 @@ public class FinremCaseData implements HasCaseDocument {
     private String bulkScanCaseReference;
     private List<ChildrenInfoCollection> childrenInfo;
     private CaseDocument formA;
-    private List<DocumentCollection> scannedD81s;
+    private List<DocumentCollectionItem> scannedD81s;
     private String transferLocalCourtName;
     private String transferLocalCourtEmail;
     private String transferLocalCourtInstructions;
@@ -231,8 +231,8 @@ public class FinremCaseData implements HasCaseDocument {
     private String soleTraderName1;
     private YesOrNo promptForAnyDocument;
     private List<HearingDirectionDetailsCollection> hearingDirectionDetailsCollection;
-    private List<DocumentCollection> hearingNoticeDocumentPack;
-    private List<DocumentCollection> hearingNoticesDocumentCollection;
+    private List<DocumentCollectionItem> hearingNoticeDocumentPack;
+    private List<DocumentCollectionItem> hearingNoticesDocumentCollection;
     private Map<String, Object> courtDetails;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -256,7 +256,7 @@ public class FinremCaseData implements HasCaseDocument {
     private String attendingCourtWithArrangement;
     private SolicitorToDraftOrder solicitorResponsibleForDraftingOrder;
     private List<DirectionOrderCollection> uploadHearingOrder;
-    private List<DocumentCollection> hearingOrderOtherDocuments;
+    private List<DocumentCollectionItem> hearingOrderOtherDocuments;
 
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;

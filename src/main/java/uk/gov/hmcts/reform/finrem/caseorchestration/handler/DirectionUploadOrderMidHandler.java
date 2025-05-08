@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
@@ -74,7 +74,7 @@ public class DirectionUploadOrderMidHandler extends FinremCallbackHandler {
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getHearingOrderOtherDocuments())) {
-            List<DocumentCollection> hearingOrderOtherDocuments = filterNewItems(
+            List<DocumentCollectionItem> hearingOrderOtherDocuments = filterNewItems(
                 caseData.getHearingOrderOtherDocuments(),
                 caseDataBefore.getHearingOrderOtherDocuments()
             );

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface WithAttachments {
     /**
      * Retrieves a list of case document attachments.
      *
-     * @return a list of {@link DocumentCollection} representing the attachments.
+     * @return a list of {@link DocumentCollectionItem} representing the attachments.
      */
-    List<DocumentCollection> getAttachments();
+    List<DocumentCollectionItem> getAttachments();
 }

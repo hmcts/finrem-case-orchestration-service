@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
@@ -170,8 +170,8 @@ class OrderDateServiceTest  {
     @Test
     void shouldRetainAdditionalDocuments() {
         List<DirectionOrderCollection> orderCollections = new ArrayList<>();
-        List<DocumentCollection> listOfAdditionalDocuments = List.of(
-            DocumentCollection.builder().value(caseDocument("attachment", "attachment")).build()
+        List<DocumentCollectionItem> listOfAdditionalDocuments = List.of(
+            DocumentCollectionItem.builder().value(caseDocument("attachment", "attachment")).build()
         );
         DirectionOrderCollection orderCollection
             = DirectionOrderCollection.builder().value(DirectionOrder

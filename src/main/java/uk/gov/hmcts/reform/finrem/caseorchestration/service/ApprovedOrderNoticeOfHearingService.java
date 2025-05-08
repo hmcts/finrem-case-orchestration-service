@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingDirectionDetail;
@@ -56,18 +56,18 @@ public class ApprovedOrderNoticeOfHearingService {
     public void createAndStoreHearingNoticeDocumentPack(FinremCaseDetails caseDetails,
                                                         String authToken) {
 
-        List<DocumentCollection> hearingNoticePack = new ArrayList<>();
+        List<DocumentCollectionItem> hearingNoticePack = new ArrayList<>();
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
         hearingNoticePack.add(getDocumentCollectionObj(noticeOfHearingDocument));
 
         FinremCaseData caseData = caseDetails.getData();
-        List<DocumentCollection> documentCollections = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
+        List<DocumentCollectionItem> documentCollectionItems = Optional.ofNullable(caseData.getHearingNoticesDocumentCollection()).orElse(new ArrayList<>());
 
-        documentCollections.add(DocumentCollection.builder().value(
+        documentCollectionItems.add(DocumentCollectionItem.builder().value(
             buildCaseDocumentWithExistingDocBreakingReferences(noticeOfHearingDocument)
         ).build());
 
-        documentCollections.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
+        documentCollectionItems.forEach(docColl -> addAdditionalHearingDocument(caseData, docColl.getValue()));
 
         Optional<CaseDocument> latestDraftHearingOrder = Optional.ofNullable(caseData.getLatestDraftHearingOrder());
         latestDraftHearingOrder.ifPresent(latestDraftHearingOrderDocument -> hearingNoticePack.add(getDocumentCollectionObj(
@@ -91,8 +91,8 @@ public class ApprovedOrderNoticeOfHearingService {
     }
 
 
-    private DocumentCollection getDocumentCollectionObj(CaseDocument caseDocument) {
-        return DocumentCollection.builder().value(caseDocument).build();
+    private DocumentCollectionItem getDocumentCollectionObj(CaseDocument caseDocument) {
+        return DocumentCollectionItem.builder().value(caseDocument).build();
     }
 
     private void addAdditionalHearingDocument(FinremCaseData caseData, CaseDocument documentToAdd) {

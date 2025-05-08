@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UnapproveOrder;
@@ -50,7 +50,7 @@ public abstract class SendOrderPartyDocumentHandler {
 
     public void setUpConsentOrderApprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
                                                          List<ConsentOrderCollection> approvedConsentOrders,
-                                                         List<DocumentCollection> additionalDocuments) {
+                                                         List<DocumentCollectionItem> additionalDocuments) {
         if (partyList.contains(caseRoleCode)) {
             FinremCaseData caseData = caseDetails.getData();
             List<ConsentInContestedApprovedOrderCollection> orderColl = Optional.ofNullable(getConsentOrderCollectionForParty(caseData))
@@ -63,7 +63,7 @@ public abstract class SendOrderPartyDocumentHandler {
 
     public void setUpConsentOrderUnapprovedDocumentsOnCase(FinremCaseDetails caseDetails, List<String> partyList,
                                                            CaseDocument latestOrderDocument,
-                                                           List<DocumentCollection> additionalDocuments) {
+                                                           List<DocumentCollectionItem> additionalDocuments) {
         if (partyList.contains(caseRoleCode)) {
             FinremCaseData caseData = caseDetails.getData();
             List<UnapprovedOrderCollection> orderColl = Optional.ofNullable(getUnapprovedOrderCollectionForParty(caseData))
@@ -106,7 +106,7 @@ public abstract class SendOrderPartyDocumentHandler {
             ).build();
     }
 
-    private UnapprovedOrderCollection getUnapprovedOrderCollection(CaseDocument consentOrder, List<DocumentCollection> additionalDocuments) {
+    private UnapprovedOrderCollection getUnapprovedOrderCollection(CaseDocument consentOrder, List<DocumentCollectionItem> additionalDocuments) {
         return UnapprovedOrderCollection.builder()
             .value(UnapproveOrder.builder().caseDocument(consentOrder).additionalConsentDocuments(additionalDocuments)
                 .orderReceivedAt(LocalDateTime.now()).build()).build();

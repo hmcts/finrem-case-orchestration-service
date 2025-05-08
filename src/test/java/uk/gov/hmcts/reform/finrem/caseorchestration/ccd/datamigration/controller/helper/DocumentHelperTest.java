@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
@@ -300,13 +300,13 @@ class DocumentHelperTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
 
-        DocumentCollection dc = DocumentCollection
+        DocumentCollectionItem dc = DocumentCollectionItem
             .builder()
             .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
             .build();
-        List<DocumentCollection> documentCollections = new ArrayList<>();
-        documentCollections.add(dc);
-        caseData.setHearingOrderOtherDocuments(documentCollections);
+        List<DocumentCollectionItem> documentCollectionItems = new ArrayList<>();
+        documentCollectionItems.add(dc);
+        caseData.setHearingOrderOtherDocuments(documentCollectionItems);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any(), anyString())).thenReturn(caseDocument());
 

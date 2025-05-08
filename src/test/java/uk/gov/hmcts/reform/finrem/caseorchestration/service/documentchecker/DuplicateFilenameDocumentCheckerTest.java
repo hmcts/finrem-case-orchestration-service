@@ -35,7 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -238,7 +238,7 @@ class DuplicateFilenameDocumentCheckerTest {
                         .build()))
                     .build()),
             Arguments.of(FinremCaseData.builder()
-                .additionalCicDocuments(List.of(DocumentCollection.builder()
+                .additionalCicDocuments(List.of(DocumentCollectionItem.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)
                     .build()))
                 .build()),
@@ -329,7 +329,7 @@ class DuplicateFilenameDocumentCheckerTest {
                     .build()))
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .scannedD81s(List.of(DocumentCollection.builder()
+                .scannedD81s(List.of(DocumentCollectionItem.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)
                     .build()))
                 .build()),
@@ -343,12 +343,12 @@ class DuplicateFilenameDocumentCheckerTest {
                         .build())
                         .build()),
             Arguments.of(FinremCaseData.builder()
-                .hearingNoticeDocumentPack(List.of(DocumentCollection.builder()
+                .hearingNoticeDocumentPack(List.of(DocumentCollectionItem.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)
                     .build()))
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .hearingNoticesDocumentCollection(List.of(DocumentCollection.builder()
+                .hearingNoticesDocumentCollection(List.of(DocumentCollectionItem.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)
                     .build()))
                 .build()),
@@ -367,7 +367,7 @@ class DuplicateFilenameDocumentCheckerTest {
                     .build()))
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .hearingOrderOtherDocuments(List.of(DocumentCollection.builder()
+                .hearingOrderOtherDocuments(List.of(DocumentCollectionItem.builder()
                     .value(DUPLICATED_CASE_DOCUMENT)
                     .build()))
                 .build()),
@@ -557,7 +557,7 @@ class DuplicateFilenameDocumentCheckerTest {
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .generalLetterWrapper(GeneralLetterWrapper.builder()
-                    .generalLetterUploadedDocuments(List.of(DocumentCollection.builder()
+                    .generalLetterUploadedDocuments(List.of(DocumentCollectionItem.builder()
                         .value(DUPLICATED_CASE_DOCUMENT)
                         .build()))
                     .build())
@@ -584,7 +584,7 @@ class DuplicateFilenameDocumentCheckerTest {
                 .generalLetterWrapper(GeneralLetterWrapper.builder()
                     .generalLetterCollection(List.of(GeneralLetterCollection.builder()
                         .value(GeneralLetter.builder()
-                            .generalLetterUploadedDocuments(List.of(DocumentCollection.builder()
+                            .generalLetterUploadedDocuments(List.of(DocumentCollectionItem.builder()
                                 .value(DUPLICATED_CASE_DOCUMENT)
                                 .build()))
                             .build())
@@ -730,7 +730,7 @@ class DuplicateFilenameDocumentCheckerTest {
                 .consentOrderWrapper(ConsentOrderWrapper.builder()
                     .appConsentApprovedOrders(List.of(ConsentInContestedApprovedOrderCollection.builder()
                         .approvedOrder(ConsentInContestedApprovedOrder.builder()
-                            .additionalConsentDocuments(List.of(DocumentCollection.builder()
+                            .additionalConsentDocuments(List.of(DocumentCollectionItem.builder()
                                 .value(DUPLICATED_CASE_DOCUMENT)
                                 .build()))
                             .build())

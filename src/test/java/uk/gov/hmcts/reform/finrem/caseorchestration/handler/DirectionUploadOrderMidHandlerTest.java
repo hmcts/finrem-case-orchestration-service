@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
@@ -70,9 +70,9 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         uploadHearingOrders.add(orderCollection);
         caseData.setUploadHearingOrder(uploadHearingOrders);
 
-        DocumentCollection documentCollection = DocumentCollection.builder().value(caseDocument).build();
-        List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>();
-        hearingOrderOtherDocuments.add(documentCollection);
+        DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder().value(caseDocument).build();
+        List<DocumentCollectionItem> hearingOrderOtherDocuments = new ArrayList<>();
+        hearingOrderOtherDocuments.add(documentCollectionItem);
         caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -97,9 +97,9 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         caseData.setUploadHearingOrder(uploadHearingOrders);
         finremCallbackRequest.getCaseDetailsBefore().getData().setUploadHearingOrder(uploadHearingOrders);
 
-        DocumentCollection documentCollection = DocumentCollection.builder().value(caseDocument).build();
-        List<DocumentCollection> hearingOrderOtherDocuments = new ArrayList<>();
-        hearingOrderOtherDocuments.add(documentCollection);
+        DocumentCollectionItem documentCollectionItem = DocumentCollectionItem.builder().value(caseDocument).build();
+        List<DocumentCollectionItem> hearingOrderOtherDocuments = new ArrayList<>();
+        hearingOrderOtherDocuments.add(documentCollectionItem);
         caseData.setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
 
         finremCallbackRequest.getCaseDetailsBefore().getData().setHearingOrderOtherDocuments(hearingOrderOtherDocuments);
@@ -223,8 +223,8 @@ class DirectionUploadOrderMidHandlerTest extends BaseHandlerTestSetup {
         caseData.setUploadHearingOrder(List.of(oldOrderCollection, newOrderCollection));
 
         //Create similar setup for hearingOrderOtherDocuments
-        DocumentCollection oldDocCollection = DocumentCollection.builder().value(oldDocument).build();
-        DocumentCollection newDocCollection = DocumentCollection.builder().value(newDocument).build();
+        DocumentCollectionItem oldDocCollection = DocumentCollectionItem.builder().value(oldDocument).build();
+        DocumentCollectionItem newDocCollection = DocumentCollectionItem.builder().value(newDocument).build();
         caseDataBefore.setHearingOrderOtherDocuments(List.of(oldDocCollection));
         caseData.setHearingOrderOtherDocuments(List.of(oldDocCollection, newDocCollection));
 

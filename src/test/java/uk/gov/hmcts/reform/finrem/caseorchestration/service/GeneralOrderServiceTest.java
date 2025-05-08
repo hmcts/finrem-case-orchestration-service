@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -546,7 +546,7 @@ class GeneralOrderServiceTest {
                     .agreedDraftOrderCollection(List.of(
                         AgreedDraftOrderCollection.builder()
                             .value(AgreedDraftOrder.builder()
-                                .attachments(List.of(DocumentCollection.builder().value(expectedAttachment).build()))
+                                .attachments(List.of(DocumentCollectionItem.builder().value(expectedAttachment).build()))
                                 .pensionSharingAnnex(expectedCaseDocument)
                                 .orderStatus(PROCESSED)
                                 .build())
@@ -605,12 +605,12 @@ class GeneralOrderServiceTest {
                     .finalisedOrdersCollection(List.of(
                         FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument1).build()).build(),
                         FinalisedOrderCollection.builder().value(FinalisedOrder.builder().finalisedDocument(expectedCaseDocument2)
-                            .attachments(List.of(DocumentCollection.builder().value(expectedAttachment1).build())).build()).build()
+                            .attachments(List.of(DocumentCollectionItem.builder().value(expectedAttachment1).build())).build()).build()
                     ))
                     .agreedDraftOrderCollection(List.of(
                         AgreedDraftOrderCollection.builder()
                             .value(AgreedDraftOrder.builder()
-                                .attachments(List.of(DocumentCollection.builder().value(expectedAttachment2).build()))
+                                .attachments(List.of(DocumentCollectionItem.builder().value(expectedAttachment2).build()))
                                 .pensionSharingAnnex(expectedCaseDocument3)
                                 .orderStatus(PROCESSED)
                                 .build())
@@ -741,7 +741,7 @@ class GeneralOrderServiceTest {
                         AgreedDraftOrderCollection.builder()
                             .value(AgreedDraftOrder.builder()
                                 .orderStatus(PROCESSED)
-                                .attachments(List.of(DocumentCollection.builder()
+                                .attachments(List.of(DocumentCollectionItem.builder()
                                     .value(caseDocument("https://fakeurl/attachment1", "attachment1.pdf", "attachment1"))
                                     .build()))
                                 .draftOrder(caseDocument("https://fakeurl/documentUrl", "processedFileName.pdf", "binaryUrl")).build())

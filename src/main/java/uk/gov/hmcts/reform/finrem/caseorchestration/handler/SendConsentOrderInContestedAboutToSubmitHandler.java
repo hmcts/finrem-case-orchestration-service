@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderSentToPartiesCollection;
@@ -107,7 +107,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         log.info("Setting up order documents for case {}:", caseId);
         List<CaseDocument> consentOrderDocumentPack;
         ConsentOrderWrapper wrapper = caseData.getConsentOrderWrapper();
-        List<DocumentCollection> additionalDocuments = getAdditionalDocuments(caseData, userAuthorisation, caseId, printOrderCollection);
+        List<DocumentCollectionItem> additionalDocuments = getAdditionalDocuments(caseData, userAuthorisation, caseId, printOrderCollection);
 
         if (consentOrderApprovedDocumentService.getApprovedOrderModifiedAfterNotApprovedOrder(wrapper, userAuthorisation)) {
             List<ConsentOrderCollection> approvedConsentOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
@@ -156,13 +156,13 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
         return approvedConsentOrderDocumentPack;
     }
 
-    private List<DocumentCollection> getAdditionalDocuments(FinremCaseData caseData,
-                                                            String userAuthorisation,
-                                                            String caseId,
-                                                            List<OrderSentToPartiesCollection> printOrderCollection) {
+    private List<DocumentCollectionItem> getAdditionalDocuments(FinremCaseData caseData,
+                                                                String userAuthorisation,
+                                                                String caseId,
+                                                                List<OrderSentToPartiesCollection> printOrderCollection) {
 
         List<CaseDocument> documents = new ArrayList<>();
-        List<DocumentCollection> caseDocuments = new ArrayList<>();
+        List<DocumentCollectionItem> caseDocuments = new ArrayList<>();
         if (caseData.getAdditionalCicDocuments() != null) {
             caseData.getAdditionalCicDocuments().forEach(doc -> documents.add(doc.getValue()));
         }
@@ -173,7 +173,7 @@ public class SendConsentOrderInContestedAboutToSubmitHandler extends FinremCallb
                     genericDocumentService.convertDocumentIfNotPdfAlready(doc, userAuthorisation, caseId)).toList();
             pdfDocuments.forEach(doc -> {
                 printOrderCollection.add(addToPrintOrderCollection(doc));
-                caseDocuments.add(DocumentCollection.builder().value(doc).build());
+                caseDocuments.add(DocumentCollectionItem.builder().value(doc).build());
             });
         }
         return caseDocuments;
