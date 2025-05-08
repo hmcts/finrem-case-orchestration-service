@@ -13,11 +13,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +32,9 @@ class HearingsAboutToStartHandlerTest {
 
     @Mock
     private PartyService partyService;
+
+    @Mock
+    private ValidateHearingService validateHearingService;
 
     @InjectMocks
     private ManageHearingsAboutToStartHandler handler;
@@ -54,5 +64,35 @@ class HearingsAboutToStartHandlerTest {
         // Assert
         assertNull(response.getData().getManageHearingsWrapper()
             .getManageHearingsActionSelection());
+    }
+
+    @Test
+    void givenValidCaseDataWithErrors_whenHandle_thenReturnsResponseWithErrors() {
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .workingHearing(Hearing.builder()
+                    .hearingType(HearingType.DIR)
+                    .build())
+                .build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(finremCaseData)
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(validateHearingService.validateManageHearingErrors(finremCaseData))
+            .thenReturn(List.of("Error 1", "Error 2"));
+
+        // Act
+        var response = handler.handle(callbackRequest, "authToken");
+
+        // Assert
+        assertThat(response.getErrors()).containsExactly("Error 1", "Error 2");
+        assertThat(response.getData()).isEqualTo(finremCaseData);
+
     }
 }

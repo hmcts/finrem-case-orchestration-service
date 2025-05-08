@@ -37,11 +37,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @ExtendWith(MockitoExtension.class)
 class HearingsAboutToSubmitHandlerTest {
 
-    @InjectMocks
-    private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
-
     @Mock
     private ValidateHearingService validateHearingService;
+
+    @InjectMocks
+    private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
 
     @Test
     void testCanHandle() {
@@ -50,7 +50,7 @@ class HearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidCaseData_whenHandle_thenReturnsResponseWithErrorsAndWarnings() {
+    void givenValidCaseDataWithWarnings_whenHandle_thenReturnsResponseWarnings() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .workingHearing(Hearing.builder()
@@ -67,8 +67,6 @@ class HearingsAboutToSubmitHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(validateHearingService.validateManageHearingErrors(finremCaseData))
-            .thenReturn(List.of("Error 1", "Error 2"));
         when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
             .thenReturn(List.of("Warning 1"));
 
@@ -76,7 +74,6 @@ class HearingsAboutToSubmitHandlerTest {
         var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, "authToken");
 
         // Assert
-        assertThat(response.getErrors()).containsExactly("Error 1", "Error 2");
         assertThat(response.getWarnings()).containsExactly("Warning 1");
         assertThat(response.getData()).isEqualTo(finremCaseData);
     }

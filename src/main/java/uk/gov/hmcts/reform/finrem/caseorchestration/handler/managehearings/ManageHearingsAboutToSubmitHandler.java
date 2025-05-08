@@ -48,10 +48,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         FinremCaseData finremCaseData = caseDetails.getData();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
-        List<String> errors = new ArrayList<>(validateHearingService.validateManageHearingErrors(finremCaseData));
-
-        List<String> warnings = new ArrayList<>(validateHearingService.validateManageHearingWarnings(finremCaseData,
-            manageHearingsWrapper.getWorkingHearing().getHearingType()));
+        List<String> warnings = validateHearingService.validateManageHearingWarnings(finremCaseData,
+            manageHearingsWrapper.getWorkingHearing().getHearingType());
 
         List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
                 manageHearingsWrapper.getHearings())
@@ -68,6 +66,6 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         manageHearingsWrapper.setManageHearingsActionSelection(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).errors(errors).warnings(warnings).build();
+            .data(finremCaseData).warnings(warnings).build();
     }
 }

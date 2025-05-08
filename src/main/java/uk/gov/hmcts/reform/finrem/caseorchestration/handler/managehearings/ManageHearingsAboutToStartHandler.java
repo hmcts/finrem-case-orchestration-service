@@ -14,15 +14,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+
+import java.util.List;
 
 @Slf4j
 @Service
 public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     private final PartyService partyService;
+    private final ValidateHearingService validateHearingService;
 
-    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService) {
+    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
@@ -40,6 +45,14 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = caseDetails.getData();
+
+        List<String> errors = validateHearingService.validateManageHearingErrors(finremCaseData);
+        if (!errors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(finremCaseData)
+                .errors(errors)
+                .build();
+        }
 
         // Reset any previous Manage Hearings action selection
         finremCaseData.getManageHearingsWrapper()

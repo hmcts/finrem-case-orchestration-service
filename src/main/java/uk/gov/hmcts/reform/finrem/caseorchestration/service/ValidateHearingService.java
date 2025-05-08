@@ -69,6 +69,12 @@ public class ValidateHearingService {
         return List.of();
     }
 
+    /**
+     * Validates if any required fields for managing a hearing are empty.
+     *
+     * @param caseData the case data containing hearing details to validate
+     * @return a list of error messages if required fields are empty, otherwise an empty list
+     */
     public List<String> validateManageHearingErrors(FinremCaseData caseData) {
         boolean isAnyFieldEmpty = caseData.getIssueDate() == null
             || caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate() == null
@@ -77,6 +83,15 @@ public class ValidateHearingService {
         return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
+    /**
+     * Validates if the hearing date for a specific hearing type falls within the expected timeline
+     * based on the case type and application type (e.g., fast track or express case).
+     *
+     * @param caseData the case data containing hearing details to validate
+     * @param hearingType the type of hearing to validate (e.g., FDA, FDR)
+     * @return a list of warning messages if the hearing date is outside the expected timeline,
+     *         otherwise an empty list
+     */
     public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
         Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
