@@ -15,5 +15,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ManageHearingsCollectionItem {
     private UUID id;
-    private ManageHearing value;
+    private Hearing value;
 }

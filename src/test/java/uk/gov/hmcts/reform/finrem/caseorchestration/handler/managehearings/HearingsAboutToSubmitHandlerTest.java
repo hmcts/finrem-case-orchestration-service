@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
-class ManageHearingsAboutToSubmitHandlerTest {
+class HearingsAboutToSubmitHandlerTest {
 
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
@@ -53,8 +53,8 @@ class ManageHearingsAboutToSubmitHandlerTest {
     void givenValidCaseData_whenHandle_thenReturnsResponseWithErrorsAndWarnings() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingManageHearing(ManageHearing.builder()
-                    .manageHearingType(ManageHearingType.DIR)
+                .workingHearing(Hearing.builder()
+                    .hearingType(HearingType.DIR)
                     .build())
                 .build())
             .build();
@@ -69,7 +69,7 @@ class ManageHearingsAboutToSubmitHandlerTest {
 
         when(validateHearingService.validateManageHearingErrors(finremCaseData))
             .thenReturn(List.of("Error 1", "Error 2"));
-        when(validateHearingService.validateManageHearingWarnings(finremCaseData, ManageHearingType.DIR))
+        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
             .thenReturn(List.of("Warning 1"));
 
         // Act
@@ -84,11 +84,11 @@ class ManageHearingsAboutToSubmitHandlerTest {
     @Test
     void givenValidCaseData_whenHandle_thenHearingAddedToManageHearingsList() {
         String caseReference = TestConstants.CASE_ID;
-        ManageHearing hearingToAdd = createHearingToAdd();
+        Hearing hearingToAdd = createHearingToAdd();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingManageHearing(hearingToAdd)
+                .workingHearing(hearingToAdd)
                 .build())
             .build();
 
@@ -98,25 +98,25 @@ class ManageHearingsAboutToSubmitHandlerTest {
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
 
-        assertThat(responseManageHearingsWrapper.getManageHearings())
+        assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
-        assertThat(responseManageHearingsWrapper.getWorkingManageHearing()).isNull();
+        assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
         assertThat(responseManageHearingsWrapper.getManageHearingsActionSelection()).isNull();
     }
 
-    private ManageHearing createHearingToAdd() {
-        return ManageHearing
+    private Hearing createHearingToAdd() {
+        return Hearing
             .builder()
-            .manageHearingDate(LocalDate.now())
-            .manageHearingType(ManageHearingType.DIR)
-            .manageHearingTimeEstimate("30mins")
-            .manageHearingTime("10:00")
-            .manageHearingMode(HearingMode.IN_PERSON)
-            .manageHearingAdditionalInformation("Additional Info")
-            .manageHearingNoticePrompt(YesOrNo.YES)
-            .manageHearingAdditionalDocPrompt(YesOrNo.YES)
-            .manageHearingUploadAdditionalDocs(List.of(
+            .hearingDate(LocalDate.now())
+            .hearingType(HearingType.DIR)
+            .hearingTimeEstimate("30mins")
+            .hearingTime("10:00")
+            .hearingMode(HearingMode.IN_PERSON)
+            .additionalHearingInformation("Additional Info")
+            .hearingNoticePrompt(YesOrNo.YES)
+            .additionalHearingDocPrompt(YesOrNo.YES)
+            .additionalHearingDocs(List.of(
                 DocumentCollectionItem
                     .builder()
                     .value(CaseDocument

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class ManageHearingsAboutToStartHandlerTest {
+class HearingsAboutToStartHandlerTest {
 
     @Mock
     private PartyService partyService;

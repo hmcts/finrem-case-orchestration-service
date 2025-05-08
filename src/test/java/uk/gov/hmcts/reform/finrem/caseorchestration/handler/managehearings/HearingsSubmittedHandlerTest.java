@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 @ExtendWith(MockitoExtension.class)
-class ManageHearingsSubmittedHandlerTest {
+class HearingsSubmittedHandlerTest {
 
     @InjectMocks
     private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;

@@ -23,20 +23,19 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ManageHearing implements HasCaseDocument {
+public class Hearing {
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate manageHearingDate;
-    private ManageHearingType manageHearingType;
-    private String manageHearingTimeEstimate;
-    private String manageHearingTime;
-    private Court manageHearingCourtSelection;
-    private HearingMode manageHearingMode;
-    private String manageHearingAdditionalInformation;
-    private YesOrNo manageHearingNoticePrompt;
-    private YesOrNo manageHearingAdditionalDocPrompt;
-    public List<DocumentCollectionItem> manageHearingUploadAdditionalDocs;
+    private LocalDate hearingDate;
+    private HearingType hearingType;
+    private String hearingTimeEstimate;
+    private String hearingTime;
+    private Court hearingCourtSelection;
+    private HearingMode hearingMode;
+    private String additionalHearingInformation;
+    private YesOrNo hearingNoticePrompt;
+    private YesOrNo additionalHearingDocPrompt;
+    public List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 }
-

@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageHearingBundlesAboutToStartHandlerTest {
+public class HearingBundlesAboutToStartHandlerTest {
 
     protected static final String THIS_IS_AN_ERROR = "This is an error";
     @Mock

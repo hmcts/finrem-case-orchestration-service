@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 @Slf4j
@@ -45,8 +45,8 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         finremCaseData.getManageHearingsWrapper()
             .setManageHearingsActionSelection(null);
 
-        finremCaseData.getManageHearingsWrapper().setWorkingManageHearing(
-            ManageHearing.builder()
+        finremCaseData.getManageHearingsWrapper().setWorkingHearing(
+            Hearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
                 .build());
 

@@ -5,6 +5,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import java.util.UUID;
 
 public class ManageHearingDocument {
-    private UUID manageHearingId;
-    private CaseDocument manageHearingDocument;
+    private UUID hearingId;
+    private CaseDocument hearingDocument;
 }

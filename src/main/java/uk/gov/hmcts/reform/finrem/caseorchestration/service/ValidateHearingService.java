@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -71,17 +71,17 @@ public class ValidateHearingService {
 
     public List<String> validateManageHearingErrors(FinremCaseData caseData) {
         boolean isAnyFieldEmpty = caseData.getIssueDate() == null
-            || caseData.getManageHearingsWrapper().getWorkingManageHearing().getManageHearingDate() == null
+            || caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate() == null
             || caseData.getFastTrackDecision() == null;
 
         return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateManageHearingWarnings(FinremCaseData caseData, ManageHearingType hearingType) {
+    public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
         Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
-        LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingManageHearing().getManageHearingDate();
+        LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
 
-        if (issueDate.isEmpty() || !(hearingType.equals(ManageHearingType.FDA) || hearingType.equals(ManageHearingType.FDR))) {
+        if (issueDate.isEmpty() || !(hearingType.equals(HearingType.FDA) || hearingType.equals(HearingType.FDR))) {
             return List.of();
         }
 

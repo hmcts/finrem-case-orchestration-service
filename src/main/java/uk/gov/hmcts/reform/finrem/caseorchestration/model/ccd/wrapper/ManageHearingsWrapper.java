@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 
 import java.util.List;
@@ -23,8 +23,8 @@ import java.util.UUID;
 public class ManageHearingsWrapper {
 
     private ManageHearingsAction manageHearingsActionSelection;
-    private ManageHearing workingManageHearing;
-    private List<ManageHearingsCollectionItem> manageHearings;
-    private List<ManageHearingDocumentsCollectionItem> manageHearingDocumentsCollection;
-    private UUID workingManageHearingId;
+    private Hearing workingHearing;
+    private List<ManageHearingsCollectionItem> hearings;
+    private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
+    private UUID workingHearingId;
 }

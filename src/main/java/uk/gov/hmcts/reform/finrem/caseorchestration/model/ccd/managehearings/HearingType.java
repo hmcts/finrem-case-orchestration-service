@@ -2,12 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 
 import java.util.Arrays;
 
 @RequiredArgsConstructor
-public enum ManageHearingType {
+public enum HearingType {
     MPS("Maintenance Pending Suit (MPS)"),
     FDA("First Directions Appointment (FDA)"),
     FDR("Financial Dispute Resolution (FDR)"),
@@ -26,8 +25,8 @@ public enum ManageHearingType {
         return id;
     }
 
-    public static ManageHearingType getManageHearingType(String ccdType) {
-        return Arrays.stream(ManageHearingType.values())
+    public static HearingType getManageHearingType(String ccdType) {
+        return Arrays.stream(HearingType.values())
             .filter(option -> option.id.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
