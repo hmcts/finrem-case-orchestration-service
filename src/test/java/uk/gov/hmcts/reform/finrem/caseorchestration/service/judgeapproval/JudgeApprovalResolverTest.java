@@ -360,4 +360,33 @@ class JudgeApprovalResolverTest {
         verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
         verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
     }
+
+    @Test
+    void shouldProcessRefusedIntervenerApprovablesAndUpdateTheirState() {
+        AgreedDraftOrder intervenerSample;
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder dowBuilder = DraftOrdersWrapper.builder();
+        dowBuilder.intvAgreedDraftOrderCollection(List.of(
+            AgreedDraftOrderCollection.builder().value(intervenerSample = AgreedDraftOrder.builder().draftOrder(TARGET_DOCUMENT).build()).build()
+        ));
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().build();
+        DraftOrdersWrapper draftOrdersWrapper;
+        JudgeApproval ja;
+
+        // Mocking IDAM service for getting judge's full name
+        lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
+
+        judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
+            draftOrdersWrapper = dowBuilder.build(), TARGET_DOCUMENT, ja = JudgeApproval.builder()
+                .judgeDecision(JudgeDecision.LEGAL_REP_NEEDS_TO_MAKE_CHANGE)
+                .document(TARGET_DOCUMENT)
+                .changesRequestedByJudge("FEEDBACK")
+                .build(), AUTH_TOKEN);
+
+        assertEquals(OrderStatus.REFUSED, intervenerSample.getOrderStatus());
+        assertNull(intervenerSample.getApprovalDate());
+        assertNull(intervenerSample.getApprovalJudge()); // AgreedDraftOrder doesn't store approvalJudge
+        verify(refusedOrderProcessor).processRefusedOrders(finremCaseDetails, draftOrdersWrapper, ja, AUTH_TOKEN);
+        verify(hearingProcessor, never()).processHearingInstruction(eq(draftOrdersWrapper), any(AnotherHearingRequest.class));
+    }
 }

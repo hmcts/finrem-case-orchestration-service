@@ -295,6 +295,36 @@ class UploadDraftOrdersAboutToSubmitHandlerTest {
         assertThat(draftOrderResult3.getAttachments()).isNull();
     }
 
+    @Test
+    void givenAnAgreedOrderByIntervener_whenHandle_shouldAppendIntvAgreedDraftOrderCollection() {
+        String caseReference = "1727874196328932";
+        mockCaseRole(caseReference, CaseRole.INTVR_SOLICITOR_1);
+
+        UploadAgreedDraftOrder uado1 = UploadAgreedDraftOrder.builder()
+            .uploadParty(buildUploadParty(UPLOAD_PARTY_APPLICANT))
+            .build();
+
+        AgreedDraftOrderCollection draftOrder1 = AgreedDraftOrderCollection.builder()
+            .value(AgreedDraftOrder.builder().draftOrder(CaseDocument.builder().build()).build()).build();
+
+        DraftOrdersWrapper.DraftOrdersWrapperBuilder builder = DraftOrdersWrapper.builder();
+        builder.uploadAgreedDraftOrder(uado1);
+        builder.typeOfDraftOrder(AGREED_DRAFT_ORDER_OPTION);
+        builder.agreedDraftOrderCollection(new ArrayList<>());
+        FinremCaseData caseData = FinremCaseData.builder().draftOrdersWrapper(builder.build()).build();
+
+        when(draftOrderService.processAgreedDraftOrders(uado1, AUTH_TOKEN)).thenReturn(List.of(draftOrder1));
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            handler.handle(FinremCallbackRequestFactory.from(1727874196328932L, caseData, SCHEDULING_AND_HEARING), AUTH_TOKEN);
+
+        verify(draftOrderService).populateDraftOrdersReviewCollection(caseData, uado1, List.of(draftOrder1));
+        assertThat(response.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection())
+            .containsAll(List.of(draftOrder1));
+        assertThat(response.getData().getDraftOrdersWrapper().getIntvAgreedDraftOrderCollection())
+            .containsAll(List.of(draftOrder1));
+    }
+
     @ParameterizedTest
     @MethodSource("provideAgreedDraftOrders")
     void shouldHandleAgreedDraftOrder(UploadAgreedDraftOrder uado,
