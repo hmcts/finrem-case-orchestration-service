@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -389,7 +390,7 @@ class ValidateHearingServiceTest {
     }
 
     private FinremCaseDetails getCaseDetails() {
-        return FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
+        return FinremCaseDetails.builder().id(Long.parseLong(TestConstants.CASE_ID)).data(FinremCaseData.builder().build()).build();
     }
 
     private DynamicMultiSelectList getPartiesOnCase() {

@@ -144,5 +144,4 @@ class ManageHearingsAboutToSubmitHandlerTest {
                 .build())
             .build();
     }
-
 }
