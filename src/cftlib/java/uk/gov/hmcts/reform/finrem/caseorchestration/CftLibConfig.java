@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.rse.ccd.lib.ControlPlane;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLib;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLibConfigurer;
 
@@ -19,6 +20,7 @@ public class CftLibConfig implements CFTLibConfigurer {
         createCcdRoles(lib);
         createIdamUsers(lib);
         importDefinitions(lib);
+        startDockerCompose();
     }
 
     private void importDefinitions(CFTLib lib) throws IOException {
@@ -58,5 +60,10 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-divorce-financialremedy-courtadmin");
 
         lib.createIdamUser("fr_citizen@mailinator.com", "citizen");
+    }
+
+    private void startDockerCompose() {
+        ControlPlane.waitForDB();
+        DockerComposeProcessRunner.start();
     }
 }
