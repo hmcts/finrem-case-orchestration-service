@@ -182,6 +182,13 @@ public class BulkPrintService {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
+
+        caseDocuments.forEach(document -> {
+            if (!document.getFileName().toLowerCase().endsWith(".pdf")) {
+                throw new IllegalArgumentException("All documents must be in PDF format. Invalid file: " + document.getFileName());
+            }
+        });
+
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
     }
 
@@ -194,6 +201,13 @@ public class BulkPrintService {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
+
+        caseDocuments.forEach(document -> {
+            if (!document.getFileName().toLowerCase().endsWith(".pdf")) {
+                throw new IllegalArgumentException("All documents must be in PDF format. Invalid file: " + document.getFileName());
+            }
+        });
+
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
     }
 
