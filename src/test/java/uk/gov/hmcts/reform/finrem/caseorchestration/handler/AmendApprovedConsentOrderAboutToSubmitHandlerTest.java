@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.ApprovedConsentOrderDocumentCategoriser;
@@ -26,7 +26,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +50,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
-    private  DocumentHelper documentHelper;
+    private DocumentHelper documentHelper;
 
     private static final CaseDocument ORIGINAL_LETTER = CaseDocument.builder().documentUrl("originalLetter.docx").build();
     private static final CaseDocument ORIGINAL_ORDER = CaseDocument.builder().documentUrl("originalOrder.docx").build();
@@ -89,89 +87,70 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     }
 
     @Test
-    void givenContestedCase_whenNoApprovedOrdersOnCase_thenDoesNotCategorise() {
+    void givenUserHasModifiedCollection_whenHandle_ShouldUpdateWithNewDocumentAndStamp() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertNull(response.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders());
-    }
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(MODIFIED_LETTER, STAMPED_LETTER);
+        mockDocumentStamping(MODIFIED_ORDER, STAMPED_ORDER);
 
-    @Test
-    void givenContestedCase_whenSingleApprovedOrderOnCase_thenCategoriseOrderLetterAndPensionDocuments() {
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        callbackRequest.getCaseDetails().getData().getConsentOrderWrapper().setContestedConsentedApprovedOrders(List.of(getApprovedOrderWithLetter("letter.pdf",
-            "letterurl", "letterbinary")));
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders()
-            .get(0).getApprovedOrder().getOrderLetter().getCategoryId());
-    }
-
-    @Test
-    void givenContestedCase_whenMultipleApprovedOrdersOnCase_thenCategoriseOrderLetterAndPensionDocuments() {
-        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        callbackRequest.getCaseDetails().getData().getConsentOrderWrapper().setContestedConsentedApprovedOrders(List.of(getApprovedOrderWithLetter("letter.pdf",
-            "letterurl", "letterbinary"), getApprovedOrderWithLetter("letter2.pdf",
-            "letter2url", "letter2binary")));
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
-        response.getData().getConsentOrderWrapper().getContestedConsentedApprovedOrders().forEach(order ->
-            assertEquals(APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-                order.getApprovedOrder().getOrderLetter().getCategoryId()));
-    }
-
-@Test
-void givenUserHasModifiedCollection_whenHandle_ShouldUpdateWithNewDocumentAndStamp() {
-    when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-    when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
-    mockDocumentStamping(MODIFIED_LETTER, STAMPED_LETTER);
-    mockDocumentStamping(MODIFIED_ORDER, STAMPED_ORDER);
-
-    FinremCaseData currentData = FinremCaseData.builder()
-        .consentOrderWrapper(
-            ConsentOrderWrapper.builder()
-                .contestedConsentedApprovedOrders(List.of(
-                    ConsentOrderCollection.builder()
-                        .approvedOrder(ApprovedOrder.builder()
-                            .orderLetter(MODIFIED_LETTER)
-                            .consentOrder(MODIFIED_ORDER)
+        FinremCaseData currentData = FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder()
+                    .contestedConsentedApprovedOrders(List.of(
+                        ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(MODIFIED_LETTER)
+                                .consentOrder(MODIFIED_ORDER)
+                                .build())
                             .build())
-                        .build())
-                )
-                .build())
-        .build();
+                    )
+                    .build())
+            .build();
 
-    FinremCaseData previousData = FinremCaseData.builder()
-        .consentOrderWrapper(
-            ConsentOrderWrapper.builder()
-                .contestedConsentedApprovedOrders(List.of(
-                    ConsentOrderCollection.builder()
-                        .approvedOrder(ApprovedOrder.builder()
-                            .orderLetter(ORIGINAL_LETTER)
-                            .consentOrder(ORIGINAL_ORDER)
+        FinremCaseData previousData = FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder()
+                    .contestedConsentedApprovedOrders(List.of(
+                        ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(ORIGINAL_LETTER)
+                                .consentOrder(ORIGINAL_ORDER)
+                                .build())
                             .build())
-                        .build())
-                )
+                    )
+                    .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(currentData)
                 .build())
-        .build();
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(previousData)
+                .build())
+            .build();
 
-    FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-        .caseDetails(FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(currentData)
-            .build())
-        .caseDetailsBefore(FinremCaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(previousData)
-            .build())
-        .build();
+        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-    aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
+            .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
-    verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
-    assertEquals(STAMPED_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-        .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
-    assertEquals(STAMPED_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-        .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
-}
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+
+        //Check if the original documents are replaced with stamped documents
+        assertEquals(STAMPED_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
+            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
+        assertEquals(STAMPED_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
+            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
+
+        //Check if category ids are set
+        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
+            response.get(0).getApprovedOrder().getConsentOrder().getCategoryId());
+        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
+            response.get(0).getApprovedOrder().getOrderLetter().getCategoryId());
+    }
 
     @Test
     void givenUserHasNotModified_whenHandle_ShouldNotCallAnything() {
