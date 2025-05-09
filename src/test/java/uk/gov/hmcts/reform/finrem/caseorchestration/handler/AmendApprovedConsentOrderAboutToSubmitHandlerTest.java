@@ -98,7 +98,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     @Test
     void givenContestedCase_whenSingleApprovedOrderOnCase_thenCategoriseOrderLetterAndPensionDocuments() {
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
-        callbackRequest.getCaseDetails().getData().getConsentOrderWrapper().setContestedConsentedApprovedOrders(List.of(getApprovedOrder("letter.pdf",
+        callbackRequest.getCaseDetails().getData().getConsentOrderWrapper().setContestedConsentedApprovedOrders(List.of(getApprovedOrderWithLetter("letter.pdf",
             "letterurl", "letterbinary")));
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
