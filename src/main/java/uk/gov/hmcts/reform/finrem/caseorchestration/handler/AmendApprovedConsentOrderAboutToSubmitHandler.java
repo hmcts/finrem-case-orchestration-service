@@ -82,20 +82,24 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
             }
 
             ApprovedOrder previousApprovedOrder = previousOrder.getApprovedOrder();
-            currentApprovedOrder.setOrderLetter(
-                stampIfUpdated(currentApprovedOrder.getOrderLetter(),
-                    previousApprovedOrder.getOrderLetter(),
-                    userAuthorisation, stampType, caseId
-                )
-            );
 
-            currentApprovedOrder.setConsentOrder(
-                stampIfUpdated(
-                    currentApprovedOrder.getConsentOrder(),
-                    previousApprovedOrder.getConsentOrder(),
-                    userAuthorisation, stampType, caseId
-                )
-            );
+            if (currentApprovedOrder.getOrderLetter() != null) {
+                currentApprovedOrder.setOrderLetter(
+                    stampIfUpdated(currentApprovedOrder.getOrderLetter(),
+                        previousApprovedOrder.getOrderLetter(),
+                        userAuthorisation, stampType, caseId
+                    )
+                );
+            }
+            if (currentApprovedOrder.getConsentOrder() != null) {
+                currentApprovedOrder.setConsentOrder(
+                    stampIfUpdated(
+                        currentApprovedOrder.getConsentOrder(),
+                        previousApprovedOrder.getConsentOrder(),
+                        userAuthorisation, stampType, caseId
+                    )
+                );
+            }
             if (!CollectionUtils.isEmpty(currentApprovedOrder.getPensionDocuments())) {
                 currentApprovedOrder.setPensionDocuments(
                     currentApprovedOrder.getPensionDocuments().stream()
