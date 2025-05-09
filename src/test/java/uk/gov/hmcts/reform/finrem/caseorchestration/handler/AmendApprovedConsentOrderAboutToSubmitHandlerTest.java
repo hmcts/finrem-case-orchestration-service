@@ -161,14 +161,13 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .getContestedConsentedApprovedOrders().get(1).getApprovedOrder().getOrderLetter());
 
         //Check if category ids are set
-        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(0).getApprovedOrder().getConsentOrder().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(0).getApprovedOrder().getOrderLetter().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(1).getApprovedOrder().getConsentOrder().getCategoryId());
-        assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(1).getApprovedOrder().getOrderLetter().getCategoryId());
+        assertThat(response)
+            .flatExtracting(order -> List.of(
+                order.getApprovedOrder().getConsentOrder().getCategoryId(),
+                order.getApprovedOrder().getOrderLetter().getCategoryId()
+            ))
+            .allMatch(id ->
+                DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId().equals(id));
     }
 
     @Test
@@ -228,10 +227,9 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .flatExtracting(ApprovedOrder::getPensionDocuments)
             .extracting(PensionTypeCollection::getTypedCaseDocument)
             .extracting(PensionType::getPensionDocument)
-            .extracting(CaseDocument::getDocumentUrl)
             .containsExactlyInAnyOrder(
-                stampedPensionDoc1.getDocumentUrl(),
-                stampedPensionDoc2.getDocumentUrl()
+                stampedPensionDoc1,
+                stampedPensionDoc2
             );
     }
 
