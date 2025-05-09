@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/credit-account-payments"
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "payments-api/credit-account-payments-account-on-hold.json"
+  }
+}

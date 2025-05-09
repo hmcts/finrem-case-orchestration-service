@@ -1,0 +1,12 @@
+services:
+  wiremock:
+    container_name: wiremock
+    image: wiremock/wiremock:latest
+    volumes:
+      - ./mocks/wiremock:/home/wiremock:rw
+      - ./mocks/wiremock/mappings/payments-api:/home/wiremock/mappings/payments-api:rw
+      - ./mocks/wiremock/__files/payments-api:/home/wiremock/__files/payments-api:rw
+    ports:
+      - "8765:8080"
+    command:
+      --global-response-templating
