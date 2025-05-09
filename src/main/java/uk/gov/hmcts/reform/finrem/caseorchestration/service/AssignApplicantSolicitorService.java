@@ -34,7 +34,7 @@ public class AssignApplicantSolicitorService {
                         assignCaseAccessService.assignCaseAccess(caseDetails, userAuthorisation);
                         ccdDataStoreService.removeCreatorRole(caseDetails, userAuthorisation);
                     } catch (Exception e) {
-                        log.error("Assigning case access threw exception for Case ID: {}, {}",
+                        log.info("Assigning case access threw exception for Case ID: {}, {}",
                             caseDetails.getId(), e.getMessage());
                         throw new AssignCaseAccessException(e.getMessage());
                     }
@@ -49,7 +49,7 @@ public class AssignApplicantSolicitorService {
                 throw new AssignCaseAccessException(errorMessage);
             }
         } catch (Exception e) {
-            log.error("Exception when trying to assign case access for Case ID: {}, {}",
+            log.info("Exception when trying to assign case access for Case ID: {}, {}",
                 caseDetails.getId(), e.getMessage());
             throw new AssignCaseAccessException(e.getMessage());
         }
