@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -161,7 +160,6 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         mockDocumentStamping(newLetter, STAMPED_LETTER);
         mockDocumentStamping(newOrder, STAMPED_ORDER);
 
-
         FinremCaseData currentData = FinremCaseData.builder()
             .consentOrderWrapper(
                 ConsentOrderWrapper.builder()
@@ -287,17 +285,6 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
         assertEquals(ORIGINAL_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
-    }
-
-    private ConsentOrderCollection getApprovedOrderWithLetter(String letterFile, String letterUrl, String letterBinary) {
-        ApprovedOrder approvedOrder = ApprovedOrder.builder()
-            .orderLetter(getCaseDocument(letterFile, letterUrl, letterBinary))
-            .build();
-        return ConsentOrderCollection.builder().approvedOrder(approvedOrder).build();
-    }
-
-    private CaseDocument getCaseDocument(String file, String url, String binary) {
-        return TestSetUpUtils.caseDocument(url, file, binary);
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
