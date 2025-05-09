@@ -43,7 +43,6 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
 
     public static final String AUTH_TOKEN = "tokien:)";
     private AmendApprovedConsentOrderAboutToSubmitHandler aboutToSubmitHandler;
-    private FinremCallbackRequest callbackRequest;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
@@ -66,12 +65,11 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         ApprovedConsentOrderDocumentCategoriser approvedConsentOrderCategoriser = new ApprovedConsentOrderDocumentCategoriser(featureToggleService);
         aboutToSubmitHandler = new AmendApprovedConsentOrderAboutToSubmitHandler(finremCaseDetailsMapper, approvedConsentOrderCategoriser,
             genericDocumentService, documentHelper);
-        callbackRequest = buildCallbackRequest(EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER);
     }
 
     @Test
     void canHandle() {
-        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER);
     }
 
     @Test
@@ -81,44 +79,9 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         mockDocumentStamping(MODIFIED_LETTER, STAMPED_LETTER);
         mockDocumentStamping(MODIFIED_ORDER, STAMPED_ORDER);
 
-        FinremCaseData currentData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(MODIFIED_LETTER)
-                                .consentOrder(MODIFIED_ORDER)
-                                .build())
-                            .build())
-                    )
-                    .build())
-            .build();
-
-        FinremCaseData previousData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(ORIGINAL_LETTER)
-                                .consentOrder(ORIGINAL_ORDER)
-                                .build())
-                            .build())
-                    )
-                    .build())
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(currentData)
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(previousData)
-                .build())
-            .build();
+        FinremCaseData currentData = buildCaseData(MODIFIED_LETTER, MODIFIED_ORDER, null);
+        FinremCaseData previousData = buildCaseData(ORIGINAL_LETTER, ORIGINAL_ORDER, null);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(currentData, previousData);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -126,14 +89,8 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
-
-        //Check if the original documents are replaced with stamped documents
-        assertEquals(STAMPED_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
-        assertEquals(STAMPED_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
-
-        //Check if category ids are set
+        assertEquals(STAMPED_ORDER, response.get(0).getApprovedOrder().getConsentOrder());
+        assertEquals(STAMPED_LETTER, response.get(0).getApprovedOrder().getOrderLetter());
         assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
             response.get(0).getApprovedOrder().getConsentOrder().getCategoryId());
         assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
@@ -183,16 +140,7 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
                     .build())
             .build();
 
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(currentData)
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(previousData)
-                .build())
-            .build();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(currentData, previousData);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -228,44 +176,9 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
         when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
         when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
 
-        FinremCaseData currentData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(ORIGINAL_LETTER)
-                                .consentOrder(ORIGINAL_ORDER)
-                                .build())
-                            .build())
-                    )
-                    .build())
-            .build();
-
-        FinremCaseData previousData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(ORIGINAL_LETTER)
-                                .consentOrder(ORIGINAL_ORDER)
-                                .build())
-                            .build())
-                    )
-                    .build())
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(currentData)
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(previousData)
-                .build())
-            .build();
+        FinremCaseData currentData = buildCaseData(ORIGINAL_LETTER, ORIGINAL_ORDER, null);
+        FinremCaseData previousData = buildCaseData(ORIGINAL_LETTER, ORIGINAL_ORDER, null);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(currentData, previousData);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -300,48 +213,12 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
                     .build())
                 .build());
 
-        FinremCaseData currentData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(ORIGINAL_LETTER)
-                                .consentOrder(ORIGINAL_ORDER)
-                                .pensionDocuments(pensionDocs)
-                                .build())
-                            .build())
-                    )
-                    .build()
-            )
-            .build();
-
-        FinremCaseData previousData = FinremCaseData.builder()
-            .consentOrderWrapper(
-                ConsentOrderWrapper.builder()
-                    .contestedConsentedApprovedOrders(List.of(
-                        ConsentOrderCollection.builder()
-                            .approvedOrder(ApprovedOrder.builder()
-                                .orderLetter(ORIGINAL_LETTER)
-                                .consentOrder(ORIGINAL_ORDER)
-                                .build())
-                            .build())
-                    )
-                    .build())
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(currentData)
-                .build())
-            .caseDetailsBefore(FinremCaseDetails.builder()
-                .id(Long.valueOf(CASE_ID))
-                .data(previousData)
-                .build())
-            .build();
+        FinremCaseData currentData = buildCaseData(ORIGINAL_LETTER, ORIGINAL_ORDER, pensionDocs);
+        FinremCaseData previousData = buildCaseData(ORIGINAL_LETTER, ORIGINAL_ORDER, null);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(currentData, previousData);
 
         aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
         List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
@@ -361,5 +238,35 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
         when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, CASE_ID))
             .thenReturn(stampedDocument);
+    }
+
+    private FinremCallbackRequest buildCallbackRequest(FinremCaseData currentData, FinremCaseData previousData) {
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(currentData)
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(previousData)
+                .build())
+            .build();
+    }
+
+    private FinremCaseData buildCaseData(CaseDocument letter, CaseDocument order, List<PensionTypeCollection> pensionDocs) {
+        return FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder()
+                    .contestedConsentedApprovedOrders(List.of(
+                        ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(letter)
+                                .consentOrder(order)
+                                .pensionDocuments(pensionDocs)
+                                .build())
+                            .build())
+                    )
+                    .build())
+            .build();
     }
 }
