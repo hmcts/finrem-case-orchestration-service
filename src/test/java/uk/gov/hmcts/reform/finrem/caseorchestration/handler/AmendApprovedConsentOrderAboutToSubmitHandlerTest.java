@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -23,8 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.Ap
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
@@ -68,21 +70,8 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_whenAboutToSubmitEvent_thenHandlerCannotHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED,
-            EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER), equalTo(false));
-    }
-
-    @Test
-    void givenACcdCallbackContestedCase_whenAboutToSubmitEvent_thenHandlerCanHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
-            EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER), equalTo(true));
-    }
-
-    @Test
-    void givenACcdCallbackConsentedCase_whenAboutToStartEvent_thenHandlerCannotHandle() {
-        assertThat(aboutToSubmitHandler.canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED,
-            EventType.AMEND_CONTESTED_APPROVED_CONSENT_ORDER), equalTo(false));
+    void canHandle() {
+        assertCanHandle(aboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DRAFT_ORDERS);
     }
 
     @Test
@@ -285,6 +274,88 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
         assertEquals(ORIGINAL_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
+    }
+
+    @Test
+    void givenUserHasAddedPensionDocuments_whenHandle_ShouldStampPensionDocuments() {
+        final CaseDocument pensionDoc1 = CaseDocument.builder().documentUrl("pensionDoc1.docx").build();
+        final CaseDocument stampedPensionDoc1 = CaseDocument.builder().documentUrl("pensionDoc1.pdf").build();
+        final CaseDocument pensionDoc2 = CaseDocument.builder().documentUrl("pensionDoc2.docx").build();
+        final CaseDocument stampedPensionDoc2 = CaseDocument.builder().documentUrl("pensionDoc2.pdf").build();
+
+        when(featureToggleService.isCaseFileViewEnabled()).thenReturn(true);
+        when(documentHelper.getStampType(any(FinremCaseData.class))).thenReturn(FAMILY_COURT_STAMP);
+        mockDocumentStamping(pensionDoc1, stampedPensionDoc1);
+        mockDocumentStamping(pensionDoc2, stampedPensionDoc2);
+
+        List<PensionTypeCollection> pensionDocs = List.of(
+            PensionTypeCollection.builder()
+                .typedCaseDocument(PensionType.builder()
+                    .pensionDocument(pensionDoc1)
+                    .build())
+                .build(),
+            PensionTypeCollection.builder()
+                .typedCaseDocument(PensionType.builder()
+                    .pensionDocument(pensionDoc2)
+                    .build())
+                .build());
+
+        FinremCaseData currentData = FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder()
+                    .contestedConsentedApprovedOrders(List.of(
+                        ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(ORIGINAL_LETTER)
+                                .consentOrder(ORIGINAL_ORDER)
+                                .pensionDocuments(pensionDocs)
+                                .build())
+                            .build())
+                    )
+                    .build()
+            )
+            .build();
+
+        FinremCaseData previousData = FinremCaseData.builder()
+            .consentOrderWrapper(
+                ConsentOrderWrapper.builder()
+                    .contestedConsentedApprovedOrders(List.of(
+                        ConsentOrderCollection.builder()
+                            .approvedOrder(ApprovedOrder.builder()
+                                .orderLetter(ORIGINAL_LETTER)
+                                .consentOrder(ORIGINAL_ORDER)
+                                .build())
+                            .build())
+                    )
+                    .build())
+            .build();
+
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(currentData)
+                .build())
+            .caseDetailsBefore(FinremCaseDetails.builder()
+                .id(Long.valueOf(CASE_ID))
+                .data(previousData)
+                .build())
+            .build();
+
+        aboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        List<ConsentOrderCollection> response = callbackRequest.getCaseDetails().getData()
+            .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
+
+        verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
+        assertThat(response)
+            .extracting(ConsentOrderCollection::getApprovedOrder)
+            .flatExtracting(ApprovedOrder::getPensionDocuments)
+            .extracting(PensionTypeCollection::getTypedCaseDocument)
+            .extracting(PensionType::getPensionDocument)
+            .extracting(CaseDocument::getDocumentUrl)
+            .containsExactlyInAnyOrder(
+                stampedPensionDoc1.getDocumentUrl(),
+                stampedPensionDoc2.getDocumentUrl()
+            );
     }
 
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
