@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
+import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @Service
 public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends FinremCallbackHandler {
@@ -26,19 +29,33 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.SEND_ORDER.equals(eventType));
+            && EventType.SEND_ORDER.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info("Received request for {} about to submit callback for Case ID: {}",
-            EventType.SEND_ORDER, callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.SEND_ORDER, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
+        try {
+            consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.SEND_ORDER,
+                userAuthorisation);
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .data(caseDetails.getData())
+                .build();
+        } catch (IllegalStateException e) {
+            if ("There must be exactly one court selected in case data, current initialisedCourtField size is 0"
+                .equals(e.getMessage())) {
+                String userFriendlyMessage = "No FR court information is present on the case. "
+                    + "Please add this information using Update FR Court Info.";
+                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                    .errors(List.of(userFriendlyMessage))
+                    .build();
+            }
+            throw e;
+        }
     }
 }
