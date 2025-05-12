@@ -448,6 +448,8 @@ dependencies {
     implementation group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
 
     implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
+    // Can be removed once notifications-java-client is updated
+    implementation("org.bitbucket.b_c:jose4j:0.9.6")
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
