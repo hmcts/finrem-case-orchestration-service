@@ -485,6 +485,7 @@ public class TestSetUpUtils {
     public static List<BulkPrintDocument> bulkPrintDocumentList() {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder()
+                .fileName("PDF Document.pdf")
             .binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
         return bulkPrintDocuments;
     }
