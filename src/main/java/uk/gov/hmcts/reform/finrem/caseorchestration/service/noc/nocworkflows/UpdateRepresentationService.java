@@ -80,7 +80,7 @@ public class UpdateRepresentationService {
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
-            log.error("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
+            log.info("User has represented litigant as Barrister for Case ID: {}, REJECTING COR", caseDetails.getId());
             changeRequest.setApprovalStatus(REJECTED);
             Map<String, Object> caseData = caseDetails.getData();
             caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
