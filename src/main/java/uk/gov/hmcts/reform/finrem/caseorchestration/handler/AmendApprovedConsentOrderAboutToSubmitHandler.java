@@ -98,7 +98,7 @@ public class AmendApprovedConsentOrderAboutToSubmitHandler extends FinremCallbac
                     )
                 );
             }
-            if (!CollectionUtils.isEmpty(currentApprovedOrder.getPensionDocuments())) {
+            if (CollectionUtils.isNotEmpty(currentApprovedOrder.getPensionDocuments())) {
                 currentApprovedOrder.setPensionDocuments(
                     currentApprovedOrder.getPensionDocuments().stream()
                         .map(pensionDoc -> {
