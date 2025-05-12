@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -53,6 +54,7 @@ class HearingsAboutToSubmitHandlerTest {
     void givenValidCaseDataWithWarnings_whenHandle_thenReturnsResponseWarnings() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .workingHearing(Hearing.builder()
                     .hearingType(HearingType.DIR)
                     .build())
@@ -85,6 +87,7 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .workingHearing(hearingToAdd)
                 .build())
             .build();
@@ -99,7 +102,6 @@ class HearingsAboutToSubmitHandlerTest {
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
-        assertThat(responseManageHearingsWrapper.getManageHearingsActionSelection()).isNull();
     }
 
     private Hearing createHearingToAdd() {
