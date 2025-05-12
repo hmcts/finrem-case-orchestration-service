@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
@@ -21,7 +22,6 @@ import java.net.URI;
 import java.util.Objects;
 
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 @Service
 @RequiredArgsConstructor
@@ -38,19 +38,16 @@ public class PBAValidationClient {
     public PBAValidationResponse isPBAValid(String authToken, String pbaNumber) {
         String emailId = idamService.getUserEmailId(authToken);
         URI uri = buildUri();
-        log.info("Inside isPBAValid, PRD API uri : {}, emailId : {}", uri, emailId);
         try {
-            HttpEntity request;
-            request = buildRequest(authToken, emailId);
+            HttpEntity request = buildRequest(authToken, emailId);
             ResponseEntity<PBAOrganisationResponse> responseEntity = restTemplate.exchange(uri, GET,
                 request, PBAOrganisationResponse.class);
             PBAOrganisationResponse pbaOrganisationResponse = Objects.requireNonNull(responseEntity.getBody());
-            log.info("pbaOrganisationEntityResponse : {}", pbaOrganisationResponse);
             boolean isValid = pbaOrganisationResponse.getOrganisationEntityResponse().getPaymentAccount()
                 .contains(pbaNumber);
             return PBAValidationResponse.builder().pbaNumberValid(isValid).build();
         } catch (HttpClientErrorException ex) {
-            log.info("HttpClientErrorException caught", ex);
+            log.info("HttpClientErrorException caught: {}", ex.getMessage());
             return PBAValidationResponse.builder().build();
         }
     }
@@ -68,7 +65,8 @@ public class PBAValidationClient {
     }
 
     private URI buildUri() {
-        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
-            .build().toUri();
+        return UriComponentsBuilder.fromUriString(serviceConfig.getUrl() + serviceConfig.getApi())
+            .build()
+            .toUri();
     }
 }
