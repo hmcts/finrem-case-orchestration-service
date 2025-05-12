@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintSer
 import java.util.Collections;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper.MISSING_COURT_SELECTION_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
+
 @Slf4j
 @Service
 public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends FinremCallbackHandler {
@@ -29,7 +32,7 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.SEND_ORDER.equals(eventType);
+            && SEND_ORDER.equals(eventType);
     }
 
     @Override
@@ -41,18 +44,16 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         try {
-            consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, EventType.SEND_ORDER,
+            consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, SEND_ORDER,
                 userAuthorisation);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData())
                 .build();
         } catch (IllegalStateException e) {
-            if ("There must be exactly one court selected in case data, current initialisedCourtField size is 0"
-                .equals(e.getMessage())) {
-                String userFriendlyMessage = "No FR court information is present on the case. "
-                    + "Please add this information using Update FR Court Info.";
+            if (MISSING_COURT_SELECTION_MESSAGE.equals(e.getMessage())) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                    .errors(List.of(userFriendlyMessage))
+                    .errors(List.of("No FR court information is present on the case. "
+                            + "Please add this information using Update FR Court Info."))
                     .build();
             }
             throw e;

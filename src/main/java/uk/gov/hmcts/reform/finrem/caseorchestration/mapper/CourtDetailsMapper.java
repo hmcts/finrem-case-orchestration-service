@@ -30,6 +30,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class CourtDetailsMapper {
 
+    public static final String MISSING_COURT_SELECTION_MESSAGE
+        = "There must be exactly one court selected in case data";
+
     private final ObjectMapper objectMapper;
 
     @SuppressWarnings("java:S3011")
@@ -46,13 +49,12 @@ public class CourtDetailsMapper {
     public CourtDetailsTemplateFields getCourtDetails(CourtListWrapper courtListWrapper) {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
-        if (initialisedCourtField.size() != 1) {
-            throw new IllegalStateException("There must be exactly one court selected in case data, "
-                + "current initialisedCourtField size is " + initialisedCourtField.size());
+        if (initialisedCourtField.isEmpty()) {
+            throw new IllegalStateException(MISSING_COURT_SELECTION_MESSAGE);
         }
 
         try {
-            return convertToFrcCourtDetails(initialisedCourtField.get(0), courtListWrapper);
+            return convertToFrcCourtDetails(initialisedCourtField.getFirst(), courtListWrapper);
         } catch (Exception exception) {
             throw new IllegalStateException("Could not access court list object field");
         }
