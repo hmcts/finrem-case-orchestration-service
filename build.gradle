@@ -32,7 +32,7 @@ def versions = [
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
         apacheLogging        : '2.24.3',
-        idamClient           : '3.0.3',
+        idamClient           : '3.0.4',
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
@@ -121,7 +121,7 @@ sourceSets {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    maven { url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
 }
 
 configurations {
@@ -465,7 +465,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation('com.github.hmcts:fortify-client:1.4.8:all')
+    testImplementation('com.github.hmcts:fortify-client:1.4.9:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
