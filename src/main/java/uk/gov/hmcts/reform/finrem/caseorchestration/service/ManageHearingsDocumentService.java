@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,16 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimHearingFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtIH;
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +29,16 @@ public class ManageHearingsDocumentService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final DocumentConfiguration documentConfiguration;
 
-    public CaseDocument generateInterimHearingNotice(Hearing hearing,
-                                                      FinremCaseDetails caseDetails,
-                                                      String authorisationToken) {
+    public CaseDocument generateHearingNotice(Hearing hearing,
+                                              FinremCaseDetails caseDetails,
+                                              String authorisationToken) {
 
         CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
         FinremCaseData caseData = caseDetails.getData();
         Map<String, Object> documentDataMap = caseDetailsCopy.getData();
+
+
+        //TODO: Pass correct details into hearing document generation
 
         documentDataMap.put("ccdCaseNumber", caseData.getCcdCaseId());
         documentDataMap.put("applicantName", caseData.getFullApplicantName());

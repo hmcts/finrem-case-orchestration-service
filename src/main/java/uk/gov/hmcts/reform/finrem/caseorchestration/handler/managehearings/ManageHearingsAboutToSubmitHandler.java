@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -91,14 +90,12 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         hearingWrapper.setHearings(manageHearingsCollectionItemList);
 
         CaseDocument hearingNotice = manageHearingsDocumentService
-            .generateInterimHearingNotice(hearing, finremCaseDetails, authToken);
+            .generateHearingNotice(hearing, finremCaseDetails, authToken);
 
         List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
                 hearingWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
-
-        //TODO: Check why hearing documents is not being updated
         manageHearingDocuments.add(
             ManageHearingDocumentsCollectionItem.builder()
                 .value(ManageHearingDocument
@@ -108,6 +105,9 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
                     .build())
                 .build()
         );
+
+        finremCaseDetails.getData().getManageHearingsWrapper()
+            .setHearingDocumentsCollection(manageHearingDocuments);
 
         //TODO: Generate other documents documents
         if (HearingType.FDA.equals(hearing.getHearingType())) {
