@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,18 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
 
-    private static final String AUTH_TOKEN = "TOKEN-:";
     @InjectMocks
     private SendOrderConsentForNotApprovedOrderAboutToSubmitHandler handler;
 
     @Mock
     private ConsentOrderPrintService service;
-
 
     @Test
     void givenCase_whenEventIsAmendApplication_thenCanHandle() {
