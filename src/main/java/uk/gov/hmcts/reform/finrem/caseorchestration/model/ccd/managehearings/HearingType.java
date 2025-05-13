@@ -14,9 +14,10 @@ public enum HearingType {
     DIR("Directions (DIR)"),
     MENTION("Mention"),
     PERMISSION_TO_APPEAL("Permission to Appeal"),
+    APPEAL_HEARING("Appeal Hearing (Financial Remedy)"),
     APPLICATION_HEARING("Application Hearing"),
     RETRIAL_HEARING("Retrial Hearing"),
-    PTR("Pre-Trial Review");
+    PTR("Pre-Trial Review (PTR)");
 
     private final String id;
 
