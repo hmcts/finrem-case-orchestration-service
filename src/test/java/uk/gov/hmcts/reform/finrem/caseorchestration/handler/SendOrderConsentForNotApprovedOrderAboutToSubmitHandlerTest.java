@@ -48,7 +48,6 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
         assertFalse(handler.canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE));
     }
 
-
     @Test
     void handle() {
         FinremCallbackRequest callbackRequest = callbackRequest();
@@ -58,7 +57,6 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
             any(EventType.class),
             anyString());
     }
-
 
     private FinremCallbackRequest callbackRequest() {
         return FinremCallbackRequest
