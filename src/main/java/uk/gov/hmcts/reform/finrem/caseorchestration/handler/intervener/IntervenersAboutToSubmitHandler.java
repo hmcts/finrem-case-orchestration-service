@@ -45,7 +45,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANAGE_INTERVENERS.equals(eventType));
+            && EventType.MANAGE_INTERVENERS.equals(eventType);
     }
 
     @Override
@@ -96,6 +96,5 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         };
     }
-
 
 }
