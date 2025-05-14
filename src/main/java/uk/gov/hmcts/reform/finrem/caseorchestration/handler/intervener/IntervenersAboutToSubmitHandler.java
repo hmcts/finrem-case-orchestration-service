@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -52,8 +53,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
