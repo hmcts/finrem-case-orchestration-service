@@ -126,7 +126,6 @@ repositories {
         url 'https://jitpack.io'
         content {
             includeVersion 'com.github.hmcts', 'ccd-client', '4.9.5-SPRING2'
-            includeVersion 'com.github.hmcts', 'service-auth-provider-java-client', '5.3.0'
             includeVersion 'com.github.hmcts', 'bsp-common-lib', '0.0.51'
             includeVersion 'com.github.hmcts', 'send-letter-client', '4.0.4'
             includeVersion 'com.github.hmcts', 'ccd-case-document-am-client', '1.7.3'
