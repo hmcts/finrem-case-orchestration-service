@@ -180,7 +180,6 @@ public class IntervenerService {
 
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
-
         if (userId.isPresent()) {
             assignCaseAccessService.grantCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
         } else {
