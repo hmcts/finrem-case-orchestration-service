@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -180,10 +179,6 @@ public class IntervenerService {
     }
 
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        if (StringUtils.isBlank(orgId)) {
-            // skip this logic if orgId is not set
-            return;
-        }
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
 
         if (userId.isPresent()) {
@@ -194,10 +189,6 @@ public class IntervenerService {
     }
 
     private void revokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, List<String> errors) {
-        if (StringUtils.isBlank(orgId)) {
-            // skip this logic if orgId is not set
-            return;
-        }
         Optional<String> userId = organisationService.findUserByEmail(email, systemUserService.getSysUserToken());
         if (userId.isPresent()) {
             assignCaseAccessService.removeCaseRoleToUser(caseId, userId.get(), caseRole, orgId);
