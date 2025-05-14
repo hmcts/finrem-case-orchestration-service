@@ -141,12 +141,10 @@ public class PBAPaymentController extends BaseController {
                         }
                     } else {
                         String errorMessage = "Applicant solicitor does not belong to chosen applicant organisation";
-                        log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
                         return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                     }
                 } else {
                     String errorMessage = "Applicant organisation not selected";
-                    log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
                     return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                 }
             } catch (Exception e) {
