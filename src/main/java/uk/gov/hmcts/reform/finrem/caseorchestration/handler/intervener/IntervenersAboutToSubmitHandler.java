@@ -57,8 +57,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
-        log.info("selected operation choice {} for intervener {} for Case ID: {}",
-            selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
+
         List<String> errors = new ArrayList<>();
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
