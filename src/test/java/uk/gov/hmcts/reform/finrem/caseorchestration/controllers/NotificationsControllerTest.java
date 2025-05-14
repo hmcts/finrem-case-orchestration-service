@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
@@ -88,7 +87,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ConsentOrderAvailableCorresponder.class,
     ConsentOrderNotApprovedSentCorresponder.class,
     ContestedIntermHearingCorresponder.class,
-    ContestedDraftOrderCorresponder.class,
     FinremCaseDetailsMapper.class,
     DocumentHelper.class,
     LetterAddresseeGeneratorMapper.class,
