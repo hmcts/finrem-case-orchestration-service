@@ -127,8 +127,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockitoBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
     @MockitoBean
-    private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
-    @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @MockitoBean
     private InternationalPostalService postalService;
@@ -182,7 +180,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any(CaseDetails.class));
     }
-
 
     @Test
     public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
@@ -260,27 +257,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
