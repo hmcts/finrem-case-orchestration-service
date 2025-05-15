@@ -6,6 +6,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,11 +31,13 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -302,6 +307,61 @@ class FinremNotificationRequestMapperTest {
         assertEquals("intervener name", notificationRequest.getIntervenerFullName());
         assertEquals("test org", notificationRequest.getIntervenerSolicitorFirm());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
+    }
+
+    @ParameterizedTest
+    @MethodSource("intervenerOrganisationScenarios")
+    void shouldCreateNotificationRequestForIntervenerNotificationWhenOrgIsNotPresent(
+        OrganisationPolicy organisationPolicy, String expectedFirmName) {
+
+        IntervenerOne intervenerDetails = IntervenerOne.builder()
+            .intervenerName("intervener name")
+            .intervenerOrganisation(organisationPolicy)
+            .intervenerSolicitorReference(TEST_SOLICITOR_REFERENCE)
+            .build();
+
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(
+            contestedFinremCaseDetails, intervenerDetails, TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL, TEST_SOLICITOR_REFERENCE);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("intervener name", notificationRequest.getIntervenerFullName());
+        assertEquals(expectedFirmName, notificationRequest.getIntervenerSolicitorFirm());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getIntervenerSolicitorReferenceNumber());
+    }
+
+    private static Stream<Arguments> intervenerOrganisationScenarios() {
+        Organisation completeOrg = Organisation.builder()
+            .organisationName("test org")
+            .organisationID("1")
+            .build();
+
+        Organisation orgWithNullId = Organisation.builder()
+            .organisationName("test org")
+            .organisationID(null)
+            .build();
+
+        OrganisationPolicy withCompleteOrg = OrganisationPolicy.builder()
+            .organisation(completeOrg)
+            .build();
+
+        OrganisationPolicy withNullOrg = OrganisationPolicy.builder()
+            .organisation(null)
+            .build();
+
+        OrganisationPolicy withOrgWithoutId = OrganisationPolicy.builder()
+            .organisation(orgWithNullId)
+            .build();
+
+        return Stream.of(
+            arguments(null, null),                        // intervenerOrganisation is null
+            arguments(withNullOrg, null),                // organisation is null
+            arguments(withOrgWithoutId, "test org"),     // organisationID is null
+            arguments(withCompleteOrg, "test org")       // control case
+        );
     }
 
     @Test

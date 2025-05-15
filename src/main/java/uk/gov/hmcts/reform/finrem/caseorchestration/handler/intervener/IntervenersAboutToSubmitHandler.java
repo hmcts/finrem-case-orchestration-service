@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -45,20 +46,18 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANAGE_INTERVENERS.equals(eventType));
+            && EventType.MANAGE_INTERVENERS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         Long caseId = callbackRequest.getCaseDetails().getId();
-        log.info("Invoking contested event {}, callback {} callback for Case ID: {}",
-            callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
-        log.info("selected operation choice {} for intervener {} for Case ID: {}",
-            selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
+
         List<String> errors = new ArrayList<>();
         IntervenerWrapper intervener = getIntervenerWrapper(caseData, selectedOperationCode);
 
@@ -96,6 +95,5 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             default -> throw new IllegalArgumentException("Invalid operation code: " + selectedOperationCode);
         };
     }
-
 
 }

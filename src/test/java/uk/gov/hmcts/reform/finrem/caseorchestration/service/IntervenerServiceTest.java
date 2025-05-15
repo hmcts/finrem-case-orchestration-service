@@ -319,6 +319,41 @@ public class IntervenerServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public
+    void givenContestedCase_whenAddingintervenerAndIntv1RepresentWithNullOrgId_thenSetIntvenerDateAddedAndDefaultOrg() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(null).organisationName(null).build()
+        ).build();
+        IntervenerOne oneWrapper = IntervenerOne
+            .builder().intervenerName("One name").intervenerEmail("test@test.com")
+            .intervenerSolEmail("test@test.com")
+            .intervenerSolicitorFirm(INTERVENER_SOL_FIRM)
+            .intervenerSolicitorReference(INTERVENER_SOL_REFERENCE)
+            .intervenerRepresented(YesOrNo.YES)
+            .intervenerOrganisation(organisationPolicy).build();
+        finremCaseData.setIntervenerOne(oneWrapper);
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        List<String> errors = new ArrayList<>();
+        service.updateIntervenerDetails(oneWrapper, errors, finremCallbackRequest);
+
+        assertNotNull(finremCaseData.getIntervenerOne().getIntervenerDateAdded());
+        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
+            INTVR_SOLICITOR_1.getCcdCode(), null);
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
     public void givenContestedCase_whenUpdatingIntervener1AndChangedRepresetationYesToNoAndCountryNotProvided_thenShowError() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -1562,8 +1597,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
-        String error = String.format("Could not find intervener with provided email for caseId 123");
-        assertEquals("expecting exception to throw when user not found in am", error, errors.get(0));
+        String error = "Could not find intervener with provided email";
+        assertEquals("expecting exception to throw when user not found in am", error, errors.getFirst());
         assertFalse(errors.isEmpty());
     }
 
