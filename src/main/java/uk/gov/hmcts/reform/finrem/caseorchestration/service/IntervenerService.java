@@ -112,8 +112,7 @@ public class IntervenerService {
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
         if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervenerRepresented() != null
-            && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
+            && YesOrNo.YES.equals(beforeIntv.getIntervenerRepresented())) {
             String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
             if (ObjectUtils.notEqual(beforeData, orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
                 revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
