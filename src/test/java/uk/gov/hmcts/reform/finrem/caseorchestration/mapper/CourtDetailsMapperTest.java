@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BirminghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LondonCourt;
@@ -76,16 +77,14 @@ public class CourtDetailsMapperTest {
     public void givenCourtListAndInvalidFieldDeclarations_whenGetCourtDetails_thenThrowIllegalStateException() {
         try {
             courtDetailsMapper.getCourtDetails(new DefaultCourtListWrapper());
-        } catch (IllegalStateException ise) {
+        } catch (MissingCourtException ex) {
             String expectedMessage = "There must be exactly one court selected in case data";
-            assertTrue(ise.getMessage().contains(expectedMessage));
+            assertTrue(ex.getMessage().contains(expectedMessage));
         }
     }
 
     @Test
     public void givenCaseDataWithDifferentRegions_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneCourt() {
-
-
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.MIDLANDS)
             .londonFrcList(RegionLondonFrc.LONDON)
             .midlandsFrcList(RegionMidlandsFrc.BIRMINGHAM)
@@ -118,7 +117,6 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenCaseDataWithSameCourts_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataUnchanged() {
-
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
             .londonFrcList(RegionLondonFrc.LONDON)
             .courtListWrapper(
@@ -145,8 +143,6 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenCaseDataWithThreeCourtLists_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneCourt() {
-
-
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.MIDLANDS)
             .midlandsFrcList(RegionMidlandsFrc.BIRMINGHAM)
             .londonFrcList(RegionLondonFrc.LONDON)
@@ -190,8 +186,6 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenCaseDataWithDifferentCourtsOnSameFrc_whenGetCaseDetailsWithOnlyLatestAllocatedCourt_thenCaseDataWithOnlyOneLatestCourt() {
-
-
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
             .londonFrcList(RegionLondonFrc.LONDON)
             .walesFrcList(RegionWalesFrc.SWANSEA)
@@ -229,8 +223,6 @@ public class CourtDetailsMapperTest {
 
     @Test
     public void givenCaseDataWithNoPreviousCourtList_whenLondonCourt_thenCaseDataWithOnlyOneLatestCourt() {
-
-
         AllocatedRegionWrapper allocatedRegionWrapper = AllocatedRegionWrapper.builder().regionList(Region.LONDON)
             .londonFrcList(RegionLondonFrc.LONDON)
             .courtListWrapper(
