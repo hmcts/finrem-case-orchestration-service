@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -29,9 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class CourtDetailsMapper {
 
-    public static final String MISSING_COURT_SELECTION_MESSAGE
-        = "There must be exactly one court selected in case data";
-
     private final ObjectMapper objectMapper;
 
     @SuppressWarnings("java:S3011")
@@ -49,7 +47,7 @@ public class CourtDetailsMapper {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
         if (initialisedCourtField.isEmpty()) {
-            throw new IllegalStateException(MISSING_COURT_SELECTION_MESSAGE);
+            throw new MissingCourtException("There must be exactly one court selected in case data");
         }
 
         try {

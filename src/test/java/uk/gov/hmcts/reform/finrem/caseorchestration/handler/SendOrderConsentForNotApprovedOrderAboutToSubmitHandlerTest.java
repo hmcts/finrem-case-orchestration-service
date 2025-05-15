@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -50,10 +51,9 @@ class SendOrderConsentForNotApprovedOrderAboutToSubmitHandlerTest {
     void givenCase_whenMissingCourtSelectionMessage_thenReturnError() {
         // Arrange
         FinremCallbackRequest callbackRequest = callbackRequest();
-        String exceptionMessage = "There must be exactly one court selected in case data";
 
         // Mock the behavior of the service to throw the specific exception
-        doThrow(new IllegalStateException(exceptionMessage))
+        doThrow(new MissingCourtException("whatever"))
             .when(service).sendConsentOrderToBulkPrint(any(FinremCaseDetails.class),
                 any(FinremCaseDetails.class),
                 any(EventType.class),

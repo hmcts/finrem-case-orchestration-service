@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -11,10 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
-import java.util.Collections;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper.MISSING_COURT_SELECTION_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_ORDER;
 
 @Slf4j
@@ -49,14 +48,11 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseDetails.getData())
                 .build();
-        } catch (IllegalStateException e) {
-            if (MISSING_COURT_SELECTION_MESSAGE.equals(e.getMessage())) {
-                return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                    .errors(List.of("No FR court information is present on the case. "
-                            + "Please add this information using Update FR Court Info."))
-                    .build();
-            }
-            throw e;
+        } catch (MissingCourtException e) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(List.of("No FR court information is present on the case. "
+                    + "Please add this information using Update FR Court Info."))
+                .build();
         }
     }
 }
