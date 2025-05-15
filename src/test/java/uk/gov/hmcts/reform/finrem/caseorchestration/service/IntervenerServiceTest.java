@@ -1562,8 +1562,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         List<String> errors = new ArrayList<>();
         service.updateIntervenerDetails(wrapper, errors,  finremCallbackRequest);
-        String error = String.format("Could not find intervener with provided email for caseId 123");
-        assertEquals("expecting exception to throw when user not found in am", error, errors.get(0));
+        String error = "Could not find intervener with provided email";
+        assertEquals("expecting exception to throw when user not found in am", error, errors.getFirst());
         assertFalse(errors.isEmpty());
     }
 
