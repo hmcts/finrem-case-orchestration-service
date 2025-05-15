@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -189,7 +189,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         DynamicRadioList addresseeList = getDynamicRadioList(APPLICANT_SOLICITOR, APP_SOLICITOR_LABEL, false);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressee(addresseeList);
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterUploadedDocuments(
-            List.of(DocumentCollection.builder().value(caseDocument()).build()));
+            List.of(DocumentCollectionItem.builder().value(caseDocument()).build()));
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         List<GeneralLetterCollection> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
 
@@ -254,12 +254,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void validateEncryptionOnUploadedDocuments() {
-        List<DocumentCollection> caseDocuments = new ArrayList<>();
-        DocumentCollection doc1 = DocumentCollection.builder().value(caseDocument()).build();
+        List<DocumentCollectionItem> caseDocuments = new ArrayList<>();
+        DocumentCollectionItem doc1 = DocumentCollectionItem.builder().value(caseDocument()).build();
         caseDocuments.add(doc1);
-        DocumentCollection doc2 = DocumentCollection.builder().value(null).build();
+        DocumentCollectionItem doc2 = DocumentCollectionItem.builder().value(null).build();
         caseDocuments.add(doc2);
-        DocumentCollection doc3 = null;
+        DocumentCollectionItem doc3 = null;
         caseDocuments.add(doc3);
         String caseId = "1346347334";
         String auth = AUTH_TOKEN;

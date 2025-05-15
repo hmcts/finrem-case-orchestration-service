@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -137,10 +137,10 @@ class UploadedDraftOrderCategoriserTest {
             CaseDocument document1 = CaseDocument.builder().documentFilename("additional doc 1.pdf").build();
             CaseDocument document2 = CaseDocument.builder().documentFilename("additional doc 2.pdf").build();
 
-            DocumentCollection additionalDocument1 = DocumentCollection.builder()
+            DocumentCollectionItem additionalDocument1 = DocumentCollectionItem.builder()
                 .value(document1)
                 .build();
-            DocumentCollection additionalDocument2 = DocumentCollection.builder()
+            DocumentCollectionItem additionalDocument2 = DocumentCollectionItem.builder()
                 .value(document2)
                 .build();
 

@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageHearingBundlesAboutToStartHandlerTest {
+public class HearingBundlesAboutToStartHandlerTest {
 
     protected static final String THIS_IS_AN_ERROR = "This is an error";
     @Mock

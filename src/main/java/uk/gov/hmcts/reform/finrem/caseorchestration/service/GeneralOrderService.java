@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -251,7 +251,7 @@ public class GeneralOrderService {
             hearingOrderDocuments.stream().map(DirectionOrderCollection::getValue).forEach(directionOrder ->
                 appendOrderToShareCollection(orderToShareCollection, directionOrder.getUploadDraftDocument(),
                     "Case documents tab [Approved Order] - %s",
-                    emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)));
+                    emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)));
         }
 
         populateProcessedAgreedDraftOrderToOrdersToShare(data, orderToShareCollection);
@@ -269,7 +269,7 @@ public class GeneralOrderService {
             .filter(agreedDraftOrder -> PROCESSED == agreedDraftOrder.getOrderStatus())
             .forEach(agreedDraftOrder ->
                 appendOrderToShareCollection(orderToShareCollection, agreedDraftOrder.getTargetDocument(), "Approved order - %s",
-                    emptyIfNull(agreedDraftOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)
+                    emptyIfNull(agreedDraftOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
             ));
     }
 
@@ -278,7 +278,7 @@ public class GeneralOrderService {
             .map(FinalisedOrderCollection::getValue)
             .forEach(finalisedOrder ->
                 appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s",
-                    emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollection::getValue).toArray(CaseDocument[]::new)
+                    emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
                 ));
     }
 
@@ -472,7 +472,7 @@ public class GeneralOrderService {
                 .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections)
                     .stream()
                     .map(WithAttachmentsCollection::getValue)
-                    .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollection::getValue)
+                    .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollectionItem::getValue)
                     .toList(), d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
         }
         return orderAdded != null;
