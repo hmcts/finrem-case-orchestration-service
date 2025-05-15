@@ -39,7 +39,6 @@ class HearingsAboutToStartHandlerTest {
     @InjectMocks
     private ManageHearingsAboutToStartHandler handler;
 
-
     @Test
     void canHandle() {
         assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_HEARINGS);
