@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -101,10 +101,10 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
         when(genericDocumentService.convertDocumentIfNotPdfAlready(document1, AUTH_TOKEN, "123")).thenReturn(pdfConverted1);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(document2, AUTH_TOKEN, "123")).thenReturn(pdfConverted2);
 
-        DocumentCollection additionalDocument1 = DocumentCollection.builder()
+        DocumentCollectionItem additionalDocument1 = DocumentCollectionItem.builder()
             .value(document1)
             .build();
-        DocumentCollection additionalDocument2 = DocumentCollection.builder()
+        DocumentCollectionItem additionalDocument2 = DocumentCollectionItem.builder()
             .value(document2)
             .build();
 
@@ -116,7 +116,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
             .isNotEmpty()
             .extracting(DraftDirectionOrderCollection::getValue)
             .flatExtracting(DraftDirectionOrder::getAdditionalDocuments)
-            .extracting(DocumentCollection::getValue)
+            .extracting(DocumentCollectionItem::getValue)
             .containsExactlyInAnyOrder(pdfConverted1, pdfConverted2);
 
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
@@ -126,7 +126,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
-    private FinremCallbackRequest setupTestData(List<DocumentCollection> additionalDocuments) {
+    private FinremCallbackRequest setupTestData(List<DocumentCollectionItem> additionalDocuments) {
         CaseDocument caseDocument = caseDocument(FILE_URL, FILE_NAME, FILE_BINARY_URL);
 
         //Create direction order with additional documents (if any)

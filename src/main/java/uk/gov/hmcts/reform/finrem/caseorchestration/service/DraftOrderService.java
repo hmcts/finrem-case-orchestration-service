@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -121,11 +121,11 @@ public class DraftOrderService {
         ofNullable(uploadDraftOrder.getAgreedDraftOrderDocument()).ifPresent(builder::draftOrder);
 
         // Add additional attachments for orders only
-        List<DocumentCollection> attachments = ofNullable(uploadDraftOrder.getAdditionalDocuments())
+        List<DocumentCollectionItem> attachments = ofNullable(uploadDraftOrder.getAdditionalDocuments())
             .orElse(List.of()).stream()
             .map(AdditionalDocumentsCollection::getValue)
             .filter(Objects::nonNull)
-            .map(value -> DocumentCollection.builder().value(value.getOrderAttachment()).build())
+            .map(value -> DocumentCollectionItem.builder().value(value.getOrderAttachment()).build())
             .toList();
         if (!attachments.isEmpty()) {
             builder.attachments(attachments);

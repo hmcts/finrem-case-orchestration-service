@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -30,7 +30,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
     @Override
     public List<CaseDocument> getCaseDocuments(FinremCaseDetails caseDetails) {
         return caseDetails.getData().getHearingNoticeDocumentPack().stream()
-            .map(DocumentCollection::getValue)
+            .map(DocumentCollectionItem::getValue)
             .toList();
     }
 }

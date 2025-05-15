@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
@@ -33,7 +33,7 @@ class HearingNoticesCategoriserTest {
     void testCategorise() {
         FinremCaseData finremCaseData = getFinremCaseData();
         hearingNoticesCategoriser.categorise(finremCaseData);
-        List<DocumentCollection> hearingNoticeDocuments = finremCaseData.getHearingNoticeDocumentPack();
+        List<DocumentCollectionItem> hearingNoticeDocuments = finremCaseData.getHearingNoticeDocumentPack();
 
         assertThat(hearingNoticeDocuments.get(0).getValue().getCategoryId()).isEqualTo(
             DocumentCategory.HEARING_NOTICES.getDocumentCategoryId()
@@ -50,11 +50,11 @@ class HearingNoticesCategoriserTest {
             .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e")
             .documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary").build();
 
-        List<DocumentCollection> hearingNoticeDocumentPack = List.of(
-            DocumentCollection.builder()
+        List<DocumentCollectionItem> hearingNoticeDocumentPack = List.of(
+            DocumentCollectionItem.builder()
                 .value(hearingNoticeDocument)
                 .build(),
-            DocumentCollection.builder()
+            DocumentCollectionItem.builder()
                 .value(getAdditionalHearingDocument())
                 .build()
         );

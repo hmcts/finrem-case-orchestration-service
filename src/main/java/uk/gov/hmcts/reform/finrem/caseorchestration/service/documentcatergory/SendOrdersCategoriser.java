@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentInContestedApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
@@ -163,8 +163,8 @@ public class SendOrdersCategoriser extends DocumentCategoriser {
         }
 
         if (CollectionUtils.isNotEmpty(approvedOrder.getAdditionalConsentDocuments())) {
-            List<DocumentCollection> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),
-                new TypeReference<List<DocumentCollection>>() {
+            List<DocumentCollectionItem> additionalConsentDocumentsCopy = documentHelper.deepCopyArray(approvedOrder.getAdditionalConsentDocuments(),
+                new TypeReference<List<DocumentCollectionItem>>() {
                 });
             additionalConsentDocumentsCopy.forEach(ad ->
                 setCategoryToAllOrdersDocs(ad.getValue(), categoryToApply));
