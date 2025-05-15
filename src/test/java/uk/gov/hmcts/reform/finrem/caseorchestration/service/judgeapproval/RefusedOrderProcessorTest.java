@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -67,8 +67,8 @@ class RefusedOrderProcessorTest {
     private static final String SUBMITTED_BY = "Claire";
     private static final String SUBMITTED_BY_EMAIL = "claire@solicitor.com";
     private static final LocalDateTime SUBMITTED_DATE = LocalDateTime.of(1989, 6, 4, 0, 0);
-    private static final List<DocumentCollection> ATTACHMENTS = List.of(
-        DocumentCollection.builder().value(CaseDocument.builder().documentUrl("randomDoc.pdf").build()).build()
+    private static final List<DocumentCollectionItem> ATTACHMENTS = List.of(
+        DocumentCollectionItem.builder().value(CaseDocument.builder().documentUrl("randomDoc.pdf").build()).build()
     );
 
     @InjectMocks

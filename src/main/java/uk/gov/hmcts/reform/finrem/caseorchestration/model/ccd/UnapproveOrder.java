@@ -23,7 +23,7 @@ public class UnapproveOrder implements HasCaseDocument {
     CaseDocument caseDocument;
 
     @JsonProperty("additionalConsentDocuments")
-    private List<DocumentCollection> additionalConsentDocuments;
+    private List<DocumentCollectionItem> additionalConsentDocuments;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderReceivedAt;

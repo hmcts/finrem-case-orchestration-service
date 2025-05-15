@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -134,7 +134,7 @@ class SendConsentOrderInContestedAboutToSubmitHandlerTest {
 
         CaseDocument additionalDocument = caseDocument("additionalDocumentUrl", "additionalDocumentFileName",
             "additionalDocumentBinaryUrl");
-        data.setAdditionalCicDocuments(List.of(DocumentCollection.builder().value(additionalDocument).build()));
+        data.setAdditionalCicDocuments(List.of(DocumentCollectionItem.builder().value(additionalDocument).build()));
         ApprovedOrder firstApprovedOrder = ApprovedOrder.builder().consentOrder(caseDocument("consentOrder1Url", "consentOrder1Name",
             "consentOrder1Binary")).orderLetter(caseDocument("orderLetter1Url", "orderLetter1Name",
             "OrderLetter1Binary")).build();
