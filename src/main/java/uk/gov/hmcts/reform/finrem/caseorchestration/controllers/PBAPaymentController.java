@@ -66,7 +66,6 @@ public class PBAPaymentController extends BaseController {
     private final PrdOrganisationService prdOrganisationService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
@@ -101,7 +100,6 @@ public class PBAPaymentController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles assign applicant solicitor call")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
@@ -135,22 +133,20 @@ public class PBAPaymentController extends BaseController {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
                             ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
                         } catch (Exception e) {
-                            log.error("Assigning case access threw exception for Case ID: {}, {}",
+                            log.info("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());
                             return assignCaseAccessFailure(caseDetails, emptyList());
                         }
                     } else {
                         String errorMessage = "Applicant solicitor does not belong to chosen applicant organisation";
-                        log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
                         return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                     }
                 } else {
                     String errorMessage = "Applicant organisation not selected";
-                    log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
                     return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                 }
             } catch (Exception e) {
-                log.error("Exception when trying to assign case access for Case ID: {}, {}",
+                log.info("Exception when trying to assign case access for Case ID: {}, {}",
                     caseDetails.getId(), e.getMessage());
                 return assignCaseAccessFailure(caseDetails, emptyList());
             }
@@ -179,7 +175,6 @@ public class PBAPaymentController extends BaseController {
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails, List<String> errorDetails) {
         log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
-
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .errors(ImmutableList.<String>builder()
