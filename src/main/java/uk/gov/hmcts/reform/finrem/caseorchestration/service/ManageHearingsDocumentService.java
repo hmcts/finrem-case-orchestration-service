@@ -44,18 +44,21 @@ public class ManageHearingsDocumentService {
         documentDataMap.put("applicantName", caseData.getFullApplicantName());
         documentDataMap.put("respondentName", caseData.getFullRespondentNameContested());
         documentDataMap.put("letterDate", String.valueOf(LocalDate.now()));
-        documentDataMap.put("interimHearingType", hearing.getHearingType());
-        documentDataMap.put("interimHearingDate", hearing.getHearingDate());
-        documentDataMap.put("interimHearingTime", hearing.getHearingTime());
-        documentDataMap.put("interimTimeEstimate", hearing.getHearingTimeEstimate());
-        documentDataMap.put("interimAdditionalInformationAboutHearing",
+        documentDataMap.put("hearingType", hearing.getHearingType());
+        documentDataMap.put("hearingDate", hearing.getHearingDate());
+        documentDataMap.put("hearingTime", hearing.getHearingTime());
+        documentDataMap.put("hearingTimeEstimate", hearing.getHearingTimeEstimate());
+        //TODO: Fix typo
+        documentDataMap.put("attenandance", hearing.getHearingMode());
+        documentDataMap.put("additionalHearingInformation",
             hearing.getAdditionalHearingInformation());
 
         documentDataMap.put("courtDetails", buildHearingFrcCourtDetails(caseData));
         documentDataMap.put("hearingVenue", courtDetailsConfiguration.getCourts().get(caseData.getSelectedHearingCourt()).getCourtAddress());
 
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetailsCopy),
-            documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName());
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, documentDataMap,
+            documentConfiguration.getManageHearingNoticeTemplate(caseDetails),
+            documentConfiguration.getManageHearingNoticeFileName(),
+            caseDetailsCopy.getId().toString());
     }
 }
