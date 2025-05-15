@@ -87,7 +87,7 @@ public class IntervenerService {
                     intervenerWrapper.setIntervenerSolicitorFirm(null);
                     intervenerWrapper.setIntervenerSolicitorReference(null);
                 }
-                log.info("{}} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
+                log.info("{} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 setDefaultOrgForintervener(intervenerWrapper);
             }
         }
