@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
