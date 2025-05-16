@@ -182,6 +182,8 @@ public class BulkPrintService {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
+        validateFileTypeOnCaseDocuments(caseDocuments);
+
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
     }
 
@@ -194,7 +196,17 @@ public class BulkPrintService {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
+        validateFileTypeOnCaseDocuments(caseDocuments);
+
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), recipient, documents, isInternational, auth);
+    }
+
+    private void validateFileTypeOnCaseDocuments(List<BulkPrintDocument> caseDocuments) {
+        caseDocuments.forEach(document -> {
+            if (!document.getFileName().toLowerCase().endsWith(".pdf")) {
+                throw new IllegalArgumentException("All documents must be in PDF format. Invalid file: " + document.getFileName());
+            }
+        });
     }
 
     private BulkPrintDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
