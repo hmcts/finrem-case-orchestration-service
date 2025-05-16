@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assig
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -57,7 +56,6 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
-    private final ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -132,25 +130,6 @@ public class NotificationsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         consentOrderAvailableCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Solicitor To Draft Order")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Draft Order e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        contestedDraftOrderCorresponder.sendCorrespondence(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
