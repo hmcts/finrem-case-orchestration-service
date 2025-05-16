@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-
 
 @Slf4j
 @Component
@@ -46,13 +46,12 @@ public class CourtDetailsMapper {
     public CourtDetailsTemplateFields getCourtDetails(CourtListWrapper courtListWrapper) {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
-        if (initialisedCourtField.size() != 1) {
-            throw new IllegalStateException("There must be exactly one court selected in case data, "
-                + "current initialisedCourtField size is " + initialisedCourtField.size());
+        if (initialisedCourtField.isEmpty()) {
+            throw new MissingCourtException("There must be exactly one court selected in case data");
         }
 
         try {
-            return convertToFrcCourtDetails(initialisedCourtField.get(0), courtListWrapper);
+            return convertToFrcCourtDetails(initialisedCourtField.getFirst(), courtListWrapper);
         } catch (Exception exception) {
             throw new IllegalStateException("Could not access court list object field");
         }

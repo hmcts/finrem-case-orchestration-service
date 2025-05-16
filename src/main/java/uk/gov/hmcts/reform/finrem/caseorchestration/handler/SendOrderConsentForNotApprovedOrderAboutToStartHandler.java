@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -18,18 +19,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.SEND_
 
 @Slf4j
 @Service
-public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends FinremCallbackHandler {
-    private final ConsentOrderPrintService consentOrderPrintService;
+public class SendOrderConsentForNotApprovedOrderAboutToStartHandler extends FinremCallbackHandler {
 
-    public SendOrderConsentForNotApprovedOrderAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                                   ConsentOrderPrintService consentOrderPrintService) {
+    private CourtDetailsMapper courtDetailsMapper;
+
+    public SendOrderConsentForNotApprovedOrderAboutToStartHandler(FinremCaseDetailsMapper mapper,
+                                                                  CourtDetailsMapper courtDetailsMapper) {
         super(mapper);
-        this.consentOrderPrintService = consentOrderPrintService;
+        this.courtDetailsMapper = courtDetailsMapper;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && SEND_ORDER.equals(eventType);
     }
@@ -37,22 +39,20 @@ public class SendOrderConsentForNotApprovedOrderAboutToSubmitHandler extends Fin
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-
         try {
-            consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, caseDetailsBefore, SEND_ORDER,
-                userAuthorisation);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseDetails.getData())
-                .build();
+            courtDetailsMapper.getCourtDetails(
+                caseDetails.getData().getRegionWrapper().getDefaultCourtList());
         } catch (MissingCourtException e) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .errors(List.of("No FR court information is present on the case. "
                     + "Please add this information using Update FR Court Info."))
                 .build();
         }
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData())
+            .build();
     }
 }

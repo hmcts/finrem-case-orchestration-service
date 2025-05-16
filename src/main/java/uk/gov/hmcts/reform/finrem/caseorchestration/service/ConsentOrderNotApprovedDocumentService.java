@@ -71,7 +71,6 @@ public class ConsentOrderNotApprovedDocumentService {
         }
     }
 
-
     public BulkPrintDocument notApprovedCoverLetter(FinremCaseDetails caseDetails, String authorisationToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
