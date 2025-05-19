@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +63,8 @@ class ManageHearingsDocumentServiceTest {
      * Builds a FinremCaseDetails instance composed of Hearing and FinremCaseData instances.
      * A simple CaseDetails instance is built to be returned by the mock finremCaseDetailsMapper.
      */
-    @Test
+    @ParameterizedTest
+    @MethodSource("hearingProvider")
     void shouldGenerateHearingNotice() {
         Hearing hearing = Hearing.builder()
             .hearingType(HearingType.APPEAL_HEARING)
@@ -128,5 +133,42 @@ class ManageHearingsDocumentServiceTest {
         verify(documentConfiguration).getManageHearingNoticeTemplate();
         verify(documentConfiguration).getManageHearingNoticeFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345"));
+    }
+
+    static Stream<Arguments> hearingProvider() {
+        return Stream.of(
+                // a complete hearing
+                Arguments.of(Hearing.builder()
+                        .hearingType(HearingType.APPEAL_HEARING)
+                        .hearingDate(LocalDate.now())
+                        .hearingTime("10:00 AM")
+                        .hearingTimeEstimate("2 hours")
+                        .hearingMode(HearingMode.IN_PERSON)
+                        .additionalHearingInformation("Additional Info")
+                        .hearingCourtSelection(Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                        .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                        .build())
+                                .build())
+                        .build()),
+                // a hearing without hearing mode (migrated cases), or additional information (optional field)
+                Arguments.of(Hearing.builder()
+                        .hearingType(HearingType.FDA)
+                        .hearingDate(LocalDate.now())
+                        .hearingTime("14:00")
+                        .hearingTimeEstimate("An amount of time")
+                        .hearingMode(null)
+                        .additionalHearingInformation(null)
+                        .hearingCourtSelection(Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                        .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                        .build())
+                                .build())
+                        .build())
+        );
     }
 }
