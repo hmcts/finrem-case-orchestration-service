@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -30,16 +31,18 @@ public class ManageHearingsDocumentService {
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final DocumentConfiguration documentConfiguration;
 
+    private static final String CASE_DETAILS = "caseDetails";
+    private static final String CASE_DATA = "case_data";
+
     public CaseDocument generateHearingNotice(Hearing hearing,
                                               FinremCaseDetails caseDetails,
                                               String authorisationToken) {
 
         CaseDetails caseDetailsCopy = finremCaseDetailsMapper.mapToCaseDetails(caseDetails);
         FinremCaseData caseData = caseDetails.getData();
-        Map<String, Object> documentDataMap = new HashMap<>();
+        Map<String, Object> documentDataMap = caseDetailsCopy.getData();
 
-        documentDataMap.put("case_data", caseDetailsCopy.getData());
-        documentDataMap.put("ccdCaseNumber", caseDetails.getId());
+        documentDataMap.put("ccdCaseNumber", String.valueOf(caseDetails.getId()));
         documentDataMap.put("applicantName", caseData.getFullApplicantName());
         documentDataMap.put("respondentName", caseData.getFullRespondentNameContested());
         documentDataMap.put("letterDate", String.valueOf(LocalDate.now()));
@@ -47,19 +50,25 @@ public class ManageHearingsDocumentService {
         documentDataMap.put("hearingDate", String.valueOf(hearing.getHearingDate()));
         documentDataMap.put("hearingTime", hearing.getHearingTime());
         documentDataMap.put("hearingTimeEstimate", hearing.getHearingTimeEstimate());
-        documentDataMap.put("attendance", hearing.getHearingMode().getValue());
+        documentDataMap.put("attendance", hearing.getHearingMode().getDisplayValue());
         documentDataMap.put("additionalHearingInformation",
             hearing.getAdditionalHearingInformation());
-
         documentDataMap.put("courtDetails", buildHearingFrcCourtDetails(caseData));
         documentDataMap.put("hearingVenue", courtDetailsConfiguration.getCourts().get(caseData.getSelectedHearingCourt()).getCourtAddress());
 
-        HashMap<String, Object> caseDetailsMap = new HashMap<>();
-        caseDetailsMap.put("caseDetails", documentDataMap);
+        HashMap<String, Object> caseDetailsMap = new HashMap<>(Map.of(
+            CASE_DETAILS, Map.of(
+                CASE_DATA, documentDataMap
+            )
+        ));
 
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap,
+        CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap,
                 documentConfiguration.getManageHearingNoticeTemplate(),
                 documentConfiguration.getManageHearingNoticeFileName(),
                 caseDetails.getId().toString());
+
+        hearingDoc.setCategoryId(DocumentCategory.HEARING_DOCUMENTS.getDocumentCategoryId());
+
+        return hearingDoc;
     }
 }
