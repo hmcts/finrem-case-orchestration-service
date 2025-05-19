@@ -6,12 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -97,43 +100,6 @@ class ValidateHearingServiceTest {
         assertThat(errors).containsExactly(HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE);
     }
 
-    private DynamicMultiSelectList getPartiesOnCase() {
-        DynamicMultiSelectList partiesOnCase = getPartiesOnCaseMissingSelectedAppAndResp();
-        partiesOnCase.getValue().addAll(new ArrayList<>(
-            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
-                getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()))));
-
-        return partiesOnCase;
-    }
-
-    private DynamicMultiSelectList getPartiesOnCaseMissingSelectedAppAndResp() {
-        List<DynamicMultiSelectListElement> activeParties = new ArrayList<>(
-            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
-                getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
-
-        List<DynamicMultiSelectListElement> selectedParties = new ArrayList<>(
-            List.of(getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
-                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
-        DynamicMultiSelectList partiesOnCase = DynamicMultiSelectList.builder()
-            .value(selectedParties)
-            .listItems(activeParties)
-            .build();
-        return partiesOnCase;
-    }
-
-    private DynamicMultiSelectListElement getDynamicElementList(String role) {
-        return DynamicMultiSelectListElement.builder()
-            .code(role)
-            .label(role)
-            .build();
-    }
-
     @Test
     void noErrors() {
         caseData.setIssueDate(LocalDate.now());
@@ -213,6 +179,196 @@ class ValidateHearingServiceTest {
         assertThat(errors).isEmpty();
     }
 
+    @Test
+    void manageHearingIssueDateEmpty() {
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        caseData.setIssueDate(null);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7), HearingType.FDR);
+        List<String> errors = service.validateManageHearingErrors(caseData);
+
+        caseData.setPartiesOnCase(getPartiesOnCase());
+        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
+    }
+
+    @Test
+    void manageHearingFastTrackDecisionEmpty() {
+        caseData.setIssueDate(LocalDate.now());
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7), HearingType.FDR);
+        caseData.setFastTrackDecisionReason(null);
+        caseData.setPartiesOnCase(getPartiesOnCase());
+
+        List<String> errors = service.validateManageHearingErrors(caseData);
+        assertThat(errors).containsExactly(REQUIRED_FIELD_EMPTY_ERROR);
+    }
+
+    @Test
+    void manageHearingHearingNoErrors() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7), HearingType.FDR);
+
+        List<String> errors = service.validateManageHearingErrors(caseData);
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageFastTrackHearingDatesWarningFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDR);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());;
+        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
+    }
+
+    @Test
+    void manageFastTrackHearingDatesWarningFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDA);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).containsExactly(DATE_BETWEEN_6_AND_10_WEEKS);
+    }
+
+    @Test
+    void manageHearingHearingFastTrackHearingDatesNoWarningFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7), HearingType.FDR);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingFastTrackHearingDatesNoWarningFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.YES);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(7), HearingType.FDA);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingExpressPilotDatesFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDR);
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
+    }
+
+    @Test
+    void manageHearingHearingExpressPilotDatesFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDA);
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
+    }
+
+
+    @Test
+    void manageHearingHearingExpressPilotDatesNoWarningFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(17), HearingType.FDR);
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingExpressPilotDatesNoWarningFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        caseData.getExpressCaseWrapper().setExpressCaseParticipation(ENROLLED);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(17), HearingType.FDA);
+        when(expressCaseService.isExpressCase(caseData)).thenReturn(true);
+
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingNonFastTrackHearingDatesWarningFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDR);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).containsExactly(DATE_BETWEEN_12_AND_16_WEEKS);
+    }
+
+    @Test
+    void manageHearingHearingNonFastTrackHearingDatesWarningFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(3), HearingType.FDA);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).containsExactly(DATE_BETWEEN_12_AND_16_WEEKS);
+    }
+
+    @Test
+    void manageHearingHearingNonFastTrackHearingDatesNoWarningFDR() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13), HearingType.FDR);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingNonFastTrackHearingDatesNoWarningFDA() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13), HearingType.FDA);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingDatesWarningOtherHearingType() {
+        caseData.setIssueDate(LocalDate.now());
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13), HearingType.DIR);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void manageHearingHearingDatesWarningNoIssueDate() {
+        caseData.setIssueDate(null);
+        caseData.setFastTrackDecision(YesOrNo.NO);
+        setUpManageHearingToAdd(caseData, LocalDate.now().plusWeeks(13), HearingType.DIR);
+        List<String> errors = service.validateManageHearingWarnings(caseData, caseData.getManageHearingsWrapper()
+            .getWorkingHearing().getHearingType());
+        assertThat(errors).isEmpty();
+    }
+
+
     private List<String> doTestWarnings() {
         return service.validateHearingWarnings(caseDetails);
     }
@@ -222,7 +378,51 @@ class ValidateHearingServiceTest {
     }
 
     private FinremCaseDetails getCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
-        return FinremCaseDetails.builder().id(123L).data(caseData).build();
+        return FinremCaseDetails.builder().id(Long.parseLong(TestConstants.CASE_ID)).data(FinremCaseData.builder().build()).build();
     }
+
+    private DynamicMultiSelectList getPartiesOnCase() {
+        DynamicMultiSelectList partiesOnCase = getPartiesOnCaseMissingSelectedAppAndResp();
+        partiesOnCase.getValue().addAll(new ArrayList<>(
+            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
+                getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()))));
+
+        return partiesOnCase;
+    }
+
+    private DynamicMultiSelectList getPartiesOnCaseMissingSelectedAppAndResp() {
+        List<DynamicMultiSelectListElement> activeParties = new ArrayList<>(
+            List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getCcdCode()),
+                getDynamicElementList(CaseRole.RESP_SOLICITOR.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+
+        List<DynamicMultiSelectListElement> selectedParties = new ArrayList<>(
+            List.of(getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getCcdCode()),
+                getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getCcdCode())));
+        return DynamicMultiSelectList.builder()
+            .value(selectedParties)
+            .listItems(activeParties)
+            .build();
+    }
+
+    private DynamicMultiSelectListElement getDynamicElementList(String role) {
+        return DynamicMultiSelectListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+    }
+
+    private void setUpManageHearingToAdd(FinremCaseData caseData, LocalDate hearingDate, HearingType hearingType) {
+        caseData.getManageHearingsWrapper().setWorkingHearing(Hearing
+            .builder()
+            .hearingDate(hearingDate)
+            .hearingType(hearingType)
+            .build());
+    }
+
 }

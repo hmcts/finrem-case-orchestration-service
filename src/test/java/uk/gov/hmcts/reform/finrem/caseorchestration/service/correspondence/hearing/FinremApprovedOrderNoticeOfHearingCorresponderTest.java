@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 
 import java.util.List;
 
@@ -36,11 +36,11 @@ class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHearingCo
         assertEquals(2, documentsToPrint.size());
     }
 
-    private List<DocumentCollection> buildHearingNoticePack() {
-        return List.of(DocumentCollection.builder().value(CaseDocument.builder()
+    private List<DocumentCollectionItem> buildHearingNoticePack() {
+        return List.of(DocumentCollectionItem.builder().value(CaseDocument.builder()
                 .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
                 .build()).build(),
-            DocumentCollection.builder().value(CaseDocument.builder()
+            DocumentCollectionItem.builder().value(CaseDocument.builder()
                 .documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)
                 .build()).build());
     }
