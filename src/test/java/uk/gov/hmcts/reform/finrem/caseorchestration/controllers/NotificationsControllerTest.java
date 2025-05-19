@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedDraftOrderCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedIntermHearingCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
@@ -88,7 +87,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     ConsentOrderAvailableCorresponder.class,
     ConsentOrderNotApprovedSentCorresponder.class,
     ContestedIntermHearingCorresponder.class,
-    ContestedDraftOrderCorresponder.class,
     FinremCaseDetailsMapper.class,
     DocumentHelper.class,
     LetterAddresseeGeneratorMapper.class,
@@ -126,8 +124,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private DocumentHelper documentHelper;
     @MockitoBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
-    @MockitoBean
-    private ContestedDraftOrderCorresponder contestedDraftOrderCorresponder;
     @MockitoBean
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @MockitoBean
@@ -182,7 +178,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any(CaseDetails.class));
     }
-
 
     @Test
     public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
@@ -260,27 +255,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
-
-        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendSolicitorToDraftOrderEmailRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
-
-        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
-
-        verify(contestedDraftOrderCorresponder).sendCorrespondence(any(CaseDetails.class));
     }
 
     @Test
