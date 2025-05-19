@@ -311,7 +311,7 @@ class FinremNotificationRequestMapperTest {
 
     @ParameterizedTest
     @MethodSource("intervenerOrganisationScenarios")
-    void shouldCreateNotificationRequestForIntervenerNotificationWhenOrgIsNotPresent(
+    void givenOrgIsNotPresent_whenIntervenerDetailsProvided_thenCreateNotificationRequest(
         OrganisationPolicy organisationPolicy, String expectedFirmName) {
 
         IntervenerOne intervenerDetails = IntervenerOne.builder()
