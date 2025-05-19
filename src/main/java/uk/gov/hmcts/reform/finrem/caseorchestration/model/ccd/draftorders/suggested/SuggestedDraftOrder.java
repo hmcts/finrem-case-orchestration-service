@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSubmittedInfo;
 
@@ -28,5 +28,5 @@ public class SuggestedDraftOrder implements HasCaseDocument, HasSubmittedInfo {
     private String uploadedOnBehalfOf;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime submittedDate;
-    private List<DocumentCollection> attachments;
+    private List<DocumentCollectionItem> attachments;
 }

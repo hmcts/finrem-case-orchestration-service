@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService.HEARING_DEFAULT_CORRESPONDENCE_ERROR_MESSAGE;
 
@@ -64,6 +66,51 @@ public class ValidateHearingService {
         } else if (isHearingOutsideOfTimeline(issueDate.plusWeeks(12), issueDate.plusWeeks(16), hearingDate)) {
             return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
+        return List.of();
+    }
+
+    /**
+     * Validates if any required fields for managing a hearing are empty.
+     *
+     * @param caseData the case data containing hearing details to validate
+     * @return a list of error messages if required fields are empty, otherwise an empty list
+     */
+    public List<String> validateManageHearingErrors(FinremCaseData caseData) {
+        boolean isAnyFieldEmpty = caseData.getIssueDate() == null
+            || caseData.getFastTrackDecision() == null;
+
+        return isAnyFieldEmpty ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
+    }
+
+    /**
+     * Validates if the hearing date for a specific hearing type falls within the expected timeline
+     * based on the case type and application type (e.g., fast track or express case).
+     *
+     * @param caseData the case data containing hearing details to validate
+     * @param hearingType the type of hearing to validate (e.g., FDA, FDR)
+     * @return a list of warning messages if the hearing date is outside the expected timeline,
+     *         otherwise an empty list
+     */
+    public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
+        Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
+        LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
+
+        if (issueDate.isEmpty() || !(hearingType.equals(HearingType.FDA) || hearingType.equals(HearingType.FDR))) {
+            return List.of();
+        }
+
+        if (caseData.isFastTrackApplication()) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(6), issueDate.get().plusWeeks(10), hearingDate)) {
+                return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
+            }
+        } else if (expressCaseService.isExpressCase(caseData)) {
+            if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(16), issueDate.get().plusWeeks(20), hearingDate)) {
+                return List.of(DATE_BETWEEN_16_AND_20_WEEKS);
+            }
+        } else if (isHearingOutsideOfTimeline(issueDate.get().plusWeeks(12), issueDate.get().plusWeeks(16), hearingDate)) {
+            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
+        }
+
         return List.of();
     }
 

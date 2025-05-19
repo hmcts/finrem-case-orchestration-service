@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApproveOrdersHolde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderConsolidateCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeep;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentToKeepCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -437,14 +437,14 @@ class DocumentRemovalServiceTest {
     void testRemoveDocuments_NestedObjectInArray() {
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseId(TestConstants.CASE_ID)
-            .hearingNoticeDocumentPack(List.of(DocumentCollection.builder()
+            .hearingNoticeDocumentPack(List.of(DocumentCollectionItem.builder()
                     .value(CaseDocument.builder()
                         .documentUrl("https://example1.com/123")
                         .documentFilename("Approved Order1.pdf")
                         .documentBinaryUrl("https://example1.com/binary")
                         .build())
                 .build(),
-                DocumentCollection.builder()
+                DocumentCollectionItem.builder()
                     .value(CaseDocument.builder()
                         .documentUrl("https://example2.com/456")
                         .documentFilename("Additional Hearing Doc.pdf")

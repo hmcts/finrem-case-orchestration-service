@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
@@ -63,8 +63,8 @@ class UploadApprovedOrderContestedAboutToStartHandlerTest extends BaseHandlerTes
         caseData.setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
         caseData.setOrderApprovedJudgeName("moj");
         caseData.setOrderApprovedDate(LocalDate.now());
-        List<DocumentCollection> hearingNoticeDocumentPack = new ArrayList<>();
-        DocumentCollection collection = DocumentCollection.builder().value(caseDocument()).build();
+        List<DocumentCollectionItem> hearingNoticeDocumentPack = new ArrayList<>();
+        DocumentCollectionItem collection = DocumentCollectionItem.builder().value(caseDocument()).build();
         hearingNoticeDocumentPack.add(collection);
         caseData.setHearingNoticeDocumentPack(hearingNoticeDocumentPack);
 
