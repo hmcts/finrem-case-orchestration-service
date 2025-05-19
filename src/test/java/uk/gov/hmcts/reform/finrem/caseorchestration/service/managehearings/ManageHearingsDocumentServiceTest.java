@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -29,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCateg
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,8 +41,6 @@ class ManageHearingsDocumentServiceTest {
     private ManageHearingsDocumentService manageHearingsDocumentService;
 
     @Mock
-    private DocumentHelper documentHelper;
-    @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
     @Mock
     private GenericDocumentService genericDocumentService;
@@ -57,6 +53,12 @@ class ManageHearingsDocumentServiceTest {
     private static final String TEMPLATE = "template";
     private static final String FILE_NAME = "fileName";
 
+    /**
+     * Test case for generateHearingNotice method.
+     * This test checks that the method forwards the correct info for doc generation.
+     * Builds a FinremCaseDetails instance composed of Hearing and FinremCaseData instances.
+     * A simple CaseDetails instance is built to be returned by the mock finremCaseDetailsMapper.
+     */
     @Test
     void shouldGenerateHearingNotice() {
         Hearing hearing = Hearing.builder()
@@ -75,7 +77,7 @@ class ManageHearingsDocumentServiceTest {
                     .build()).build())
             .build();
 
-        FinremCaseData caseData = FinremCaseData.builder()
+        FinremCaseData finremCaseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper
                 .builder()
                 .applicantFmName("Bilbo")
@@ -84,22 +86,23 @@ class ManageHearingsDocumentServiceTest {
                 .respondentLname("Gollum")
                 .build())
             .build();
+        finremCaseData.getManageHearingsWrapper().setWorkingHearing(hearing);
 
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
             .id(12345L)
-            .data(caseData)
+            .data(finremCaseData)
             .build();
 
-        CaseDetails caseDetailsCopy = CaseDetails.builder()
+        CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
-            .data(Map.of())
+            .data(new HashMap<>())
             .build();
 
         CaseDocument expectedDocument = CaseDocument.builder()
             .documentUrl("http://document.url")
             .build();
 
-        when(finremCaseDetailsMapper.mapToCaseDetails(caseDetails)).thenReturn(caseDetailsCopy);
+        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
         when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", CourtDetails
             .builder()
                 .courtAddress("Bromley County Court, College Road, Bromley, BR1 3PX")
@@ -112,15 +115,15 @@ class ManageHearingsDocumentServiceTest {
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345")))
             .thenReturn(expectedDocument);
 
-        // Act
-        CaseDocument result = manageHearingsDocumentService.generateHearingNotice(hearing, caseDetails, AUTHORISATION_TOKEN);
+        // Call the method under test
+        CaseDocument result = manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, AUTHORISATION_TOKEN);
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.getDocumentUrl()).isEqualTo(expectedDocument.getDocumentUrl());
         assertThat(result.getCategoryId()).isEqualTo(DocumentCategory.HEARING_DOCUMENTS.getDocumentCategoryId());
 
-        verify(finremCaseDetailsMapper).mapToCaseDetails(caseDetails);
+        verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails);
         verify(courtDetailsConfiguration).getCourts();
         verify(documentConfiguration).getManageHearingNoticeTemplate();
         verify(documentConfiguration).getManageHearingNoticeFileName();
