@@ -43,6 +43,8 @@ public class PdfStampingService {
 
     private final EvidenceManagementDownloadService emDownloadService;
 
+    private final DocumentConversionService documentConversionService;
+
     public Document stampDocument(Document document,
                                   String authToken,
                                   boolean isAnnexNeeded,
@@ -52,12 +54,14 @@ public class PdfStampingService {
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, stampType);
+            byte[] flattenDoc = documentConversionService.flattenPdfDocument(stampedDoc);
+
             MultipartFile multipartFile =
-                FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
+                FinremMultipartFile.builder().name(document.getFileName()).content(flattenDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
             List<FileUploadResponse> uploadResponse =
                 emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
-            FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
+            FileUploadResponse fileSaved = Optional.of(uploadResponse.getFirst())
                 .filter(response -> response.getStatus() == HttpStatus.OK)
                 .orElseThrow(() -> new DocumentStorageException("Failed to store document"));
             return CONVERTER.apply(fileSaved);
