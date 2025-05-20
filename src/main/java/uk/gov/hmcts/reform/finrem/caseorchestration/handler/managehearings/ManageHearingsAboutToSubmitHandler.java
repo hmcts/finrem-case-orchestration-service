@@ -62,7 +62,6 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         List<String> warnings = new ArrayList<>();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            //TODO: Return if warnings to avoid duplicate document generation
             warnings = validateHearingService.validateManageHearingWarnings(finremCaseDetails.getData(),
                 manageHearingsWrapper.getWorkingHearing().getHearingType());
 
