@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistoryCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
@@ -20,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -155,12 +158,34 @@ public class FinremNotificationRequestMapper {
             .build();
     }
 
+    /**
+     * Builds a {@link NotificationRequest} for an intervener in a financial remedy case.
+     *
+     * <p>This method prepares the notification details such as the intervener's full name,
+     * solicitor firm, solicitor reference number, recipient name and email, and party names
+     * from the case. If the intervener organisation name is present, it is used as the
+     * solicitor firm name; otherwise, it falls back to the solicitor firm string directly.</p>
+     *
+     * @param caseDetails      the details of the financial remedy case, including applicant and respondent names
+     * @param intervenerDetails the details of the intervener, including organisation and solicitor information
+     * @param recipientName     the name of the recipient for the notification (can be null or empty)
+     * @param recipientEmail    the email address of the notification recipient
+     * @param referenceNumber   the solicitor's reference number (can be null or empty)
+     * @return a populated {@link NotificationRequest} containing the relevant notification fields
+     */
     public NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails,
                                                         String recipientName, String recipientEmail, String referenceNumber) {
+        String intvSolicitorFirm = intervenerDetails.getIntervenerSolicitorFirm();
+        String organisationName = Optional.of(intervenerDetails)
+            .map(IntervenerDetails::getIntervenerOrganisation)
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationName)
+            .orElse(null);
+
         return NotificationRequest.builder()
             .caseReferenceNumber(caseDetails.getId().toString())
             .intervenerFullName(intervenerDetails.getIntervenerName())
-            .intervenerSolicitorFirm(intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName())
+            .intervenerSolicitorFirm(organisationName == null ? intvSolicitorFirm : organisationName)
             .intervenerSolicitorReferenceNumber(nullToEmpty(referenceNumber))
             .name(nullToEmpty(recipientName))
             .notificationEmail(recipientEmail)
