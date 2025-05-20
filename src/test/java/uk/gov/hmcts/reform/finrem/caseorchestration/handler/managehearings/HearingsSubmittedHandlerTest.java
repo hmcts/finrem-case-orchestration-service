@@ -109,5 +109,5 @@ class HearingsSubmittedHandlerTest {
             .caseDetails(caseDetails)
             .build();
     }
-    
+
 }

@@ -109,10 +109,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         finremCaseDetails.getData().getManageHearingsWrapper()
             .setHearingDocumentsCollection(manageHearingDocuments);
 
-        //TODO: Generate other documents documents
         if (HearingType.FDA.equals(hearing.getHearingType())) {
-            // TODO: Only generate if FORM C is not already generated
-            // hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails);
+           // Send hearing type specific notices
         }
     }
 }

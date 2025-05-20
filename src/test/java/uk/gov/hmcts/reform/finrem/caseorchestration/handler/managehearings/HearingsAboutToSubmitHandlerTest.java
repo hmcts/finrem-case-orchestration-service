@@ -99,12 +99,28 @@ class HearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
+        when(manageHearingsDocumentService.generateHearingNotice(hearingToAdd, request.getCaseDetails(), AUTH_TOKEN))
+            .thenReturn(CaseDocument
+                .builder()
+                .documentUrl("documentUrl")
+                .documentBinaryUrl("documentBinaryUrl")
+                .documentFilename("HearingNotice.pdf")
+                .uploadTimestamp(LocalDateTime.now())
+                .build()
+        );
+
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
+        var hearingDocumentAdded = responseManageHearingsWrapper.getHearingDocumentsCollection().getFirst();
+        var hearingId = responseManageHearingsWrapper.getHearings().getFirst().getId();
 
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
+        assertThat(hearingDocumentAdded.getValue().getHearingId()).isEqualTo(hearingId);
+        assertThat(hearingDocumentAdded.getValue().getHearingDocument().getDocumentFilename())
+            .isEqualTo("HearingNotice.pdf");
+        assertThat(responseManageHearingsWrapper.getWorkingHearingId()).isEqualTo(hearingId);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
     }
 
