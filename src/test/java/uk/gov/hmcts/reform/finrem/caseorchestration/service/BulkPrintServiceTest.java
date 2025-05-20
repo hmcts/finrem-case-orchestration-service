@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -343,6 +344,24 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNonPdfDocumentIsProvided() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        caseDetails.getData().getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.YES);
+        List<BulkPrintDocument> bulkPrintDocuments = List.of(BulkPrintDocument.builder()
+            .fileName("Word Document.docx")
+            .binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
+
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(genericDocumentService.bulkPrint(bulkPrintRequestArgumentCaptor.capture(), any(), anyBoolean(), eq(AUTH_TOKEN))).thenReturn(letterId);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
+        });
     }
 
     private CaseDetails caseDetails() {
