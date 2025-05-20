@@ -38,7 +38,7 @@ public class GenericDocumentService {
     }
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
-                                                             String template, String fileName, String caseId) {
+                                                            String template, String fileName, String caseId) {
         Document generatedPdf = documentManagementService
             .storeDocument(template, fileName, placeholders, authorisationToken, caseId);
         return CaseDocument.from(generatedPdf);
