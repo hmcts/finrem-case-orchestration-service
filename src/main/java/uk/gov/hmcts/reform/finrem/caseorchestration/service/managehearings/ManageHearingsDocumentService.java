@@ -31,7 +31,27 @@ public class ManageHearingsDocumentService {
 
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
+    private static final String CCD_CASE_NUMBER = "ccdCaseNumber";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String LETTER_DATE = "letterDate";
+    private static final String HEARING_TYPE = "hearingType";
+    private static final String HEARING_DATE = "hearingDate";
+    private static final String HEARING_TIME = "hearingTime";
+    private static final String HEARING_TIME_ESTIMATE = "hearingTimeEstimate";
+    private static final String COURT_DETAILS = "courtDetails";
+    private static final String HEARING_VENUE = "hearingVenue";
+    private static final String ATTENDANCE = "attendance";
+    private static final String ADDITIONAL_HEARING_INFORMATION = "additionalHearingInformation";
 
+    /**
+     * Generates a hearing notice document for the given hearing and case details.
+     *
+     * @param hearing the hearing information to include in the notice
+     * @param finremCaseDetails the case details containing case data
+     * @param authorisationToken the authorisation token for document generation
+     * @return the generated hearing notice as a {@link CaseDocument}
+     */
     public CaseDocument generateHearingNotice(Hearing hearing,
                                               FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
@@ -40,23 +60,23 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object> documentDataMap = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
 
-        documentDataMap.put("ccdCaseNumber", finremCaseDetails.getId().toString());
-        documentDataMap.put("applicantName", finremCaseData.getFullApplicantName());
-        documentDataMap.put("respondentName", finremCaseData.getFullRespondentNameContested());
-        documentDataMap.put("letterDate", LocalDate.now().toString());
-        documentDataMap.put("hearingType", hearing.getHearingType());
-        documentDataMap.put("hearingDate", hearing.getHearingDate().toString());
-        documentDataMap.put("hearingTime", hearing.getHearingTime());
-        documentDataMap.put("hearingTimeEstimate", hearing.getHearingTimeEstimate());
-        documentDataMap.put("courtDetails", buildHearingFrcCourtDetails(finremCaseData));
-        documentDataMap.put("hearingVenue", courtDetailsConfiguration.getCourts().get(finremCaseData.getSelectedHearingCourt()).getCourtAddress());
+        documentDataMap.put(CCD_CASE_NUMBER, finremCaseDetails.getId().toString());
+        documentDataMap.put(APPLICANT_NAME, finremCaseData.getFullApplicantName());
+        documentDataMap.put(RESPONDENT_NAME, finremCaseData.getFullRespondentNameContested());
+        documentDataMap.put(LETTER_DATE, LocalDate.now().toString());
+        documentDataMap.put(HEARING_TYPE, hearing.getHearingType());
+        documentDataMap.put(HEARING_DATE, hearing.getHearingDate().toString());
+        documentDataMap.put(HEARING_TIME, hearing.getHearingTime());
+        documentDataMap.put(HEARING_TIME_ESTIMATE, hearing.getHearingTimeEstimate());
+        documentDataMap.put(COURT_DETAILS, buildHearingFrcCourtDetails(finremCaseData));
+        documentDataMap.put(HEARING_VENUE, courtDetailsConfiguration.getCourts().get(finremCaseData.getSelectedHearingCourt()).getCourtAddress());
         documentDataMap.put(
-                "attendance",
-                hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : ""
+            ATTENDANCE,
+            hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : ""
         );
         documentDataMap.put(
-                "additionalHearingInformation",
-                hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : ""
+            ADDITIONAL_HEARING_INFORMATION,
+            hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : ""
         );
 
         HashMap<String, Object> caseDetailsMap = new HashMap<>(Map.of(

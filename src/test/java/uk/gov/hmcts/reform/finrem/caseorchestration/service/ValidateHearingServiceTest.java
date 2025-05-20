@@ -210,7 +210,6 @@ class ValidateHearingServiceTest {
         List<String> errors = service.validateManageHearingErrors(caseData);
         assertThat(errors).isEmpty();
     }
-    // From here
 
     @Test
     void manageFastTrackHearingDatesWarningFDR() {
