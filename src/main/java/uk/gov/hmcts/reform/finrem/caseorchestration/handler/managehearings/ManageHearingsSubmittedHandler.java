@@ -55,10 +55,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
             .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
             .getValue();
 
-
-        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            //TODO: Send notifications
-        }
+        // Send Notifications
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
