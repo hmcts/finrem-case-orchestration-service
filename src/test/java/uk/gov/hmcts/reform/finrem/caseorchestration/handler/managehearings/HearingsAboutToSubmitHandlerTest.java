@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,18 +22,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -43,7 +48,7 @@ class HearingsAboutToSubmitHandlerTest {
     private ValidateHearingService validateHearingService;
 
     @Mock
-    private ManageHearingsDocumentService manageHearingsDocumentService;
+    private ManageHearingActionService manageHearingActionService;
 
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
@@ -56,6 +61,7 @@ class HearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseDataWithWarnings_whenHandle_thenReturnsResponseWarnings() {
+        //Arrange
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
@@ -86,6 +92,7 @@ class HearingsAboutToSubmitHandlerTest {
 
     @Test
     void givenValidCaseData_whenHandle_thenHearingAddedToManageHearingsList() {
+        // Arrange
         String caseReference = TestConstants.CASE_ID;
         Hearing hearingToAdd = createHearingToAdd();
 
@@ -99,21 +106,50 @@ class HearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
-        when(manageHearingsDocumentService.generateHearingNotice(hearingToAdd, request.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(CaseDocument
-                .builder()
-                .documentUrl("documentUrl")
-                .documentBinaryUrl("documentBinaryUrl")
-                .documentFilename("HearingNotice.pdf")
-                .uploadTimestamp(LocalDateTime.now())
-                .build()
-        );
+        // Mock dependent calls
+        when(validateHearingService.validateManageHearingWarnings(caseData, HearingType.DIR))
+            .thenReturn(List.of());
 
+        doAnswer(invocation -> {
+
+            UUID workingHearingID = UUID.randomUUID();
+            ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
+                .id(workingHearingID)
+                .value(hearingToAdd)
+                .build();
+
+            ManageHearingDocumentsCollectionItem manageHearingDocumentsCollectionItem = ManageHearingDocumentsCollectionItem
+                .builder()
+                .id(UUID.randomUUID())
+                .value(ManageHearingDocument.builder()
+                    .hearingId(workingHearingID)
+                    .hearingDocument(CaseDocument.builder()
+                        .categoryId("categoryId")
+                        .documentUrl("documentUrl")
+                        .documentFilename("HearingNotice.pdf")
+                        .documentBinaryUrl("documentBinaryUrl")
+                        .uploadTimestamp(LocalDateTime.now())
+                        .build())
+                    .build())
+                .build();
+
+            FinremCaseDetails details = invocation.getArgument(0);
+            ManageHearingsWrapper wrapper = details.getData().getManageHearingsWrapper();
+
+            wrapper.setHearings(List.of(manageHearingsCollectionItem));
+            wrapper.setHearingDocumentsCollection(List.of(manageHearingDocumentsCollectionItem));
+            wrapper.setWorkingHearingId(workingHearingID);
+            return null;
+        }).when(manageHearingActionService)
+            .performAddHearing(request.getCaseDetails(), caseData.getManageHearingsWrapper(), AUTH_TOKEN);
+
+        // Act
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
         var hearingDocumentAdded = responseManageHearingsWrapper.getHearingDocumentsCollection().getFirst();
         var hearingId = responseManageHearingsWrapper.getHearings().getFirst().getId();
 
+        //Asset
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);

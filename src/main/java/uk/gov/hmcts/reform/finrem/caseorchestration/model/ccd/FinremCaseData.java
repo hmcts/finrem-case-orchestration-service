@@ -845,7 +845,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public String getSelectedHearingCourt() {
         Court court = getManageHearingsWrapper().getWorkingHearing().getHearingCourtSelection();
-        CourtListWrapper courtList = getManageHearingsWrapper().getWorkingHearing().getHearingCourtSelection().getDefaultCourtListWrapper();
+        CourtListWrapper courtList = court.getDefaultCourtListWrapper();
 
         return Map.of(
             Region.MIDLANDS, getMidlandsCourt(court.getMidlandsList(), courtList),
