@@ -37,6 +37,7 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
 
     public static final String USER_ID = "someUserId";
     public static final String TEST_EMAIL = "test@gmail.com";
+    public static final String TEST_INVALID_EMAIL = "test@test";
 
     @InjectMocks
     private PrdOrganisationService prdOrganisationService;
@@ -128,10 +129,10 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenBadRequest_whenFindUserByEmail_thenHandleBadRequestException() {
-        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_INVALID_EMAIL)))
                 .thenThrow(FeignException.BadRequest.class);
 
-        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_INVALID_EMAIL, AUTH_TOKEN);
 
         assertTrue(userId.isEmpty());
     }
