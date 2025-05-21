@@ -14,22 +14,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
-public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
+public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
-    private final ManageHearingActionService manageHearingActionService;
+    private final  ValidateHearingService validateHearingService;
 
-    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ManageHearingActionService manageHearingActionService) {
+    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
-        this.manageHearingActionService = manageHearingActionService;
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.MANAGE_HEARINGS.equals(eventType);
     }
@@ -37,7 +40,7 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -45,13 +48,16 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
 
+        List<String> warnings = new ArrayList<>();
+
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            manageHearingActionService.performAddHearing(finremCaseDetails, manageHearingsWrapper, userAuthorisation);
+            warnings = validateHearingService.validateManageHearingWarnings(finremCaseDetails.getData(),
+                manageHearingsWrapper.getWorkingHearing().getHearingType());
         }
 
-        manageHearingsWrapper.setWorkingHearing(null);
-
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).build();
+            .data(finremCaseData)
+            .warnings(warnings)
+            .build();
     }
 }

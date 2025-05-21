@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
@@ -38,14 +37,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsAboutToSubmitHandlerTest {
-
-    @Mock
-    private ValidateHearingService validateHearingService;
 
     @Mock
     private ManageHearingActionService manageHearingActionService;
@@ -57,37 +52,6 @@ class HearingsAboutToSubmitHandlerTest {
     void testCanHandle() {
         Assertions.assertCanHandle(manageHearingsAboutToSubmitHandler, CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED,
             EventType.MANAGE_HEARINGS);
-    }
-
-    @Test
-    void givenValidCaseDataWithWarnings_whenHandle_thenReturnsResponseWarnings() {
-        //Arrange
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                .workingHearing(Hearing.builder()
-                    .hearingType(HearingType.DIR)
-                    .build())
-                .build())
-            .build();
-
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData)
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
-            .thenReturn(List.of("Warning 1"));
-
-        // Act
-        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, "authToken");
-
-        // Assert
-        assertThat(response.getWarnings()).containsExactly("Warning 1");
-        assertThat(response.getData()).isEqualTo(finremCaseData);
     }
 
     @Test
@@ -105,10 +69,6 @@ class HearingsAboutToSubmitHandlerTest {
 
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
-
-        // Mock dependent calls
-        when(validateHearingService.validateManageHearingWarnings(caseData, HearingType.DIR))
-            .thenReturn(List.of());
 
         doAnswer(invocation -> {
 
