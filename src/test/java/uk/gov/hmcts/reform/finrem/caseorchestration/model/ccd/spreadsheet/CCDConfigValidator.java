@@ -46,18 +46,18 @@ public class CCDConfigValidator {
     protected static final String INTERVENER_CT = "FR_intervener";
     protected static final String REFUSAL_ORDER_CT = "FR_orderRefusalOrder";
     protected static final int ROW_HEADERS = 2;
-    private List<String> ccdFieldsTypeToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer",
+    private final List<String> ccdFieldsTypeToIgnore = List.of("Label", "OrderSummary", "CaseHistoryViewer",
         "CasePaymentHistoryViewer", "FlagLauncher", "ComponentLauncher");
 
     private List<String> ccdFieldsToIgnore = Arrays.asList("caseDocumentConfidential");
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";
     protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
-    private List<String> finremCaseDataFieldsToIgnore = List.of("ccdCaseId", "courtDetails", "d11", "isCfvCategoriesAppliedFlag");
-    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT, REFUSAL_ORDER_CT);
-    private List<String> alreadyProcessedCcdFields = new ArrayList<>();
+    private final List<String> finremCaseDataFieldsToIgnore = List.of("ccdCaseId", "courtDetails", "d11", "isCfvCategoriesAppliedFlag", "orderSummary");
+    private final List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST, INTERVENER_CT, REFUSAL_ORDER_CT);
+    private final List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
-    private Map<String, String> fieldTypesMap = Map.ofEntries(
+    private final Map<String, String> fieldTypesMap = Map.ofEntries(
         Map.entry("Text", "String"),
         Map.entry("AddressUK", "Address"),
         Map.entry("AddressGlobalUK", "Address"),
@@ -78,7 +78,7 @@ public class CCDConfigValidator {
         Map.entry("Flags", "CaseFlag")
     );
 
-    private Map<String, String> specialFieldTypes = Map.ofEntries(
+    private final Map<String, String> specialFieldTypes = Map.ofEntries(
         Map.entry("currentUserCaseRole", "CaseRole")
     );
 

@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
 
 import java.math.BigDecimal;
 
@@ -30,4 +31,5 @@ public class PaymentDetailsWrapper {
     private String pbaReference;
     @JsonProperty("PBAPaymentReference")
     private String pbaPaymentReference;
+    private OrderSummary orderSummary;
 }
