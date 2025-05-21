@@ -149,7 +149,7 @@ class HearingsAboutToSubmitHandlerTest {
         var hearingDocumentAdded = responseManageHearingsWrapper.getHearingDocumentsCollection().getFirst();
         var hearingId = responseManageHearingsWrapper.getHearings().getFirst().getId();
 
-        //Asset
+        //Assert
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
