@@ -52,8 +52,11 @@ public class PrdOrganisationService {
         } catch (FeignException.NotFound notFoundException) {
             log.info("Could not find user by email");
             return Optional.empty();
+        } catch (FeignException.BadRequest invalidEmailFoundException) {
+            log.info("Email is not valid or null");
+            return Optional.empty();
         } catch (FeignException exception) {
-            throw new RuntimeException(email != null ? maskEmail(getStackTrace(exception), email) : "Email is not valid or null");
+            throw new RuntimeException(maskEmail(getStackTrace(exception), email));
         }
     }
 }
