@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,24 +22,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsAboutToSubmitHandlerTest {
 
     @Mock
-    private ValidateHearingService validateHearingService;
+    private ManageHearingActionService manageHearingActionService;
 
     @InjectMocks
     private ManageHearingsAboutToSubmitHandler manageHearingsAboutToSubmitHandler;
@@ -50,41 +55,14 @@ class HearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidCaseDataWithWarnings_whenHandle_thenReturnsResponseWarnings() {
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingHearing(Hearing.builder()
-                    .hearingType(HearingType.DIR)
-                    .build())
-                .build())
-            .build();
-
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .data(finremCaseData)
-            .build();
-
-        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
-            .thenReturn(List.of("Warning 1"));
-
-        // Act
-        var response = manageHearingsAboutToSubmitHandler.handle(callbackRequest, "authToken");
-
-        // Assert
-        assertThat(response.getWarnings()).containsExactly("Warning 1");
-        assertThat(response.getData()).isEqualTo(finremCaseData);
-    }
-
-    @Test
     void givenValidCaseData_whenHandle_thenHearingAddedToManageHearingsList() {
+        // Arrange
         String caseReference = TestConstants.CASE_ID;
         Hearing hearingToAdd = createHearingToAdd();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .workingHearing(hearingToAdd)
                 .build())
             .build();
@@ -92,14 +70,55 @@ class HearingsAboutToSubmitHandlerTest {
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CaseType.CONTESTED, caseData);
 
+        doAnswer(invocation -> {
+
+            UUID workingHearingID = UUID.randomUUID();
+            ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
+                .id(workingHearingID)
+                .value(hearingToAdd)
+                .build();
+
+            ManageHearingDocumentsCollectionItem manageHearingDocumentsCollectionItem = ManageHearingDocumentsCollectionItem
+                .builder()
+                .id(UUID.randomUUID())
+                .value(ManageHearingDocument.builder()
+                    .hearingId(workingHearingID)
+                    .hearingDocument(CaseDocument.builder()
+                        .categoryId("categoryId")
+                        .documentUrl("documentUrl")
+                        .documentFilename("HearingNotice.pdf")
+                        .documentBinaryUrl("documentBinaryUrl")
+                        .uploadTimestamp(LocalDateTime.now())
+                        .build())
+                    .build())
+                .build();
+
+            FinremCaseDetails details = invocation.getArgument(0);
+            ManageHearingsWrapper wrapper = details.getData().getManageHearingsWrapper();
+
+            wrapper.setHearings(List.of(manageHearingsCollectionItem));
+            wrapper.setHearingDocumentsCollection(List.of(manageHearingDocumentsCollectionItem));
+            wrapper.setWorkingHearing(null);
+            wrapper.setWorkingHearingId(workingHearingID);
+            return null;
+        }).when(manageHearingActionService)
+            .performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
+
+        // Act
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
+        var hearingDocumentAdded = responseManageHearingsWrapper.getHearingDocumentsCollection().getFirst();
+        var hearingId = responseManageHearingsWrapper.getHearings().getFirst().getId();
 
+        //Assert
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
+        assertThat(hearingDocumentAdded.getValue().getHearingId()).isEqualTo(hearingId);
+        assertThat(hearingDocumentAdded.getValue().getHearingDocument().getDocumentFilename())
+            .isEqualTo("HearingNotice.pdf");
+        assertThat(responseManageHearingsWrapper.getWorkingHearingId()).isEqualTo(hearingId);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
-        assertThat(responseManageHearingsWrapper.getManageHearingsActionSelection()).isNull();
     }
 
     private Hearing createHearingToAdd() {
