@@ -32,6 +32,7 @@ public class PdfStampingServiceTest {
 
     @Mock private EvidenceManagementUploadService evidenceManagementUploadServiceService;
     @Mock private EvidenceManagementDownloadService evidenceManagementDownloadService;
+    @Mock private DocumentConversionService documentConversionService;
 
     private String caseId = "123123123";
 
