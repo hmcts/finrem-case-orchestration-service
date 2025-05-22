@@ -1,0 +1,46 @@
+{
+  "token": "",
+  "event_id": "FR_approveApplication",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "caseAdded",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "divorceCaseNumber": "DD12D12345",
+      "divorceStageReached": "Decree Nisi",
+      "assignedToJudge": "Judge Judy",
+      "assignedToJudgeReason": "Draft consent order",
+      "refusalOrderJudgeType": "Her Honour Judge",
+      "refusalOrderJudgeName": "Judgey",
+      "solicitorAgreeToReceiveEmails": "Yes",
+      "solicitorDXnumber": "string",
+      "solicitorEmail": "email@hmcts.net",
+      "solicitorFirm": "FirmA",
+      "solicitorName": "SolName1",
+      "solicitorPhone": "1234567891",
+      "solicitorReference": "LL01",
+      "currentUserCaseRoleLabel": "[RESPSOLICITOR]",
+      "helpWithFeesQuestion": "No",
+      "HWFNumber": "654633",
+      "PBANumber": "PBA0043648",
+      "amountToPay": "25500",
+      "PBAPaymentReference": "RC-1223-2480-8740-5642",
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "9dda3ffc-18bc-4a18-83cb-5b1525c784c6",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "25500",
+              "FeeVersion": "3",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "25500",
+        "PaymentReference": "Test payment"
+      }
+    }
+  }
+}

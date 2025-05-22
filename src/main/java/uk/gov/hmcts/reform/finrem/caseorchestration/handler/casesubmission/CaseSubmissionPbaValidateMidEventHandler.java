@@ -45,8 +45,8 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         validateCaseData(callbackRequestWithFinremCaseDetails);
 
         FinremCaseData caseData = caseDetails.getData();
-        if (YesOrNo.NO.equals(caseData.getHelpWithFeesQuestion())) {
-            String pbaNumber = Objects.toString(caseData.getPbaNumber());
+        if (YesOrNo.NO.equals(caseData.getPaymentDetailsWrapper().getHelpWithFeesQuestion())) {
+            String pbaNumber = Objects.toString(caseData.getPaymentDetailsWrapper().getPbaNumber());
             log.info("Validating PBA Number: {} for Case ID: {}", pbaNumber, caseDetails.getId());
             if (!pbaValidationService.isValidPBA(userAuthorisation, pbaNumber)) {
                 log.info("PBA number is invalid for Case ID: {}", caseDetails.getId());

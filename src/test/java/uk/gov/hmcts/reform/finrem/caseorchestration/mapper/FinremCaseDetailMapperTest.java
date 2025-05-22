@@ -129,8 +129,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -149,8 +152,8 @@ class FinremCaseDetailMapperTest {
     static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
-
     private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
+    private static final String PAYMENT_DETAILS_REQUEST = "/fixtures/deserialisation/payment-details.json";
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
@@ -230,6 +233,25 @@ class FinremCaseDetailMapperTest {
         assertNotNull(caseData.getContactDetailsWrapper().getRespondentAddress());
         assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
         assertEquals("Line1", caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1());
+    }
+
+    @Test
+    void givenPaymentDetails_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsFromJson(PAYMENT_DETAILS_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        PaymentDetailsWrapper paymentDetailsWrapper = finremCaseDetails.getData().getPaymentDetailsWrapper();
+
+        assertEquals(YesOrNo.NO, paymentDetailsWrapper.getHelpWithFeesQuestion());
+        assertEquals("654633", paymentDetailsWrapper.getHwfNumber());
+        assertEquals(new BigDecimal("25500"), paymentDetailsWrapper.getAmountToPay());
+        assertEquals("PBA0043648", paymentDetailsWrapper.getPbaNumber());
+        assertEquals("RC-1223-2480-8740-5642", paymentDetailsWrapper.getPbaPaymentReference());
+        assertEquals(1, paymentDetailsWrapper.getOrderSummary().getFees().size());
+        FeeValue feeValue = paymentDetailsWrapper.getOrderSummary().getFees().getFirst().getValue();
+        assertEquals("FEE0229", feeValue.getFeeCode());
+        assertEquals("25500", feeValue.getFeeAmount());
+        assertEquals("3", feeValue.getFeeVersion());
+        assertEquals("Application for a financial order", feeValue.getFeeDescription());
     }
 
     private void assertBatchThree(FinremCaseData caseData) {

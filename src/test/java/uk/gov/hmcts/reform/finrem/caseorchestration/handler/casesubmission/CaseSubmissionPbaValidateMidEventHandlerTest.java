@@ -42,8 +42,8 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
     void testHandle_ValidPbaNumber_thenHandlerCanHandle() {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setHelpWithFeesQuestion(NO);
-        caseData.setPbaNumber("ValidPbaNumber");
+        caseData.getPaymentDetailsWrapper().setHelpWithFeesQuestion(NO);
+        caseData.getPaymentDetailsWrapper().setPbaNumber("ValidPbaNumber");
         caseDetails.setData(caseData);
 
         Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "ValidPbaNumber")).thenReturn(true);
@@ -61,8 +61,8 @@ class CaseSubmissionPbaValidateMidEventHandlerTest {
     void testHandle_InvalidPbaNumber_thenReturnError() {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         FinremCaseData caseData = new FinremCaseData();
-        caseData.setHelpWithFeesQuestion(NO);
-        caseData.setPbaNumber("InvalidPbaNumber");
+        caseData.getPaymentDetailsWrapper().setHelpWithFeesQuestion(NO);
+        caseData.getPaymentDetailsWrapper().setPbaNumber("InvalidPbaNumber");
         caseDetails.setData(caseData);
 
         Mockito.when(pbaValidationService.isValidPBA("userAuthorisation", "InvalidPbaNumber")).thenReturn(false);

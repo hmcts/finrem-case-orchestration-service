@@ -59,7 +59,7 @@ public class FeeService {
     }
 
     private OrderSummary createOrderSummary(FinremCaseDetails caseDetails, FeeItem feeItem) {
-        String paymentReference = caseDetails.getData().getPbaPaymentReference();
+        String paymentReference = caseDetails.getData().getPaymentDetailsWrapper().getPbaPaymentReference();
         return OrderSummary.builder()
             .paymentTotal(feeItem.getValue().getFeeAmount())
             .paymentReference(paymentReference)
