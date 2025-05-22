@@ -94,6 +94,9 @@ public class DocumentConfiguration {
     private String generalApplicationHearingNoticeTemplate;
     private String generalApplicationHearingNoticeHighCourtTemplate;
     private String generalApplicationHearingNoticeFileName;
+    private String manageHearingNoticeTemplate;
+    private String manageHearingHCNoticeTemplate;
+    private String manageHearingNoticeFileName;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
@@ -228,6 +231,11 @@ public class DocumentConfiguration {
             return true;
         }
         return false;
+    }
+
+    public String getManageHearingNoticeTemplate(FinremCaseDetails finremCaseDetails) {
+        return isHighCourtSelected(finremCaseDetails) ? manageHearingHCNoticeTemplate
+            : manageHearingNoticeTemplate;
     }
 
     private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {
