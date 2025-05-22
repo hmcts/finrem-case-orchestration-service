@@ -65,7 +65,7 @@ class ManageHearingActionServiceTest {
             .thenReturn(hearingNotice);
 
         // Act
-        manageHearingActionService.performAddHearing(finremCaseDetails, hearingWrapper, AUTH_TOKEN);
+        manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertThat(hearingWrapper.getHearings()).hasSize(1);

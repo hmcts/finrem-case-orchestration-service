@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -24,43 +25,80 @@ public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
 
-    public void performAddHearing(FinremCaseDetails finremCaseDetails, ManageHearingsWrapper hearingWrapper, String authToken) {
-        Hearing hearing = finremCaseDetails.getData().getManageHearingsWrapper().getWorkingHearing();
+    /**
+     * Adds a new hearing to the case details and generates the associated hearing notice document.
+     *
+     * @param finremCaseDetails case details containing hearing data
+     * @param authToken         authorization token for accessing secure resources
+     */
+    public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
 
-        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
-                hearingWrapper.getHearings())
-            .orElseGet(ArrayList::new);
+        UUID hearingId = UUID.randomUUID();
+        addHearingToCollection(hearingWrapper, hearingId);
+        addHearingNotice(hearingWrapper, finremCaseDetails, hearingId, authToken);
 
-        UUID manageHearingID = UUID.randomUUID();
-        manageHearingsCollectionItemList.add(
-            ManageHearingsCollectionItem.builder().id(manageHearingID).value(hearing).build()
-        );
-        hearingWrapper.setWorkingHearingId(manageHearingID);
-        hearingWrapper.setHearings(manageHearingsCollectionItemList);
-
-        CaseDocument hearingNotice = manageHearingsDocumentService
-            .generateHearingNotice(hearing, finremCaseDetails, authToken);
-
-        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
-                hearingWrapper.getHearingDocumentsCollection())
-            .orElseGet(ArrayList::new);
-
-        manageHearingDocuments.add(
-            ManageHearingDocumentsCollectionItem.builder()
-                .value(ManageHearingDocument
-                    .builder()
-                    .hearingId(manageHearingID)
-                    .hearingDocument(hearingNotice)
-                    .build())
-                .build()
-        );
-
-        finremCaseDetails.getData().getManageHearingsWrapper()
-            .setHearingDocumentsCollection(manageHearingDocuments);
-
-        if (HearingType.FDA.equals(hearing.getHearingType())) {
-            // Send hearing type specific notices
+        if (HearingType.FDA.equals(hearingWrapper.getWorkingHearing().getHearingType())) {
+            // Generate hearing type specific docs
         }
 
+        hearingWrapper.setWorkingHearing(null);
+    }
+
+    /**
+     * Adds the current working hearing to the hearings collection in the wrapper.
+     *
+     * @param hearingsWrapper wrapper containing hearing-related data
+     * @param hearingId       the ID for the hearing to be added
+     */
+    private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
+
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+                        hearingsWrapper.getHearings())
+                .orElseGet(ArrayList::new);
+
+        manageHearingsCollectionItemList.add(
+                ManageHearingsCollectionItem
+                        .builder()
+                        .id(hearingId)
+                        .value(hearingsWrapper.getWorkingHearing())
+                        .build()
+        );
+        hearingsWrapper.setWorkingHearingId(hearingId);
+        hearingsWrapper.setHearings(manageHearingsCollectionItemList);
+    }
+
+    /**
+     * Generates and adds a hearing notice document to the hearing documents collection.
+     *
+     * @param hearingsWrapper wrapper containing hearing-related data
+     * @param finremCaseDetails case details containing the hearing data
+     * @param hearingId the ID for the associated hearing
+     * @param authToken authorization token for accessing secure resources
+     */
+    private void addHearingNotice(ManageHearingsWrapper hearingsWrapper,
+                                  FinremCaseDetails finremCaseDetails,
+                                  UUID hearingId,
+                                  String authToken) {
+
+        CaseDocument hearingNotice = manageHearingsDocumentService
+                .generateHearingNotice(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
+
+        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
+                        hearingsWrapper.getHearingDocumentsCollection())
+                .orElseGet(ArrayList::new);
+
+        manageHearingDocuments.add(
+                ManageHearingDocumentsCollectionItem.builder()
+                        .value(ManageHearingDocument
+                                .builder()
+                                .hearingId(hearingId)
+                                .hearingDocument(hearingNotice)
+                                .build())
+                        .build()
+        );
+
+        hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
     }
 }

@@ -98,10 +98,11 @@ class HearingsAboutToSubmitHandlerTest {
 
             wrapper.setHearings(List.of(manageHearingsCollectionItem));
             wrapper.setHearingDocumentsCollection(List.of(manageHearingDocumentsCollectionItem));
+            wrapper.setWorkingHearing(null);
             wrapper.setWorkingHearingId(workingHearingID);
             return null;
         }).when(manageHearingActionService)
-            .performAddHearing(request.getCaseDetails(), caseData.getManageHearingsWrapper(), AUTH_TOKEN);
+            .performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
 
         // Act
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);

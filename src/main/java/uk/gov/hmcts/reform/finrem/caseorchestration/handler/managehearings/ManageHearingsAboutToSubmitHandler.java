@@ -42,14 +42,13 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        ManageHearingsAction actionSelection = finremCaseData
+            .getManageHearingsWrapper()
+            .getManageHearingsActionSelection();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            manageHearingActionService.performAddHearing(finremCaseDetails, manageHearingsWrapper, userAuthorisation);
+            manageHearingActionService.performAddHearing(finremCaseDetails, userAuthorisation);
         }
-
-        manageHearingsWrapper.setWorkingHearing(null);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
