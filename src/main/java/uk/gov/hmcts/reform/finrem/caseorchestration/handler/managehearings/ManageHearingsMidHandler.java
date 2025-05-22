@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -13,25 +12,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
-public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
+public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
-    public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService) {
+    private final  ValidateHearingService validateHearingService;
+
+    public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
+        this.validateHearingService = validateHearingService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.SUBMITTED.equals(callbackType)
+        return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.MANAGE_HEARINGS.equals(eventType);
     }
@@ -39,26 +40,24 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info(CallbackHandlerLogger.submitted(callbackRequest));
-
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
-        Hearing hearing = manageHearingsWrapper.getHearings().stream()
-            .filter(h -> h.getId().equals(hearingId))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-            .getValue();
+        List<String> warnings = new ArrayList<>();
 
-        // Send Notifications
+        if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
+            warnings = validateHearingService.validateManageHearingWarnings(finremCaseDetails.getData(),
+                manageHearingsWrapper.getWorkingHearing().getHearingType());
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
+            .warnings(warnings)
             .build();
     }
 }
