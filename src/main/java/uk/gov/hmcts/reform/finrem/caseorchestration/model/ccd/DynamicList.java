@@ -18,6 +18,12 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class DynamicList {
+
+    public DynamicList(String value) {
+        this.value = new DynamicListElement();
+        this.value.setCode(value);
+    }
+
     /**
      * The selected value for the dropdown.
      */
