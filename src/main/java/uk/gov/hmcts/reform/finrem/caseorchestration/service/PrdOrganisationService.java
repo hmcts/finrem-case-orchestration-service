@@ -44,19 +44,33 @@ public class PrdOrganisationService {
         return organisationApi.findOrganisationByOrgId(userToken, authTokenGenerator.generate(), orgId);
     }
 
+    /**
+     * Find a user by email address that is registered with an Organisation.
+     * Suppress NotFound and BadRequest exceptions returned by API,
+     * to prevent an alert being sent for support follow up for invalid or unknown email addresses.
+     * Unhandled exceptions are logged and rethrown.
+     * @param email - email address to search for
+     * @param authToken - authorisation token
+     * @return - Optional of user
+     */
     @Cacheable(cacheManager = APPLICATION_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {
-            log.info("Finding user by email");
+            if (email == null) {
+                log.debug("findUserByEmail passed a null email");
+                return Optional.empty();
+            }
+            log.debug("Finding user by email");
             return Optional.of(organisationApi.findUserByEmail(authToken, authTokenGenerator.generate(), email).getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
-            log.info("Could not find user by email");
+            log.debug("findUserByEmail raised a NotFound exception. Suppressed.");
             return Optional.empty();
         } catch (FeignException.BadRequest badRequestException) {
-            log.info("Email is not valid or null");
+            log.debug("findUserByEmail raised a BadRequest exception. Suppressed");
             return Optional.empty();
         } catch (FeignException exception) {
-            throw new RuntimeException(maskEmail(getStackTrace(exception), email));
+            throw new RuntimeException(
+                    email != null ? maskEmail(getStackTrace(exception), email) : "findUserByEmail raised an unknown exception");
         }
     }
 }
