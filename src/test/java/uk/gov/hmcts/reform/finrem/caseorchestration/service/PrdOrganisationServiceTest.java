@@ -22,9 +22,11 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -122,7 +124,7 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
         } catch (RuntimeException e) {
             if (e instanceof FeignException) {
                 assertEquals("expecting exception to throw when email is null",
-                    "Email is not valid or null", e.getMessage());
+                    "findUserByEmail raised an unknown exception", e.getMessage());
             }
         }
     }
@@ -133,7 +135,22 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
                 .thenThrow(FeignException.BadRequest.class);
 
         Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_INVALID_EMAIL, AUTH_TOKEN);
-
         assertTrue(userId.isEmpty());
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenEmailIsNull() {
+        Optional<String> result = prdOrganisationService.findUserByEmail(null, AUTH_TOKEN);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void shouldThrowRuntimeExceptionForOtherFeignException() {
+        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+                .thenThrow(mock(FeignException.class));
+
+        assertThrows(RuntimeException.class, () ->
+                prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN)
+        );
     }
 }
