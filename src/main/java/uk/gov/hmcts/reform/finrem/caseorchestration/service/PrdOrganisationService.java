@@ -47,7 +47,7 @@ public class PrdOrganisationService {
     /**
      * Find a user by email address that is registered with an Organisation.
      * Suppress NotFound and BadRequest exceptions returned by API,
-     * to prevent an alert being sent for support follow up for invalid or unknown email addresses.
+     * to suppress alert being sent for support follow up for user's invalid input.
      * Unhandled exceptions are logged and rethrown.
      * @param email - email address to search for
      * @param authToken - authorisation token
