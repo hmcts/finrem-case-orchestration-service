@@ -64,7 +64,7 @@ public class IntervenerService {
 
             final String caseRole = intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode();
             FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-            if (intervenerWrapper.getIntervenerRepresented().equals(YesOrNo.YES)) {
+            if (isRepresented(intervenerWrapper)) {
                 log.info("Add {} case role for Case ID: {}", caseRole, caseId);
                 String orgId = intervenerWrapper.getIntervenerOrganisation().getOrganisation().getOrganisationID();
                 String email = intervenerWrapper.getIntervenerSolEmail();
@@ -74,8 +74,7 @@ public class IntervenerService {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
                 IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
                 if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervenerRepresented() != null
-                    && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
+                    && isRepresented(beforeIntv)) {
 
                     log.info("{} now not represented for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                     revokeIntervenerRole(caseId, beforeIntv.getIntervenerSolEmail(),
@@ -87,12 +86,16 @@ public class IntervenerService {
                     intervenerWrapper.setIntervenerSolicitorFirm(null);
                     intervenerWrapper.setIntervenerSolicitorReference(null);
                 }
-                log.info("{}} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
+                log.info("{} add default case role and organisation for Case ID: {}", intervenerWrapper.getIntervenerType(), caseId);
                 setDefaultOrgForintervener(intervenerWrapper);
             }
         }
         intervenerChangeDetails.setIntervenerDetails(intervenerWrapper);
         return intervenerChangeDetails;
+    }
+
+    private boolean isRepresented(IntervenerWrapper intervenerWrapper) {
+        return YesOrNo.YES.equals(intervenerWrapper.getIntervenerRepresented());
     }
 
     private void validateIntervenerCountryOfResident(IntervenerWrapper intervenerWrapper, List<String> errors) {
@@ -112,10 +115,9 @@ public class IntervenerService {
         IntervenerWrapper beforeIntv = intervenerWrapper.getIntervenerWrapperFromCaseData(beforeData);
 
         if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervenerRepresented() != null
-            && beforeIntv.getIntervenerRepresented().equals(YesOrNo.YES)) {
+            && isRepresented(beforeIntv)) {
             String beforeOrgId = beforeIntv.getIntervenerOrganisation().getOrganisation().getOrganisationID();
-            if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
+            if (ObjectUtils.notEqual(beforeOrgId, orgId) || !beforeIntv.getIntervenerSolEmail().equals(email)) {
                 revokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervenerSolEmail(),
                     beforeOrgId,
                     intervenerWrapper.getIntervenerSolicitorCaseRole().getCcdCode(), errors);
@@ -159,7 +161,6 @@ public class IntervenerService {
         intervenerWrapper.getIntervenerOrganisation().setOrgPolicyReference(null);
     }
 
-
     public IntervenerChangeDetails setIntervenerAddedChangeDetails(IntervenerWrapper intervenerWrapper) {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
@@ -198,8 +199,8 @@ public class IntervenerService {
     }
 
     private void logError(Long caseId, List<String> errors) {
-        String error = String.format("Could not find intervener with provided email for caseId %s", caseId);
-        log.info(error);
+        String error = "Could not find intervener with provided email";
+        log.info(String.format(error + " for caseId %s", caseId));
         errors.add(error);
     }
 }

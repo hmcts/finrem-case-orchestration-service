@@ -1,21 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
-public class ApplicationTypeTest {
+class ApplicationTypeTest {
 
     @Test
-    public void checkAllApplicationTypes() {
+    void checkAllApplicationTypes() {
         assertEquals("consented", CONSENTED.toString());
         assertEquals("contested", CONTESTED.toString());
     }
 
     @Test
-    public void covertAllApplicationTypes() {
+    void covertAllApplicationTypes() {
         assertEquals(CONSENTED, ApplicationType.from("consented"));
         assertEquals(CONTESTED, ApplicationType.from("contested"));
 
@@ -24,13 +26,18 @@ public class ApplicationTypeTest {
     }
 
     @Test
-    public void checkToString() {
-        assertEquals("consented", CONSENTED.toString());
-        assertEquals("contested", CONTESTED.toString());
+    void throwIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ApplicationType.from("abcd"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwIllegalArgumentException() {
-        ApplicationType.from("abcd");
+    @Test
+    void testFromCaseType() {
+        assertEquals(CONSENTED, ApplicationType.from(CaseType.CONSENTED));
+        assertEquals(CONTESTED, ApplicationType.from(CaseType.CONTESTED));
+    }
+
+    @Test
+    void testFromCaseTypeThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> ApplicationType.from(CaseType.UNKNOWN));
     }
 }
