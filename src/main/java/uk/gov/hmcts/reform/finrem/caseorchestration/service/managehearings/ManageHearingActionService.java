@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
+    private final ExpressCaseService expressCaseService;
 
     /**
      * Adds a new hearing to the case details and generates the associated hearing notice document.
@@ -100,5 +102,20 @@ public class ManageHearingActionService {
         );
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    private void addFormCAndG(ManageHearingsWrapper hearingsWrapper,
+                          FinremCaseDetails finremCaseDetails,
+                          UUID hearingId,
+                          String authToken) {
+
+        FinremCaseData caseData = finremCaseDetails.getData();
+
+        if(caseData.isFastTrackApplication()) {
+            // Generate fastTrack Form C
+        } else {
+            // Generate Form C for express case
+            // Generate From G for express case
+        }
     }
 }

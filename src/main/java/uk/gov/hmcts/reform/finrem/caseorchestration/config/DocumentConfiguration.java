@@ -97,6 +97,11 @@ public class DocumentConfiguration {
     private String manageHearingNoticeTemplate;
     private String manageHearingHCNoticeTemplate;
     private String manageHearingNoticeFileName;
+    private String manageHearingFormCTemplate;
+    private String manageHearingHCFromCTemplate;
+    private String manageHearingExpressFromCTemplate;
+    private String manageHearingFastTrackFormCTemplate;
+    private String manageHearingFastTrackHCFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
@@ -152,8 +157,16 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
 
+    public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
+    }
+
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
+    }
+
+    public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? manageHearingHCFromCTemplate : manageHearingFormCTemplate;
     }
 
     public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {

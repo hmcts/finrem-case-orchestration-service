@@ -42,6 +42,7 @@ public class DirectionUploadOrderSubmittedHandler extends FinremCallbackHandler 
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
 
+        // How is this "Process Order" going to be affected by new hearing document generation?
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Handling contested event {} submit callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
