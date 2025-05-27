@@ -163,9 +163,11 @@ class JudgeApprovalResolver {
     }
 
     private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
-        ofNullable(draftOrdersWrapper.getHearingInstruction())
-            .map(HearingInstruction::getAnotherHearingRequestCollection)
-            .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
+        if (draftOrdersWrapper.getHearingInstruction().getRequireAnotherHearing() == YesOrNo.YES) {
+            ofNullable(draftOrdersWrapper.getHearingInstruction())
+                .map(HearingInstruction::getAnotherHearingRequestCollection)
+                .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
+        }
     }
 
     private boolean isFinalOrderSelected(JudgeApproval judgeApproval) {
