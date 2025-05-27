@@ -29,6 +29,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${pba.account.liberata.check.enabled}")
     private boolean pbaAccountLiberataCheckEnabled;
 
+    @Value("${service.pdf-service.accessKey}")
+    private String docmosisAccessKey;
+
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
     private String dataPath = "data";
@@ -39,6 +42,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
+        assertThat(docmosisAccessKey).isEqualTo("dyVv8pXwQ03RRyJZQIPX2RWP9LgJJGTU08kc9dA8ATJoA9EZXQEWe7L1Uwe");
         validateFeeLookUpPayment(feeLookup, "fee-lookup_consented.json", consentedDir);
     }
 
