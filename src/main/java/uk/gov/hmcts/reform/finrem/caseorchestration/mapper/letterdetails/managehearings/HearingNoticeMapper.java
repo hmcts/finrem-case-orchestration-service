@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
@@ -15,11 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ManageHe
 
 import java.time.LocalDate;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingFrcCourtDetails;
-
 @Component
 public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
-
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
     public HearingNoticeMapper(CourtDetailsMapper courtDetailsMapper,
@@ -34,6 +32,9 @@ public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
 
+        CourtDetailsTemplateFields courtTemplateFields =
+            courtDetailsConfiguration.buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
+
         return ManageHearingsNoticeDetails.builder()
             .ccdCaseNumber(caseDetails.getId().toString())
             .applicantName(caseDetails.getData().getFullApplicantName())
@@ -43,8 +44,8 @@ public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
             .hearingDate(hearing.getHearingDate().toString())
             .hearingTime(hearing.getHearingTime())
             .hearingTimeEstimate(hearing.getHearingTimeEstimate())
-            .courtDetails(buildHearingFrcCourtDetails(caseData))
-            .hearingVenue(courtDetailsConfiguration.getCourts().get(caseData.getSelectedHearingCourt()).getCourtAddress())
+            .courtDetails(courtTemplateFields)
+            .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
             .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
             .additionalHearingInformation(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
             .build();

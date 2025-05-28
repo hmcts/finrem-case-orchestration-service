@@ -3,23 +3,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +20,6 @@ public class ManageHearingsDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private static final String ADDITIONAL_HEARING_INFORMATION = "additionalHearingInformation";
     private final HearingNoticeMapper hearingNoticeMapper;
 
     /**

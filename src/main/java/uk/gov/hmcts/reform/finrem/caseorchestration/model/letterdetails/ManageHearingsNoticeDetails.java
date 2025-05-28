@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
-import java.util.Map;
 
 @Data
 @Builder
@@ -20,7 +20,7 @@ public class ManageHearingsNoticeDetails implements DocumentTemplateDetails {
     private String hearingDate;
     private String hearingTime;
     private String hearingTimeEstimate;
-    private Map<String, Object> courtDetails;
+    private CourtDetailsTemplateFields courtDetails;
     private String hearingVenue;
     private String attendance;
     private String additionalHearingInformation;
