@@ -13,18 +13,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListW
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
 
 import java.time.LocalDate;
 
 @Component
-public class FormCMapper extends AbstractLetterDetailsMapper {
+public class ManageHearingFormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
 
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    public FormCMapper(CourtDetailsMapper courtDetailsMapper,
-                               CourtDetailsConfiguration courtDetailsConfiguration,
-                               ObjectMapper objectMapper) {
+    public ManageHearingFormCLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
+                                                 CourtDetailsConfiguration courtDetailsConfiguration,
+                                                 ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
         this.courtDetailsConfiguration = courtDetailsConfiguration;
     }

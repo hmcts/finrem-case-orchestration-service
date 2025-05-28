@@ -184,6 +184,10 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
     }
 
+    public String getFormGTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
+    }
+
     public String getContestedMiniFormTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
     }

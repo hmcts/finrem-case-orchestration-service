@@ -104,11 +104,12 @@ public class ManageHearingActionService {
         // TODO: Need to handle to handle not creating duplicate docs
         CaseDocument formC =
            manageHearingsDocumentService.generateFormC(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
-
         addDocumentToCollection(formC, hearingsWrapper);
 
         if(!caseData.isFastTrackApplication()) {
-            // TODO: Generate From G for express case
+            CaseDocument formG =
+                manageHearingsDocumentService.generateFormG(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
+            addDocumentToCollection(formG, hearingsWrapper);
         }
     }
 

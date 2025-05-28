@@ -16,12 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 import java.time.LocalDate;
 
 @Component
-public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
+public class HearingNoticeLetterDetailsMapper extends AbstractLetterDetailsMapper {
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    public HearingNoticeMapper(CourtDetailsMapper courtDetailsMapper,
-                               CourtDetailsConfiguration courtDetailsConfiguration,
-                               ObjectMapper objectMapper) {
+    public HearingNoticeLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
+                                            CourtDetailsConfiguration courtDetailsConfiguration,
+                                            ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
         this.courtDetailsConfiguration = courtDetailsConfiguration;
     }

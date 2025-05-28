@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.FormCMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.formg.FormGLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -22,8 +23,9 @@ public class ManageHearingsDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private final HearingNoticeMapper hearingNoticeMapper;
-    private final FormCMapper formCMapper;
+    private final HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
+    private final FormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
 
     /**
@@ -38,7 +40,7 @@ public class ManageHearingsDocumentService {
                                               FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = hearingNoticeMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+        Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
                 hearing.getHearingCourtSelection());
 
         CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(
@@ -58,7 +60,7 @@ public class ManageHearingsDocumentService {
                                       FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = formCMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+        Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
                 hearing.getHearingCourtSelection());
 
         String template = expressCaseService.isExpressCase(finremCaseDetails.getData()) ? documentConfiguration.getManageHearingExpressFromCTemplate() :
@@ -83,6 +85,20 @@ public class ManageHearingsDocumentService {
                                       FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        return CaseDocument.builder().build();
+        Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
+                hearing.getHearingCourtSelection());
+
+        CaseDocument formG = genericDocumentService.generateDocumentFromPlaceholdersMap(
+                authorisationToken,
+                documentDataMap,
+                documentConfiguration.getFormGTemplate(finremCaseDetails),
+                documentConfiguration.getFormGFileName(),
+                finremCaseDetails.getId().toString()
+        );
+
+
+        formG.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+
+        return formG;
     }
 }
