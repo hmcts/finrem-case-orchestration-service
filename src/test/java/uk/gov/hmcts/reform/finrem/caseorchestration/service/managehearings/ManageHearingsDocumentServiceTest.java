@@ -115,7 +115,7 @@ class ManageHearingsDocumentServiceTest {
                 .phoneNumber("1234567890")
                 .email("some@email.com")
             .build()));
-        when(documentConfiguration.getManageHearingNoticeTemplate()).thenReturn(TEMPLATE);
+        when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails)).thenReturn(TEMPLATE);
         when(documentConfiguration.getManageHearingNoticeFileName()).thenReturn(FILE_NAME);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345")))
             .thenReturn(expectedDocument);
@@ -130,7 +130,7 @@ class ManageHearingsDocumentServiceTest {
 
         verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails);
         verify(courtDetailsConfiguration).getCourts();
-        verify(documentConfiguration).getManageHearingNoticeTemplate();
+        verify(documentConfiguration).getManageHearingNoticeTemplate(finremCaseDetails);
         verify(documentConfiguration).getManageHearingNoticeFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345"));
     }
