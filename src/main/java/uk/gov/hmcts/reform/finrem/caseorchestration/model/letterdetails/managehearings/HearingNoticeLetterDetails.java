@@ -1,17 +1,18 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ManageHearingsNoticeDetails implements DocumentTemplateDetails {
+public class HearingNoticeLetterDetails implements DocumentTemplateDetails {
     private String ccdCaseNumber;
     private String applicantName;
     private String respondentName;

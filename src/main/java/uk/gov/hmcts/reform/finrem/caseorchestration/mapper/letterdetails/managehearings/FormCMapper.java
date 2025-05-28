@@ -8,18 +8,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.Abstrac
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
 
 import java.time.LocalDate;
 
 @Component
-public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
+public class FormCMapper extends AbstractLetterDetailsMapper {
+
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    public HearingNoticeMapper(CourtDetailsMapper courtDetailsMapper,
+    public FormCMapper(CourtDetailsMapper courtDetailsMapper,
                                CourtDetailsConfiguration courtDetailsConfiguration,
                                ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
@@ -30,23 +33,34 @@ public class HearingNoticeMapper extends AbstractLetterDetailsMapper {
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+        ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
 
         CourtDetailsTemplateFields courtTemplateFields =
             courtDetailsConfiguration.buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
-        return HearingNoticeLetterDetails.builder()
-            .ccdCaseNumber(caseDetails.getId().toString())
-            .applicantName(caseData.getFullApplicantName())
-            .respondentName(caseData.getRespondentFullName())
-            .letterDate(LocalDate.now().toString())
-            .hearingType(hearing.getHearingType().toString())
+        LocalDate hearingDate = hearing.getHearingDate();
+
+        return FormCLetterDetails.builder()
+            .caseNumber(caseDetails.getId().toString())
+            .courtDetails(courtTemplateFields)
+            .applicantFMName(contactDetails.getApplicantFmName())
+            .applicantLName(contactDetails.getApplicantLname())
+            .respondentFMName(contactDetails.getRespondentFmName())
+            .respondentLName(contactDetails.getRespondentLname())
+            .solicitorReference(contactDetails.getSolicitorReference())
+            .rSolicitorReference(contactDetails.getRespondentSolicitorReference())
             .hearingDate(hearing.getHearingDate().toString())
             .hearingTime(hearing.getHearingTime())
-            .hearingTimeEstimate(hearing.getHearingTimeEstimate())
-            .courtDetails(courtTemplateFields)
-            .hearingVenue(courtTemplateFields.getCourtContactDetailsAsOneLineAddressString())
+            .timeEstimate(hearing.getHearingTimeEstimate())
+            .hearingDateLess35Days(String.valueOf(hearingDate.minusDays(35)))
+            .hearingDateLess28Days(String.valueOf(hearingDate.minusDays(28)))
+            .hearingDateLess21Days(String.valueOf(hearingDate.minusDays(21)))
+            .hearingDateLess14Days(String.valueOf(hearingDate.minusDays(14)))
+            .hearingDateLess7Days(String.valueOf(hearingDate.minusDays(7)))
             .attendance(hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : "")
-            .additionalHearingInformation(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
+            .additionalInformationAboutHearing(hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : "")
+            .formCCreatedDate(String.valueOf(LocalDate.now()))
+            .eventDatePlus21Days(String.valueOf(LocalDate.now().plusDays(21)))
             .build();
     }
 }

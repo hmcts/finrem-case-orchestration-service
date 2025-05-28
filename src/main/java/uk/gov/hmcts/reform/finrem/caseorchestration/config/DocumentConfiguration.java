@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
@@ -94,13 +95,19 @@ public class DocumentConfiguration {
     private String generalApplicationHearingNoticeTemplate;
     private String generalApplicationHearingNoticeHighCourtTemplate;
     private String generalApplicationHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
     private String manageHearingNoticeTemplate;
+    @Getter(AccessLevel.NONE)
     private String manageHearingHCNoticeTemplate;
     private String manageHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
     private String manageHearingFormCTemplate;
+    @Getter(AccessLevel.NONE)
     private String manageHearingHCFromCTemplate;
     private String manageHearingExpressFromCTemplate;
+    @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackFormCTemplate;
+    @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackHCFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
@@ -161,12 +168,12 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
     }
 
-    public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
-        return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
-    }
-
     public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? manageHearingHCFromCTemplate : manageHearingFormCTemplate;
+    }
+
+    public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
     }
 
     public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {

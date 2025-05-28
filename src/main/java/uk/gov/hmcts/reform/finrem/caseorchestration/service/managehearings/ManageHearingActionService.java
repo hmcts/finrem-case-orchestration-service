@@ -36,13 +36,17 @@ public class ManageHearingActionService {
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
+        HearingType hearingType = hearingWrapper.getWorkingHearing().getHearingType();
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
         addHearingNotice(hearingWrapper, finremCaseDetails, hearingId, authToken);
 
-        if (HearingType.FDA.equals(hearingWrapper.getWorkingHearing().getHearingType())) {
-            // Generate hearing type specific docs
+        if (HearingType.FDA.equals(hearingType) ||
+            (HearingType.FDR.equals(hearingType)) &&
+                expressCaseService.isExpressCase(caseData)) {
+            addFormCAndG(hearingWrapper, finremCaseDetails, hearingId, authToken);
+            // TODO: Attach 'out of court' and PFD supporting documents
         }
 
         hearingWrapper.setWorkingHearing(null);
@@ -87,21 +91,7 @@ public class ManageHearingActionService {
         CaseDocument hearingNotice = manageHearingsDocumentService
                 .generateHearingNotice(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
 
-        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
-                        hearingsWrapper.getHearingDocumentsCollection())
-                .orElseGet(ArrayList::new);
-
-        manageHearingDocuments.add(
-                ManageHearingDocumentsCollectionItem.builder()
-                        .value(ManageHearingDocument
-                                .builder()
-                                .hearingId(hearingId)
-                                .hearingDocument(hearingNotice)
-                                .build())
-                        .build()
-        );
-
-        hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+        addDocumentToCollection(hearingNotice, hearingsWrapper);
     }
 
     private void addFormCAndG(ManageHearingsWrapper hearingsWrapper,
@@ -111,11 +101,32 @@ public class ManageHearingActionService {
 
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        if(caseData.isFastTrackApplication()) {
-            // Generate fastTrack Form C
-        } else {
-            // Generate Form C for express case
-            // Generate From G for express case
+        // TODO: Need to handle to handle not creating duplicate docs
+        CaseDocument formC =
+           manageHearingsDocumentService.generateFormC(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
+
+        addDocumentToCollection(formC, hearingsWrapper);
+
+        if(!caseData.isFastTrackApplication()) {
+            // TODO: Generate From G for express case
         }
+    }
+
+    private void addDocumentToCollection(CaseDocument document, ManageHearingsWrapper hearingsWrapper) {
+        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
+                hearingsWrapper.getHearingDocumentsCollection())
+            .orElseGet(ArrayList::new);
+
+        manageHearingDocuments.add(
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument
+                    .builder()
+                    .hearingId(hearingsWrapper.getWorkingHearingId())
+                    .hearingDocument(document)
+                    .build())
+                .build()
+        );
+
+        hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
     }
 }
