@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -26,13 +28,10 @@ public class EmailService {
 
     private final EmailClient emailClient;
 
-    @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
 
-    @Value("#{${uk.gov.notify.email.template.vars}}")
     private Map<String, Map<String, String>> emailTemplateVars;
 
-    @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
     private Map<String, Map<String, String>> contestedContactEmails;
 
     @Value("${finrem.manageCase.baseurl}")
@@ -59,6 +58,22 @@ public class EmailService {
     private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
+    private final Environment environment;
+
+    /**
+     * Upgrading to NotificationClient 5.0.0 eagerly loads.
+     * SPel no longer permitted, get template maps from this post construct.
+     */
+    @PostConstruct
+    public void initNotifyTemplateMaps() {
+        String templatesJson = environment.getProperty("uk.gov.notify.email.templates");
+        String varsJson = environment.getProperty("uk.gov.notify.email.template.vars");
+        String contactsJson = environment.getProperty("uk.gov.notify.email.contestedContactEmails");
+
+        emailTemplates = parseStringMap(templatesJson);
+        emailTemplateVars = parseNestedStringMap(varsJson);
+        contestedContactEmails = parseNestedStringMap(contactsJson);
+    }
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -66,6 +81,20 @@ public class EmailService {
             templateVars);
         log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
+    }
+
+    /**
+     * Todo
+     * test code to check templates work without cluttering notify dashboard
+     * @param notificationRequest
+     * @param template
+     */
+    public void previewConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
+        Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
+        EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
+                templateVars);
+        log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
+        previewEmail(emailToSend, "send Confirmation email for " + template.name());
     }
 
     protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
@@ -197,6 +226,28 @@ public class EmailService {
         }
     }
 
+    /**
+     * todo
+     * test code to check templates work without cluttering notify dashboard
+     * @param emailToSend
+     * @param emailDescription
+     */
+    private void previewEmail(EmailToSend emailToSend, String emailDescription) {
+        String templateId = emailToSend.getTemplateId();
+        String referenceId = emailToSend.getReferenceId();
+        try {
+            log.info("Attempting to create a preview for {} with template {}. Reference ID: {}",
+                    emailDescription, templateId, referenceId);
+            emailClient.generateTemplatePreview(
+                    templateId,
+                    emailToSend.getTemplateFields()
+            );
+            log.info("Previewing template success");
+        } catch (NotificationClientException e) {
+            log.warn("Failed to preview template. Reason:", e);
+        }
+    }
+
     private JSONObject preparedForEmailAttachment(final byte[] documentContents) {
         try {
             if (documentContents != null) {
@@ -206,5 +257,43 @@ public class EmailService {
             log.warn("Failed to attach document to email", e);
         }
         return null;
+    }
+
+    /**
+     * Used by initNotifyMaps to parse the email templates JSON string into a Map.
+     * TODO: needs a test
+     * @param json
+     * @return
+     */
+    private Map<String, String> parseStringMap(String json) {
+        JSONObject jsonObject = new JSONObject(json);
+        Map<String, String> map = new HashMap<>();
+        for (String key : jsonObject.keySet()) {
+            map.put(key, jsonObject.getString(key));
+        }
+        return map;
+    }
+
+    /**
+     * Used by initNotifyMaps to parse the email template variables JSON string into a Map.
+     * The JSON is expected to contain nested objects, where each key maps to another map of key-value pairs.
+     * TODO: needs a test
+     * @param json
+     * @return
+     */
+    private Map<String, Map<String, String>> parseNestedStringMap(String json) {
+        JSONObject jsonObject = new JSONObject(json);
+        Map<String, Map<String, String>> result = new HashMap<>();
+
+        for (String key : jsonObject.keySet()) {
+            JSONObject nestedJson = jsonObject.getJSONObject(key);
+            Map<String, String> nestedMap = new HashMap<>();
+            for (String nestedKey : nestedJson.keySet()) {
+                nestedMap.put(nestedKey, nestedJson.getString(nestedKey));
+            }
+            result.put(key, nestedMap);
+        }
+
+        return result;
     }
 }

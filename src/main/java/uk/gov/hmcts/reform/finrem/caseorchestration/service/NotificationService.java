@@ -92,6 +92,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_SOLICITOR_REMOVED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_REJECT_GENERAL_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_TRANSFER_TO_LOCAL_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -1955,5 +1956,14 @@ public class NotificationService {
     public void sendRefusedDraftOrderOrPsa(NotificationRequest notificationRequest) {
         log.info("{} - Sending refused draft order or PSA", notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
+    }
+
+    public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
+        log.info("{} - Sending hearing notification to applicant", notificationRequest.getCaseReferenceNumber());
+
+        // For development. Regression testing of Notify needed if we keep the latest Notify Java Client needed for doing previews.
+        emailService.previewConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+        // todo: switch to send actual email if preview works.
+        // emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 }
