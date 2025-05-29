@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.DocumentStorageException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 
 @Service
 @RequiredArgsConstructor
-public class PfdNcdrDocumentService {
+public class StaticDocumentService {
 
     private final EvidenceManagementUploadService uploadService;
     private final NotificationService notificationService;
@@ -36,6 +37,17 @@ public class PfdNcdrDocumentService {
      * @return true if PFD NCDR Cover Letter is required, false otherwise
      */
     public boolean isPdfNcdrCoverSheetRequired(CaseDetails caseDetails) {
+        return !notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
+    }
+
+    /**
+     * Checks if a PFD NCDR Cover Letter is required on a case. It is required if the respondent solicitor is not digital
+     * or the respondent is a LiP.
+     *
+     * @param caseDetails finrem case details
+     * @return true if PFD NCDR Cover Letter is required, false otherwise
+     */
+    public boolean isPdfNcdrCoverSheetRequired(FinremCaseDetails caseDetails) {
         return !notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
@@ -55,6 +67,21 @@ public class PfdNcdrDocumentService {
     }
 
     /**
+     * Uploads Out Of Court Resolution document to document store and returns the document.
+     *
+     * @param caseId case ID
+     * @param authToken user authorization token
+     * @return uploaded document
+     */
+    public CaseDocument uploadOutOfCourtResolutionDocument(String caseId, String authToken) {
+        byte[] bytes = getOutOfCourtResolutionDocument();
+
+        MultipartFile multipartFile = createMultipartFile("OutOfFamilyCourtResolution.pdf", bytes);
+
+        return uploadDocument(caseId, authToken, multipartFile, "Out Of Court Resolution Document");
+    }
+
+    /**
      * Uploads PFD NCDR Cover Letter document to document store and returns the document.
      *
      * @param caseId case ID
@@ -67,6 +94,15 @@ public class PfdNcdrDocumentService {
         MultipartFile multipartFile = createMultipartFile("PfdNcdrCoverLetter.pdf", bytes);
 
         return uploadDocument(caseId, authToken, multipartFile, "PFD NCDR Cover Letter");
+    }
+
+    private byte[] getOutOfCourtResolutionDocument() {
+        String filename = "documents/out-of-court-resolution-doc.pdf";
+        try {
+            return FileUtils.readResourceAsByteArray(filename);
+        } catch (IOException e) {
+            throw new DocumentStorageException("Failed to get PFD NCDR Compliance Letter", e);
+        }
     }
 
     private byte[] getPfdNcdrComplianceLetter() {

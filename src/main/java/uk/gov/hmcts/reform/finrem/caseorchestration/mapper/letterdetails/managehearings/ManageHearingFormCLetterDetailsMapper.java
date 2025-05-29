@@ -40,7 +40,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractLetterDetails
         LocalDate hearingDate = hearing.getHearingDate();
 
         return FormCLetterDetails.builder()
-            .caseNumber(caseDetails.getId().toString())
+            .caseNumber(caseData.getDivorceCaseNumber())
             .courtDetails(courtTemplateFields)
             .applicantFMName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())

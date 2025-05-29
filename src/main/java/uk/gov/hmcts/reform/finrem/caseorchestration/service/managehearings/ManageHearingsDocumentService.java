@@ -10,11 +10,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StaticDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class ManageHearingsDocumentService {
     private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
+    private final StaticDocumentService staticDocumentService;
 
     /**
      * Generates a hearing notice document for the given hearing and case details.
@@ -100,5 +107,24 @@ public class ManageHearingsDocumentService {
         formG.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
 
         return formG;
+    }
+
+    public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        String caseId = caseDetails.getId().toString();
+
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(PFD_NCDR_COMPLIANCE_LETTER,
+                staticDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken));
+
+        if (staticDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
+            documentMap.put(PFD_NCDR_COVER_LETTER,
+                    staticDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken));
+        }
+
+        return documentMap;
+    }
+
+    public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
+        return staticDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
     }
 }

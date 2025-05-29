@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +47,8 @@ public class ManageHearingActionService {
             (HearingType.FDR.equals(hearingType)) &&
                 expressCaseService.isExpressCase(caseData)) {
             addFormCAndG(hearingWrapper, finremCaseDetails, hearingId, authToken);
+            addPfdNcdrDocuments(hearingWrapper, finremCaseDetails, authToken);
+            addOutOfCourtResolutionDocument(hearingWrapper, finremCaseDetails, authToken);
             // TODO: Attach 'out of court' and PFD supporting documents
         }
 
@@ -111,6 +114,22 @@ public class ManageHearingActionService {
                 manageHearingsDocumentService.generateFormG(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
             addDocumentToCollection(formG, hearingsWrapper);
         }
+    }
+
+    private void addPfdNcdrDocuments(ManageHearingsWrapper hearingsWrapper,
+                                         FinremCaseDetails finremCaseDetails,
+                                         String authToken) {
+        Map<String, CaseDocument> pfdNcdrComplianceLetter = manageHearingsDocumentService
+            .generatePfdNcdrDocuments(finremCaseDetails, authToken);
+        pfdNcdrComplianceLetter.forEach((key, document) -> addDocumentToCollection(document, hearingsWrapper));
+    }
+
+    private void addOutOfCourtResolutionDocument(ManageHearingsWrapper hearingsWrapper,
+                                                  FinremCaseDetails finremCaseDetails,
+                                                  String authToken) {
+        CaseDocument outOfCourtResolutionDocument =
+            manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, authToken);
+        addDocumentToCollection(outOfCourtResolutionDocument, hearingsWrapper);
     }
 
     private void addDocumentToCollection(CaseDocument document, ManageHearingsWrapper hearingsWrapper) {

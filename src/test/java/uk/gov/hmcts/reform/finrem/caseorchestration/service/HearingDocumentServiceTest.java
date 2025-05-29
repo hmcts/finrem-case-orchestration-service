@@ -123,7 +123,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @MockitoBean
     private NotificationService notificationService;
     @MockitoBean
-    private PfdNcdrDocumentService pfdNcdrDocumentService;
+    private StaticDocumentService staticDocumentService;
 
     @Before
     public void setUp() {
@@ -579,12 +579,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     private void mockPfdNcdrDocuments(boolean respondentDigital) {
-        when(pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(any(CaseDetails.class))).thenReturn(!respondentDigital);
+        when(staticDocumentService.isPdfNcdrCoverSheetRequired(any(CaseDetails.class))).thenReturn(!respondentDigital);
 
         CaseDocument pfdNcdrComplianceLetter = createDocument("pfdNcdrComplianceLetter.pdf");
-        when(pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
+        when(staticDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
         CaseDocument pfdNcdrCoverLetter = createDocument("pfdNcdrCoverLetter.pdf");
-        when(pfdNcdrDocumentService.uploadPfdNcdrCoverLetter(any(), any())).thenReturn(pfdNcdrCoverLetter);
+        when(staticDocumentService.uploadPfdNcdrCoverLetter(any(), any())).thenReturn(pfdNcdrCoverLetter);
     }
 
     private CaseDocument createDocument(String filename) {
@@ -596,7 +596,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private void verifyPfdNcdrDocuments(Map<String, CaseDocument> result, boolean respondentDigital) {
         assertThat(result.get(PFD_NCDR_COMPLIANCE_LETTER).getDocumentFilename(), is("pfdNcdrComplianceLetter.pdf"));
         if (respondentDigital) {
-            verify(pfdNcdrDocumentService, never()).uploadPfdNcdrCoverLetter(any(), any());
+            verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(any(), any());
             assertThat(result.get(PFD_NCDR_COVER_LETTER), is(nullValue()));
         } else {
             assertThat(result.get(PFD_NCDR_COVER_LETTER).getDocumentFilename(), is("pfdNcdrCoverLetter.pdf"));

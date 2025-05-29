@@ -41,7 +41,7 @@ public class HearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
-    private final PfdNcdrDocumentService pfdNcdrDocumentService;
+    private final StaticDocumentService staticDocumentService;
     private final ExpressCaseService expressCaseService;
 
 
@@ -109,12 +109,12 @@ public class HearingDocumentService {
         String authToken = pair.getRight();
 
         Map<String, CaseDocument> documentMap = new HashMap<>();
-        CaseDocument pfdNcdrComplianceLetter = pfdNcdrDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
+        CaseDocument pfdNcdrComplianceLetter = staticDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
         documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, pfdNcdrComplianceLetter);
 
         // A cover letter is only required for non-digital respondents
-        if (pfdNcdrDocumentService.isPdfNcdrCoverSheetRequired(pair.getLeft())) {
-            CaseDocument pfdNcdrCoverLetter = pfdNcdrDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
+        if (staticDocumentService.isPdfNcdrCoverSheetRequired(pair.getLeft())) {
+            CaseDocument pfdNcdrCoverLetter = staticDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
             documentMap.put(PFD_NCDR_COVER_LETTER, pfdNcdrCoverLetter);
         }
 
