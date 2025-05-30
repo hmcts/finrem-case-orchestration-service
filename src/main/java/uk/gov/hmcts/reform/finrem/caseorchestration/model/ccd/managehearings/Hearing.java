@@ -36,6 +36,6 @@ public class Hearing {
     private String additionalHearingInformation;
     private YesOrNo hearingNoticePrompt;
     private YesOrNo additionalHearingDocPrompt;
-    public List<DocumentCollectionItem> additionalHearingDocs;
+    private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 }
