@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -25,7 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLetterDetails;
 
 import java.time.LocalDate;
 
@@ -33,18 +31,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
-
 @ExtendWith(MockitoExtension.class)
-class HearingNoticeLetterDetailsMapperTest {
+class ManageHearingFormGLetterDetailsMapperTest {
 
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
 
-    private HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    private ManageHearingFormGLetterDetailsMapper manageHearingFormGLetterDetailsMapper;
 
     @BeforeEach
     void setUp() {
-        hearingNoticeLetterDetailsMapper = new HearingNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
+        manageHearingFormGLetterDetailsMapper = new ManageHearingFormGLetterDetailsMapper(new ObjectMapper(), courtDetailsConfiguration, null);
     }
 
     @Test
@@ -77,10 +74,10 @@ class HearingNoticeLetterDetailsMapperTest {
                             .courtListWrapper(DefaultCourtListWrapper
                                 .builder()
                                 .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                .build())
                             .build())
                         .build())
                     .build())
-                .build())
             .build();
 
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
@@ -99,20 +96,18 @@ class HearingNoticeLetterDetailsMapperTest {
             .thenReturn(courtTemplateFields);
 
         // Act
-        DocumentTemplateDetails result = hearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);
+        DocumentTemplateDetails result = manageHearingFormGLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);
 
         // Assert
-        HearingNoticeLetterDetails hearingNoticeDetails = (HearingNoticeLetterDetails) result;
-        assertThat(hearingNoticeDetails.getCcdCaseNumber()).isEqualTo("12345");
-        assertThat(hearingNoticeDetails.getApplicantName()).isEqualTo("John Doe");
-        assertThat(hearingNoticeDetails.getRespondentName()).isEqualTo("Jane Smith");
-        assertThat(hearingNoticeDetails.getHearingType()).isEqualTo("FDR");
-        assertThat(hearingNoticeDetails.getHearingDate()).isEqualTo("2025-08-01");
-        assertThat(hearingNoticeDetails.getHearingTime()).isEqualTo("10:00 AM");
-        assertThat(hearingNoticeDetails.getHearingTimeEstimate()).isEqualTo("2 hours");
-        assertThat(hearingNoticeDetails.getAttendance()).isEqualTo("In Person");
-        assertThat(hearingNoticeDetails.getAdditionalHearingInformation()).isEqualTo("Additional info");
-        assertThat(hearingNoticeDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
-        assertThat(hearingNoticeDetails.getHearingVenue()).isEqualTo("London Court, 123 Court Street, London");
+        FormGLetterDetails formGLetterDetails = (FormGLetterDetails) result;
+        assertThat(formGLetterDetails.getApplicantFmName()).isEqualTo("John");
+        assertThat(formGLetterDetails.getApplicantLName()).isEqualTo("Doe");
+        assertThat(formGLetterDetails.getRespondentFmName()).isEqualTo("Jane");
+        assertThat(formGLetterDetails.getRespondentLName()).isEqualTo("Smith");
+        assertThat(formGLetterDetails.getSolicitorReference()).isEqualTo(TestConstants.TEST_SOLICITOR_REFERENCE);
+        assertThat(formGLetterDetails.getRespondentSolicitorReference()).isEqualTo(TestConstants.TEST_RESP_SOLICITOR_REFERENCE);
+        assertThat(formGLetterDetails.getHearingDate()).isEqualTo("2025-08-01");
+        assertThat(formGLetterDetails.getHearingTime()).isEqualTo("10:00 AM");
+        assertThat(formGLetterDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
     }
 }
