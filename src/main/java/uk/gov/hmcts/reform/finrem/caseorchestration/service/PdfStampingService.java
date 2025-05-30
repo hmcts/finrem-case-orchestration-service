@@ -50,7 +50,7 @@ public class PdfStampingService {
                                   boolean isAnnexNeeded,
                                   StampType stampType,
                                   String caseId) {
-        log.info("Stamp document : {}", document);
+        log.info("About to stamp document: {} for Case ID: {}", document, caseId);
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, stampType);
