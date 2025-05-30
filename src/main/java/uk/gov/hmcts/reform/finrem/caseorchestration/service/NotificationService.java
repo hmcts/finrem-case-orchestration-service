@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -113,6 +114,9 @@ public class NotificationService {
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
+
+    @Value("${uk.gov.notify.template.preview.enabled:false}")
+    private boolean previewTemplateOnlyIsEnabled;
 
     /**
      * No Return.
@@ -1958,12 +1962,19 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
     }
 
+    /**
+     * Sends a hearing notification email to the applicant solicitor.
+     * todo explain preview bit
+     *
+     * @param notificationRequest the notification request containing details for the email
+     */
     public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
         log.info("{} - Sending hearing notification to applicant", notificationRequest.getCaseReferenceNumber());
 
-        // For development. Regression testing of Notify needed if we keep the latest Notify Java Client needed for doing previews.
-        emailService.previewConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
-        // todo: switch to send actual email if preview works.
-        // emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+        if (previewTemplateOnlyIsEnabled) {
+            emailService.previewConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+        } else {
+            emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+        }
     }
 }

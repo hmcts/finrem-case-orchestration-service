@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailToSend;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
+import uk.gov.service.notify.TemplatePreview;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -238,13 +239,13 @@ public class EmailService {
         try {
             log.info("Attempting to create a preview for {} with template {}. Reference ID: {}",
                     emailDescription, templateId, referenceId);
-            emailClient.generateTemplatePreview(
+            TemplatePreview templatePreview = emailClient.generateTemplatePreview(
                     templateId,
                     emailToSend.getTemplateFields()
             );
-            log.info("Previewing template success");
+            log.info("Preview successful. Rendered template:\n{}", templatePreview);
         } catch (NotificationClientException e) {
-            log.warn("Failed to preview template. Reason:", e);
+            log.warn("Failed to preview template '{}'. Reason: {}", templateId, e.getMessage(), e);
         }
     }
 
