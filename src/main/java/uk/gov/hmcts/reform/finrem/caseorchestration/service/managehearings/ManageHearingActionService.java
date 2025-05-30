@@ -55,13 +55,13 @@ public class ManageHearingActionService {
         addHearingToCollection(hearingWrapper, hearingId);
 
         Map<String, CaseDocument> documentMap = new HashMap<>();
-        documentMap.put(HEARING_NOTICE_DOCUMENT, manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, authToken));
+        documentMap.put(HEARING_NOTICE_DOCUMENT, manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken));
 
         if (HearingType.FDA.equals(hearingType) || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData))) {
-            documentMap.put(FORM_C, manageHearingsDocumentService.generateFormC(hearing, finremCaseDetails, authToken));
+            documentMap.put(FORM_C, manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken));
 
             if (YesOrNo.isNoOrNull(caseData.getFastTrackDecision())) {
-                documentMap.put(FORM_G, manageHearingsDocumentService.generateFormG(hearing, finremCaseDetails, authToken));
+                documentMap.put(FORM_G, manageHearingsDocumentService.generateFormG(finremCaseDetails, authToken));
             }
 
             documentMap.putAll(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, authToken));

@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StaticDocumentService;
@@ -38,13 +36,11 @@ public class ManageHearingsDocumentService {
     /**
      * Generates a hearing notice document for the given hearing and case details.
      *
-     * @param hearing the hearing information to include in the notice
-     * @param finremCaseDetails the case details containing case data
+     * @param finremCaseDetails  the case details containing case data
      * @param authorisationToken the authorisation token for document generation
      * @return the generated hearing notice as a {@link CaseDocument}
      */
-    public CaseDocument generateHearingNotice(Hearing hearing,
-                                              FinremCaseDetails finremCaseDetails,
+    public CaseDocument generateHearingNotice(FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
 
         Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
@@ -62,8 +58,7 @@ public class ManageHearingsDocumentService {
         return hearingDoc;
     }
 
-    public CaseDocument generateFormC(Hearing hearing,
-                                      FinremCaseDetails finremCaseDetails,
+    public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
         Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
@@ -86,8 +81,7 @@ public class ManageHearingsDocumentService {
         return fromC;
     }
 
-    public CaseDocument generateFormG(Hearing hearing,
-                                      FinremCaseDetails finremCaseDetails,
+    public CaseDocument generateFormG(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
         Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,35 +9,29 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StaticDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsDocumentServiceTest {
@@ -45,130 +40,225 @@ class ManageHearingsDocumentServiceTest {
     private ManageHearingsDocumentService manageHearingsDocumentService;
 
     @Mock
-    private CourtDetailsConfiguration courtDetailsConfiguration;
-    @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
-    private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
     private DocumentConfiguration documentConfiguration;
+    @Mock
+    private HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    @Mock
+    private ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
+    @Mock
+    private ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
+    @Mock
+    private ExpressCaseService expressCaseService;
+    @Mock
+    private StaticDocumentService staticDocumentService;
 
-    private static final String AUTHORISATION_TOKEN = "authToken";
-    private static final String TEMPLATE = "template";
-    private static final String FILE_NAME = "fileName";
+    private static final String HEARING_NOTICE_TEMPLATE = "HearingNoticeTemplate";
+    private static final String STANDARD_FORM_C = "StandardFormCTemplate";
+    private static final String EXPRESS_FORM_C = "ExpressFormCTemplate";
+    private static final String FAST_TRACK_FORM_C = "FastTrackFormCTemplate";
+    private static final String PFD_NCDR_COMPLIANCE_LETTER = "PfdNcdrComplianceLetter";
+    private static final String PFD_NCDR_COVER_LETTER = "PfdNcdrCoverLetter";
 
-    /**
-     * Test case for generateHearingNotice method.
-     * This test checks that the method forwards the correct info for doc generation.
-     * Builds a FinremCaseDetails instance composed of Hearing and FinremCaseData instances.
-     * A simple CaseDetails instance is built to be returned by the mock finremCaseDetailsMapper.
-     */
-    @ParameterizedTest
-    @MethodSource("hearingProvider")
-    void shouldGenerateHearingNotice() {
-        Hearing hearing = Hearing.builder()
-            .hearingType(HearingType.APPEAL_HEARING)
-            .hearingDate(LocalDate.now())
-            .hearingTime("10:00 AM")
-            .hearingTimeEstimate("2 hours")
-            .hearingMode(HearingMode.IN_PERSON)
-            .additionalHearingInformation("Additional Info")
-            .hearingCourtSelection(Court
-                .builder()
-                .region(Region.LONDON)
-                .londonList(RegionLondonFrc.LONDON)
-                .courtListWrapper(DefaultCourtListWrapper.builder()
-                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                    .build()).build())
-            .build();
 
-        FinremCaseData finremCaseData = FinremCaseData.builder()
-            .contactDetailsWrapper(ContactDetailsWrapper
-                .builder()
-                .applicantFmName("Bilbo")
-                .applicantLname("Baggins")
-                .respondentFmName("Smeagol")
-                .respondentLname("Gollum")
-                .build())
-            .build();
-        finremCaseData.getManageHearingsWrapper().setWorkingHearing(hearing);
 
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .id(12345L)
-            .data(finremCaseData)
-            .build();
+    private FinremCaseDetails finremCaseDetails;
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(new HashMap<>())
-            .build();
-
-        CaseDocument expectedDocument = CaseDocument.builder()
-            .documentUrl("http://document.url")
-            .build();
-
-        when(finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
-        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", CourtDetails
+    @BeforeEach
+    void setUp() {
+        finremCaseDetails = FinremCaseDetails
             .builder()
-                .courtAddress("Bromley County Court, College Road, Bromley, BR1 3PX")
-                .courtName("Bromley County Court And Family Court")
-                .phoneNumber("1234567890")
-                .email("some@email.com")
-            .build()));
-        when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails)).thenReturn(TEMPLATE);
-        when(documentConfiguration.getManageHearingNoticeFileName()).thenReturn(FILE_NAME);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345")))
+            .id(Long.valueOf(CASE_ID))
+            .build();
+    }
+
+    @Test
+    void shouldGenerateHearingNotice() {
+        // Arrange
+        Map<String, Object> documentDataMap = Map.of("key", "value");
+        CaseDocument expectedDocument = CaseDocument
+            .builder()
+            .documentFilename("hearingNoticeFileName")
+            .documentBinaryUrl("hearingNoticeBinaryUrl")
+            .documentUrl("hearingNoticeUrl")
+            .build();
+
+        when(hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
+            .thenReturn(documentDataMap);
+        when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails))
+            .thenReturn(HEARING_NOTICE_TEMPLATE);
+        when(documentConfiguration.getManageHearingNoticeFileName())
+            .thenReturn("hearingNoticeFileName");
+
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CASE_ID))
             .thenReturn(expectedDocument);
 
-        // Call the method under test
-        CaseDocument result = manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, AUTHORISATION_TOKEN);
+        // Act
+        CaseDocument actualDocument = manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.getDocumentUrl()).isEqualTo(expectedDocument.getDocumentUrl());
-        assertThat(result.getCategoryId()).isEqualTo(DocumentCategory.HEARING_DOCUMENTS.getDocumentCategoryId());
-
-        verify(finremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails);
-        verify(courtDetailsConfiguration).getCourts();
+        assertEquals(expectedDocument, actualDocument);
+        verify(hearingNoticeLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
         verify(documentConfiguration).getManageHearingNoticeTemplate(finremCaseDetails);
         verify(documentConfiguration).getManageHearingNoticeFileName();
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTHORISATION_TOKEN), any(), eq(TEMPLATE), eq(FILE_NAME), eq("12345"));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CASE_ID);
     }
 
-    static Stream<Arguments> hearingProvider() {
+    @ParameterizedTest
+    @MethodSource("provideCaseDataForFormCGeneration")
+    void shouldGenerateFormC(boolean isExpressCase, boolean isFastTrackApplication, String expectedTemplate) {
+        // Arrange
+        Map<String, Object> documentDataMap = Map.of("key", "value");
+        CaseDocument expectedDocument = CaseDocument
+            .builder()
+            .documentFilename("formCFileName")
+            .documentBinaryUrl("formCBinaryUrl")
+            .documentUrl("formCUrl")
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .expressCaseWrapper(
+                ExpressCaseWrapper.builder()
+                .expressCaseParticipation(isExpressCase ? ExpressCaseParticipation.ENROLLED : ExpressCaseParticipation.DOES_NOT_QUALIFY)
+                .build())
+            .fastTrackDecision(isFastTrackApplication ? YesOrNo.YES : YesOrNo.NO)
+            .build();
+        finremCaseDetails.setData(caseData);
+
+        when(manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
+            .thenReturn(documentDataMap);
+        when(expressCaseService.isExpressCase(caseData))
+            .thenReturn(isExpressCase);
+
+        if (isFastTrackApplication) {
+            when(documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails))
+                .thenReturn(FAST_TRACK_FORM_C);
+        }
+        if (isExpressCase) {
+            when(documentConfiguration.getManageHearingExpressFromCTemplate())
+                .thenReturn(EXPRESS_FORM_C);
+        }
+        if (!isExpressCase && !isFastTrackApplication) {
+            when(documentConfiguration.getFormCStandardTemplate(finremCaseDetails))
+                .thenReturn(STANDARD_FORM_C);
+        }
+
+        when(documentConfiguration.getFormCFileName())
+            .thenReturn("formCFileName");
+
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, expectedTemplate, "formCFileName", CASE_ID))
+            .thenReturn(expectedDocument);
+
+        // Act
+        CaseDocument actualDocument = manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(expectedDocument, actualDocument);
+        verify(manageHearingFormCLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, expectedTemplate, "formCFileName", CASE_ID);
+    }
+
+    private static Stream<Arguments> provideCaseDataForFormCGeneration() {
         return Stream.of(
-                // a complete hearing
-                Arguments.of(Hearing.builder()
-                        .hearingType(HearingType.APPEAL_HEARING)
-                        .hearingDate(LocalDate.now())
-                        .hearingTime("10:00 AM")
-                        .hearingTimeEstimate("2 hours")
-                        .hearingMode(HearingMode.IN_PERSON)
-                        .additionalHearingInformation("Additional Info")
-                        .hearingCourtSelection(Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                        .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                        .build())
-                                .build())
-                        .build()),
-                // a hearing without hearing mode (migrated cases), or additional information (optional field)
-                Arguments.of(Hearing.builder()
-                        .hearingType(HearingType.FDA)
-                        .hearingDate(LocalDate.now())
-                        .hearingTime("14:00")
-                        .hearingTimeEstimate("An amount of time")
-                        .hearingMode(null)
-                        .additionalHearingInformation(null)
-                        .hearingCourtSelection(Court.builder()
-                                .region(Region.LONDON)
-                                .londonList(RegionLondonFrc.LONDON)
-                                .courtListWrapper(DefaultCourtListWrapper.builder()
-                                        .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
-                                        .build())
-                                .build())
-                        .build())
+            Arguments.of(true, false, EXPRESS_FORM_C),
+            Arguments.of(false, true, FAST_TRACK_FORM_C),
+            Arguments.of(false, false, STANDARD_FORM_C)
         );
     }
+
+    @Test
+    void shouldGenerateFormG() {
+        // Arrange
+        Map<String, Object> documentDataMap = Map.of("key", "value");
+        CaseDocument expectedDocument = CaseDocument
+            .builder()
+            .documentFilename("formGFileName")
+            .documentBinaryUrl("formGBinaryUrl")
+            .documentUrl("formGUrl")
+            .build();
+
+        when(formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
+            .thenReturn(documentDataMap);
+        when(documentConfiguration.getFormGTemplate(finremCaseDetails))
+            .thenReturn("formGTemplate");
+        when(documentConfiguration.getFormGFileName())
+            .thenReturn("formGFileName");
+
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, "formGTemplate", "formGFileName", CASE_ID))
+            .thenReturn(expectedDocument);
+
+        // Act
+        CaseDocument actualDocument = manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(expectedDocument, actualDocument);
+        verify(formGLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
+        verify(documentConfiguration).getFormGTemplate(finremCaseDetails);
+        verify(documentConfiguration).getFormGFileName();
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
+            AUTH_TOKEN, documentDataMap, "formGTemplate", "formGFileName", CASE_ID);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCoverSheetRequiredValues")
+    void shouldGeneratePfdNcdrDocuments(boolean isCoverSheetRequired) {
+        // Arrange
+        CaseDocument complianceLetter = CaseDocument.builder()
+            .documentFilename("complianceLetterFileName")
+            .documentBinaryUrl("complianceLetterBinaryUrl")
+            .documentUrl("complianceLetterUrl")
+            .build();
+
+        CaseDocument coverLetter = CaseDocument.builder()
+            .documentFilename("coverLetterFileName")
+            .documentBinaryUrl("coverLetterBinaryUrl")
+            .documentUrl("coverLetterUrl")
+            .build();
+
+        when(staticDocumentService.uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+            .thenReturn(complianceLetter);
+
+        // Ensure proper stubbing for cover sheet requirement
+        when(staticDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+            .thenReturn(isCoverSheetRequired);
+
+        if (isCoverSheetRequired) {
+            // Ensure proper stubbing for cover letter
+            when(staticDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+                .thenReturn(coverLetter);
+        }
+
+        // Act
+        Map<String, CaseDocument> documentMap = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
+        if (isCoverSheetRequired) {
+            assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
+        } else {
+            assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
+        }
+
+        verify(staticDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
+        if (isCoverSheetRequired) {
+            verify(staticDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        } else {
+            verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        }
+    }
+
+    private static Stream<Arguments> provideCoverSheetRequiredValues() {
+        return Stream.of(
+            Arguments.of(true),  // Cover sheet required
+            Arguments.of(false)  // Cover sheet not required
+        );
+    }
+
 }

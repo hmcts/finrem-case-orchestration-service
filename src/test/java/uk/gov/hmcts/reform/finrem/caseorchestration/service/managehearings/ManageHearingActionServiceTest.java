@@ -68,7 +68,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/hearing-notice")
             .build();
 
-        when(manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
     }
@@ -102,7 +102,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/form-c")
             .build();
 
-        when(manageHearingsDocumentService.generateFormC(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formC);
 
         formG = CaseDocument.builder()
@@ -110,7 +110,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/form-g")
             .build();
 
-        when(manageHearingsDocumentService.generateFormG(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formG);
 
         pfdNcdrDocuments = Map.of(
@@ -146,9 +146,9 @@ class ManageHearingActionServiceTest {
                 outOfCourtResolution);
 
         // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(hearing, finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormG(hearing, finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateFormG(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
     }
@@ -162,7 +162,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/form-c")
             .build();
 
-        when(manageHearingsDocumentService.generateFormC(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formC);
 
         formG = CaseDocument.builder()
@@ -170,7 +170,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/form-g")
             .build();
 
-        when(manageHearingsDocumentService.generateFormG(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formG);
 
         pfdNcdrDocuments = Map.of(
@@ -210,9 +210,9 @@ class ManageHearingActionServiceTest {
                 outOfCourtResolution);
 
         // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(hearing, finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormG(hearing, finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateFormG(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
     }
@@ -229,7 +229,7 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/form-c")
             .build();
 
-        when(manageHearingsDocumentService.generateFormC(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formC);
 
         pfdNcdrDocuments = Map.of(
@@ -269,12 +269,12 @@ class ManageHearingActionServiceTest {
                 outOfCourtResolution);
 
         // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(hearing, finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
         verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
 
         // Verify that generateFormC was not called
-        verify(manageHearingsDocumentService, never()).generateFormG(hearing, finremCaseDetails, AUTH_TOKEN);
+        verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
     }
 }
