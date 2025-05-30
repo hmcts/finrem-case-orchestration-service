@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
@@ -17,19 +16,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 import java.time.LocalDate;
 
 @Component
-public class ManageHearingFormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
+public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
-
-    public ManageHearingFormCLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
-                                                 CourtDetailsConfiguration courtDetailsConfiguration,
+    public ManageHearingFormCLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
                                                  ObjectMapper objectMapper) {
-        super(courtDetailsMapper, objectMapper);
-        this.courtDetailsConfiguration = courtDetailsConfiguration;
+        super(objectMapper, courtDetailsConfiguration);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();

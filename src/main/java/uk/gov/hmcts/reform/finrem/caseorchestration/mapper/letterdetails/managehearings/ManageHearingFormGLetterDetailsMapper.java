@@ -18,19 +18,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLet
 import java.time.LocalDate;
 
 @Component
-public class ManageHearingFormGLetterDetailsMapper extends AbstractLetterDetailsMapper {
+public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
-    private final DataStoreClient dataStoreClient;
-
-    public ManageHearingFormGLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper, CourtDetailsConfiguration courtDetailsConfiguration, DataStoreClient dataStoreClient) {
-        super(courtDetailsMapper, objectMapper);
-        this.courtDetailsConfiguration = courtDetailsConfiguration;
-        this.dataStoreClient = dataStoreClient;
+    public ManageHearingFormGLetterDetailsMapper(ObjectMapper objectMapper, CourtDetailsConfiguration courtDetailsConfiguration, DataStoreClient dataStoreClient) {
+        super(objectMapper, courtDetailsConfiguration);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();

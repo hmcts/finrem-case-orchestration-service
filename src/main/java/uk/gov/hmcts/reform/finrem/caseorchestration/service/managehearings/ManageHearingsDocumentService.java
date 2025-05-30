@@ -47,8 +47,7 @@ public class ManageHearingsDocumentService {
                                               FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
-                hearing.getHearingCourtSelection());
+        Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
@@ -67,8 +66,7 @@ public class ManageHearingsDocumentService {
                                       FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
-                hearing.getHearingCourtSelection());
+        Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         String template = expressCaseService.isExpressCase(finremCaseDetails.getData()) ? documentConfiguration.getManageHearingExpressFromCTemplate() :
                 (finremCaseDetails.getData().isFastTrackApplication() ?
@@ -92,8 +90,7 @@ public class ManageHearingsDocumentService {
                                       FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
-        Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails,
-                hearing.getHearingCourtSelection());
+        Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
         CaseDocument formG = genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,

@@ -16,18 +16,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehe
 import java.time.LocalDate;
 
 @Component
-public class HearingNoticeLetterDetailsMapper extends AbstractLetterDetailsMapper {
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
+public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    public HearingNoticeLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
-                                            CourtDetailsConfiguration courtDetailsConfiguration,
+    public HearingNoticeLetterDetailsMapper(CourtDetailsConfiguration courtDetailsConfiguration,
                                             ObjectMapper objectMapper) {
-        super(courtDetailsMapper, objectMapper);
-        this.courtDetailsConfiguration = courtDetailsConfiguration;
+        super(objectMapper, courtDetailsConfiguration);
     }
 
     @Override
-    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
 
