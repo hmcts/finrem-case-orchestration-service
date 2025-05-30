@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -15,16 +18,18 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.COURT_SEAL_IMAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fileUploadResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PdfStampingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PdfStampingServiceTest {
 
     public static final String COURT_SEAL_PDF = "/courtseal.pdf";
     public static final String HIGH_COURT_SEAL_PDF = "/highcourtseal.pdf";
@@ -35,28 +40,30 @@ public class PdfStampingServiceTest {
     @Mock private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @Mock private DocumentConversionService documentConversionService;
 
-    @Test(expected = StampDocumentException.class)
-    public void shouldThrowExceptionWhenDocumentIsNotPdf() throws Exception {
+    @Test
+    void shouldThrowExceptionWhenDocumentIsNotPdf() throws Exception {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_IMAGE);
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
             .thenReturn(imageAsBytes);
 
-        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, CASE_ID);
+        assertThrows(StampDocumentException.class, () -> {
+            service.stampDocument(document, AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CASE_ID);
+        });
     }
 
     @Test
-    public void shouldAddAnnexAndStampToDocument() throws Exception {
+    void shouldAddAnnexAndStampToDocument() throws Exception {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
             .thenReturn(imageAsBytes);
 
         when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP, CASE_ID);
+        Document stampDocument = service.stampDocument(document, AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, CASE_ID);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -65,17 +72,17 @@ public class PdfStampingServiceTest {
     }
 
     @Test
-    public void shouldAddStampToDocument() throws Exception {
+    void shouldAddStampToDocument() throws Exception {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
             .thenReturn(imageAsBytes);
 
         when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, CASE_ID);
+        Document stampDocument = service.stampDocument(document, AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, CASE_ID);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -84,17 +91,17 @@ public class PdfStampingServiceTest {
     }
 
     @Test
-    public void shouldAddStampToHighCourtDocument() throws Exception {
+    void shouldAddStampToHighCourtDocument() throws Exception {
         Document document = document();
         byte[] imageAsBytes = service.imageAsBytes(HIGH_COURT_SEAL_PDF);
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), AUTH_TOKEN))
             .thenReturn(imageAsBytes);
 
         when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP, CASE_ID);
+        Document stampDocument = service.stampDocument(document, AUTH_TOKEN, false, StampType.HIGH_COURT_STAMP, CASE_ID);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -103,7 +110,7 @@ public class PdfStampingServiceTest {
     }
 
     @Test
-    public void shouldGetImageAsBytes() throws Exception {
+    void shouldGetImageAsBytes() throws Exception {
         byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_IMAGE);
 
         assertThat(imageAsBytes, notNullValue());
