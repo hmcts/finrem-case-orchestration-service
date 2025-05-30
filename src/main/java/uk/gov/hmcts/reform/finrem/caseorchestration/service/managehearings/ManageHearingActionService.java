@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -59,7 +60,7 @@ public class ManageHearingActionService {
         if (HearingType.FDA.equals(hearingType) || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData))) {
             documentMap.put(FORM_C, manageHearingsDocumentService.generateFormC(hearing, finremCaseDetails, authToken));
 
-            if (!caseData.isFastTrackApplication()) {
+            if (YesOrNo.isNoOrNull(caseData.getFastTrackDecision())) {
                 documentMap.put(FORM_G, manageHearingsDocumentService.generateFormG(hearing, finremCaseDetails, authToken));
             }
 
