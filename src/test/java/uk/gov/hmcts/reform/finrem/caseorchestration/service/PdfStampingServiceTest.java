@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -116,7 +115,6 @@ class PdfStampingServiceTest {
             PDDocument spyDoc = spy(realDoc);
 
             when(spyDoc.getPage(0)).thenReturn(spyPage);
-            when(spyPage.getCropBox()).thenReturn(new PDRectangle(0, 0, 200, 300));
 
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
             mockedImageUtils.when(() -> ImageUtils.imageAsBytes(any(String.class))).thenCallRealMethod();
@@ -180,7 +178,6 @@ class PdfStampingServiceTest {
             PDDocument spyDoc = spy(realDoc);
 
             when(spyDoc.getPage(0)).thenReturn(spyPage);
-            when(spyPage.getCropBox()).thenReturn(new PDRectangle(0, 0, 200, 300));
 
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
 
@@ -211,7 +208,6 @@ class PdfStampingServiceTest {
             PDDocument spyDoc = spy(realDoc);
 
             when(spyDoc.getPage(0)).thenReturn(spyPage);
-            when(spyPage.getCropBox()).thenReturn(new PDRectangle(0, 0, 200, 300));
 
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
             mockStampedPdfBytes(spyDoc);
