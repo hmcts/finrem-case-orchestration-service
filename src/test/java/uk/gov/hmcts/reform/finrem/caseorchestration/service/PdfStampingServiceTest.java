@@ -114,8 +114,6 @@ class PdfStampingServiceTest {
             realDoc.addPage(spyPage);
             PDDocument spyDoc = spy(realDoc);
 
-            when(spyDoc.getPage(0)).thenReturn(spyPage);
-
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
             mockedImageUtils.when(() -> ImageUtils.imageAsBytes(any(String.class))).thenCallRealMethod();
 
@@ -177,8 +175,6 @@ class PdfStampingServiceTest {
             realDoc.addPage(spyPage);
             PDDocument spyDoc = spy(realDoc);
 
-            when(spyDoc.getPage(0)).thenReturn(spyPage);
-
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
 
             StampDocumentException exception = assertThrows(StampDocumentException.class, () ->
@@ -206,8 +202,6 @@ class PdfStampingServiceTest {
             PDPage spyPage = spy(new PDPage());
             realDoc.addPage(spyPage);
             PDDocument spyDoc = spy(realDoc);
-
-            when(spyDoc.getPage(0)).thenReturn(spyPage);
 
             mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
             mockStampedPdfBytes(spyDoc);
