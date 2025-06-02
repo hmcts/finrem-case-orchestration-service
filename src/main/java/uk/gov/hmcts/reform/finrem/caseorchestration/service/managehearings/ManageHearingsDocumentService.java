@@ -137,7 +137,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates an Out Of Court Resolution document for the given case details.
+     * Generates an Out Of Court Resolution document
      *
      * @param caseDetails  the case details containing case data
      * @param authToken    the authorization token for document generation
