@@ -145,5 +145,4 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isDuplicatePayment(), is(true));
         assertThat(paymentResponse.getStatusHistories(), nullValue());
     }
-
 }
