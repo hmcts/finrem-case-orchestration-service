@@ -58,6 +58,13 @@ public class ManageHearingsDocumentService {
         return hearingDoc;
     }
 
+    /**
+     * Generates appropriate Form C document based on the case type (standard/fast track/express).
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form C document as a {@link CaseDocument}
+     */
     public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
@@ -81,6 +88,13 @@ public class ManageHearingsDocumentService {
         return fromC;
     }
 
+    /**
+     * Generates Form G document
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form G document as a {@link CaseDocument}
+     */
     public CaseDocument generateFormG(FinremCaseDetails finremCaseDetails,
                                       String authorisationToken) {
 
@@ -100,6 +114,13 @@ public class ManageHearingsDocumentService {
         return formG;
     }
 
+    /**
+     * Generates PFD NCDR documents including compliance letter and cover letter if required.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token for document generation
+     * @return a map containing the generated PFD NCDR documents
+     */
     public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
 
@@ -115,6 +136,13 @@ public class ManageHearingsDocumentService {
         return documentMap;
     }
 
+    /**
+     * Generates an Out Of Court Resolution document for the given case details.
+     *
+     * @param caseDetails  the case details containing case data
+     * @param authToken    the authorization token for document generation
+     * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
+     */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
         return staticDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
     }
