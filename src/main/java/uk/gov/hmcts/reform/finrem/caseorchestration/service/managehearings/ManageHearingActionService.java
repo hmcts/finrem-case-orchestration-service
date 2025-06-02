@@ -36,14 +36,13 @@ public class ManageHearingActionService {
     private static final String OUT_OF_COURT_RESOLUTION = "outOfCourtResolution";
 
     /**
-     * Adds a new hearing to the case details and generates all associated documents, including the hearing notice.
+     * Adds a new hearing to the case and generates associated documents.
      *
-     * This method updates the hearings collection in the case data and generates relevant documents
-     * based on the hearing type and case configuration. The generated documents are added to the
-     * hearing documents collection in the case data.
+     * Updates the hearings collection and generates documents based on the hearing type
+     * and case configuration. Adds the generated documents to the hearing documents collection.
      *
-     * @param finremCaseDetails the case details containing hearing and case data
-     * @param authToken         the authorization token for accessing secure resources
+     * @param finremCaseDetails case details containing hearing and case data
+     * @param authToken         authorization token for secure resource access
      */
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
