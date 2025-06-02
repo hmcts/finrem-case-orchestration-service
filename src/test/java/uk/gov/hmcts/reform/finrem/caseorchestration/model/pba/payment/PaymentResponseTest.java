@@ -54,8 +54,8 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("You have insufficient funds available"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0001"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(),
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0001"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(),
             is("You have insufficient funds available"));
     }
 
@@ -81,8 +81,8 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("Your account is on hold"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0003"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is on hold"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0003"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(), is("Your account is on hold"));
     }
 
     @Test
@@ -107,8 +107,8 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("Your account is deleted"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0004"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is deleted"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0004"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(), is("Your account is deleted"));
     }
 
     @Test
@@ -133,16 +133,15 @@ public class PaymentResponseTest {
         String json = "{"
             + "  \"timestamp\": \"2019-01-09T17:59:20.473+0000\","
             + "  \"status\": 400,"
-            + "  \"error\": \"Bad Request\","
-            + "  \"message\": \"duplicate payment\","
+            + "  \"error\": \"duplicate payment\","
             + "  \"path\": \"/credit-account-payments\""
             + "}";
         PaymentResponse paymentResponse = mapper.readValue(json, PaymentResponse.class);
         assertThat(paymentResponse.getReference(), nullValue());
         assertThat(paymentResponse.getStatus(), is("400"));
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
-        assertThat(paymentResponse.getPaymentError(), is("Bad Request"));
-        assertThat(paymentResponse.getMessage(), is("duplicate payment"));
+        assertThat(paymentResponse.getPaymentError(), nullValue());
+        assertThat(paymentResponse.getMessage(), nullValue());
         assertThat(paymentResponse.isDuplicatePayment(), is(true));
         assertThat(paymentResponse.getStatusHistories(), nullValue());
     }
