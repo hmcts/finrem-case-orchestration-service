@@ -3,15 +3,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 public abstract class AbstractManageHearingsLetterMapper {
     protected static final String CASE_DETAILS = "caseDetails";
     protected static final String CASE_DATA = "case_data";
@@ -38,5 +38,16 @@ public abstract class AbstractManageHearingsLetterMapper {
             ID, caseDetails.getId());
 
         return Map.of(CASE_DETAILS, caseDetailsMap);
+    }
+
+    protected CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection) {
+        CourtDetails courtDetails = courtDetailsConfiguration.getCourts().get(courtSelection);
+
+        return CourtDetailsTemplateFields.builder()
+            .courtName(courtDetails.getCourtName())
+            .courtAddress(courtDetails.getCourtAddress())
+            .phoneNumber(courtDetails.getPhoneNumber())
+            .email(courtDetails.getEmail())
+            .build();
     }
 }

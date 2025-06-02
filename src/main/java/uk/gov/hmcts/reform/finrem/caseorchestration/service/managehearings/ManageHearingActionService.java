@@ -22,6 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -29,11 +34,6 @@ public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
-
-    private static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
-    private static final String FORM_C = "formC";
-    private static final String FORM_G = "formG";
-    private static final String OUT_OF_COURT_RESOLUTION = "outOfCourtResolution";
 
     /**
      * Adds a new hearing to the case and generates associated documents.

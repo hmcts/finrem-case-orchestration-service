@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremFormCandGCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.StaticHearingDocumentService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class HearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final FinremFormCandGCorresponder finremFormCandGCorresponder;
-    private final StaticDocumentService staticDocumentService;
+    private final StaticHearingDocumentService staticHearingDocumentService;
     private final ExpressCaseService expressCaseService;
 
 
@@ -109,12 +110,12 @@ public class HearingDocumentService {
         String authToken = pair.getRight();
 
         Map<String, CaseDocument> documentMap = new HashMap<>();
-        CaseDocument pfdNcdrComplianceLetter = staticDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
+        CaseDocument pfdNcdrComplianceLetter = staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authToken);
         documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, pfdNcdrComplianceLetter);
 
         // A cover letter is only required for non-digital respondents
-        if (staticDocumentService.isPdfNcdrCoverSheetRequired(pair.getLeft())) {
-            CaseDocument pfdNcdrCoverLetter = staticDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
+        if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(pair.getLeft())) {
+            CaseDocument pfdNcdrCoverLetter = staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authToken);
             documentMap.put(PFD_NCDR_COVER_LETTER, pfdNcdrCoverLetter);
         }
 

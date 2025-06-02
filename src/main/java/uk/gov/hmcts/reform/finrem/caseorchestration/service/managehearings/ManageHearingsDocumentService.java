@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.StaticDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class ManageHearingsDocumentService {
     private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
-    private final StaticDocumentService staticDocumentService;
+    private final StaticHearingDocumentService staticHearingDocumentService;
 
     /**
      * Generates a hearing notice document for the given hearing and case details.
@@ -126,11 +125,11 @@ public class ManageHearingsDocumentService {
 
         Map<String, CaseDocument> documentMap = new HashMap<>();
         documentMap.put(PFD_NCDR_COMPLIANCE_LETTER,
-                staticDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken));
+                staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken));
 
-        if (staticDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
+        if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
             documentMap.put(PFD_NCDR_COVER_LETTER,
-                    staticDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken));
+                    staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken));
         }
 
         return documentMap;
@@ -144,6 +143,6 @@ public class ManageHearingsDocumentService {
      * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
-        return staticDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
     }
 }

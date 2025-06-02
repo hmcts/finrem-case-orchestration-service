@@ -28,7 +28,7 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
 
         CourtDetailsTemplateFields courtTemplateFields =
-            courtDetailsConfiguration.buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
+            buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
 
         LocalDate hearingDate = hearing.getHearingDate();
 

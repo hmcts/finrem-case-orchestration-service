@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FileUtils;
 
@@ -24,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 
 @Service
 @RequiredArgsConstructor
-public class StaticDocumentService {
+public class StaticHearingDocumentService {
 
     private final EvidenceManagementUploadService uploadService;
     private final NotificationService notificationService;
@@ -78,7 +79,7 @@ public class StaticDocumentService {
 
         MultipartFile multipartFile = createMultipartFile("OutOfFamilyCourtResolution.pdf", bytes);
 
-        return uploadDocument(caseId, authToken, multipartFile, "Out Of Court Resolution Document");
+        return uploadDocument(caseId, authToken, multipartFile, "Out of Court Resolution Document");
     }
 
     /**
@@ -101,7 +102,7 @@ public class StaticDocumentService {
         try {
             return FileUtils.readResourceAsByteArray(filename);
         } catch (IOException e) {
-            throw new DocumentStorageException("Failed to get PFD NCDR Compliance Letter", e);
+            throw new DocumentStorageException("Failed to get Out of Court Resolution Document", e);
         }
     }
 

@@ -23,15 +23,4 @@ public class CourtDetailsConfiguration {
             });
         }
     }
-
-    public CourtDetailsTemplateFields buildCourtDetailsTemplateFields(String courtSelection) {
-        CourtDetails courtDetails = courts.get(courtSelection);
-
-        return CourtDetailsTemplateFields.builder()
-            .courtName(courtDetails.getCourtName())
-            .courtAddress(courtDetails.getCourtAddress())
-            .phoneNumber(courtDetails.getPhoneNumber())
-            .email(courtDetails.getEmail())
-            .build();
-    }
 }

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.io.IOException;
 
@@ -25,21 +24,5 @@ class CourtDetailsConfigurationTest {
         assertThat(courtDetails.getCourtAddress()).isEqualTo("Bromley County Court, College Road, Bromley, BR1 3PX");
         assertThat(courtDetails.getPhoneNumber()).isEqualTo("0300 123 5577");
         assertThat(courtDetails.getEmail()).isEqualTo("FRCLondon@justice.gov.uk");
-    }
-
-    @Test
-    void shouldBuildCourtDetailsTemplateFields() throws IOException {
-
-        CourtDetailsConfiguration config = new CourtDetailsConfiguration(new ObjectMapper());
-
-        // Act
-        CourtDetailsTemplateFields result = config.buildCourtDetailsTemplateFields("FR_s_CFCList_1");
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.getCourtName()).isEqualTo("Bromley County Court And Family Court");
-        assertThat(result.getCourtAddress()).isEqualTo("Bromley County Court, College Road, Bromley, BR1 3PX");
-        assertThat(result.getPhoneNumber()).isEqualTo("0300 123 5577");
-        assertThat(result.getEmail()).isEqualTo("FRCLondon@justice.gov.uk");
     }
 }

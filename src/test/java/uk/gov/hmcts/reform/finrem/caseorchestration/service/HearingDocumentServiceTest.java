@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.StaticHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils;
 
 import java.time.LocalDate;
@@ -123,7 +124,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @MockitoBean
     private NotificationService notificationService;
     @MockitoBean
-    private StaticDocumentService staticDocumentService;
+    private StaticHearingDocumentService staticHearingDocumentService;
 
     @Before
     public void setUp() {
@@ -579,12 +580,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     private void mockPfdNcdrDocuments(boolean respondentDigital) {
-        when(staticDocumentService.isPdfNcdrCoverSheetRequired(any(CaseDetails.class))).thenReturn(!respondentDigital);
+        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(any(CaseDetails.class))).thenReturn(!respondentDigital);
 
         CaseDocument pfdNcdrComplianceLetter = createDocument("pfdNcdrComplianceLetter.pdf");
-        when(staticDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
+        when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(any(), any())).thenReturn(pfdNcdrComplianceLetter);
         CaseDocument pfdNcdrCoverLetter = createDocument("pfdNcdrCoverLetter.pdf");
-        when(staticDocumentService.uploadPfdNcdrCoverLetter(any(), any())).thenReturn(pfdNcdrCoverLetter);
+        when(staticHearingDocumentService.uploadPfdNcdrCoverLetter(any(), any())).thenReturn(pfdNcdrCoverLetter);
     }
 
     private CaseDocument createDocument(String filename) {
@@ -596,7 +597,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private void verifyPfdNcdrDocuments(Map<String, CaseDocument> result, boolean respondentDigital) {
         assertThat(result.get(PFD_NCDR_COMPLIANCE_LETTER).getDocumentFilename(), is("pfdNcdrComplianceLetter.pdf"));
         if (respondentDigital) {
-            verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(any(), any());
+            verify(staticHearingDocumentService, never()).uploadPfdNcdrCoverLetter(any(), any());
             assertThat(result.get(PFD_NCDR_COVER_LETTER), is(nullValue()));
         } else {
             assertThat(result.get(PFD_NCDR_COVER_LETTER).getDocumentFilename(), is("pfdNcdrCoverLetter.pdf"));

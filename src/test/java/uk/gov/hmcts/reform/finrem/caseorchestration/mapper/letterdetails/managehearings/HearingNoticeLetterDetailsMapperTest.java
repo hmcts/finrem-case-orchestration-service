@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,8 +99,14 @@ class HearingNoticeLetterDetailsMapperTest {
             .courtAddress("123 Court Street, London")
             .build();
 
-        when(courtDetailsConfiguration.buildCourtDetailsTemplateFields("FR_s_CFCList_1"))
-            .thenReturn(courtTemplateFields);
+        CourtDetails courtDetails = CourtDetails.builder()
+            .courtName("London Court")
+            .phoneNumber("010000 00000")
+            .email("email@test.com")
+            .courtAddress("123 Court Street, London")
+            .build();
+
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of("FR_s_CFCList_1", courtDetails));
 
         // Act
         DocumentTemplateDetails result = hearingNoticeLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails);

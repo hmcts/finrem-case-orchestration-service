@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.StaticDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.Map;
@@ -52,7 +51,7 @@ class ManageHearingsDocumentServiceTest {
     @Mock
     private ExpressCaseService expressCaseService;
     @Mock
-    private StaticDocumentService staticDocumentService;
+    private StaticHearingDocumentService staticHearingDocumentService;
 
     private static final String HEARING_NOTICE_TEMPLATE = "hearingNoticeTemplate";
     private static final String HEARING_NOTICE_FILE_NAME = "hearingNoticeFileName";
@@ -222,13 +221,13 @@ class ManageHearingsDocumentServiceTest {
             .documentFilename(PFD_NCDR_COVER_LETTER_FILE_NAME)
             .build();
 
-        when(staticDocumentService.uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+        when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
             .thenReturn(complianceLetter);
 
-        when(staticDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
             .thenReturn(true);
 
-        when(staticDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+        when(staticHearingDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
             .thenReturn(coverLetter);
 
         // Act
@@ -238,9 +237,9 @@ class ManageHearingsDocumentServiceTest {
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
         assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
 
-        verify(staticDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        verify(staticDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
-        verify(staticDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
+        verify(staticHearingDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -250,10 +249,10 @@ class ManageHearingsDocumentServiceTest {
             .documentFilename(PFD_NCDR_COMPLIANCE_LETTER_FILE_NAME)
             .build();
 
-        when(staticDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
+        when(staticHearingDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
             .thenReturn(complianceLetter);
 
-        when(staticDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+        when(staticHearingDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
             .thenReturn(false);
 
         // Act
@@ -263,9 +262,9 @@ class ManageHearingsDocumentServiceTest {
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
         assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
 
-        verify(staticDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        verify(staticDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
-        verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
+        verify(staticHearingDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -275,7 +274,7 @@ class ManageHearingsDocumentServiceTest {
             .documentFilename(OUT_OF_COURT_RESOLUTION)
             .build();
 
-        when(staticDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN))
+        when(staticHearingDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN))
             .thenReturn(expectedDocument);
 
         // Act
@@ -283,7 +282,7 @@ class ManageHearingsDocumentServiceTest {
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
-        verify(staticDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
+        verify(staticHearingDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
     }
 
 
