@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script is used to make a credit account payment for a financial remedy case.
+# It can be used to trigger duplicate payments for testing purposes.
+# Usage: ./bin/pba/credit-account-payments.sh <applicant solicitor password> <ccdReference>
 
 idamApiHost=https://idam-api.aat.platform.hmcts.net
 s2sHost=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
