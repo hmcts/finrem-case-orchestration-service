@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -13,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTe
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailToSend;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
-import uk.gov.service.notify.TemplatePreview;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,32 +19,36 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
+@Profile("!local")
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @SuppressWarnings("java:S6857")
 public class EmailService {
 
-    private final EmailClient emailClient;
+    final EmailClient emailClient;
 
-    private Map<String, String> emailTemplates;
+    @Value("#{${uk.gov.notify.email.templates}}")
+    Map<String, String> emailTemplates;
 
-    private Map<String, Map<String, String>> emailTemplateVars;
+    @Value("#{${uk.gov.notify.email.template.vars}}")
+    Map<String, Map<String, String>> emailTemplateVars;
 
-    private Map<String, Map<String, String>> contestedContactEmails;
+    @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
+    Map<String, Map<String, String>> contestedContactEmails;
 
     @Value("${finrem.manageCase.baseurl}")
-    private String manageCaseBaseUrl;
+    String manageCaseBaseUrl;
 
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
-    private static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
-    private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
-    private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
-    private static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
-    private static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
-    private static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
-    private static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
+    static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
+    static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
+    static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
+    static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
+    static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
+    static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
+    static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
     public static final String FR_CONSENT_ORDER_AVAILABLE_CTSC = "FR_CONSENT_ORDER_AVAILABLE_CTSC";
     public static final String GENERAL_APPLICATION_REJECTED = "FR_REJECT_GENERAL_APPLICATION";
     public static final String BARRISTER_ACCESS_ADDED = "FR_BARRISTER_ACCESS_ADDED";
@@ -56,25 +58,9 @@ public class EmailService {
     public static final String INTERVENER_SOLICITOR_ADDED_EMAIL = "FR_INTERVENER_SOLICITOR_ADDED_EMAIL";
     public static final String INTERVENER_REMOVED_EMAIL = "FR_INTERVENER_REMOVED_EMAIL";
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
-    private static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
-    private static final String HEARING_DATE = "hearingDate";
-    private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
-    private final Environment environment;
-
-    /**
-     * Upgrading to NotificationClient 5.0.0 eagerly loads.
-     * SPel no longer permitted, get template maps from this post construct.
-     */
-    @PostConstruct
-    public void initNotifyTemplateMaps() {
-        String templatesJson = environment.getProperty("uk.gov.notify.email.templates");
-        String varsJson = environment.getProperty("uk.gov.notify.email.template.vars");
-        String contactsJson = environment.getProperty("uk.gov.notify.email.contestedContactEmails");
-
-        emailTemplates = parseStringMap(templatesJson);
-        emailTemplateVars = parseNestedStringMap(varsJson);
-        contestedContactEmails = parseNestedStringMap(contactsJson);
-    }
+    static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
+    static final String HEARING_DATE = "hearingDate";
+    static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
@@ -82,20 +68,6 @@ public class EmailService {
             templateVars);
         log.info("Sending confirmation email on Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
-    }
-
-    /**
-     * Todo
-     * test code to check templates work without cluttering notify dashboard
-     * @param notificationRequest
-     * @param template
-     */
-    public void previewConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
-        Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
-        EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
-                templateVars);
-        log.info("Creating a preview email for Case ID : {} using template: {}", notificationRequest.getCaseReferenceNumber(), template.name());
-        previewEmail(emailToSend, "send Confirmation email for " + template.name());
     }
 
     protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
@@ -179,7 +151,7 @@ public class EmailService {
         return templateVars;
     }
 
-    private void setIntervenerSolicitorDetails(NotificationRequest notificationRequest, String templateName, Map<String, Object> templateVars) {
+    void setIntervenerSolicitorDetails(NotificationRequest notificationRequest, String templateName, Map<String, Object> templateVars) {
         if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName) || INTERVENER_SOLICITOR_REMOVED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
@@ -188,21 +160,21 @@ public class EmailService {
         }
     }
 
-    private void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
+    void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
                                                         Map<String, Object> templateVars) {
         templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeName", notificationRequest.getJudgeName());
         templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
     }
 
-    private void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
+    void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
                                                        Map<String, Object> templateVars) {
         templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeFeedback", notificationRequest.getJudgeFeedback());
         templateVars.put("documentName", notificationRequest.getDocumentName());
     }
 
-    private EmailToSend generateEmail(String destinationAddress,
+    EmailToSend generateEmail(String destinationAddress,
                                       String templateName,
                                       Map<String, Object> templateVars) {
         String referenceId = UUID.randomUUID().toString();
@@ -210,7 +182,7 @@ public class EmailService {
         return new EmailToSend(destinationAddress, templateId, templateVars, referenceId);
     }
 
-    private void sendEmail(EmailToSend emailToSend, String emailDescription) {
+    void sendEmail(EmailToSend emailToSend, String emailDescription) {
         String templateId = emailToSend.getTemplateId();
         String referenceId = emailToSend.getReferenceId();
         try {
@@ -227,29 +199,7 @@ public class EmailService {
         }
     }
 
-    /**
-     * todo
-     * test code to check templates work without cluttering notify dashboard
-     * @param emailToSend
-     * @param emailDescription
-     */
-    private void previewEmail(EmailToSend emailToSend, String emailDescription) {
-        String templateId = emailToSend.getTemplateId();
-        String referenceId = emailToSend.getReferenceId();
-        try {
-            log.info("Attempting to create a preview for {} with template {}. Reference ID: {}",
-                    emailDescription, templateId, referenceId);
-            TemplatePreview templatePreview = emailClient.generateTemplatePreview(
-                    templateId,
-                    emailToSend.getTemplateFields()
-            );
-            log.info("Preview successful. Rendered template:\n{}", templatePreview);
-        } catch (NotificationClientException e) {
-            log.warn("Failed to preview template '{}'. Reason: {}", templateId, e.getMessage(), e);
-        }
-    }
-
-    private JSONObject preparedForEmailAttachment(final byte[] documentContents) {
+    JSONObject preparedForEmailAttachment(final byte[] documentContents) {
         try {
             if (documentContents != null) {
                 return NotificationClient.prepareUpload(documentContents);
@@ -258,43 +208,5 @@ public class EmailService {
             log.warn("Failed to attach document to email", e);
         }
         return null;
-    }
-
-    /**
-     * Used by initNotifyMaps to parse the email templates JSON string into a Map.
-     * TODO: needs a test
-     * @param json
-     * @return
-     */
-    private Map<String, String> parseStringMap(String json) {
-        JSONObject jsonObject = new JSONObject(json);
-        Map<String, String> map = new HashMap<>();
-        for (String key : jsonObject.keySet()) {
-            map.put(key, jsonObject.getString(key));
-        }
-        return map;
-    }
-
-    /**
-     * Used by initNotifyMaps to parse the email template variables JSON string into a Map.
-     * The JSON is expected to contain nested objects, where each key maps to another map of key-value pairs.
-     * TODO: needs a test
-     * @param json
-     * @return
-     */
-    private Map<String, Map<String, String>> parseNestedStringMap(String json) {
-        JSONObject jsonObject = new JSONObject(json);
-        Map<String, Map<String, String>> result = new HashMap<>();
-
-        for (String key : jsonObject.keySet()) {
-            JSONObject nestedJson = jsonObject.getJSONObject(key);
-            Map<String, String> nestedMap = new HashMap<>();
-            for (String nestedKey : nestedJson.keySet()) {
-                nestedMap.put(nestedKey, nestedJson.getString(nestedKey));
-            }
-            result.put(key, nestedMap);
-        }
-
-        return result;
     }
 }

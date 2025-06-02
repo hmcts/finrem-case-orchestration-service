@@ -1970,11 +1970,6 @@ public class NotificationService {
      */
     public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
         log.info("{} - Sending hearing notification to applicant", notificationRequest.getCaseReferenceNumber());
-
-        if (previewTemplateOnlyIsEnabled) {
-            emailService.previewConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
-        } else {
-            emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
-        }
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 }
