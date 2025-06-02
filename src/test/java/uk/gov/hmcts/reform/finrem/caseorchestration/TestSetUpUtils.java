@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -522,5 +523,11 @@ public class TestSetUpUtils {
             .documentUrl(DOC_URL)
             .documentBinaryUrl(BINARY_URL)
             .build();
+    }
+
+    public static byte[] documentAsBytes() {
+        byte[] bytes = new byte[1024];
+        new Random().nextBytes(bytes);
+        return bytes;
     }
 }

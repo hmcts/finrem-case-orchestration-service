@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -19,10 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.ImageUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class PdfStampingService {
         doc.setAllSecurityToBeRemoved(true);
         PDPage page = doc.getPage(0);
         PdfAnnexStampingInfo info = PdfAnnexStampingInfo.builder(page).build();
-        log.info("PdfAnnexStampingInfo data  = {}", info);
+        log.info("PdfAnnexStampingInfo data = {}", info);
 
         PDPageContentStream psdStream = new PDPageContentStream(doc, page, APPEND, true, true);
 
@@ -102,9 +101,7 @@ public class PdfStampingService {
         return outputBytes.toByteArray();
     }
 
-    public byte[] imageAsBytes(String fileName) throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
-            return IOUtils.toByteArray(inputStream);
-        }
+    private byte[] imageAsBytes(String fileName) throws IOException {
+        return ImageUtils.imageAsBytes(fileName);
     }
 }
