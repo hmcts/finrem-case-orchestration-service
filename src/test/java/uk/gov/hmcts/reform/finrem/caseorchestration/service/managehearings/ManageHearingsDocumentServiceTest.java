@@ -54,12 +54,24 @@ class ManageHearingsDocumentServiceTest {
     @Mock
     private StaticDocumentService staticDocumentService;
 
-    private static final String HEARING_NOTICE_TEMPLATE = "HearingNoticeTemplate";
-    private static final String STANDARD_FORM_C = "StandardFormCTemplate";
-    private static final String EXPRESS_FORM_C = "ExpressFormCTemplate";
-    private static final String FAST_TRACK_FORM_C = "FastTrackFormCTemplate";
-    private static final String PFD_NCDR_COMPLIANCE_LETTER = "PfdNcdrComplianceLetter";
-    private static final String PFD_NCDR_COVER_LETTER = "PfdNcdrCoverLetter";
+    private static final String HEARING_NOTICE_TEMPLATE = "hearingNoticeTemplate";
+    private static final String HEARING_NOTICE_FILE_NAME = "hearingNoticeFileName";
+
+    private static final String STANDARD_FORM_C = "standardFormCTemplate";
+    private static final String EXPRESS_FORM_C = "expressFormCTemplate";
+    private static final String FAST_TRACK_FORM_C = "fastTrackFormCTemplate";
+    private static final String FORM_C_FILE_NAME = "formCFileName";
+
+    private static final String FORM_G_TEMPLATE = "formGTemplate";
+    private static final String FORM_G_FILE_NAME = "formGFileName";
+
+    private static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
+    private static final String PFD_NCDR_COMPLIANCE_LETTER_FILE_NAME = "pfdNcdrComplianceLetterFileName";
+
+    private static final String PFD_NCDR_COVER_LETTER = "pfdNcdrCoverLetter";
+    private static final String PFD_NCDR_COVER_LETTER_FILE_NAME = "pfdNcdrCoverLetterFileName";
+
+    private static final String OUT_OF_COURT_RESOLUTION = "OutOfCourtResolution.pdf";
 
 
 
@@ -79,9 +91,7 @@ class ManageHearingsDocumentServiceTest {
         Map<String, Object> documentDataMap = Map.of("key", "value");
         CaseDocument expectedDocument = CaseDocument
             .builder()
-            .documentFilename("hearingNoticeFileName")
-            .documentBinaryUrl("hearingNoticeBinaryUrl")
-            .documentUrl("hearingNoticeUrl")
+            .documentFilename(HEARING_NOTICE_FILE_NAME)
             .build();
 
         when(hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
@@ -89,10 +99,10 @@ class ManageHearingsDocumentServiceTest {
         when(documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails))
             .thenReturn(HEARING_NOTICE_TEMPLATE);
         when(documentConfiguration.getManageHearingNoticeFileName())
-            .thenReturn("hearingNoticeFileName");
+            .thenReturn(HEARING_NOTICE_FILE_NAME);
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, "hearingNoticeFileName", CASE_ID))
+            AUTH_TOKEN, documentDataMap, HEARING_NOTICE_TEMPLATE, HEARING_NOTICE_FILE_NAME, CASE_ID))
             .thenReturn(expectedDocument);
 
         // Act
@@ -114,9 +124,7 @@ class ManageHearingsDocumentServiceTest {
         Map<String, Object> documentDataMap = Map.of("key", "value");
         CaseDocument expectedDocument = CaseDocument
             .builder()
-            .documentFilename("formCFileName")
-            .documentBinaryUrl("formCBinaryUrl")
-            .documentUrl("formCUrl")
+            .documentFilename(FORM_C_FILE_NAME)
             .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
@@ -147,10 +155,10 @@ class ManageHearingsDocumentServiceTest {
         }
 
         when(documentConfiguration.getFormCFileName())
-            .thenReturn("formCFileName");
+            .thenReturn(FORM_C_FILE_NAME);
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, expectedTemplate, "formCFileName", CASE_ID))
+            AUTH_TOKEN, documentDataMap, expectedTemplate, FORM_C_FILE_NAME, CASE_ID))
             .thenReturn(expectedDocument);
 
         // Act
@@ -160,7 +168,7 @@ class ManageHearingsDocumentServiceTest {
         assertEquals(expectedDocument, actualDocument);
         verify(manageHearingFormCLetterDetailsMapper).getDocumentTemplateDetailsAsMap(finremCaseDetails);
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, expectedTemplate, "formCFileName", CASE_ID);
+            AUTH_TOKEN, documentDataMap, expectedTemplate, FORM_C_FILE_NAME, CASE_ID);
     }
 
     private static Stream<Arguments> provideCaseDataForFormCGeneration() {
@@ -177,20 +185,18 @@ class ManageHearingsDocumentServiceTest {
         Map<String, Object> documentDataMap = Map.of("key", "value");
         CaseDocument expectedDocument = CaseDocument
             .builder()
-            .documentFilename("formGFileName")
-            .documentBinaryUrl("formGBinaryUrl")
-            .documentUrl("formGUrl")
+            .documentFilename(FORM_G_FILE_NAME)
             .build();
 
         when(formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails))
             .thenReturn(documentDataMap);
         when(documentConfiguration.getFormGTemplate(finremCaseDetails))
-            .thenReturn("formGTemplate");
+            .thenReturn(FORM_G_TEMPLATE);
         when(documentConfiguration.getFormGFileName())
-            .thenReturn("formGFileName");
+            .thenReturn(FORM_G_FILE_NAME);
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, "formGTemplate", "formGFileName", CASE_ID))
+            AUTH_TOKEN, documentDataMap, FORM_G_TEMPLATE, FORM_G_FILE_NAME, CASE_ID))
             .thenReturn(expectedDocument);
 
         // Act
@@ -202,63 +208,84 @@ class ManageHearingsDocumentServiceTest {
         verify(documentConfiguration).getFormGTemplate(finremCaseDetails);
         verify(documentConfiguration).getFormGFileName();
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(
-            AUTH_TOKEN, documentDataMap, "formGTemplate", "formGFileName", CASE_ID);
+            AUTH_TOKEN, documentDataMap, FORM_G_TEMPLATE,  FORM_G_FILE_NAME, CASE_ID);
     }
 
-    @ParameterizedTest
-    @MethodSource("provideCoverSheetRequiredValues")
-    void shouldGeneratePfdNcdrDocuments(boolean isCoverSheetRequired) {
+    @Test
+    void shouldGeneratePfdNcdrDocumentsWithCoverSheet() {
         // Arrange
         CaseDocument complianceLetter = CaseDocument.builder()
-            .documentFilename("complianceLetterFileName")
-            .documentBinaryUrl("complianceLetterBinaryUrl")
-            .documentUrl("complianceLetterUrl")
+            .documentFilename(PFD_NCDR_COMPLIANCE_LETTER_FILE_NAME)
             .build();
 
         CaseDocument coverLetter = CaseDocument.builder()
-            .documentFilename("coverLetterFileName")
-            .documentBinaryUrl("coverLetterBinaryUrl")
-            .documentUrl("coverLetterUrl")
+            .documentFilename(PFD_NCDR_COVER_LETTER_FILE_NAME)
             .build();
 
         when(staticDocumentService.uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
             .thenReturn(complianceLetter);
 
-        // Ensure proper stubbing for cover sheet requirement
         when(staticDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
-            .thenReturn(isCoverSheetRequired);
+            .thenReturn(true);
 
-        if (isCoverSheetRequired) {
-            // Ensure proper stubbing for cover letter
-            when(staticDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
-                .thenReturn(coverLetter);
-        }
+        when(staticDocumentService.uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN)))
+            .thenReturn(coverLetter);
 
         // Act
         Map<String, CaseDocument> documentMap = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
-        if (isCoverSheetRequired) {
-            assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
-        } else {
-            assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
-        }
+        assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
 
         verify(staticDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
         verify(staticDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
-        if (isCoverSheetRequired) {
-            verify(staticDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        } else {
-            verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
-        }
+        verify(staticDocumentService).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
     }
 
-    private static Stream<Arguments> provideCoverSheetRequiredValues() {
-        return Stream.of(
-            Arguments.of(true),  // Cover sheet required
-            Arguments.of(false)  // Cover sheet not required
-        );
+    @Test
+    void shouldGeneratePfdNcdrDocumentsWithoutCoverSheet() {
+        // Arrange
+        CaseDocument complianceLetter = CaseDocument.builder()
+            .documentFilename(PFD_NCDR_COMPLIANCE_LETTER_FILE_NAME)
+            .build();
+
+        when(staticDocumentService.uploadPfdNcdrComplianceLetter(CASE_ID, AUTH_TOKEN))
+            .thenReturn(complianceLetter);
+
+        when(staticDocumentService.isPdfNcdrCoverSheetRequired(eq(finremCaseDetails)))
+            .thenReturn(false);
+
+        // Act
+        Map<String, CaseDocument> documentMap = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
+        assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
+
+        verify(staticDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
+        verify(staticDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
+        verify(staticDocumentService, never()).uploadPfdNcdrCoverLetter(eq(CASE_ID), eq(AUTH_TOKEN));
     }
+
+    @Test
+    void shouldGenerateOutOfCourtResolutionDoc() {
+        // Arrange
+        CaseDocument expectedDocument = CaseDocument.builder()
+            .documentFilename(OUT_OF_COURT_RESOLUTION)
+            .build();
+
+        when(staticDocumentService.uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN))
+            .thenReturn(expectedDocument);
+
+        // Act
+        CaseDocument actualDocument = manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        assertEquals(expectedDocument, actualDocument);
+        verify(staticDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
+    }
+
+
 
 }
