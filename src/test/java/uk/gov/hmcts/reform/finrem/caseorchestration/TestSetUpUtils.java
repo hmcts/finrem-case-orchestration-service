@@ -524,10 +524,4 @@ public class TestSetUpUtils {
             .documentBinaryUrl(BINARY_URL)
             .build();
     }
-
-    public static byte[] documentAsBytes() {
-        byte[] bytes = new byte[1024];
-        new Random().nextBytes(bytes);
-        return bytes;
-    }
 }
