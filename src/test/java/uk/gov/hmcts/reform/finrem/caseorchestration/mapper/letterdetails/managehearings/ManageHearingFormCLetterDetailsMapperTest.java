@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
 
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -44,8 +47,9 @@ class ManageHearingFormCLetterDetailsMapperTest {
         manageHearingFormCLetterDetailsMapper = new ManageHearingFormCLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
     }
 
-    @Test
-    void shouldBuildDocumentTemplateDetails() {
+    @ParameterizedTest
+    @MethodSource("provideFormCDetails")
+    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo, String expectedAttendance, String expectedAdditionalInfo)  {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
@@ -65,8 +69,8 @@ class ManageHearingFormCLetterDetailsMapperTest {
                         .hearingDate(LocalDate.of(2025, 8, 1))
                         .hearingTime("10:00 AM")
                         .hearingTimeEstimate("2 hours")
-                        .hearingMode(HearingMode.IN_PERSON)
-                        .additionalHearingInformation("Additional info")
+                        .hearingMode(hearingMode)
+                        .additionalHearingInformation(additionalHearingInfo)
                         .hearingCourtSelection(
                             Court
                             .builder()
@@ -111,8 +115,8 @@ class ManageHearingFormCLetterDetailsMapperTest {
         assertThat(formCLetterDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(formCLetterDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(formCLetterDetails.getTimeEstimate()).isEqualTo("2 hours");
-        assertThat(formCLetterDetails.getAttendance()).isEqualTo("In Person");
-        assertThat(formCLetterDetails.getAdditionalInformationAboutHearing()).isEqualTo("Additional info");
+        assertThat(formCLetterDetails.getAttendance()).isEqualTo(expectedAttendance);
+        assertThat(formCLetterDetails.getAdditionalInformationAboutHearing()).isEqualTo(expectedAdditionalInfo);
         assertThat(formCLetterDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
         assertThat(formCLetterDetails.getHearingDateLess35Days()).isEqualTo("2025-06-27");
         assertThat(formCLetterDetails.getHearingDateLess28Days()).isEqualTo("2025-07-04");
@@ -121,5 +125,12 @@ class ManageHearingFormCLetterDetailsMapperTest {
         assertThat(formCLetterDetails.getHearingDateLess7Days()).isEqualTo("2025-07-25");
         assertThat(formCLetterDetails.getFormCCreatedDate()).isEqualTo(LocalDate.now().toString());
         assertThat(formCLetterDetails.getEventDatePlus21Days()).isEqualTo(LocalDate.now().plusDays(21).toString());
+    }
+
+    private static Stream<Arguments> provideFormCDetails() {
+        return Stream.of(
+            Arguments.of(HearingMode.IN_PERSON, "Additional info", "In Person", "Additional info"),
+            Arguments.of(null, null, "", "")
+        );
     }
 }

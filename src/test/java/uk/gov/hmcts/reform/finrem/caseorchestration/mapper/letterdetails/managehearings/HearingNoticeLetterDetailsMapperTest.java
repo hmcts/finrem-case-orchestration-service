@@ -2,14 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
 
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -47,8 +48,9 @@ class HearingNoticeLetterDetailsMapperTest {
         hearingNoticeLetterDetailsMapper = new HearingNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
     }
 
-    @Test
-    void shouldBuildDocumentTemplateDetails() {
+    @ParameterizedTest
+    @MethodSource("provideHearingDetails")
+    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo, String expectedAttendance, String expectedAdditionalInfo) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
@@ -68,8 +70,8 @@ class HearingNoticeLetterDetailsMapperTest {
                         .hearingDate(LocalDate.of(2025, 8,1))
                         .hearingTime("10:00 AM")
                         .hearingTimeEstimate("2 hours")
-                        .hearingMode(HearingMode.IN_PERSON)
-                        .additionalHearingInformation("Additional info")
+                        .hearingMode(hearingMode)
+                        .additionalHearingInformation(additionalHearingInfo)
                         .hearingCourtSelection(Court
                             .builder()
                             .region(Region.LONDON)
@@ -103,16 +105,23 @@ class HearingNoticeLetterDetailsMapperTest {
 
         // Assert
         HearingNoticeLetterDetails hearingNoticeDetails = (HearingNoticeLetterDetails) result;
-        assertThat(hearingNoticeDetails.getCcdCaseNumber()).isEqualTo("12345");
+        assertThat(hearingNoticeDetails.getCcdCaseNumber()).isEqualTo(CASE_ID);
         assertThat(hearingNoticeDetails.getApplicantName()).isEqualTo("John Doe");
         assertThat(hearingNoticeDetails.getRespondentName()).isEqualTo("Jane Smith");
         assertThat(hearingNoticeDetails.getHearingType()).isEqualTo("FDR");
         assertThat(hearingNoticeDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(hearingNoticeDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(hearingNoticeDetails.getHearingTimeEstimate()).isEqualTo("2 hours");
-        assertThat(hearingNoticeDetails.getAttendance()).isEqualTo("In Person");
-        assertThat(hearingNoticeDetails.getAdditionalHearingInformation()).isEqualTo("Additional info");
+        assertThat(hearingNoticeDetails.getAttendance()).isEqualTo(expectedAttendance);
+        assertThat(hearingNoticeDetails.getAdditionalHearingInformation()).isEqualTo(expectedAdditionalInfo);
         assertThat(hearingNoticeDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
         assertThat(hearingNoticeDetails.getHearingVenue()).isEqualTo("London Court, 123 Court Street, London");
+    }
+
+    private static Stream<Arguments> provideHearingDetails() {
+        return Stream.of(
+            Arguments.of(HearingMode.IN_PERSON, "Additional info", "In Person", "Additional info"),
+            Arguments.of(null, null, "", "")
+        );
     }
 }
