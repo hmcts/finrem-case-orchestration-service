@@ -47,11 +47,11 @@ final class DockerComposeProcessRunner {
         int code = process.waitFor();
 
         if (code != 0) {
-           log.error("****** Failed to start services in {} ******", file);
-           log.info("Exit value: {}", code);
-           return;
+            log.error("****** Failed to start services in {} ******", file);
+            log.info("Exit value: {}", code);
+            return;
         }
 
-       log.info("Successfully started services in {}", file);
+        log.info("Successfully started services in {}", file);
     }
 }
