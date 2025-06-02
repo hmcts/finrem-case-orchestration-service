@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GeneralApplicationInterimHearingNoticeLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
     private static final String INTERIM_JSON = "/fixtures/contested-interim-hearing.json";
     private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =

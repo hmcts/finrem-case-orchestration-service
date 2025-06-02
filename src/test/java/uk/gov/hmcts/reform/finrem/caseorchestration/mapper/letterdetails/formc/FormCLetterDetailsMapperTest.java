@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ManageHearingFormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
+public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2022, 1, 1);
 
