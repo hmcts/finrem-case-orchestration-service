@@ -24,7 +24,7 @@ class CourtDetailsConfigurationTest {
         assertThat(courtDetails.getCourtName()).isEqualTo("Bromley County Court And Family Court");
         assertThat(courtDetails.getCourtAddress()).isEqualTo("Bromley County Court, College Road, Bromley, BR1 3PX");
         assertThat(courtDetails.getPhoneNumber()).isEqualTo("0300 123 5577");
-        assertThat(courtDetails.getEmail()).isEqualTo("0300 123 5577");
+        assertThat(courtDetails.getEmail()).isEqualTo("FRCLondon@justice.gov.uk");
     }
 
     @Test
