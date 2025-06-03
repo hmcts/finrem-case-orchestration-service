@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -26,8 +25,12 @@ public class LocalEmailService extends EmailService {
     }
 
     /**
-     * some javadoc.  Explain how to switch off to send mails.
-     * Essentially, remove the @Profile("!local") annotation in EmailService
+     * Orchestrates previewing the email in the console, based on the provided notification request and template.
+     * Note, this service is used when the active profile (@profile class annotation) is 'local'.
+     * EmailService is used when the active profile is not 'local'.
+     *
+     * @param notificationRequest the request containing details for the email
+     * @param template            the email template to use
      */
     @Override
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {

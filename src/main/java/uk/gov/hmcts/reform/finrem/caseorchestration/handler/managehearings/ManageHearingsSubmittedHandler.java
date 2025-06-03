@@ -40,7 +40,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         // Send Notifications
         manageHearingsCorresponder.sendHearingNotifications(callbackRequest);
 
-        // Where appropriate, send generated documents
+        // Where appropriate, send generated documents, this is upcoming work.
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData())

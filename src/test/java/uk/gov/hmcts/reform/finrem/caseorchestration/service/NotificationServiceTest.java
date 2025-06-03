@@ -134,6 +134,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_INTERIM_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_NOC_CASEWORKER;
@@ -1688,6 +1689,15 @@ class NotificationServiceTest {
             eq(FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED));
         NotificationRequest actual = argumentCaptor.getValue();
         assertEquals("test@test.com", actual.getNotificationEmail());
+    }
+
+    @Test
+    void testSendHearingNotificationToApplicant() {
+        NotificationRequest nr = NotificationRequest.builder()
+                .notificationEmail("test@test.com")
+                .build();
+        notificationService.sendHearingNotificationToApplicant(nr);
+        verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 
     private FinremCaseData getFinremCaseData() {

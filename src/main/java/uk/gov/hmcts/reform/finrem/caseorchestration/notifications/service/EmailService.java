@@ -62,6 +62,14 @@ public class EmailService {
     static final String HEARING_DATE = "hearingDate";
     static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
+    /**
+     * Orchestrates sending an email based on the provided notification request and template.
+     * Note, this service is used when the active profile (@profile class annotation) is not 'local'.
+     * LocalEmailService is used for local testing, when the active profile is local.
+     *
+     * @param notificationRequest the request containing details for the email
+     * @param template            the email template to use
+     */
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),

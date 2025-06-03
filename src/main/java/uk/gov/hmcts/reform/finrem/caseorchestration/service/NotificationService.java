@@ -1964,8 +1964,6 @@ public class NotificationService {
 
     /**
      * Sends a hearing notification email to the applicant solicitor.
-     * todo explain preview bit
-     *
      * @param notificationRequest the notification request containing details for the email
      */
     public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
