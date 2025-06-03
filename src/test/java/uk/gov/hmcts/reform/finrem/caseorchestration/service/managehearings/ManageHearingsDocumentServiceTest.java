@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
@@ -28,7 +27,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
@@ -72,8 +74,6 @@ class ManageHearingsDocumentServiceTest {
 
     private static final String OUT_OF_COURT_RESOLUTION = "OutOfCourtResolution.pdf";
 
-
-
     private FinremCaseDetails finremCaseDetails;
 
     @BeforeEach
@@ -105,7 +105,8 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(expectedDocument);
 
         // Act
-        CaseDocument actualDocument = manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
+        CaseDocument actualDocument =
+            manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
@@ -121,15 +122,12 @@ class ManageHearingsDocumentServiceTest {
     void shouldGenerateFormC(boolean isExpressCase, boolean isFastTrackApplication, String expectedTemplate) {
         // Arrange
         Map<String, Object> documentDataMap = Map.of("key", "value");
-        CaseDocument expectedDocument = CaseDocument
-            .builder()
-            .documentFilename(FORM_C_FILE_NAME)
-            .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .expressCaseWrapper(
                 ExpressCaseWrapper.builder()
-                .expressCaseParticipation(isExpressCase ? ExpressCaseParticipation.ENROLLED : ExpressCaseParticipation.DOES_NOT_QUALIFY)
+                .expressCaseParticipation(isExpressCase
+                    ? ExpressCaseParticipation.ENROLLED : ExpressCaseParticipation.DOES_NOT_QUALIFY)
                 .build())
             .fastTrackDecision(isFastTrackApplication ? YesOrNo.YES : YesOrNo.NO)
             .build();
@@ -155,6 +153,11 @@ class ManageHearingsDocumentServiceTest {
 
         when(documentConfiguration.getFormCFileName())
             .thenReturn(FORM_C_FILE_NAME);
+
+        CaseDocument expectedDocument = CaseDocument
+            .builder()
+            .documentFilename(FORM_C_FILE_NAME)
+            .build();
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(
             AUTH_TOKEN, documentDataMap, expectedTemplate, FORM_C_FILE_NAME, CASE_ID))
@@ -231,7 +234,8 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(coverLetter);
 
         // Act
-        Map<String, CaseDocument> documentMap = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
+        Map<String, CaseDocument> documentMap =
+            manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
@@ -256,7 +260,8 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(false);
 
         // Act
-        Map<String, CaseDocument> documentMap = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
+        Map<String, CaseDocument> documentMap =
+            manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
@@ -278,13 +283,11 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(expectedDocument);
 
         // Act
-        CaseDocument actualDocument = manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
+        CaseDocument actualDocument =
+            manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(staticHearingDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
     }
-
-
-
 }

@@ -51,7 +51,8 @@ class ManageHearingFormCLetterDetailsMapperTest {
 
     @ParameterizedTest
     @MethodSource("provideFormCDetails")
-    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo, String expectedAttendance, String expectedAdditionalInfo)  {
+    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo,
+                                            String expectedAttendance, String expectedAdditionalInfo)  {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
@@ -114,9 +115,9 @@ class ManageHearingFormCLetterDetailsMapperTest {
         // Assert
         FormCLetterDetails formCLetterDetails = (FormCLetterDetails) result;
         assertThat(formCLetterDetails.getCaseNumber()).isEqualTo(caseData.getDivorceCaseNumber());
-        assertThat(formCLetterDetails.getApplicantFMName()).isEqualTo("John");
+        assertThat(formCLetterDetails.getApplicantFmName()).isEqualTo("John");
         assertThat(formCLetterDetails.getApplicantLName()).isEqualTo("Doe");
-        assertThat(formCLetterDetails.getRespondentFMName()).isEqualTo("Jane");
+        assertThat(formCLetterDetails.getRespondentFmName()).isEqualTo("Jane");
         assertThat(formCLetterDetails.getRespondentLName()).isEqualTo("Smith");
         assertThat(formCLetterDetails.getSolicitorReference()).isEqualTo(TestConstants.TEST_SOLICITOR_REFERENCE);
         assertThat(formCLetterDetails.getRSolicitorReference()).isEqualTo(TestConstants.TEST_RESP_SOLICITOR_REFERENCE);

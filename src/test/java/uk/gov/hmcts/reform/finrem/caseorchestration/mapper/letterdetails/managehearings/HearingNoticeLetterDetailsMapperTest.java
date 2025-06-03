@@ -11,13 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -47,12 +41,14 @@ class HearingNoticeLetterDetailsMapperTest {
 
     @BeforeEach
     void setUp() {
-        hearingNoticeLetterDetailsMapper = new HearingNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
+        hearingNoticeLetterDetailsMapper =
+                new HearingNoticeLetterDetailsMapper(courtDetailsConfiguration, new ObjectMapper());
     }
 
     @ParameterizedTest
     @MethodSource("provideHearingDetails")
-    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo, String expectedAttendance, String expectedAdditionalInfo) {
+    void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo,
+                                            String expectedAttendance, String expectedAdditionalInfo) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)

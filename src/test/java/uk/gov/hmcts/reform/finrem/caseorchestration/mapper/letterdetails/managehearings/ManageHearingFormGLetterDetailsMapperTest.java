@@ -43,7 +43,8 @@ class ManageHearingFormGLetterDetailsMapperTest {
 
     @BeforeEach
     void setUp() {
-        manageHearingFormGLetterDetailsMapper = new ManageHearingFormGLetterDetailsMapper(new ObjectMapper(), courtDetailsConfiguration, null);
+        manageHearingFormGLetterDetailsMapper = new ManageHearingFormGLetterDetailsMapper(
+            new ObjectMapper(), courtDetailsConfiguration);
     }
 
     @Test

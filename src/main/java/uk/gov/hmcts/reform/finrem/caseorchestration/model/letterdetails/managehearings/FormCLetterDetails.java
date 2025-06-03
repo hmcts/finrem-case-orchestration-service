@@ -15,9 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 public class FormCLetterDetails implements DocumentTemplateDetails {
     private String caseNumber;
     private CourtDetailsTemplateFields courtDetails;
-    private String applicantFMName;
+    @JsonProperty(value = "applicantFMName")
+    private String applicantFmName;
     private String applicantLName;
-    private String respondentFMName;
+    @JsonProperty(value = "respondentFMName")
+    private String respondentFmName;
     private String respondentLName;
     private String solicitorReference;
     private String rSolicitorReference;

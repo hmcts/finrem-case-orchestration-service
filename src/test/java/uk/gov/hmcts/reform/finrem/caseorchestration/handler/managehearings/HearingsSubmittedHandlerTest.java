@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
@@ -38,9 +36,6 @@ class HearingsSubmittedHandlerTest {
 
     @InjectMocks
     private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;
-
-    @Mock
-    private HearingService hearingService;
 
     @Test
     void testCanHandle() {

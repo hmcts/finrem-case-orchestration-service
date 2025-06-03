@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandlerLogger;
@@ -16,16 +15,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @Service
 public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
-    public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, HearingDocumentService hearingDocumentService) {
+    public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
 

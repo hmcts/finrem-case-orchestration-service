@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -15,7 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.FormGLet
 @Component
 public class ManageHearingFormGLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
 
-    public ManageHearingFormGLetterDetailsMapper(ObjectMapper objectMapper, CourtDetailsConfiguration courtDetailsConfiguration, DataStoreClient dataStoreClient) {
+    public ManageHearingFormGLetterDetailsMapper(ObjectMapper objectMapper,
+                                                 CourtDetailsConfiguration courtDetailsConfiguration) {
         super(objectMapper, courtDetailsConfiguration);
     }
 

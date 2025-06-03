@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
 
 import java.util.Arrays;
 

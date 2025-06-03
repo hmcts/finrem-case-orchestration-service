@@ -73,7 +73,6 @@ class ManageHearingActionServiceTest {
 
     }
 
-
     @Test
     void shouldAddHearingAndGenerateHearingNotice() {
 
@@ -94,7 +93,7 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
-    void shouldGenerateAllDocumentsForFDAHearingType() {
+    void shouldGenerateAllDocumentsForFdaHearingType() {
         hearing.setHearingType(HearingType.FDA);
 
         formC = CaseDocument.builder()
@@ -139,7 +138,8 @@ class ManageHearingActionServiceTest {
 
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item -> item.getValue().getHearingDocument())
+            .extracting(item ->
+                item.getValue().getHearingDocument())
             .contains(hearingNotice, formC, formG,
                 pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
                 pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
@@ -154,7 +154,7 @@ class ManageHearingActionServiceTest {
     }
 
     @Test
-    void shouldGenerateDocumentsForFDRHearingTypeWithExpressCase() {
+    void shouldGenerateDocumentsForFdrHearingTypeWithExpressCase() {
         hearing.setHearingType(HearingType.FDR);
 
         formC = CaseDocument.builder()
@@ -203,7 +203,8 @@ class ManageHearingActionServiceTest {
         // Assert
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item -> item.getValue().getHearingDocument())
+            .extracting(item ->
+                item.getValue().getHearingDocument())
             .contains(hearingNotice, formC, formG,
                 pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
                 pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
@@ -262,7 +263,8 @@ class ManageHearingActionServiceTest {
         // Assert
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item -> item.getValue().getHearingDocument())
+            .extracting(item ->
+                item.getValue().getHearingDocument())
             .contains(hearingNotice, formC,
                 pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
                 pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),

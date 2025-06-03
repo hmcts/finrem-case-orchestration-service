@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -69,9 +69,10 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        String template = expressCaseService.isExpressCase(finremCaseDetails.getData()) ? documentConfiguration.getManageHearingExpressFromCTemplate() :
-                (finremCaseDetails.getData().isFastTrackApplication() ?
-                documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails) :
+        String template = expressCaseService.isExpressCase(finremCaseDetails.getData())
+            ? documentConfiguration.getManageHearingExpressFromCTemplate() :
+                (finremCaseDetails.getData().isFastTrackApplication()
+                    ? documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails) :
                         documentConfiguration.getFormCStandardTemplate(finremCaseDetails));
 
         CaseDocument fromC = genericDocumentService.generateDocumentFromPlaceholdersMap(
@@ -88,7 +89,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates Form G document
+     * Generates Form G document.
      *
      * @param finremCaseDetails  the case details
      * @param authorisationToken the token for document generation
@@ -136,7 +137,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates an Out Of Court Resolution document
+     * Generates an Out of Court Resolution document.
      *
      * @param caseDetails  the case details containing case data
      * @param authToken    the authorization token for document generation
