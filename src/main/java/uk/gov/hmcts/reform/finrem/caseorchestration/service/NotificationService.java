@@ -115,9 +115,6 @@ public class NotificationService {
     private final EvidenceManagementDownloadService evidenceManagementDownloadService;
     private final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    @Value("${uk.gov.notify.template.preview.enabled:false}")
-    private boolean previewTemplateOnlyIsEnabled;
-
     /**
      * No Return.
      *

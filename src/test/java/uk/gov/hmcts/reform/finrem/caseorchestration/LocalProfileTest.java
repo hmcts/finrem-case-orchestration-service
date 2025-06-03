@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 @SpringBootTest
 class LocalProfileTest {
 
-    @Autowired(required = false)
+    @Autowired
     LocalEmailService localEmailService;
 
     @Test

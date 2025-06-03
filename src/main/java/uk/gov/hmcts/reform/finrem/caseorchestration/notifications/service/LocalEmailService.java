@@ -42,8 +42,7 @@ public class LocalEmailService extends EmailService {
     }
 
     /**
-     * todo
-     * test code to check templates work without cluttering notify dashboard
+     * Uses emailClient to generate a preview of the email template.
      * @param emailToSend
      * @param emailDescription
      */

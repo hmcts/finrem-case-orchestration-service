@@ -16,7 +16,13 @@ public class ManageHearingsCorresponder {
 
     private final HearingNotificationHelper hearingNotificationHelper;
 
-    // todo
+    /**
+     * Sends hearing notifications to relevant parties based on the callback request.
+     * Loops through each selected party in the hearing and sends using
+     * {@link HearingNotificationHelper#sendHearingNotificationsByParty}.</p>
+     *
+     * @param callbackRequest the callback request containing case and hearing data
+     */
     public void sendHearingNotifications(FinremCallbackRequest callbackRequest) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
