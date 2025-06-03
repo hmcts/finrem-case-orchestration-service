@@ -1,16 +1,22 @@
 #!/bin/bash
 # This script is used to make a credit account payment for a financial remedy case.
 # It can be used to trigger duplicate payments for testing purposes.
-# Usage: ./bin/pba/credit-account-payments.sh <applicant solicitor password> <ccdReference>
+# Usage: ./bin/pba/credit-account-payments.sh <applicant solicitor password> <contested | consented> <ccdReference>
 
 idamApiHost=https://idam-api.aat.platform.hmcts.net
 s2sHost=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
 paymentsApiHost=http://payment-api-aat.service.core-compute-aat.internal
 userEmail="fr_applicant_solicitor1@mailinator.com"
 userPassword=$1
-ccdReference=$2
+caseType=$2
+ccdReference=$3
 if [[ -z $userPassword ]]; then
   echo 1>&2 "Error: User password not provided"
+  exit 1
+fi
+
+if [[ -z caseType ]]; then
+  echo 1>&2 "Error: Case Type not provided"
   exit 1
 fi
 
@@ -36,6 +42,16 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
+if [[ $caseType = "contested" ]]; then
+  description='Financial Remedy Contested Application'
+  feeCode='FEE0229'
+  amount='313.00'
+else
+  description='Financial Remedy Consented Application'
+  feeCode='FEE0228'
+  amount='60.00'
+fi
+
 response=$(curl -s -w "\n%{http_code}" -X POST "$paymentsApiHost/credit-account-payments" \
   --header "Authorization: Bearer $accessToken" \
   --header "ServiceAuthorization: Bearer $serviceToken" \
@@ -43,15 +59,15 @@ response=$(curl -s -w "\n%{http_code}" -X POST "$paymentsApiHost/credit-account-
   --data @- <<EOF
     {
       "account_number": "PBA0089162",
-      "amount": 60,
+      "amount": "$amount",
       "ccd_case_number": "$ccdReference",
       "currency": "GBP",
       "customer_reference": "my ref",
-      "description": "Financial Remedy Consented Application",
+      "description": "$description",
       "fees": [
         {
-          "calculated_amount": 60,
-          "code": "FEE0228",
+          "calculated_amount": "$amount",
+          "code": "$feeCode",
           "version": "5",
           "volume": 1
         }
