@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -33,6 +32,6 @@ class PBAPaymentServiceAdapterTest {
         PaymentResponse response = service.makePayment(AUTH_TOKEN, finremCaseDetails);
 
         assertThat(response).isEqualTo(paymentResponse);
-        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, caseDetails);
+        verify(pbaPaymentService).makePayment(AUTH_TOKEN, caseDetails);
     }
 }
