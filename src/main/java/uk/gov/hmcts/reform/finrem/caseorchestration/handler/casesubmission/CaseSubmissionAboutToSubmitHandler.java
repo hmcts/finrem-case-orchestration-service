@@ -97,6 +97,6 @@ public class CaseSubmissionAboutToSubmitHandler extends FinremCallbackHandler {
     }
 
     private boolean isPaymentReferenceExists(FinremCaseData caseData) {
-        return !StringUtils.isEmpty(caseData.getPaymentDetailsWrapper().getPbaPaymentReference());
+        return StringUtils.isNotEmpty(caseData.getPaymentDetailsWrapper().getPbaPaymentReference());
     }
 }
