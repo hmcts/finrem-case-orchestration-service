@@ -18,10 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.utils.ImageUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +29,7 @@ import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.WIDTH_AND_HEIGHT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService.CONVERTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ImageUtils.imageAsBytes;
 
 @Service
 @RequiredArgsConstructor
@@ -99,9 +98,5 @@ public class PdfStampingService {
         doc.close();
 
         return outputBytes.toByteArray();
-    }
-
-    private byte[] imageAsBytes(String fileName) throws IOException {
-        return ImageUtils.imageAsBytes(fileName);
     }
 }
