@@ -40,7 +40,6 @@ public class CaseOrchestrationSmokeTests {
     private RestAssuredConfig config;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-
     @Before
     public void setUp() {
         RestAssured.useRelaxedHTTPSValidation();

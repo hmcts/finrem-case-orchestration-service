@@ -57,7 +57,6 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    maxWarnings = 584
     toolVersion = '10.23.1'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
@@ -525,4 +524,16 @@ tasks.withType(Tar) {
 
 tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('checkstyleMain') {
+    maxWarnings = 299
+}
+
+tasks.named('checkstyleTest') {
+    maxWarnings = 578
+}
+
+tasks.named('checkstyleContract') {
+    maxWarnings = 16
 }

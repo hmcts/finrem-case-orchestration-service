@@ -36,7 +36,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String hwf = "HWF";
     private String pba = "PBA";
 
-
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
         validateFeeLookUpPayment(feeLookup, "fee-lookup_consented.json", consentedDir);
