@@ -40,7 +40,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 
-
 @RunWith(SerenityRunner.class)
 public class AmendCaseDetailsTest extends IntegrationTestBase {
 
@@ -430,5 +429,4 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             MIAM_ADDITIONAL_INFO_OTHER_GROUNDS_TEXTBOX
         };
     }
-
 }
