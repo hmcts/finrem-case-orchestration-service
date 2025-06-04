@@ -22,12 +22,17 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ApplicantSolicitorDetailsValidatorTest  {
+class ApplicantSolicitorDetailsValidatorTest {
 
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
+    enum NullOrEmptyTest {
+        EMPTY_STRING,
+        SET_NULL
+    }
+
     @BeforeEach
-    public void setup() {
+    void setup() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
@@ -37,13 +42,7 @@ class ApplicantSolicitorDetailsValidatorTest  {
     @ValueSource(strings = {"No"})
     @NullSource
     void shouldReturnEmptyError(String applicantRepresented) {
-        Map<String, Object> map = new HashMap<>(Map.of(
-            "solicitorEmail", "this_is@email.com",
-            "solicitorPhone", "9999999999",
-            "solicitorName", "SOLICITOR NAME",
-            "solicitorFirm", "SOLICITOR FIRM",
-            "solicitorAddress", Map.of("PostCode", "GU2 7NY")));
-        map.put("applicantRepresented", applicantRepresented);
+        Map<String, Object> map = getApplicantInfosMap(applicantRepresented);
 
         CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
 
@@ -56,7 +55,7 @@ class ApplicantSolicitorDetailsValidatorTest  {
     @Test
     void shouldReturnEmptyErrorIfContestedCase() {
         CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType())
-            .data(Map.of()).build();
+            .data(getApplicantOrganisationPolicyMap()).build();
 
         FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
         ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
@@ -75,11 +74,6 @@ class ApplicantSolicitorDetailsValidatorTest  {
         assertThat(validationErrors).isEmpty();
     }
 
-    enum NullOrEmptyTest {
-        EMPTY_STRING,
-        SET_NULL
-    }
-
     private static Stream<Arguments> parameters() {
         return Stream.of(
             Arguments.of("solicitorEmail", "Applicant solicitor's email is required."),
@@ -92,14 +86,9 @@ class ApplicantSolicitorDetailsValidatorTest  {
 
     @ParameterizedTest
     @MethodSource("parameters")
-    void shouldReturnError(String fieldName, String expectedError) {
+    void shouldReturnSingleError(String fieldName, String expectedError) {
         Arrays.stream(NullOrEmptyTest.values()).forEach(t -> {
-            Map<String, Object> map = new HashMap<>(Map.of(
-                "solicitorEmail", "this_is@email.com",
-                "solicitorPhone", "9999999999",
-                "solicitorName", "SOLICITOR NAME",
-                "solicitorFirm", "SOLICITOR FIRM",
-                "solicitorAddress", Map.of("PostCode", "GU2 7NY")));
+            Map<String, Object> map = getApplicantInfosMap("Yes");
             if (t == NullOrEmptyTest.EMPTY_STRING) {
                 if ("solicitorAddress".equals(fieldName)) {
                     // skip solicitorAddress if it's not a string
@@ -107,14 +96,14 @@ class ApplicantSolicitorDetailsValidatorTest  {
                 }
                 map.put(fieldName, "");
             } else {
-                map.remove((fieldName));
+                map.remove(fieldName);
             }
             CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
 
             FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
             ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
             List<String> validationErrors = validator.validate(caseData);
-            assertThat(validationErrors).hasSize(1).contains(expectedError);
+            assertThat(validationErrors).containsExactly(expectedError);
         });
     }
 
@@ -122,11 +111,9 @@ class ApplicantSolicitorDetailsValidatorTest  {
     @MethodSource("parameters")
     void shouldReturnMultipleErrors(String fieldName, String expectedError) {
         Arrays.stream(NullOrEmptyTest.values()).forEach(t -> {
-            Map<String, Object> map = new HashMap<>(Map.of(
-                "solicitorEmail", "this_is@email.com",
-                "solicitorPhone", "9999999999",
-                "solicitorName", "SOLICITOR NAME",
-                "solicitorFirm", "SOLICITOR FIRM"));
+            Map<String, Object> map = getApplicantInfosMap("Yes");
+            // Remove solicitorAddress to trigger its error
+            map.remove("solicitorAddress");
             if ("solicitorAddress".equals(fieldName)) {
                 // skip parameter: solicitorAddress
                 return;
@@ -134,14 +121,41 @@ class ApplicantSolicitorDetailsValidatorTest  {
             if (t == NullOrEmptyTest.EMPTY_STRING) {
                 map.put(fieldName, "");
             } else {
-                map.remove((fieldName));
+                map.remove(fieldName);
             }
             CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
 
             FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
             ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
             List<String> validationErrors = validator.validate(caseData);
-            assertThat(validationErrors).hasSize(2).contains(expectedError, "Applicant solicitor's address is required.");
+            assertThat(validationErrors).containsExactly("Applicant solicitor's address is required.",
+                expectedError);
         });
+    }
+
+    private static Map<String, Object> getApplicantOrganisationPolicyMap() {
+        return Map.of(
+            "ApplicantOrganisationPolicy", Map.of(
+                "Organisation", Map.of(
+                    "OrganisationID", "FinRem-1-Org"
+                )
+            )
+        );
+    }
+
+    private static Map<String, Object> getApplicantInfosMap(String applicantRepresented) {
+        Map<String, Object> map = new HashMap<>(Map.of(
+            "ApplicantOrganisationPolicy", Map.of(
+                "Organisation", Map.of(
+                    "OrganisationID", "FinRem-1-Org"
+                )
+            ),
+            "solicitorEmail", "this_is@email.com",
+            "solicitorPhone", "9999999999",
+            "solicitorName", "SOLICITOR NAME",
+            "solicitorFirm", "SOLICITOR FIRM",
+            "solicitorAddress", Map.of("PostCode", "GU2 7NY")));
+        map.put("applicantRepresented", applicantRepresented);
+        return map;
     }
 }
