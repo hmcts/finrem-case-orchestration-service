@@ -119,7 +119,6 @@ public class GeneralApplicationHelper {
             || Objects.equals(generalApplicationStatus, OTHER.getId()));
     }
 
-
     public List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
         return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
         });
@@ -173,7 +172,6 @@ public class GeneralApplicationHelper {
         }
         return null;
     }
-
 
     public int getCompareTo(GeneralApplicationCollectionData e1, GeneralApplicationCollectionData e2) {
         if (e2 == null || e2.getGeneralApplicationItems() == null
