@@ -57,7 +57,7 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    toolVersion = '10.23.1'
+    toolVersion = '10.25.0'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
