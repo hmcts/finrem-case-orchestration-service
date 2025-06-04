@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
 import java.io.IOException;
 import java.io.InputStream;
