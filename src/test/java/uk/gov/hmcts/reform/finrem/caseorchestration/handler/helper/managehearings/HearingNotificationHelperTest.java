@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ManageHearings.HearingNotificationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingNotificationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -137,5 +137,32 @@ class HearingNotificationHelperTest {
 
         verify(notificationRequestMapper, never()).buildHearingNotificationForApplicantSolicitor(caseDetails, hearing);
         verify(notificationService, never()).sendHearingNotificationToApplicant(notificationRequest);
+    }
+
+    @Test
+    void shouldThrowExceptionIfSendHearingNotificationsByPartyGivenUnexpectedCaseRole() {
+        // Caseworker is not handled in the switch statement, so it should throw an exception
+        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
+        party.setCode(CaseRole.CASEWORKER.getCcdCode());
+
+        FinremCaseDetails caseDetails = new FinremCaseDetails();
+        caseDetails.setId(12345L); // to check case reference in exception message
+
+        Hearing hearing = new Hearing();
+
+        // When
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        });
+
+        // Then
+        assertTrue(
+                exception.getMessage().contains(
+                        String.format(
+                                "Unexpected value: %s for case reference 12345",
+                                CaseRole.CASEWORKER
+                        )
+                )
+        );
     }
 }

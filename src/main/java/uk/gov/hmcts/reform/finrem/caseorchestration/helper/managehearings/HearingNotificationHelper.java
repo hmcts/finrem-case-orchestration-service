@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.helper.ManageHearings;
+package uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class HearingNotificationHelper {
      * extracts the working hearing ID, and finds the corresponding {@link Hearing} in the list of hearings.
      * If the hearing ID is not found, it throws an {@link IllegalStateException}.</p>
      *
-     * A working hearing is a Hearing that a User is currently creating or amending.
+     * <p>A working hearing is a {@link Hearing} that a user is currently creating or amending.</p>
      *
      * @param finremCaseData the case data containing hearing information
      * @return the {@link Hearing} associated with the working hearing ID
@@ -68,8 +68,7 @@ public class HearingNotificationHelper {
      */
     public void sendHearingNotificationsByParty(DynamicMultiSelectListElement party,
                                                 FinremCaseDetails finremCaseDetails,
-                                                Hearing hearing)
-    {
+                                                Hearing hearing) {
         CaseRole caseRole = CaseRole.forValue(party.getCode());
         switch (caseRole) {
             case CaseRole.APP_SOLICITOR -> {
@@ -92,6 +91,13 @@ public class HearingNotificationHelper {
             case CaseRole.INTVR_SOLICITOR_4 -> {
                 log.info("Handling case: INTVR_SOLICITOR_4, work to follow");
             }
+            default -> throw new IllegalStateException(
+                    String.format(
+                            "Unexpected value: %s for case reference %s",
+                            caseRole,
+                            finremCaseDetails.getId()
+                    )
+            );
         }
     }
 
@@ -107,8 +113,7 @@ public class HearingNotificationHelper {
      */
     public void sendHearingNotificationToApplicantSolicitor(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing)
-    {
+            Hearing hearing) {
 
         NotificationRequest notificationRequest = notificationRequestMapper
                 .buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing);

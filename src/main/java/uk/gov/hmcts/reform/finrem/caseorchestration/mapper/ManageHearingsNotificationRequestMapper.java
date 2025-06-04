@@ -31,16 +31,15 @@ public class ManageHearingsNotificationRequestMapper {
      */
     public NotificationRequest buildHearingNotificationForApplicantSolicitor(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing)
-    {
+            Hearing hearing) {
 
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         String applicantSurname = finremCaseData.getContactDetailsWrapper().getApplicantLname();
         String respondentSurname = finremCaseData.getContactDetailsWrapper().getRespondentLname();
 
-        String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType()) ?
-            EmailService.CONTESTED : EmailService.CONSENTED; ;
+        String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())
+            ? EmailService.CONTESTED : EmailService.CONSENTED; ;
 
         String selectedFRC  = CourtHelper.getSelectedFrc(finremCaseDetails);
 

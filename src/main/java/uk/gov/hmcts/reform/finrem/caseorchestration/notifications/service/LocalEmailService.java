@@ -43,8 +43,8 @@ public class LocalEmailService extends EmailService {
 
     /**
      * Uses emailClient to generate a preview of the email template.
-     * @param emailToSend
-     * @param emailDescription
+     * @param emailToSend the email to send, containing template ID and fields
+     * @param emailDescription a description of the email being previewed, for logging purposes
      */
     private void previewEmail(EmailToSend emailToSend, String emailDescription) {
         String templateId = emailToSend.getTemplateId();
