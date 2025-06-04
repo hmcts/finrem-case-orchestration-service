@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.NullChecker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -40,6 +43,12 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
             validateField(contactDetailsWrapper.getSolicitorPhone(), "phone", ret);
             validateField(contactDetailsWrapper.getSolicitorFirm(), "name of your firm", ret);
             validateField(contactDetailsWrapper.getSolicitorName(), "name", ret);
+        }
+        if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null) == null) {
+            ret.add("Applicant organisation policy is missing.");
         }
         return ret;
     }
