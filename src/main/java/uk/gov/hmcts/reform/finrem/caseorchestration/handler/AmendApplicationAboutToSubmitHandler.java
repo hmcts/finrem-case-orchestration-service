@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -28,28 +29,38 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
 
     private final ConsentOrderService consentOrderService;
 
+    private final CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
+
     @Autowired
     public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
-                                                ConsentOrderService consentOrderService) {
+                                                ConsentOrderService consentOrderService,
+                                                CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator) {
         super(mapper);
         this.consentOrderService = consentOrderService;
+        this.createCaseMandatoryDataValidator = createCaseMandatoryDataValidator;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APP_DETAILS.equals(eventType));
+            && EventType.AMEND_APP_DETAILS.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
         List<String> errors = new ArrayList<>();
 
         FinremCaseData caseData = caseDetails.getData();
+        List<String> mandatoryDataErrors = createCaseMandatoryDataValidator.validate(caseData);
+        if (!mandatoryDataErrors.isEmpty()) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+                .errors(mandatoryDataErrors)
+                .data(caseData).build();
+        }
 
         checkApplicantPostCodeDetails(caseData, errors);
         checkRespondentPostCodeDetails(caseData, errors);
@@ -92,7 +103,6 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         if (caseData.isRespondentRepresentedByASolicitor()) {
             postCode = caseData.getRespondentSolicitorPostcode();
         } else {
-
             Address respondentAddress = caseData.getContactDetailsWrapper().getRespondentAddress() != null
                 ? caseData.getContactDetailsWrapper().getRespondentAddress()
                 : null;
