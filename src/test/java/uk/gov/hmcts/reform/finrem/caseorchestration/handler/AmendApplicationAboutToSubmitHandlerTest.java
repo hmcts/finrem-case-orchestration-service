@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.lenient;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -30,10 +31,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDoc
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
+@ExtendWith(MockitoExtension.class)
+class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String PERIODIC_PAYMENT_CHILD_JSON = "/fixtures/updatecase/amend-periodic-payment-order.json";
     private static final String PERIODIC_PAYMENT_JSON = "/fixtures/updatecase/amend-periodic-payment-order-without"
         + "-agreement-with-valid-enums.json";
@@ -47,7 +47,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private static final String RES_SOL_JSON = "/fixtures/updatecase/remove-respondent-solicitor-details.json";
     private static final String APP_SOL_JSON = "/fixtures/updatecase/remove-applicant-solicitor-details.json";
 
-    private AmendApplicationAboutToSubmitHandler handler;
+    private AmendApplicationAboutToSubmitHandler underTest;
 
     @Mock
     private ConsentOrderService consentOrderService;
@@ -55,25 +55,25 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     @Mock
     private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
+        underTest = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
             consentOrderService, createCaseMandatoryDataValidator);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
     }
 
     @Test
-    public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
-        assertCanHandle(handler, CallbackType.ABOUT_TO_SUBMIT, CONSENTED, EventType.AMEND_APP_DETAILS);
+    void givenCase_whenEventIsAmendApplication_thenCanHandle() {
+        assertCanHandle(underTest, CallbackType.ABOUT_TO_SUBMIT, CONSENTED, EventType.AMEND_APP_DETAILS);
     }
 
     @Test
-    public void givenCase_whenSolicitorChooseToDecreeAbsolute_thenShouldDeleteDecreeNisi() {
+    void givenCase_whenSolicitorChooseToDecreeAbsolute_thenShouldDeleteDecreeNisi() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(DECREE_NISI_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getDivorceUploadEvidence2());
@@ -81,10 +81,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenSolicitorChooseToDecreeNisi_thenShouldDeleteDecreeAbsolute() {
+    void givenCase_whenSolicitorChooseToDecreeNisi_thenShouldDeleteDecreeAbsolute() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(DECREE_ABS_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getDivorceUploadEvidence1());
@@ -92,10 +92,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeleteD81IndividualData() {
+    void givenCase_whenCaseUpdated_thenShouldDeleteD81IndividualData() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_JOINT_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getD81Applicant());
@@ -104,10 +104,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeleteD81JointData() {
+    void givenCase_whenCaseUpdated_thenShouldDeleteD81JointData() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(D81_INDIVIUAL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getD81Joint());
@@ -116,10 +116,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeletePropertyDetails() {
+    void givenCase_whenCaseUpdated_thenShouldDeletePropertyDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PROPERTY_DETAILS_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3a());
@@ -127,10 +127,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldNotRemovePropertyDetails() {
+    void givenCase_whenCaseUpdated_thenShouldNotRemovePropertyDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PROPERTY_ADJ_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication3a());
@@ -138,11 +138,11 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithOutWrittenAgreement() {
+    void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithOutWrittenAgreement() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(PERIODIC_PAYMENT_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNotNull(responseData.getNatureApplicationWrapper().getNatureOfApplication6());
@@ -150,10 +150,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithWrittenAgreementForChildren() {
+    void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithWrittenAgreementForChildren() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PERIODIC_PAYMENT_CHILD_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication6());
@@ -161,10 +161,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsIfUnchecked() {
+    void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsIfUnchecked() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PAYMENT_UNCHECKED_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getNatureApplicationWrapper().getNatureOfApplication5());
@@ -174,10 +174,10 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenCase_whenIfRespondentNotRepresentedBySolicitor_thenShouldDeleteRespondentSolicitorDetails() {
+    void givenCase_whenIfRespondentNotRepresentedBySolicitor_thenShouldDeleteRespondentSolicitorDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(RES_SOL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorFirm());
@@ -189,12 +189,11 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorPhone());
     }
 
-
     @Test
-    public void givenCase_whenApplicantNotRepresentedBySolicitor_thenShouldDeleteApplicantSolicitorDetails() {
+    void givenCase_whenApplicantNotRepresentedBySolicitor_thenShouldDeleteApplicantSolicitorDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(APP_SOL_JSON);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
         assertNull(responseData.getContactDetailsWrapper().getSolicitorFirm());
@@ -207,7 +206,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenNullPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowError() {
+    void givenNullPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowError() {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -218,7 +217,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
         assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
@@ -226,7 +225,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenValidPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowNoErrors() {
+    void givenValidPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowNoErrors() {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -238,13 +237,13 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(0, response.getErrors().size());
     }
 
     @Test
-    public void givenNullPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
+    void givenNullPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -255,7 +254,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
         assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
@@ -263,7 +262,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     }
 
     @Test
-    public void givenValidPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowNoErrors() {
+    void givenValidPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowNoErrors() {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -275,13 +274,13 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(0, response.getErrors().size());
     }
 
     @Test
-    public void givenEmptyPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
+    void givenEmptyPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
@@ -293,7 +292,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertEquals(2, response.getErrors().size());
         assertEquals("Postcode field is required for applicant address.", response.getErrors().get(0));
