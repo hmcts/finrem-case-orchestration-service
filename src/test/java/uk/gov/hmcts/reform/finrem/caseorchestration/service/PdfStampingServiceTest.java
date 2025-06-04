@@ -122,10 +122,13 @@ class PdfStampingServiceTest {
 
             // Now call the public method - this will use your mocked static and mocks above
             Document result = underTest.stampDocument(document, authToken, isAnnexNeeded, stampType, CASE_ID);
+            assertNotNull(result);
 
             // Verify uploadService called with the flattened bytes (not the original bytes)
             verify(evidenceManagementUploadServiceService).upload(argThat(list -> {
-                if (list.isEmpty()) return false;
+                if (list.isEmpty()) {
+                    return false;
+                }
                 MultipartFile mf = list.getFirst();
                 try {
                     return Arrays.equals(mf.getBytes(), FLATTEN_PDF_BYTES);
@@ -137,8 +140,6 @@ class PdfStampingServiceTest {
             if (isAnnexNeeded) {
                 mockedImageUtils.verify(() -> ImageUtils.imageAsBytes(ANNEX_IMAGE));
             }
-
-            assertNotNull(result);
         }
     }
 
