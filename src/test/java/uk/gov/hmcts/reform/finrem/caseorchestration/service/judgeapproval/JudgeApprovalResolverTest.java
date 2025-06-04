@@ -106,6 +106,7 @@ class JudgeApprovalResolverTest {
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .hearingInstruction(HearingInstruction.builder()
+                        .requireAnotherHearing(YesOrNo.YES)
                         .anotherHearingRequestCollection(List.of(
                             AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
                         ))
@@ -117,6 +118,7 @@ class JudgeApprovalResolverTest {
             Arguments.of(
                 DraftOrdersWrapper.builder()
                     .hearingInstruction(HearingInstruction.builder()
+                        .requireAnotherHearing(YesOrNo.YES)
                         .anotherHearingRequestCollection(List.of(
                             AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build(),
                             AnotherHearingRequestCollection.builder().value(AnotherHearingRequest.builder().build()).build()
