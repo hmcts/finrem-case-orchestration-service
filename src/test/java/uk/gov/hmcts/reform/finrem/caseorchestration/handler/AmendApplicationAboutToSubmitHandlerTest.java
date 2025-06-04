@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase.mandatorydatavalidation.CreateCaseMandatoryDataValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -46,20 +47,22 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private static final String RES_SOL_JSON = "/fixtures/updatecase/remove-respondent-solicitor-details.json";
     private static final String APP_SOL_JSON = "/fixtures/updatecase/remove-applicant-solicitor-details.json";
 
-
     private AmendApplicationAboutToSubmitHandler handler;
+
     @Mock
     private ConsentOrderService consentOrderService;
+
+    @Mock
+    private CreateCaseMandatoryDataValidator createCaseMandatoryDataValidator;
 
     @Before
     public void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
-            consentOrderService);
+            consentOrderService, createCaseMandatoryDataValidator);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
     }
-
 
     @Test
     public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
