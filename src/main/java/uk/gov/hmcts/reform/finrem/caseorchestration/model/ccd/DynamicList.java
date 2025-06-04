@@ -21,6 +21,7 @@ public class DynamicList {
 
     /**
      * Constructs a new {@link DynamicList} instance from a given string value.
+     *
      * <p>
      * This constructor is primarily used for deserialization purposes, allowing
      * Jackson to create a {@link DynamicList} object from a string representation.
