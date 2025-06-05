@@ -29,6 +29,12 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
                 log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
                 return ret;
             }
+            if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
+                .map(OrganisationPolicy::getOrganisation)
+                .map(Organisation::getOrganisationID)
+                .orElse(null) == null) {
+                ret.add("Applicant organisation policy is missing.");
+            }
             if (contactDetailsWrapper.getSolicitorAddress() == null
                 || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
                 ret.add("Applicant solicitor's address is required.");
@@ -37,12 +43,6 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
             validateField(contactDetailsWrapper.getSolicitorPhone(), "phone", ret);
             validateField(contactDetailsWrapper.getSolicitorFirm(), "name of your firm", ret);
             validateField(contactDetailsWrapper.getSolicitorName(), "name", ret);
-        }
-        if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .map(Organisation::getOrganisationID)
-            .orElse(null) == null) {
-            ret.add("Applicant organisation policy is missing.");
         }
         return ret;
     }
