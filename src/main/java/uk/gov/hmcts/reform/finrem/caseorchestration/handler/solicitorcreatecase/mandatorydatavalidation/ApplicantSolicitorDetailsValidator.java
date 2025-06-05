@@ -18,12 +18,6 @@ import java.util.Optional;
 @Slf4j
 class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
 
-    private void validateField(String fieldValue, String fieldName, List<String> errors) {
-        if (!StringUtils.hasText(fieldValue)) {
-            errors.add(String.format("Applicant solicitor's %s is required.", fieldName));
-        }
-    }
-
     @Override
     public List<String> validate(FinremCaseData caseData) {
         ContactDetailsWrapper contactDetailsWrapper = caseData.getContactDetailsWrapper();
@@ -51,5 +45,11 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
             ret.add("Applicant organisation policy is missing.");
         }
         return ret;
+    }
+
+    private void validateField(String fieldValue, String fieldName, List<String> errors) {
+        if (!StringUtils.hasText(fieldValue)) {
+            errors.add(String.format("Applicant solicitor's %s is required.", fieldName));
+        }
     }
 }
