@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BirminghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -25,13 +28,17 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class CourtDetailsMapperTest {
+
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     private CourtDetailsMapper courtDetailsMapper;
 
     @BeforeEach
     void setUp() {
-        courtDetailsMapper = new CourtDetailsMapper(new ObjectMapper());
+        courtDetailsMapper = new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration);
     }
 
     @Test

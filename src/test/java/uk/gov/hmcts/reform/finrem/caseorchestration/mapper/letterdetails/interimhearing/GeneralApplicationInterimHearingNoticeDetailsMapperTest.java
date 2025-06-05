@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.interi
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -20,6 +22,9 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Abs
     private static final String INTERIM_JSON = "/fixtures/contested-interim-hearing.json";
     private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =
         "/fixtures/contested/interim-hearing-two-collection-modified.json";
+
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @Autowired
     private GeneralApplicationInterimHearingNoticeDetailsMapper generalApplicationInterimHearingNoticeDetailsMapper;
@@ -76,6 +81,6 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapperTest extends Abs
     private CourtDetailsTemplateFields getCourtDetails(CfcCourt court) {
         InterimCourtListWrapper courtListWrapper = new InterimCourtListWrapper();
         courtListWrapper.setInterimCfcCourtList(court);
-        return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
+        return new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration).getCourtDetails(courtListWrapper);
     }
 }

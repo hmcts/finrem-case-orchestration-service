@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.genera
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
@@ -25,6 +27,9 @@ public class GeneralApplicationOrderDetailsMapperTest extends AbstractLetterDeta
 
     @Autowired
     private GeneralApplicationOrderDetailsMapper generalApplicationOrderDetailsMapper;
+
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @Before
     public void setUp() throws Exception {
@@ -76,6 +81,6 @@ public class GeneralApplicationOrderDetailsMapperTest extends AbstractLetterDeta
     private CourtDetailsTemplateFields getCourtDetails() {
         DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
         courtListWrapper.setCfcCourtList(CfcCourt.KINGSTON_UPON_THAMES_COUNTY_COURT_AND_FAMILY_COURT);
-        return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
+        return new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration).getCourtDetails(courtListWrapper);
     }
 }

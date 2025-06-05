@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.manahehearin
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -20,17 +20,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HearingTabDataMapper {
 
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
+    private final CourtDetailsMapper courtDetailsMapper;
 
     public HearingTabItem mapHearingToTabData(ManageHearingsCollectionItem hearingCollectionItem, List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
 
         Hearing hearing = hearingCollectionItem.getValue();
 
         return HearingTabItem.builder()
-            .tabHearingType(hearing.getHearingType().name())
+            .tabHearingType(hearing.getHearingType().getId())
             //TODO: Pull out court value
-            //.courtSelection(courtDetailsConfiguration.getCourts().get(courtSelection).getCourtName())
-            .tabCourtSelection("Cheese")
+            .tabCourtSelection(courtDetailsMapper.convertToFrcCourtDetails(hearing.getHearingCourtSelection()).getCourtName())
             .tabAttendance(hearing.getHearingMode().getDisplayValue())
             .tabDateTime(hearing.getHearingDate()
                     .format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearing.getHearingTime())

@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -19,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class CourtDetailsMapper {
 
     private final ObjectMapper objectMapper;
+    private final CourtDetailsConfiguration courtDetailsConfiguration;
 
     @SuppressWarnings("java:S3011")
     final BiPredicate<Field, CourtListWrapper> fieldIsNotNullOrEmpty = (field, courtListWrapper) -> {
@@ -83,6 +88,31 @@ public class CourtDetailsMapper {
 
         return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {
         });
+    }
+
+    private Optional<Field> getCourtField(CourtListWrapper regionWrapper) {
+        List<Field> allFields = Arrays.asList(regionWrapper.getClass().getDeclaredFields());
+        return allFields.stream()
+            .filter(field -> fieldIsNotNullOrEmpty.test(field, regionWrapper))
+            .findFirst();
+    }
+
+    public CourtDetails convertToFrcCourtDetails(Court court) {
+        Optional<Field> optionalField = getCourtField(court.getDefaultCourtListWrapper());
+
+        if (optionalField.isPresent()) {
+            Field field = optionalField.get();
+            try {
+                field.setAccessible(true);
+                String value = ((CourtList) field.get(court.getDefaultCourtListWrapper())).getSelectedCourtId();
+                return courtDetailsConfiguration.getCourts().get(value);
+            } catch (IllegalAccessException e) {
+                log.error("Error accessing field: {}", field.getName(), e);
+                throw new IllegalStateException("Unable to access the field: " + field.getName(), e);
+            }
+        } else {
+            throw new IllegalStateException("No valid field found in the court list wrapper");
+        }
     }
 
     public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,

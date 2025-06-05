@@ -6,16 +6,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.manahehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,6 +27,9 @@ class ManageHearingActionServiceTest {
 
     @Mock
     private ManageHearingsDocumentService manageHearingsDocumentService;
+
+    @Mock
+    private HearingTabDataMapper hearingTabDataMapper;
 
     @InjectMocks
     private ManageHearingActionService manageHearingActionService;
@@ -61,14 +68,37 @@ class ManageHearingActionServiceTest {
             .documentUrl("http://example.com/hearing-notice")
             .build();
 
+        HearingTabItem hearingTabItem = HearingTabItem.builder()
+            .tabHearingType("Some Hearing Type")
+            .tabCourtSelection("Some Court")
+            .tabAttendance("Some Attendance")
+            .tabDateTime("20 Jul 2025 10:00")
+            .tabTimeEstimate("30 mins")
+            .tabConfidentialParties("Party A, Party B")
+            .tabAdditionalInformation("Some additional information")
+            .tabHearingDocuments(List.of(DocumentCollectionItem
+                .builder()
+                    .value(CaseDocument
+                        .builder()
+                        .documentFilename("HearingNotice.pdf")
+                        .documentUrl("http://example.com/hearing-notice")
+                        .documentBinaryUrl("http://example.com/hearing-notice-binary")
+                        .build())
+                .build()))
+            .build();
+
         when(manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
+
+        when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
+            .thenReturn(hearingTabItem);
 
         // Act
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
         assertThat(hearingWrapper.getHearings()).hasSize(1);
+        assertThat(hearingWrapper.getHearingTabItems()).hasSize(1);
         UUID hearingId = hearingWrapper.getWorkingHearingId();
         assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
         assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
