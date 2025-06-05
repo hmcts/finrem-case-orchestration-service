@@ -133,6 +133,30 @@ class ApplicantSolicitorDetailsValidatorTest {
         });
     }
 
+    @Test
+    void givenConsentedCase_whenApplicantOrganisationPolicyMissing_thenReturnError() {
+        Map<String, Object> map = getApplicantInfosMap("Yes");
+        map.remove("ApplicantOrganisationPolicy");
+        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
+
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
+        ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
+        List<String> validationErrors = validator.validate(caseData);
+        assertThat(validationErrors).containsExactly("Applicant organisation policy is missing.");
+    }
+
+    @Test
+    void givenConsentedCase_whenApplicantNotRepresentedAndOrganisationPolicyMissing_thenNoError() {
+        Map<String, Object> map = getApplicantInfosMap("No");
+        map.remove("ApplicantOrganisationPolicy");
+        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
+
+        FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
+        ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
+        List<String> validationErrors = validator.validate(caseData);
+        assertThat(validationErrors).isEmpty();
+    }
+
     private static Map<String, Object> getApplicantOrganisationPolicyMap() {
         return Map.of(
             "ApplicantOrganisationPolicy", Map.of(
