@@ -77,7 +77,6 @@ public class IdamService {
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
 
-
     public String getUserEmailId(String authorisationToken) {
         return email.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
