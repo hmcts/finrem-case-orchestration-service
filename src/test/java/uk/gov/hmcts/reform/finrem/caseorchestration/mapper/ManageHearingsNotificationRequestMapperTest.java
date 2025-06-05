@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
-public class ManageHearingsNotificationRequestMapperTest {
+class ManageHearingsNotificationRequestMapperTest {
 
     private final ManageHearingsNotificationRequestMapper mapper = new ManageHearingsNotificationRequestMapper();
 
@@ -60,6 +60,5 @@ public class ManageHearingsNotificationRequestMapperTest {
             assertThat(result.getCaseType()).isEqualTo(EmailService.CONTESTED);
             assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
         }
-
     }
 }

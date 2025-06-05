@@ -71,26 +71,20 @@ public class HearingNotificationHelper {
                                                 Hearing hearing) {
         CaseRole caseRole = CaseRole.forValue(party.getCode());
         switch (caseRole) {
-            case CaseRole.APP_SOLICITOR -> {
+            case CaseRole.APP_SOLICITOR ->
                 sendHearingNotificationToApplicantSolicitor(
                         finremCaseDetails,
                         hearing);
-            }
-            case CaseRole.RESP_SOLICITOR -> {
+            case CaseRole.RESP_SOLICITOR ->
                 log.info("Handling case: RESP_SOLICITOR, work to follow");
-            }
-            case CaseRole.INTVR_SOLICITOR_1 -> {
+            case CaseRole.INTVR_SOLICITOR_1 ->
                 log.info("Handling case: INTVR_SOLICITOR_1, work to follow");
-            }
-            case CaseRole.INTVR_SOLICITOR_2 -> {
+            case CaseRole.INTVR_SOLICITOR_2 ->
                 log.info("Handling case: INTVR_SOLICITOR_2, work to follow");
-            }
-            case CaseRole.INTVR_SOLICITOR_3 -> {
+            case CaseRole.INTVR_SOLICITOR_3 ->
                 log.info("Handling case: INTVR_SOLICITOR_3, work to follow");
-            }
-            case CaseRole.INTVR_SOLICITOR_4 -> {
+            case CaseRole.INTVR_SOLICITOR_4 ->
                 log.info("Handling case: INTVR_SOLICITOR_4, work to follow");
-            }
             default -> throw new IllegalStateException(
                     String.format(
                             "Unexpected value: %s for case reference %s",

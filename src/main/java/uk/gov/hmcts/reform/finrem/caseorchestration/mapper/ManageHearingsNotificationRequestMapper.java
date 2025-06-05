@@ -39,7 +39,7 @@ public class ManageHearingsNotificationRequestMapper {
         String respondentSurname = finremCaseData.getContactDetailsWrapper().getRespondentLname();
 
         String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())
-            ? EmailService.CONTESTED : EmailService.CONSENTED; ;
+            ? EmailService.CONTESTED : EmailService.CONSENTED;
 
         String selectedFRC  = CourtHelper.getSelectedFrc(finremCaseDetails);
 
