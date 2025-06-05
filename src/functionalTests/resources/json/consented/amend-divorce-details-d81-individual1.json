@@ -287,7 +287,12 @@
             "amendedConsentOrderDate": "2010-01-02"
           }
         }
-      ]
+      ],
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "FinRem-1-Org"
+        }
+      }
     }
   }
 }
