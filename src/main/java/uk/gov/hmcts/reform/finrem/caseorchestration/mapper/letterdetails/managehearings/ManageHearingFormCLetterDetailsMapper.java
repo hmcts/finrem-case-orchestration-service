@@ -7,11 +7,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.FormCLetterDetails;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Component
 public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
@@ -24,7 +26,11 @@ public class ManageHearingFormCLetterDetailsMapper extends AbstractManageHearing
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-        Hearing hearing = caseData.getManageHearingsWrapper().getWorkingHearing();
+
+        Hearing hearing = Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
+
         ContactDetailsWrapper contactDetails = caseData.getContactDetailsWrapper();
 
         CourtDetailsTemplateFields courtTemplateFields =

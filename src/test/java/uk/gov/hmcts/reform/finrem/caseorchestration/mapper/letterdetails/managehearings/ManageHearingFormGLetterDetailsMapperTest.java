@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
@@ -118,5 +119,23 @@ class ManageHearingFormGLetterDetailsMapperTest {
         assertThat(formGLetterDetails.getHearingDate()).isEqualTo("2025-08-01");
         assertThat(formGLetterDetails.getHearingTime()).isEqualTo("10:00 AM");
         assertThat(formGLetterDetails.getCourtDetails()).isEqualTo(courtTemplateFields);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWorkingHearingIsNull() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingHearing(null).build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> manageHearingFormGLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo("Working hearing is null");
     }
 }

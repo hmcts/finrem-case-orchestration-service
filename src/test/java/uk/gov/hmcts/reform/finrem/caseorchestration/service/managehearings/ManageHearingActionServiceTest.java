@@ -86,9 +86,9 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
 
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
-        assertThat(hearingWrapper.getHearingDocumentsCollection().get(0).getValue().getHearingId())
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
             .isEqualTo(hearingId);
-        assertThat(hearingWrapper.getHearingDocumentsCollection().get(0).getValue().getHearingDocument())
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingDocument())
             .isEqualTo(hearingNotice);
     }
 

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
@@ -141,5 +143,23 @@ class ManageHearingFormCLetterDetailsMapperTest {
             Arguments.of(HearingMode.IN_PERSON, "Additional info", "In Person", "Additional info"),
             Arguments.of(null, null, "", "")
         );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWorkingHearingIsNull() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(ManageHearingsWrapper.builder().workingHearing(null).build())
+            .build();
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .id(Long.valueOf(CASE_ID))
+            .data(caseData)
+            .build();
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> manageHearingFormCLetterDetailsMapper.buildDocumentTemplateDetails(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo("Working hearing is null");
     }
 }
