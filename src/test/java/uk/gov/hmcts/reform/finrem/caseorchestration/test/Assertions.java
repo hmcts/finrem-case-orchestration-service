@@ -32,4 +32,16 @@ public class Assertions {
             }
         }
     }
+
+    public static void assertCanHandleAnyCaseType(CallbackHandler handler, CallbackType expectedCallbackType,
+                                                  EventType expectedEventType) {
+        for (CallbackType callbackType : CallbackType.values()) {
+            for (CaseType caseType : CaseType.values()) {
+                for (EventType eventType : EventType.values()) {
+                    boolean expectedOutcome = callbackType == expectedCallbackType && eventType == expectedEventType;
+                    assertThat(handler.canHandle(callbackType, caseType, eventType), equalTo(expectedOutcome));
+                }
+            }
+        }
+    }
 }

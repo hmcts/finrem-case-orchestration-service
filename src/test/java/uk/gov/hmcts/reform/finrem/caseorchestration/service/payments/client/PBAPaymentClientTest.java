@@ -6,13 +6,13 @@ import org.springframework.http.HttpMethod;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.PaymentsBaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.error.InvalidTokenException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.error.PaymentException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withUnauthorizedRequest;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.paymentRequest;
@@ -40,14 +40,15 @@ public class PBAPaymentClientTest extends PaymentsBaseServiceTest {
         assertThat(response, is(paymentResponse()));
     }
 
-    @Test(expected = PaymentException.class)
+    @Test
     public void makePaymentReceivesClientError() {
         mockServer.expect(requestTo(URI))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withUnauthorizedRequest()
                 .body(paymentResponseErrorToString()).contentType(APPLICATION_JSON));
 
-        pbaPaymentClient.makePaymentWithSiteId(AUTH_TOKEN, paymentRequest());
+        PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithSiteId(AUTH_TOKEN, paymentRequest());
+        assertThat(paymentResponse.isPaymentSuccess(), is(false));
     }
 
     @Test(expected = InvalidTokenException.class)
@@ -65,14 +66,30 @@ public class PBAPaymentClientTest extends PaymentsBaseServiceTest {
         assertThat(response, is(paymentResponse()));
     }
 
-    @Test(expected = PaymentException.class)
+    @Test
     public void makePaymentWithCaseTypeReceivesClientError() {
         mockServer.expect(requestTo(URI))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withUnauthorizedRequest()
                 .body(paymentResponseErrorToString()).contentType(APPLICATION_JSON));
 
-        pbaPaymentClient.makePaymentWithCaseType(AUTH_TOKEN, paymentRequestWithCaseType());
+        PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithCaseType(AUTH_TOKEN, paymentRequestWithCaseType());
+
+        assertThat(paymentResponse.isPaymentSuccess(), is(false));
+    }
+
+    @Test
+    public void makePaymentWithCaseTypeReceivesDuplicatePaymentError() {
+        mockServer.expect(requestTo(URI))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withBadRequest()
+                .body("duplicate payment").contentType(APPLICATION_JSON));
+
+        PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithCaseType(AUTH_TOKEN, paymentRequestWithCaseType());
+
+        assertThat(paymentResponse.isPaymentSuccess(), is(false));
+        assertThat(paymentResponse.isDuplicatePayment(), is(true));
+        assertThat(paymentResponse.getError(), is(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE));
     }
 
     @Test(expected = InvalidTokenException.class)

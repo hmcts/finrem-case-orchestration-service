@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,11 @@ import static java.util.Locale.ENGLISH;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentResponse {
-    public static ImmutableList<String> PAYMENT_STATUS_SUCCESS = ImmutableList.of("success", "pending");
+    /**
+     * Response message from the payment service when a payment is identified as a duplicate.
+     */
+    public static final String DUPLICATE_PAYMENT_MESSAGE = "duplicate payment";
+    private static final List<String> PAYMENT_STATUS_SUCCESS = List.of("success", "pending");
 
     @JsonProperty(value = "reference")
     private String reference;
@@ -36,15 +39,20 @@ public class PaymentResponse {
     @JsonProperty(value = "status_histories")
     private List<PaymentStatusHistory> statusHistories;
 
-
     public String getPaymentError() {
-        return Optional.ofNullable(statusHistories).filter(s -> s.size() > 0)
-            .map(s -> s.get(0).getErrorMessage()).orElse(message);
+        return Optional.ofNullable(statusHistories).filter(s -> !s.isEmpty())
+            .map(s -> s.getFirst().getErrorMessage()).orElse(message);
     }
 
     public boolean isPaymentSuccess() {
         return Optional.ofNullable(status)
                 .map(s -> PAYMENT_STATUS_SUCCESS.contains(s.toLowerCase(ENGLISH)))
+                .orElse(false);
+    }
+
+    public boolean isDuplicatePayment() {
+        return Optional.ofNullable(error)
+                .map(e -> e.equals(DUPLICATE_PAYMENT_MESSAGE))
                 .orElse(false);
     }
 }
