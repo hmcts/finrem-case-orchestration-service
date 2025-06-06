@@ -22,14 +22,15 @@ public class HearingTabDataMapper {
 
     private final CourtDetailsMapper courtDetailsMapper;
 
-    public HearingTabItem mapHearingToTabData(ManageHearingsCollectionItem hearingCollectionItem, List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
+    public HearingTabItem mapHearingToTabData(ManageHearingsCollectionItem hearingCollectionItem,
+                                              List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
 
         Hearing hearing = hearingCollectionItem.getValue();
 
         return HearingTabItem.builder()
             .tabHearingType(hearing.getHearingType().getId())
-            //TODO: Pull out court value
-            .tabCourtSelection(courtDetailsMapper.convertToFrcCourtDetails(hearing.getHearingCourtSelection()).getCourtName())
+            .tabCourtSelection(courtDetailsMapper.convertToFrcCourtDetails(hearing.getHearingCourtSelection())
+                .getCourtName())
             .tabAttendance(hearing.getHearingMode().getDisplayValue())
             .tabDateTime(hearing.getHearingDate()
                     .format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearing.getHearingTime())
@@ -37,7 +38,8 @@ public class HearingTabDataMapper {
             .tabConfidentialParties(hearing.getPartiesOnCaseMultiSelectList().getValue().stream().map(
                     DynamicMultiSelectListElement::getLabel).collect(Collectors.joining(", ")))
             .tabAdditionalInformation(hearing.getAdditionalHearingInformation())
-            .tabHearingDocuments(mapHearingDocumentsToTabData(hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+            .tabHearingDocuments(mapHearingDocumentsToTabData(
+                hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
             .build();
     }
 
@@ -45,7 +47,6 @@ public class HearingTabDataMapper {
             List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
             UUID hearingId,
             Hearing hearing) {
-
 
         List<DocumentCollectionItem> documents = new ArrayList<>(hearingDocumentsCollection.stream()
                 .filter(doc -> doc.getValue().getHearingId().equals(hearingId))
