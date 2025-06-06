@@ -20,14 +20,29 @@ public abstract class AbstractManageHearingsLetterMapper {
     private final ObjectMapper objectMapper;
     protected final CourtDetailsConfiguration courtDetailsConfiguration;
 
-    protected AbstractManageHearingsLetterMapper(ObjectMapper objectMapper, CourtDetailsConfiguration courtDetailsConfiguration) {
+    protected AbstractManageHearingsLetterMapper(ObjectMapper objectMapper,
+                                                 CourtDetailsConfiguration courtDetailsConfiguration) {
         this.objectMapper = objectMapper;
         this.courtDetailsConfiguration = courtDetailsConfiguration;
         objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Builds the document template that is used to map generated document details for the given case details.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing case-specific data
+     * @return a {@link DocumentTemplateDetails} object with the template details
+     */
     public abstract DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails);
 
+    /**
+     * Converts the document template details for the given case details into a map structure.
+     * The resulting map contains the case details, including the case data and case ID,
+     * structured to be processed by general document generation.
+     *
+     * @param caseDetails the {@link FinremCaseDetails} containing case-specific data
+     * @return a {@link Map} with the document template details organized under the "caseDetails" key
+     */
     public Map<String, Object> getDocumentTemplateDetailsAsMap(FinremCaseDetails caseDetails) {
         Map<String, Object> documentTemplateDetails =
             objectMapper.convertValue(buildDocumentTemplateDetails(caseDetails),

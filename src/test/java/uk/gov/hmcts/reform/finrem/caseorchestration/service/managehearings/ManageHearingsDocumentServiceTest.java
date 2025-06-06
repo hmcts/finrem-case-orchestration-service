@@ -143,7 +143,7 @@ class ManageHearingsDocumentServiceTest {
                 .thenReturn(FAST_TRACK_FORM_C);
         }
         if (isExpressCase) {
-            when(documentConfiguration.getManageHearingExpressFromCTemplate())
+            when(documentConfiguration.getManageHearingExpressFormCTemplate())
                 .thenReturn(EXPRESS_FORM_C);
         }
         if (!isExpressCase && !isFastTrackApplication) {

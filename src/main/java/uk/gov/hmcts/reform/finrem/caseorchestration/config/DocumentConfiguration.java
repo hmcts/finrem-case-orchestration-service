@@ -103,7 +103,7 @@ public class DocumentConfiguration {
     private String manageHearingFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingHCFromCTemplate;
-    private String manageHearingExpressFromCTemplate;
+    private String manageHearingExpressFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String manageHearingFastTrackFormCTemplate;
     @Getter(AccessLevel.NONE)

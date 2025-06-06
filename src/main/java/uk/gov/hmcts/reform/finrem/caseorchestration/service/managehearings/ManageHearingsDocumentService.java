@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -69,23 +70,17 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        String template = expressCaseService.isExpressCase(finremCaseDetails.getData())
-            ? documentConfiguration.getManageHearingExpressFromCTemplate() :
-                (finremCaseDetails.getData().isFastTrackApplication()
-                    ? documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails) :
-                        documentConfiguration.getFormCStandardTemplate(finremCaseDetails));
-
-        CaseDocument fromC = genericDocumentService.generateDocumentFromPlaceholdersMap(
+        CaseDocument formC = genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
-                template,
+                determineFromCTemplate(finremCaseDetails),
                 documentConfiguration.getFormCFileName(),
                 finremCaseDetails.getId().toString()
         );
 
-        fromC.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+        formC.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
 
-        return fromC;
+        return formC;
     }
 
     /**
@@ -107,7 +102,6 @@ public class ManageHearingsDocumentService {
                 documentConfiguration.getFormGFileName(),
                 finremCaseDetails.getId().toString()
         );
-
 
         formG.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
 
@@ -145,5 +139,16 @@ public class ManageHearingsDocumentService {
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
         return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+    }
+
+    private String determineFromCTemplate(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        if (expressCaseService.isExpressCase(caseData)) {
+            return documentConfiguration.getManageHearingExpressFormCTemplate();
+        } else if (caseData.isFastTrackApplication()) {
+            return documentConfiguration.getFormCFastTrackTemplate(caseDetails);
+        } else {
+            return documentConfiguration.getFormCStandardTemplate(caseDetails);
+        }
     }
 }
