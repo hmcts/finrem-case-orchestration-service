@@ -3,14 +3,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.manahehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
+    private final HearingTabDataMapper hearingTabDataMapper;
 
     /**
      * Adds a new hearing to the case details and generates the associated hearing notice document.
@@ -43,6 +45,7 @@ public class ManageHearingActionService {
             // Generate hearing type specific docs
         }
 
+        updateTabData(caseData);
         hearingWrapper.setWorkingHearing(null);
     }
 
@@ -100,5 +103,20 @@ public class ManageHearingActionService {
         );
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    private void updateTabData(FinremCaseData caseData) {
+        List<ManageHearingsCollectionItem> hearings =
+            caseData.getManageHearingsWrapper().getHearings();
+
+        List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
+            .map(hearingCollectionItem -> HearingTabCollectionItem.builder()
+                .value(hearingTabDataMapper.mapHearingToTabData(
+                    hearingCollectionItem,
+                    caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
+                .build())
+            .toList();
+
+        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
     }
 }

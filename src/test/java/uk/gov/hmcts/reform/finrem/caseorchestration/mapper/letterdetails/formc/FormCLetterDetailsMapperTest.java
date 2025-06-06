@@ -4,7 +4,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.formc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
@@ -29,6 +31,9 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
 
     @Autowired
     private FormCLetterDetailsMapper formCLetterDetailsMapper;
+
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     @Before
     public void setUp() {
@@ -87,7 +92,7 @@ public class FormCLetterDetailsMapperTest extends AbstractLetterDetailsMapperTes
     private CourtDetailsTemplateFields getCourtDetails() {
         DefaultCourtListWrapper courtListWrapper = new DefaultCourtListWrapper();
         courtListWrapper.setBristolCourtList(BristolCourt.BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
-        return new CourtDetailsMapper(new ObjectMapper()).getCourtDetails(courtListWrapper);
+        return new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration).getCourtDetails(courtListWrapper);
     }
 
     private void setCaseDetails() {
