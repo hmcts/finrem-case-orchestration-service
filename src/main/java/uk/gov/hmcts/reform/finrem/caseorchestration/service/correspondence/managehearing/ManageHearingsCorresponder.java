@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingNotificationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -30,13 +32,21 @@ public class ManageHearingsCorresponder {
 
         Hearing hearing = hearingNotificationHelper.getHearingInContext(finremCaseData);
 
-        if (hearingNotificationHelper.shouldSendNotification(hearing)) {
-            hearing.getPartiesOnCaseMultiSelectList()
-                    .getValue()
-                    .forEach(party -> hearingNotificationHelper.sendHearingNotificationsByParty(
-                            party,
-                            finremCaseDetails,
-                            hearing));
+        if (!hearingNotificationHelper.shouldSendNotification(hearing)) {
+            return;
+        }
+
+        DynamicMultiSelectList partyList = hearing.getPartiesOnCaseMultiSelectList();
+        if (partyList == null || partyList.getValue() == null) {
+            return;
+        }
+
+        for (DynamicMultiSelectListElement party : partyList.getValue()) {
+            hearingNotificationHelper.sendHearingNotificationsByParty(
+                    party,
+                    finremCaseDetails,
+                    hearing
+            );
         }
     }
 }

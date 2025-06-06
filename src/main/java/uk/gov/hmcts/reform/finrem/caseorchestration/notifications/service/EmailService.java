@@ -26,29 +26,29 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @SuppressWarnings("java:S6857")
 public class EmailService {
 
-    final EmailClient emailClient;
+    protected final EmailClient emailClient;
 
     @Value("#{${uk.gov.notify.email.templates}}")
-    Map<String, String> emailTemplates;
+    protected Map<String, String> emailTemplates;
 
     @Value("#{${uk.gov.notify.email.template.vars}}")
-    Map<String, Map<String, String>> emailTemplateVars;
+    protected Map<String, Map<String, String>> emailTemplateVars;
 
     @Value("#{${uk.gov.notify.email.contestedContactEmails}}")
-    Map<String, Map<String, String>> contestedContactEmails;
+    protected Map<String, Map<String, String>> contestedContactEmails;
 
     @Value("${finrem.manageCase.baseurl}")
-    String manageCaseBaseUrl;
+    protected String manageCaseBaseUrl;
 
     public static final String CONTESTED = "contested";
     public static final String CONSENTED = "consented";
-    static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
-    static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
-    static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
-    static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
-    static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
-    static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
-    static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
+    protected static final String FR_ASSIGNED_TO_JUDGE = "FR_ASSIGNED_TO_JUDGE";
+    protected static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
+    protected static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
+    protected static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
+    protected static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
+    protected static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
+    protected static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
     public static final String FR_CONSENT_ORDER_AVAILABLE_CTSC = "FR_CONSENT_ORDER_AVAILABLE_CTSC";
     public static final String GENERAL_APPLICATION_REJECTED = "FR_REJECT_GENERAL_APPLICATION";
     public static final String BARRISTER_ACCESS_ADDED = "FR_BARRISTER_ACCESS_ADDED";
@@ -58,9 +58,9 @@ public class EmailService {
     public static final String INTERVENER_SOLICITOR_ADDED_EMAIL = "FR_INTERVENER_SOLICITOR_ADDED_EMAIL";
     public static final String INTERVENER_REMOVED_EMAIL = "FR_INTERVENER_REMOVED_EMAIL";
     public static final String INTERVENER_SOLICITOR_REMOVED_EMAIL = "FR_INTERVENER_SOLICITOR_REMOVED_EMAIL";
-    static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
-    static final String HEARING_DATE = "hearingDate";
-    static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
+    protected static final String PHONE_OPENING_HOURS = "phoneOpeningHours";
+    protected static final String HEARING_DATE = "hearingDate";
+    protected static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
     /**
      * Orchestrates sending an email based on the provided notification request and template.
@@ -159,7 +159,7 @@ public class EmailService {
         return templateVars;
     }
 
-    void setIntervenerSolicitorDetails(NotificationRequest notificationRequest, String templateName, Map<String, Object> templateVars) {
+    protected void setIntervenerSolicitorDetails(NotificationRequest notificationRequest, String templateName, Map<String, Object> templateVars) {
         if (INTERVENER_SOLICITOR_ADDED_EMAIL.equals(templateName) || INTERVENER_SOLICITOR_REMOVED_EMAIL.equals(templateName)) {
             templateVars.put("intervenerFullName", notificationRequest.getIntervenerFullName());
             templateVars.put("intervenerSolicitorReferenceNumber", notificationRequest.getIntervenerSolicitorReferenceNumber());
@@ -168,21 +168,21 @@ public class EmailService {
         }
     }
 
-    void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
+    protected void addDraftOrderReviewOverdueTemplateVars(NotificationRequest notificationRequest,
                                                         Map<String, Object> templateVars) {
         templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeName", notificationRequest.getJudgeName());
         templateVars.put("oldestDraftOrderDate", notificationRequest.getOldestDraftOrderDate());
     }
 
-    void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
+    protected void addRefusedDraftOrderOrPsaTemplateVars(NotificationRequest notificationRequest,
                                                        Map<String, Object> templateVars) {
         templateVars.put(HEARING_DATE, notificationRequest.getHearingDate());
         templateVars.put("judgeFeedback", notificationRequest.getJudgeFeedback());
         templateVars.put("documentName", notificationRequest.getDocumentName());
     }
 
-    EmailToSend generateEmail(String destinationAddress,
+    protected EmailToSend generateEmail(String destinationAddress,
                                       String templateName,
                                       Map<String, Object> templateVars) {
         String referenceId = UUID.randomUUID().toString();
@@ -190,7 +190,7 @@ public class EmailService {
         return new EmailToSend(destinationAddress, templateId, templateVars, referenceId);
     }
 
-    void sendEmail(EmailToSend emailToSend, String emailDescription) {
+    protected void sendEmail(EmailToSend emailToSend, String emailDescription) {
         String templateId = emailToSend.getTemplateId();
         String referenceId = emailToSend.getReferenceId();
         try {
@@ -207,7 +207,7 @@ public class EmailService {
         }
     }
 
-    JSONObject preparedForEmailAttachment(final byte[] documentContents) {
+    protected JSONObject preparedForEmailAttachment(final byte[] documentContents) {
         try {
             if (documentContents != null) {
                 return NotificationClient.prepareUpload(documentContents);

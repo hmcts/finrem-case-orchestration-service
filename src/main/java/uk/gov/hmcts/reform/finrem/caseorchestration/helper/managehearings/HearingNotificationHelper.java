@@ -10,10 +10,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -25,21 +27,31 @@ public class HearingNotificationHelper {
     private final NotificationService notificationService;
 
     /**
-     * Retrieves the hearing currently in context, based on the working hearing ID from the case data.
+     * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
      *
-     * <p>This method looks up the {@link ManageHearingsWrapper} from the provided case data,
-     * extracts the working hearing ID, and finds the corresponding {@link Hearing} in the list of hearings.
-     * If the hearing ID is not found, it throws an {@link IllegalStateException}.</p>
+     * <p>This method accesses the {@link ManageHearingsWrapper} from the given {@link FinremCaseData},
+     * and uses the working hearing ID, to locate the matching {@link Hearing} in the lis of hearings</p>
      *
-     * <p>A working hearing is a {@link Hearing} that a user is currently creating or amending.</p>
+     * <p>If the hearings list is {@code null}, or if no hearing matches the working hearing ID,
+     * this method throws an {@link IllegalStateException} </p>
      *
-     * @param finremCaseData the case data containing hearing information
-     * @return the {@link Hearing} associated with the working hearing ID
-     * @throws IllegalStateException if no matching hearing is found for the working hearing ID
+     * <p>A working hearing refers to the {@link Hearing} a user is actively creating or modifying in the UI.</p>
+     *
+     * @param finremCaseData the case data containing the hearings and context
+     * @return the {@link Hearing} associated with the current working hearing ID
+     * @throws IllegalStateException if the hearings list is missing, or no matching hearing is found
      */
     public Hearing getHearingInContext(FinremCaseData finremCaseData) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
         UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        List<ManageHearingsCollectionItem> hearings = manageHearingsWrapper.getHearings();
+
+        if (hearings == null) {
+            throw new IllegalStateException(
+                    "No hearings available to search for. Working hearing ID is: " + hearingId
+            );
+        }
 
         return manageHearingsWrapper.getHearings().stream()
                 .filter(h -> h.getId().equals(hearingId))

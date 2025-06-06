@@ -97,6 +97,24 @@ class HearingNotificationHelperTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenGetHearingInContextCalledForEmptyHearingCollection() {
+        UUID hearingId = UUID.randomUUID();
+
+        ManageHearingsWrapper wrapper = new ManageHearingsWrapper();
+        wrapper.setWorkingHearingId(hearingId);
+
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setManageHearingsWrapper(wrapper);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                helper.getHearingInContext(caseData));
+
+        assertTrue(exception.getMessage().contains(
+                String.format("No hearings available to search for. Working hearing ID is: %s",
+                        hearingId)));
+    }
+
+    @Test
     void shouldSendHearingNotificationToApplicant() {
         FinremCaseDetails finremCaseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
@@ -232,12 +250,12 @@ class HearingNotificationHelperTest {
 
         // Then
         assertTrue(
-                exception.getMessage().contains(
-                        String.format(
-                                "Unexpected value: %s for case reference 12345",
-                                CaseRole.CASEWORKER
-                        )
+            exception.getMessage().contains(
+                String.format(
+                    "Unexpected value: %s for case reference 12345",
+                    CaseRole.CASEWORKER
                 )
+            )
         );
     }
 }
