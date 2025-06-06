@@ -24,16 +24,16 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
 
         List<String> ret = new ArrayList<>();
 
+        if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null) == null) {
+            ret.add("Applicant organisation policy is missing.");
+        }
         if (caseData.isConsentedApplication()) {
             if (YesOrNo.NO.equals(contactDetailsWrapper.getApplicantRepresented())) {
                 log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
                 return ret;
-            }
-            if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-                .map(OrganisationPolicy::getOrganisation)
-                .map(Organisation::getOrganisationID)
-                .orElse(null) == null) {
-                ret.add("Applicant organisation policy is missing.");
             }
             if (contactDetailsWrapper.getSolicitorAddress() == null
                 || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
