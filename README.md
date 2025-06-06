@@ -112,6 +112,10 @@ Ensure you have the following environment variables set:
 1. From a terminal window run `./gradlew bootWithCCD`
 2. From a separate terminal window run `./gradlew functional`
 
+bootWithCCD starts the service with an active profile of 'local'.
+This can be used to determine locally running behavior. Such as:
+- Calls to the GOV.UK Notify API only render a preview of an email in the console.
+
 ### Running additional tests in the Jenkins PR Pipeline
 1. Add one or more appropriate labels to your PR in GitHub. Valid labels are:
 

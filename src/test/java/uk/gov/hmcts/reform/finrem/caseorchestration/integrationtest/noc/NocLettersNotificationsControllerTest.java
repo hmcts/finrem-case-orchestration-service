@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.DraftOrdersNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerOneLetterAddresseeGenerator;
@@ -71,7 +72,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
     LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
-    InternationalPostalService.class})
+    InternationalPostalService.class, ManageHearingsNotificationRequestMapper.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     public static final String AUTH_TOKEN = "authToken";

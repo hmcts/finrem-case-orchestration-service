@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 
 @Slf4j
@@ -22,7 +21,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
 
-    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ManageHearingActionService manageHearingActionService) {
+    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
     }
