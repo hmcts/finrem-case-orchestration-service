@@ -24,17 +24,12 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
 
         List<String> ret = new ArrayList<>();
 
-        if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
-            .map(OrganisationPolicy::getOrganisation)
-            .map(Organisation::getOrganisationID)
-            .orElse(null) == null) {
-            ret.add("Applicant organisation policy is missing.");
+        if (shouldSkipSolicitorValidation(contactDetailsWrapper, caseData, ret)) {
+            return ret;
         }
+
+        checkOrganisationPolicy(caseData, ret);
         if (caseData.isConsentedApplication()) {
-            if (YesOrNo.NO.equals(contactDetailsWrapper.getApplicantRepresented())) {
-                log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
-                return ret;
-            }
             if (contactDetailsWrapper.getSolicitorAddress() == null
                 || !NullChecker.anyNonNull(contactDetailsWrapper.getSolicitorAddress())) {
                 ret.add("Applicant solicitor's address is required.");
@@ -45,6 +40,23 @@ class ApplicantSolicitorDetailsValidator implements MandatoryDataValidator {
             validateField(contactDetailsWrapper.getSolicitorName(), "name", ret);
         }
         return ret;
+    }
+
+    private boolean shouldSkipSolicitorValidation(ContactDetailsWrapper contactDetailsWrapper, FinremCaseData caseData, List<String> errors) {
+        if (YesOrNo.NO.equals(contactDetailsWrapper.getApplicantRepresented())) {
+            log.info("{} - Skip validating solicitor details since the applicant is not represented", caseData.getCcdCaseId());
+            return true;
+        }
+        return false;
+    }
+
+    private void checkOrganisationPolicy(FinremCaseData caseData, List<String> errors) {
+        if (Optional.ofNullable(caseData.getApplicantOrganisationPolicy())
+            .map(OrganisationPolicy::getOrganisation)
+            .map(Organisation::getOrganisationID)
+            .orElse(null) == null) {
+            errors.add("Applicant organisation policy is missing.");
+        }
     }
 
     private void validateField(String fieldValue, String fieldName, List<String> errors) {

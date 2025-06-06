@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -133,11 +134,12 @@ class ApplicantSolicitorDetailsValidatorTest {
         });
     }
 
-    @Test
-    void givenConsentedCase_whenApplicantOrganisationPolicyMissing_thenReturnError() {
+    @ParameterizedTest
+    @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
+    void givenConsentedCase_whenApplicantOrganisationPolicyMissing_thenReturnError(CaseType caseType) {
         Map<String, Object> map = getApplicantInfosMap("Yes");
         map.remove("ApplicantOrganisationPolicy");
-        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
+        CaseDetails cd = CaseDetails.builder().caseTypeId(caseType.getCcdType()).data(map).build();
 
         FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
         ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
@@ -145,11 +147,12 @@ class ApplicantSolicitorDetailsValidatorTest {
         assertThat(validationErrors).containsExactly("Applicant organisation policy is missing.");
     }
 
-    @Test
-    void givenConsentedCase_whenApplicantNotRepresentedAndOrganisationPolicyMissing_thenNoError() {
+    @ParameterizedTest
+    @EnumSource(value = CaseType.class, names = {"CONSENTED", "CONTESTED"})
+    void givenConsentedCase_whenApplicantNotRepresentedAndOrganisationPolicyMissing_thenNoError(CaseType caseType) {
         Map<String, Object> map = getApplicantInfosMap("No");
         map.remove("ApplicantOrganisationPolicy");
-        CaseDetails cd = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(map).build();
+        CaseDetails cd = CaseDetails.builder().caseTypeId(caseType.getCcdType()).data(map).build();
 
         FinremCaseData caseData = finremCaseDetailsMapper.mapToFinremCaseDetails(cd).getData();
         ApplicantSolicitorDetailsValidator validator = new ApplicantSolicitorDetailsValidator();
