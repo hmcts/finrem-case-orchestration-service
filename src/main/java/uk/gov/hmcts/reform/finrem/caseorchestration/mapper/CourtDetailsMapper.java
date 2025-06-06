@@ -97,6 +97,26 @@ public class CourtDetailsMapper {
             .findFirst();
     }
 
+    /**
+     * Converts the given {@link Court} object to a {@link CourtDetails} object by retrieving the selected court ID
+     * from the associated {@link CourtListWrapper}.
+     *
+     * <p>This method uses reflection to access fields in the {@link CourtListWrapper} to determine the selected court.
+     * While this approach works, it is not ideal because:
+     * <ul>
+     *     <li>Reflection bypasses standard access controls, which can lead to potential security and maintainability issues.</li>
+     *     <li>Changes to the structure of the {@link CourtListWrapper} class (e.g., renaming fields) can break this method
+     *         without any compile-time errors.</li>
+     * </ul>
+     * <p> This method is intended as a temporary solution to retrieve the  court details;
+     * it lacks the appropriate accessesors and is brittle to changes in the underlying interface implementation.
+     * The goal is to refactor the {@link Court} object and its associated classes to provide explicit accessors
+     * for retrieving the selected court, eliminating the need for this reflective method.
+     *
+     * @param court the {@link Court} object containing the court list wrapper
+     * @return the {@link CourtDetails} object corresponding to the selected court
+     * @throws IllegalStateException if no valid field is found in the court list wrapper or if the field cannot be accessed.
+     */
     public CourtDetails convertToFrcCourtDetails(Court court) {
         Optional<Field> optionalField = getCourtField(court.getDefaultCourtListWrapper());
 
