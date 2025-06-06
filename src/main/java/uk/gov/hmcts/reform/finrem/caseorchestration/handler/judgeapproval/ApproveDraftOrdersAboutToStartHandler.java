@@ -142,6 +142,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
+                        .orderApprovedDate(draftOrdersReview.getOrderApprovedDate())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
