@@ -89,7 +89,6 @@ public class PartyService {
         return unrepresentedParties;
     }
 
-
     private List<DynamicMultiSelectListElement> getActiveInterveners(FinremCaseData caseData) {
 
         List<DynamicMultiSelectListElement> activeInterveners = new ArrayList<>();
