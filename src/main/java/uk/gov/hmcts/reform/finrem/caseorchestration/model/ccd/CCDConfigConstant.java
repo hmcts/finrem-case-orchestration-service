@@ -340,6 +340,8 @@ public class CCDConfigConstant {
     public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
+    public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
+    public static final String OUT_OF_COURT_RESOLUTION = "outOfCourtResolution";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
