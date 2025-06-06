@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
-
 @FeignClient(name = "data-store-api", url = "${ccd.data-store.api.baseurl}")
 public interface DataStoreClient {
     @GetMapping(
