@@ -30,7 +30,7 @@ public class LocalEmailServiceTest {
     private LocalEmailService localEmailService;
 
     @Mock
-    EmailClient mockEmailClient;
+    private EmailClient mockEmailClient;
 
     /**
      * For each template tested, add to the temp maps for emailTemplateVars and emailTemplates.
