@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -21,8 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +29,7 @@ import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.WIDTH_AND_HEIGHT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService.CONVERTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ImageUtils.imageAsBytes;
 
 @Service
 @RequiredArgsConstructor
@@ -43,21 +41,25 @@ public class PdfStampingService {
 
     private final EvidenceManagementDownloadService emDownloadService;
 
+    private final DocumentConversionService documentConversionService;
+
     public Document stampDocument(Document document,
                                   String authToken,
                                   boolean isAnnexNeeded,
                                   StampType stampType,
                                   String caseId) {
-        log.info("Stamp document : {}", document);
+        log.info("About to stamp document: {} for Case ID: {}", document, caseId);
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, stampType);
+            byte[] flattenDoc = documentConversionService.flattenPdfDocument(stampedDoc);
+
             MultipartFile multipartFile =
-                FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
+                FinremMultipartFile.builder().name(document.getFileName()).content(flattenDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
             List<FileUploadResponse> uploadResponse =
                 emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
-            FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
+            FileUploadResponse fileSaved = Optional.of(uploadResponse.getFirst())
                 .filter(response -> response.getStatus() == HttpStatus.OK)
                 .orElseThrow(() -> new DocumentStorageException("Failed to store document"));
             return CONVERTER.apply(fileSaved);
@@ -72,7 +74,7 @@ public class PdfStampingService {
         doc.setAllSecurityToBeRemoved(true);
         PDPage page = doc.getPage(0);
         PdfAnnexStampingInfo info = PdfAnnexStampingInfo.builder(page).build();
-        log.info("PdfAnnexStampingInfo data  = {}", info);
+        log.info("PdfAnnexStampingInfo data = {}", info);
 
         PDPageContentStream psdStream = new PDPageContentStream(doc, page, APPEND, true, true);
 
@@ -96,11 +98,5 @@ public class PdfStampingService {
         doc.close();
 
         return outputBytes.toByteArray();
-    }
-
-    public byte[] imageAsBytes(String fileName) throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
-            return IOUtils.toByteArray(inputStream);
-        }
     }
 }
