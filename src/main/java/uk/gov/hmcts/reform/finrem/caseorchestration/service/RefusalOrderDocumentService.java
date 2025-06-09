@@ -109,7 +109,6 @@ public class RefusalOrderDocumentService {
         return finremCaseData;
     }
 
-
     public CaseDocument generateRefusalOrder(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         FinremCaseData finremCaseData = finremCaseDetails.getData();
         String rejectOrderFileName;
@@ -147,7 +146,6 @@ public class RefusalOrderDocumentService {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
-
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();

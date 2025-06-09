@@ -164,6 +164,7 @@ class JudgeApprovalResolver {
 
     private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
         ofNullable(draftOrdersWrapper.getHearingInstruction())
+            .filter(hearingInstruction -> hearingInstruction.getRequireAnotherHearing() == YesOrNo.YES)
             .map(HearingInstruction::getAnotherHearingRequestCollection)
             .ifPresent(collection -> collection.forEach(a -> hearingProcessor.processHearingInstruction(draftOrdersWrapper, a.getValue())));
     }

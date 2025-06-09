@@ -83,7 +83,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return PATH + "AppSolReplacing/after-update-details.json";
     }
 
-
     @Before
     public void setUp() {
         super.setUp();
