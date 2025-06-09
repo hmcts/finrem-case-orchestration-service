@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,6 +118,8 @@ public class ManageHearingActionService {
             caseData.getManageHearingsWrapper().getHearings();
 
         List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
+            .sorted(Comparator.comparing(hearingCollectionItem ->
+                hearingCollectionItem.getValue().getHearingDate()))
             .map(hearingCollectionItem -> HearingTabCollectionItem.builder()
                 .value(hearingTabDataMapper.mapHearingToTabData(
                     hearingCollectionItem,

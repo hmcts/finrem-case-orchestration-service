@@ -32,6 +32,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class HearingTabDataMapperTest {
 
+    private static final String DEFAULT_HEARING_MODE = "Hearing mode not specified";
+    private static final String DEFAULT_DATE_TIME = "Date and time not provided";
+    private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Confidential parties not specified";
+
     private static final String COURT_NAME = "courtName";
     private static final String HEARING_TYPE = "Financial Dispute Resolution (FDR)";
     private static final String HEARING_DATE_TIME = "01 Aug 2025 10:00 AM";
@@ -105,5 +109,44 @@ class HearingTabDataMapperTest {
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_1_FILENAME)));
         assertTrue(result.getTabHearingDocuments().stream()
             .anyMatch(doc -> doc.getValue().getDocumentFilename().equals(DOCUMENT_2_FILENAME)));
+    }
+
+    @Test
+    void mapHearingToTabData_withNullValues_returnsDefaults() {
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
+        when(courtDetailsMapper.convertToFrcCourtDetails(any())).thenReturn(CourtDetails.builder().courtName(COURT_NAME).build());
+
+        Hearing hearing = Hearing.builder()
+            .hearingType(HearingType.FDR)
+            .hearingDate(null)
+            .hearingTime("10:00 AM")
+            .hearingTimeEstimate(HEARING_TIME_ESTIMATE)
+            .hearingMode(null)
+            .partiesOnCaseMultiSelectList(null)
+            .additionalHearingInformation(null)
+            .additionalHearingDocs(null)
+            .build();
+
+        ManageHearingsCollectionItem hearingCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(hearingId)
+            .value(hearing)
+            .build();
+
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection = List.of();
+
+        // Act
+        HearingTabItem result = hearingTabDataMapper.mapHearingToTabData(hearingCollectionItem, hearingDocumentsCollection);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(HEARING_TYPE, result.getTabHearingType());
+        assertEquals(COURT_NAME, result.getTabCourtSelection());
+        assertEquals(DEFAULT_HEARING_MODE, result.getTabAttendance());
+        assertEquals(DEFAULT_DATE_TIME, result.getTabDateTime());
+        assertEquals(HEARING_TIME_ESTIMATE, result.getTabTimeEstimate());
+        assertEquals(DEFAULT_CONFIDENTIAL_PARTIES, result.getTabConfidentialParties());
+        assertEquals(" ", result.getTabAdditionalInformation());
+        assertTrue(result.getTabHearingDocuments().isEmpty());
     }
 }

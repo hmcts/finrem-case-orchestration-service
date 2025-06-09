@@ -99,8 +99,10 @@ public class HearingTabDataMapper {
             hearingDocumentsCollection.stream()
                 .filter(doc -> doc.getValue().getHearingId().equals(hearingId))
                 .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build()),
-            hearing.getAdditionalHearingDocs().stream()
+            hearing.getAdditionalHearingDocs() != null
+                ? hearing.getAdditionalHearingDocs().stream()
                 .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
+                : Stream.empty()
         ).toList();
     }
 }
