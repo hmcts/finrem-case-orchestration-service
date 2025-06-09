@@ -105,6 +105,13 @@ public class ManageHearingActionService {
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
     }
 
+    /**
+     * Regenerates the hearing tab data for the case.
+     * This method processes the hearings collection and maps each hearing to its corresponding
+     * tab data representation. The resulting tab data is then updated in the case data.
+     *
+     * @param caseData the case data containing the hearings and hearing documents
+     */
     private void updateTabData(FinremCaseData caseData) {
         List<ManageHearingsCollectionItem> hearings =
             caseData.getManageHearingsWrapper().getHearings();

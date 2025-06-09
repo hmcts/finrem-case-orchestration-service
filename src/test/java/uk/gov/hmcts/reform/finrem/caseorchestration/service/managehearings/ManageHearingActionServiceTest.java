@@ -20,6 +20,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,5 +110,14 @@ class ManageHearingActionServiceTest {
             .isEqualTo(hearingId);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingDocument())
             .isEqualTo(hearingNotice);
+
+        // Verify the mocked method is called with the expected hearing
+        verify(hearingTabDataMapper).mapHearingToTabData(
+            argThat(hearingItem -> hearingItem.getValue().equals(hearing)),
+            argThat(docCollection -> ((
+                docCollection.getFirst().getValue().getHearingId().equals(hearingId)
+                    && docCollection.getFirst().getValue().getHearingDocument().equals(hearingNotice))
+            ))
+        );
     }
 }

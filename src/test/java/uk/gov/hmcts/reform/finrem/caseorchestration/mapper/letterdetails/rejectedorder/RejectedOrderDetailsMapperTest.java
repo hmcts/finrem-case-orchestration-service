@@ -44,7 +44,6 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
     @Mock
     private CourtDetailsConfiguration courtDetailsConfiguration;
 
-
     @Before
     public void setUp() throws Exception {
         setCaseDetails(TEST_JSON_CONTESTED);
