@@ -37,8 +37,6 @@ public class DraftOrdersReview implements HasCaseDocument {
     private LocalDate hearingDate;
     private String hearingTime;
     private String hearingJudge;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate orderApprovedDate;
 
     @JsonProperty("draftOrderDocReviewCollection")
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
