@@ -17,7 +17,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetails
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_POSTCODE_ERROR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.RESPONDENT_SOLICITOR_POSTCODE_ERROR;
 
-
 class ContactDetailsValidatorTest {
 
     @ParameterizedTest
