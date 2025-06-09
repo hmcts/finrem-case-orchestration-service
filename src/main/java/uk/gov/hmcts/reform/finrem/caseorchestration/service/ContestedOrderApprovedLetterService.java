@@ -55,6 +55,9 @@ public class ContestedOrderApprovedLetterService {
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
+        caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE,
+            finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         populateTemplateVariables(caseDetailsCopy, judgeDetails);
