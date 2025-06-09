@@ -38,7 +38,7 @@ public class ReadyForHearingConsentedAboutToStartHandler extends FinremCallbackH
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.aboutToStart(callbackRequest);
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
