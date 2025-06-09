@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -65,6 +66,7 @@ public class PBAPaymentController extends BaseController {
     private final CcdDataStoreService ccdDataStoreService;
     private final PrdOrganisationService prdOrganisationService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
@@ -186,7 +188,7 @@ public class PBAPaymentController extends BaseController {
 
     private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
                            @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService)
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService, objectMapper)
             .feeLookup(authToken, callbackRequest);
         caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
         caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
