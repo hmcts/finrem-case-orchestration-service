@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
@@ -55,9 +54,6 @@ public class ContestedOrderApprovedLetterService {
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
-        caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE,
-            finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         populateTemplateVariables(caseDetailsCopy, judgeDetails);
@@ -92,6 +88,5 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
-        caseData.put("orderApprovedDate", caseDetails.getData().get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }

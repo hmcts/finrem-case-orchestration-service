@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.LocalDateExtension;
 
 import java.time.LocalDate;
@@ -100,10 +99,6 @@ class ContestedOrderApprovedLetterServiceTest {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        ExtraReportFieldsInput extraReportFieldsInput = ExtraReportFieldsInput.builder()
-            .orderApprovedDate(LocalDate.now())
-            .build();
-        finremCaseDetails.getData().getDraftOrdersWrapper().setExtraReportFieldsInput(extraReportFieldsInput);
         CaseDetails caseDetails = testCaseDetails();
 
         when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
@@ -129,13 +124,7 @@ class ContestedOrderApprovedLetterServiceTest {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
 
         CaseDetails caseDetails = testCaseDetails();
-        ExtraReportFieldsInput extraReportFieldsInput = ExtraReportFieldsInput.builder()
-            .orderApprovedDate(LocalDate.now())
-            .build();
         FinremCaseData finremCaseData = FinremCaseData.builder().build();
-        finremCaseData.setDraftOrdersWrapper(finremCaseData.getDraftOrdersWrapper().toBuilder()
-            .extraReportFieldsInput(extraReportFieldsInput)
-            .build());
         FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
 
         when(mapper.mapToCaseDetails(finremCaseDetails)).thenReturn(caseDetails);
