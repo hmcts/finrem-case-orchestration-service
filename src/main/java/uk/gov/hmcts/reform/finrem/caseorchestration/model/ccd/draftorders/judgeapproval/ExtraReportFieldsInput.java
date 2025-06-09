@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
+import java.time.LocalDate;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -23,5 +25,8 @@ public class ExtraReportFieldsInput {
 
     @JsonProperty("judgeType")
     private JudgeType judgeType;
+
+    @JsonProperty("orderApprovedDate")
+    private LocalDate orderApprovedDate;
 
 }
