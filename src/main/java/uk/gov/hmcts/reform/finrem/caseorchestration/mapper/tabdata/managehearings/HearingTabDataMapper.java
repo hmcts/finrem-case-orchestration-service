@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.manahehearings;
+package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
