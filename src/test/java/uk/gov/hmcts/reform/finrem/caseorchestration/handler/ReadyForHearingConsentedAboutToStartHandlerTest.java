@@ -2,12 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,62 +23,36 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandlerTestSetup {
+class ReadyForHearingConsentedAboutToStartHandlerTest {
 
     private ReadyForHearingConsentedAboutToStartHandler handler;
 
-    private static final String AUTH_TOKEN = "token:)";
-
-    @Before
-    public void setup() {
-        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new ReadyForHearingConsentedAboutToStartHandler(finremCaseDetailsMapper);
+    @BeforeEach
+    void setup() {
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
+        ConsentedHearingHelper consentedHearingHelper = new ConsentedHearingHelper(objectMapper);
+        handler = new ReadyForHearingConsentedAboutToStartHandler(finremCaseDetailsMapper, consentedHearingHelper);
     }
 
     @Test
-    public void canHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
-            is(true));
+     void canHandle() {
+        Assertions.assertCanHandle(handler, CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.READY_FOR_HEARING);
     }
 
     @Test
-    public void canNotHandleWrongCaseType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.READY_FOR_HEARING),
-            is(false));
-    }
-
-    @Test
-    public void canNotHandleWrongEvent() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
-    public void canNotHandleWrongCallbackType() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
-            is(false));
-    }
-
-
-    @Test
-    public void givenConsentedCase_WhenHearingNotListed_ThenShouldNotBeReadyForHearing() {
+    void givenConsentedCase_WhenHearingNotListed_ThenShouldNotBeReadyForHearing() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(List.of("There is no hearing on the case."), response.getErrors());
+        assertThat(response.getErrors(), is(List.of("There is no hearing on the case.")));
     }
 
-
     @Test
-    public void givenConsentedCase_WhenHearingListingSchedulesOnly_ThenShouldBeReadyForHearing() {
+    void givenConsentedCase_WhenHearingListingSchedulesOnly_ThenShouldBeReadyForHearing() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         ConsentedHearingDataElement consentedHearingDataElement = new ConsentedHearingDataElement();
@@ -93,7 +67,7 @@ public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandler
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
+            .builder()
             .eventType(EventType.READY_FOR_HEARING)
             .caseDetails(FinremCaseDetails.builder().id(123L)
                 .caseType(CaseType.CONSENTED)
