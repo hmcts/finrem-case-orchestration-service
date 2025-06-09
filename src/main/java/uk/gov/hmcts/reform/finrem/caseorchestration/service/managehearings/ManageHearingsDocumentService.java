@@ -73,7 +73,7 @@ public class ManageHearingsDocumentService {
         CaseDocument formC = genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
-                determineFromCTemplate(finremCaseDetails),
+                determineFormCTemplate(finremCaseDetails),
                 documentConfiguration.getFormCFileName(),
                 finremCaseDetails.getId().toString()
         );
@@ -131,7 +131,7 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Generates an Out of Court Resolution document.
+     * Generates an Out-of-Court Resolution document.
      *
      * @param caseDetails  the case details containing case data
      * @param authToken    the authorization token for document generation
@@ -141,7 +141,7 @@ public class ManageHearingsDocumentService {
         return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
     }
 
-    private String determineFromCTemplate(FinremCaseDetails caseDetails) {
+    private String determineFormCTemplate(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         if (expressCaseService.isExpressCase(caseData)) {
             return documentConfiguration.getManageHearingExpressFormCTemplate();

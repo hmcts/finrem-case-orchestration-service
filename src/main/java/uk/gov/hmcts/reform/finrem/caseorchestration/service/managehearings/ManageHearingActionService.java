@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
@@ -47,7 +46,6 @@ public class ManageHearingActionService {
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
-        Hearing hearing = hearingWrapper.getWorkingHearing();
         HearingType hearingType = hearingWrapper.getWorkingHearing().getHearingType();
 
         UUID hearingId = UUID.randomUUID();
@@ -56,10 +54,15 @@ public class ManageHearingActionService {
         Map<String, CaseDocument> documentMap = new HashMap<>();
         documentMap.put(HEARING_NOTICE_DOCUMENT, manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken));
 
-        if (HearingType.FDA.equals(hearingType) || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData))) {
+        boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
+            || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
+
+        boolean isNotFastTrack = YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
+
+        if (shouldGenerateFormC) {
             documentMap.put(FORM_C, manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken));
 
-            if (YesOrNo.isNoOrNull(caseData.getFastTrackDecision())) {
+            if (isNotFastTrack) {
                 documentMap.put(FORM_G, manageHearingsDocumentService.generateFormG(finremCaseDetails, authToken));
             }
 

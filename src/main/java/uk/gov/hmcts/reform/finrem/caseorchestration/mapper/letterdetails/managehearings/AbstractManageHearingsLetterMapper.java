@@ -2,15 +2,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manage
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class AbstractManageHearingsLetterMapper {
     protected static final String CASE_DETAILS = "caseDetails";
@@ -24,7 +27,6 @@ public abstract class AbstractManageHearingsLetterMapper {
                                                  CourtDetailsConfiguration courtDetailsConfiguration) {
         this.objectMapper = objectMapper;
         this.courtDetailsConfiguration = courtDetailsConfiguration;
-        objectMapper.registerModule(new JavaTimeModule());
     }
 
     /**
@@ -64,5 +66,11 @@ public abstract class AbstractManageHearingsLetterMapper {
             .phoneNumber(courtDetails.getPhoneNumber())
             .email(courtDetails.getEmail())
             .build();
+    }
+
+    protected Hearing getWorkingHearing(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getManageHearingsWrapper())
+            .map(ManageHearingsWrapper::getWorkingHearing)
+            .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
     }
 }

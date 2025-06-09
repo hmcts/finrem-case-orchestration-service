@@ -6,13 +6,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.managehearings.HearingNoticeLetterDetails;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Component
 public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLetterMapper {
@@ -25,10 +23,7 @@ public class HearingNoticeLetterDetailsMapper extends AbstractManageHearingsLett
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
-
-        Hearing hearing = Optional.ofNullable(caseData.getManageHearingsWrapper())
-            .map(ManageHearingsWrapper::getWorkingHearing)
-            .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
+        Hearing hearing = getWorkingHearing(caseData);
 
         CourtDetailsTemplateFields courtTemplateFields =
             buildCourtDetailsTemplateFields(caseData.getSelectedHearingCourt());
