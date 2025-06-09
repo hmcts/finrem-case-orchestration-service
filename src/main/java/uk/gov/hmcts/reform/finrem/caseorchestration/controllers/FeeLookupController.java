@@ -43,6 +43,7 @@ public class FeeLookupController extends BaseController {
 
     private final FeeService feeService;
     private final CaseDataService caseDataService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles looking up Case Fees")
@@ -64,7 +65,6 @@ public class FeeLookupController extends BaseController {
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
-        ObjectMapper objectMapper = new ObjectMapper();
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
