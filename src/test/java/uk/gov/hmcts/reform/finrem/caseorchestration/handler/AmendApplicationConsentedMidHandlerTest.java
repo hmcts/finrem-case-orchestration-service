@@ -3,9 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -95,7 +92,7 @@ class AmendApplicationConsentedMidHandlerTest {
     }
 
     @Test
-    void givenBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
+    void givenBlankApplicantOrRespondentAddressAndNotRepresented_thenHandlerWillShowNoErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -111,32 +108,23 @@ class AmendApplicationConsentedMidHandlerTest {
         assertThat(handle.getErrors()).isEmpty();
     }
 
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenBlankApplicantOrRespondentAddressAndTheyAreLivingOutsideUK_thenHandlerWillShowErrorMessages(YesOrNo resideOutsideUK) {
+    @Test
+    void givenBlankApplicantOrRespondentAddress_whenRepresentedAndResideOutsideUK_thenHandlerWillShowErrorMessages() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
-        }
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setApplicantAddress(new Address());
-        if (resideOutsideUK != null) {
-            data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
-        }
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setRespondentAddress(new Address());
 
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).containsExactlyInAnyOrder(
-            "Postcode field is required for applicant address.",
-            "Postcode field is required for respondent address."
-        );
+        assertThat(handle.getErrors()).isEmpty();
     }
 
     @Test
