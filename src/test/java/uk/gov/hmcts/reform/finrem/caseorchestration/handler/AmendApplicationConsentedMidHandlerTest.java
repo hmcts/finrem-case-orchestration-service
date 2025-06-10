@@ -116,16 +116,19 @@ class AmendApplicationConsentedMidHandlerTest {
     @ParameterizedTest
     @NullSource
     @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenBlankApplicantOrRespondentAddressAndTheyAreLivingOutsideUK_thenHandlerWillShowErrorMessages
-        (YesOrNo resideOutsideUK) {
+    void givenBlankApplicantOrRespondentAddressAndTheyAreLivingOutsideUK_thenHandlerWillShowErrorMessages(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+        if (resideOutsideUK != null) {
+            data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+        }
         data.getContactDetailsWrapper().setApplicantAddress(new Address());
-        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
+        if (resideOutsideUK != null) {
+            data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
+        }
         data.getContactDetailsWrapper().setRespondentAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
