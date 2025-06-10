@@ -4,10 +4,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class ContactDetailsValidator {
 
@@ -48,13 +51,9 @@ public class ContactDetailsValidator {
         }
     }
 
-
     private static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address applicantAddress = wrapper.getApplicantAddress();
-
-        if (applicantAddress != null
-            && !applicantAddress.isEmpty()
-            && ObjectUtils.isEmpty(applicantAddress.getPostCode())) {
+        if (postCodeIsInvalid(applicantAddress, wrapper.getApplicantResideOutsideUK())) {
             errors.add(APPLICANT_POSTCODE_ERROR);
         }
 
@@ -62,19 +61,23 @@ public class ContactDetailsValidator {
 
     private static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
-            && wrapper.getRespondentSolicitorAddress() != null
-            && ObjectUtils.isEmpty(wrapper.getRespondentSolicitorAddress().getPostCode())) {
+            && postCodeIsInvalid(wrapper.getRespondentSolicitorAddress())) {
             errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
         }
     }
 
     private static void checkForEmptyRespondentPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address respondentAddress = wrapper.getRespondentAddress();
-
-        if (respondentAddress != null
-            && !respondentAddress.isEmpty()
-            && ObjectUtils.isEmpty(respondentAddress.getPostCode())) {
+        if (postCodeIsInvalid(respondentAddress, wrapper.getRespondentResideOutsideUK())) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
         }
+    }
+
+    private static boolean postCodeIsInvalid(Address address) {
+        return postCodeIsInvalid(address, null);
+    }
+
+    private static boolean postCodeIsInvalid(Address address, YesOrNo resideOutsideUK) {
+        return address != null && !address.isEmpty() && YesOrNo.isNoOrNull(resideOutsideUK) && isEmpty(address.getPostCode());
     }
 }
