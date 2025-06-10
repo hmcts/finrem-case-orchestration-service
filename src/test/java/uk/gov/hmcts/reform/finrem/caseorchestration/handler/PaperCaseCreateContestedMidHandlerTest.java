@@ -170,16 +170,13 @@ class PaperCaseCreateContestedMidHandlerTest {
         assertThat(handle.getErrors()).isEmpty();
     }
 
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
+    @Test
+    void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
