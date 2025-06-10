@@ -36,7 +36,7 @@ def versions = [
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '3.1.0',
+        tika                 : '3.2.0',
         amClient             : '1.59.2',
         sendLetterClient     : '5.0.4',
         elasticSearch        : '7.17.28',
@@ -527,11 +527,11 @@ tasks.withType(Zip) {
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 289
+    maxWarnings = 286
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 578
+    maxWarnings = 554
 }
 
 tasks.named('checkstyleContract') {

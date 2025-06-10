@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.client.EmailClient;
@@ -18,13 +19,14 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
+@Profile("!local")
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @SuppressWarnings("java:S6857")
 public class EmailService {
 
-    private final EmailClient emailClient;
+    protected final EmailClient emailClient;
 
     @Value("#{${uk.gov.notify.email.templates}}")
     private Map<String, String> emailTemplates;
@@ -60,6 +62,14 @@ public class EmailService {
     private static final String HEARING_DATE = "hearingDate";
     private static final String MANAGE_CASE_BASE_URL = "manageCaseBaseUrl";
 
+    /**
+     * Orchestrates sending an email based on the provided notification request and template.
+     * Note, this service is used when the active profile (@profile class annotation) is not 'local'.
+     * LocalEmailService is used for local testing, when the active profile is local.
+     *
+     * @param notificationRequest the request containing details for the email
+     * @param template            the email template to use
+     */
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
         Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
@@ -172,7 +182,7 @@ public class EmailService {
         templateVars.put("documentName", notificationRequest.getDocumentName());
     }
 
-    private EmailToSend generateEmail(String destinationAddress,
+    protected EmailToSend generateEmail(String destinationAddress,
                                       String templateName,
                                       Map<String, Object> templateVars) {
         String referenceId = UUID.randomUUID().toString();

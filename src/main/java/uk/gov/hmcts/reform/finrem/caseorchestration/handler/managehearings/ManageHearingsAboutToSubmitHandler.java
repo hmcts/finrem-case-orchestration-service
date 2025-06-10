@@ -21,7 +21,8 @@ public class ManageHearingsAboutToSubmitHandler  extends FinremCallbackHandler {
 
     private final ManageHearingActionService manageHearingActionService;
 
-    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ManageHearingActionService manageHearingActionService) {
+    public ManageHearingsAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.manageHearingActionService = manageHearingActionService;
     }
