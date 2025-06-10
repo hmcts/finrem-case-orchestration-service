@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,15 +14,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +41,9 @@ class ManageHearingActionServiceTest {
 
     @InjectMocks
     private ManageHearingActionService manageHearingActionService;
+
+    @Captor
+    private ArgumentCaptor<ManageHearingsCollectionItem> hearingCaptor;
 
     private static final String AUTH_TOKEN = "authToken";
 
@@ -119,5 +128,62 @@ class ManageHearingActionServiceTest {
                     && docCollection.getFirst().getValue().getHearingDocument().equals(hearingNotice))
             ))
         );
+    }
+
+    @Test
+    void shouldAddHearingToTabCollectionInCorrectOrder() {
+        // Arrange
+        Hearing hearing1 = Hearing.builder()
+            .hearingType(HearingType.DIR)
+            .hearingDate(java.time.LocalDate.of(2025, 7, 20))
+            .hearingTime("10:00")
+            .build();
+
+        Hearing hearing2 = Hearing.builder()
+            .hearingType(HearingType.FDA)
+            .hearingDate(java.time.LocalDate.of(2025, 7, 15))
+            .hearingTime("11:00")
+            .build();
+
+        ManageHearingsWrapper hearingWrapper = ManageHearingsWrapper.builder()
+            .workingHearing(hearing1)
+            .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
+                .id(UUID.randomUUID())
+                .value(hearing2)
+                .build())))
+            .build();
+
+        finremCaseDetails.getData().setManageHearingsWrapper(hearingWrapper);
+
+        HearingTabItem hearingTabItem1 = HearingTabItem.builder()
+            .tabHearingType("Hearing 1")
+            .tabDateTime("20 Jul 2025 10:00")
+            .build();
+
+        HearingTabItem hearingTabItem2 = HearingTabItem.builder()
+            .tabHearingType("Hearing 2")
+            .tabDateTime("15 Jul 2025 11:00")
+            .build();
+
+        when(manageHearingsDocumentService.generateHearingNotice(hearing1, finremCaseDetails, AUTH_TOKEN))
+            .thenReturn(CaseDocument.builder().build());
+
+        when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
+            .thenReturn(hearingTabItem2, hearingTabItem1);
+
+        // Act
+        manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
+
+        // Assert
+        verify(hearingTabDataMapper, times(2)).mapHearingToTabData(hearingCaptor.capture(), any());
+
+        List<ManageHearingsCollectionItem> capturedHearings = hearingCaptor.getAllValues();
+        assertThat(capturedHearings.get(0).getValue()).isEqualTo(hearing2);
+        assertThat(capturedHearings.get(1).getValue()).isEqualTo(hearing1);
+
+        List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 }
