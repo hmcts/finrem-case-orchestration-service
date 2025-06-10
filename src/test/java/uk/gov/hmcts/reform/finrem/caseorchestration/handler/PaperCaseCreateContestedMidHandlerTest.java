@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -185,8 +184,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        Assertions.assertThat(handle.getErrors())
-            .containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
+        assertThat(handle.getErrors()).containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
     }
 
     @Test
@@ -210,8 +208,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        Assertions.assertThat(handle.getErrors())
-            .containsExactly(APPLICANT_POSTCODE_ERROR);
+        assertThat(handle.getErrors()).containsExactly(APPLICANT_POSTCODE_ERROR);
     }
 
     @Test
@@ -228,8 +225,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        Assertions.assertThat(handle.getErrors())
-            .containsExactly(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
+        assertThat(handle.getErrors()).containsExactly(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
     }
 
     @Test
@@ -254,8 +250,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        Assertions.assertThat(handle.getErrors())
-            .containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
+        assertThat(handle.getErrors()).containsExactlyInAnyOrder(RESPONDENT_POSTCODE_ERROR);
     }
 
     @Test
