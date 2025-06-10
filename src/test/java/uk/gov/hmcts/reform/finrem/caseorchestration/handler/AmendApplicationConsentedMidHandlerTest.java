@@ -101,9 +101,7 @@ class AmendApplicationConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setApplicantAddress(new Address());
-        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setRespondentAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
