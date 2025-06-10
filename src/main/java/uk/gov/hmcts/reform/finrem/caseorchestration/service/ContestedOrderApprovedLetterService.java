@@ -11,11 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
@@ -56,8 +59,11 @@ public class ContestedOrderApprovedLetterService {
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE,
-            finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
+                .map(DraftOrdersWrapper::getExtraReportFieldsInput)
+                .map(ExtraReportFieldsInput::getOrderApprovedDate)
+                .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .orElse(null));
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         populateTemplateVariables(caseDetailsCopy, judgeDetails);
