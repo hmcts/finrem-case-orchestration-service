@@ -225,7 +225,7 @@ class PaperCaseCreateContestedMidHandlerTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    void givenContestedCase_WhenEmptyPostCodeForInternationalApplicantOrRespondent_thenHandlerWillShowNoErrorMessage
+    void givenContestedCase_WhenEmptyPostCodeForInternationalApplicantAndRespondent_thenHandlerWillShowNoErrorMessage
         (String nullOrEmptyPostCode) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
