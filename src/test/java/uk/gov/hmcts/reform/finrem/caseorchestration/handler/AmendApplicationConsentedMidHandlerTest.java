@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -98,16 +101,42 @@ class AmendApplicationConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setApplicantAddress(new Address());
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setRespondentAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, handle.getErrors().size());
+        assertThat(handle.getErrors()).isEmpty();
     }
 
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenBlankApplicantOrRespondentAddressAndTheyAreLivingOutsideUK_thenHandlerWillShowErrorMessages
+        (YesOrNo resideOutsideUK) {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+        data.getContactDetailsWrapper().setApplicantAddress(new Address());
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
+        data.getContactDetailsWrapper().setRespondentAddress(new Address());
+
+        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(handle.getErrors()).containsExactlyInAnyOrder(
+            "Postcode field is required for applicant address.",
+            "Postcode field is required for respondent address."
+        );
+    }
 
     @Test
     void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
