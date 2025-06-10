@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -38,14 +37,12 @@ public class ContactDetailsValidator {
     private static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
             if (caseData.isApplicantRepresentedByASolicitor()
-                && wrapper.getApplicantSolicitorAddress() != null
-                && ObjectUtils.isEmpty(wrapper.getApplicantSolicitorAddress().getPostCode())) {
+                && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
         } else {
             if (caseData.isApplicantRepresentedByASolicitor()
-                && wrapper.getSolicitorAddress() != null
-                && ObjectUtils.isEmpty(wrapper.getSolicitorAddress().getPostCode())) {
+                && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
         }
@@ -73,25 +70,11 @@ public class ContactDetailsValidator {
     }
 
     private static boolean postCodeIsInvalid(Address address) {
-        return postCodeIsInvalid(address, null);
+        return postCodeIsInvalid(address, YesOrNo.NO);
     }
 
-    /**
-     * Determines if the postcode in the given address is invalid based on residency status.
-     *
-     * <p>
-     * If the person resides in the UK (i.e., {@code resideOutsideUK} is {@code null} or {@code NO}),
-     * the postcode is considered invalid if the address is empty or the postcode itself is empty.
-     * If the person resides outside the UK, the emptiness of postcode is not considered invalid.
-     * If the address is {@code null}, this method returns {@code false}.
-     * </p>
-     *
-     * @param address the {@link Address} to validate
-     * @param resideOutsideUK {@link YesOrNo} indicating if the person resides outside the UK; {@code null} means resides in the UK
-     * @return {@code true} if the postcode is invalid for a UK resident, {@code false} otherwise
-     */
     private static boolean postCodeIsInvalid(Address address, YesOrNo resideOutsideUK) {
-        if (address == null) {
+        if (address == null || (resideOutsideUK == null && address.isEmpty())) {
             return false;
         }
         boolean livesInUK = resideOutsideUK == null || YesOrNo.isNo(resideOutsideUK);
