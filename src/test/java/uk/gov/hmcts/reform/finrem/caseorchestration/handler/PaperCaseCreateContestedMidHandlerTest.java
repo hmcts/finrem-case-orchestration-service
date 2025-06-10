@@ -170,13 +170,16 @@ class PaperCaseCreateContestedMidHandlerTest {
         assertThat(handle.getErrors()).isEmpty();
     }
 
-    @Test
-    void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage() {
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_WhenEmptyApplicantSolicitorPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
@@ -187,13 +190,16 @@ class PaperCaseCreateContestedMidHandlerTest {
         assertThat(handle.getErrors()).containsExactly(APPLICANT_SOLICITOR_POSTCODE_ERROR);
     }
 
-    @Test
-    void givenContestedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowErrorMessage() {
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setApplicantAddress(new Address(
             "AddressLine1",
             "AddressLine2",
@@ -211,13 +217,16 @@ class PaperCaseCreateContestedMidHandlerTest {
         assertThat(handle.getErrors()).containsExactly(APPLICANT_POSTCODE_ERROR);
     }
 
-    @Test
-    void givenContestedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowErrorMessage() {
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_WhenEmptyRespondentSolicitorPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address());
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
@@ -228,13 +237,16 @@ class PaperCaseCreateContestedMidHandlerTest {
         assertThat(handle.getErrors()).containsExactly(RESPONDENT_SOLICITOR_POSTCODE_ERROR);
     }
 
-    @Test
-    void givenContestedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowErrorMessage() {
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_WhenEmptyRespondentPostCode_thenHandlerWillShowErrorMessage(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setRespondentAddress(new Address(
             "AddressLine1",
             "AddressLine2",
