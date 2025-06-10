@@ -85,6 +85,9 @@ class ContactDetailsValidatorTest {
                 createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
                 createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
                 null },
             new Object[] {
