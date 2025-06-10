@@ -3,6 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,8 +55,10 @@ class PaperCaseCreateContestedMidHandlerTest {
         verify(postalService).validate(callbackRequest.getCaseDetails().getData());
     }
 
-    @Test
-    void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage() {
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenContestedCase_WhenNotEmptyPostCode_thenHandlerWillShowNoErrorMessage(YesOrNo resideOutsideUK) {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -68,6 +74,7 @@ class PaperCaseCreateContestedMidHandlerTest {
             "SW1A 1AA"
         ));
 
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setApplicantAddress(new Address(
             "AddressLine1",
             "AddressLine2",
@@ -88,6 +95,7 @@ class PaperCaseCreateContestedMidHandlerTest {
             "SW1A 2AA"
         ));
 
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
         data.getContactDetailsWrapper().setRespondentAddress(new Address(
             "AddressLine1",
             "AddressLine2",
@@ -96,6 +104,64 @@ class PaperCaseCreateContestedMidHandlerTest {
             "Country",
             "Town",
             "SW1A 2AA"
+        ));
+
+        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        data.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertThat(handle.getErrors()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenContestedCase_WhenEmptyPostCodeForInternationalApplicantOrRespondent_thenHandlerWillShowNoErrorMessage
+        (String nullOrEmptyPostCode) {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.getContactDetailsWrapper().setApplicantSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            "SW1A 1AA"
+        ));
+
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
+        data.getContactDetailsWrapper().setApplicantAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            nullOrEmptyPostCode
+        ));
+
+        data.getContactDetailsWrapper().setRespondentSolicitorAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            "SW1A 2AA"
+        ));
+
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
+        data.getContactDetailsWrapper().setRespondentAddress(new Address(
+            "AddressLine1",
+            "AddressLine2",
+            "AddressLine3",
+            "County",
+            "Country",
+            "Town",
+            nullOrEmptyPostCode
         ));
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
