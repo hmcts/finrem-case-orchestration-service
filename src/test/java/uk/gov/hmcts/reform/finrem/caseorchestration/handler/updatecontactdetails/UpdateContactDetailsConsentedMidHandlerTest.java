@@ -83,6 +83,8 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
+        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
+        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
         data.getContactDetailsWrapper().setApplicantAddress(new Address());
         data.getContactDetailsWrapper().setRespondentAddress(new Address());
 
@@ -90,9 +92,8 @@ class UpdateContactDetailsConsentedMidHandlerTest {
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(0, handle.getErrors().size());
+        assertThat(handle.getErrors()).isEmpty();
     }
-
 
     @Test
     void givenConsentedCase_WhenEmptyApplicantPostCode_thenHandlerWillShowMessage() {
