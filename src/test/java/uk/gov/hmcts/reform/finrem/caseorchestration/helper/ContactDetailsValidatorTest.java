@@ -48,33 +48,47 @@ class ContactDetailsValidatorTest {
 
     private static Stream<Object[]> provideInvalidCaseData() {
         return Stream.of(
-            new Object[] { createCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
+            new Object[] {
+                createCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
                 APPLICANT_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
                 null },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null, null),
                 null },
-            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null, null),
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null, null),
                 null }
         );
     }
