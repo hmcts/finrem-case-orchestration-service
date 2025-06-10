@@ -57,13 +57,12 @@ public class ContestedOrderApprovedLetterService {
      * @param authorisationToken the authorisation token for document generation service
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
+            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
+            .map(ExtraReportFieldsInput::getOrderApprovedDate)
+            .orElse(null);
+        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
-        caseDetails.getData().put(CONTESTED_ORDER_APPROVED_DATE,
-            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
-                .map(DraftOrdersWrapper::getExtraReportFieldsInput)
-                .map(ExtraReportFieldsInput::getOrderApprovedDate)
-                .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .orElse(null));
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         populateTemplateVariables(caseDetailsCopy, judgeDetails);
