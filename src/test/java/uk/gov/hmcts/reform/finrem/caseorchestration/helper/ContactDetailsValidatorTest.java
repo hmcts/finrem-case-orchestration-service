@@ -19,18 +19,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetails
 
 class ContactDetailsValidatorTest {
 
-    private static class PostcodeInformation {
+    private static class PostCodeModifier {
 
         String postCode;
         YesOrNo resideOutsideUK;
 
-        PostcodeInformation(String postCode) {
-            this(postCode, null);
+        PostCodeModifier(String postCode) {
+            this.postCode = postCode;
+            this.resideOutsideUK = null;
         }
 
-        PostcodeInformation(String postCode, YesOrNo resideOutsideUK) {
+        PostCodeModifier(String postCode, boolean resideOutsideUK) {
             this.postCode = postCode;
-            this.resideOutsideUK = resideOutsideUK;
+            this.resideOutsideUK = YesOrNo.forValue(resideOutsideUK);
         }
     }
 
@@ -38,20 +39,24 @@ class ContactDetailsValidatorTest {
     @MethodSource("provideInvalidCaseData")
     void shouldReturnErrorWhenPostcodeIsMissing(FinremCaseData caseData, String expectedError) {
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
-        assertThat(errors).containsOnly(expectedError);
+        if (expectedError != null) {
+            assertThat(errors).containsOnly(expectedError);
+        } else {
+            assertThat(errors).isEmpty();
+        }
     }
 
     private static Stream<Object[]> provideInvalidCaseData() {
         return Stream.of(
-            new Object[] {createCaseData(null, "SW1A 1AA", "E1 6AN", "EC1A 1BB", YesOrNo.YES, null, null),
+            new Object[] { createCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
-            new Object[]{ createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
+            new Object[] { createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
                 APPLICANT_POSTCODE_ERROR },
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, YesOrNo.YES, null),
-                RESPONDENT_SOLICITOR_POSTCODE_ERROR},
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", null, "EC1A 1BB", null, null, YesOrNo.YES),
+            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
-            new Object[]{ createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", null, null, null, null),
+            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
+                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] { createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
                 RESPONDENT_POSTCODE_ERROR }
         );
     }
@@ -100,15 +105,15 @@ class ContactDetailsValidatorTest {
                                                  YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
                                                  YesOrNo consentedRespondentRepresented) {
         return createCaseData(
-            applicantSolicitorPostcode, new PostcodeInformation(applicantPostcode),
-            respondentSolicitorPostcode, new PostcodeInformation(respondentPostcode),
+            applicantSolicitorPostcode, new PostCodeModifier(applicantPostcode),
+            respondentSolicitorPostcode, new PostCodeModifier(respondentPostcode),
             applicantRepresented, contestedRespondentRepresented,
             consentedRespondentRepresented
         );
     }
 
-    private static FinremCaseData createCaseData(String applicantSolicitorPostcode, PostcodeInformation applicantPostcode,
-                                                 String respondentSolicitorPostcode, PostcodeInformation respondentPostcode,
+    private static FinremCaseData createCaseData(String applicantSolicitorPostcode, PostCodeModifier applicantPostcode,
+                                                 String respondentSolicitorPostcode, PostCodeModifier respondentPostcode,
                                                  YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
                                                  YesOrNo consentedRespondentRepresented) {
         return FinremCaseData.builder().contactDetailsWrapper(
