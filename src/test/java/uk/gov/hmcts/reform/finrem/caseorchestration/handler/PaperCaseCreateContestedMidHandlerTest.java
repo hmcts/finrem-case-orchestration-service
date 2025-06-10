@@ -138,7 +138,9 @@ class PaperCaseCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+        if (resideOutsideUK != null) {
+            data.getContactDetailsWrapper().setApplicantResideOutsideUK(resideOutsideUK);
+        }
         data.getContactDetailsWrapper().setApplicantAddress(new Address(
             "AddressLine1",
             "AddressLine2",
@@ -182,7 +184,9 @@ class PaperCaseCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
 
-        data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
+        if (resideOutsideUK != null) {
+            data.getContactDetailsWrapper().setRespondentResideOutsideUK(resideOutsideUK);
+        }
         data.getContactDetailsWrapper().setRespondentAddress(new Address(
             "AddressLine1",
             "AddressLine2",
