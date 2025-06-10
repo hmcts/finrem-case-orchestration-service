@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -91,8 +92,7 @@ public class CourtDetailsMapper {
     }
 
     private Optional<Field> getCourtField(CourtListWrapper regionWrapper) {
-        List<Field> allFields = Arrays.asList(regionWrapper.getClass().getDeclaredFields());
-        return allFields.stream()
+        return Stream.of(regionWrapper.getClass().getDeclaredFields())
             .filter(field -> fieldIsNotNullOrEmpty.test(field, regionWrapper))
             .findFirst();
     }
@@ -109,7 +109,7 @@ public class CourtDetailsMapper {
      *         without any compile-time errors.</li>
      * </ul>
      * <p> This method is intended as a temporary solution to retrieve the  court details;
-     * it lacks the appropriate accessesors and is brittle to changes in the underlying interface implementation.
+     * it lacks the appropriate accessors and is brittle to changes in the underlying interface implementation.
      * The goal is to refactor the {@link Court} object and its associated classes to provide explicit accessors
      * for retrieving the selected court, eliminating the need for this reflective method.
      *
@@ -118,21 +118,21 @@ public class CourtDetailsMapper {
      * @throws IllegalStateException if no valid field is found in the court list wrapper or if the field cannot be accessed.
      */
     public CourtDetails convertToFrcCourtDetails(Court court) {
-        Optional<Field> optionalField = getCourtField(court.getDefaultCourtListWrapper());
+        CourtListWrapper wrapper = court.getDefaultCourtListWrapper();
 
-        if (optionalField.isPresent()) {
-            Field field = optionalField.get();
-            try {
-                field.setAccessible(true);
-                String value = ((CourtList) field.get(court.getDefaultCourtListWrapper())).getSelectedCourtId();
-                return courtDetailsConfiguration.getCourts().get(value);
-            } catch (IllegalAccessException e) {
-                log.error("Error accessing field: {}", field.getName(), e);
-                throw new IllegalStateException("Unable to access the field: " + field.getName(), e);
-            }
-        } else {
-            throw new IllegalStateException("No valid field found in the court list wrapper");
-        }
+        return getCourtField(wrapper)
+            .map(field -> {
+                try {
+                    field.setAccessible(true);
+                    CourtList courtList = (CourtList) field.get(wrapper);
+                    String courtId = courtList.getSelectedCourtId();
+                    return courtDetailsConfiguration.getCourts().get(courtId);
+                } catch (IllegalAccessException e) {
+                    log.error("Error accessing field: {}", field.getName(), e);
+                    throw new IllegalStateException("Unable to access the field: " + field.getName(), e);
+                }
+            })
+            .orElseThrow(() -> new IllegalStateException("No valid field found in the court list wrapper"));
     }
 
     public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,
