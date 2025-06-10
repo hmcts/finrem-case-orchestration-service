@@ -71,6 +71,7 @@ public class ContactDetailsValidator {
 
     /**
      * Validates the given solicitor address assuming the solicitor is based in the UK.
+     *
      * <p>
      * This method is typically used for validating applicant or respondent solicitor addresses,
      * where it is expected that the solicitor resides within the UK.
@@ -85,12 +86,14 @@ public class ContactDetailsValidator {
 
     /**
      * Determines whether the given address is invalid based on whether the person lives in the UK.
+     *
      * <p>
      * An address is considered invalid if:
      * <ul>
      *   <li>The person lives in the UK (either explicitly or because the field is not set), and</li>
      *   <li>The address is empty or missing a postcode.</li>
      * </ul>
+     *
      * <p>
      * If the person lives outside the UK, address validation is not enforced (always returns false).
      * If the {@code resideOutsideUK} field is not set and the address is empty or null,
@@ -115,6 +118,4 @@ public class ContactDetailsValidator {
 
         return livesInUK && addressMissingRequiredPostcode;
     }
-
-
 }
