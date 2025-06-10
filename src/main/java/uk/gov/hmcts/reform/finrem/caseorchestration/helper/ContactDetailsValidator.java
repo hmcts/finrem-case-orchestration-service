@@ -56,7 +56,6 @@ public class ContactDetailsValidator {
         if (postCodeIsInvalid(applicantAddress, wrapper.getApplicantResideOutsideUK())) {
             errors.add(APPLICANT_POSTCODE_ERROR);
         }
-
     }
 
     private static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
@@ -77,7 +76,29 @@ public class ContactDetailsValidator {
         return postCodeIsInvalid(address, null);
     }
 
+    /**
+     * Checks if the postcode in the given address is invalid based on the residence status.
+     *
+     * <p>The logic is as follows:
+     * <ul>
+     *   <li>If {@code resideOutsideUK} is {@code null}, it is assumed the person resides in the UK (treated as {@code No}).</li>
+     *   <li>If {@code address} is {@code null}, returns {@code false} since there's no postcode to validate.</li>
+     *   <li>If the person resides in the UK ({@code resideOutsideUK} is {@code No}) and the address is empty, returns {@code true} indicating invalid postcode.</li>
+     *   <li>If the address is not empty, the person resides in the UK or the residence status is unknown, and the postcode is empty, returns {@code true} indicating invalid postcode.</li>
+     * </ul>
+     *
+     * @param address the {@link Address} object containing address details, may be {@code null}
+     * @param resideOutsideUK the {@link YesOrNo} flag indicating if the person resides outside the UK; if {@code null}, assumed to be {@code No}
+     * @return {@code true} if the postcode is considered invalid under the given conditions; {@code false} otherwise
+     */
     private static boolean postCodeIsInvalid(Address address, YesOrNo resideOutsideUK) {
-        return address != null && !address.isEmpty() && YesOrNo.isNoOrNull(resideOutsideUK) && isEmpty(address.getPostCode());
+        resideOutsideUK = resideOutsideUK == null ? YesOrNo.NO : resideOutsideUK; // living in UK if resideOutsideUK is null
+        if (address == null) {
+            return false;
+        }
+        if (YesOrNo.isNo(resideOutsideUK) && address.isEmpty()) {
+            return true;
+        }
+        return !address.isEmpty() && YesOrNo.isNoOrNull(resideOutsideUK) && isEmpty(address.getPostCode());
     }
 }
