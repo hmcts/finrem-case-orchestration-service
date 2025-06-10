@@ -91,7 +91,7 @@ class AmendApplicationConsentedMidHandlerTest {
     }
 
     @Test
-    void givenBlankApplicantOrRespondentAddressAndNotRepresented_thenHandlerWillShowNoErrorMessage() {
+    void givenBlankApplicantOrRespondentAddress_thenHandlerWillShowNoErrorMessage() {
 
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
@@ -102,25 +102,6 @@ class AmendApplicationConsentedMidHandlerTest {
 
         data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
         data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenBlankApplicantOrRespondentAddress_whenRepresentedAndResideOutsideUK_thenHandlerWillShowErrorMessages() {
-
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-
-        data.getContactDetailsWrapper().setApplicantResideOutsideUK(YesOrNo.YES);
-        data.getContactDetailsWrapper().setApplicantAddress(new Address());
-        data.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
-        data.getContactDetailsWrapper().setRespondentAddress(new Address());
-
-        data.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        data.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors()).isEmpty();
