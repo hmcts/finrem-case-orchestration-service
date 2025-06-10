@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -109,7 +108,6 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
-        ObjectMapper mapper = new ObjectMapper();
 
         if (caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);
