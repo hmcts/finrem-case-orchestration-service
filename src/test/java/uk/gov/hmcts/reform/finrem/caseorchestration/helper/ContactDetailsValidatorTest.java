@@ -36,8 +36,8 @@ class ContactDetailsValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideInvalidCaseData")
-    void shouldReturnErrorWhenPostcodeIsMissing(FinremCaseData caseData, String expectedError) {
+    @MethodSource("provideCaseDataWithInvalidPostcodes")
+    void shouldValidatePostcodeConditionsAndReturnExpectedErrors(FinremCaseData caseData, String expectedError) {
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         if (expectedError != null) {
             assertThat(errors).containsOnly(expectedError);
@@ -46,7 +46,7 @@ class ContactDetailsValidatorTest {
         }
     }
 
-    private static Stream<Object[]> provideInvalidCaseData() {
+    private static Stream<Object[]> provideCaseDataWithInvalidPostcodes() {
         return Stream.of(
             new Object[] {
                 createCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
@@ -59,6 +59,9 @@ class ContactDetailsValidatorTest {
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
                 createCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
                 createCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),

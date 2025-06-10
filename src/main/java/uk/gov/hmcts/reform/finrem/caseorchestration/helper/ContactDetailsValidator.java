@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ContactDetailsValidator {
 
@@ -111,7 +111,7 @@ public class ContactDetailsValidator {
         boolean livesInUK = resideOutsideUK == null || YesOrNo.isNo(resideOutsideUK);
 
         // For UK residents, postcode must be present and address must not be empty
-        boolean addressMissingRequiredPostcode = address.isEmpty() || isEmpty(address.getPostCode());
+        boolean addressMissingRequiredPostcode = address.isEmpty() || isBlank(address.getPostCode());
 
         return livesInUK && addressMissingRequiredPostcode;
     }
