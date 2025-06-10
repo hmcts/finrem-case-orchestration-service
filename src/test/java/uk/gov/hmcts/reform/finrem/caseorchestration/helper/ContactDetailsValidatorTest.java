@@ -43,8 +43,7 @@ class ContactDetailsValidatorTest {
 
     private static Stream<Object[]> provideInvalidCaseData() {
         return Stream.of(
-            new Object[] {
-                createCaseData(null, "SW1A 1AA", "E1 6AN", "EC1A 1BB", YesOrNo.YES, null, null),
+            new Object[] {createCaseData(null, "SW1A 1AA", "E1 6AN", "EC1A 1BB", YesOrNo.YES, null, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
             new Object[]{ createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
                 APPLICANT_POSTCODE_ERROR },
