@@ -11,19 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-
-import java.util.UUID;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 
 @Slf4j
 @Service
 public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
 
-    public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final ManageHearingsCorresponder manageHearingsCorresponder;
+
+    public ManageHearingsSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                          ManageHearingsCorresponder manageHearingsCorresponder) {
         super(finremCaseDetailsMapper);
+        this.manageHearingsCorresponder = manageHearingsCorresponder;
     }
 
     @Override
@@ -36,26 +35,15 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
-        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
-
-        ManageHearingsAction actionSelection = finremCaseData.getManageHearingsWrapper().getManageHearingsActionSelection();
-        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
-        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
-
-        Hearing hearing = manageHearingsWrapper.getHearings().stream()
-            .filter(h -> h.getId().equals(hearingId))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
-            .getValue();
-
         // Send Notifications
+        manageHearingsCorresponder.sendHearingNotifications(callbackRequest);
+
+        // Where appropriate, send generated documents, this is upcoming work.
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData)
+            .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationT
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.ApplicantLetterAddresseeGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.address.IntervenerFourLetterAddresseeGenerator;
@@ -118,7 +119,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTes
     EvidenceManagementDownloadService.class, LetterAddresseeGeneratorMapper.class, ApplicantLetterAddresseeGenerator.class,
     RespondentLetterAddresseeGenerator.class, IntervenerOneLetterAddresseeGenerator.class, IntervenerTwoLetterAddresseeGenerator.class,
     IntervenerThreeLetterAddresseeGenerator.class, IntervenerFourLetterAddresseeGenerator.class,
-    InternationalPostalService.class, CourtDetailsConfiguration.class})
+    InternationalPostalService.class, CourtDetailsConfiguration.class, ManageHearingsNotificationRequestMapper.class})
 public class ManageBarristersITest implements IntegrationTest {
 
     private static final String SERVICE_AUTH_TOKEN = "serviceAuth";

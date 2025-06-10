@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.66'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1744'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1745'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -36,7 +36,7 @@ def versions = [
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '3.1.0',
+        tika                 : '3.2.0',
         amClient             : '1.59.2',
         sendLetterClient     : '5.0.4',
         elasticSearch        : '7.17.28',
@@ -531,7 +531,7 @@ tasks.named('checkstyleMain') {
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 575
+    maxWarnings = 554
 }
 
 tasks.named('checkstyleContract') {

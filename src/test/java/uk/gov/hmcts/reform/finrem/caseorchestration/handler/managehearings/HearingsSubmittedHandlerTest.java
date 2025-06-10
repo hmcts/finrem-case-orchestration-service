@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
@@ -29,13 +31,16 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsSubmittedHandlerTest {
 
     @InjectMocks
     private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;
+
+    @Mock
+    private ManageHearingsCorresponder manageHearingsCorresponder;
 
     @Test
     void testCanHandle() {
@@ -55,21 +60,8 @@ class HearingsSubmittedHandlerTest {
 
         // Assert
         assertThat(response.getData()).isNotNull();
-        assertThat(response.getData().getManageHearingsWrapper().getWorkingHearingId()).isEqualTo(hearingID);
         assertThat(response.getErrors()).isNullOrEmpty();
-    }
-
-    @Test
-    void shouldThrowIllegalStateIfHearingNotFound() {
-        // Arrange
-        UUID hearingID = UUID.randomUUID();
-        UUID mismatchedHearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, mismatchedHearingID);
-
-        // Act & Assert
-        assertThrows(IllegalStateException.class, () ->
-            manageHearingsSubmittedHandler.handle(callbackRequest, TestConstants.AUTH_TOKEN)
-        );
+        verify(manageHearingsCorresponder).sendHearingNotifications(callbackRequest);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId) {
