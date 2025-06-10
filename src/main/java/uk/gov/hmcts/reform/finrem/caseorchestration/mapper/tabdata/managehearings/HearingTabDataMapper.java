@@ -95,14 +95,22 @@ public class HearingTabDataMapper {
         UUID hearingId,
         Hearing hearing) {
 
+        List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
+            ? hearingDocumentsCollection.stream()
+            .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
+            .toList()
+            : List.of();
+
+        List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
+            ? hearing.getAdditionalHearingDocs().stream()
+            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
+            .toList()
+            : List.of();
+        
         return Stream.concat(
-            hearingDocumentsCollection.stream()
-                .filter(doc -> doc.getValue().getHearingId().equals(hearingId))
-                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build()),
-            hearing.getAdditionalHearingDocs() != null
-                ? hearing.getAdditionalHearingDocs().stream()
-                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
-                : Stream.empty()
+            hearingDocuments.stream(),
+            additionalDocs.stream()
         ).toList();
     }
 }

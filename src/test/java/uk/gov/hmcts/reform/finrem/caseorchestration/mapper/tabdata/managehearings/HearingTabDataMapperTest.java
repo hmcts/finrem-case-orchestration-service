@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,7 +113,7 @@ class HearingTabDataMapperTest {
     }
 
     @Test
-    void mapHearingToTabData_withNullValues_returnsDefaults() {
+    void mapHearingToTabData_withNullValues_returnsDefaultsAndEmptyDocs() {
         // Arrange
         UUID hearingId = UUID.randomUUID();
         when(courtDetailsMapper.convertToFrcCourtDetails(any())).thenReturn(CourtDetails.builder().courtName(COURT_NAME).build());
@@ -147,6 +148,6 @@ class HearingTabDataMapperTest {
         assertEquals(HEARING_TIME_ESTIMATE, result.getTabTimeEstimate());
         assertEquals(DEFAULT_CONFIDENTIAL_PARTIES, result.getTabConfidentialParties());
         assertEquals(" ", result.getTabAdditionalInformation());
-        assertTrue(result.getTabHearingDocuments().isEmpty());
+        assertThat(result.getTabHearingDocuments()).isEmpty();
     }
 }
