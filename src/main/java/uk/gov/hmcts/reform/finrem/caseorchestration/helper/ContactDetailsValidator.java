@@ -77,28 +77,29 @@ public class ContactDetailsValidator {
     }
 
     /**
-     * Checks if the postcode in the given address is invalid based on the residence status.
+     * Determines if the postcode in the given address is invalid based on residency status.
      *
-     * <p>The logic is as follows:
-     * <ul>
-     *   <li>If {@code resideOutsideUK} is {@code null}, it is assumed the person resides in the UK (treated as {@code No}).</li>
-     *   <li>If {@code address} is {@code null}, returns {@code false} since there's no postcode to validate.</li>
-     *   <li>If the person resides in the UK ({@code resideOutsideUK} is {@code No}) and the address is empty, returns {@code true} indicating invalid postcode.</li>
-     *   <li>If the address is not empty, the person resides in the UK or the residence status is unknown, and the postcode is empty, returns {@code true} indicating invalid postcode.</li>
-     * </ul>
+     * <p>
+     * If the person resides in the UK (i.e., {@code resideOutsideUK} is {@code null} or {@code NO}),
+     * the postcode is considered invalid if the address is empty or the postcode itself is empty.
+     * If the person resides outside the UK, the emptiness of postcode is not considered invalid.
+     * If the address is {@code null}, this method returns {@code false}.
+     * </p>
      *
-     * @param address the {@link Address} object containing address details, may be {@code null}
-     * @param resideOutsideUK the {@link YesOrNo} flag indicating if the person resides outside the UK; if {@code null}, assumed to be {@code No}
-     * @return {@code true} if the postcode is considered invalid under the given conditions; {@code false} otherwise
+     * @param address the {@link Address} to validate
+     * @param resideOutsideUK {@link YesOrNo} indicating if the person resides outside the UK; {@code null} means resides in the UK
+     * @return {@code true} if the postcode is invalid for a UK resident, {@code false} otherwise
      */
     private static boolean postCodeIsInvalid(Address address, YesOrNo resideOutsideUK) {
-        resideOutsideUK = resideOutsideUK == null ? YesOrNo.NO : resideOutsideUK; // living in UK if resideOutsideUK is null
         if (address == null) {
             return false;
         }
-        if (YesOrNo.isNo(resideOutsideUK) && address.isEmpty()) {
-            return true;
+        boolean livesInUK = resideOutsideUK == null || YesOrNo.isNo(resideOutsideUK);
+
+        if (livesInUK) {
+            return address.isEmpty() || isEmpty(address.getPostCode());
         }
-        return !address.isEmpty() && YesOrNo.isNoOrNull(resideOutsideUK) && isEmpty(address.getPostCode());
+        return false;
     }
+
 }
