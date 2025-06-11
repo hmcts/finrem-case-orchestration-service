@@ -48,7 +48,7 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
+    public static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address applicantAddress = wrapper.getApplicantAddress();
         if (postCodeIsInvalid(applicantAddress, wrapper.getApplicantResideOutsideUK())) {
             errors.add(APPLICANT_POSTCODE_ERROR);
@@ -62,7 +62,7 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static void checkForEmptyRespondentPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
+    public static void checkForEmptyRespondentPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address respondentAddress = wrapper.getRespondentAddress();
         if (postCodeIsInvalid(respondentAddress, wrapper.getRespondentResideOutsideUK())) {
             errors.add(RESPONDENT_POSTCODE_ERROR);
