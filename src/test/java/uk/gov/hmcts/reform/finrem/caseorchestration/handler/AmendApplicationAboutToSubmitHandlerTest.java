@@ -202,38 +202,6 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         assertNull(responseData.getContactDetailsWrapper().getSolicitorPhone());
     }
 
-    private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setSolicitorAddress(applicantSolicitorAddress);
-        caseData.getContactDetailsWrapper().setApplicantAddress(null);
-    }
-
-    private static void setupApplicantNotRepresented(FinremCaseData caseData, Address applicantAddress) {
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        caseData.getContactDetailsWrapper().setSolicitorAddress(null);
-        caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
-    }
-
-    private static void setupRespondentRepresented(FinremCaseData caseData, Address respondentSolicitorAddress) {
-        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(respondentSolicitorAddress);
-        caseData.getContactDetailsWrapper().setRespondentAddress(null);
-    }
-
-    private static void setupRespondentNotRepresented(FinremCaseData caseData, Address respondentAddress) {
-        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
-        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
-    }
-
-    private static Address addressWithNullOrEmptyPostcode(String emptyOfNullPostCode) {
-        return Address.builder().addressLine1("10 New Street").country("Canada").postCode(emptyOfNullPostCode).build();
-    }
-
-    private static Address addressWithPostcode() {
-        return Address.builder().addressLine1("10 New Street").country("United Kingdom").postCode("AAA BBB").build();
-    }
-
     @ParameterizedTest
     @NullAndEmptySource
     void givenNullOFEmptyPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowError(String nullOfEmptyPostcode) {
@@ -300,6 +268,38 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
 
         // Assert
         assertThat(response.getErrors()).isEmpty();
+    }
+
+    private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(applicantSolicitorAddress);
+        caseData.getContactDetailsWrapper().setApplicantAddress(null);
+    }
+
+    private static void setupApplicantNotRepresented(FinremCaseData caseData, Address applicantAddress) {
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
+    }
+
+    private static void setupRespondentRepresented(FinremCaseData caseData, Address respondentSolicitorAddress) {
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(respondentSolicitorAddress);
+        caseData.getContactDetailsWrapper().setRespondentAddress(null);
+    }
+
+    private static void setupRespondentNotRepresented(FinremCaseData caseData, Address respondentAddress) {
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+    }
+
+    private static Address addressWithNullOrEmptyPostcode(String emptyOfNullPostCode) {
+        return Address.builder().addressLine1("10 New Street").country("Canada").postCode(emptyOfNullPostCode).build();
+    }
+
+    private static Address addressWithPostcode() {
+        return Address.builder().addressLine1("10 New Street").country("United Kingdom").postCode("AAA BBB").build();
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {
