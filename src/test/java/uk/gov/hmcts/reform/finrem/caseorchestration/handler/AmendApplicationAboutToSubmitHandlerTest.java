@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -200,20 +202,51 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         assertNull(responseData.getContactDetailsWrapper().getSolicitorPhone());
     }
 
-    @Test
-    void givenNullPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowError() {
+    private static void setupApplicantRepresented(FinremCaseData caseData, Address applicantSolicitorAddress) {
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(applicantSolicitorAddress);
+        caseData.getContactDetailsWrapper().setApplicantAddress(null);
+    }
+
+    private static void setupApplicantNotRepresented(FinremCaseData caseData, Address applicantAddress) {
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
+    }
+
+    private static void setupRespondentRepresented(FinremCaseData caseData, Address respondentSolicitorAddress) {
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(respondentSolicitorAddress);
+        caseData.getContactDetailsWrapper().setRespondentAddress(null);
+    }
+
+    private static void setupRespondentNotRepresented(FinremCaseData caseData, Address respondentAddress) {
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+    }
+
+    private static Address addressWithNullOrEmptyPostcode(String emptyOfNullPostCode) {
+        return Address.builder().addressLine1("10 New Street").country("Canada").postCode(emptyOfNullPostCode).build();
+    }
+
+    private static Address addressWithPostcode() {
+        return Address.builder().addressLine1("10 New Street").country("United Kingdom").postCode("AAA BBB").build();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenNullOFEmptyPostCode_whenApplicantAndRespondentNotRepresentedBySolicitor_thenHandlerThrowError(String nullOfEmptyPostcode) {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Address address = new Address();
-        address.setCounty("West Yorkshire");
-        finremCaseData.getContactDetailsWrapper().setApplicantAddress(address);
-        finremCaseData.getContactDetailsWrapper().setRespondentAddress(address);
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        setupApplicantNotRepresented(finremCaseData, addressWithNullOrEmptyPostcode(nullOfEmptyPostcode));
+        setupRespondentNotRepresented(finremCaseData, addressWithNullOrEmptyPostcode(nullOfEmptyPostcode));
 
+        // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        // Assert
         assertThat(response.getErrors()).containsExactlyInAnyOrder(
             "Postcode field is required for applicant address.",
             "Postcode field is required for respondent address."
@@ -225,81 +258,48 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Address address = new Address();
-        address.setCounty("West Yorkshire");
-        address.setPostCode("BD1 1BE");
-        finremCaseData.getContactDetailsWrapper().setApplicantAddress(address);
-        finremCaseData.getContactDetailsWrapper().setRespondentAddress(address);
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
-        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.NO);
+        setupApplicantNotRepresented(finremCaseData, addressWithPostcode());
+        setupRespondentNotRepresented(finremCaseData, addressWithPostcode());
 
+        // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
+        // Assert
         assertThat(response.getErrors()).isEmpty();
     }
 
-    @Test
-    void givenNullPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    void givenNullOFEmptyPostCode_whenBothApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError(String nullOfEmptyPostcode) {
         // Arrange
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        setupApplicantRepresented(finremCaseData, addressWithNullOrEmptyPostcode(nullOfEmptyPostcode));
+        setupRespondentRepresented(finremCaseData, addressWithNullOrEmptyPostcode(nullOfEmptyPostcode));
 
-        finremCaseData.getContactDetailsWrapper()
-            .setApplicantAddress(Address.builder().addressLine1("Address 1").postCode(null).build());
-        finremCaseData.getContactDetailsWrapper()
-            .setRespondentAddress(Address.builder().addressLine1("Address 1").postCode(null).build());
-        finremCaseData.getContactDetailsWrapper()
-            .setSolicitorAddress(Address.builder().addressLine1("Address 1").postCode("XXX XXX").build());
-        finremCaseData.getContactDetailsWrapper()
-            .setRespondentSolicitorAddress(Address.builder().addressLine1("Address 1").postCode("XXX XXX").build());
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-
+        // Act
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors()).containsExactlyInAnyOrder(
-            "Postcode field is required for applicant address.",
-            "Postcode field is required for respondent address."
-        );
-    }
-
-    @Test
-    void givenValidPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowNoErrors() {
-        // Arrange
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Address address = new Address();
-        address.setCounty("West Yorkshire");
-        address.setPostCode("BD1 1BE");
-        finremCaseData.getContactDetailsWrapper().setSolicitorAddress(address);
-        finremCaseData.getContactDetailsWrapper().setRespondentSolicitorAddress(address);
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        assertThat(response.getErrors()).isEmpty();
-    }
-
-    @Test
-    void givenEmptyPostCode_whenApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowError() {
-        // Arrange
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Address address = new Address();
-        address.setCounty("West Yorkshire");
-        address.setPostCode(" ");
-        finremCaseData.getContactDetailsWrapper().setSolicitorAddress(address);
-        finremCaseData.getContactDetailsWrapper().setRespondentSolicitorAddress(address);
-        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        finremCaseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
+        // Assert
         assertThat(response.getErrors()).containsExactlyInAnyOrder(
             "Postcode field is required for applicant solicitor address.",
             "Postcode field is required for respondent solicitor address."
         );
+    }
+
+    @Test
+    void givenValidPostCode_whenBothApplicantAndRespondentRepresentedBySolicitor_thenHandlerThrowNoErrors() {
+        // Arrange
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        setupApplicantRepresented(finremCaseData, addressWithPostcode());
+        setupRespondentRepresented(finremCaseData, addressWithPostcode());
+
+        // Act
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        // Assert
+        assertThat(response.getErrors()).isEmpty();
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {
