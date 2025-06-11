@@ -51,7 +51,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSet
     private ConsentOrderService consentOrderService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
         handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
             consentOrderService);
