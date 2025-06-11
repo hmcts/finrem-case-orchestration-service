@@ -24,7 +24,8 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
     private final PartyService partyService;
     private final ValidateHearingService validateHearingService;
 
-    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, PartyService partyService, ValidateHearingService validateHearingService) {
+    public ManageHearingsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                             PartyService partyService, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
         this.partyService = partyService;
         this.validateHearingService = validateHearingService;
