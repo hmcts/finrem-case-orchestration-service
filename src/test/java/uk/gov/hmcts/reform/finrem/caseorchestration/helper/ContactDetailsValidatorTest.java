@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -49,66 +50,66 @@ class ContactDetailsValidatorTest {
     private static Stream<Object[]> provideCaseDataWithInvalidPostcodes() {
         return Stream.of(
             new Object[] {
-                createCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
+                createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
+                createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
                 null },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
                 null },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null, null),
                 null },
             new Object[] {
-                createCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null, null),
                 null }
         );
     }
 
     @Test
     void shouldReturnNoErrorsForValidCaseData() {
-        FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
 
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsEmpty() {
-        FinremCaseData caseData = createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -116,7 +117,7 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsEmpty() {
-        FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -124,7 +125,7 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsNull() {
-        FinremCaseData caseData = createCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(null); // Null address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -132,17 +133,17 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsNull() {
-        FinremCaseData caseData = createCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(null); // Null address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
 
-    private static FinremCaseData createCaseData(String applicantSolicitorPostcode, String applicantPostcode,
-                                                 String respondentSolicitorPostcode, String respondentPostcode,
-                                                 YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
-                                                 YesOrNo consentedRespondentRepresented) {
-        return createCaseData(
+    private static FinremCaseData createConsentedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
+                                                          String respondentSolicitorPostcode, String respondentPostcode,
+                                                          YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
+                                                          YesOrNo consentedRespondentRepresented) {
+        return createConsentedCaseData(
             applicantSolicitorPostcode, new PostCodeModifier(applicantPostcode),
             respondentSolicitorPostcode, new PostCodeModifier(respondentPostcode),
             applicantRepresented, contestedRespondentRepresented,
@@ -150,11 +151,11 @@ class ContactDetailsValidatorTest {
         );
     }
 
-    private static FinremCaseData createCaseData(String applicantSolicitorPostcode, PostCodeModifier applicantPostcode,
-                                                 String respondentSolicitorPostcode, PostCodeModifier respondentPostcode,
-                                                 YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
-                                                 YesOrNo consentedRespondentRepresented) {
-        return FinremCaseData.builder().contactDetailsWrapper(
+    private static FinremCaseData createConsentedCaseData(String applicantSolicitorPostcode, PostCodeModifier applicantPostcode,
+                                                          String respondentSolicitorPostcode, PostCodeModifier respondentPostcode,
+                                                          YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
+                                                          YesOrNo consentedRespondentRepresented) {
+        return FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .applicantRepresented(applicantRepresented)
                 .contestedRespondentRepresented(contestedRespondentRepresented)
