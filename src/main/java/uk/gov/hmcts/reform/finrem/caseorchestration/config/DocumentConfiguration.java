@@ -94,9 +94,20 @@ public class DocumentConfiguration {
     private String generalApplicationHearingNoticeTemplate;
     private String generalApplicationHearingNoticeHighCourtTemplate;
     private String generalApplicationHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
     private String manageHearingNoticeTemplate;
+    @Getter(AccessLevel.NONE)
     private String manageHearingHCNoticeTemplate;
     private String manageHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFormCTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingHCFromCTemplate;
+    private String manageHearingExpressFormCTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFastTrackFormCTemplate;
+    @Getter(AccessLevel.NONE)
+    private String manageHearingFastTrackHCFormCTemplate;
     @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
@@ -152,6 +163,14 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
 
+    public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? manageHearingFastTrackHCFormCTemplate : manageHearingFastTrackFormCTemplate;
+    }
+
+    public String getFormCStandardTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? manageHearingHCFromCTemplate : manageHearingFormCTemplate;
+    }
+
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
     }
@@ -161,6 +180,10 @@ public class DocumentConfiguration {
     }
 
     public String getFormGTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
+    }
+
+    public String getFormGTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
     }
 
