@@ -34,13 +34,28 @@ public class ContactDetailsValidator {
         return errors;
     }
 
+    /**
+     * Validates the applicant solicitor's postcode and adds an error if it is missing or invalid.
+     *
+     * <p>
+     * For contested cases, the postcode is taken from {@code wrapper.getApplicantSolicitorAddress()}.
+     * For consented cases, the postcode is taken from {@code wrapper.getSolicitorAddress()}.
+     *
+     * <p>
+     * If the applicant is represented by a solicitor and the postcode is missing or invalid,
+     * an error message is added to the provided {@code errors} list.
+     *
+     * @param caseData the case data containing case type and solicitor representation info
+     * @param wrapper the wrapper containing solicitor address details
+     * @param errors the list to which error messages will be added if validation fails
+     */
     public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
             }
-        } else {
+        } else if (caseData.getCcdCaseType() == CaseType.CONSENTED) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getSolicitorAddress())) {
                 errors.add(APPLICANT_SOLICITOR_POSTCODE_ERROR);
@@ -48,6 +63,19 @@ public class ContactDetailsValidator {
         }
     }
 
+    /**
+     * Validates the applicant's postcode and adds an error if it is missing or invalid.
+     *
+     * <p>
+     * If the applicant resides in the UK (or residency is unspecified) and the postcode is missing or empty,
+     * an error message is added to the provided {@code errors} list.
+     *
+     * <p>
+     * If the applicant resides outside the UK, postcode validation is skipped.
+     *
+     * @param wrapper the wrapper containing applicant address and residency details
+     * @param errors the list to which error messages will be added if validation fails
+     */
     public static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address applicantAddress = wrapper.getApplicantAddress();
         if (postCodeIsInvalid(applicantAddress, wrapper.getApplicantResideOutsideUK())) {
@@ -55,6 +83,18 @@ public class ContactDetailsValidator {
         }
     }
 
+    /**
+     * Validates the respondent solicitor's postcode and adds an error if it is missing or invalid.
+     *
+     * <p>
+     * If the respondent is represented by a solicitor and the postcode in
+     * {@code wrapper.getRespondentSolicitorAddress()} is missing or empty, an error message is added
+     * to the provided {@code errors} list.
+     *
+     * @param caseData the case data indicating solicitor representation status
+     * @param wrapper the wrapper containing respondent solicitor address details
+     * @param errors the list to which error messages will be added if validation fails
+     */
     public static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
             && postCodeIsInvalid(wrapper.getRespondentSolicitorAddress())) {
@@ -62,6 +102,20 @@ public class ContactDetailsValidator {
         }
     }
 
+    /**
+     * Validates the respondent's postcode and adds an error if it is missing or invalid.
+     *
+     * <p>
+     * If the respondent resides in the UK (or if residency is unspecified) and the postcode in
+     * {@code wrapper.getRespondentAddress()} is missing or empty, an error message is added
+     * to the provided {@code errors} list.
+     *
+     * <p>
+     * If the respondent resides outside the UK, postcode validation is skipped.
+     *
+     * @param wrapper the wrapper containing respondent address and residency details
+     * @param errors the list to which error messages will be added if validation fails
+     */
     public static void checkForEmptyRespondentPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address respondentAddress = wrapper.getRespondentAddress();
         if (postCodeIsInvalid(respondentAddress, wrapper.getRespondentResideOutsideUK())) {
