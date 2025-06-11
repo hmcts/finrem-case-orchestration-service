@@ -27,7 +27,6 @@ public class BarristerUpdateDifferenceCalculatorTest {
         .build();
     public static final String ANOTHER_EMAIL = "anotherEmail";
 
-
     private final BarristerUpdateDifferenceCalculator underTest = new BarristerUpdateDifferenceCalculator();
 
     @Test

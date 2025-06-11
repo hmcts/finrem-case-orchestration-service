@@ -85,6 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_APPROVED_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTEST_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_ADDED_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_INTERVENER_REMOVED_EMAIL;
@@ -1955,5 +1956,14 @@ public class NotificationService {
     public void sendRefusedDraftOrderOrPsa(NotificationRequest notificationRequest) {
         log.info("{} - Sending refused draft order or PSA", notificationRequest.getCaseReferenceNumber());
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_DRAFT_ORDER_OR_PSA_REFUSED);
+    }
+
+    /**
+     * Sends a hearing notification email to the applicant solicitor.
+     * @param notificationRequest the notification request containing details for the email
+     */
+    public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
+        log.info("{} - Sending hearing notification to applicant", notificationRequest.getCaseReferenceNumber());
+        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 }
