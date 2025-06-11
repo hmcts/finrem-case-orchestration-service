@@ -34,7 +34,7 @@ public class ContactDetailsValidator {
         return errors;
     }
 
-    private static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+    public static void checkForEmptyApplicantSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
             if (caseData.isApplicantRepresentedByASolicitor()
                 && postCodeIsInvalid(wrapper.getApplicantSolicitorAddress())) {
@@ -55,7 +55,7 @@ public class ContactDetailsValidator {
         }
     }
 
-    private static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+    public static void checkForEmptyRespondentSolicitorPostcode(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
         if (caseData.isRespondentRepresentedByASolicitor()
             && postCodeIsInvalid(wrapper.getRespondentSolicitorAddress())) {
             errors.add(RESPONDENT_SOLICITOR_POSTCODE_ERROR);

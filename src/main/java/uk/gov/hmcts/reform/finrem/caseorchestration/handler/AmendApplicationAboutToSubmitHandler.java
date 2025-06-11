@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyApplicantPostcode;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyApplicantSolicitorPostcode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRespondentPostcode;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContactDetailsValidator.checkForEmptyRespondentSolicitorPostcode;
 
 @Slf4j
 @Service
@@ -54,6 +56,8 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         // below validations are needed because users can use browser's back to bypass the validation in mid handler
         checkForEmptyApplicantPostcode(caseData.getContactDetailsWrapper(), errors);
         checkForEmptyRespondentPostcode(caseData.getContactDetailsWrapper(), errors);
+        checkForEmptyApplicantSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
+        checkForEmptyRespondentSolicitorPostcode(caseData, caseData.getContactDetailsWrapper(), errors);
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
