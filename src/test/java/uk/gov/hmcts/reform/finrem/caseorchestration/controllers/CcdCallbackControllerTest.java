@@ -30,7 +30,6 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
     @MockitoBean
     private CallbackDispatchService callbackDispatchService;
 
-
     @Before
     public void testSetup() throws Exception {
         setUp();
