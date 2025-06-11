@@ -50,66 +50,115 @@ class ContactDetailsValidatorTest {
     private static Stream<Object[]> provideCaseDataWithInvalidPostcodes() {
         return Stream.of(
             new Object[] {
-                createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null, null),
+                createConsentedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
                 APPLICANT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null),
+                createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 APPLICANT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 null },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 null },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
                 null },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, null, YesOrNo.YES),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
                 RESPONDENT_SOLICITOR_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null),
                 RESPONDENT_POSTCODE_ERROR },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null),
                 null },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null),
                 null },
             new Object[] {
-                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null, null),
+                createConsentedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null),
+                null },
+            // Contested
+            new Object[] {
+                createContestedCaseData(null, new PostCodeModifier("SW1A 1AA"), "E1 6AN", new PostCodeModifier("EC1A 1BB"), YesOrNo.YES, null),
+                APPLICANT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier(null, false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier(" ", false), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                APPLICANT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier(null, true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier(" ", true), "E1 6AN", new PostCodeModifier("EC1A 1BB"), null, null),
+                null },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
+                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), null, new PostCodeModifier("EC1A 1BB"), null, YesOrNo.YES),
+                RESPONDENT_SOLICITOR_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(""), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" "), null, null),
+                RESPONDENT_POSTCODE_ERROR },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier("", true), null, null),
+                null },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(" ", true), null, null),
+                null },
+            new Object[] {
+                createContestedCaseData("SW1A 1AA", new PostCodeModifier("E1 6AN"), "EC1A 1BB", new PostCodeModifier(null, true), null, null),
                 null }
         );
     }
 
     @Test
     void shouldReturnNoErrorsForValidCaseData() {
-        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
 
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsEmpty() {
-        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -117,7 +166,7 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsEmpty() {
-        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(new Address()); // Empty address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -125,7 +174,7 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenApplicantAddressIsNull() {
-        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", null, "E1 6AN", "EC1A 1BB", null, null);
         caseData.getContactDetailsWrapper().setApplicantAddress(null); // Null address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
@@ -133,33 +182,93 @@ class ContactDetailsValidatorTest {
 
     @Test
     void shouldNotReturnErrorWhenRespondentAddressIsNull() {
-        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null, null);
+        FinremCaseData caseData = createConsentedCaseData("SW1A 1AA", "E1 6AN", "EC1A 1BB", "B1 1BB", null, null);
         caseData.getContactDetailsWrapper().setRespondentAddress(null); // Null address object
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         assertThat(errors).isEmpty();
     }
 
+    private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
+                                                          String respondentSolicitorPostcode, String respondentPostcode,
+                                                          YesOrNo applicantRepresented, YesOrNo respondentRepresented) {
+        return createContestedCaseData(
+            applicantSolicitorPostcode, new PostCodeModifier(applicantPostcode),
+            respondentSolicitorPostcode, new PostCodeModifier(respondentPostcode),
+            applicantRepresented, respondentRepresented
+        );
+    }
+
+    private static FinremCaseData createContestedCaseData(String applicantSolicitorPostcode, PostCodeModifier applicantPostcode,
+                                                          String respondentSolicitorPostcode, PostCodeModifier respondentPostcode,
+                                                          YesOrNo applicantRepresented, YesOrNo respondentRepresented) {
+        return FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).contactDetailsWrapper(
+            ContactDetailsWrapper.builder()
+                .applicantRepresented(applicantRepresented)
+                .contestedRespondentRepresented(respondentRepresented)
+                .applicantResideOutsideUK(applicantPostcode.resideOutsideUK)
+                .applicantAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(applicantPostcode.postCode)
+                        .build())
+                .applicantSolicitorAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(applicantSolicitorPostcode)
+                        .build())
+                .respondentResideOutsideUK(respondentPostcode.resideOutsideUK)
+                .respondentAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(respondentPostcode.postCode)
+                        .build()
+                )
+                .respondentSolicitorAddress(
+                    Address.builder()
+                        .addressLine1("AddressLine1")
+                        .addressLine2("AddressLine2")
+                        .addressLine3("AddressLine3")
+                        .county("County")
+                        .country("Country")
+                        .postTown("Town")
+                        .postCode(respondentSolicitorPostcode)
+                        .build()
+                ).build()
+        ).build();
+    }
+
     private static FinremCaseData createConsentedCaseData(String applicantSolicitorPostcode, String applicantPostcode,
                                                           String respondentSolicitorPostcode, String respondentPostcode,
-                                                          YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
-                                                          YesOrNo consentedRespondentRepresented) {
+                                                          YesOrNo applicantRepresented, YesOrNo respondentRepresented) {
         return createConsentedCaseData(
             applicantSolicitorPostcode, new PostCodeModifier(applicantPostcode),
             respondentSolicitorPostcode, new PostCodeModifier(respondentPostcode),
-            applicantRepresented, contestedRespondentRepresented,
-            consentedRespondentRepresented
+            applicantRepresented, respondentRepresented
         );
     }
 
     private static FinremCaseData createConsentedCaseData(String applicantSolicitorPostcode, PostCodeModifier applicantPostcode,
                                                           String respondentSolicitorPostcode, PostCodeModifier respondentPostcode,
-                                                          YesOrNo applicantRepresented, YesOrNo contestedRespondentRepresented,
-                                                          YesOrNo consentedRespondentRepresented) {
+                                                          YesOrNo applicantRepresented, YesOrNo respondentRepresented) {
         return FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).contactDetailsWrapper(
             ContactDetailsWrapper.builder()
                 .applicantRepresented(applicantRepresented)
-                .contestedRespondentRepresented(contestedRespondentRepresented)
-                .consentedRespondentRepresented(consentedRespondentRepresented)
+                .consentedRespondentRepresented(respondentRepresented)
                 .applicantResideOutsideUK(applicantPostcode.resideOutsideUK)
                 .applicantAddress(
                     Address.builder()
