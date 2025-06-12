@@ -1,12 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BirminghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LondonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
@@ -19,19 +24,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 class CourtDetailsMapperTest {
+
+    @Mock
+    private CourtDetailsConfiguration courtDetailsConfiguration;
 
     private CourtDetailsMapper courtDetailsMapper;
 
     @BeforeEach
     void setUp() {
-        courtDetailsMapper = new CourtDetailsMapper(new ObjectMapper());
+        courtDetailsMapper = new CourtDetailsMapper(new ObjectMapper(), courtDetailsConfiguration);
     }
 
     @Test
@@ -41,10 +52,10 @@ class CourtDetailsMapperTest {
 
         CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
-        assertThat(courtDetails.getCourtName(), is("Bromley County Court And Family Court"));
-        assertThat(courtDetails.getCourtAddress(), is("Bromley County Court, College Road, Bromley, BR1 3PX"));
-        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
-        assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
+        assertEquals("Bromley County Court And Family Court", courtDetails.getCourtName());
+        assertEquals("Bromley County Court, College Road, Bromley, BR1 3PX", courtDetails.getCourtAddress());
+        assertEquals("FRCLondon@justice.gov.uk", courtDetails.getEmail());
+        assertEquals("0300 123 5577", courtDetails.getPhoneNumber());
     }
 
     @Test
@@ -54,10 +65,10 @@ class CourtDetailsMapperTest {
 
         CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
-        assertThat(courtDetails.getCourtName(), is("Croydon County Court And Family Court"));
-        assertThat(courtDetails.getCourtAddress(), is("Croydon County Court, Altyre Road, Croydon, CR9 5AB"));
-        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
-        assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
+        assertEquals("Croydon County Court And Family Court", courtDetails.getCourtName());
+        assertEquals("Croydon County Court, Altyre Road, Croydon, CR9 5AB", courtDetails.getCourtAddress());
+        assertEquals("FRCLondon@justice.gov.uk", courtDetails.getEmail());
+        assertEquals("0300 123 5577", courtDetails.getPhoneNumber());
     }
 
     @Test
@@ -67,11 +78,10 @@ class CourtDetailsMapperTest {
 
         CourtDetailsTemplateFields courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
-        assertThat(courtDetails.getCourtName(), is("Barnet Civil And Family Courts Centre"));
-        assertThat(courtDetails.getCourtAddress(), is("Barnet County Court, St Marys Court, "
-            + "Regents Park Road, Finchley Central, London, N3 1BQ"));
-        assertThat(courtDetails.getEmail(), is("FRCLondon@justice.gov.uk"));
-        assertThat(courtDetails.getPhoneNumber(), is("0300 123 5577"));
+        assertEquals("Barnet Civil And Family Courts Centre", courtDetails.getCourtName());
+        assertEquals("Barnet County Court, St Marys Court, Regents Park Road, Finchley Central, London, N3 1BQ", courtDetails.getCourtAddress());
+        assertEquals("FRCLondon@justice.gov.uk", courtDetails.getEmail());
+        assertEquals("0300 123 5577", courtDetails.getPhoneNumber());
     }
 
     @Test
@@ -104,16 +114,11 @@ class CourtDetailsMapperTest {
         AllocatedRegionWrapper allocatedRegionWrapperReturn =
             courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper, null);
 
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.MIDLANDS)));
-        assertThat(allocatedRegionWrapperReturn.getMidlandsFrcList(),
-            is(equalTo(RegionMidlandsFrc.BIRMINGHAM)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getBirminghamCourtList(),
-            is(equalTo(BirminghamCourt.WORCESTER_COMBINED_COURT)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
-            is(nullValue()));
+        assertEquals(Region.MIDLANDS, allocatedRegionWrapperReturn.getRegionList());
+        assertEquals(RegionMidlandsFrc.BIRMINGHAM, allocatedRegionWrapperReturn.getMidlandsFrcList());
+        assertEquals(BirminghamCourt.WORCESTER_COMBINED_COURT, allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getBirminghamCourtList());
+        assertNull(allocatedRegionWrapperReturn.getLondonFrcList());
+        assertNull(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList());
     }
 
     @Test
@@ -133,13 +138,9 @@ class CourtDetailsMapperTest {
             courtDetailsMapper.getLatestAllocatedCourt(
                 allocatedRegionWrapperBefore, allocatedRegionWrapper, true);
 
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(equalTo(RegionLondonFrc.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
-            is(equalTo(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT)));
-
+        assertEquals(Region.LONDON, allocatedRegionWrapperReturn.getRegionList());
+        assertEquals(RegionLondonFrc.LONDON, allocatedRegionWrapperReturn.getLondonFrcList());
+        assertEquals(CfcCourt.BRENTFORD_COUNTY_AND_FAMILY_COURT, allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList());
     }
 
     @Test
@@ -169,20 +170,13 @@ class CourtDetailsMapperTest {
             courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
                 null);
 
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.MIDLANDS)));
-        assertThat(allocatedRegionWrapperReturn.getMidlandsFrcList(),
-            is(equalTo(RegionMidlandsFrc.BIRMINGHAM)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getBirminghamCourtList(),
-            is(equalTo(BirminghamCourt.WORCESTER_COMBINED_COURT)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
-            is(nullValue()));
+        assertEquals(Region.MIDLANDS, allocatedRegionWrapperReturn.getRegionList());
+        assertEquals(RegionMidlandsFrc.BIRMINGHAM, allocatedRegionWrapperReturn.getMidlandsFrcList());
+        assertEquals(BirminghamCourt.WORCESTER_COMBINED_COURT, allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getBirminghamCourtList());
+        assertNull(allocatedRegionWrapperReturn.getLondonFrcList());
+        assertNull(allocatedRegionWrapperReturn.getWalesFrcList());
+        assertNull(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList());
+        assertNull(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList());
     }
 
     @Test
@@ -210,16 +204,11 @@ class CourtDetailsMapperTest {
             courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
                 null);
 
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(equalTo(RegionLondonFrc.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList(),
-            is(equalTo(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)));
-        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
-            is(nullValue()));
+        assertEquals(Region.LONDON, allocatedRegionWrapperReturn.getRegionList());
+        assertEquals(RegionLondonFrc.LONDON, allocatedRegionWrapperReturn.getLondonFrcList());
+        assertEquals(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT, allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getCfcCourtList());
+        assertNull(allocatedRegionWrapperReturn.getWalesFrcList());
+        assertNull(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList());
     }
 
     @Test
@@ -237,15 +226,57 @@ class CourtDetailsMapperTest {
             courtDetailsMapper.getLatestAllocatedCourt(allocatedRegionWrapperBefore, allocatedRegionWrapper,
                 true);
 
-        assertThat(allocatedRegionWrapperReturn.getRegionList(),
-            is(equalTo(Region.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getLondonFrcList(),
-            is(equalTo(RegionLondonFrc.LONDON)));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getLondonCourtList(),
-            is(equalTo(LondonCourt.CENTRAL_FAMILY_COURT)));
-        assertThat(allocatedRegionWrapperReturn.getWalesFrcList(),
-            is(nullValue()));
-        assertThat(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList(),
-            is(nullValue()));
+        assertEquals(Region.LONDON, allocatedRegionWrapperReturn.getRegionList());
+        assertEquals(RegionLondonFrc.LONDON, allocatedRegionWrapperReturn.getLondonFrcList());
+        assertEquals(LondonCourt.CENTRAL_FAMILY_COURT, allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getLondonCourtList());
+        assertNull(allocatedRegionWrapperReturn.getWalesFrcList());
+        assertNull(allocatedRegionWrapperReturn.getDefaultCourtListWrapper().getSwanseaCourtList());
+    }
+
+    @Test
+    void givenValidCourtField_whenConvertToFrcCourtDetails_thenReturnExpectedCourtDetailsTemplateFields() {
+        // Mocking the court details map
+        when(courtDetailsConfiguration.getCourts()).thenReturn(Map.of(
+            "FR_s_CFCList_2", new CourtDetails("Croydon County Court And Family Court",
+                "Croydon County Court, Altyre Road, Croydon, CR9 5AB", "0300 123 5577", "FRCLondon@justice.gov.uk")
+        ));
+
+        // Setting up the test data
+        DefaultCourtListWrapper courtList = new DefaultCourtListWrapper();
+        courtList.setCfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT);
+
+        Court court = Court
+            .builder()
+            .londonList(RegionLondonFrc.LONDON)
+            .region(Region.LONDON)
+            .courtListWrapper(DefaultCourtListWrapper
+                .builder()
+                .cfcCourtList(CfcCourt.CROYDON_COUNTY_COURT_AND_FAMILY_COURT)
+                .build())
+            .build();
+
+        // Invoking the method
+        CourtDetails courtDetails = courtDetailsMapper.convertToFrcCourtDetails(court);
+
+        // Assertions
+        assertEquals("Croydon County Court And Family Court", courtDetails.getCourtName());
+        assertEquals("Croydon County Court, Altyre Road, Croydon, CR9 5AB", courtDetails.getCourtAddress());
+        assertEquals("FRCLondon@justice.gov.uk", courtDetails.getEmail());
+        assertEquals("0300 123 5577", courtDetails.getPhoneNumber());
+    }
+
+    @Test
+    void givenNoValidFieldInCourtListWrapper_whenConvertToFrcCourtDetails_thenThrowIllegalStateException() {
+        // Mocking a Court object with an empty DefaultCourtListWrapper
+        Court court = Court.builder()
+            .courtListWrapper(DefaultCourtListWrapper.builder().build())
+            .build();
+
+        // Expecting an IllegalStateException
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> courtDetailsMapper.convertToFrcCourtDetails(court));
+
+        // Verifying the exception message
+        assertEquals("No valid field found in the court list wrapper", exception.getMessage());
     }
 }
