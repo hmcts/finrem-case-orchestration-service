@@ -19,20 +19,23 @@ public class ManageHearingsCorresponder {
     private final HearingNotificationHelper hearingNotificationHelper;
 
     /**
-     * Sends hearing notifications to relevant parties based on the callback request.
+     * Begins sending hearing correspondence to relevant parties based on the callback request.
      * Loops through each selected party in the hearing and sends using
-     * {@link HearingNotificationHelper#sendHearingNotificationsByParty}.</p>
+     *
+     * todo - update this javadoc
+     *
+     * {@link HearingNotificationHelper#sendHearingCorrespondenceByParty}.</p>
      *
      * @param callbackRequest the callback request containing case and hearing data
      */
-    public void sendHearingNotifications(FinremCallbackRequest callbackRequest) {
+    public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         Hearing hearing = hearingNotificationHelper.getHearingInContext(finremCaseData);
 
-        if (!hearingNotificationHelper.shouldSendNotification(hearing)) {
+        if (hearingNotificationHelper.shouldNotSendNotification(hearing)) {
             return;
         }
 
@@ -42,7 +45,7 @@ public class ManageHearingsCorresponder {
         }
 
         for (DynamicMultiSelectListElement party : partyList.getValue()) {
-            hearingNotificationHelper.sendHearingNotificationsByParty(
+            hearingNotificationHelper.sendHearingCorrespondenceByParty(
                     party,
                     finremCaseDetails,
                     hearing

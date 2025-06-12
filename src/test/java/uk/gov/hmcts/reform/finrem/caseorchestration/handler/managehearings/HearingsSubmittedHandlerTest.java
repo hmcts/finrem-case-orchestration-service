@@ -63,7 +63,7 @@ class HearingsSubmittedHandlerTest {
         // Assert
         assertThat(response.getData()).isNotNull();
         assertThat(response.getErrors()).isNullOrEmpty();
-        verify(manageHearingsCorresponder).sendHearingNotifications(callbackRequest);
+        verify(manageHearingsCorresponder).sendHearingCorrespondence(callbackRequest);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId) {

@@ -46,28 +46,28 @@ class ManageHearingsCorresponderTest {
         when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(list);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldSendNotification(hearing)).thenReturn(true);
+        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
-        corresponder.sendHearingNotifications(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest);
 
         // Assert that sendHearingNotificationsByParty called for each party
-        verify(hearingNotificationHelper).sendHearingNotificationsByParty(firstParty, callbackRequest.getCaseDetails(), hearing);
-        verify(hearingNotificationHelper).sendHearingNotificationsByParty(secondParty, callbackRequest.getCaseDetails(), hearing);
+        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(firstParty, callbackRequest.getCaseDetails(), hearing);
+        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(secondParty, callbackRequest.getCaseDetails(), hearing);
     }
 
     @Test
-    void shouldNotSendNotificationsWhenShouldSendNotificationFalse() {
+    void shouldNotSendNotificationsWhenShouldNotSendNotificationTrue() {
         FinremCallbackRequest callbackRequest = callbackRequest();
         Hearing hearing = new Hearing();
 
         when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldSendNotification(hearing)).thenReturn(false);
+        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(true);
 
-        corresponder.sendHearingNotifications(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest);
 
         verify(hearingNotificationHelper, never())
-                .sendHearingNotificationsByParty(any(), any(), any());
+                .sendHearingCorrespondenceByParty(any(), any(), any());
     }
 
     @Test
@@ -82,13 +82,13 @@ class ManageHearingsCorresponderTest {
         when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(list);
 
         when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldSendNotification(hearing)).thenReturn(true);
+        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
-        corresponder.sendHearingNotifications(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest);
 
         verify(hearingNotificationHelper, never())
-                .sendHearingNotificationsByParty(any(), any(), any());
+                .sendHearingCorrespondenceByParty(any(), any(), any());
     }
 
     private FinremCallbackRequest callbackRequest() {

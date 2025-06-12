@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -29,8 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HearingNotificationHelperTest {
@@ -44,6 +45,9 @@ class HearingNotificationHelperTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private PaperNotificationService paperNotificationService;
+
     @InjectMocks
     private HearingNotificationHelper helper;
 
@@ -51,14 +55,14 @@ class HearingNotificationHelperTest {
     void shouldReturnCorrectValuesWhenShouldSendNotificationUsed() {
         Hearing hearing = mock(Hearing.class);
 
-        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.YES);
-        assertTrue(helper.shouldSendNotification(hearing));
-
         when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.NO);
-        assertFalse(helper.shouldSendNotification(hearing));
+        assertTrue(helper.shouldNotSendNotification(hearing));
+
+        when(hearing.getHearingNoticePrompt()).thenReturn(YesOrNo.YES);
+        assertFalse(helper.shouldNotSendNotification(hearing));
 
         when(hearing.getHearingNoticePrompt()).thenReturn(null);
-        assertFalse(helper.shouldSendNotification(hearing));
+        assertTrue(helper.shouldNotSendNotification(hearing));
     }
 
     @Test
@@ -120,10 +124,12 @@ class HearingNotificationHelperTest {
         Hearing hearing = new Hearing();
         NotificationRequest notificationRequest = new NotificationRequest();
 
+        when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails))
+                .thenReturn(false);
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing))
                 .thenReturn(notificationRequest);
 
-        helper.sendHearingNotificationToApplicantSolicitor(finremCaseDetails, hearing);
+        helper.processCorrespondenceForApplicant(finremCaseDetails, hearing);
 
         verify(notificationRequestMapper).buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing);
         verify(notificationService).sendHearingNotificationToApplicant(notificationRequest);
@@ -138,10 +144,12 @@ class HearingNotificationHelperTest {
         Hearing hearing = new Hearing();
         NotificationRequest notificationRequest = new NotificationRequest();
 
+        when(paperNotificationService.shouldPrintForApplicant(caseDetails))
+                .thenReturn(false);
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(caseDetails, hearing))
                 .thenReturn(notificationRequest);
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         verify(notificationRequestMapper).buildHearingNotificationForApplicantSolicitor(caseDetails, hearing);
         verify(notificationService).sendHearingNotificationToApplicant(notificationRequest);
@@ -159,7 +167,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         assertThat(logs.getInfos()).contains("Handling case: RESP_SOLICITOR, work to follow");
     }
@@ -176,7 +184,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_1, work to follow");
     }
@@ -193,7 +201,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_2, work to follow");
     }
@@ -210,7 +218,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_3, work to follow");
     }
@@ -227,7 +235,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_4, work to follow");
     }
@@ -245,7 +253,7 @@ class HearingNotificationHelperTest {
 
         // When
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            helper.sendHearingNotificationsByParty(party, caseDetails, hearing);
+            helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
         });
 
         // Then
