@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.MissingCourtException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -19,8 +22,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -31,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class CourtDetailsMapper {
 
     private final ObjectMapper objectMapper;
+    private final CourtDetailsConfiguration courtDetailsConfiguration;
 
     @SuppressWarnings("java:S3011")
     final BiPredicate<Field, CourtListWrapper> fieldIsNotNullOrEmpty = (field, courtListWrapper) -> {
@@ -83,6 +89,50 @@ public class CourtDetailsMapper {
 
         return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {
         });
+    }
+
+    private Optional<Field> getCourtField(CourtListWrapper regionWrapper) {
+        return Stream.of(regionWrapper.getClass().getDeclaredFields())
+            .filter(field -> fieldIsNotNullOrEmpty.test(field, regionWrapper))
+            .findFirst();
+    }
+
+    /**
+     * Converts the given {@link Court} object to a {@link CourtDetails} object by retrieving the selected court ID
+     * from the associated {@link CourtListWrapper}.
+     *
+     * <p>This method uses reflection to access fields in the {@link CourtListWrapper} to determine the selected court.
+     * While this approach works, it is not ideal because:
+     * <ul>
+     *     <li>Reflection bypasses standard access controls, which can lead to potential security and maintainability issues.</li>
+     *     <li>Changes to the structure of the {@link CourtListWrapper} class (e.g., renaming fields) can break this method
+     *         without any compile-time errors.</li>
+     * </ul>
+     * <p> This method is intended as a temporary solution to retrieve the  court details;
+     * it lacks the appropriate accessors and is brittle to changes in the underlying interface implementation.
+     * The goal is to refactor the {@link Court} object and its associated classes to provide explicit accessors
+     * for retrieving the selected court, eliminating the need for this reflective method.
+     *
+     * @param court the {@link Court} object containing the court list wrapper
+     * @return the {@link CourtDetails} object corresponding to the selected court
+     * @throws IllegalStateException if no valid field is found in the court list wrapper or if the field cannot be accessed.
+     */
+    public CourtDetails convertToFrcCourtDetails(Court court) {
+        CourtListWrapper wrapper = court.getDefaultCourtListWrapper();
+
+        return getCourtField(wrapper)
+            .map(field -> {
+                try {
+                    field.setAccessible(true);
+                    CourtList courtList = (CourtList) field.get(wrapper);
+                    String courtId = courtList.getSelectedCourtId();
+                    return courtDetailsConfiguration.getCourts().get(courtId);
+                } catch (IllegalAccessException e) {
+                    log.error("Error accessing field: {}", field.getName(), e);
+                    throw new IllegalStateException("Unable to access the field: " + field.getName(), e);
+                }
+            })
+            .orElseThrow(() -> new IllegalStateException("No valid field found in the court list wrapper"));
     }
 
     public AllocatedRegionWrapper getLatestAllocatedCourt(AllocatedRegionWrapper regionWrapperBefore,
