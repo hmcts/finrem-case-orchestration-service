@@ -492,7 +492,7 @@ dependencies {
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-    functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
+    functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib, classifier: 'plain'
 
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
