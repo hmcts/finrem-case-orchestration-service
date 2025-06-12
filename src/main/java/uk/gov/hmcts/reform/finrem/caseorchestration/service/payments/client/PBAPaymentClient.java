@@ -2,12 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
@@ -15,11 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.config.PBAPaymentServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.error.InvalidTokenException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.error.PaymentException;
 
 import java.net.URI;
-
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,8 @@ public class PBAPaymentClient {
             log.info("Payment response: {} ", response);
             return response.getBody();
         } catch (Exception ex) {
-            throw new PaymentException(ex);
+            log.info("Payment with SiteId failed with exception : {}", ex.getMessage());
+            return handlePaymentException(ex);
         }
     }
 
@@ -63,7 +65,8 @@ public class PBAPaymentClient {
             log.info("Payment response: {} ", response);
             return response.getBody();
         } catch (Exception ex) {
-            throw new PaymentException(ex);
+            log.info("Payment with CaseType failed with exception : {}", ex.getMessage());
+            return handlePaymentException(ex);
         }
     }
 
@@ -79,6 +82,34 @@ public class PBAPaymentClient {
     }
 
     private URI buildUri() {
-        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
+        return UriComponentsBuilder.fromUriString(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
+    }
+
+    private PaymentResponse handlePaymentException(Exception e) {
+        // The payments API returns HTTP 4xx errors when there is a user error with the PBA account
+        if (e instanceof HttpClientErrorException httpClientErrorException) {
+            return get400ErrorResponse(httpClientErrorException);
+        } else {
+            return PaymentResponse.builder()
+                .error("An error occurred while processing the payment.")
+                .build();
+        }
+    }
+
+    private PaymentResponse get400ErrorResponse(HttpClientErrorException e) {
+        if (isDuplicatePaymentException(e)) {
+            return PaymentResponse.builder()
+                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
+                .build();
+        } else {
+            return PaymentResponse.builder()
+                .error("Payment failed. Please review your account.")
+                .build();
+        }
+    }
+
+    private boolean isDuplicatePaymentException(HttpClientErrorException e) {
+        return e.getStatusCode() == HttpStatus.BAD_REQUEST
+            && StringUtils.contains(e.getResponseBodyAsString(), PaymentResponse.DUPLICATE_PAYMENT_MESSAGE);
     }
 }
