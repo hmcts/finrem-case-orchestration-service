@@ -45,5 +45,4 @@ public class AssignToJudgeConsentInContestedSubmittedHandler extends FinremCallb
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 
-
 }
