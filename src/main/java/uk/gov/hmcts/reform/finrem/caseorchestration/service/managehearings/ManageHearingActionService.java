@@ -7,18 +7,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearing
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
 
 @Service
 @RequiredArgsConstructor
@@ -26,26 +35,46 @@ import java.util.UUID;
 public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
+    private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
 
     /**
-     * Adds a new hearing to the case details and generates the associated hearing notice document.
+     * Adds a new hearing to the case and generates associated documents.
      *
-     * @param finremCaseDetails case details containing hearing data
-     * @param authToken         authorization token for accessing secure resources
+     * Updates the hearings collection and generates documents based on the hearing type
+     * and case configuration. Adds the generated documents to the hearing documents collection.
+     *
+     * @param finremCaseDetails case details containing hearing and case data
+     * @param authToken         authorization token for secure resource access
      */
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
+        HearingType hearingType = hearingWrapper.getWorkingHearing().getHearingType();
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
-        addHearingNotice(hearingWrapper, finremCaseDetails, hearingId, authToken);
 
-        if (HearingType.FDA.equals(hearingWrapper.getWorkingHearing().getHearingType())) {
-            // Generate hearing type specific docs
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(HEARING_NOTICE_DOCUMENT, manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken));
+
+        boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
+            || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
+
+        boolean isNotFastTrack = YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
+
+        if (shouldGenerateFormC) {
+            documentMap.put(FORM_C, manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken));
+
+            if (isNotFastTrack) {
+                documentMap.put(FORM_G, manageHearingsDocumentService.generateFormG(finremCaseDetails, authToken));
+            }
+
+            documentMap.putAll(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, authToken));
+            documentMap.put(OUT_OF_COURT_RESOLUTION, manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, authToken));
         }
 
+        addDocumentsToCollection(documentMap, hearingWrapper);
         updateTabData(caseData);
         hearingWrapper.setWorkingHearing(null);
     }
@@ -74,34 +103,27 @@ public class ManageHearingActionService {
     }
 
     /**
-     * Generates and adds a hearing notice document to the hearing documents collection.
+     * Adds generated documents to the hearing documents collection in the wrapper.
+     * Takes a map of document types and their corresponding `CaseDocument` objects,
+     * and adds them to the hearing documents collection in the `ManageHearingsWrapper`.
+     * Each document is associated with the current working hearing ID.
      *
-     * @param hearingsWrapper wrapper containing hearing-related data
-     * @param finremCaseDetails case details containing the hearing data
-     * @param hearingId the ID for the associated hearing
-     * @param authToken authorization token for accessing secure resources
+     * @param documentMap    a map containing document types as keys and their corresponding `CaseDocument` objects
+     * @param hearingsWrapper the wrapper containing hearing-related data
      */
-    private void addHearingNotice(ManageHearingsWrapper hearingsWrapper,
-                                  FinremCaseDetails finremCaseDetails,
-                                  UUID hearingId,
-                                  String authToken) {
-
-        CaseDocument hearingNotice = manageHearingsDocumentService
-                .generateHearingNotice(hearingsWrapper.getWorkingHearing(), finremCaseDetails, authToken);
-
+    private void addDocumentsToCollection(Map<String, CaseDocument> documentMap, ManageHearingsWrapper hearingsWrapper) {
         List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
-                        hearingsWrapper.getHearingDocumentsCollection())
-                .orElseGet(ArrayList::new);
+                hearingsWrapper.getHearingDocumentsCollection())
+            .orElseGet(ArrayList::new);
 
-        manageHearingDocuments.add(
-                ManageHearingDocumentsCollectionItem.builder()
-                        .value(ManageHearingDocument
-                                .builder()
-                                .hearingId(hearingId)
-                                .hearingDocument(hearingNotice)
-                                .build())
-                        .build()
-        );
+        documentMap.forEach((key, document) -> manageHearingDocuments.add(
+            ManageHearingDocumentsCollectionItem.builder()
+                .value(ManageHearingDocument.builder()
+                    .hearingId(hearingsWrapper.getWorkingHearingId())
+                    .hearingDocument(document)
+                    .build())
+                .build()
+        ));
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
     }

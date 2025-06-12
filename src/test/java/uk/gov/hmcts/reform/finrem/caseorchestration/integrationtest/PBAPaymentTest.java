@@ -32,7 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -52,7 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @Slf4j
 @Category(IntegrationTest.class)
 public class PBAPaymentTest extends BaseTest {
-    private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
+    private static final String PBA_PAYMENT_URL = "/case-orchestration/ccdAboutToSubmitEvent";
     private static final String PBA_URL = "/credit-account-payments";
     private static final String FEE_RESPONSE = "{\n"
         + "  \"code\": \"FEE0600\",\n"
@@ -138,8 +138,8 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("Application (without notice)")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
             .andExpect(jsonPath("$.data.amountToPay", is("5000")))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.errors", is(empty())))
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test
@@ -158,8 +158,8 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("Application (without notice)")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
             .andExpect(jsonPath("$.data.amountToPay", is("5000")))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.errors", is(empty())))
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class PBAPaymentTest extends BaseTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .andExpect(jsonPath("$.warnings", is(empty())));
     }
 
     @Test

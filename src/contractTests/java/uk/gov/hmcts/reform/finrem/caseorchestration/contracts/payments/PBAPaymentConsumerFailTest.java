@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAPaymentClient;
 
 import java.io.IOException;
@@ -22,10 +23,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.contracts.payments.PBAPaymentConsumerSuccessTest.getDslPart;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.contracts.payments.PBAPaymentConsumerSuccessTest.getPaymentRequest;
-
 
 @SpringBootTest({"payment.url: http://localhost:8887"})
 @TestPropertySource(locations = "classpath:application.properties")
@@ -42,7 +42,6 @@ public class PBAPaymentConsumerFailTest extends BaseTest {
 
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("payment_creditAccountPayment", "localhost", 8887, this);
-
 
     @Pact(provider = "payment_creditAccountPayment", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragmentFail(PactDslWithProvider builder) throws IOException {
@@ -73,9 +72,8 @@ public class PBAPaymentConsumerFailTest extends BaseTest {
 
     private void verifyForbiddenRequest(BigDecimal amount) {
         PaymentRequestWithSiteID paymentRequest = getPaymentRequest(amount);
-        assertThrows(Exception.class, () -> {
-            pbaPaymentClient.makePaymentWithSiteId(AUTH_TOKEN, paymentRequest);
-        });
+        PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithSiteId(AUTH_TOKEN, paymentRequest);
+        assertThat(paymentResponse.isPaymentSuccess()).isFalse();
     }
 
     private DslPart buildPBAPaymentResponseDsl(String status, String paymentStatus, String errorCode, String errorMessage) {

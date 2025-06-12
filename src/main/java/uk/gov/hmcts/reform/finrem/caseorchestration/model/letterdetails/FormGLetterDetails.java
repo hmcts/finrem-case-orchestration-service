@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsT
 @NoArgsConstructor
 public class FormGLetterDetails implements DocumentTemplateDetails {
     private String divorceCaseNumber;
+    private String caseNumber;
     private CourtDetailsTemplateFields courtDetails;
     @JsonProperty("applicantFMName")
     private String applicantFmName;
