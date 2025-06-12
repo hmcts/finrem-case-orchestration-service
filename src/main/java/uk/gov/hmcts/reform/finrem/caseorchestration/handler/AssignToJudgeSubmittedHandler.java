@@ -48,9 +48,7 @@ public class AssignToJudgeSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         validateCaseData(callbackRequest);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
