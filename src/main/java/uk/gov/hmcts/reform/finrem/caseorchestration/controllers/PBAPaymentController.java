@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,12 +17,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.miam.MiamLegacyExemptionsService;
 
@@ -31,22 +26,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUBMIT_CASE_DATE;
 
 @RestController
@@ -59,48 +45,10 @@ public class PBAPaymentController extends BaseController {
     private static final String MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE =
         "The following MIAM exemptions that are no longer valid. Please re-submit the exemptions using Amend Application Details.";
 
-    private final FeeService feeService;
-    private final PBAPaymentService pbaPaymentService;
-    private final CaseDataService caseDataService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
     private final PrdOrganisationService prdOrganisationService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
-    private final ObjectMapper objectMapper;
-
-    @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
-
-        validateCaseData(callbackRequest);
-
-        final Map<String, Object> mapOfCaseData = caseDetails.getData();
-        feeLookup(authToken, callbackRequest, mapOfCaseData);
-        boolean helpWithFeeQuestion = Objects.toString(mapOfCaseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
-        if (helpWithFeeQuestion) {
-            boolean pbaPaymentReference = isEmpty((String) mapOfCaseData.get(PBA_PAYMENT_REFERENCE));
-            if (pbaPaymentReference) {
-                PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, caseDetails);
-                if (!paymentResponse.isPaymentSuccess()) {
-                    return paymentFailure(mapOfCaseData, paymentResponse);
-                }
-                mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-                log.info("Payment Succeeded.");
-            } else {
-                log.info("PBA Payment Reference for case already exists.");
-            }
-        } else {
-            log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
-            mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
-    }
 
     @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles assign applicant solicitor call")
@@ -183,23 +131,6 @@ public class PBAPaymentController extends BaseController {
                 .addAll(errorDetails != null ? errorDetails : emptyList())
                 .add("Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case")
                 .build())
-            .build());
-    }
-
-    private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-                           @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService, objectMapper)
-            .feeLookup(authToken, callbackRequest);
-        caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
-        caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
-    }
-
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
-        String paymentError = paymentResponse.getPaymentError();
-        log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER), paymentResponse.getPaymentError());
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(List.of(paymentError))
             .build());
     }
 
