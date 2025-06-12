@@ -32,7 +32,6 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
     }
 
-
     @Test
     public void shouldCreatePaymentResponseWhenInvalidFunds() throws Exception {
         String json = "{"
@@ -55,11 +54,10 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("You have insufficient funds available"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0001"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(),
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0001"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(),
             is("You have insufficient funds available"));
     }
-
 
     @Test
     public void shouldCreatePaymentResponseWhenAccountOnHold() throws Exception {
@@ -83,10 +81,9 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("Your account is on hold"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0003"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is on hold"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0003"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(), is("Your account is on hold"));
     }
-
 
     @Test
     public void shouldCreatePaymentResponseWhenAccountDeleted() throws Exception {
@@ -110,10 +107,9 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
         assertThat(paymentResponse.getPaymentError(), is("Your account is deleted"));
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0004"));
-        assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is deleted"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorCode(), is("CA-E0004"));
+        assertThat(paymentResponse.getStatusHistories().getFirst().getErrorMessage(), is("Your account is deleted"));
     }
-
 
     @Test
     public void shouldCreatePaymentResponseWhenAccessIsDenied() throws Exception {
@@ -132,4 +128,21 @@ public class PaymentResponseTest {
         assertThat(paymentResponse.getStatusHistories(), nullValue());
     }
 
+    @Test
+    public void shouldCreatePaymentResponseWhenDuplicatePayment() throws Exception {
+        String json = "{"
+            + "  \"timestamp\": \"2019-01-09T17:59:20.473+0000\","
+            + "  \"status\": 400,"
+            + "  \"error\": \"duplicate payment\","
+            + "  \"path\": \"/credit-account-payments\""
+            + "}";
+        PaymentResponse paymentResponse = mapper.readValue(json, PaymentResponse.class);
+        assertThat(paymentResponse.getReference(), nullValue());
+        assertThat(paymentResponse.getStatus(), is("400"));
+        assertThat(paymentResponse.isPaymentSuccess(), is(false));
+        assertThat(paymentResponse.getPaymentError(), nullValue());
+        assertThat(paymentResponse.getMessage(), nullValue());
+        assertThat(paymentResponse.isDuplicatePayment(), is(true));
+        assertThat(paymentResponse.getStatusHistories(), nullValue());
+    }
 }
