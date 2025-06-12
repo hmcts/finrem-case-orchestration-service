@@ -21,8 +21,26 @@ public class ContactDetailsValidator {
     private ContactDetailsValidator() {
     }
 
-    public static List<String> validateCaseDataAddresses(FinremCaseData caseData) {
+    /**
+     * Validates the postcode fields within the contact details of the given case data.
+     *
+     * <p>
+     * This method checks for missing or empty postcode fields depending on whether the applicant,
+     * respondent, or their solicitors are expected to reside in the UK.
+     * </p>
+     *
+     * <ul>
+     *   <li>Applicant solicitor postcode (if applicable)</li>
+     *   <li>Applicant postcode (if applicable)</li>
+     *   <li>Respondent solicitor postcode (if applicable)</li>
+     *   <li>Respondent postcode (if applicable)</li>
+     * </ul>
+     *
+     * @param caseData the {@link FinremCaseData} containing contact details to validate
+     * @return a list of validation error messages for any missing or invalid postcode fields
+     */
 
+    public static List<String> validateCaseDataAddresses(FinremCaseData caseData) {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
 
@@ -40,10 +58,12 @@ public class ContactDetailsValidator {
      * <p>
      * For contested cases, the postcode is taken from {@code wrapper.getApplicantSolicitorAddress()}.
      * For consented cases, the postcode is taken from {@code wrapper.getSolicitorAddress()}.
+     * </p>
      *
      * <p>
      * If the applicant is represented by a solicitor and the postcode is missing or invalid,
      * an error message is added to the provided {@code errors} list.
+     * </p>
      *
      * @param caseData the case data containing case type and solicitor representation info
      * @param wrapper the wrapper containing solicitor address details
@@ -69,9 +89,11 @@ public class ContactDetailsValidator {
      * <p>
      * If the applicant resides in the UK (or residency is unspecified) and the postcode is missing or empty,
      * an error message is added to the provided {@code errors} list.
+     * </p>
      *
      * <p>
      * If the applicant resides outside the UK, postcode validation is skipped.
+     * </p>
      *
      * @param wrapper the wrapper containing applicant address and residency details
      * @param errors the list to which error messages will be added if validation fails
@@ -90,6 +112,7 @@ public class ContactDetailsValidator {
      * If the respondent is represented by a solicitor and the postcode in
      * {@code wrapper.getRespondentSolicitorAddress()} is missing or empty, an error message is added
      * to the provided {@code errors} list.
+     * </p>
      *
      * @param caseData the case data indicating solicitor representation status
      * @param wrapper the wrapper containing respondent solicitor address details
@@ -109,9 +132,11 @@ public class ContactDetailsValidator {
      * If the respondent resides in the UK (or if residency is unspecified) and the postcode in
      * {@code wrapper.getRespondentAddress()} is missing or empty, an error message is added
      * to the provided {@code errors} list.
+     * </p>
      *
      * <p>
      * If the respondent resides outside the UK, postcode validation is skipped.
+     * </p>
      *
      * @param wrapper the wrapper containing respondent address and residency details
      * @param errors the list to which error messages will be added if validation fails
@@ -130,6 +155,7 @@ public class ContactDetailsValidator {
      * This method is typically used for validating applicant or respondent solicitor addresses,
      * where it is expected that the solicitor resides within the UK.
      * Therefore, the {@code resideOutsideUK} flag is assumed to be {@link YesOrNo#NO}.
+     * </p>
      *
      * @param address the solicitor's address to validate
      * @return {@code true} if the address is empty or missing a postcode; {@code false} otherwise
@@ -147,11 +173,13 @@ public class ContactDetailsValidator {
      *   <li>The person lives in the UK (either explicitly or because the field is not set), and</li>
      *   <li>The address is empty or missing a postcode.</li>
      * </ul>
+     * </p>
      *
      * <p>
      * If the person lives outside the UK, address validation is not enforced (always returns false).
      * If the {@code resideOutsideUK} field is not set and the address is empty or null,
      * the address is not considered invalid.
+     * </p>
      *
      * @param address           the address to validate
      * @param resideOutsideUK   {@code YES} if the person lives outside the UK, {@code NO} if they live in the UK,
