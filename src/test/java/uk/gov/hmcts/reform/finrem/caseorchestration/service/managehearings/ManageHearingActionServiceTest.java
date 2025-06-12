@@ -29,9 +29,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -51,8 +50,6 @@ class ManageHearingActionServiceTest {
 
     @Captor
     private ArgumentCaptor<ManageHearingsCollectionItem> hearingCaptor;
-
-    private static final String AUTH_TOKEN = "authToken";
 
     private FinremCaseDetails finremCaseDetails;
     private ManageHearingsWrapper hearingWrapper;
@@ -119,7 +116,7 @@ class ManageHearingActionServiceTest {
                 .build()))
             .build();
 
-        when(manageHearingsDocumentService.generateHearingNotice(hearing, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
         when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
@@ -186,7 +183,7 @@ class ManageHearingActionServiceTest {
             .tabDateTime("15 Jul 2025 11:00")
             .build();
 
-        when(manageHearingsDocumentService.generateHearingNotice(hearing1, finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateHearingNotice( finremCaseDetails, AUTH_TOKEN))
             .thenReturn(CaseDocument.builder().build());
 
         when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
