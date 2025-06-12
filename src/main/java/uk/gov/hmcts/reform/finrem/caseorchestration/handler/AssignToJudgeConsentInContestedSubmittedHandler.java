@@ -29,15 +29,14 @@ public class AssignToJudgeConsentInContestedSubmittedHandler extends FinremCallb
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.ASSIGN_TO_JUDGE_CONSENT.equals(eventType));
+            && EventType.ASSIGN_TO_JUDGE_CONSENT.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
-            caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
