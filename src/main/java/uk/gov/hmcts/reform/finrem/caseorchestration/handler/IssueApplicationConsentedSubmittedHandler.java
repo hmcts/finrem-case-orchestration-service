@@ -10,19 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.IssueApplicationConsentedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.AssignedToJudgeSkipRespIntlPostCorresponder;
 
 @Slf4j
 @Service
 public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
 
-    private final IssueApplicationConsentedCorresponder issueApplicationConsentedCorresponder;
+    private final AssignedToJudgeSkipRespIntlPostCorresponder assignedToJudgeSkipRespIntlPostCorresponder;
 
     @Autowired
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationConsentedCorresponder issueApplicationConsentedCorresponder) {
+                                                     AssignedToJudgeSkipRespIntlPostCorresponder assignedToJudgeSkipRespIntlPostCorresponder) {
         super(finremCaseDetailsMapper);
-        this.issueApplicationConsentedCorresponder = issueApplicationConsentedCorresponder;
+        this.assignedToJudgeSkipRespIntlPostCorresponder = assignedToJudgeSkipRespIntlPostCorresponder;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        issueApplicationConsentedCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        assignedToJudgeSkipRespIntlPostCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 }

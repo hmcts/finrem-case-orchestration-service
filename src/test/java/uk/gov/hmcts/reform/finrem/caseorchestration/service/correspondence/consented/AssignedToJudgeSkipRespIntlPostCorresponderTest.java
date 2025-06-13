@@ -1,0 +1,220 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+
+@ExtendWith(MockitoExtension.class)
+class AssignedToJudgeSkipRespIntlPostCorresponderTest {
+
+    private final CaseType[] testingCastTypes = new CaseType[] {CONSENTED, CONTESTED};
+
+    private final CaseDocument expectedCaseDocument = expectedCaseDocument();
+
+    @InjectMocks
+    private AssignedToJudgeSkipRespIntlPostCorresponder underTest;
+
+    @Mock
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private BulkPrintService bulkPrintService;
+
+    @BeforeEach
+    void setUp() {
+        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(expectedCaseDocument);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DocumentHelper.PaperNotificationRecipient.class,
+        names = {"APPLICANT", "RESPONDENT"})
+    void givenAnyCaseTypeCase_whenGetDocumentToPrint_thenReturnExpectedDocument(DocumentHelper.PaperNotificationRecipient party) {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+            switch (party) {
+                case APPLICANT:
+                    lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
+                        DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(unexpectedCaseDocument());
+                    break;
+                case RESPONDENT:
+                    lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
+                        DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(unexpectedCaseDocument());
+                    break;
+                default:
+                    throw new IllegalStateException("Unreachable code");
+            }
+
+            // Act
+            CaseDocument result = underTest.getDocumentToPrint(caseDetails, AUTH_TOKEN, party);
+
+            // Assert
+            assertThat(result).isEqualTo(expectedCaseDocument);
+        }
+    }
+
+    @Test
+    void givenAnyCaseTypeCase_whenApplicantSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+            when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        }
+    }
+
+    @Test
+    void givenAnyCaseTypeCase_whenApplicantSolicitorEmailNotPopulated_thenSendLetter() {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+            when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        }
+    }
+
+    @Test
+    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        }
+    }
+
+    @Test
+    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulated_thenSendLetter() {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+
+            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        }
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(value = YesOrNo.class, names = {"NO"})
+    void givenAnyCaseTypeCaseWithRespondentResideOutsideUK_whenRespondentSolicitorEmailNotPopulated_thenSendLetter(
+        YesOrNo respondentResideOutsideUK) {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseData caseData = FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .respondentResideOutsideUK(respondentResideOutsideUK)
+                    .build())
+                .build();
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType, caseData);
+
+            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        }
+    }
+
+    @Test
+    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendLetter() {
+        for (CaseType caseType : testingCastTypes) {
+            // Arrange
+            FinremCaseData caseData = FinremCaseData.builder()
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .respondentResideOutsideUK(YesOrNo.YES)
+                    .build())
+                .build();
+            FinremCaseDetails caseDetails = buildCaseDetails(caseType, caseData);
+
+            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+
+            // Act
+            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+            // Assert
+            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        }
+    }
+
+    private FinremCaseDetails buildCaseDetails(CaseType caseType) {
+        return buildCaseDetails(caseType, FinremCaseData.builder().ccdCaseType(caseType).build());
+    }
+
+    private FinremCaseDetails buildCaseDetails(CaseType caseType, FinremCaseData caseData) {
+        caseData.setCcdCaseType(caseType);
+        return FinremCaseDetailsBuilderFactory.from(CASE_ID, caseType, caseData)
+            .build();
+    }
+
+    private CaseDocument expectedCaseDocument() {
+        return CaseDocument.builder().documentFilename("expected").build();
+    }
+
+    private CaseDocument unexpectedCaseDocument() {
+        return CaseDocument.builder().documentFilename("unexpected").build();
+    }
+
+}

@@ -14,14 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 
 @Slf4j
 @Component
-public class IssueApplicationConsentedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+public class AssignedToJudgeSkipRespIntlPostCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     @Autowired
-    public IssueApplicationConsentedCorresponder(NotificationService notificationService,
-                                                 BulkPrintService bulkPrintService,
-                                                 AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
+    public AssignedToJudgeSkipRespIntlPostCorresponder(NotificationService notificationService,
+                                                       BulkPrintService bulkPrintService,
+                                                       AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
         super(notificationService, bulkPrintService);
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
     }
