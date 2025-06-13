@@ -10,19 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.IssueApplicationCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.IssueApplicationConsentedCorresponder;
 
 @Slf4j
 @Service
 public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
 
-    private final IssueApplicationCorresponder issueApplicationCorresponder;
+    private final IssueApplicationConsentedCorresponder issueApplicationConsentedCorresponder;
 
     @Autowired
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     IssueApplicationCorresponder issueApplicationCorresponder) {
+                                                     IssueApplicationConsentedCorresponder issueApplicationConsentedCorresponder) {
         super(finremCaseDetailsMapper);
-        this.issueApplicationCorresponder = issueApplicationCorresponder;
+        this.issueApplicationConsentedCorresponder = issueApplicationConsentedCorresponder;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        issueApplicationCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        issueApplicationConsentedCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 }

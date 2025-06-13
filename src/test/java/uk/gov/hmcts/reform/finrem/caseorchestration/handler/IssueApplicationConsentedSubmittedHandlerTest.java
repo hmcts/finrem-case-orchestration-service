@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.IssueApplicationCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.IssueApplicationConsentedCorresponder;
 
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -23,7 +23,7 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     private IssueApplicationConsentedSubmittedHandler handlerUnderTest;
 
     @Mock
-    private IssueApplicationCorresponder issueApplicationCorresponder;
+    private IssueApplicationConsentedCorresponder issueApplicationConsentedCorresponder;
 
     @Test
     void testCanHandle() {
@@ -34,7 +34,7 @@ class IssueApplicationConsentedSubmittedHandlerTest {
     void testHandle() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         handlerUnderTest.handle(callbackRequest, AUTH_TOKEN);
-        verify(issueApplicationCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(issueApplicationConsentedCorresponder).sendCorrespondence(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
