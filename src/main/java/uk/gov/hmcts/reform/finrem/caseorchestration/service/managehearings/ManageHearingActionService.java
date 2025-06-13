@@ -149,6 +149,8 @@ public class ManageHearingActionService {
                 .build())
             .toList();
 
+        List<app>
+
         caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
     }
 }

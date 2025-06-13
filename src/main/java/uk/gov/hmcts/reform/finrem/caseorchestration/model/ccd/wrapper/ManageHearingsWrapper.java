@@ -29,4 +29,10 @@ public class ManageHearingsWrapper {
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
     private UUID workingHearingId;
     private List<HearingTabCollectionItem> hearingTabItems;
+    private List<HearingTabCollectionItem> applicantTabItems;
+    private List<HearingTabCollectionItem> respondentTabItems;
+    private List<HearingTabCollectionItem> int1TabItems;
+    private List<HearingTabCollectionItem> int2TabItems;
+    private List<HearingTabCollectionItem> int3TabItems;
+    private List<HearingTabCollectionItem> int4TabItems;
 }
