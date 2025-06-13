@@ -3,95 +3,152 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildHearingFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ManageHearingsDocumentService {
 
-    private final CourtDetailsConfiguration courtDetailsConfiguration;
     private final GenericDocumentService genericDocumentService;
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
     private final DocumentConfiguration documentConfiguration;
-
-    private static final String CASE_DETAILS = "caseDetails";
-    private static final String CASE_DATA = "case_data";
-    private static final String CCD_CASE_NUMBER = "ccdCaseNumber";
-    private static final String APPLICANT_NAME = "applicantName";
-    private static final String RESPONDENT_NAME = "respondentName";
-    private static final String LETTER_DATE = "letterDate";
-    private static final String HEARING_TYPE = "hearingType";
-    private static final String HEARING_DATE = "hearingDate";
-    private static final String HEARING_TIME = "hearingTime";
-    private static final String HEARING_TIME_ESTIMATE = "hearingTimeEstimate";
-    private static final String COURT_DETAILS = "courtDetails";
-    private static final String HEARING_VENUE = "hearingVenue";
-    private static final String ATTENDANCE = "attendance";
-    private static final String ADDITIONAL_HEARING_INFORMATION = "additionalHearingInformation";
+    private final HearingNoticeLetterDetailsMapper hearingNoticeLetterDetailsMapper;
+    private final ManageHearingFormCLetterDetailsMapper manageHearingFormCLetterDetailsMapper;
+    private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
+    private final ExpressCaseService expressCaseService;
+    private final StaticHearingDocumentService staticHearingDocumentService;
 
     /**
      * Generates a hearing notice document for the given hearing and case details.
      *
-     * @param hearing the hearing information to include in the notice
-     * @param finremCaseDetails the case details containing case data
+     * @param finremCaseDetails  the case details containing case data
      * @param authorisationToken the authorisation token for document generation
      * @return the generated hearing notice as a {@link CaseDocument}
      */
-    public CaseDocument generateHearingNotice(Hearing hearing,
-                                              FinremCaseDetails finremCaseDetails,
+    public CaseDocument generateHearingNotice(FinremCaseDetails finremCaseDetails,
                                               String authorisationToken) {
 
-        FinremCaseData finremCaseData = finremCaseDetails.getData();
+        Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        Map<String, Object> documentDataMap = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails).getData();
-
-        documentDataMap.put(CCD_CASE_NUMBER, finremCaseDetails.getId().toString());
-        documentDataMap.put(APPLICANT_NAME, finremCaseData.getFullApplicantName());
-        documentDataMap.put(RESPONDENT_NAME, finremCaseData.getFullRespondentNameContested());
-        documentDataMap.put(LETTER_DATE, LocalDate.now().toString());
-        documentDataMap.put(HEARING_TYPE, hearing.getHearingType());
-        documentDataMap.put(HEARING_DATE, hearing.getHearingDate().toString());
-        documentDataMap.put(HEARING_TIME, hearing.getHearingTime());
-        documentDataMap.put(HEARING_TIME_ESTIMATE, hearing.getHearingTimeEstimate());
-        documentDataMap.put(COURT_DETAILS, buildHearingFrcCourtDetails(finremCaseData));
-        documentDataMap.put(HEARING_VENUE, courtDetailsConfiguration.getCourts().get(finremCaseData.getSelectedHearingCourt()).getCourtAddress());
-        documentDataMap.put(
-            ATTENDANCE,
-            hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : ""
-        );
-        documentDataMap.put(
-            ADDITIONAL_HEARING_INFORMATION,
-            hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : ""
-        );
-
-        HashMap<String, Object> caseDetailsMap = new HashMap<>(Map.of(
-            CASE_DETAILS, Map.of(
-                CASE_DATA, documentDataMap
-            )
-        ));
-
-        CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap,
-                documentConfiguration.getManageHearingNoticeTemplate(),
+        CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(
+                authorisationToken,
+                documentDataMap,
+                documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
                 documentConfiguration.getManageHearingNoticeFileName(),
-                finremCaseDetails.getId().toString());
+                finremCaseDetails.getId().toString()
+        );
 
-        hearingDoc.setCategoryId(DocumentCategory.HEARING_DOCUMENTS.getDocumentCategoryId());
+        hearingDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
 
         return hearingDoc;
+    }
+
+    /**
+     * Generates appropriate Form C document based on the case type (standard/fast track/express).
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form C document as a {@link CaseDocument}
+     */
+    public CaseDocument generateFormC(FinremCaseDetails finremCaseDetails,
+                                      String authorisationToken) {
+
+        Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+
+        CaseDocument formC = genericDocumentService.generateDocumentFromPlaceholdersMap(
+                authorisationToken,
+                documentDataMap,
+                determineFormCTemplate(finremCaseDetails),
+                documentConfiguration.getFormCFileName(),
+                finremCaseDetails.getId().toString()
+        );
+
+        formC.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+
+        return formC;
+    }
+
+    /**
+     * Generates Form G document.
+     *
+     * @param finremCaseDetails  the case details
+     * @param authorisationToken the token for document generation
+     * @return the generated Form G document as a {@link CaseDocument}
+     */
+    public CaseDocument generateFormG(FinremCaseDetails finremCaseDetails,
+                                      String authorisationToken) {
+
+        Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
+
+        CaseDocument formG = genericDocumentService.generateDocumentFromPlaceholdersMap(
+                authorisationToken,
+                documentDataMap,
+                documentConfiguration.getFormGTemplate(finremCaseDetails),
+                documentConfiguration.getFormGFileName(),
+                finremCaseDetails.getId().toString()
+        );
+
+        formG.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+
+        return formG;
+    }
+
+    /**
+     * Generates PFD NCDR documents including compliance letter and cover letter if required.
+     *
+     * @param caseDetails        the case details
+     * @param authorisationToken the authorisation token for document generation
+     * @return a map containing the generated PFD NCDR documents
+     */
+    public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+        String caseId = caseDetails.getId().toString();
+
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(PFD_NCDR_COMPLIANCE_LETTER,
+                staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken));
+
+        if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
+            documentMap.put(PFD_NCDR_COVER_LETTER,
+                    staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken));
+        }
+
+        return documentMap;
+    }
+
+    /**
+     * Generates an Out-of-Court Resolution document.
+     *
+     * @param caseDetails  the case details containing case data
+     * @param authToken    the authorization token for document generation
+     * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
+     */
+    public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
+        return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+    }
+
+    private String determineFormCTemplate(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        if (expressCaseService.isExpressCase(caseData)) {
+            return documentConfiguration.getManageHearingExpressFormCTemplate();
+        } else if (caseData.isFastTrackApplication()) {
+            return documentConfiguration.getFormCFastTrackTemplate(caseDetails);
+        } else {
+            return documentConfiguration.getFormCStandardTemplate(caseDetails);
+        }
     }
 }

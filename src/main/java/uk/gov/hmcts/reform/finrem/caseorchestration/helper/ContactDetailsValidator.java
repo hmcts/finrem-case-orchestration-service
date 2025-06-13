@@ -48,7 +48,6 @@ public class ContactDetailsValidator {
         }
     }
 
-
     private static void checkForEmptyApplicantPostcode(ContactDetailsWrapper wrapper, List<String> errors) {
         Address applicantAddress = wrapper.getApplicantAddress();
 
