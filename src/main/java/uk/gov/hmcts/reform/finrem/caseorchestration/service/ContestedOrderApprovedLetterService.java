@@ -59,11 +59,11 @@ public class ContestedOrderApprovedLetterService {
      * @param authorisationToken the authorisation token for document generation service
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
-        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
-            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
-            .map(ExtraReportFieldsInput::getOrderApprovedDate)
-            .orElse(null);
-        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
+//        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
+//            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
+//            .map(ExtraReportFieldsInput::getOrderApprovedDate)
+//            .orElse(null);
+//        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
@@ -75,7 +75,7 @@ public class ContestedOrderApprovedLetterService {
 
         CoverLetter coverLetter = new CoverLetter();
         coverLetter.setCaseDocument(approvedOrderCoverLetter);
-        coverLetter.setOrderApprovedDate(orderApprovedDate);
+//        coverLetter.setOrderApprovedDate(orderApprovedDate);
         finremCaseDetails.getData().getOrderApprovedCoverLetterCollection().add(
             CoverLetterCollection.builder()
                 .value(coverLetter)
