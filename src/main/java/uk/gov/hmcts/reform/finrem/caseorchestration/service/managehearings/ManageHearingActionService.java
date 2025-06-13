@@ -24,10 +24,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor
@@ -149,8 +151,16 @@ public class ManageHearingActionService {
                 .build())
             .toList();
 
-        List<app>
+        List<HearingTabCollectionItem> applicantTabItems = hearingTabItems.stream()
+            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(APPLICANT))
+            .toList();
 
+        List<HearingTabCollectionItem> respondentTabItems = hearingTabItems.stream()
+            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(RESPONDENT))
+            .toList();
+
+        caseData.getManageHearingsWrapper().setRespondentHearingTabItems(respondentTabItems);
+        caseData.getManageHearingsWrapper().setApplicantHearingTabItems(applicantTabItems);
         caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
     }
 }
