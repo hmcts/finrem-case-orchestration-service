@@ -34,7 +34,7 @@ public class GeneralApplicationReferToJudgeSubmittedHandler extends FinremCallba
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.submitted(callbackRequest);
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (isJudgeEmailPresent(caseDetails.getData())) {
