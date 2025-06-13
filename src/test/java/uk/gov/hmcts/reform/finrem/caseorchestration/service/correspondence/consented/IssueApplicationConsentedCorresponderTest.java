@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -13,9 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -28,6 +32,12 @@ class IssueApplicationConsentedCorresponderTest {
 
     @Mock
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private BulkPrintService bulkPrintService;
 
     @ParameterizedTest
     @EnumSource(value = DocumentHelper.PaperNotificationRecipient.class,
@@ -55,6 +65,19 @@ class IssueApplicationConsentedCorresponderTest {
 
         // Assert
         assertThat(result).isEqualTo(expectedCaseDocument);
+    }
+
+    @Test
+    void givenConsentedCase_whenApplicantSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
+        // Arrange
+        FinremCaseDetails caseDetails = consentedCaseDetails();
+        when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
+
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     private FinremCaseDetails consentedCaseDetails() {
