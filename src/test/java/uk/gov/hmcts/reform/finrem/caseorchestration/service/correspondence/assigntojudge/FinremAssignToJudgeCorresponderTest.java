@@ -86,7 +86,7 @@ public class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    public void shouldEmailApplicantSolcitor() {
+    public void shouldEmailApplicantSolicitor() {
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorEmailPopulated(caseDetails);

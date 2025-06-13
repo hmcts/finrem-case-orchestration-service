@@ -62,5 +62,4 @@ public class FinremAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAl
         notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails,
             notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerWrapper));
     }
-
 }
