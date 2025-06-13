@@ -48,7 +48,6 @@ public class AssignToJudgeSubmittedHandler extends FinremCallbackHandler {
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
-        validateCaseData(callbackRequest);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
