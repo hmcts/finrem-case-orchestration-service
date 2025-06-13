@@ -10,13 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CoverLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CoverLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
@@ -53,6 +59,11 @@ public class ContestedOrderApprovedLetterService {
      * @param authorisationToken the authorisation token for document generation service
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+//        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
+//            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
+//            .map(ExtraReportFieldsInput::getOrderApprovedDate)
+//            .orElse(null);
+//        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
@@ -62,7 +73,15 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
-        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+        CoverLetter coverLetter = new CoverLetter();
+        coverLetter.setCaseDocument(approvedOrderCoverLetter);
+//        coverLetter.setOrderApprovedDate(orderApprovedDate);
+        finremCaseDetails.getData().getOrderApprovedCoverLetterCollection().add(
+            CoverLetterCollection.builder()
+                .value(coverLetter)
+                .build()
+        );
+        //finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
@@ -88,5 +107,6 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        caseData.put("orderApprovedDate", caseDetails.getData().get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }
