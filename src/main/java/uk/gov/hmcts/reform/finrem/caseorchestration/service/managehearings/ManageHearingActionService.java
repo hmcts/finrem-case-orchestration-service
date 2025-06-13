@@ -28,6 +28,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
@@ -138,8 +142,9 @@ public class ManageHearingActionService {
      * @param caseData the case data containing the hearings and hearing documents
      */
     private void updateTabData(FinremCaseData caseData) {
-        List<ManageHearingsCollectionItem> hearings =
-            caseData.getManageHearingsWrapper().getHearings();
+
+        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+        List<ManageHearingsCollectionItem> hearings = hearingsWrapper.getHearings();
 
         List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
             .sorted(Comparator.comparing(hearingCollectionItem ->
@@ -151,16 +156,25 @@ public class ManageHearingActionService {
                 .build())
             .toList();
 
-        List<HearingTabCollectionItem> applicantTabItems = hearingTabItems.stream()
-            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(APPLICANT))
-            .toList();
+        List<HearingTabCollectionItem> applicantTabItems = filterHearingTabItems(hearingTabItems, APPLICANT);
+        List<HearingTabCollectionItem> respondentTabItems = filterHearingTabItems(hearingTabItems, RESPONDENT);
+        List<HearingTabCollectionItem> int1TabItems = filterHearingTabItems(hearingTabItems, INTERVENER1);
+        List<HearingTabCollectionItem> int2TabItems = filterHearingTabItems(hearingTabItems, INTERVENER2);
+        List<HearingTabCollectionItem> int3TabItems = filterHearingTabItems(hearingTabItems, INTERVENER3);
+        List<HearingTabCollectionItem> int4TabItems = filterHearingTabItems(hearingTabItems, INTERVENER4);
 
-        List<HearingTabCollectionItem> respondentTabItems = hearingTabItems.stream()
-            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(RESPONDENT))
-            .toList();
+        hearingsWrapper.setHearingTabItems(hearingTabItems);
+        hearingsWrapper.setRespondentHearingTabItems(respondentTabItems);
+        hearingsWrapper.setApplicantHearingTabItems(applicantTabItems);
+        hearingsWrapper.setInt1HearingTabItems(int1TabItems);
+        hearingsWrapper.setInt2HearingTabItems(int2TabItems);
+        hearingsWrapper.setInt3HearingTabItems(int3TabItems);
+        hearingsWrapper.setInt4HearingTabItems(int4TabItems);
+    }
 
-        caseData.getManageHearingsWrapper().setRespondentHearingTabItems(respondentTabItems);
-        caseData.getManageHearingsWrapper().setApplicantHearingTabItems(applicantTabItems);
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
+    private List<HearingTabCollectionItem> filterHearingTabItems(List<HearingTabCollectionItem> hearingTabItems, String party) {
+        return hearingTabItems.stream()
+            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList();
     }
 }
