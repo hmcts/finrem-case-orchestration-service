@@ -194,7 +194,7 @@ class AssignedToJudgeSkipRespIntlPostCorresponderTest {
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendLetter() {
+    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
         for (CaseType caseType : testingCastTypes) {
             // Arrange
             FinremCaseData caseData = FinremCaseData.builder()
