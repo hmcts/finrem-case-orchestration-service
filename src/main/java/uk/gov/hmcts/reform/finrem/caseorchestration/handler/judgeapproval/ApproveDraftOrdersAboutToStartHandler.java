@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -130,6 +131,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
 
+                prePopulateOrderApprovedDate(draftOrdersReview);
+
                 // Process Draft Orders
                 Stream<JudgeApproval> draftOrderStream = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
                     .map(DraftOrderDocReviewCollection::getValue)
@@ -142,6 +145,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
+                        .orderApprovedDate(draftOrdersReview.getOrderApprovedDate())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -174,6 +178,21 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             })
             .sorted(Comparator.comparing(JudgeApproval::getSortKey, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
+    }
+
+    /**
+     * Pre-populates the orderApprovedDate in the DraftOrdersReview object.
+     * If orderApprovedDate is not set, it uses hearingDate if available, otherwise defaults to current date.
+     *
+     * @param draftOrdersReview the DraftOrdersReview object to update
+     */
+    private static void prePopulateOrderApprovedDate(DraftOrdersReview draftOrdersReview) {
+        // Ensure orderApprovedDate is set if not already
+        draftOrdersReview.setOrderApprovedDate(
+            Optional.ofNullable(draftOrdersReview.getOrderApprovedDate())
+                .orElseGet(() -> Optional.ofNullable(draftOrdersReview.getHearingDate())
+                    .orElse(java.time.LocalDate.now()))
+        );
     }
 
     private JudgeApproval createReviewableItems(List<DraftOrdersReviewCollection> outstanding, int index) {

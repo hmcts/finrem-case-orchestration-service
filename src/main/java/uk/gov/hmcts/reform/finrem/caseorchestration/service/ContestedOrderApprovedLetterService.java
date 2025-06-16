@@ -67,21 +67,21 @@ public class ContestedOrderApprovedLetterService {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        populateTemplateVariables(caseDetailsCopy, judgeDetails);
+        populateTemplateVariables(finremCaseDetails, caseDetailsCopy, judgeDetails);
 
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
-        CoverLetter coverLetter = new CoverLetter();
-        coverLetter.setCaseDocument(approvedOrderCoverLetter);
+//        CoverLetter coverLetter = new CoverLetter();
+//        coverLetter.setCaseDocument(approvedOrderCoverLetter);
 //        coverLetter.setOrderApprovedDate(orderApprovedDate);
-        finremCaseDetails.getData().getOrderApprovedCoverLetterCollection().add(
-            CoverLetterCollection.builder()
-                .value(coverLetter)
-                .build()
-        );
-        //finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+//        finremCaseDetails.getData().getOrderApprovedCoverLetterCollection().add(
+//            CoverLetterCollection.builder()
+//                .value(coverLetter)
+//                .build()
+//        );
+        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
@@ -93,6 +93,12 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_COVER_LETTER, approvedOrderCoverLetter);
+    }
+
+    private void populateTemplateVariables(FinremCaseDetails finremCaseDetails, CaseDetails caseDetails, String judgeDetails) {
+        populateTemplateVariables(caseDetails, judgeDetails);
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put("orderApprovedDate", finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate());
     }
 
     private void populateTemplateVariables(CaseDetails caseDetails, String judgeDetails) {
@@ -107,6 +113,5 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
-        caseData.put("orderApprovedDate", caseDetails.getData().get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }
