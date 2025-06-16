@@ -1,111 +1,233 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.StampDocumentException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.ImageUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.IsNull.notNullValue;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.ANNEX_IMAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.COURT_SEAL_IMAGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fileUploadResponse;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo.HIGH_COURT_SEAL_IMAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.HIGH_COURT_STAMP;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PdfStampingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PdfStampingServiceTest {
 
-    public static final String COURT_SEAL_PDF = "/courtseal.pdf";
-    public static final String HIGH_COURT_SEAL_PDF = "/highcourtseal.pdf";
+    @InjectMocks
+    private PdfStampingService underTest;
 
-    @InjectMocks private PdfStampingService service;
+    @Mock
+    private EvidenceManagementUploadService evidenceManagementUploadServiceService;
 
-    @Mock private EvidenceManagementUploadService evidenceManagementUploadServiceService;
-    @Mock private EvidenceManagementDownloadService evidenceManagementDownloadService;
+    @Mock
+    private EvidenceManagementDownloadService evidenceManagementDownloadService;
 
-    private String caseId = "123123123";
+    @Mock
+    private DocumentConversionService documentConversionService;
 
-    @Test(expected = StampDocumentException.class)
-    public void shouldThrowExceptionWhenDocumentIsNotPdf() throws Exception {
-        Document document = document();
-        byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_IMAGE);
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
-            .thenReturn(imageAsBytes);
+    private static final byte[] ORIGINAL_PDF_BYTES = "original pdf bytes".getBytes();
 
-        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, caseId);
+    private static final byte[] STAMPED_PDF_BYTES = "stamped pdf bytes".getBytes();
+
+    private static final byte[] FLATTEN_PDF_BYTES = "flattened pdf bytes".getBytes();
+
+    static class StampTypeAndImageArgumentsProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Stream.of(
+                Arguments.of(FAMILY_COURT_STAMP, COURT_SEAL_IMAGE, true),
+                Arguments.of(FAMILY_COURT_STAMP, COURT_SEAL_IMAGE, false),
+                Arguments.of(HIGH_COURT_STAMP, HIGH_COURT_SEAL_IMAGE, true),
+                Arguments.of(HIGH_COURT_STAMP, HIGH_COURT_SEAL_IMAGE, false)
+            );
+        }
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(StampTypeAndImageArgumentsProvider.class)
+    void givenDocument_whenStampDocument_thenGivenCourtStampIsAddedAndPdfIsFlattened(StampType stampType,
+                                                                                     String expectedImageFilename,
+                                                                                     boolean isAnnexNeeded)
+        throws Exception {
+        // Prepare inputs
+        Document document = mock(Document.class);
+        when(document.getBinaryUrl()).thenReturn("some-url");
+        when(document.getFileName()).thenReturn("file.pdf");
+
+        String authToken = AUTH_TOKEN;
+
+        when(evidenceManagementDownloadService.download("some-url", authToken))
+            .thenReturn(ORIGINAL_PDF_BYTES);
+        when(documentConversionService.flattenPdfDocument(eq(STAMPED_PDF_BYTES))).thenReturn(FLATTEN_PDF_BYTES);
+        FileUploadResponse uploadResponse = mock(FileUploadResponse.class);
+        when(uploadResponse.getStatus()).thenReturn(HttpStatus.OK);
+        when(evidenceManagementUploadServiceService.upload(anyList(), eq(CASE_ID), eq(authToken)))
+            .thenReturn(Collections.singletonList(uploadResponse));
+
+        try (MockedStatic<Loader> mockedLoader = mockStatic(Loader.class);
+             MockedStatic<ImageUtils> mockedImageUtils = mockStatic(ImageUtils.class)
+        ) {
+            PDDocument realDoc = new PDDocument();
+            PDPage spyPage = spy(new PDPage());
+            realDoc.addPage(spyPage);
+            PDDocument spyDoc = spy(realDoc);
+
+            mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
+            mockedImageUtils.when(() -> ImageUtils.imageAsBytes(any(String.class))).thenCallRealMethod();
+
+            // Mock save and close behavior on PDDocument
+            mockStampedPdfBytes(spyDoc);
+
+            // Now call the public method - this will use your mocked static and mocks above
+            Document result = underTest.stampDocument(document, authToken, isAnnexNeeded, stampType, CASE_ID);
+            assertNotNull(result);
+
+            // Verify uploadService called with the flattened bytes (not the original bytes)
+            verify(evidenceManagementUploadServiceService).upload(argThat(list -> {
+                if (list.isEmpty()) {
+                    return false;
+                }
+                MultipartFile mf = list.getFirst();
+                try {
+                    return Arrays.equals(mf.getBytes(), FLATTEN_PDF_BYTES);
+                } catch (Exception e) {
+                    return false;
+                }
+            }), eq(CASE_ID), eq(authToken));
+            mockedImageUtils.verify(() -> ImageUtils.imageAsBytes(expectedImageFilename));
+            if (isAnnexNeeded) {
+                mockedImageUtils.verify(() -> ImageUtils.imageAsBytes(ANNEX_IMAGE));
+            }
+        }
     }
 
     @Test
-    public void shouldAddAnnexAndStampToDocument() throws Exception {
-        Document document = document();
-        byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
+    void givenDocument_whenDownloadFails_thenThrowsStampDocumentException() {
+        RuntimeException downloadException = new RuntimeException("Download error");
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
-            .thenReturn(imageAsBytes);
+        Document mockedDocument = mock(Document.class);
+        when(mockedDocument.getBinaryUrl()).thenReturn("some-url");
+        when(evidenceManagementDownloadService.download(eq("some-url"), eq(AUTH_TOKEN)))
+            .thenThrow(downloadException);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
-
-        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP, caseId);
-
-        assertThat(stampDocument, not(equalTo(imageAsBytes)));
-        assertThat(stampDocument.getFileName(), is(document.getFileName()));
-        assertThat(stampDocument.getBinaryUrl(), is(document.getBinaryUrl()));
-        assertThat(stampDocument.getUrl(), is(document.getUrl()));
+        StampDocumentException exception = assertThrows(StampDocumentException.class, () ->
+            underTest.stampDocument(mockedDocument, AUTH_TOKEN, true, FAMILY_COURT_STAMP,
+                CASE_ID)
+        );
+        assertStampDocumentException(exception, downloadException);
     }
 
     @Test
-    public void shouldAddStampToDocument() throws Exception {
-        Document document = document();
-        byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_PDF);
+    void givenDocument_whenFlattenPdfDocumentFails_thenThrowsStampDocumentException() {
+        RuntimeException flattenException = new RuntimeException("Flatten pdf failure");
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
-            .thenReturn(imageAsBytes);
+        Document mockedDocument = mock(Document.class);
+        when(mockedDocument.getBinaryUrl()).thenReturn("some-url");
+        when(evidenceManagementDownloadService.download("some-url", AUTH_TOKEN))
+            .thenReturn(ORIGINAL_PDF_BYTES);
+        when(documentConversionService.flattenPdfDocument(any(byte[].class)))
+            .thenThrow(flattenException);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
+        try (MockedStatic<Loader> mockedLoader = mockStatic(Loader.class)) {
+            PDDocument realDoc = new PDDocument();
+            PDPage spyPage = spy(new PDPage());
+            realDoc.addPage(spyPage);
+            PDDocument spyDoc = spy(realDoc);
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP, caseId);
+            mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
 
-        assertThat(stampDocument, not(equalTo(imageAsBytes)));
-        assertThat(stampDocument.getFileName(), is(document.getFileName()));
-        assertThat(stampDocument.getBinaryUrl(), is(document.getBinaryUrl()));
-        assertThat(stampDocument.getUrl(), is(document.getUrl()));
+            StampDocumentException exception = assertThrows(StampDocumentException.class, () ->
+                underTest.stampDocument(mockedDocument, AUTH_TOKEN, true, FAMILY_COURT_STAMP,
+                    CASE_ID)
+            );
+            assertStampDocumentException(exception, flattenException);
+        }
     }
 
     @Test
-    public void shouldAddStampToHighCourtDocument() throws Exception {
-        Document document = document();
-        byte[] imageAsBytes = service.imageAsBytes(HIGH_COURT_SEAL_PDF);
+    void givenDocument_whenUploadDocumentFails_thenThrowsStampDocumentException() throws IOException {
+        RuntimeException uploadException = new RuntimeException("Upload failure");
 
-        when(evidenceManagementDownloadService.download(document.getBinaryUrl(), "auth"))
-            .thenReturn(imageAsBytes);
+        Document mockedDocument = mock(Document.class);
+        when(mockedDocument.getBinaryUrl()).thenReturn("some-url");
+        when(evidenceManagementDownloadService.download("some-url", AUTH_TOKEN))
+            .thenReturn(ORIGINAL_PDF_BYTES);
+        when(documentConversionService.flattenPdfDocument(eq(STAMPED_PDF_BYTES))).thenReturn(FLATTEN_PDF_BYTES);
+        when(evidenceManagementUploadServiceService.upload(anyList(), eq(CASE_ID), eq(AUTH_TOKEN)))
+            .thenThrow(uploadException);
 
-        when(evidenceManagementUploadServiceService.upload(any(), anyString(), any()))
-            .thenReturn(fileUploadResponse());
+        try (MockedStatic<Loader> mockedLoader = mockStatic(Loader.class)) {
+            PDDocument realDoc = new PDDocument();
+            PDPage spyPage = spy(new PDPage());
+            realDoc.addPage(spyPage);
+            PDDocument spyDoc = spy(realDoc);
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP, caseId);
+            mockedLoader.when(() -> Loader.loadPDF(eq(ORIGINAL_PDF_BYTES))).thenReturn(spyDoc);
+            mockStampedPdfBytes(spyDoc);
 
-        assertThat(stampDocument, not(equalTo(imageAsBytes)));
-        assertThat(stampDocument.getFileName(), is(document.getFileName()));
-        assertThat(stampDocument.getBinaryUrl(), is(document.getBinaryUrl()));
-        assertThat(stampDocument.getUrl(), is(document.getUrl()));
+            StampDocumentException exception = assertThrows(StampDocumentException.class, () ->
+                underTest.stampDocument(mockedDocument, AUTH_TOKEN, true, FAMILY_COURT_STAMP,
+                    CASE_ID)
+            );
+            assertStampDocumentException(exception, uploadException);
+        }
     }
 
-    @Test
-    public void shouldGetImageAsBytes() throws Exception {
-        byte[] imageAsBytes = service.imageAsBytes(COURT_SEAL_IMAGE);
+    private void mockStampedPdfBytes(PDDocument spyDoc) throws IOException {
+        doAnswer(invocation -> {
+            ByteArrayOutputStream os = invocation.getArgument(0);
+            os.write(STAMPED_PDF_BYTES);
+            return null;
+        }).when(spyDoc).save(any(ByteArrayOutputStream.class));
+        doNothing().when(spyDoc).close();
+    }
 
-        assertThat(imageAsBytes, notNullValue());
+    private void assertStampDocumentException(StampDocumentException exception,
+                                              RuntimeException thrownException) {
+        assertTrue(exception.getMessage().contains("Failed to annex/stamp PDF for document"));
+        assertTrue(exception.getMessage().contains(thrownException.getMessage()));
+        assertEquals(thrownException, exception.getCause());
     }
 }
