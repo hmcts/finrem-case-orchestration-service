@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -11,10 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,7 @@ public class ManageHearingActionService {
 
     private final ManageHearingsDocumentService manageHearingsDocumentService;
     private final ExpressCaseService expressCaseService;
+    private final HearingTabDataMapper hearingTabDataMapper;
 
     /**
      * Adds a new hearing to the case and generates associated documents.
@@ -71,6 +75,7 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
+        updateTabData(caseData);
         hearingWrapper.setWorkingHearing(null);
     }
 
@@ -121,5 +126,29 @@ public class ManageHearingActionService {
         ));
 
         hearingsWrapper.setHearingDocumentsCollection(manageHearingDocuments);
+    }
+
+    /**
+     * Regenerates the hearing tab data for the case.
+     * This method processes the hearings collection and maps each hearing to its corresponding
+     * tab data representation ordered by hearing date ASC. The resulting tab data is then updated in the case data.
+     *
+     * @param caseData the case data containing the hearings and hearing documents
+     */
+    private void updateTabData(FinremCaseData caseData) {
+        List<ManageHearingsCollectionItem> hearings =
+            caseData.getManageHearingsWrapper().getHearings();
+
+        List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
+            .sorted(Comparator.comparing(hearingCollectionItem ->
+                hearingCollectionItem.getValue().getHearingDate()))
+            .map(hearingCollectionItem -> HearingTabCollectionItem.builder()
+                .value(hearingTabDataMapper.mapHearingToTabData(
+                    hearingCollectionItem,
+                    caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
+                .build())
+            .toList();
+
+        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
     }
 }
