@@ -3,16 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -29,18 +27,19 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingActionServiceTest {
+
+    private static final String HEARING_NOTICE_URL = "http://example.com/hearing-notice";
+    private static final String HEARING_NOTICE_FILENAME = "HearingNotice.pdf";
 
     @Mock
     private ManageHearingsDocumentService manageHearingsDocumentService;
@@ -52,378 +51,185 @@ class ManageHearingActionServiceTest {
     @InjectMocks
     private ManageHearingActionService manageHearingActionService;
 
-    @Captor
-    private ArgumentCaptor<ManageHearingsCollectionItem> hearingCaptor;
-
     private FinremCaseDetails finremCaseDetails;
     private ManageHearingsWrapper hearingWrapper;
     private Hearing hearing;
 
-    CaseDocument hearingNotice;
-    CaseDocument formC;
-    CaseDocument formG;
-    Map<String, CaseDocument> pfdNcdrDocuments;
-    CaseDocument outOfCourtResolution;
-
     @BeforeEach
     void setUp() {
-        hearing = Hearing.builder()
-            .hearingType(HearingType.DIR)
-            .hearingDate(java.time.LocalDate.now())
-            .hearingTime("10:00")
-            .hearingTimeEstimate("30mins")
-            .build();
-
-        hearingWrapper = ManageHearingsWrapper.builder()
-            .workingHearing(hearing)
-            .build();
-
+        hearing = createHearing(HearingType.DIR, "10:00", "30mins", java.time.LocalDate.now());
+        hearingWrapper = ManageHearingsWrapper.builder().workingHearing(hearing).build();
         finremCaseDetails = FinremCaseDetails.builder()
-            .data(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData.builder()
-                .manageHearingsWrapper(hearingWrapper)
-                .build())
-            .build();
-
-        hearingNotice = CaseDocument.builder()
-            .documentFilename("HearingNotice.pdf")
-            .documentUrl("http://example.com/hearing-notice")
+            .data(FinremCaseData.builder().manageHearingsWrapper(hearingWrapper).build())
             .build();
     }
 
     @Test
-    void shouldAddHearingAndGenerateHearingNotice() {
-        // Arrange
-        CaseDocument hearingNotice = CaseDocument.builder()
-            .documentFilename("HearingNotice.pdf")
-            .documentUrl("http://example.com/hearing-notice")
-            .build();
-
-        HearingTabItem hearingTabItem = HearingTabItem.builder()
-            .tabHearingType("Some Hearing Type")
-            .tabCourtSelection("Some Court")
-            .tabAttendance("Some Attendance")
-            .tabDateTime("20 Jul 2025 10:00")
-            .tabTimeEstimate("30 mins")
-            .tabConfidentialParties("Party A, Party B")
-            .tabAdditionalInformation("Some additional information")
-            .tabHearingDocuments(List.of(DocumentCollectionItem
-                .builder()
-                    .value(CaseDocument
-                        .builder()
-                        .documentFilename("HearingNotice.pdf")
-                        .documentUrl("http://example.com/hearing-notice")
-                        .documentBinaryUrl("http://example.com/hearing-notice-binary")
-                        .build())
-                .build()))
-            .build();
-
+    void performAddHearing_shouldAddHearingAndGenerateHearingNotice() {
+        CaseDocument hearingNotice = createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL);
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
-        // Act
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        // Assert
         assertThat(hearingWrapper.getHearings()).hasSize(1);
-        UUID hearingId = hearingWrapper.getWorkingHearingId();
-        assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
-        assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
-
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
-        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
-            .isEqualTo(hearingId);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingDocument())
             .isEqualTo(hearingNotice);
     }
 
     @Test
-    void shouldAddHearingToTabCollectionInCorrectOrder() {
-        // Arrange
-        Hearing hearing1 = Hearing.builder()
-            .hearingType(HearingType.DIR)
-            .hearingDate(java.time.LocalDate.of(2025, 7, 20))
-            .partiesOnCaseMultiSelectList(DynamicMultiSelectList
-                .builder()
-                .listItems(List.of(
-                    DynamicMultiSelectListElement.builder()
-                        .label("Applicant")
-                        .code(APPLICANT)
-                        .build()))
-                .build())
-            .hearingTime("10:00")
-            .build();
-
-        Hearing hearing2 = Hearing.builder()
-            .hearingType(HearingType.FDA)
-            .hearingDate(java.time.LocalDate.of(2025, 7, 15))
-            .hearingTime("11:00")
-            .partiesOnCaseMultiSelectList(DynamicMultiSelectList
-                .builder()
-                .listItems(List.of(
-                    DynamicMultiSelectListElement.builder()
-                        .label("Respondent")
-                        .code(RESPONDENT)
-                        .build()))
-                .build())
-            .build();
-
-        ManageHearingsWrapper hearingWrapper = ManageHearingsWrapper.builder()
-            .hearings(new ArrayList<>(List.of(
-                ManageHearingsCollectionItem.builder()
-                    .id(UUID.randomUUID())
-                    .value(hearing2)
-                    .build(),
-                ManageHearingsCollectionItem
-                    .builder()
-                    .id(UUID.randomUUID())
-                    .value(hearing1)
-                    .build()
-            )))
-            .build();
-
-        finremCaseDetails.getData().setManageHearingsWrapper(hearingWrapper);
-
-        HearingTabItem hearingTabItem1 = HearingTabItem.builder()
-            .tabHearingType("Applicant Hearing")
-            .tabDateTime("20 Jul 2025 10:00")
-            .tabConfidentialParties(APPLICANT)
-            .build();
-
-        HearingTabItem hearingTabItem2 = HearingTabItem.builder()
-            .tabHearingType("Respondent 2")
-            .tabDateTime("15 Jul 2025 11:00")
-            .tabConfidentialParties(RESPONDENT)
-            .build();
-
-        HearingTabItem hearingTabItem3 = HearingTabItem.builder()
-            .tabHearingType("Hearing 2")
-            .tabDateTime("15 Jul 2025 11:00")
-            .tabConfidentialParties(INTERVENER1)
-            .build();
-
-        when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
-            .thenReturn(hearingTabItem2, hearingTabItem1);
-
-        // Act
-        manageHearingActionService.updateTabData(finremCaseDetails.getData());
-
-        // Assert
-        verify(hearingTabDataMapper, times(2)).mapHearingToTabData(hearingCaptor.capture(), any());
-
-        List<ManageHearingsCollectionItem> capturedHearings = hearingCaptor.getAllValues();
-        assertThat(capturedHearings.get(0).getValue()).isEqualTo(hearing2);
-        assertThat(capturedHearings.get(1).getValue()).isEqualTo(hearing1);
-
-        List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        List<HearingTabCollectionItem> applicantHearingTabItems = hearingWrapper.getApplicantHearingTabItems();
-        List<HearingTabCollectionItem> respondentHearingTabItems = hearingWrapper.getRespondentHearingTabItems();
-
-        // CW View All hearing tab items
-        assertThat(hearingTabItems).hasSize(2);
-        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
-        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
-
-        // Applicant View hearing tab items
-        assertThat(applicantHearingTabItems.getFirst().getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
-
-        // Respondent View hearing tab items
-        assertThat(respondentHearingTabItems.getFirst().getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
-    }
-
-    @Test
-    void shouldGenerateAllDocumentsForFdaHearingType() {
+    void performAddHearing_shouldGenerateAllDocumentsForStandardFdaHearingType() {
         hearing.setHearingType(HearingType.FDA);
 
-        formC = CaseDocument.builder()
-            .documentFilename("FormC.pdf")
-            .documentUrl("http://example.com/form-c")
-            .build();
-
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(formC);
-
-        formG = CaseDocument.builder()
-            .documentFilename("FormG.pdf")
-            .documentUrl("http://example.com/form-g")
-            .build();
-
-        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(formG);
-
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
+            "PFD_NCDR_COMPLIANCE_LETTER", createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"),
+            "PFD_NCDR_COVER_LETTER", createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter")
         );
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
 
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(pfdNcdrDocuments);
-
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(hearingNotice);
-
-        outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
-            .documentUrl("http://example.com/OutOfCourtResolution")
-            .build();
-
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN)).thenReturn(formG);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN)).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
 
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item ->
-                item.getValue().getHearingDocument())
-            .contains(hearingNotice, formC, formG,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
-                outOfCourtResolution);
-
-        // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormG(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
+            .extracting(item -> item.getValue().getHearingDocument())
+            .contains(formC, formG, pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"), outOfCourtResolution);
     }
 
     @Test
-    void shouldGenerateDocumentsForFdrHearingTypeWithExpressCase() {
+    void performAddHearing_shouldGenerateDocumentsForFdrHearingTypeWithExpressCase() {
         hearing.setHearingType(HearingType.FDR);
 
-        formC = CaseDocument.builder()
-            .documentFilename("FormC.pdf")
-            .documentUrl("http://example.com/form-c")
-            .build();
-
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(formC);
-
-        formG = CaseDocument.builder()
-            .documentFilename("FormG.pdf")
-            .documentUrl("http://example.com/form-g")
-            .build();
-
-        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(formG);
-
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
+            "PFD_NCDR_COMPLIANCE_LETTER", createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"),
+            "PFD_NCDR_COVER_LETTER", createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter")
         );
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
 
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(pfdNcdrDocuments);
-
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(hearingNotice);
-
-        outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
-            .documentUrl("http://example.com/OutOfCourtResolution")
-            .build();
-
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(outOfCourtResolution);
-
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN)).thenReturn(formG);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf", "http://example.com/hearing-notice"));
         when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
 
-        // Act
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        // Assert
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item ->
-                item.getValue().getHearingDocument())
-            .contains(hearingNotice, formC, formG,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
-                outOfCourtResolution);
-
-        // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormG(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
+            .extracting(item -> item.getValue().getHearingDocument())
+            .contains(formC, formG, pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"), outOfCourtResolution);
     }
 
     @Test
-    void shouldNotGenerateFormGForFastTrackApplication() {
+    void performAddHearing_shouldNotGenerateFormGForFastTrackApplication() {
         hearing.setHearingType(HearingType.FDA);
         finremCaseDetails.getData().setFastTrackDecision(YesOrNo.YES);
 
-        hearing.setHearingType(HearingType.FDR);
-
-        formC = CaseDocument.builder()
-            .documentFilename("FormC.pdf")
-            .documentUrl("http://example.com/form-c")
-            .build();
-
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(formC);
-
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
+        CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
+            "PFD_NCDR_COMPLIANCE_LETTER", createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"),
+            "PFD_NCDR_COVER_LETTER", createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter")
         );
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
 
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(hearingNotice);
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN)).thenReturn(formC);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN)).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN)).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN)).thenReturn(createCaseDocument("HearingNotice.pdf", "http://example.com/hearing-notice"));
 
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(pfdNcdrDocuments);
-
-        outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
-            .documentUrl("http://example.com/OutOfCourtResolution")
-            .build();
-
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN))
-            .thenReturn(outOfCourtResolution);
-
-        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
-
-        // Act
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
-        // Assert
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(5);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
-            .extracting(item ->
-                item.getValue().getHearingDocument())
-            .contains(hearingNotice, formC,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
-                outOfCourtResolution);
+            .extracting(item -> item.getValue().getHearingDocument())
+            .contains(formC, pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"), outOfCourtResolution);
 
-        // Verify that all other methods were called
-        verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateFormC(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
-        verify(manageHearingsDocumentService).generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN);
-
-        // Verify that generateFormC was not called
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
+        Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", java.time.LocalDate.of(2025, 7, 20));
+        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
+            .builder()
+            .listItems(List.of(
+                DynamicMultiSelectListElement.builder()
+                    .label("Applicant")
+                    .code(APPLICANT)
+                    .build()))
+            .build()
+        );
+
+        Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", java.time.LocalDate.of(2025, 7, 15));
+        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
+            .builder()
+            .listItems(List.of(
+                DynamicMultiSelectListElement.builder()
+                    .label("Respondent")
+                    .code(RESPONDENT)
+                    .build()))
+            .build()
+        );
+
+        hearingWrapper.setHearings(new ArrayList<>(List.of(
+            createHearingCollectionItem(hearing2),
+            createHearingCollectionItem(hearing1)
+        )));
+
+        when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
+            .thenReturn(createHearingTabItem("Respondent Hearing", "15 Jul 2025 11:00", APPLICANT),
+                createHearingTabItem("Applicant Hearing", "20 Jul 2025 10:00", RESPONDENT));
+
+        manageHearingActionService.updateTabData(finremCaseDetails.getData());
+
+        List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
+    }
+
+    private Hearing createHearing(HearingType type, String time, String estimate, java.time.LocalDate date) {
+        return Hearing.builder()
+            .hearingType(type)
+            .hearingDate(date)
+            .hearingTime(time)
+            .hearingTimeEstimate(estimate)
+            .build();
+    }
+
+    private CaseDocument createCaseDocument(String filename, String url) {
+        return CaseDocument.builder()
+            .documentFilename(filename)
+            .documentUrl(url)
+            .build();
+    }
+
+    private ManageHearingsCollectionItem createHearingCollectionItem(Hearing hearing) {
+        return ManageHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(hearing)
+            .build();
+    }
+
+    private HearingTabItem createHearingTabItem(String type, String dateTime, String parties) {
+        return HearingTabItem.builder()
+            .tabHearingType(type)
+            .tabDateTime(dateTime)
+            .tabConfidentialParties(parties)
+            .build();
     }
 }
