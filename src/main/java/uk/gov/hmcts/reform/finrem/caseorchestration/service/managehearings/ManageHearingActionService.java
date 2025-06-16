@@ -81,7 +81,6 @@ public class ManageHearingActionService {
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
-        updateTabData(caseData);
         hearingWrapper.setWorkingHearing(null);
     }
 
@@ -135,41 +134,47 @@ public class ManageHearingActionService {
     }
 
     /**
-     * Regenerates the hearing tab data for the case.
-     * This method processes the hearings collection and maps each hearing to its corresponding
-     * tab data representation ordered by hearing date ASC. The resulting tab data is then updated in the case data.
+     * Updates the hearing tab data for the case by processing the hearings collection.
+     * Maps each hearing to its corresponding tab data representation, sorts the data
+     * by hearing date in ascending order, and categorizes it by party. The updated
+     * tab data is then stored in the case data.
      *
      * @param caseData the case data containing the hearings and hearing documents
      */
-    private void updateTabData(FinremCaseData caseData) {
-
+    public void updateTabData(FinremCaseData caseData) {
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
-        List<ManageHearingsCollectionItem> hearings = hearingsWrapper.getHearings();
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new);
 
-        List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
-            .sorted(Comparator.comparing(hearingCollectionItem ->
-                hearingCollectionItem.getValue().getHearingDate()))
-            .map(hearingCollectionItem -> HearingTabCollectionItem.builder()
+        List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
+
+        Map<String, List<HearingTabCollectionItem>> partyTabItems = Map.of(
+            APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT),
+            RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT),
+            INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1),
+            INTERVENER2, filterHearingTabItems(hearingTabItems, INTERVENER2),
+            INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3),
+            INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4)
+        );
+
+        hearingsWrapper.setHearingTabItems(hearingTabItems);
+        hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
+        hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
+        hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
+        hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
+        hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
+        hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+    }
+
+    private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
+        return hearings.stream()
+            .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
+            .map(hearing -> HearingTabCollectionItem.builder()
                 .value(hearingTabDataMapper.mapHearingToTabData(
-                    hearingCollectionItem,
+                    hearing,
                     caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
                 .build())
             .toList();
-
-        List<HearingTabCollectionItem> applicantTabItems = filterHearingTabItems(hearingTabItems, APPLICANT);
-        List<HearingTabCollectionItem> respondentTabItems = filterHearingTabItems(hearingTabItems, RESPONDENT);
-        List<HearingTabCollectionItem> int1TabItems = filterHearingTabItems(hearingTabItems, INTERVENER1);
-        List<HearingTabCollectionItem> int2TabItems = filterHearingTabItems(hearingTabItems, INTERVENER2);
-        List<HearingTabCollectionItem> int3TabItems = filterHearingTabItems(hearingTabItems, INTERVENER3);
-        List<HearingTabCollectionItem> int4TabItems = filterHearingTabItems(hearingTabItems, INTERVENER4);
-
-        hearingsWrapper.setHearingTabItems(hearingTabItems);
-        hearingsWrapper.setRespondentHearingTabItems(respondentTabItems);
-        hearingsWrapper.setApplicantHearingTabItems(applicantTabItems);
-        hearingsWrapper.setInt1HearingTabItems(int1TabItems);
-        hearingsWrapper.setInt2HearingTabItems(int2TabItems);
-        hearingsWrapper.setInt3HearingTabItems(int3TabItems);
-        hearingsWrapper.setInt4HearingTabItems(int4TabItems);
     }
 
     private List<HearingTabCollectionItem> filterHearingTabItems(List<HearingTabCollectionItem> hearingTabItems, String party) {
