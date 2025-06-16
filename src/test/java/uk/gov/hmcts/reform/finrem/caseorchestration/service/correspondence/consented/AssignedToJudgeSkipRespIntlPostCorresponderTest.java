@@ -18,24 +18,38 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
 @ExtendWith(MockitoExtension.class)
 class AssignedToJudgeSkipRespIntlPostCorresponderTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(FinremSingleLetterOrEmailAllPartiesCorresponder.class);
 
     private final CaseType[] testingCastTypes = new CaseType[] {CONSENTED, CONTESTED};
 
@@ -196,7 +210,47 @@ class AssignedToJudgeSkipRespIntlPostCorresponderTest {
             // Assert
             verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
             verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+            assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
+            logs.reset();
         }
+    }
+
+    @Test
+    void givenContestedCase_whenIntervenerSolicitorEmailPopulated_thenSendEmailToIntervenerSolicitor() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONTESTED);
+        SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(any(IntervenerWrapper.class)))
+            .thenReturn(expectedSolicitorCaseDataKeysWrapper);
+
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        verify(notificationService, times(4)).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
+    }
+
+    @Test
+    void givenConsentCase_whenIntervenerSolicitorEmailPopulated_thenSendEmailToIntervenerSolicitor() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+        SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
+
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
     }
 
     private FinremCaseDetails buildCaseDetails(CaseType caseType) {
