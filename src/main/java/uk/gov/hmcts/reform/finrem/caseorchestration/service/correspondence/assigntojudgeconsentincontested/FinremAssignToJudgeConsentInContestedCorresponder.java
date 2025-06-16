@@ -52,16 +52,4 @@ public class FinremAssignToJudgeConsentInContestedCorresponder extends FinremSin
         log.info("Not sending email correspondence to Intervener for Case ID: {}", caseDetails.getId());
     }
 
-    @Override
-    protected boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
-        // override international address checking
-        return true;
-    }
-
-    @Override
-    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
-        // override international address checking
-        return true;
-    }
-
 }
