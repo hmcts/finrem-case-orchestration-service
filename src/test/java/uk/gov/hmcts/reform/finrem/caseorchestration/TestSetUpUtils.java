@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
@@ -17,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
@@ -42,7 +39,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,10 +63,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class TestSetUpUtils {
 
@@ -118,18 +112,6 @@ public class TestSetUpUtils {
         return feeResponse;
     }
 
-    public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(UPLOAD_ORDER, ImmutableList.of(consentOrderData(uploadOrderId)));
-        return caseData;
-    }
-
-    public static Map<String, Object> caseDataWithPreviewOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
-        return caseData;
-    }
-
     public static Map<String, Object> caseDataWithGeneralOrder() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, caseDocument());
@@ -140,19 +122,6 @@ public class TestSetUpUtils {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, caseDocument());
         return caseData;
-    }
-
-    private static ConsentOrderData consentOrderData(String id) {
-        ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
-        consentOrder.setDocumentLink(caseDocument());
-        consentOrder.setDocumentDateAdded(LocalDate.now());
-
-        ConsentOrderData consentOrderData = new ConsentOrderData();
-        consentOrderData.setId(id);
-        consentOrderData.setConsentOrder(consentOrder);
-
-        return consentOrderData;
     }
 
     public static Document document() {
