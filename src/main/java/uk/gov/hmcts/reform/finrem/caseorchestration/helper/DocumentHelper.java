@@ -524,7 +524,7 @@ public class DocumentHelper {
         String applicantName = finremCaseDetails.getData().getFullApplicantName();
         String respondentName = finremCaseDetails.getData().getRespondentFullName();
 
-        if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo, !recipientResideOutsideOfUK)) {
+        if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo, recipientResideOutsideOfUK)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
                 .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo, recipientResideOutsideOfUK))
@@ -585,10 +585,10 @@ public class DocumentHelper {
         return recipient == INTERVENER_ONE || recipient == INTERVENER_TWO || recipient == INTERVENER_THREE || recipient == INTERVENER_FOUR;
     }
 
-    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address, boolean checkPostCodeEmptiness) {
+    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address, boolean skipPostCodeCheck) {
         return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotEmpty(address.getAddressLine1())
-            && (!checkPostCodeEmptiness || StringUtils.isNotEmpty(address.getPostCode()));
+            && (skipPostCodeCheck || StringUtils.isNotEmpty(address.getPostCode()));
     }
 
     public <T> T deepCopy(T object, Class<T> objectClass) {

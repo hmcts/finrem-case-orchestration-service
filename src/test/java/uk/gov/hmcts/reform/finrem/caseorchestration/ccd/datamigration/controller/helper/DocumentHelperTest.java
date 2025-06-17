@@ -64,7 +64,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -123,9 +122,6 @@ class DocumentHelperTest {
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService,
             service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
-
-        lenient().when(postalService.isRecipientResideOutsideOfUK(any(FinremCaseData.class), anyString()))
-            .thenCallRealMethod();
     }
 
     @Test
@@ -426,7 +422,6 @@ class DocumentHelperTest {
 
     @Test
     void testAddressWithCountryAndAddressLine3AreNotInOutputForLetterPrinting() {
-
         Map<String, Object> testAddressMap = new HashMap<>();
         testAddressMap.put("AddressLine1", "50 Applicant Street");
         testAddressMap.put("AddressLine2", "Second Address Line");
@@ -487,7 +482,7 @@ class DocumentHelperTest {
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .addressToSendTo(buildAddress("Address line 1")).build());
+                .addressToSendTo(buildAddress()).build());
         preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
@@ -512,13 +507,13 @@ class DocumentHelperTest {
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
+                .finremAddressToSendTo(buildFinremAddress()).build());
 
         when(letterAddresseeGenerator.generate(finremCaseDetails, APPLICANT)).thenReturn(
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
+                .finremAddressToSendTo(buildFinremAddress()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, APPLICANT);
 
@@ -545,7 +540,7 @@ class DocumentHelperTest {
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .addressToSendTo(buildAddress("Address line 1")).build());
+                .addressToSendTo(buildAddress()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
 
@@ -571,7 +566,7 @@ class DocumentHelperTest {
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
+                .finremAddressToSendTo(buildFinremAddress()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, RESPONDENT);
 
@@ -597,7 +592,7 @@ class DocumentHelperTest {
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .finremAddressToSendTo(buildFinremAddressWithEmptyPostCode("Address line 1")).build());
+                .finremAddressToSendTo(buildFinremAddressWithEmptyPostCode()).build());
 
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, RESPONDENT);
 
@@ -827,54 +822,6 @@ class DocumentHelperTest {
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
 
-    private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-    }
-
-    private FinremCallbackRequest prepareFinremCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
-
-            CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-            FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
-            return FinremCallbackRequest.builder()
-                .caseDetails(finremCaseDetails)
-                .build();
-        }
-    }
-
-    private static Map<String, Object> buildAddress(String addressLine1) {
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", addressLine1);
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
-        return solicitorAddress;
-    }
-
-    private static Address buildFinremAddress(String addressLine1) {
-        return buildFinremAddress(addressLine1, "SE1");
-    }
-
-    private static Address buildFinremAddress(String addressLine1, String postCode) {
-        return Address.builder()
-            .addressLine1(addressLine1).addressLine2("Second Address Line")
-            .addressLine3("Third Address Line")
-            .county("London")
-            .country("England")
-            .postTown("London")
-            .postCode(postCode)
-            .build();
-    }
-
-    private static Address buildFinremAddressWithEmptyPostCode(String addressLine1) {
-        return buildFinremAddress(addressLine1, null);
-    }
-
     @Test
     void convertToCaseDocumentIfObjNotNull() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
@@ -949,6 +896,13 @@ class DocumentHelperTest {
         assertEquals(expected, documentHelper.checkIfOrderAlreadyInFinalOrderCollection(list, document));
     }
 
+    @Test
+    void prepareFinalOrder() {
+        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
+        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
+        assertNotNull(orderCollection.getValue().getOrderDateTime());
+    }
+
     private static Stream<Arguments> provideOrderCollections() {
         CaseDocument doc1 = caseDocument();
         CaseDocument doc2 = caseDocument("url", "name.pdf", "binary");
@@ -964,17 +918,58 @@ class DocumentHelperTest {
         );
     }
 
-    @Test
-    void prepareFinalOrder() {
-        DirectionOrderCollection orderCollection = documentHelper.prepareFinalOrder(caseDocument());
-        assertEquals(YesOrNo.YES, orderCollection.getValue().getIsOrderStamped());
-        assertNotNull(orderCollection.getValue().getOrderDateTime());
-    }
-
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest.builder()
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
             .build();
+    }
+
+    private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+    }
+
+    private FinremCallbackRequest prepareFinremCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+
+            CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+            return FinremCallbackRequest.builder()
+                .caseDetails(finremCaseDetails)
+                .build();
+        }
+    }
+
+    private static Map<String, Object> buildAddress() {
+        Map<String, Object> solicitorAddress = new HashMap<>();
+        solicitorAddress.put("AddressLine1", "First Address Line");
+        solicitorAddress.put("AddressLine2", "Second Address Line");
+        solicitorAddress.put("AddressLine3", "Third Address Line");
+        solicitorAddress.put("County", "London");
+        solicitorAddress.put("Country", "England");
+        solicitorAddress.put("PostTown", "London");
+        solicitorAddress.put("PostCode", "SE1");
+        return solicitorAddress;
+    }
+
+    private static Address buildFinremAddress() {
+        return buildFinremAddress("SE1");
+    }
+
+    private static Address buildFinremAddress(String postCode) {
+        return Address.builder()
+            .addressLine1("First Address Line").addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode(postCode)
+            .build();
+    }
+
+    private static Address buildFinremAddressWithEmptyPostCode() {
+        return buildFinremAddress(null);
     }
 }
