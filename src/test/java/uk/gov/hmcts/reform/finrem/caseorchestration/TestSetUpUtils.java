@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -259,7 +260,7 @@ public class TestSetUpUtils {
     }
 
     public static FinremCaseDetails defaultConsentedFinremCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
             NatureApplication.PERIODICAL_PAYMENT_ORDER,
             NatureApplication.PENSION_SHARING_ORDER,
@@ -271,6 +272,28 @@ public class TestSetUpUtils {
         caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressConsented(caseData);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .id(123456789L)
+            .state(State.APPLICATION_SUBMITTED)
+            .data(caseData)
+            .build();
+    }
+
+    public static FinremCaseDetails defaultConsentedFinremCaseDetailsWithNonUkRespondent() {
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build();
+        List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
+        populateApplicantNameAndAddress(caseData);
+        populateNonUkRespondentNameAndAddressConsented(caseData);
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONSENTED)
@@ -443,6 +466,23 @@ public class TestSetUpUtils {
         respondentAddress.setPostTown("London");
         respondentAddress.setPostCode("SW1");
 
+        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(null);
+    }
+
+    private static void populateNonUkRespondentNameAndAddressConsented(FinremCaseData caseData) {
+        Address respondentAddress = Address.builder().build();
+        respondentAddress.setAddressLine1("50 Respondent Street");
+        respondentAddress.setAddressLine2("Consented");
+        respondentAddress.setAddressLine3("Third Address Line");
+        respondentAddress.setCounty("Toronto");
+        respondentAddress.setCountry("Canada");
+        respondentAddress.setPostTown("London");
+        respondentAddress.setPostCode(null);
+
+        caseData.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
         caseData.getContactDetailsWrapper().setRespondentLname("Doe");
         caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
