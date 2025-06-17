@@ -111,8 +111,8 @@ public class ManageHearingActionService {
      * Adds each document to the hearing documents collection in the `ManageHearingsWrapper`.
      * Each document is associated with the current working hearing ID.
      *
-     * @param documentMap   a map containing document types as keys and a pair with
-     *                      the corresponding `CaseDocument` objects and CaseDocumentType.
+     * @param documentMap   a map containing a string describing the document against a pair with
+     *                      the corresponding CaseDocument object and CaseDocumentType.
      * @param hearingsWrapper the wrapper containing hearing-related data
      */
     private void addDocumentsToCollection(Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap,
