@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
         guava                : '33.4.8-jre',
-        bspCommonLib         : '0.1.1',
+        bspCommonLib         : '0.1.2',
         ccdClient            : '5.1.0',
         commonsIo            : '2.19.0',
         commonsLang3         : '3.17.0',
@@ -410,7 +410,7 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-    implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: '0.1.1', classifier: 'plain'
+    implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
@@ -492,7 +492,7 @@ dependencies {
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-    functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib, classifier: 'plain'
+    functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
