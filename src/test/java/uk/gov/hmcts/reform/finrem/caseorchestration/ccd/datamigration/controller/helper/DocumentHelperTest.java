@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
@@ -63,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -77,6 +79,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetailsWithNonUkRespondent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
@@ -109,7 +112,7 @@ class DocumentHelperTest {
     @Mock
     private LetterAddresseeGeneratorMapper letterAddresseeGenerator;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
-    @Mock
+    @Spy
     private InternationalPostalService postalService;
 
     @BeforeEach
@@ -120,6 +123,9 @@ class DocumentHelperTest {
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService,
             service, finremCaseDetailsMapper, letterAddresseeGenerator, postalService);
+
+        lenient().when(postalService.isRecipientResideOutsideOfUK(any(FinremCaseData.class), anyString()))
+            .thenCallRealMethod();
     }
 
     @Test
@@ -559,16 +565,41 @@ class DocumentHelperTest {
 
     @Test
     void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
+        FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
 
-        CaseDetails caseDetails = defaultConsentedCaseDetails();
-
-        when(letterAddresseeGenerator.generate(caseDetails, RESPONDENT)).thenReturn(
+        when(letterAddresseeGenerator.generate(finremCaseDetails, RESPONDENT)).thenReturn(
             AddresseeDetails.builder()
                 .addresseeName("addresseeName")
                 .reference("reference")
-                .addressToSendTo(buildAddress("Address line 1")).build());
+                .finremAddressToSendTo(buildFinremAddress("Address line 1")).build());
 
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(caseDetails, RESPONDENT);
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, RESPONDENT);
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+    @Test
+    void whenPreparingLetterToNonUkRespondentTemplateData_CtscDataIsPopulated_finrem() {
+        FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetailsWithNonUkRespondent();
+
+        when(letterAddresseeGenerator.generate(finremCaseDetails, RESPONDENT)).thenReturn(
+            AddresseeDetails.builder()
+                .addresseeName("addresseeName")
+                .reference("reference")
+                .finremAddressToSendTo(buildFinremAddressWithEmptyPostCode("Address line 1")).build());
+
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(finremCaseDetails, RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -826,14 +857,22 @@ class DocumentHelperTest {
     }
 
     private static Address buildFinremAddress(String addressLine1) {
+        return buildFinremAddress(addressLine1, "SE1");
+    }
+
+    private static Address buildFinremAddress(String addressLine1, String postCode) {
         return Address.builder()
             .addressLine1(addressLine1).addressLine2("Second Address Line")
             .addressLine3("Third Address Line")
             .county("London")
             .country("England")
             .postTown("London")
-            .postCode("SE1")
+            .postCode(postCode)
             .build();
+    }
+
+    private static Address buildFinremAddressWithEmptyPostCode(String addressLine1) {
+        return buildFinremAddress(addressLine1, null);
     }
 
     @Test
