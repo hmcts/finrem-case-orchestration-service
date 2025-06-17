@@ -16,11 +16,11 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
         guava                : '33.4.8-jre',
-        bspCommonLib         : '0.0.51',
+        bspCommonLib         : '0.1.2',
         ccdClient            : '5.1.0',
         commonsIo            : '2.19.0',
         commonsLang3         : '3.17.0',
-        hmctsNotify          : '4.1.1-RELEASE',
+        hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.38',
         mockito              : '5.18.0',
@@ -40,7 +40,7 @@ def versions = [
         amClient             : '1.59.2',
         sendLetterClient     : '5.0.4',
         elasticSearch        : '7.17.28',
-        jacksonDatabind      : '2.19.0',
+        jacksonDatabind      : '2.19.1',
         retry                : '1.3.4',
         snakeyaml            : '2.4',
         loadbalancer         : '4.2.1'
@@ -120,13 +120,7 @@ sourceSets {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
-    maven {
-        url 'https://jitpack.io'
-        content {
-            includeVersion 'com.github.hmcts', 'bsp-common-lib', '0.0.51'
-        }
-    }
+    maven {url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'}
 }
 
 configurations {
