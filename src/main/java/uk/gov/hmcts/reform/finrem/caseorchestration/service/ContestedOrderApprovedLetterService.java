@@ -98,7 +98,8 @@ public class ContestedOrderApprovedLetterService {
     private void populateTemplateVariables(FinremCaseDetails finremCaseDetails, CaseDetails caseDetails, String judgeDetails) {
         populateTemplateVariables(caseDetails, judgeDetails);
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("orderApprovedDate", finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate());
+        // TODO: Handle all JudgeApproval in collection
+        caseData.put("orderApprovedDate", finremCaseDetails.getData().getDraftOrdersWrapper().getJudgeApproval1().getOrderApprovedDate());
     }
 
     private void populateTemplateVariables(CaseDetails caseDetails, String judgeDetails) {
