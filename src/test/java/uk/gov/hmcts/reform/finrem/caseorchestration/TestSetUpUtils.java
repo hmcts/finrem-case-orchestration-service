@@ -317,7 +317,7 @@ public class TestSetUpUtils {
     }
 
     public static FinremCaseDetails defaultContestedFinremCaseDetails() {
-        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build();
         List<NatureApplication> natureOfApplications = List.of(NatureApplication.LUMP_SUM_ORDER,
             NatureApplication.PERIODICAL_PAYMENT_ORDER,
             NatureApplication.PENSION_SHARING_ORDER,
@@ -355,7 +355,6 @@ public class TestSetUpUtils {
         caseData.put(APPLICANT_ADDRESS, applicantAddress);
         caseData.put(APPLICANT_REPRESENTED, null);
     }
-
 
     private static void populateApplicantNameAndAddress(FinremCaseData caseData) {
         Address applicantAddress = Address.builder()
@@ -446,9 +445,8 @@ public class TestSetUpUtils {
         respondentAddress.setAddressLine1("50 Respondent Street");
         respondentAddress.setAddressLine2("Consented");
         respondentAddress.setAddressLine3("Third Address Line");
-        respondentAddress.setCounty("Toronto");
         respondentAddress.setCountry("Canada");
-        respondentAddress.setPostTown("London");
+        respondentAddress.setPostTown("Toronto");
         respondentAddress.setPostCode(null);
 
         caseData.getContactDetailsWrapper().setRespondentResideOutsideUK(YesOrNo.YES);
@@ -475,7 +473,6 @@ public class TestSetUpUtils {
     }
 
     private static void populateRespondentNameAndAddressContested(FinremCaseData caseData) {
-
         Address respondentAddress = Address.builder().build();
         respondentAddress.setAddressLine1("50 Respondent Street");
         respondentAddress.setAddressLine2("Contested");
@@ -515,9 +512,7 @@ public class TestSetUpUtils {
         return caseData;
     }
 
-    public static CaseDocument newDocument(String documentName,
-                                           String filename,
-                                           String binaryUrl) {
+    public static CaseDocument newDocument(String documentName, String filename, String binaryUrl) {
         return CaseDocument.builder()
             .documentFilename(filename)
             .documentUrl(documentName)
