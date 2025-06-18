@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -27,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
@@ -58,7 +61,7 @@ class ManageHearingActionServiceTest {
     CaseDocument hearingNotice;
     CaseDocument formC;
     CaseDocument formG;
-    Map<String, CaseDocument> pfdNcdrDocuments;
+    Map<String, Pair<CaseDocument, CaseDocumentType>> pfdNcdrDocuments;
     CaseDocument outOfCourtResolution;
 
     @BeforeEach
@@ -87,6 +90,8 @@ class ManageHearingActionServiceTest {
 
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
+
+        pfdNcdrDocuments = buildPfdNcdrDocumentsMap();
     }
 
     @Test
@@ -137,6 +142,8 @@ class ManageHearingActionServiceTest {
             .isEqualTo(hearingId);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingDocument())
             .isEqualTo(hearingNotice);
+        assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingCaseDocumentType())
+                .isEqualTo(CaseDocumentType.HEARING_NOTICE);
 
         // Verify the mocked method is called with the expected hearing
         verify(hearingTabDataMapper).mapHearingToTabData(
@@ -183,7 +190,7 @@ class ManageHearingActionServiceTest {
             .tabDateTime("15 Jul 2025 11:00")
             .build();
 
-        when(manageHearingsDocumentService.generateHearingNotice( finremCaseDetails, AUTH_TOKEN))
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(CaseDocument.builder().build());
 
         when(hearingTabDataMapper.mapHearingToTabData(any(), any()))
@@ -225,38 +232,30 @@ class ManageHearingActionServiceTest {
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formG);
 
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
-        );
-
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(pfdNcdrDocuments);
 
         outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
+            .documentFilename("OutOfCourtResolution.pdf")
             .documentUrl("http://example.com/OutOfCourtResolution")
             .build();
 
         when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(outOfCourtResolution);
 
+        // Act
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
+        // Check
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(6);
         assertThat(hearingWrapper.getHearingDocumentsCollection())
             .extracting(item ->
                 item.getValue().getHearingDocument())
             .contains(hearingNotice, formC, formG,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER").getLeft(),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER").getLeft(),
                 outOfCourtResolution);
+        assertTrue(documentTypesMatchFileNames());
 
         // Verify that all other methods were called
         verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
@@ -286,22 +285,11 @@ class ManageHearingActionServiceTest {
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formG);
 
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
-        );
-
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(pfdNcdrDocuments);
 
         outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
+            .documentFilename("OutOfCourtResolution.pdf")
             .documentUrl("http://example.com/OutOfCourtResolution")
             .build();
 
@@ -319,8 +307,8 @@ class ManageHearingActionServiceTest {
             .extracting(item ->
                 item.getValue().getHearingDocument())
             .contains(hearingNotice, formC, formG,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER").getLeft(),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER").getLeft(),
                 outOfCourtResolution);
 
         // Verify that all other methods were called
@@ -346,22 +334,11 @@ class ManageHearingActionServiceTest {
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(formC);
 
-        pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", CaseDocument.builder()
-                .documentFilename("ComplianceLetter.pdf")
-                .documentUrl("http://example.com/compliance-letter")
-                .build(),
-            "PFD_NCDR_COVER_LETTER", CaseDocument.builder()
-                .documentFilename("CoverLetter.pdf")
-                .documentUrl("http://example.com/cover-letter")
-                .build()
-        );
-
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(pfdNcdrDocuments);
 
         outOfCourtResolution = CaseDocument.builder()
-            .documentFilename("OutOfCourtReolution.pdf")
+            .documentFilename("OutOfCourtResolution.pdf")
             .documentUrl("http://example.com/OutOfCourtResolution")
             .build();
 
@@ -379,9 +356,10 @@ class ManageHearingActionServiceTest {
             .extracting(item ->
                 item.getValue().getHearingDocument())
             .contains(hearingNotice, formC,
-                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER"),
-                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER"),
+                pfdNcdrDocuments.get("PFD_NCDR_COMPLIANCE_LETTER").getLeft(),
+                pfdNcdrDocuments.get("PFD_NCDR_COVER_LETTER").getLeft(),
                 outOfCourtResolution);
+        assertTrue(documentTypesMatchFileNames());
 
         // Verify that all other methods were called
         verify(manageHearingsDocumentService).generateHearingNotice(finremCaseDetails, AUTH_TOKEN);
@@ -391,5 +369,65 @@ class ManageHearingActionServiceTest {
 
         // Verify that generateFormC was not called
         verify(manageHearingsDocumentService, never()).generateFormG(finremCaseDetails, AUTH_TOKEN);
+    }
+
+    /**
+     * Builds a map of PFD NCDR CaseDocuments.
+     *
+     * @return a map containing PFD NCDR documents with their filenames and their CaseDocumentTypes.
+     * Used by test class setup.
+     */
+    private Map<String, Pair<CaseDocument, CaseDocumentType>> buildPfdNcdrDocumentsMap() {
+        CaseDocument coverLetter = CaseDocument.builder()
+                .documentFilename("ComplianceLetter.pdf")
+                .documentUrl("http://example.com/compliance-letter")
+                .build();
+
+        CaseDocument complianceLetter = CaseDocument.builder()
+                .documentFilename("CoverLetter.pdf")
+                .documentUrl("http://example.com/cover-letter")
+                .build();
+
+        return Map.of(
+                "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(coverLetter, CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
+                "PFD_NCDR_COVER_LETTER", Pair.of(complianceLetter, CaseDocumentType.PFD_NCDR_COVER_LETTER)
+        );
+    }
+
+    /**
+     * Checks if the document types match their expected filenames.
+     *
+     * @return true if all document types match their expected filenames, false otherwise.
+     */
+    private boolean documentTypesMatchFileNames() {
+        hearingWrapper.getHearingDocumentsCollection().forEach(item -> {
+            CaseDocumentType caseDocumentType = item.getValue().getHearingCaseDocumentType();
+            CaseDocument document = item.getValue().getHearingDocument();
+            String fileName = document.getDocumentFilename();
+
+            switch (caseDocumentType) {
+                case HEARING_NOTICE:
+                    assertThat(fileName).isEqualTo("HearingNotice.pdf");
+                    break;
+                case FORM_C:
+                    assertThat(fileName).contains("FormC.pdf");
+                    break;
+                case FORM_G:
+                    assertThat(fileName).contains("FormG.pdf");
+                    break;
+                case PFD_NCDR_COMPLIANCE_LETTER:
+                    assertThat(fileName).contains("ComplianceLetter.pdf");
+                    break;
+                case PFD_NCDR_COVER_LETTER:
+                    assertThat(fileName).contains("CoverLetter.pdf");
+                    break;
+                case OUT_OF_COURT_RESOLUTION:
+                    assertThat(fileName).contains("OutOfCourtResolution.pdf");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected document type: " + caseDocumentType);
+            }
+        });
+        return true;
     }
 }

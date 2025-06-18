@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 
 import java.util.UUID;
 
@@ -18,5 +19,6 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageHearingDocument {
     private UUID hearingId;
+    private CaseDocumentType hearingCaseDocumentType;
     private CaseDocument hearingDocument;
 }
