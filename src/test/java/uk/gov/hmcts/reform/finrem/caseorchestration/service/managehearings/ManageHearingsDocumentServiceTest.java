@@ -14,14 +14,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -33,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsDocumentServiceTest {
@@ -273,7 +280,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     @Test
-    void shouldGenerateOutOfCourtResolutionDoc() {
+    void categoriseSystemDuplicateDocs_shouldGenerateOutOfCourtResolutionDoc() {
         // Arrange
         CaseDocument expectedDocument = CaseDocument.builder()
             .documentFilename(OUT_OF_COURT_RESOLUTION)
@@ -289,5 +296,43 @@ class ManageHearingsDocumentServiceTest {
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(staticHearingDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
+    }
+
+    @Test
+    void shouldCategoriseSystemDuplicateDocs() {
+        // Arrange
+        String expectedCategoryId = SYSTEM_DUPLICATES.getDocumentCategoryId();
+
+        ManageHearingsCollectionItem hearingItem = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder()
+                .additionalHearingDocs(List.of(
+                    DocumentCollectionItem
+                        .builder()
+                        .value(CaseDocument
+                                .builder()
+                                .categoryId(null)
+                                .build())
+                            .build()))
+                .build())
+            .build();
+
+        ManageHearingDocumentsCollectionItem hearingDocumentItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingDocument(CaseDocument
+                    .builder()
+                    .categoryId(null)
+                    .build())
+                .build())
+            .build();
+
+        List<ManageHearingsCollectionItem> hearings = List.of(hearingItem);
+        List<ManageHearingDocumentsCollectionItem> hearingDocuments = List.of(hearingDocumentItem);
+
+        // Act
+        manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings, hearingDocuments);
+
+        // Assert
+        assertEquals(expectedCategoryId, hearingItem.getValue().getAdditionalHearingDocs().getFirst().getValue().getCategoryId());
+        assertEquals(expectedCategoryId, hearingDocumentItem.getValue().getHearingDocument().getCategoryId());
     }
 }

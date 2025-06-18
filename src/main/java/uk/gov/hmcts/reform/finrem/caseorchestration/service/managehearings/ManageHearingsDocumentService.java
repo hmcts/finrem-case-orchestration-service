@@ -10,15 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Service
 @RequiredArgsConstructor
@@ -134,6 +138,31 @@ public class ManageHearingsDocumentService {
         CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
         outOfCourtDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
         return  outOfCourtDoc;
+    }
+
+    /**
+     * Categorizes system duplicate documents by setting their category ID to SYSTEM_DUPLICATES.
+     * This method processes both hearings and hearing documents collections, ensuring that
+     * any additional hearing documents or hearing document values are appropriately marked.
+     *
+     * @param hearings         the list of hearing collection items to process
+     * @param hearingDocuments the list of hearing document collection items to process
+     */
+    public void categoriseSystemDuplicateDocs(List<ManageHearingsCollectionItem> hearings, List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
+        if (hearings != null) {
+            hearings.stream()
+                .map(ManageHearingsCollectionItem::getValue)
+                .filter(hearing -> hearing.getAdditionalHearingDocs() != null)
+                .flatMap(hearing -> hearing.getAdditionalHearingDocs().stream())
+                .forEach(document -> document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
+
+        if (hearingDocuments != null) {
+            hearingDocuments.stream()
+                .map(ManageHearingDocumentsCollectionItem::getValue)
+                .filter(value -> value != null && value.getHearingDocument() != null)
+                .forEach(value -> value.getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
     }
 
     private String determineFormCTemplate(FinremCaseDetails caseDetails) {

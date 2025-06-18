@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Service
 @RequiredArgsConstructor
@@ -183,25 +182,8 @@ public class ManageHearingActionService {
         hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
         hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
 
-        // Mark System Duplicates
-        markSystemDuplicates(hearings, hearingsWrapper.getHearingDocumentsCollection());
-    }
-
-    private void markSystemDuplicates(List<ManageHearingsCollectionItem> hearings, List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
-        if (hearings != null) {
-            hearings.stream()
-                .map(ManageHearingsCollectionItem::getValue)
-                .filter(hearing -> hearing.getAdditionalHearingDocs() != null)
-                .flatMap(hearing -> hearing.getAdditionalHearingDocs().stream())
-                .forEach(document -> document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
-        }
-
-        if (hearingDocuments != null) {
-            hearingDocuments.stream()
-                .map(ManageHearingDocumentsCollectionItem::getValue)
-                .filter(value -> value != null && value.getHearingDocument() != null)
-                .forEach(value -> value.getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
-        }
+        manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings,
+            hearingsWrapper.getHearingDocumentsCollection());
     }
 
     private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
