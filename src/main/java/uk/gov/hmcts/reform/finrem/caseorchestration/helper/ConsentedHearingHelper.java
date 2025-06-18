@@ -31,7 +31,6 @@ public class ConsentedHearingHelper {
 
     private final ObjectMapper objectMapper;
 
-
     public List<ConsentedHearingDataWrapper> getHearings(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(LIST_FOR_HEARING_COLLECTION_CONSENTED))
             .map(this::convertToHearingDataList).orElse(new ArrayList<>());
