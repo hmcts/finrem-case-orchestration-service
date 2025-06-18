@@ -183,17 +183,20 @@ public class ManageHearingActionService {
     }
 
     private void markSystemDuplicates(List<ManageHearingsCollectionItem> hearings, List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
-        hearings.forEach(hearing -> {
-            hearing.getValue().getAdditionalHearingDocs().forEach(document -> {
-                document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId());
-            });
-        });
+        if (hearings != null) {
+            hearings.stream()
+                .map(ManageHearingsCollectionItem::getValue)
+                .filter(hearing -> hearing.getAdditionalHearingDocs() != null)
+                .flatMap(hearing -> hearing.getAdditionalHearingDocs().stream())
+                .forEach(document -> document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
 
-        hearingDocuments.forEach(document -> {
-            if (document.getValue().getHearingDocument() != null) {
-                document.getValue().getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId());
-            }
-        });
+        if (hearingDocuments != null) {
+            hearingDocuments.stream()
+                .map(ManageHearingDocumentsCollectionItem::getValue)
+                .filter(value -> value != null && value.getHearingDocument() != null)
+                .forEach(value -> value.getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
     }
 
     private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {

@@ -87,17 +87,25 @@ class ManageHearingActionServiceTest {
 
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
         CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
-        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
 
         Map<String, Pair<CaseDocument, CaseDocumentType>>  pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
+            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf",
+                "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
+            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf",
+                "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
 
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, "AUTH_TOKEN")).thenReturn(formC);
-        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, "AUTH_TOKEN")).thenReturn(formG);
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, "AUTH_TOKEN")).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(formG);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(createCaseDocument(HEARING_NOTICE_FILENAME, HEARING_NOTICE_URL));
 
         manageHearingActionService.performAddHearing(finremCaseDetails, "AUTH_TOKEN");
 
@@ -116,17 +124,26 @@ class ManageHearingActionServiceTest {
 
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
         CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
-        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
 
         Map<String, Pair<CaseDocument, CaseDocumentType>>  pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
+            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf",
+                "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
+            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf",
+                "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
 
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, "AUTH_TOKEN")).thenReturn(formC);
-        when(manageHearingsDocumentService.generateFormG(finremCaseDetails, "AUTH_TOKEN")).thenReturn(formG);
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, "AUTH_TOKEN")).thenReturn(createCaseDocument("HearingNotice.pdf", "http://example.com/hearing-notice"));
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(formC);
+        when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(formG);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(createCaseDocument("HearingNotice.pdf",
+            "http://example.com/hearing-notice"));
         when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
 
         manageHearingActionService.performAddHearing(finremCaseDetails, "AUTH_TOKEN");
@@ -146,15 +163,23 @@ class ManageHearingActionServiceTest {
         finremCaseDetails.getData().setFastTrackDecision(YesOrNo.YES);
 
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
-        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf", "http://example.com/OutOfCourtResolution");
+        CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
+            "http://example.com/OutOfCourtResolution");
         Map<String, Pair<CaseDocument, CaseDocumentType>>  pfdNcdrDocuments = Map.of(
-            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf", "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
-            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf", "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
+            "PFD_NCDR_COMPLIANCE_LETTER", Pair.of(createCaseDocument("ComplianceLetter.pdf",
+                "http://example.com/compliance-letter"), CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER),
+            "PFD_NCDR_COVER_LETTER",  Pair.of(createCaseDocument("CoverLetter.pdf",
+                "http://example.com/cover-letter"), CaseDocumentType.PFD_NCDR_COVER_LETTER));
 
-        when(manageHearingsDocumentService.generateFormC(finremCaseDetails, "AUTH_TOKEN")).thenReturn(formC);
-        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
-        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
-        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, "AUTH_TOKEN")).thenReturn(createCaseDocument("HearingNotice.pdf", "http://example.com/hearing-notice"));
+        when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(formC);
+        when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(pfdNcdrDocuments);
+        when(manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(outOfCourtResolution);
+        when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails,
+            "AUTH_TOKEN")).thenReturn(createCaseDocument("HearingNotice.pdf",
+            "http://example.com/hearing-notice"));
 
         manageHearingActionService.performAddHearing(finremCaseDetails, "AUTH_TOKEN");
 
