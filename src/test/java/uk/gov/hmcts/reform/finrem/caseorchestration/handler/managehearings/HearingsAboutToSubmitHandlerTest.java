@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -90,6 +91,7 @@ class HearingsAboutToSubmitHandlerTest {
                         .documentBinaryUrl("documentBinaryUrl")
                         .uploadTimestamp(LocalDateTime.now())
                         .build())
+                        .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
                     .build())
                 .build();
 
@@ -146,6 +148,7 @@ class HearingsAboutToSubmitHandlerTest {
         assertThat(hearingDocumentAdded.getValue().getHearingId()).isEqualTo(hearingId);
         assertThat(hearingDocumentAdded.getValue().getHearingDocument().getDocumentFilename())
             .isEqualTo("HearingNotice.pdf");
+        assertThat(hearingDocumentAdded.getValue().getHearingCaseDocumentType()).isEqualTo(CaseDocumentType.HEARING_NOTICE);
         assertThat(responseManageHearingsWrapper.getWorkingHearingId()).isEqualTo(hearingId);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
 
