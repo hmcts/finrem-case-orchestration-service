@@ -140,6 +140,8 @@ public class ManageHearingsDocumentService {
             );
         }
 
+        documentMap.forEach((key, value) ->
+            value.getLeft().setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId()));
         return documentMap;
     }
 
@@ -151,7 +153,9 @@ public class ManageHearingsDocumentService {
      * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
-        return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        outOfCourtDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+        return  outOfCourtDoc;
     }
 
     private String determineFormCTemplate(FinremCaseDetails caseDetails) {

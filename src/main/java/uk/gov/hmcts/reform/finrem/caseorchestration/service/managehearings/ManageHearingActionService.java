@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Service
 @RequiredArgsConstructor
@@ -176,6 +177,23 @@ public class ManageHearingActionService {
         hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
         hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
         hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+
+        // Mark System Duplicates
+        markSystemDuplicates(hearings, hearingsWrapper.getHearingDocumentsCollection());
+    }
+
+    private void markSystemDuplicates(List<ManageHearingsCollectionItem> hearings, List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
+        hearings.forEach(hearing -> {
+            hearing.getValue().getAdditionalHearingDocs().forEach(document -> {
+                document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId());
+            });
+        });
+
+        hearingDocuments.forEach(document -> {
+            if (document.getValue().getHearingDocument() != null) {
+                document.getValue().getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId());
+            }
+        });
     }
 
     private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
