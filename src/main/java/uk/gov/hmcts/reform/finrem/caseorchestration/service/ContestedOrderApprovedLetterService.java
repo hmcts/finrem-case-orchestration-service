@@ -22,7 +22,6 @@ import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
@@ -59,11 +58,12 @@ public class ContestedOrderApprovedLetterService {
      * @param authorisationToken the authorisation token for document generation service
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
-//        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
-//            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
-//            .map(ExtraReportFieldsInput::getOrderApprovedDate)
-//            .orElse(null);
-//        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
+        LocalDate orderApprovedDate = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper())
+            .map(DraftOrdersWrapper::getExtraReportFieldsInput)
+            .map(ExtraReportFieldsInput::getOrderApprovedDate)
+            .orElse(null);
+        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
+
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
@@ -73,6 +73,7 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
+// TODO: Uncomment when CoverLetterCollection is implemented
 //        CoverLetter coverLetter = new CoverLetter();
 //        coverLetter.setCaseDocument(approvedOrderCoverLetter);
 //        coverLetter.setOrderApprovedDate(orderApprovedDate);
@@ -81,6 +82,7 @@ public class ContestedOrderApprovedLetterService {
 //                .value(coverLetter)
 //                .build()
 //        );
+
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
@@ -99,7 +101,7 @@ public class ContestedOrderApprovedLetterService {
         populateTemplateVariables(caseDetails, judgeDetails);
         Map<String, Object> caseData = caseDetails.getData();
         // TODO: Handle all JudgeApproval in collection
-        caseData.put("orderApprovedDate", finremCaseDetails.getData().getDraftOrdersWrapper().getJudgeApproval1().getOrderApprovedDate());
+        caseData.put("orderApprovedDate", finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput().getOrderApprovedDate());
     }
 
     private void populateTemplateVariables(CaseDetails caseDetails, String judgeDetails) {
