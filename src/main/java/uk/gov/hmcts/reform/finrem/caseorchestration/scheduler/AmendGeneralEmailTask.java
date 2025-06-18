@@ -49,24 +49,25 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        log.info("Starting AmendGeneralEmailTask Cron....\n" +
-                        "TASK_NAME: {}\n" +
-                        "SUMMARY: {}\n" +
-                        "TASK_ENABLED: {}\n" +
-                        "BATCH_SIZE: {}\n" +
-                        "CASE_TYPE_ID: {}\n" +
-                        "CSV_FILE: {}\n" +
-                        "SECRET KEY EXIST: {}",
+        log.info("Starting AmendGeneralEmailTask Cron....\n"
+                        + "TASK_NAME: {}\n"
+                        + "SUMMARY: {}\n"
+                        + "TASK_ENABLED: {}\n"
+                        + "BATCH_SIZE: {}\n"
+                        + "CASE_TYPE_ID: {}\n"
+                        + "CSV_FILE: {}\n"
+                        + "SECRET KEY EXIST: {}",
                 getTaskName(),
                 getSummary(),
                 taskEnabled,
                 batchSize,
                 caseTypeId,
                 getCaseListFileName(),
-                secret!=null && !secret.isEmpty());
+                secret != null && !secret.isEmpty());
 
-        if(secret.isEmpty()) {
-            log.error("Secret key is empty. Unable to decrypt the csv file. Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
+        if (secret.isEmpty()) {
+            log.error("Secret key is empty. Unable to decrypt the csv file. "
+                    + "Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
             return List.of();
         }
 
