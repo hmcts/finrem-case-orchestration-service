@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.SUBMITTED;
 
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
