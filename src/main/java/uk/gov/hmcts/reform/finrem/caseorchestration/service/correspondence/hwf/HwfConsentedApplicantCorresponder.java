@@ -34,7 +34,6 @@ public class HwfConsentedApplicantCorresponder extends FinremSingleLetterOrEmail
     }
 
     @Override
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
         log.info("Sending Consented HWF Successful email notification to Solicitor");
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
