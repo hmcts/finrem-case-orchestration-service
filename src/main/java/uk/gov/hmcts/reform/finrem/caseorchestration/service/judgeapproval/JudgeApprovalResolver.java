@@ -103,7 +103,7 @@ class JudgeApprovalResolver {
                     approvable.replaceDocument(judgeApproval.getAmendedDocument());
                 }
                 approvable.setOrderStatus(APPROVED_BY_JUDGE);
-                approvable.setApprovalDate(LocalDateTime.now());
+                approvable.setApprovalDate(judgeApproval.getOrderApprovedDate().atStartOfDay());
             }
             if (refused) {
                 approvable.setOrderStatus(REFUSED);
