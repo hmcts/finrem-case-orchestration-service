@@ -30,7 +30,6 @@ public class HwfConsentedApplicantCorresponder extends FinremSingleLetterOrEmail
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Getting HWF Successful notification letter for bulk print");
         return helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authorisationToken, APPLICANT);
-
     }
 
     @Override
