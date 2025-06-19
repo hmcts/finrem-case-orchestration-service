@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,18 +16,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FinremHwfContestedApplicantCorresponderTest {
 
-    FinremHwfContestedApplicantCorresponder underTest;
+    @InjectMocks
+    private FinremHwfContestedApplicantCorresponder underTest;
 
     @Mock
     NotificationService notificationService;
 
     @Spy
     private FinremCaseDetails caseDetails;
-
-    @BeforeEach
-    void setUp() {
-        underTest = new FinremHwfContestedApplicantCorresponder(notificationService);
-    }
 
     @Test
     void shouldEmailApplicant() {
