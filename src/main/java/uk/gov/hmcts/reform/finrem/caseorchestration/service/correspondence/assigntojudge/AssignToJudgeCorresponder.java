@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
 
-
 @Component
 @Slf4j
 public class AssignToJudgeCorresponder extends CaseDetailsSingleLetterOrEmailAllPartiesCorresponder {
