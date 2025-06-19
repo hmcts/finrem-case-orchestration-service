@@ -137,7 +137,7 @@ tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
     testLogging {
@@ -300,19 +300,19 @@ pact {
     }
 }
 
-task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+tasks.register('smoke', Test) {
     description = "Runs smoke Tests"
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
 }
 
-task functional(type: Test) {
+tasks.register('functional', Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
 }
 
-task contractTest(type: Test) {
+tasks.register('contractTest', Test) {
     group = 'Delivery pipeline'
     description = 'Runs the consumer Pact tests'
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
@@ -320,7 +320,7 @@ task contractTest(type: Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
-task runAndPublishConsumerPactTests(type: Test) {
+tasks.register('runAndPublishConsumerPactTests', Test) {
     dependsOn(contractTest)
     logger.lifecycle("Runs pact Tests")
     testClassesDirs = sourceSets.contract.output.classesDirs
@@ -508,24 +508,24 @@ dependencies {
     }
 }
 
-tasks.withType(Jar) {
+tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Zip) {
+tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 273
+    maxWarnings = 260
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 530
+    maxWarnings = 516
 }
 
 tasks.named('checkstyleContract') {

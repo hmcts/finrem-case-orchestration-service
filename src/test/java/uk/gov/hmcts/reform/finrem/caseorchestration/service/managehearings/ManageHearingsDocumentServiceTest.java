@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -234,12 +236,12 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(coverLetter);
 
         // Act
-        Map<String, CaseDocument> documentMap =
+        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap =
             manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
-        assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER).getLeft());
+        assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER).getLeft());
 
         verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
         verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
@@ -260,11 +262,11 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(false);
 
         // Act
-        Map<String, CaseDocument> documentMap =
+        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap =
             manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER).getLeft());
         assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
 
         verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
