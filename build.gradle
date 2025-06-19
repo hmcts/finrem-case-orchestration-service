@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.66'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1720'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1745'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -16,16 +16,16 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
         guava                : '33.4.8-jre',
-        bspCommonLib         : '0.0.51',
-        ccdClient            : '4.9.5-SPRING2',
+        bspCommonLib         : '0.1.2',
+        ccdClient            : '5.1.0',
         commonsIo            : '2.19.0',
         commonsLang3         : '3.17.0',
-        hmctsNotify          : '4.1.1-RELEASE',
+        hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.38',
-        mockito              : '5.17.0',
+        mockito              : '5.18.0',
         pact                 : '4.6.17',
-        pdfbox               : '3.0.4',
+        pdfbox               : '3.0.5',
         reformLogging        : '6.1.9',
         serenity             : '4.2.30',
         serviceTokenGenerator: '5.3.2',
@@ -36,11 +36,11 @@ def versions = [
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
         springHateoas        : '1.5.6',
-        tika                 : '3.1.0',
-        amClient             : '1.7.3',
-        sendLetterClient     : '4.0.4',
+        tika                 : '3.2.0',
+        amClient             : '1.59.2',
+        sendLetterClient     : '5.0.4',
         elasticSearch        : '7.17.28',
-        jacksonDatabind      : '2.19.0',
+        jacksonDatabind      : '2.19.1',
         retry                : '1.3.4',
         snakeyaml            : '2.4',
         loadbalancer         : '4.2.1'
@@ -49,7 +49,7 @@ def versions = [
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
     springCloudBomVersion = "2024.0.1"
-    restAssuredBomVersion = "5.5.2"
+    restAssuredBomVersion = "5.5.5"
 }
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -57,8 +57,7 @@ version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 checkstyle {
-    maxWarnings = 584
-    toolVersion = '10.23.1'
+    toolVersion = '10.25.0'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -121,16 +120,7 @@ sourceSets {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
-    maven {
-        url 'https://jitpack.io'
-        content {
-            includeVersion 'com.github.hmcts', 'ccd-client', '4.9.5-SPRING2'
-            includeVersion 'com.github.hmcts', 'bsp-common-lib', '0.0.51'
-            includeVersion 'com.github.hmcts', 'send-letter-client', '4.0.4'
-            includeVersion 'com.github.hmcts', 'ccd-case-document-am-client', '1.7.3'
-        }
-    }
+    maven {url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'}
 }
 
 configurations {
@@ -147,7 +137,7 @@ tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
     testLogging {
@@ -310,19 +300,19 @@ pact {
     }
 }
 
-task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+tasks.register('smoke', Test) {
     description = "Runs smoke Tests"
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
 }
 
-task functional(type: Test) {
+tasks.register('functional', Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
 }
 
-task contractTest(type: Test) {
+tasks.register('contractTest', Test) {
     group = 'Delivery pipeline'
     description = 'Runs the consumer Pact tests'
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
@@ -330,7 +320,7 @@ task contractTest(type: Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
-task runAndPublishConsumerPactTests(type: Test) {
+tasks.register('runAndPublishConsumerPactTests', Test) {
     dependsOn(contractTest)
     logger.lifecycle("Runs pact Tests")
     testClassesDirs = sourceSets.contract.output.classesDirs
@@ -417,7 +407,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
-    implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+    implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
@@ -500,7 +490,7 @@ dependencies {
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+    functionalImplementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
@@ -518,14 +508,26 @@ dependencies {
     }
 }
 
-tasks.withType(Jar) {
+tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Zip) {
+tasks.withType(Zip).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('checkstyleMain') {
+    maxWarnings = 260
+}
+
+tasks.named('checkstyleTest') {
+    maxWarnings = 516
+}
+
+tasks.named('checkstyleContract') {
+    maxWarnings = 16
 }

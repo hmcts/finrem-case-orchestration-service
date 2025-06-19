@@ -12,7 +12,6 @@ public enum CaseDocumentType {
     FORM_B("Form B"),
     APPLICANT_FORM_E("Applicant - Form E"),
     FORM_F("Form F"),
-    FORM_G("Form G"),
     FORM_H("Form H"),
     LETTER_FROM_APPLICANT("Letter from Applicant"),
     CASE_SUMMARY("Case Summary"),
@@ -49,8 +48,15 @@ public enum CaseDocumentType {
     WITNESS_SUMMONS("Witness Summons"),
     POINTS_OF_CLAIM_OR_DEFENCE("Points of claim/defence"),
 
-    FM5("FM5");
+    FM5("FM5"),
 
+    // Document types related to the Manage Hearings event:
+    HEARING_NOTICE("Hearing notice"),
+    FORM_C("Form C"),
+    FORM_G("Form G"),
+    OUT_OF_COURT_RESOLUTION("Out of court resolution"),
+    PFD_NCDR_COMPLIANCE_LETTER("PFD NCDR compliance letter"),
+    PFD_NCDR_COVER_LETTER("PFD NCDR cover letter");
 
     private final String id;
 

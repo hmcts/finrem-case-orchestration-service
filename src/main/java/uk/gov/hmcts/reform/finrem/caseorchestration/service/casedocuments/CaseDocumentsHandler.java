@@ -21,7 +21,6 @@ public class CaseDocumentsHandler extends PartyDocumentsHandler {
         return true;
     }
 
-
     @Override
     protected DocumentCategory getDocumentCategoryFromDocumentType(CaseDocumentType caseDocumentType, CaseDocumentParty caseDocumentParty) {
 

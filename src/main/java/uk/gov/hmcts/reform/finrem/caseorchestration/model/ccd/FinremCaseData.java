@@ -51,8 +51,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.SendOrderW
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -112,17 +112,6 @@ public class FinremCaseData implements HasCaseDocument {
     private List<PaymentDocumentCollection> copyOfPaperFormA;
     @JsonProperty("otherCollection")
     private List<OtherDocumentCollection> otherDocumentsCollection;
-    private YesOrNo helpWithFeesQuestion;
-    @JsonProperty("HWFNumber")
-    private String hwfNumber;
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private BigDecimal amountToPay;
-    @JsonProperty("PBANumber")
-    private String pbaNumber;
-    @JsonProperty("PBAreference")
-    private String pbaReference;
-    @JsonProperty("PBAPaymentReference")
-    private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
     private List<DocumentCollectionItem> additionalCicDocuments;
@@ -440,6 +429,10 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RefugeWrapper refugeWrapper;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private PaymentDetailsWrapper paymentDetailsWrapper;
 
     @JsonIgnore
     public CaseFlagsWrapper getCaseFlagsWrapper() {
@@ -1070,5 +1063,13 @@ public class FinremCaseData implements HasCaseDocument {
             this.expressCaseWrapper = new ExpressCaseWrapper();
         }
         return expressCaseWrapper;
+    }
+
+    @JsonIgnore
+    public PaymentDetailsWrapper getPaymentDetailsWrapper() {
+        if (paymentDetailsWrapper == null) {
+            this.paymentDetailsWrapper = new PaymentDetailsWrapper();
+        }
+        return paymentDetailsWrapper;
     }
 }

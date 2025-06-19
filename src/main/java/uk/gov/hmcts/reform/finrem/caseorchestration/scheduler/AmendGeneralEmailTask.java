@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -50,24 +49,25 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        log.info("Starting AmendGeneralEmailTask Cron....\n" +
-                        "TASK_NAME: {}\n" +
-                        "SUMMARY: {}\n" +
-                        "TASK_ENABLED: {}\n" +
-                        "BATCH_SIZE: {}\n" +
-                        "CASE_TYPE_ID: {}\n" +
-                        "CSV_FILE: {}\n" +
-                        "SECRET KEY EXIST: {}",
+        log.info("Starting AmendGeneralEmailTask Cron....\n"
+                        + "TASK_NAME: {}\n"
+                        + "SUMMARY: {}\n"
+                        + "TASK_ENABLED: {}\n"
+                        + "BATCH_SIZE: {}\n"
+                        + "CASE_TYPE_ID: {}\n"
+                        + "CSV_FILE: {}\n"
+                        + "SECRET KEY EXIST: {}",
                 getTaskName(),
                 getSummary(),
                 taskEnabled,
                 batchSize,
                 caseTypeId,
                 getCaseListFileName(),
-                secret!=null && !secret.isEmpty());
+                secret != null && !secret.isEmpty());
 
-        if(secret.isEmpty()) {
-            log.error("Secret key is empty. Unable to decrypt the csv file. Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
+        if (secret.isEmpty()) {
+            log.error("Secret key is empty. Unable to decrypt the csv file. "
+                    + "Please configure Azure Key Vault or set the secret key [cron-csv-file-decrypt-key].");
             return List.of();
         }
 
@@ -109,7 +109,6 @@ public class AmendGeneralEmailTask extends CsvFileProcessingTask {
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
-        ObjectMapper mapper = new ObjectMapper();
 
         if (caseData.getGeneralEmailWrapper().getGeneralEmailUploadedDocument() != null) {
             caseData.getGeneralEmailWrapper().setGeneralEmailUploadedDocument(null);

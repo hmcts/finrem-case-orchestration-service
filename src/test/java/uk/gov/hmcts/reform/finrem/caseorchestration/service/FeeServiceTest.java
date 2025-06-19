@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOn
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.FeeClient;
 
 import java.math.BigDecimal;
@@ -42,7 +43,9 @@ class FeeServiceTest {
     @Test
     void givenSchedule1ContestedCase_whenGetApplicationFeeCaseData_thenReturnsFeeCaseData() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .pbaPaymentReference("PBA1234567")
+            .paymentDetailsWrapper(PaymentDetailsWrapper.builder()
+                .pbaPaymentReference("PBA1234567")
+                .build())
             .scheduleOneWrapper(ScheduleOneWrapper.builder()
                 .typeOfApplication(SCHEDULE_1_CHILDREN_ACT_1989)
                 .build())
@@ -68,7 +71,9 @@ class FeeServiceTest {
     @Test
     void givenConsentedCase_whenGetApplicationFeeCaseData_thenReturnsFeeCaseData() {
         FinremCaseData caseData = FinremCaseData.builder()
-            .pbaPaymentReference("PBA1234567")
+            .paymentDetailsWrapper(PaymentDetailsWrapper.builder()
+                .pbaPaymentReference("PBA1234567")
+                .build())
             .build();
         FinremCaseDetails caseDetails =
             FinremCaseDetails.builder()

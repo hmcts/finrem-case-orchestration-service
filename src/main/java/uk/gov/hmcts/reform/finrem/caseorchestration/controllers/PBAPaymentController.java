@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,13 +59,14 @@ public class PBAPaymentController extends BaseController {
     private static final String MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE =
         "The following MIAM exemptions that are no longer valid. Please re-submit the exemptions using Amend Application Details.";
 
-    private final FeeService feeService;
-    private final PBAPaymentService pbaPaymentService;
-    private final CaseDataService caseDataService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
     private final PrdOrganisationService prdOrganisationService;
     private final MiamLegacyExemptionsService miamLegacyExemptionsService;
+    private final FeeService feeService;
+    private final PBAPaymentService pbaPaymentService;
+    private final CaseDataService caseDataService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
@@ -184,9 +186,22 @@ public class PBAPaymentController extends BaseController {
             .build());
     }
 
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> miamInvalidLegacyExemptionsFailure(Map<String, Object> caseData) {
+        List<String> invalidLegacyExemptions = miamLegacyExemptionsService.getInvalidLegacyExemptions(caseData);
+
+        List<String> errors = new ArrayList<>();
+        errors.add(MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE);
+        errors.addAll(invalidLegacyExemptions);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .errors(errors)
+            .build());
+    }
+
     private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
                            @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService)
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService, objectMapper)
             .feeLookup(authToken, callbackRequest);
         caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
         caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
@@ -198,19 +213,6 @@ public class PBAPaymentController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of(paymentError))
-            .build());
-    }
-
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> miamInvalidLegacyExemptionsFailure(Map<String, Object> caseData) {
-        List<String> invalidLegacyExemptions = miamLegacyExemptionsService.getInvalidLegacyExemptions(caseData);
-
-        List<String> errors = new ArrayList<>();
-        errors.add(MIAM_INVALID_LEGACY_EXEMPTIONS_ERROR_MESSAGE);
-        errors.addAll(invalidLegacyExemptions);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData)
-            .errors(errors)
             .build());
     }
 }

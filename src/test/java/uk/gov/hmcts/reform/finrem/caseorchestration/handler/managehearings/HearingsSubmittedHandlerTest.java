@@ -10,14 +10,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.managehearing.ManageHearingsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
 
 import java.time.LocalDate;
@@ -25,7 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsSubmittedHandlerTest {
@@ -34,7 +40,7 @@ class HearingsSubmittedHandlerTest {
     private ManageHearingsSubmittedHandler manageHearingsSubmittedHandler;
 
     @Mock
-    private HearingService hearingService;
+    private ManageHearingsCorresponder manageHearingsCorresponder;
 
     @Test
     void testCanHandle() {
@@ -54,21 +60,8 @@ class HearingsSubmittedHandlerTest {
 
         // Assert
         assertThat(response.getData()).isNotNull();
-        assertThat(response.getData().getManageHearingsWrapper().getWorkingHearingId()).isEqualTo(hearingID);
         assertThat(response.getErrors()).isNullOrEmpty();
-    }
-
-    @Test
-    void shouldThrowIllegalStateIfHearingNotFound() {
-        // Arrange
-        UUID hearingID = UUID.randomUUID();
-        UUID mismatchedHearingID = UUID.randomUUID();
-        FinremCallbackRequest callbackRequest = buildCallbackRequest(hearingID, mismatchedHearingID);
-
-        // Act & Assert
-        assertThrows(IllegalStateException.class, () ->
-            manageHearingsSubmittedHandler.handle(callbackRequest, TestConstants.AUTH_TOKEN)
-        );
+        verify(manageHearingsCorresponder).sendHearingNotifications(callbackRequest);
     }
 
     private FinremCallbackRequest buildCallbackRequest(UUID hearingID, UUID hearingItemId) {
