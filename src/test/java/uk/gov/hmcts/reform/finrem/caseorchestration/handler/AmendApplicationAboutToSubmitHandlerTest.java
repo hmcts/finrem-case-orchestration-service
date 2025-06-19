@@ -35,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-
     private static final String PERIODIC_PAYMENT_CHILD_JSON = "/fixtures/updatecase/amend-periodic-payment-order.json";
     private static final String PERIODIC_PAYMENT_JSON = "/fixtures/updatecase/amend-periodic-payment-order-without"
         + "-agreement-with-valid-enums.json";
@@ -320,7 +319,7 @@ class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
         setupRespondentRepresented(finremCaseData, addressWithPostcode());
 
         // Act
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = underTest.handle(finremCallbackRequest, AUTH_TOKEN);
 
         // Assert
         assertThat(response.getErrors()).isEmpty();
