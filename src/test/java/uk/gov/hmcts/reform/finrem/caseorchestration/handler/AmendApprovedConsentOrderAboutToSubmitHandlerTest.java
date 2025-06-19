@@ -34,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType.FAMILY_COURT_STAMP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
@@ -41,7 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.asser
 @ExtendWith(MockitoExtension.class)
 class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestSetup {
 
-    public static final String AUTH_TOKEN = "tokien:)";
     private AmendApprovedConsentOrderAboutToSubmitHandler aboutToSubmitHandler;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
@@ -89,12 +89,12 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
             .getConsentOrderWrapper().getContestedConsentedApprovedOrders();
 
         verify(genericDocumentService, times(2)).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
-        assertEquals(STAMPED_ORDER, response.get(0).getApprovedOrder().getConsentOrder());
-        assertEquals(STAMPED_LETTER, response.get(0).getApprovedOrder().getOrderLetter());
+        assertEquals(STAMPED_ORDER, response.getFirst().getApprovedOrder().getConsentOrder());
+        assertEquals(STAMPED_LETTER, response.getFirst().getApprovedOrder().getOrderLetter());
         assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(0).getApprovedOrder().getConsentOrder().getCategoryId());
+            response.getFirst().getApprovedOrder().getConsentOrder().getCategoryId());
         assertEquals(DocumentCategory.APPROVED_ORDERS_CONSENT_ORDER_TO_FINALISE_PROCEEDINGS.getDocumentCategoryId(),
-            response.get(0).getApprovedOrder().getOrderLetter().getCategoryId());
+            response.getFirst().getApprovedOrder().getOrderLetter().getCategoryId());
     }
 
     @Test
@@ -183,9 +183,9 @@ class AmendApprovedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTestS
 
         verify(genericDocumentService, never()).stampDocument(any(CaseDocument.class), eq(AUTH_TOKEN), eq(FAMILY_COURT_STAMP), anyString());
         assertEquals(ORIGINAL_ORDER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getConsentOrder());
+            .getContestedConsentedApprovedOrders().getFirst().getApprovedOrder().getConsentOrder());
         assertEquals(ORIGINAL_LETTER, callbackRequest.getCaseDetails().getData().getConsentOrderWrapper()
-            .getContestedConsentedApprovedOrders().get(0).getApprovedOrder().getOrderLetter());
+            .getContestedConsentedApprovedOrders().getFirst().getApprovedOrder().getOrderLetter());
     }
 
     @Test
