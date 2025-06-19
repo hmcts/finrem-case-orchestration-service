@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CoverLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CoverLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
@@ -72,16 +70,6 @@ public class ContestedOrderApprovedLetterService {
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
-
-// TODO: Uncomment when CoverLetterCollection is implemented
-//        CoverLetter coverLetter = new CoverLetter();
-//        coverLetter.setCaseDocument(approvedOrderCoverLetter);
-//        coverLetter.setOrderApprovedDate(orderApprovedDate);
-//        finremCaseDetails.getData().getOrderApprovedCoverLetterCollection().add(
-//            CoverLetterCollection.builder()
-//                .value(coverLetter)
-//                .build()
-//        );
 
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
