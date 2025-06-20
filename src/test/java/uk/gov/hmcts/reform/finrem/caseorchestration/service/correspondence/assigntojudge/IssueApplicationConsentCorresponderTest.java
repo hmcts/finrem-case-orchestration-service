@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
