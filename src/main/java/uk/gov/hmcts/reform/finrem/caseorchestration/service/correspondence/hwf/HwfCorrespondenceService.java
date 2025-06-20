@@ -17,7 +17,6 @@ public class HwfCorrespondenceService {
 
     private final HwfContestedApplicantCorresponder hwfContestedApplicantCorresponder;
 
-
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         log.info("Send HWF correspondence for Case ID: {}", caseDetails.getId());
         if (caseDataService.isConsentedApplication(caseDetails)) {
