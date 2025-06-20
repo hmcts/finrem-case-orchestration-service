@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -12,17 +12,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FinremAssignToJudgeCorresponderTest {
+@ExtendWith(MockitoExtension.class)
+class FinremAssignToJudgeCorresponderTest {
 
     FinremAssignToJudgeCorresponder assignToJudgeCorresponder;
 
@@ -33,148 +42,165 @@ public class FinremAssignToJudgeCorresponderTest {
     @Mock
     AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
-    private static final String AUTHORISATION_TOKEN = "authToken";
-
-    private FinremCaseDetails caseDetails;
-
     private CaseDocument caseDocument;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
-        caseDetails = FinremCaseDetails.builder()
-            .data(FinremCaseData.builder().build())
-            .caseType(CaseType.CONTESTED)
-            .build();
         caseDocument = CaseDocument.builder().build();
-        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
+
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.APPLICANT))).thenReturn(
             caseDocument);
-        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT))).thenReturn(
             caseDocument);
-        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
-            DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE)).thenReturn(
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))).thenReturn(
             caseDocument);
     }
 
     @Test
-    public void shouldGetDocumentToPrintForApplicant() {
-        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+    void shouldGetDocumentToPrintForApplicant() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
+        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
         assertEquals(caseDocument, result);
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
     @Test
-    public void shouldGetDocumentToPrintForRespondent() {
-        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+    void shouldGetDocumentToPrintForRespondent() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
+        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         assertEquals(caseDocument, result);
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
     @Test
-    public void shouldGetDocumentToPrintForIntervener() {
-        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+    void shouldGetDocumentToPrintForIntervener() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
+        CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         assertEquals(caseDocument, result);
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
     }
 
     @Test
-    public void shouldEmailApplicantSolicitor() {
+    void shouldEmailApplicantSolicitor() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
         verify(notificationService).isApplicantSolicitorEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Test
-    public void emailRespondentSolicitor() {
+    void emailRespondentSolicitor() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
         verify(notificationService).isRespondentSolicitorEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 
     @Test
-    public void emailIntervenerSolicitorShouldSendToIntervenerOne() {
-        String intervenerEmail = "1SolEmail";
-        caseDetails.getData().getIntervenerOne().setIntervenerSolEmail(intervenerEmail);
+    void emailIntervenerSolicitorShouldSendToIntervenerOne() {
+        // Arrange
+        IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail("1SolEmail").build();
+        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerOne(intervenerOne));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(),
-            caseDetails)).thenReturn(true);
-        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOne()))
-            .thenReturn(dataKeysWrapper);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(),
-            caseDetails);
-        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerOne());
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            eq(caseDetails))).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne,
+            caseDetails)).thenReturn(true);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerOne)).thenReturn(dataKeysWrapper);
+
+        // Act
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerOne, caseDetails);
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(intervenerOne);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     @Test
-    public void emailIntervenerSolicitorShouldSendToIntervenerTwo() {
-        String intervenerEmail = "2SolEmail";
-        caseDetails.getData().getIntervenerTwo().setIntervenerSolEmail(intervenerEmail);
+    void emailIntervenerSolicitorShouldSendToIntervenerTwo() {
+        // Arrange
+        IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail("2SolEmail").build();
+        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerTwo(intervenerTwo));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(),
+
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            eq(caseDetails))).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerTwo,
             caseDetails)).thenReturn(true);
         when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwo()))
             .thenReturn(dataKeysWrapper);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerTwo(),
-            caseDetails);
-        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerTwo());
+        // Act
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerTwo, caseDetails);
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(intervenerTwo);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     @Test
-    public void emailIntervenerSolicitorShouldSendToIntervenerThree() {
-        String intervenerEmail = "3SolEmail";
-        caseDetails.getData().getIntervenerThree().setIntervenerSolEmail(intervenerEmail);
+    void emailIntervenerSolicitorShouldSendToIntervenerThree() {
+        // Arrange
+        IntervenerThree intervenerThree = IntervenerThree.builder().intervenerSolEmail("3SolEmail").build();
+        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerThree(intervenerThree));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(),
-            caseDetails)).thenReturn(true);
-        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThree()))
-            .thenReturn(dataKeysWrapper);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerThree(),
-            caseDetails);
-        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerThree());
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            eq(caseDetails))).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerThree,
+            caseDetails)).thenReturn(true);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerThree)).thenReturn(dataKeysWrapper);
+
+        // Act
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerThree, caseDetails);
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(intervenerThree);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     @Test
-    public void emailIntervenerSolicitorShouldSendToIntervenerFour() {
-        String intervenerEmail = "4SolEmail";
-        caseDetails.getData().getIntervenerFour().setIntervenerSolEmail(intervenerEmail);
+    void emailIntervenerSolicitorShouldSendToIntervenerFour() {
+        // Arrange
+        IntervenerFour intervenerFour = IntervenerFour.builder().intervenerSolEmail("4SolEmail").build();
+        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerFour(intervenerFour));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(),
-            caseDetails)).thenReturn(true);
-        when(notificationService.getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFour()))
-            .thenReturn(dataKeysWrapper);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
 
-        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerFour(),
-            caseDetails);
-        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(caseDetails.getData().getIntervenerFour());
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            eq(caseDetails))).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerFour,
+            caseDetails)).thenReturn(true);
+        when(notificationService.getCaseDataKeysForIntervenerSolicitor(intervenerFour)).thenReturn(dataKeysWrapper);
+
+        // Act
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
+        // Assert
+        verify(notificationService).isIntervenerSolicitorDigitalAndEmailPopulated(intervenerFour, caseDetails);
+        verify(notificationService).getCaseDataKeysForIntervenerSolicitor(intervenerFour);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, dataKeysWrapper);
     }
 
     @Test
-    public void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
+    void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
+        FinremCaseDetails caseDetails = buildCaseDetails();
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
@@ -182,18 +208,29 @@ public class FinremAssignToJudgeCorresponderTest {
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(),
             caseDetails)).thenReturn(false);
 
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
 
 
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTHORISATION_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTHORISATION_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTHORISATION_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTH_TOKEN);
+    }
+
+    private FinremCaseDetails buildCaseDetails() {
+        return buildCaseDetails(FinremCaseData.builder());
+    }
+
+    private FinremCaseDetails buildCaseDetails(FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
+        return FinremCaseDetails.builder()
+            .data(caseDataBuilder.ccdCaseType(CaseType.CONTESTED).build())
+            .caseType(CaseType.CONTESTED)
+            .build();
     }
 }
