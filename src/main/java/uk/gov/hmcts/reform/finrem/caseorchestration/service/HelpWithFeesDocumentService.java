@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 public class HelpWithFeesDocumentService {
 
     private final GenericDocumentService genericDocumentService;
+
     private final DocumentConfiguration documentConfiguration;
+
     private final DocumentHelper documentHelper;
 
     /**
@@ -33,26 +35,6 @@ public class HelpWithFeesDocumentService {
      * @return the generated notification letter as a {@link CaseDocument}
      */
     public CaseDocument generateHwfSuccessfulNotificationLetter(FinremCaseDetails caseDetails, String authToken,
-                                                                DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",
-            documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
-            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
-            recipient);
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
-
-        CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocument(authToken,
-            caseDetailsForBulkPrint,
-            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
-            documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName());
-
-        log.info("Generated Help With Fees Successful Notification Letter: {}", generatedHwfSuccessfulNotificationLetter);
-
-        return generatedHwfSuccessfulNotificationLetter;
-    }
-
-    @Deprecated
-    public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken,
                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
