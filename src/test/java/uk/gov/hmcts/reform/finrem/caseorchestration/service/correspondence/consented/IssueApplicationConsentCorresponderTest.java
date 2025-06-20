@@ -54,8 +54,6 @@ class IssueApplicationConsentCorresponderTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(FinremSingleLetterOrEmailAllPartiesCorresponder.class);
 
-    private final CaseType[] testingCastTypes = new CaseType[] {CONSENTED, CONTESTED};
-
     private final CaseDocument expectedCaseDocument = expectedCaseDocument();
 
     @InjectMocks
@@ -79,143 +77,129 @@ class IssueApplicationConsentCorresponderTest {
     @ParameterizedTest
     @EnumSource(value = DocumentHelper.PaperNotificationRecipient.class,
         names = {"APPLICANT", "RESPONDENT"})
-    void givenAnyCaseTypeCase_whenGetDocumentToPrint_thenReturnExpectedDocument(DocumentHelper.PaperNotificationRecipient party) {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
-            switch (party) {
-                case APPLICANT:
-                    lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
-                        DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(unexpectedCaseDocument());
-                    break;
-                case RESPONDENT:
-                    lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
-                        DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(unexpectedCaseDocument());
-                    break;
-                default:
-                    throw new IllegalStateException("Unreachable code");
-            }
-
-            // Act
-            CaseDocument result = underTest.getDocumentToPrint(caseDetails, AUTH_TOKEN, party);
-
-            // Assert
-            assertThat(result).isEqualTo(expectedCaseDocument);
+    void givenConsentedCase_whenGetDocumentToPrint_thenReturnExpectedDocument(DocumentHelper.PaperNotificationRecipient party) {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+        switch (party) {
+            case APPLICANT:
+                lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT)).thenReturn(unexpectedCaseDocument());
+                break;
+            case RESPONDENT:
+                lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(unexpectedCaseDocument());
+                break;
+            default:
+                throw new IllegalStateException("Unreachable code");
         }
+
+        // Act
+        CaseDocument result = underTest.getDocumentToPrint(caseDetails, AUTH_TOKEN, party);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedCaseDocument);
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenApplicantSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
-            when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
+    void givenConsentedCase_whenApplicantSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+        when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
-            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
-        }
+        // Assert
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenApplicantSolicitorEmailNotPopulated_thenSendLetter() {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
-            when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+    void givenConsentedCase_whenApplicantSolicitorEmailNotPopulated_thenSendLetter() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+        when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
-            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
-        }
+        // Assert
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
-            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
+    void givenConsentedCase_whenRespondentSolicitorEmailPopulated_thenSendEmailToApplicantSolicitor() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
-        }
+        // Assert
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulated_thenSendLetter() {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType);
+    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulated_thenSendLetter() {
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
 
-            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
-        }
+        // Assert
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @ParameterizedTest
     @NullSource
     @EnumSource(value = YesOrNo.class, names = {"NO"})
-    void givenAnyCaseTypeCaseWithRespondentResideOutsideUK_whenRespondentSolicitorEmailNotPopulated_thenSendLetter(
+    void givenConsentedCaseWithRespondentResideOutsideUK_whenRespondentSolicitorEmailNotPopulated_thenSendLetter(
         YesOrNo respondentResideOutsideUK) {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseData caseData = FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .respondentResideOutsideUK(respondentResideOutsideUK)
-                    .build())
-                .build();
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType, caseData);
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentResideOutsideUK(respondentResideOutsideUK)
+                .build())
+            .build();
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED, caseData);
 
-            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-            verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
-        }
+        // Assert
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
-    void givenAnyCaseTypeCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
-        for (CaseType caseType : testingCastTypes) {
-            // Arrange
-            FinremCaseData caseData = FinremCaseData.builder()
-                .contactDetailsWrapper(ContactDetailsWrapper.builder()
-                    .respondentResideOutsideUK(YesOrNo.YES)
-                    .build())
-                .build();
-            FinremCaseDetails caseDetails = buildCaseDetails(caseType, caseData);
+    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
+        // Arrange
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .respondentResideOutsideUK(YesOrNo.YES)
+                .build())
+            .build();
+        FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED, caseData);
 
-            when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
-            // Act
-            underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
+        // Act
+        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
-            // Assert
-            verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-            verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
-            assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
-            logs.reset();
-        }
+        // Assert
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
+        logs.reset();
     }
 
     @Test
@@ -272,7 +256,7 @@ class IssueApplicationConsentCorresponderTest {
     }
 
     @Test
-    void givenConsentCase_whenSendCorrespondence_thenNothingToBeSent() {
+    void givenConsentedCase_whenSendCorrespondence_thenNothingToBeSentToInterveners() {
         // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
         SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
@@ -286,53 +270,6 @@ class IssueApplicationConsentCorresponderTest {
         verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
         verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
         verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
-    }
-
-    @Test
-    void givenContestedCaseWithIntvOne_whenIntervenerSolicitorEmailNotPopulated_thenSendLetter() {
-        // Arrange
-        FinremCaseData caseData = FinremCaseData.builder()
-            .intervenerOne(IntervenerOne.builder().intervenerName("One").build())
-            .build();
-        FinremCaseDetails caseDetails = buildCaseDetails(CONTESTED, caseData);
-        SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
-            any(FinremCaseDetails.class))).thenReturn(false);
-
-        // Act
-        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
-
-        // Assert
-        verify(notificationService, never())
-            .sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
-    }
-
-    @Test
-    void givenContestedCaseWithIntvOneAndThree_whenIntervenerSolicitorEmailNotPopulated_thenSendLetter() {
-        // Arrange
-        FinremCaseData caseData = FinremCaseData.builder()
-            .intervenerOne(IntervenerOne.builder().intervenerName("One").build())
-            .intervenerThree(IntervenerThree.builder().intervenerName("Three").build())
-            .build();
-        FinremCaseDetails caseDetails = buildCaseDetails(CONTESTED, caseData);
-        SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
-            any(FinremCaseDetails.class))).thenReturn(false);
-
-        // Act
-        underTest.sendCorrespondence(caseDetails, AUTH_TOKEN);
-
-        // Assert
-        verify(notificationService, never())
-            .sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
         verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
     }
 
