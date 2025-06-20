@@ -10,19 +10,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consented.AssignedToJudgeSkipRespIntlPostCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 @Slf4j
 @Service
 public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
 
-    private final AssignedToJudgeSkipRespIntlPostCorresponder assignedToJudgeSkipRespIntlPostCorresponder;
+    private final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
     @Autowired
     public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                     AssignedToJudgeSkipRespIntlPostCorresponder assignedToJudgeSkipRespIntlPostCorresponder) {
+                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
         super(finremCaseDetailsMapper);
-        this.assignedToJudgeSkipRespIntlPostCorresponder = assignedToJudgeSkipRespIntlPostCorresponder;
+        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHan
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        assignedToJudgeSkipRespIntlPostCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
+        issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
 }

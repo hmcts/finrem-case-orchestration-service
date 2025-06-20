@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -48,7 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.Inte
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType.INTERVENER_TWO;
 
 @ExtendWith(MockitoExtension.class)
-class AssignedToJudgeSkipRespIntlPostCorresponderTest {
+class IssueApplicationConsentCorresponderTest {
 
     @TestLogs
     private final TestLogger logs = new TestLogger(FinremSingleLetterOrEmailAllPartiesCorresponder.class);
@@ -58,7 +59,7 @@ class AssignedToJudgeSkipRespIntlPostCorresponderTest {
     private final CaseDocument expectedCaseDocument = expectedCaseDocument();
 
     @InjectMocks
-    private AssignedToJudgeSkipRespIntlPostCorresponder underTest;
+    private IssueApplicationConsentCorresponder underTest;
 
     @Mock
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
