@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @AllArgsConstructor
 public abstract class IntervenerWrapper implements IntervenerDetails {
 
-
     private String intervenerName;
 
     private YesOrNo intervenerResideOutsideUK;
@@ -42,11 +41,11 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     private String intervenerEmail;
 
     private String intervenerPhone;
+
     private YesOrNo intervenerRepresented;
 
     @JsonIgnore
     private Boolean intervenerCorrespondenceEnabled;
-
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -95,7 +94,6 @@ public abstract class IntervenerWrapper implements IntervenerDetails {
     public abstract DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient();
 
     public abstract IntervenerWrapper getIntervenerWrapperFromCaseData(FinremCaseData caseData);
-
 
     public abstract void removeIntervenerWrapperFromCaseData(FinremCaseData caseData);
 

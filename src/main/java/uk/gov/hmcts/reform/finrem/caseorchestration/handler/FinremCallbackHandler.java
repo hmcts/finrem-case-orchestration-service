@@ -43,7 +43,7 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return callbackRequestWithFinremCaseDetails;
     }
 
-    public void validateCaseData(FinremCallbackRequest callbackRequest) {
+    protected void validateCaseData(FinremCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
