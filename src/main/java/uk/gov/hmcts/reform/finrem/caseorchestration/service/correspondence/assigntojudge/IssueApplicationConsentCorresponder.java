@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 @Component
 public class IssueApplicationConsentCorresponder extends FinremAssignToJudgeCorresponder {
 
-    public IssueApplicationConsentCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService, AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
+    public IssueApplicationConsentCorresponder(NotificationService notificationService,
+                                               BulkPrintService bulkPrintService,
+                                               AssignedToJudgeDocumentService assignedToJudgeDocumentService) {
         super(notificationService, bulkPrintService, assignedToJudgeDocumentService);
     }
 
