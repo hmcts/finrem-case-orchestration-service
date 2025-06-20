@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -105,10 +103,6 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
-    protected final boolean isNotInternationalParty(YesOrNo resideOutsideUK) {
-        return !YesOrNo.YES.equals(resideOutsideUK);
-    }
-
     protected boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
         return true;
     }
@@ -125,7 +119,4 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
 
     protected abstract void emailIntervenerSolicitor(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails);
 
-    protected final ContactDetailsWrapper getContactDetailsWrapper(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getContactDetailsWrapper();
-    }
 }
