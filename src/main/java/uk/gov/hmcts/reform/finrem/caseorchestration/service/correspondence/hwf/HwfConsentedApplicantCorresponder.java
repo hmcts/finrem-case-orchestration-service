@@ -38,4 +38,10 @@ public class HwfConsentedApplicantCorresponder extends FinremSingleLetterOrEmail
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
     }
 
+    @Override
+    public boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
+        // Applicants cannot be overseas and apply for HWF as they have to live in the UK and have UK benefits in order to apply
+        return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getApplicantResideOutsideUK());
+    }
+
 }
