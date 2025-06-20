@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Slf4j
 @Component
-public class IssueApplicationConsentCorresponder extends FinremAssignToJudgeCorresponder {
+public class IssueApplicationConsentCorresponder extends AbstractAssignToJudgeCorresponder {
 
     public IssueApplicationConsentCorresponder(NotificationService notificationService,
                                                BulkPrintService bulkPrintService,
