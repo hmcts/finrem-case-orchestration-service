@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -131,7 +132,8 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
 
-                prePopulateOrderApprovedDate(draftOrdersReview);
+                // Set the order approved date to today to pre-populate the court order date field
+                draftOrdersReview.setOrderApprovedDate(LocalDate.now());
 
                 // Process Draft Orders
                 Stream<JudgeApproval> draftOrderStream = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
@@ -179,21 +181,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             })
             .sorted(Comparator.comparing(JudgeApproval::getSortKey, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
-    }
-
-    /**
-     * Pre-populates the orderApprovedDate in the DraftOrdersReview object.
-     * If orderApprovedDate is not set, it uses hearingDate if available, otherwise defaults to current date.
-     *
-     * @param draftOrdersReview the DraftOrdersReview object to update
-     */
-    private static void prePopulateOrderApprovedDate(DraftOrdersReview draftOrdersReview) {
-        // Ensure orderApprovedDate is set if not already
-        draftOrdersReview.setOrderApprovedDate(
-            Optional.ofNullable(draftOrdersReview.getOrderApprovedDate())
-                .orElseGet(() -> Optional.ofNullable(draftOrdersReview.getHearingDate())
-                    .orElse(java.time.LocalDate.now()))
-        );
     }
 
     private JudgeApproval createReviewableItems(List<DraftOrdersReviewCollection> outstanding, int index) {
