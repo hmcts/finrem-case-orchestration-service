@@ -200,24 +200,26 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        // Arrange
+        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder()
+            .intervenerOne(IntervenerOne.builder().intervenerName("intervenerName").build()));
+
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
 
-        caseDetails.getData().getIntervenerOne().setIntervenerName("intervenerName");
-        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails.getData().getIntervenerOne(),
-            caseDetails)).thenReturn(false);
+        when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
+            eq(caseDetails))).thenReturn(false);
 
+        // Act
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
+        // Assert
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
-
-
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTH_TOKEN);
