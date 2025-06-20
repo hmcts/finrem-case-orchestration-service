@@ -138,36 +138,36 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any(CaseDetails.class));
+        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any(FinremCaseDetails.class));
         verifyNoInteractions(helpWithFeesDocumentService);
     }
 
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verifyNoMoreInteractions(notificationService);
     }
 
     @Test
     public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verifyNoMoreInteractions(notificationService);
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), anyString(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(FinremCaseDetails.class), anyString(), any());
     }
 
     @Test
@@ -240,11 +240,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestedHwfSuccessfulConfirmationEmail() {
-        when(caseDataService.isContestedApplication(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(caseDataService.isContestedApplication(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any(CaseDetails.class));
+        verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any(FinremCaseDetails.class));
     }
 
     @Test
