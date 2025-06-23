@@ -48,7 +48,9 @@ class IssueApplicationConsentCorresponderTest {
     @TestLogs
     private final TestLogger logs = new TestLogger(FinremSingleLetterOrEmailAllPartiesCorresponder.class);
 
-    private final CaseDocument expectedCaseDocument = expectedCaseDocument();
+    private final CaseDocument expectedApplicantCaseDocument = expectedCaseDocument("applicant");
+
+    private final CaseDocument expectedRespondentCaseDocument = expectedCaseDocument("respondent");
 
     @InjectMocks
     private IssueApplicationConsentCorresponder underTest;
@@ -64,8 +66,10 @@ class IssueApplicationConsentCorresponderTest {
 
     @BeforeEach
     void setUp() {
-        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
-            any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(expectedCaseDocument);
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.APPLICANT))).thenReturn(expectedApplicantCaseDocument);
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT))).thenReturn(expectedRespondentCaseDocument);
     }
 
     @ParameterizedTest
@@ -91,7 +95,16 @@ class IssueApplicationConsentCorresponderTest {
         CaseDocument result = underTest.getDocumentToPrint(caseDetails, AUTH_TOKEN, party);
 
         // Assert
-        assertThat(result).isEqualTo(expectedCaseDocument);
+        switch (party) {
+            case APPLICANT:
+                assertThat(result).isEqualTo(expectedApplicantCaseDocument);
+                break;
+            case RESPONDENT:
+                assertThat(result).isEqualTo(expectedRespondentCaseDocument);
+                break;
+            default:
+                throw new IllegalStateException("Unreachable code");
+        }
     }
 
     @Test
@@ -105,7 +118,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedApplicantCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
     }
 
     @Test
@@ -119,7 +132,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedApplicantCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
     }
 
     @Test
@@ -133,7 +146,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
@@ -148,7 +161,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @ParameterizedTest
@@ -171,7 +184,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
@@ -191,7 +204,7 @@ class IssueApplicationConsentCorresponderTest {
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
         assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
         logs.reset();
     }
@@ -208,10 +221,14 @@ class IssueApplicationConsentCorresponderTest {
         // Assert
         verify(notificationService, never())
             .sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(CaseDocument.class), eq(caseDetails),
+            eq(INTERVENER_ONE.getTypeValue()), eq(AUTH_TOKEN));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(CaseDocument.class), eq(caseDetails),
+            eq(INTERVENER_TWO.getTypeValue()), eq(AUTH_TOKEN));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(CaseDocument.class), eq(caseDetails),
+            eq(INTERVENER_THREE.getTypeValue()), eq(AUTH_TOKEN));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(CaseDocument.class), eq(caseDetails),
+            eq(INTERVENER_FOUR.getTypeValue()), eq(AUTH_TOKEN));
     }
 
     private FinremCaseDetails buildCaseDetails(CaseType caseType) {
@@ -224,8 +241,8 @@ class IssueApplicationConsentCorresponderTest {
             .build();
     }
 
-    private CaseDocument expectedCaseDocument() {
-        return CaseDocument.builder().documentFilename("expected").build();
+    private CaseDocument expectedCaseDocument(String type) {
+        return CaseDocument.builder().documentFilename("expected_" + type).build();
     }
 
     private CaseDocument unexpectedCaseDocument() {
