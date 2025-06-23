@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 @Slf4j
 public class SetConsentOrderFRCNameTask extends EncryptedCsvFileProcessingTask {
     private static final String TASK_NAME = "SetConsentOrderFRCNameTask";
-    private static final String SUMMARY = "DFR-3693 CT Fix report data";
+    private static final String SUMMARY = "DFR-3693 CT Fix ConsentOrderFRCName";
 
     @Value("${cron.updateConsentOrderFRCName.enabled:false}")
     private boolean taskEnabled;
@@ -45,6 +45,12 @@ public class SetConsentOrderFRCNameTask extends EncryptedCsvFileProcessingTask {
         log.info("Case ID: {} - Updated consentOrderFRCName.", finremCaseDetails.getId());
 
 
+    }
+
+    @Override
+    protected String getDescription(FinremCaseDetails finremCaseDetails) {
+        return String.format("ConsentOrderFRCName is: %s",
+            finremCaseDetails.getData().getConsentOrderWrapper().getConsentOrderFrcName());
     }
 
     @Override
