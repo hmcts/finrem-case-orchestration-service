@@ -12,9 +12,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
+/**
+ * Abstract base class for sending "Assign to Judge" notifications to all relevant parties in a financial remedy case.
+ *
+ * <p>
+ * This class handles the orchestration of notifications and letter generation for the Assign to Judge event,
+ * including emails to solicitors and letters for bulk print. Subclasses can specialise behaviour such as skipping
+ * letters to international respondents (e.g. {@code FinremAssignToJudgeCorresponder} was previously used for Issue Application,
+ * but that use case avoids sending letters to international respondents).
+ * </p>
+ *
+ * <p>
+ * This class extends {@link FinremSingleLetterOrEmailAllPartiesCorresponder}, and uses the
+ * {@link AssignedToJudgeDocumentService} to generate the relevant documents.
+ * </p>
+ *
+ * @see uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder
+ * @see uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService
+ */
 @Component
 @Slf4j
 public abstract class AbstractAssignToJudgeCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     @Autowired
