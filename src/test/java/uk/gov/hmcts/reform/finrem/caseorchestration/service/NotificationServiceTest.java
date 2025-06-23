@@ -234,14 +234,6 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendAssignToJudgeNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_ASSIGNED_TO_JUDGE);
-    }
-
-    @Test
     void sendAssignToJudgeNotificationEmailToIntervenerSolicitor() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         notificationService.sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(callbackRequest.getCaseDetails(),

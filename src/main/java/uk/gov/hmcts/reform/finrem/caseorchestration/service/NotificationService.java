@@ -155,19 +155,6 @@ public class NotificationService {
             .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails)));
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
-    }
-
     public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
         NotificationRequest notificationRequestForRespondentSolicitor =
             finremNotificationRequestMapper

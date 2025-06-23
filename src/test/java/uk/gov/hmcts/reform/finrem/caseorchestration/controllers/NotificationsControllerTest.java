@@ -169,13 +169,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
     public void sendConsentOrderNotApprovedEmail() {
         when(caseDataService.isConsentedApplication(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
