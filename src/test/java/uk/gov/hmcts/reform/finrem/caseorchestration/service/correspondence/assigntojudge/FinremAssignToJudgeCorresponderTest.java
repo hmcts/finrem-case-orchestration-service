@@ -272,14 +272,13 @@ class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    void givenContestedCase_whenEmailNotPopulated_thenSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
+    void givenContestedCase_whenEmailNotPopulated_thenSendLetterToApplicantRespondentAndIntervener() {
         // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONTESTED, FinremCaseData.builder()
             .intervenerOne(IntervenerOne.builder().intervenerName("intervenerName").build()).build());
 
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
-
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
             eq(caseDetails))).thenReturn(false);
 
