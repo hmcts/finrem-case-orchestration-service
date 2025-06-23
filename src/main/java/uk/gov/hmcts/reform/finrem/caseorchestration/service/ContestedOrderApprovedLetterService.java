@@ -55,10 +55,7 @@ public class ContestedOrderApprovedLetterService {
      * @param authorisationToken the authorisation token for document generation service
      */
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
-        LocalDate orderApprovedDate = LocalDate.from(ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection().getLast().getValue().getApprovalDate())
-            .orElse(LocalDate.now().atStartOfDay()));
-        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
-
+        updateOrderApprovedDateForCoverLetter(finremCaseDetails);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
@@ -69,6 +66,12 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+    }
+
+    private static void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
+        LocalDate orderApprovedDate = LocalDate.from(ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection().getLast().getValue().getApprovalDate())
+            .orElse(LocalDate.now().atStartOfDay()));
+        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
