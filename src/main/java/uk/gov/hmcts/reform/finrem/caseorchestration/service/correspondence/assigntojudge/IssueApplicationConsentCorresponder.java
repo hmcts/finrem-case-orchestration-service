@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 /**
  * Handles correspondence for the "Issue Application" event in consented cases.
+ *
  * <p>
  * This corresponder extends {@link AbstractAssignToJudgeCorresponder} and customises the behaviour
  * to ensure that letters are not sent to respondents residing outside the UK.

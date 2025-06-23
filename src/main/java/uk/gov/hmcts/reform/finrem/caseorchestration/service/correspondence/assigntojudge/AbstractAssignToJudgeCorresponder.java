@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Finre
 
 /**
  * Abstract base class for sending "Assign to Judge" notifications to all relevant parties in a financial remedy case.
+ *
  * <p>
  * This class handles the orchestration of notifications and letter generation for the Assign to Judge event,
  * including emails to solicitors and letters for bulk print. Subclasses can specialise behaviour such as skipping

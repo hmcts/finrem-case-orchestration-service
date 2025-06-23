@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 /**
  * Corresponder for the "Assign to Judge" event in financial remedy cases.
+ *
  * <p>
  * This class extends {@link AbstractAssignToJudgeCorresponder} and inherits all default behaviour for sending
  * assign-to-judge notifications, including sending letters to all parties (applicant, respondent, and interveners),
