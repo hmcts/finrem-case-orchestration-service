@@ -66,46 +66,80 @@ class FinremAssignToJudgeCorresponderTest {
     @Mock
     AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
-    private CaseDocument caseDocument;
+    private CaseDocument expectedApplicantCaseDocument;
+
+    private CaseDocument expectedRespondentCaseDocument;
+
+    private CaseDocument expectedIntevenerOneCaseDocument;
+
+    private CaseDocument expectedIntevenerTwoCaseDocument;
+
+    private CaseDocument expectedIntevenerThreeCaseDocument;
+
+    private CaseDocument expectedIntevenerFourCaseDocument;
 
     @BeforeEach
     void setUp() {
         assignToJudgeCorresponder = new FinremAssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
-        caseDocument = CaseDocument.builder().build();
+        expectedApplicantCaseDocument = expectedCaseDocument("applicant");
+        expectedRespondentCaseDocument = expectedCaseDocument("respondent");
+        expectedIntevenerOneCaseDocument = expectedCaseDocument("intevenerOne");
+        expectedIntevenerTwoCaseDocument = expectedCaseDocument("intevenerTwo");
+        expectedIntevenerThreeCaseDocument = expectedCaseDocument("intevenerThree");
+        expectedIntevenerFourCaseDocument = expectedCaseDocument("intevenerFour");
 
         lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
             eq(DocumentHelper.PaperNotificationRecipient.APPLICANT))).thenReturn(
-            caseDocument);
+            expectedApplicantCaseDocument);
         lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
             eq(DocumentHelper.PaperNotificationRecipient.RESPONDENT))).thenReturn(
-            caseDocument);
+            expectedRespondentCaseDocument);
         lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
             eq(DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE))).thenReturn(
-            caseDocument);
+            expectedIntevenerOneCaseDocument);
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO))).thenReturn(
+            expectedIntevenerTwoCaseDocument);
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE))).thenReturn(
+            expectedIntevenerThreeCaseDocument);
+        lenient().when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
+            eq(DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR))).thenReturn(
+            expectedIntevenerFourCaseDocument);
     }
 
     @Test
-    void shouldGetDocumentToPrintForApplicant() {
+    void givenConsentedCase_whenGetDocumentToPrintInvoked_thenGenerateAssignedToJudgeNotificationLetterForApplicant() {
+        // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+
+        // Act
         CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
-        assertEquals(caseDocument, result);
+
+        // Assert
+        assertEquals(expectedApplicantCaseDocument, result);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
     @Test
-    void shouldGetDocumentToPrintForRespondent() {
+    void givenConsentedCase_whenGetDocumentToPrintInvoked_thenGenerateAssignedToJudgeNotificationLetterForRespondent() {
+        // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
+
+        // Act
         CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-        assertEquals(caseDocument, result);
+
+        // Assert
+        assertEquals(expectedRespondentCaseDocument, result);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 
     @Test
-    void givenConsentedCase_whenGetDocumentToPrintInvoked_thenGenerateAssignedToJudgeNotificationLetterForCorrIntervener() {
+    void givenConsentedCase_whenGetDocumentToPrintInvoked_thenGenerateAssignedToJudgeNotificationLetterForIntervener() {
         // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
 
@@ -114,7 +148,7 @@ class FinremAssignToJudgeCorresponderTest {
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
 
         // Assert
-        assertEquals(caseDocument, result);
+        assertEquals(expectedIntevenerOneCaseDocument, result);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
     }
@@ -259,9 +293,9 @@ class FinremAssignToJudgeCorresponderTest {
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedApplicantCaseDocument, caseDetails, CCDConfigConstant.APPLICANT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedIntevenerOneCaseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTH_TOKEN);
     }
 
     @ParameterizedTest
@@ -277,14 +311,13 @@ class FinremAssignToJudgeCorresponderTest {
             .build();
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED, caseData);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
-        CaseDocument expectedCaseDocument = stubExpectedCaseDocument();
 
         // Act
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
     }
 
     @Test
@@ -297,14 +330,13 @@ class FinremAssignToJudgeCorresponderTest {
             .build();
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED, caseData);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
-        CaseDocument expectedCaseDocument = stubExpectedCaseDocument();
 
         // Act
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
         assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
         logs.reset();
     }
@@ -312,7 +344,6 @@ class FinremAssignToJudgeCorresponderTest {
     @Test
     void givenConsentedCase_whenSendCorrespondence_thenNothingToBeSentToInterveners() {
         // Arrange
-        CaseDocument expectedCaseDocument = stubExpectedCaseDocument();
         FinremCaseDetails caseDetails = buildCaseDetails(CONSENTED);
         SolicitorCaseDataKeysWrapper expectedSolicitorCaseDataKeysWrapper = SolicitorCaseDataKeysWrapper.builder().build();
 
@@ -322,17 +353,14 @@ class FinremAssignToJudgeCorresponderTest {
         // Assert
         verify(notificationService, never())
             .sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(), AUTH_TOKEN);
-        verify(bulkPrintService, never()).sendDocumentForPrint(expectedCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(), AUTH_TOKEN);
-    }
-
-    private CaseDocument stubExpectedCaseDocument() {
-        CaseDocument expectedCaseDocument = expectedCaseDocument();
-        when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN),
-            any(DocumentHelper.PaperNotificationRecipient.class))).thenReturn(expectedCaseDocument);
-        return expectedCaseDocument;
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedIntevenerOneCaseDocument, caseDetails, INTERVENER_ONE.getTypeValue(),
+            AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedIntevenerTwoCaseDocument, caseDetails, INTERVENER_TWO.getTypeValue(),
+            AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedIntevenerThreeCaseDocument, caseDetails, INTERVENER_THREE.getTypeValue(),
+            AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedIntevenerFourCaseDocument, caseDetails, INTERVENER_FOUR.getTypeValue(),
+            AUTH_TOKEN);
     }
 
     private FinremCaseDetails buildCaseDetails(CaseType caseType) {
@@ -345,8 +373,8 @@ class FinremAssignToJudgeCorresponderTest {
             .build();
     }
 
-    private CaseDocument expectedCaseDocument() {
-        return CaseDocument.builder().documentFilename("expected").build();
+    private CaseDocument expectedCaseDocument(String type) {
+        return CaseDocument.builder().documentFilename("expected_" + type).build();
     }
 
     private CaseDocument unexpectedCaseDocument() {
