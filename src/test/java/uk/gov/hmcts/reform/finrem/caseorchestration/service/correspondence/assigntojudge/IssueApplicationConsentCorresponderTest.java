@@ -206,7 +206,6 @@ class IssueApplicationConsentCorresponderTest {
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
         verify(bulkPrintService, never()).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
         assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
-        logs.reset();
     }
 
     @Test
