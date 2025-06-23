@@ -137,19 +137,6 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, FR_HWF_SUCCESSFUL);
     }
 
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails)}</p>
-     *
-     * @param caseDetails instance of CaseDetails
-     * @deprecated Use {@link CaseDetails caseDetails}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
-        sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
-    }
-
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper
             .getNotificationRequestForApplicantSolicitor(caseDetails, !isApplicantSolicitorDigital(caseDetails)));
@@ -160,21 +147,6 @@ public class NotificationService {
             finremNotificationRequestMapper
                 .getNotificationRequestForRespondentSolicitor(finremCaseDetails, !isRespondentSolicitorDigital(finremCaseDetails));
         sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
-    }
-
-    /**
-     * No Return.
-     *
-     * <p>Please use @{@link #sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails, SolicitorCaseDataKeysWrapper)}</p>
-     *
-     * @param caseDetails     instance of CaseDetails
-     * @param dataKeysWrapper instance of SolicitorCaseDataKeysWrapper
-     * @deprecated Use {@link CaseDetails caseDetails, SolicitorCaseDataKeysWrapper dataKeysWrapper}
-     */
-    @Deprecated(since = "15-june-2023")
-    public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(CaseDetails caseDetails,
-                                                                        SolicitorCaseDataKeysWrapper dataKeysWrapper) {
-        sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, dataKeysWrapper));
     }
 
     public void sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(FinremCaseDetails finremCaseDetails,
