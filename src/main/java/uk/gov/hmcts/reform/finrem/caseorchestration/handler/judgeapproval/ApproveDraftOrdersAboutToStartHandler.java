@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -132,9 +131,6 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
 
-                // Set the order approved date to today to pre-populate the court order date field
-                draftOrdersReview.setOrderApprovedDate(LocalDate.now());
-
                 // Process Draft Orders
                 Stream<JudgeApproval> draftOrderStream = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
                     .map(DraftOrderDocReviewCollection::getValue)
@@ -147,7 +143,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(draftOrdersReview.getOrderApprovedDate())
+                        .orderApprovedDate(LocalDate.now())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -168,7 +164,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(draftOrdersReview.getOrderApprovedDate())
+                        .orderApprovedDate(LocalDate.now())
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
