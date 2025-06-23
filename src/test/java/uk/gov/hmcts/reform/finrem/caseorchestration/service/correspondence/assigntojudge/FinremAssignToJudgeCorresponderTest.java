@@ -37,8 +37,10 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Mock
     NotificationService notificationService;
+
     @Mock
     BulkPrintService bulkPrintService;
+
     @Mock
     AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
@@ -62,7 +64,7 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void shouldGetDocumentToPrintForApplicant() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        FinremCaseDetails caseDetails = buildContestedCaseDetails();
         CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
         assertEquals(caseDocument, result);
@@ -72,7 +74,7 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void shouldGetDocumentToPrintForRespondent() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        FinremCaseDetails caseDetails = buildContestedCaseDetails();
         CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
         assertEquals(caseDocument, result);
@@ -82,7 +84,7 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void shouldGetDocumentToPrintForIntervener() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        FinremCaseDetails caseDetails = buildContestedCaseDetails();
         CaseDocument result = assignToJudgeCorresponder.getDocumentToPrint(caseDetails, AUTH_TOKEN,
             DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE);
         assertEquals(caseDocument, result);
@@ -92,7 +94,7 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void shouldEmailApplicantSolicitor() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        FinremCaseDetails caseDetails = buildContestedCaseDetails();
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(true);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
         verify(notificationService).isApplicantSolicitorEmailPopulated(caseDetails);
@@ -101,7 +103,7 @@ class FinremAssignToJudgeCorresponderTest {
 
     @Test
     void emailRespondentSolicitor() {
-        FinremCaseDetails caseDetails = buildCaseDetails();
+        FinremCaseDetails caseDetails = buildContestedCaseDetails();
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(true);
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
         verify(notificationService).isRespondentSolicitorEmailPopulated(caseDetails);
@@ -112,7 +114,7 @@ class FinremAssignToJudgeCorresponderTest {
     void emailIntervenerSolicitorShouldSendToIntervenerOne() {
         // Arrange
         IntervenerOne intervenerOne = IntervenerOne.builder().intervenerSolEmail("1SolEmail").build();
-        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerOne(intervenerOne));
+        FinremCaseDetails caseDetails = buildContestedCaseDetails(FinremCaseData.builder().intervenerOne(intervenerOne));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
 
@@ -134,7 +136,7 @@ class FinremAssignToJudgeCorresponderTest {
     void emailIntervenerSolicitorShouldSendToIntervenerTwo() {
         // Arrange
         IntervenerTwo intervenerTwo = IntervenerTwo.builder().intervenerSolEmail("2SolEmail").build();
-        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerTwo(intervenerTwo));
+        FinremCaseDetails caseDetails = buildContestedCaseDetails(FinremCaseData.builder().intervenerTwo(intervenerTwo));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
 
@@ -157,7 +159,7 @@ class FinremAssignToJudgeCorresponderTest {
     void emailIntervenerSolicitorShouldSendToIntervenerThree() {
         // Arrange
         IntervenerThree intervenerThree = IntervenerThree.builder().intervenerSolEmail("3SolEmail").build();
-        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerThree(intervenerThree));
+        FinremCaseDetails caseDetails = buildContestedCaseDetails(FinremCaseData.builder().intervenerThree(intervenerThree));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
 
@@ -179,7 +181,7 @@ class FinremAssignToJudgeCorresponderTest {
     void emailIntervenerSolicitorShouldSendToIntervenerFour() {
         // Arrange
         IntervenerFour intervenerFour = IntervenerFour.builder().intervenerSolEmail("4SolEmail").build();
-        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder().intervenerFour(intervenerFour));
+        FinremCaseDetails caseDetails = buildContestedCaseDetails(FinremCaseData.builder().intervenerFour(intervenerFour));
         SolicitorCaseDataKeysWrapper dataKeysWrapper = SolicitorCaseDataKeysWrapper
             .builder().build();
 
@@ -201,7 +203,7 @@ class FinremAssignToJudgeCorresponderTest {
     @Test
     void shouldSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
         // Arrange
-        FinremCaseDetails caseDetails = buildCaseDetails(FinremCaseData.builder()
+        FinremCaseDetails caseDetails = buildContestedCaseDetails(FinremCaseData.builder()
             .intervenerOne(IntervenerOne.builder().intervenerName("intervenerName").build()));
 
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
@@ -225,11 +227,11 @@ class FinremAssignToJudgeCorresponderTest {
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, IntervenerConstant.INTERVENER_ONE, AUTH_TOKEN);
     }
 
-    private FinremCaseDetails buildCaseDetails() {
-        return buildCaseDetails(FinremCaseData.builder());
+    private FinremCaseDetails buildContestedCaseDetails() {
+        return buildContestedCaseDetails(FinremCaseData.builder());
     }
 
-    private FinremCaseDetails buildCaseDetails(FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
+    private FinremCaseDetails buildContestedCaseDetails(FinremCaseData.FinremCaseDataBuilder caseDataBuilder) {
         return FinremCaseDetails.builder()
             .data(caseDataBuilder.ccdCaseType(CaseType.CONTESTED).build())
             .caseType(CaseType.CONTESTED)
