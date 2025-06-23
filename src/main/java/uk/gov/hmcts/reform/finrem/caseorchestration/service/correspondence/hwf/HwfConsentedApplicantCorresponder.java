@@ -38,9 +38,18 @@ public class HwfConsentedApplicantCorresponder extends FinremSingleLetterOrEmail
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
     }
 
+    /**
+     * Determines whether a letter should be sent to the applicant.
+     *
+     * <p>
+     * Applicants cannot be overseas and apply for Help With Fees (HWF),
+     * as they must reside in the UK and receive UK benefits to be eligible.
+     *
+     * @param caseDetails the case details
+     * @return {@code true} if the applicant resides in the UK and a letter should be sent; {@code false} otherwise
+     */
     @Override
     public boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
-        // Applicants cannot be overseas and apply for HWF as they have to live in the UK and have UK benefits in order to apply
         return isNotInternationalParty(getContactDetailsWrapper(caseDetails).getApplicantResideOutsideUK());
     }
 
