@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -143,7 +142,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(LocalDate.now())
+                        .orderApprovedDate(draftOrdersReview.getHearingDate())
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -164,7 +163,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(LocalDate.now())
+                        .orderApprovedDate(draftOrdersReview.getHearingDate())
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),
