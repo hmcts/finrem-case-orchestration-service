@@ -55,7 +55,6 @@ class SetConsentOrderFRCNameTaskTest {
     private SetConsentOrderFRCNameTask setConsentOrderFRCNameTask;
     private static final String REFERENCE = "1234567890123456";
 
-
     @BeforeEach
     void setup() {
         setConsentOrderFRCNameTask = new SetConsentOrderFRCNameTask(caseReferenceCsvLoader, ccdService, systemUserService,

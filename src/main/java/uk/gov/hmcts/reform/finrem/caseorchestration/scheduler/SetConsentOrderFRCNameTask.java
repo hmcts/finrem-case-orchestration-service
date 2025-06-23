@@ -27,7 +27,6 @@ public class SetConsentOrderFRCNameTask extends EncryptedCsvFileProcessingTask {
 
     private final SelectedCourtService selectedCourtService;
 
-
     public SetConsentOrderFRCNameTask(CaseReferenceCsvLoader csvLoader, CcdService ccdService,
                                       SystemUserService systemUserService,
                                       FinremCaseDetailsMapper finremCaseDetailsMapper,
