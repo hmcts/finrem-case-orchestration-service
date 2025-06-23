@@ -80,9 +80,9 @@ public class BaseHandlerTestSetup {
             .builder()
             .eventType(eventType)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONSENTED)
-                .data(new FinremCaseData()).build())
+                .data(FinremCaseData.builder().ccdCaseType(CONSENTED).build()).build())
             .build();
     }
 
