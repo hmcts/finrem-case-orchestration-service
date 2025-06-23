@@ -68,7 +68,7 @@ public class ContestedOrderApprovedLetterService {
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
-    private static void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
+    private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
         LocalDate orderApprovedDate = LocalDate.from(ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection().getLast().getValue().getApprovalDate())
             .orElse(LocalDate.now().atStartOfDay()));
         finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
