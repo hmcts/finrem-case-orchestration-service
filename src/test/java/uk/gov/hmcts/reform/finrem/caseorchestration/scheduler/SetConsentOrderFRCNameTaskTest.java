@@ -111,7 +111,7 @@ class SetConsentOrderFRCNameTaskTest {
         setConsentOrderFRCNameTask.run();
 
         verifySelectedCourtService();
-        verifyCcdEvent("ConsentOrderFRCName is: Croydon County Court And Family Court");
+        verifyCcdEvent();
     }
 
     private void verifySelectedCourtService() {
@@ -119,13 +119,13 @@ class SetConsentOrderFRCNameTaskTest {
             .setSelectedCourtDetailsIfPresent(any(FinremCaseData.class));
     }
 
-    private void verifyCcdEvent(String eventDescription) {
+    private void verifyCcdEvent() {
         verify(ccdService, times(1)).startEventForCaseWorker(AUTH_TOKEN, REFERENCE, CONTESTED.getCcdType(),
             AMEND_CASE_CRON.getCcdType());
         verify(ccdService).submitEventForCaseWorker(any(StartEventResponse.class), eq(AUTH_TOKEN), eq(REFERENCE),
             eq(CONTESTED.getCcdType()), eq(AMEND_CASE_CRON.getCcdType()),
             eq("DFR-3693 CT Fix ConsentOrderFRCName"),
-            eq(eventDescription));
+            eq("ConsentOrderFRCName is: Croydon County Court And Family Court"));
     }
 
     private CaseDetails createCaseData() {
