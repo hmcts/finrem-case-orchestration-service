@@ -38,7 +38,7 @@ public class ManageHearingsSubmittedHandler extends FinremCallbackHandler {
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
 
         // Send Notifications
-        manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest);
+        manageHearingsCorresponder.sendHearingCorrespondence(callbackRequest, userAuthorisation);
 
         // Where appropriate, send generated documents, this is upcoming work.
 

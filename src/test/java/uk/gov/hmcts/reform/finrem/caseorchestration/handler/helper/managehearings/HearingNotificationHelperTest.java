@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class HearingNotificationHelperTest {
@@ -129,7 +130,7 @@ class HearingNotificationHelperTest {
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing))
                 .thenReturn(notificationRequest);
 
-        helper.processCorrespondenceForApplicant(finremCaseDetails, hearing);
+        helper.processCorrespondenceForApplicant(finremCaseDetails, hearing, "authToken");
 
         verify(notificationRequestMapper).buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing);
         verify(notificationService).sendHearingNotificationToApplicant(notificationRequest);
@@ -149,7 +150,7 @@ class HearingNotificationHelperTest {
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(caseDetails, hearing))
                 .thenReturn(notificationRequest);
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         verify(notificationRequestMapper).buildHearingNotificationForApplicantSolicitor(caseDetails, hearing);
         verify(notificationService).sendHearingNotificationToApplicant(notificationRequest);
@@ -167,7 +168,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         assertThat(logs.getInfos()).contains("Handling case: RESP_SOLICITOR, work to follow");
     }
@@ -184,7 +185,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_1, work to follow");
     }
@@ -201,7 +202,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_2, work to follow");
     }
@@ -218,7 +219,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_3, work to follow");
     }
@@ -235,7 +236,7 @@ class HearingNotificationHelperTest {
         FinremCaseDetails caseDetails = new FinremCaseDetails();
         Hearing hearing = new Hearing();
 
-        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
 
         assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_4, work to follow");
     }
@@ -253,7 +254,7 @@ class HearingNotificationHelperTest {
 
         // When
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing);
+            helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
         });
 
         // Then

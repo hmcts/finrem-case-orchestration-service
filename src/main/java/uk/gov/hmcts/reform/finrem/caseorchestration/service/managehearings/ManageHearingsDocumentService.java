@@ -12,12 +12,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
@@ -152,6 +156,29 @@ public class ManageHearingsDocumentService {
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
         return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+    }
+
+    /**
+     * Retrieves the hearing notice document for the case's current working hearing.
+     * Assumes that the hearing notice is stored in the case's hearing documents collection.
+     * If no notice is found, returns an empty list.
+     *
+     * Todo needs test
+     *
+     * @param finremCaseDetails the case details containing the hearing documents
+     * @return a {@link CaseDocument}
+     */
+    public CaseDocument getHearingNotice(FinremCaseDetails finremCaseDetails) {
+
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        return manageHearingsWrapper.getHearingDocumentsCollection().stream()
+                .map(ManageHearingDocumentsCollectionItem::getValue)
+                .filter(value -> hearingId.equals(value.getHearingId()))
+                .map(ManageHearingDocument::getHearingDocument)
+                .findFirst()
+                .orElse(null);
     }
 
     private String determineFormCTemplate(FinremCaseDetails caseDetails) {

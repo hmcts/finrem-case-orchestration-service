@@ -28,7 +28,7 @@ public class ManageHearingsCorresponder {
      *
      * @param callbackRequest the callback request containing case and hearing data
      */
-    public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest) {
+    public void sendHearingCorrespondence(FinremCallbackRequest callbackRequest, String userAuthorisation) {
 
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
@@ -48,7 +48,8 @@ public class ManageHearingsCorresponder {
             hearingNotificationHelper.sendHearingCorrespondenceByParty(
                     party,
                     finremCaseDetails,
-                    hearing
+                    hearing,
+                    userAuthorisation
             );
         }
     }

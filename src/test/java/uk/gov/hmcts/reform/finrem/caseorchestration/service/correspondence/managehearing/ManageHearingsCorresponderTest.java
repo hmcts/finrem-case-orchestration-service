@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsCorresponderTest {
@@ -49,11 +50,13 @@ class ManageHearingsCorresponderTest {
         when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
-        corresponder.sendHearingCorrespondence(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Assert that sendHearingNotificationsByParty called for each party
-        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(firstParty, callbackRequest.getCaseDetails(), hearing);
-        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(secondParty, callbackRequest.getCaseDetails(), hearing);
+        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(
+                firstParty, callbackRequest.getCaseDetails(), hearing, AUTH_TOKEN);
+        verify(hearingNotificationHelper).sendHearingCorrespondenceByParty(
+                secondParty, callbackRequest.getCaseDetails(), hearing, AUTH_TOKEN);
     }
 
     @Test
@@ -64,10 +67,10 @@ class ManageHearingsCorresponderTest {
         when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(true);
 
-        corresponder.sendHearingCorrespondence(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingNotificationHelper, never())
-                .sendHearingCorrespondenceByParty(any(), any(), any());
+                .sendHearingCorrespondenceByParty(any(), any(), any(), any());
     }
 
     @Test
@@ -85,10 +88,10 @@ class ManageHearingsCorresponderTest {
         when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
-        corresponder.sendHearingCorrespondence(callbackRequest);
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         verify(hearingNotificationHelper, never())
-                .sendHearingCorrespondenceByParty(any(), any(), any());
+                .sendHearingCorrespondenceByParty(any(), any(), any(), any());
     }
 
     private FinremCallbackRequest callbackRequest() {

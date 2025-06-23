@@ -85,6 +85,8 @@ public class HearingTabDataMapper {
      * - Retrieves additional documents from the `Hearing` object and maps them to `DocumentCollectionItem` objects.
      * - Concatenates the two streams of documents into a single list.
      *
+     * Todo: when merging tabs work from master, check the indentation on the additionalDocs builder is correct.
+     *
      * @param hearingDocumentsCollection the collection of hearing documents to filter and process
      * @param hearingId                  the unique identifier of the hearing to match documents against
      * @param hearing                    the `Hearing` object containing additional documents
@@ -107,7 +109,7 @@ public class HearingTabDataMapper {
             .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
             .toList()
             : List.of();
-        
+
         return Stream.concat(
             hearingDocuments.stream(),
             additionalDocs.stream()

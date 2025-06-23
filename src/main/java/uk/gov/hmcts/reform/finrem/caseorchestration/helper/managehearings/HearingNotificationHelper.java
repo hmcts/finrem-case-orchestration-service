@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -14,14 +16,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsDocumentService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+// todo - corresponence helper?
+// still think more lives here than it should - should be in corresponser.
 
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +40,9 @@ public class HearingNotificationHelper {
     private final ManageHearingsNotificationRequestMapper notificationRequestMapper;
     private final NotificationService notificationService;
     private final PaperNotificationService paperNotificationService;
+    private final ManageHearingsDocumentService manageHearingsDocumentService;
+    private final DocumentHelper documentHelper;
+    private final BulkPrintService bulkPrintService;
 
     /**
      * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
@@ -78,8 +90,6 @@ public class HearingNotificationHelper {
 
     /**
      *
-     * todo - this makes sense in corresponder. Consider moving.
-     *
      * Sends a hearing notification to the party specified in parameters.
      *
      * <p>Uses the {@link CaseRole} of the specified party to decide what to send.
@@ -90,13 +100,15 @@ public class HearingNotificationHelper {
      */
     public void sendHearingCorrespondenceByParty(DynamicMultiSelectListElement party,
                                                  FinremCaseDetails finremCaseDetails,
-                                                 Hearing hearing) {
+                                                 Hearing hearing,
+                                                 String userAuthorisation) {
         CaseRole caseRole = CaseRole.forValue(party.getCode());
         switch (caseRole) {
             case CaseRole.APP_SOLICITOR ->
                 processCorrespondenceForApplicant(
                     finremCaseDetails,
-                    hearing);
+                    hearing,
+                    userAuthorisation);
             case CaseRole.RESP_SOLICITOR ->
                 log.info("Handling case: RESP_SOLICITOR, work to follow");
             case CaseRole.INTVR_SOLICITOR_1 ->
@@ -132,22 +144,43 @@ public class HearingNotificationHelper {
      */
     public void processCorrespondenceForApplicant(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing) {
+            Hearing hearing,
+            String userAuthorisation) {
 
         if (emailingToApplicantSolicitor(finremCaseDetails)) {
 
             NotificationRequest notificationRequest = notificationRequestMapper
                     .buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing);
 
+            // Todo - test again. Check the contested court email contacts are used for Pres NW Court.
+
             notificationService.sendHearingNotificationToApplicant(notificationRequest);
             // If FDA or FDR, follow up by emailing certain docs.  DFR-3820 to follow.
 
+            log.info("Notification for applicant solicitor. Request sent for case ID: {}",
+                    finremCaseDetails.getId());
         }
 
         if (postingToApplicant(finremCaseDetails)) {
 
             if (shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
 
+                CaseDocument hearingNotice = manageHearingsDocumentService
+                        .getHearingNotice(finremCaseDetails);
+
+                BulkPrintDocument hearingNoticeDocument = documentHelper
+                        .getBulkPrintDocumentFromCaseDocument(hearingNotice);
+
+                List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>(List.of(hearingNoticeDocument));
+
+                bulkPrintService.printApplicantDocuments(
+                        finremCaseDetails,
+                        userAuthorisation,
+                        bulkPrintDocuments
+                );
+
+                log.info("Posting notice to applicant solicitor. Request sent for case ID: {}",
+                        finremCaseDetails.getId());
             }
             // else send hearing docs too.  Logic to follow.
          }
