@@ -313,7 +313,7 @@ class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
+    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenSendLetter() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
