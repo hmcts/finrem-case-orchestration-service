@@ -321,7 +321,7 @@ class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenSendLetter() {
+    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -375,9 +375,5 @@ class FinremAssignToJudgeCorresponderTest {
 
     private CaseDocument expectedCaseDocument(String type) {
         return CaseDocument.builder().documentFilename("expected_" + type).build();
-    }
-
-    private CaseDocument unexpectedCaseDocument() {
-        return CaseDocument.builder().documentFilename("unexpected").build();
     }
 }
