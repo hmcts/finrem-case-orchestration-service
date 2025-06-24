@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -130,6 +131,13 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
             .flatMap(draftOrdersReview -> {
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
 
+                // Determine the court order date, defaulting to hearing date or current date if not available
+                LocalDate courtOrderDate = ofNullable(draftOrdersReview.getOrderApprovedDate())
+                    .map(LocalDate::from)
+                    .orElse(ofNullable(draftOrdersReview.getHearingDate())
+                        .map(LocalDate::from)
+                        .orElse(LocalDate.now()));
+
                 // Process Draft Orders
                 Stream<JudgeApproval> draftOrderStream = draftOrdersReview.getDraftOrderDocReviewCollection().stream()
                     .map(DraftOrderDocReviewCollection::getValue)
@@ -142,7 +150,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(draftOrdersReview.getHearingDate())
+                        .orderApprovedDate(courtOrderDate)
                         .document(a.getDraftOrderDocument())
                         .attachments(a.getAttachments())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
@@ -163,7 +171,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                         .hearingJudge(draftOrdersReview.getHearingJudge())
                         .hearingDate(draftOrdersReview.getHearingDate())
                         .isFinalOrder(buildIsFinalOrderDynamicMultiSelectList())
-                        .orderApprovedDate(draftOrdersReview.getHearingDate())
+                        .orderApprovedDate(courtOrderDate)
                         .document(a.getPsaDocument())
                         .sortKey(new SortKey(draftOrdersReview.getHearingTime(),
                             draftOrdersReview.getHearingDate(),

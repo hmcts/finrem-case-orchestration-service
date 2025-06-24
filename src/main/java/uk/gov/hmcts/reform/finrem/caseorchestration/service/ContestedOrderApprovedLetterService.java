@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
@@ -71,11 +70,10 @@ public class ContestedOrderApprovedLetterService {
     }
 
     private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
-        LocalDate orderApprovedDate = LocalDate.from(Optional.of(
-                ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection())
-                    .orElse(List.of())).flatMap(orders -> ofNullable(orders.getLast())
-                .map(order -> order.getValue().getApprovalDate()))
-                .orElse(LocalDate.now().atStartOfDay()));
+        LocalDate orderApprovedDate = LocalDate.from(ofNullable(
+            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of())
+                .getLast().getValue().getApprovalDate())
+            .orElse(LocalDate.now().atStartOfDay()));
         finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
     }
 
