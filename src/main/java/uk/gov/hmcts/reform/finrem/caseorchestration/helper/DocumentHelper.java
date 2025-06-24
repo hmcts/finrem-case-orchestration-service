@@ -524,7 +524,7 @@ public class DocumentHelper {
         String applicantName = finremCaseDetails.getData().getFullApplicantName();
         String respondentName = finremCaseDetails.getData().getRespondentFullName();
 
-        if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
+        if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo, recipientResideOutsideOfUK)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
                 .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo, recipientResideOutsideOfUK))
@@ -540,7 +540,7 @@ public class DocumentHelper {
             caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
         } else {
             log.info("Failed to prepare template data as not all required address details were present on Case ID: {}", caseId);
-            throw new IllegalArgumentException("DocumentHelper FinremCaseDetails Mandatory data missing from address"
+            throw new IllegalArgumentException("Mandatory data missing from address"
                 + " when trying to generate document for Case ID: " + caseId);
         }
 
@@ -585,10 +585,10 @@ public class DocumentHelper {
         return recipient == INTERVENER_ONE || recipient == INTERVENER_TWO || recipient == INTERVENER_THREE || recipient == INTERVENER_FOUR;
     }
 
-    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
+    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address, boolean skipPostCodeCheck) {
         return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotEmpty(address.getAddressLine1())
-            && StringUtils.isNotEmpty(address.getPostCode());
+            && (skipPostCodeCheck || StringUtils.isNotEmpty(address.getPostCode()));
     }
 
     public <T> T deepCopy(T object, Class<T> objectClass) {

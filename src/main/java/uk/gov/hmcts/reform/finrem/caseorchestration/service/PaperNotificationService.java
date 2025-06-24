@@ -11,9 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
-import java.util.Map;
-import java.util.UUID;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -30,30 +27,6 @@ public class PaperNotificationService {
     private final RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
-
-    @SuppressWarnings("java:S1874")
-    public void printAssignToJudgeNotification(CaseDetails caseDetails, String authToken) {
-        log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
-
-        Map<String, Object> caseData = caseDetails.getData();
-        if (caseDataService.isPaperApplication(caseData)) {
-            // Generate PDF notification letter
-            CaseDocument assignedToJudgeNotificationLetter = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
-                caseDetails, authToken, APPLICANT);
-
-            // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails, CCDConfigConstant.APPLICANT, authToken);
-            log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
-                caseDetails.getId());
-        }
-
-        if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
-            UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
-                assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails, CCDConfigConstant.RESPONDENT, authToken);
-            log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
-        }
-    }
 
     /**
      * Determines if a case should print for the applicant.
