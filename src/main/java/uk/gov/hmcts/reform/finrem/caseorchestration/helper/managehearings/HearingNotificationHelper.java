@@ -83,7 +83,7 @@ public class HearingNotificationHelper {
         return paperNotificationService.shouldPrintForApplicant(finremCaseDetails);
     }
 
-    // todo? move to hearing class?  flip to FDA/FDR?
+    // todo? move to hearing class?
     public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
 
         Set<HearingType> NOTICE_ONLY_HEARING_TYPES = Set.of(
