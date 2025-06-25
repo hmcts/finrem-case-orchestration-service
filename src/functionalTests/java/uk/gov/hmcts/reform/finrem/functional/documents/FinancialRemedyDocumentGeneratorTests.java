@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -122,7 +123,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl("documentGeneratePayload2.json", generatorUrl,
             "document", MINI_FORM_A, consentedDir);
 
-        JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
+        String fileUrl = fileRetrieveUrl(documentUrl);
+        Assert.fail(fileUrl);
+        JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileUrl);
         String mimeType = jsonPathEvaluator1.get("mimeType").toString();
         assertTrue("assert that " + mimeType + " is application/pdf", mimeType.equalsIgnoreCase("application/pdf"));
         assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
