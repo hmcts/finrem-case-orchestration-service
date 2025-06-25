@@ -72,7 +72,11 @@ public class ContestedOrderApprovedLetterService {
         List<CaseDocument> orderApprovedCoverLetterList = ofNullable(finremCaseDetails.getData().getOrderApprovedCoverLetterList())
                 .orElseGet(() -> new LinkedList<>());
         orderApprovedCoverLetterList.add(approvedOrderCoverLetter);
-        finremCaseDetails.getData().setOrderApprovedCoverLetterList(orderApprovedCoverLetterList);
+        if( finremCaseDetails.getData().getOrderApprovedCoverLetterList() != null) {
+            finremCaseDetails.getData().getOrderApprovedCoverLetterList().add(approvedOrderCoverLetter);
+        } else {
+            finremCaseDetails.getData().setOrderApprovedCoverLetterList(orderApprovedCoverLetterList);
+        }
 //        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
