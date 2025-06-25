@@ -123,7 +123,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
             "document", MINI_FORM_A, consentedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
-        assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
+        String mimeType = jsonPathEvaluator1.get("mimeType").toString();
+        assertTrue("assert that " + mimeType + " is application/pdf", mimeType.equalsIgnoreCase("application/pdf"));
         assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
     }
 
