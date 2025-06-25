@@ -910,7 +910,7 @@ class DuplicateFilenameDocumentCheckerTest {
                 .latestDraftHearingOrder(DUPLICATED_CASE_DOCUMENT)
                 .build()),
             Arguments.of(FinremCaseData.builder()
-                .orderApprovedCoverLetter(DUPLICATED_CASE_DOCUMENT)
+                .orderApprovedCoverLetterList(List.of(DUPLICATED_CASE_DOCUMENT))
                 .build()),
             Arguments.of(FinremCaseData.builder()
                 .outOfFamilyCourtResolution(DUPLICATED_CASE_DOCUMENT)

@@ -11,9 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,15 +69,23 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
-        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+        List<CaseDocument> orderApprovedCoverLetterList = ofNullable(finremCaseDetails.getData().getOrderApprovedCoverLetterList())
+                .orElseGet(() -> new LinkedList<>());
+        orderApprovedCoverLetterList.add(approvedOrderCoverLetter);
+        finremCaseDetails.getData().setOrderApprovedCoverLetterList(orderApprovedCoverLetterList);
+//        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
     private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
-        LocalDate orderApprovedDate = LocalDate.from(ofNullable(
-            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of())
-                .getLast().getValue().getApprovalDate())
+        List<FinalisedOrderCollection> finalisedOrders =
+            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of());
+        FinalisedOrderCollection lastOrder = new LinkedList<>(finalisedOrders).peekLast();
+
+        LocalDate orderApprovedDate = LocalDate.from(ofNullable(lastOrder)
+            .map(FinalisedOrderCollection::getValue)
+            .map(FinalisedOrder::getApprovalDate)
             .orElse(LocalDate.now().atStartOfDay()));
-        finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
+            finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
