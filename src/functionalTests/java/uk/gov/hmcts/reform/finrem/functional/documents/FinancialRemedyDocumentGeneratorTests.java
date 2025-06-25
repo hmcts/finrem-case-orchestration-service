@@ -119,7 +119,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl("documentGeneratePayload2.json", generatorUrl,
             "document", MINI_FORM_A, consentedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
