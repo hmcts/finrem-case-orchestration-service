@@ -30,5 +30,4 @@ public class ManageHearingsWrapper {
     private List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection;
     private UUID workingHearingId;
     private List<HearingTabCollectionItem> hearingTabItems;
-    private YesOrNo manageHearingsMigrated;
 }

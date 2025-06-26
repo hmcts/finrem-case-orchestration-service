@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderWrapper;
@@ -397,6 +398,10 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private CfvMigrationWrapper cfvMigrationWrapper;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private MhMigrationWrapper mnMigrationWrapper;
 
     private YesOrNo isNocFixAppliedFlag;
 
@@ -997,6 +1002,15 @@ public class FinremCaseData implements HasCaseDocument {
         }
 
         return cfvMigrationWrapper;
+    }
+
+    @JsonIgnore
+    public MhMigrationWrapper getMhMigrationWrapper() {
+        if (mnMigrationWrapper == null) {
+            this.mnMigrationWrapper = new MhMigrationWrapper();
+        }
+
+        return mnMigrationWrapper;
     }
 
     @JsonIgnore

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @Component
 @Slf4j
@@ -33,6 +35,9 @@ public class ManageHearingsMigrationTask extends BaseTask {
 
     @Value("${cron.manageHearingsMigration.batchSize:500}")
     private int batchSize;
+
+    @Value("${cron.manageHearingsMigration.mhMigrationVersion:1}")
+    private String mhMigrationVersion;
 
     private final ManageHearingsMigrationService manageHearingsMigrationService;
 
@@ -70,29 +75,38 @@ public class ManageHearingsMigrationTask extends BaseTask {
 
     @Override
     protected List<CaseReference> getCaseReferences() {
-        String searchQuery = getSearchQuery();
+        String searchQuery = getSearchQuery(mhMigrationVersion);
         String systemUserToken = getSystemUserToken();
 
         SearchResult searchResult = ccdService.esSearchCases(getCaseType(), searchQuery, systemUserToken);
         log.info("{} non-migrated manage hearings cases found for {}", searchResult.getTotal(), CASE_TYPE.getCcdType());
 
-        return extractCaseReferences(searchResult);
+        Predicate<FinremCaseDetails> filter = finremCaseDetails -> true;
+        return extractCaseReferences(searchResult, filter);
     }
 
-    private String getSearchQuery() {
-        // Build a query for data.manageHearingsMigrated = "NO"
-        BoolQueryBuilder notMigratedQuery = QueryBuilders.boolQuery()
-            .should(new TermQueryBuilder("data.manageHearingsMigrated.keyword", "NO"))
-            .should(QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery("data.manageHearingsMigrated")))
-            .minimumShouldMatch(1); // Either "NO" or null
+    private String getSearchQuery(String currentMigrationVersion) {
+        // Clause 1: mhMigrationVersion does NOT exist (null)
+        QueryBuilder mhMigrationVersionIsNull = QueryBuilders.boolQuery()
+            .mustNot(QueryBuilders.existsQuery("data.mhMigrationVersion"));
+
+        // Clause 2: mhMigrationVersion is NOT equal to "1"
+        QueryBuilder mhMigrationVersionNotOne = QueryBuilders.boolQuery()
+            .mustNot(new TermQueryBuilder("data.mhMigrationVersion.keyword", currentMigrationVersion));
+
+        // Combine with OR (should)
+        BoolQueryBuilder mhMigrationVersionCondition = QueryBuilders.boolQuery()
+            .should(mhMigrationVersionIsNull)
+            .should(mhMigrationVersionNotOne)
+            .minimumShouldMatch(1); // At least one condition must match
 
         // Exclude cases in state = "close"
         BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
             .mustNot(new TermQueryBuilder("state.keyword", "close"));
 
-        // Combine queries
+        // Combine all queries
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .must(notMigratedQuery)
+            .must(mhMigrationVersionCondition)
             .must(stateQuery);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
@@ -106,9 +120,10 @@ public class ManageHearingsMigrationTask extends BaseTask {
         this.taskEnabled = taskEnabled;
     }
 
-    private List<CaseReference> extractCaseReferences(SearchResult searchResult) {
+    private List<CaseReference> extractCaseReferences(SearchResult searchResult, Predicate<FinremCaseDetails> filter) {
         return searchResult.getCases().stream()
             .map(finremCaseDetailsMapper::mapToFinremCaseDetails)
+            .filter(filter)
             .map(caseDetails -> caseDetails.getId().toString())
             .map(CaseReference::new)
             .toList();
