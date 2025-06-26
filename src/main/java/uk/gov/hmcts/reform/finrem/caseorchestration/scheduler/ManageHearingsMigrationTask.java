@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -72,7 +73,11 @@ public class ManageHearingsMigrationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        manageHearingsMigrationService.populateListForHearingWrapper(finremCaseDetails.getData());
+        FinremCaseData caseData = finremCaseDetails.getData();
+        if (!manageHearingsMigrationService.wasMigrated(caseData)) {
+            manageHearingsMigrationService.populateListForHearingWrapper(finremCaseDetails.getData());
+            manageHearingsMigrationService.markCaseDataMigrated(finremCaseDetails.getData(), mhMigrationVersion);
+        }
     }
 
     @Override
