@@ -70,7 +70,7 @@ public class HearingRegionWrapper {
             .southWestList(hearingSouthWestFrcList)
             .walesList(hearingWalesFrcList)
             .hcCourtList(hearingHighCourtFrcList)
-            .courtListWrapper(DefaultCourtListWrapper.builder().build())
+            .courtListWrapper(courtListWrapper.toDefaultCourtListWrapper())
             .build();
     }
 }
