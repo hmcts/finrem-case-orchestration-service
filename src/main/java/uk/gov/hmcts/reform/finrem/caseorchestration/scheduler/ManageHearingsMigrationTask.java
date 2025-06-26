@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static java.util.Optional.ofNullable;
+
 @Component
 @Slf4j
 public class ManageHearingsMigrationTask extends BaseTask {
@@ -92,7 +94,8 @@ public class ManageHearingsMigrationTask extends BaseTask {
 
         // Clause 2: mhMigrationVersion is NOT equal to "1"
         QueryBuilder mhMigrationVersionNotOne = QueryBuilders.boolQuery()
-            .mustNot(new TermQueryBuilder("data.mhMigrationVersion.keyword", currentMigrationVersion));
+            .mustNot(new TermQueryBuilder("data.mhMigrationVersion.keyword", ofNullable(currentMigrationVersion)
+                .orElse("1")));
 
         // Combine with OR (should)
         BoolQueryBuilder mhMigrationVersionCondition = QueryBuilders.boolQuery()
