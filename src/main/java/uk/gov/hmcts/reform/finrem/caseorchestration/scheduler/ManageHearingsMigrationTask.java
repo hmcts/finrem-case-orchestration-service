@@ -70,7 +70,7 @@ public class ManageHearingsMigrationTask extends BaseTask {
 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
-        // TODO manageHearingsMigrationService
+        manageHearingsMigrationService.populateListForHearingWrapper(finremCaseDetails.getData());
     }
 
     @Override
