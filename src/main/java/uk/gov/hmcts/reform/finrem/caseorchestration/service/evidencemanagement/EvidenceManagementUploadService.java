@@ -56,6 +56,7 @@ public class EvidenceManagementUploadService {
     private String documentManagementStoreUploadUrl;
 
     public List<FileUploadResponse> upload(List<MultipartFile> files, String caseTypeId, String auth) {
+        log.info("Secure doc store enabled: {}", featureToggleService.isSecureDocEnabled());
         if (featureToggleService.isSecureDocEnabled()) {
             return uploadToSecDoc(files, caseTypeId, auth);
         } else {
