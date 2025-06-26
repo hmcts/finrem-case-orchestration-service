@@ -24,28 +24,26 @@ class HearingRegionWrapperTest {
         HearingRegionWrapper underTest = new HearingRegionWrapper();
 
         Region region = mock(Region.class);
-        RegionMidlandsFrc midlands = mock(RegionMidlandsFrc.class);
-        RegionLondonFrc london = mock(RegionLondonFrc.class);
-        RegionNorthWestFrc northWest = mock(RegionNorthWestFrc.class);
-        RegionNorthEastFrc northEast = mock(RegionNorthEastFrc.class);
-        RegionSouthEastFrc southEast = mock(RegionSouthEastFrc.class);
-        RegionSouthWestFrc southWest = mock(RegionSouthWestFrc.class);
-        RegionWalesFrc wales = mock(RegionWalesFrc.class);
-        RegionHighCourtFrc highCourt = mock(RegionHighCourtFrc.class);
-        DefaultCourtListWrapper defaultWrapper = mock(DefaultCourtListWrapper.class);
-
-        HearingCourtWrapper courtWrapper = mock(HearingCourtWrapper.class);
-        when(courtWrapper.toDefaultCourtListWrapper()).thenReturn(defaultWrapper);
-
         underTest.setHearingRegionList(region);
+        RegionMidlandsFrc midlands = mock(RegionMidlandsFrc.class);
         underTest.setHearingMidlandsFrcList(midlands);
+        RegionLondonFrc london = mock(RegionLondonFrc.class);
         underTest.setHearingLondonFrcList(london);
+        RegionNorthWestFrc northWest = mock(RegionNorthWestFrc.class);
         underTest.setHearingNorthWestFrcList(northWest);
+        RegionNorthEastFrc northEast = mock(RegionNorthEastFrc.class);
         underTest.setHearingNorthEastFrcList(northEast);
+        RegionSouthEastFrc southEast = mock(RegionSouthEastFrc.class);
         underTest.setHearingSouthEastFrcList(southEast);
+        RegionSouthWestFrc southWest = mock(RegionSouthWestFrc.class);
         underTest.setHearingSouthWestFrcList(southWest);
+        RegionWalesFrc wales = mock(RegionWalesFrc.class);
         underTest.setHearingWalesFrcList(wales);
+        RegionHighCourtFrc highCourt = mock(RegionHighCourtFrc.class);
         underTest.setHearingHighCourtFrcList(highCourt);
+        HearingCourtWrapper courtWrapper = mock(HearingCourtWrapper.class);
+        DefaultCourtListWrapper defaultWrapper = mock(DefaultCourtListWrapper.class);
+        when(courtWrapper.toDefaultCourtListWrapper()).thenReturn(defaultWrapper);
         underTest.setCourtListWrapper(courtWrapper);
 
         // Act
