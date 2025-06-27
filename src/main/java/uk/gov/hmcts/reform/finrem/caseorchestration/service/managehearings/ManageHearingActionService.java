@@ -23,9 +23,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
@@ -90,7 +92,7 @@ public class ManageHearingActionService {
      */
     private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
 
-        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = ofNullable(
                         hearingsWrapper.getHearings())
                 .orElseGet(ArrayList::new);
 
@@ -117,7 +119,7 @@ public class ManageHearingActionService {
      */
     private void addDocumentsToCollection(Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap,
                                           ManageHearingsWrapper hearingsWrapper) {
-        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
+        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = ofNullable(
                 hearingsWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
@@ -143,7 +145,8 @@ public class ManageHearingActionService {
     /**
      * Regenerates the hearing tab data for the case.
      * This method processes the hearings collection and maps each hearing to its corresponding
-     * tab data representation ordered by hearing date ASC. The resulting tab data is then updated in the case data.
+     * tab data representation ordered by hearing date ASC. The resulting tab data is then merged
+     * with any existing migrated tab items and updated in the case data.
      *
      * @param caseData the case data containing the hearings and hearing documents
      */
@@ -161,7 +164,16 @@ public class ManageHearingActionService {
                 .build())
             .toList();
 
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
+        List<HearingTabCollectionItem> existingHearingTabItems = getMigratedHearingTabItems(caseData);
+        existingHearingTabItems.addAll(hearingTabItems);
+        caseData.getManageHearingsWrapper().setHearingTabItems(existingHearingTabItems);
+    }
+
+    private List<HearingTabCollectionItem> getMigratedHearingTabItems(FinremCaseData caseData) {
+        return emptyIfNull(caseData.getManageHearingsWrapper().getHearingTabItems())
+            .stream()
+            .filter(item -> item.getValue() != null && item.getValue().getTabHearingMigratedDate() != null)
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
