@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearin
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -44,12 +46,33 @@ public class HearingTabDataMapper {
             .build();
     }
 
+    /**
+     * Retrieves the name of the specified court.
+     *
+     *
+     * @param court the {@link Court} object to retrieve the name for
+     * @return the name of the court
+     */
+    public String getCourtName(Court court) {
+        return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
+    }
+
+    public String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
+        return hearingDate != null
+            ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
+            : DEFAULT_DATE_TIME;
+    }
+
+    public String getAdditionalInformation(String AdditionalHearingInformation) {
+        return AdditionalHearingInformation != null ? AdditionalHearingInformation : " ";
+    }
+
     private String getHearingType(Hearing hearing) {
         return hearing.getHearingType().getId();
     }
 
     private String getCourtName(Hearing hearing) {
-        return courtDetailsMapper.convertToFrcCourtDetails(hearing.getHearingCourtSelection()).getCourtName();
+        return getCourtName(hearing.getHearingCourtSelection());
     }
 
     private String getHearingMode(Hearing hearing) {
@@ -57,9 +80,7 @@ public class HearingTabDataMapper {
     }
 
     private String getFormattedDateTime(Hearing hearing) {
-        return hearing.getHearingDate() != null
-            ? hearing.getHearingDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearing.getHearingTime()
-            : DEFAULT_DATE_TIME;
+        return getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime());
     }
 
     private String getConfidentialParties(Hearing hearing) {
@@ -71,7 +92,7 @@ public class HearingTabDataMapper {
     }
 
     private String getAdditionalInformation(Hearing hearing) {
-        return hearing.getAdditionalHearingInformation() != null ? hearing.getAdditionalHearingInformation() : " ";
+        return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
 
     /**

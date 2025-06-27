@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 
 import java.util.Arrays;
 
@@ -24,9 +23,5 @@ public enum HearingTypeDirection {
         return Arrays.stream(HearingTypeDirection.values())
             .filter(option -> option.id.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
-    }
-
-    public HearingType toHearingType() {
-        return HearingType.valueOf(this.name());
     }
 }

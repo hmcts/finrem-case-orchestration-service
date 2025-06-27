@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -22,6 +22,8 @@ import java.util.ArrayList;
 @Slf4j
 public class ManageHearingsMigrationService {
 
+    private final HearingTabDataMapper hearingTabDataMapper;
+
     /**
      * Marks the case data as migrated to a specified Manage Hearings migration version.
      *
@@ -32,15 +34,6 @@ public class ManageHearingsMigrationService {
         caseData.getMhMigrationWrapper().setMhMigrationVersion(mhMigrationVersion);
     }
 
-    /**
-     * Migrates hearing information from the {@code ListForHearingWrapper} (legacy fields) to a {@link Hearing}
-     * object and appends it to the {@code ManageHearingsWrapper} collection, if applicable.
-     *
-     * <p>This method checks if the case has already been migrated and if the hearing data is available. If both
-     * conditions are met, a new hearing is constructed and added to the list of hearings.</p>
-     *
-     * @param caseData the case data containing hearing information to migrate
-     */
     public void populateListForHearingWrapper(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
@@ -61,15 +54,14 @@ public class ManageHearingsMigrationService {
 
             HearingTabItem newHearingTabItem = HearingTabItem.builder()
                 .tabHearingType(hearingType != null ? hearingType.getId() : "Unknown")
-                .tabAdditionalInformation(additionalInformationAboutHearing)
-//                .hearingMode(null) // no Hearing attendance field
-//                .hearingDate(hearingDate)
-//                .hearingTime(hearingTime)
-//                .hearingType(hearingType.toHearingType())
-//                .additionalHearingInformation(additionalInformationAboutHearing)
-//                .hearingTimeEstimate(timeEstimate)
-//                .hearingCourtSelection(hearingRegionWrapper.toCourt())
-//                //.partiesOnCaseMultiSelectList(listForHearingWrapper)
+                .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
+                .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
+                .tabTimeEstimate(timeEstimate)
+                //.tabConfidentialParties(getConfidentialParties(hearing))
+                .tabAdditionalInformation(hearingTabDataMapper
+                    .getAdditionalInformation(additionalInformationAboutHearing))
+                //.tabHearingDocuments(mapHearingDocumentsToTabData(
+                // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
                 .build();
 
             appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
