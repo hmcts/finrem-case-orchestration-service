@@ -10,26 +10,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudgeconsentincontested.FinremAssignToJudgeConsentInContestedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.IssueApplicationConsentCorresponder;
 
 @Slf4j
 @Service
-public class AssignToJudgeConsentInContestedSubmittedHandler extends FinremCallbackHandler {
+public class IssueApplicationConsentedSubmittedHandler extends FinremCallbackHandler {
 
-    private final FinremAssignToJudgeConsentInContestedCorresponder corresponder;
+    private final IssueApplicationConsentCorresponder issueApplicationConsentCorresponder;
 
     @Autowired
-    public AssignToJudgeConsentInContestedSubmittedHandler(FinremCaseDetailsMapper mapper,
-                                                           FinremAssignToJudgeConsentInContestedCorresponder corresponder) {
-        super(mapper);
-        this.corresponder = corresponder;
+    public IssueApplicationConsentedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                     IssueApplicationConsentCorresponder issueApplicationConsentCorresponder) {
+        super(finremCaseDetailsMapper);
+        this.issueApplicationConsentCorresponder = issueApplicationConsentCorresponder;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.ASSIGN_TO_JUDGE_CONSENT.equals(eventType);
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.ISSUE_APPLICATION.equals(eventType);
     }
 
     @Override
@@ -38,11 +38,7 @@ public class AssignToJudgeConsentInContestedSubmittedHandler extends FinremCallb
         log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        validateCaseData(callbackRequest);
-
-        corresponder.sendCorrespondence(caseDetails, userAuthorisation);
-
+        issueApplicationConsentCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
-
 }

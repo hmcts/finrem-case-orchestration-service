@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
-
 @Component
 @Slf4j
 public class FinremAssignToJudgeConsentInContestedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
