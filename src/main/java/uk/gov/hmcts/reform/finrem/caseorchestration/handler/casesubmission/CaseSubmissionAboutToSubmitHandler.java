@@ -30,6 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @Slf4j
 public class CaseSubmissionAboutToSubmitHandler extends FinremCallbackHandler {
 
+    private static final String PAYMENT_FAILURE_MESSAGE = "Payment failed. Please review your account.";
+
     private final FeeService feeService;
     private final PBAPaymentServiceAdapter pbaPaymentService;
 
@@ -69,13 +71,14 @@ public class CaseSubmissionAboutToSubmitHandler extends FinremCallbackHandler {
             PaymentResponse paymentResponse = pbaPaymentService.makePayment(userAuthorisation, caseDetails);
             if (paymentResponse.isDuplicatePayment()) {
                 // No payment reference is supplied with a duplicate payment response
-                log.error("Case ID: {} - Duplicate payment", caseDetails.getId());
+                log.info("Case ID: {} - Duplicate payment", caseDetails.getId());
+                errors.add(PAYMENT_FAILURE_MESSAGE);
             } else if (paymentResponse.isPaymentSuccess()) {
                 log.info("Case ID: {} - Payment successful", caseDetails.getId());
                 caseData.getPaymentDetailsWrapper().setPbaPaymentReference(paymentResponse.getReference());
             } else {
                 log.info("Case ID: {} - Payment failed", caseDetails.getId());
-                errors.add(paymentResponse.getError());
+                errors.add(PAYMENT_FAILURE_MESSAGE);
             }
         }
 

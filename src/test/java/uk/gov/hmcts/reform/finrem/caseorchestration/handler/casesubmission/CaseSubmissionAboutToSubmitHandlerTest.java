@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.adapters.PBAPaymentServiceAdapter;
@@ -31,6 +30,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.PAYMENT_REF;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.paymentDuplicateError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.paymentResponse;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.SetUpUtils.paymentResponseClient401Error;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandleAnyCaseType;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,7 +97,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
 
         FinremCaseData caseData = response.getData();
         assertThat(response.getErrors()).isEmpty();
-        assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isEqualTo("New ref");
+        assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isEqualTo(PAYMENT_REF);
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
         assertThat(caseData.getState()).isNull();
@@ -120,7 +123,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPaymentRequiredAndDuplicatePaymentMade_whenHandle_thenPaymentMade() {
+    void givenPaymentRequiredAndDuplicatePaymentMade_whenHandle_thenErrorReturned() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest(YesOrNo.NO, null);
 
         mockFeeService();
@@ -129,7 +132,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertThat(response.getErrors()).isEmpty();
+        assertThat(response.getErrors()).containsOnly("Payment failed. Please review your account.");
         assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isNull();
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
@@ -160,23 +163,16 @@ class CaseSubmissionAboutToSubmitHandlerTest {
 
     private void mockPaymentSuccess() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
-            .thenReturn(PaymentResponse.builder()
-                .reference("New ref")
-                .status("success")
-                .build());
+            .thenReturn(paymentResponse());
     }
 
     private void mockPaymentFailure() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
-            .thenReturn(PaymentResponse.builder()
-                .error("Payment failed. Please review your account.")
-                .build());
+            .thenReturn(paymentResponseClient401Error());
     }
 
     private void mockPaymentDuplicate() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
-            .thenReturn(PaymentResponse.builder()
-                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
-                .build());
+            .thenReturn(paymentDuplicateError());
     }
 }

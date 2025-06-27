@@ -68,14 +68,16 @@ public class PBAPaymentClientTest extends PaymentsBaseServiceTest {
 
     @Test
     public void makePaymentWithCaseTypeReceivesClientError() {
+        String paymentResponseBody = paymentResponseErrorToString();
         mockServer.expect(requestTo(URI))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withUnauthorizedRequest()
-                .body(paymentResponseErrorToString()).contentType(APPLICATION_JSON));
+                .body(paymentResponseBody).contentType(APPLICATION_JSON));
 
         PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithCaseType(AUTH_TOKEN, paymentRequestWithCaseType());
 
         assertThat(paymentResponse.isPaymentSuccess(), is(false));
+        assertThat(paymentResponse.getError(), is(paymentResponseBody));
     }
 
     @Test

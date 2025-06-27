@@ -2,11 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -97,19 +95,8 @@ public class PBAPaymentClient {
     }
 
     private PaymentResponse get400ErrorResponse(HttpClientErrorException e) {
-        if (isDuplicatePaymentException(e)) {
-            return PaymentResponse.builder()
-                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
-                .build();
-        } else {
-            return PaymentResponse.builder()
-                .error("Payment failed. Please review your account.")
-                .build();
-        }
-    }
-
-    private boolean isDuplicatePaymentException(HttpClientErrorException e) {
-        return e.getStatusCode() == HttpStatus.BAD_REQUEST
-            && StringUtils.contains(e.getResponseBodyAsString(), PaymentResponse.DUPLICATE_PAYMENT_MESSAGE);
+        return PaymentResponse.builder()
+            .error(e.getResponseBodyAsString())
+            .build();
     }
 }

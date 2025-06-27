@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Response;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
@@ -22,13 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.model.pba.v
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
-
 
 public class SetUpUtils {
 
@@ -45,10 +45,8 @@ public class SetUpUtils {
     public static final String FEE_VERSION = "v1";
 
     public static final String PBA_NUMBER = "PBA0222";
-    public static final String CONSENTED_CASE_TYPE = "FinancialRemedyMVP2";
-    public static final String CONTESTED_CASE_TYPE = "FinancialRemedyContested";
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static FeignException feignError() {
         Response response = Response.builder().status(STATUS_CODE).headers(ImmutableMap.of()).build();
@@ -60,7 +58,7 @@ public class SetUpUtils {
     }
 
     public static String pbaAccount() {
-        PBAAccount pbaAccount = PBAAccount.builder().accountList(ImmutableList.of(PBA_NUMBER)).build();
+        PBAAccount pbaAccount = PBAAccount.builder().accountList(List.of(PBA_NUMBER)).build();
         return objectToJson(pbaAccount);
     }
 
@@ -105,7 +103,7 @@ public class SetUpUtils {
         return PaymentResponse.builder()
             .status(PAYMENT_SUCCESS_STATUS)
             .reference(PAYMENT_REF)
-            .statusHistories(ImmutableList.of()).build();
+            .statusHistories(List.of()).build();
     }
 
     public static PaymentResponse paymentDuplicateError() {
@@ -133,7 +131,7 @@ public class SetUpUtils {
         return PaymentResponse.builder()
             .status(PAYMENT_FAILED_STATUS)
             .reference(PAYMENT_REF)
-            .statusHistories(ImmutableList.of(paymentStatusHistory())).build();
+            .statusHistories(List.of(paymentStatusHistory())).build();
     }
 
     public static String paymentResponseErrorToString() {
@@ -193,7 +191,7 @@ public class SetUpUtils {
             .build();
         return PaymentRequest.builder()
             .accountNumber(ACCOUNT_NUMBER)
-            .caseType(CONSENTED_CASE_TYPE)
+            .caseType(CaseType.CONSENTED.getCcdType())
             .ccdCaseNumber("ED12345")
             .customerReference("SOL1")
             .organisationName("ORG SOL1")
