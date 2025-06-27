@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingNotificationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -22,13 +22,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class ManageHearingsCorresponder {
 
-    private final HearingNotificationHelper hearingNotificationHelper;
+    private final HearingCorrespondenceHelper hearingCorrespondenceHelper;
     private final ManageHearingsNotificationRequestMapper notificationRequestMapper;
     private final NotificationService notificationService;
     private final ManageHearingsDocumentService manageHearingsDocumentService;
@@ -37,6 +38,7 @@ public class ManageHearingsCorresponder {
 
     /**
      * Begins sending hearing correspondence to relevant parties based on the callback request.
+     * No notifications, notices or documents sent if the User has specified or the party list is empty.
      * Loops through each selected party in the hearing and sends using
      *
      * todo - update this javadoc
@@ -50,9 +52,9 @@ public class ManageHearingsCorresponder {
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
-        Hearing hearing = hearingNotificationHelper.getHearingInContext(finremCaseData);
+        Hearing hearing = hearingCorrespondenceHelper.getHearingInContext(finremCaseData);
 
-        if (hearingNotificationHelper.shouldNotSendNotification(hearing)) {
+        if (hearingCorrespondenceHelper.shouldNotSendNotification(hearing)) {
             return;
         }
 
@@ -93,7 +95,10 @@ public class ManageHearingsCorresponder {
                             hearing,
                             userAuthorisation);
             case CaseRole.RESP_SOLICITOR ->
-                    log.info("Handling case: RESP_SOLICITOR, work to follow");
+                    processCorrespondenceForRespondent(
+                            finremCaseDetails,
+                            hearing,
+                            userAuthorisation);
             case CaseRole.INTVR_SOLICITOR_1 ->
                     log.info("Handling case: INTVR_SOLICITOR_1, work to follow");
             case CaseRole.INTVR_SOLICITOR_2 ->
@@ -113,6 +118,50 @@ public class ManageHearingsCorresponder {
     }
 
     /**
+     * Processes correspondence for the applicant's solicitor.
+     *
+     *todo - update this javadoc
+     *
+     * <p>This method is responsible for sending hearing notifications to the applicant's solicitor
+     * and potentially posting documents to the applicant. It checks if the applicant solicitor should
+     * receive an email notification and processes accordingly.</p>
+     *
+     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
+     * @param hearing the hearing for which the notification is being sent
+     * @param userAuthorisation the user authorisation token for sending notifications
+     */
+    private void processCorrespondenceForApplicant(FinremCaseDetails finremCaseDetails, Hearing hearing, String userAuthorisation) {
+        processCorrespondenceForParty(
+                finremCaseDetails,
+                hearing,
+                CaseRole.APP_SOLICITOR,
+                userAuthorisation,
+                () -> hearingCorrespondenceHelper.shouldEmailToApplicantSolicitor(finremCaseDetails),
+                () -> hearingCorrespondenceHelper.shouldPostToApplicant(finremCaseDetails),
+                () -> notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing)
+        );
+    }
+
+    /**
+     * Processes correspondence for the respondent's solicitor.
+     *
+     * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
+     * @param hearing the hearing for which the notification is being sent
+     * @param userAuthorisation the user authorisation token for sending notifications
+     */
+    private void processCorrespondenceForRespondent(FinremCaseDetails finremCaseDetails, Hearing hearing, String userAuthorisation) {
+        processCorrespondenceForParty(
+                finremCaseDetails,
+                hearing,
+                CaseRole.RESP_SOLICITOR,
+                userAuthorisation,
+                () -> hearingCorrespondenceHelper.shouldEmailToRespondentSolicitor(finremCaseDetails),
+                () -> hearingCorrespondenceHelper.shouldPostToRespondent(finremCaseDetails),
+                () -> notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(finremCaseDetails, hearing)
+        );
+    }
+
+    /**
      * Builds and sends a hearing notification to the applicant's solicitor.
      * If applicantSolicitorShouldGetEmailNotification is true.
      *
@@ -123,30 +172,29 @@ public class ManageHearingsCorresponder {
      * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
      * @param hearing the hearing for which the notification is being sent
      *
-     *                TODO - check name of methid
+     *                change javadoc
      */
-    private void processCorrespondenceForApplicant(
+    private void processCorrespondenceForParty(
             FinremCaseDetails finremCaseDetails,
             Hearing hearing,
-            String userAuthorisation) {
+            CaseRole caseRole,
+            String userAuthorisation,
+            Supplier<Boolean> shouldEmailPartySolicitor,
+            Supplier<Boolean> shouldPostToParty,
+            Supplier<NotificationRequest> notificationRequestSupplier) {
 
-        if (hearingNotificationHelper.emailingToApplicantSolicitor(finremCaseDetails)) {
-
-            NotificationRequest notificationRequest = notificationRequestMapper
-                    .buildHearingNotificationForApplicantSolicitor(finremCaseDetails, hearing);
-
+        if (shouldEmailPartySolicitor.get()) {
             // Todo - test again. Check the contested court email contacts are used for Pres NW Court.
-
-            notificationService.sendHearingNotificationToApplicant(notificationRequest);
+            notificationService.sendHearingNotificationToSolicitor(
+                    notificationRequestSupplier.get(),
+                    caseRole.toString()
+            );
             // If FDA or FDR, follow up by emailing certain docs.  DFR-3820 to follow.
-
-            log.info("Notification for applicant solicitor. Request sent for case ID: {}",
-                    finremCaseDetails.getId());
         }
 
-        if (hearingNotificationHelper.postingToApplicant(finremCaseDetails)) {
+        if (shouldPostToParty.get()) {
 
-            if (hearingNotificationHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
+            if (hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
 
                 CaseDocument hearingNotice = manageHearingsDocumentService
                         .getHearingNotice(finremCaseDetails);
@@ -158,10 +206,11 @@ public class ManageHearingsCorresponder {
                     List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
                     bulkPrintDocuments.add(hearingNoticeDocument);
 
-                    bulkPrintService.printApplicantDocuments(
+                    printDocuments(
                             finremCaseDetails,
                             userAuthorisation,
-                            bulkPrintDocuments
+                            bulkPrintDocuments,
+                            caseRole
                     );
 
                     log.info("Posting notice to applicant solicitor. Request sent for case ID: {}",
@@ -171,6 +220,45 @@ public class ManageHearingsCorresponder {
                 }
             }
             // else send hearing docs too.  Logic to follow.
+        }
+    }
+
+    private void printDocuments(FinremCaseDetails finremCaseDetails, String userAuthorisation,
+                                List<BulkPrintDocument> bulkPrintDocuments, CaseRole caseRole) {
+        switch (caseRole) {
+            case CaseRole.APP_SOLICITOR ->
+                    bulkPrintService.printApplicantDocuments(
+                            finremCaseDetails,
+                            userAuthorisation,
+                            bulkPrintDocuments);
+            case CaseRole.RESP_SOLICITOR ->
+                    bulkPrintService.printRespondentDocuments(
+                            finremCaseDetails,
+                            userAuthorisation,
+                            bulkPrintDocuments);
+            case CaseRole.INTVR_SOLICITOR_1 ->
+                    // check:
+                    // intervenerWrapper.getPaperNotificationRecipient()
+                    // intervenerWrapper.getIntervenerType().getTypeValue()
+                    // If these are not set, then they may need to be set here.
+                    bulkPrintService.printIntervenerDocuments(
+                            finremCaseDetails.getData().getIntervenerOneWrapperIfPopulated(),
+                            finremCaseDetails,
+                            userAuthorisation,
+                            bulkPrintDocuments);
+            case CaseRole.INTVR_SOLICITOR_2 ->
+                    log.info("print for: INTVR_SOLICITOR_2, work to follow");
+            case CaseRole.INTVR_SOLICITOR_3 ->
+                    log.info("print for: INTVR_SOLICITOR_3, work to follow");
+            case CaseRole.INTVR_SOLICITOR_4 ->
+                    log.info("print for: INTVR_SOLICITOR_4, work to follow");
+            default -> throw new IllegalStateException(
+                    String.format(
+                            "Unexpected value: %s for case reference %s",
+                            caseRole,
+                            finremCaseDetails.getId()
+                    )
+            );
         }
     }
 }

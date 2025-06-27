@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingNotificationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 class ManageHearingsCorresponderTest {
 
     @Mock
-    private HearingNotificationHelper hearingNotificationHelper;
+    private HearingCorrespondenceHelper hearingCorrespondenceHelper;
 
     @Mock
     private ManageHearingsNotificationRequestMapper notificationRequestMapper;
@@ -71,14 +71,14 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Assert that the first method used when processing applicant solicitor correspondence is called.
-        verify(hearingNotificationHelper).emailingToApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(hearingCorrespondenceHelper).shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -86,13 +86,13 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
         Hearing hearing = new Hearing();
 
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(true);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(true);
 
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingNotificationHelper, never())
-                .emailingToApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(hearingCorrespondenceHelper, never())
+                .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -106,24 +106,24 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
         when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(list);
 
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingNotificationHelper, never())
-                .emailingToApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(hearingCorrespondenceHelper, never())
+                .shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     /**
-     * Checks that sendHearingNotificationToApplicant is called when:
+     * Checks that sendHearingNotificationToParty is called with the right role:
      * - CaseRole is APP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - emailingToApplicantSolicitor returns true
      */
     @Test
-    void shouldSendHearingNotificationToApplicant() {
+    void shouldSendHearingNotificationsToApplicant() {
         // Setup
         DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
@@ -134,18 +134,51 @@ class ManageHearingsCorresponderTest {
                 hearing)).thenReturn(notificationRequest);
 
         // Arrange
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
-        when(hearingNotificationHelper.emailingToApplicantSolicitor(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldEmailToApplicantSolicitor(callbackRequest.getCaseDetails())).thenReturn(true);
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        verify(notificationService).sendHearingNotificationToApplicant(notificationRequest);
-        verify(hearingNotificationHelper, never()).shouldSendHearingNoticeOnly(any(), any());
+        verify(notificationService).sendHearingNotificationToSolicitor(notificationRequest, CaseRole.APP_SOLICITOR.toString());
+        verify(hearingCorrespondenceHelper, never()).shouldSendHearingNoticeOnly(any(), any());
         verify(bulkPrintService, never()).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
-        assertThat(logs.getInfos()).contains("Notification for applicant solicitor. Request sent for case ID: 123");
+    }
+
+    /**
+     * Checks that sendHearingNotificationToParty is called with the right role:
+     * - CaseRole is RESP_SOLICITOR
+     * - shouldNotSendNotification returns false
+     * - emailingToApplicantSolicitor returns true
+     *
+     * When fixed, see if this a and apploicant test can be refactored to avoid code duplication.
+     *
+     */
+    @Test
+    void shouldSendHearingNotificationsToRespondent() {
+        // Setup
+        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        Hearing hearing = mock(Hearing.class);
+        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        NotificationRequest notificationRequest = new NotificationRequest();
+        when(notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(callbackRequest.getCaseDetails(),
+                hearing)).thenReturn(notificationRequest);
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldEmailToRespondentSolicitor(callbackRequest.getCaseDetails())).thenReturn(true);
+
+        // act
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        verify(notificationService).sendHearingNotificationToSolicitor(notificationRequest, CaseRole.RESP_SOLICITOR.toString());
+        verify(hearingCorrespondenceHelper, never()).shouldSendHearingNoticeOnly(any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
     }
 
     /**
@@ -165,16 +198,16 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
 
         // Arrange
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
-        when(hearingNotificationHelper.postingToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(hearingNotificationHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        verify(notificationService, never()).sendHearingNotificationToApplicant(any());
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
         assertThat(logs.getInfos()).contains("Posting notice to applicant solicitor. Request sent for case ID: 123");
     }
@@ -197,16 +230,16 @@ class ManageHearingsCorresponderTest {
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
         // Arrange
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
-        when(hearingNotificationHelper.postingToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(hearingNotificationHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
 
         // act
         corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
 
         // Verify
-        verify(notificationService, never()).sendHearingNotificationToApplicant(any());
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent for case ID: 123");
     }
 
@@ -226,8 +259,8 @@ class ManageHearingsCorresponderTest {
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
-        when(hearingNotificationHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
-        when(hearingNotificationHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
         // Act
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {

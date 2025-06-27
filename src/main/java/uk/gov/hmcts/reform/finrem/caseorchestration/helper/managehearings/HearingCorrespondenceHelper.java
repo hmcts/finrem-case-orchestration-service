@@ -18,13 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-// todo - corresponence helper?
-// still think more lives here than it should - should be in corresponser.
-
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class HearingNotificationHelper {
+public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
 
@@ -72,18 +69,47 @@ public class HearingNotificationHelper {
         return !YesOrNo.YES.equals(hearing.getHearingNoticePrompt());
     }
 
-
-    // todo? all todos need a test too
-    public boolean emailingToApplicantSolicitor(FinremCaseDetails finremCaseDetails) {
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
+     * @return true if the applicant solicitor should receive an email notification.
+     */
+    public boolean shouldEmailToApplicantSolicitor(FinremCaseDetails finremCaseDetails) {
         return !paperNotificationService.shouldPrintForApplicant(finremCaseDetails);
     }
 
-    // todo?
-    public boolean postingToApplicant(FinremCaseDetails finremCaseDetails) {
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
+     * @return true if the respondent solicitor should receive an email notification.
+     */
+    public boolean shouldEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
+        return !paperNotificationService.shouldPrintForRespondent(finremCaseDetails);
+    }
+
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
+     * @return true if the applicant should receive hearing documents by post.
+     */
+    public boolean shouldPostToApplicant(FinremCaseDetails finremCaseDetails) {
         return paperNotificationService.shouldPrintForApplicant(finremCaseDetails);
     }
 
-    // todo? move to hearing class?
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
+     * @return true if the respondent should receive hearing documents by post.
+     */
+    public boolean shouldPostToRespondent(FinremCaseDetails finremCaseDetails) {
+        return paperNotificationService.shouldPrintForRespondent(finremCaseDetails);
+    }
+
+    /**
+     * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
+     * To return true:
+     * - the Action must be ADD_HEARING
+     * - the HearingType must appear in the NOTICE_ONLY_HEARING_TYPES set
+     * @param finremCaseDetails case details
+     * @param hearing the hearing to check
+     * @return true if the hearing should only send a notice, false otherwise
+     */
     public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
 
         Set<HearingType> NOTICE_ONLY_HEARING_TYPES = Set.of(

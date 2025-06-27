@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingNotificationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -34,16 +34,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HearingNotificationHelperTest {
+class HearingCorrespondenceHelperTest {
 
     @TestLogs
-    private final TestLogger logs = new TestLogger(HearingNotificationHelper.class);
+    private final TestLogger logs = new TestLogger(HearingCorrespondenceHelper.class);
 
     @Mock
     PaperNotificationService paperNotificationService;
 
     @InjectMocks
-    private HearingNotificationHelper helper;
+    private HearingCorrespondenceHelper helper;
 
     @Test
     void shouldReturnCorrectValuesWhenShouldSendNotificationUsed() {
@@ -113,31 +113,59 @@ class HearingNotificationHelperTest {
     }
 
     /**
-     * emailingToApplicantSolicitor is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
+     * shouldEmailToApplicantSolicitor is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
      */
     @Test
-    void shouldReturnCorrectValueForEmailingToApplicantSolicitor() {
+    void shouldReturnCorrectValueForShouldEmailToApplicantSolicitor() {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
 
         when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(false);
-        assertTrue(helper.emailingToApplicantSolicitor(finremCaseDetails));
+        assertTrue(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
 
         when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(true);
-        assertFalse(helper.emailingToApplicantSolicitor(finremCaseDetails));
+        assertFalse(helper.shouldEmailToApplicantSolicitor(finremCaseDetails));
     }
 
     /**
-     * emailingToApplicantSolicitor is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
+     * shouldEmailToRespondentSolicitor is just a wrapper around the paperNotificationService.shouldPrintForRespondent.
      */
     @Test
-    void shouldReturnCorrectValueForPostingToApplicant() {
+    void shouldReturnCorrectValueForShouldEmailToRespondentSolicitor() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+
+        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(false);
+        assertTrue(helper.shouldEmailToRespondentSolicitor(finremCaseDetails));
+
+        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(true);
+        assertFalse(helper.shouldEmailToRespondentSolicitor(finremCaseDetails));
+    }
+
+    /**
+     * shouldPostToApplicant is just a wrapper around the paperNotificationService.shouldPrintForApplicant.
+     */
+    @Test
+    void shouldReturnCorrectValueForShouldPostToApplicant() {
         FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
 
         when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(true);
-        assertTrue(helper.postingToApplicant(finremCaseDetails));
+        assertTrue(helper.shouldPostToApplicant(finremCaseDetails));
 
         when(paperNotificationService.shouldPrintForApplicant(finremCaseDetails)).thenReturn(false);
-        assertFalse(helper.postingToApplicant(finremCaseDetails));
+        assertFalse(helper.shouldPostToApplicant(finremCaseDetails));
+    }
+
+    /**
+     * shouldPostToRespondent is just a wrapper around the paperNotificationService.shouldPrintForRespondent.
+     */
+    @Test
+    void shouldReturnCorrectValueForShouldPostToRespondent() {
+        FinremCaseDetails finremCaseDetails = mock(FinremCaseDetails.class);
+
+        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(true);
+        assertTrue(helper.shouldPostToRespondent(finremCaseDetails));
+
+        when(paperNotificationService.shouldPrintForRespondent(finremCaseDetails)).thenReturn(false);
+        assertFalse(helper.shouldPostToRespondent(finremCaseDetails));
     }
 
     /**

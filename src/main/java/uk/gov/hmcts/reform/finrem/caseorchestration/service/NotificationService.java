@@ -1959,11 +1959,22 @@ public class NotificationService {
     }
 
     /**
-     * Sends a hearing notification email to the applicant solicitor.
+     * Email a hearing notification to a solicitor.
      * @param notificationRequest the notification request containing details for the email
      */
-    public void sendHearingNotificationToApplicant(NotificationRequest notificationRequest) {
-        log.info("{} - Sending hearing notification to applicant", notificationRequest.getCaseReferenceNumber());
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
+    public void sendHearingNotificationToSolicitor(
+            NotificationRequest notificationRequest,
+            String caseRoleAsString) {
+
+        log.info(
+                "{} - Sending hearing notification to solicitor with role {}",
+                notificationRequest.getCaseReferenceNumber(),
+                caseRoleAsString
+        );
+
+        emailService.sendConfirmationEmail(
+                notificationRequest,
+                FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR
+        );
     }
 }
