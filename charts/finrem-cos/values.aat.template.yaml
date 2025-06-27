@@ -5,4 +5,4 @@ java:
   environment:
     FEATURE_SEND_LETTER_RECIPIENT_CHECK: false
     FEATURE_INTERVENER_ENABLED: false
-    SECURE_DOC_ENABLED: true
+    SECURE_DOC_ENABLED: false
