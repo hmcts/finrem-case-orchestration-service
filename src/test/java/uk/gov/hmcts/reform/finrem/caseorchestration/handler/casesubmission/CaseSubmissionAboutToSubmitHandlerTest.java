@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -31,6 +32,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAPaymentClient.CLIENT_PAYMENT_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAPaymentClient.SERVER_PAYMENT_ERROR_MESSAGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandleAnyCaseType;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,7 +113,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
 
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertThat(response.getErrors()).containsOnly("Payment failed. Please review your account.");
+        assertThat(response.getErrors()).containsOnly(CLIENT_PAYMENT_ERROR_MESSAGE);
         FinremCaseData caseData = response.getData();
         assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isNull();
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
@@ -120,7 +123,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenPaymentRequiredAndDuplicatePaymentMade_whenHandle_thenPaymentMade() {
+    void givenPaymentRequiredAndDuplicatePaymentMade_whenHandle_thenErrorReturned() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest(YesOrNo.NO, null);
 
         mockFeeService();
@@ -129,7 +132,25 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         var response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         FinremCaseData caseData = response.getData();
-        assertThat(response.getErrors()).isEmpty();
+        assertThat(response.getErrors()).containsOnly(CLIENT_PAYMENT_ERROR_MESSAGE);
+        assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isNull();
+        assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
+        assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
+        assertThat(caseData.getState()).isNull();
+        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    void givenPaymentRequiredAndPaymentApiServerError_whenHandle_thenErrorReturned() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest(YesOrNo.NO, null);
+
+        mockFeeService();
+        mockServerError();
+
+        var response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        FinremCaseData caseData = response.getData();
+        assertThat(response.getErrors()).containsOnly(SERVER_PAYMENT_ERROR_MESSAGE);
         assertThat(caseData.getPaymentDetailsWrapper().getPbaPaymentReference()).isNull();
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
@@ -169,14 +190,24 @@ class CaseSubmissionAboutToSubmitHandlerTest {
     private void mockPaymentFailure() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
             .thenReturn(PaymentResponse.builder()
-                .error("Payment failed. Please review your account.")
+                .error(HttpStatus.FORBIDDEN.toString())
+                .message(CLIENT_PAYMENT_ERROR_MESSAGE)
                 .build());
     }
 
     private void mockPaymentDuplicate() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
             .thenReturn(PaymentResponse.builder()
-                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
+                .error(HttpStatus.BAD_REQUEST.toString())
+                .message(CLIENT_PAYMENT_ERROR_MESSAGE)
+                .build());
+    }
+
+    private void mockServerError() {
+        when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
+            .thenReturn(PaymentResponse.builder()
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                .message(SERVER_PAYMENT_ERROR_MESSAGE)
                 .build());
     }
 }
