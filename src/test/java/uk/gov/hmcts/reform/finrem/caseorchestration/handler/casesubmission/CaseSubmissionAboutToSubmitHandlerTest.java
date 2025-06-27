@@ -198,7 +198,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
     private void mockPaymentDuplicate() {
         when(pbaPaymentService.makePayment(eq(AUTH_TOKEN), any(FinremCaseDetails.class)))
             .thenReturn(PaymentResponse.builder()
-                .error(HttpStatus.BAD_REQUEST.toString())
+                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
                 .message(CLIENT_PAYMENT_ERROR_MESSAGE)
                 .build());
     }
