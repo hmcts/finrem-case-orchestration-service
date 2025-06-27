@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions;
@@ -55,7 +57,7 @@ class HearingsAboutToSubmitHandlerTest {
     }
 
     @Test
-    void givenValidCaseData_whenHandle_thenHearingAddedToManageHearingsList() {
+    void givenValidCaseData_whenHandleAdd_thenHearingAddedToManageHearingsList() {
         // Arrange
         String caseReference = TestConstants.CASE_ID;
         Hearing hearingToAdd = createHearingToAdd();
@@ -71,7 +73,6 @@ class HearingsAboutToSubmitHandlerTest {
             CaseType.CONTESTED, caseData);
 
         doAnswer(invocation -> {
-
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
                 .id(workingHearingID)
@@ -105,13 +106,42 @@ class HearingsAboutToSubmitHandlerTest {
         }).when(manageHearingActionService)
             .performAddHearing(request.getCaseDetails(), AUTH_TOKEN);
 
+        HearingTabCollectionItem hearingTabItem = HearingTabCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(HearingTabItem
+                .builder()
+                .tabAttendance("In Person")
+                .tabHearingType("hearingType")
+                .tabDateTime("12 Oct 2023 10:00")
+                .tabCourtSelection("Court Name")
+                .tabTimeEstimate("30mins")
+                .tabConfidentialParties("Applicant")
+                .tabAdditionalInformation("Additional Info")
+                .tabHearingDocuments(List.of(
+                    DocumentCollectionItem.builder()
+                        .value(CaseDocument.builder()
+                            .documentUrl("documentUrl")
+                            .documentFilename("HearingNotice.pdf")
+                            .build())
+                        .build()))
+                .build())
+            .build();
+
+        doAnswer(invocation -> {
+            FinremCaseData data = invocation.getArgument(0);
+            ManageHearingsWrapper wrapper = data.getManageHearingsWrapper();
+            wrapper.setApplicantHearingTabItems(List.of(hearingTabItem));
+            return null;
+        }).when(manageHearingActionService)
+            .updateTabData(request.getCaseDetails().getData());
+
         // Act
         var response = manageHearingsAboutToSubmitHandler.handle(request, AUTH_TOKEN);
         var responseManageHearingsWrapper = response.getData().getManageHearingsWrapper();
         var hearingDocumentAdded = responseManageHearingsWrapper.getHearingDocumentsCollection().getFirst();
         var hearingId = responseManageHearingsWrapper.getHearings().getFirst().getId();
 
-        //Assert
+        //Assert perform add
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
             .contains(hearingToAdd);
@@ -121,6 +151,10 @@ class HearingsAboutToSubmitHandlerTest {
         assertThat(hearingDocumentAdded.getValue().getHearingCaseDocumentType()).isEqualTo(CaseDocumentType.HEARING_NOTICE);
         assertThat(responseManageHearingsWrapper.getWorkingHearingId()).isEqualTo(hearingId);
         assertThat(responseManageHearingsWrapper.getWorkingHearing()).isNull();
+
+        //Assert perform tab data
+        assertThat(responseManageHearingsWrapper.getApplicantHearingTabItems())
+            .contains(hearingTabItem);
     }
 
     private Hearing createHearingToAdd() {
