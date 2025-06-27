@@ -47,34 +47,65 @@ public class HearingTabDataMapper {
     }
 
     /**
-     * Retrieves the name of the specified court.
+     * Retrieves the name of the court associated with the given {@link Court} object.
      *
-     *
-     * @param court the {@link Court} object to retrieve the name for
+     * @param court the {@link Court} object to retrieve the court name for
      * @return the name of the court
      */
     public String getCourtName(Court court) {
         return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
     }
 
+    /**
+     * Retrieves the name of the court associated with the given {@link Hearing}.
+     *
+     * @param hearing the {@link Hearing} object to retrieve the court name for
+     * @return the name of the court
+     */
     public String getCourtName(Hearing hearing) {
         return getCourtName(hearing.getHearingCourtSelection());
     }
 
+    /**
+     * Formats the given hearing date and time into a human-readable string.
+     * If the date is {@code null}, returns a default value.
+     *
+     * @param hearingDate the hearing date to format
+     * @param hearingTime the hearing time to append to the date
+     * @return a formatted date-time string (e.g., "27 Jun 2025 10:00 AM"), or a default value if the date is null
+     */
     public String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
         return hearingDate != null
             ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
             : DEFAULT_DATE_TIME;
     }
 
+    /**
+     * Formats the date and time of the given {@link Hearing} into a human-readable string.
+     *
+     * @param hearing the {@link Hearing} to extract and format date and time from
+     * @return a formatted date-time string, or a default value if the date is null
+     */
     public String getFormattedDateTime(Hearing hearing) {
         return getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime());
     }
 
-    public String getAdditionalInformation(String AdditionalHearingInformation) {
-        return AdditionalHearingInformation != null ? AdditionalHearingInformation : " ";
+    /**
+     * Returns the additional hearing information if available, otherwise returns a blank space.
+     *
+     * @param additionalHearingInformation the string containing additional information
+     * @return the additional information or a blank space if {@code null}
+     */
+    public String getAdditionalInformation(String additionalHearingInformation) {
+        return additionalHearingInformation != null ? additionalHearingInformation : " ";
     }
 
+    /**
+     * Retrieves the additional hearing information from the given {@link Hearing}.
+     *
+     * @param hearing the {@link Hearing} to retrieve additional information from
+     * @return the additional information or a blank space if {@code null}
+     */
     public String getAdditionalInformation(Hearing hearing) {
         return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
