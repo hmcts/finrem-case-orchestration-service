@@ -57,30 +57,34 @@ public class HearingTabDataMapper {
         return courtDetailsMapper.convertToFrcCourtDetails(court).getCourtName();
     }
 
+    public String getCourtName(Hearing hearing) {
+        return getCourtName(hearing.getHearingCourtSelection());
+    }
+
     public String getFormattedDateTime(LocalDate hearingDate, String hearingTime) {
         return hearingDate != null
             ? hearingDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) + " " + hearingTime
             : DEFAULT_DATE_TIME;
     }
 
+    public String getFormattedDateTime(Hearing hearing) {
+        return getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime());
+    }
+
     public String getAdditionalInformation(String AdditionalHearingInformation) {
         return AdditionalHearingInformation != null ? AdditionalHearingInformation : " ";
+    }
+
+    public String getAdditionalInformation(Hearing hearing) {
+        return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
 
     private String getHearingType(Hearing hearing) {
         return hearing.getHearingType().getId();
     }
 
-    private String getCourtName(Hearing hearing) {
-        return getCourtName(hearing.getHearingCourtSelection());
-    }
-
     private String getHearingMode(Hearing hearing) {
         return hearing.getHearingMode() != null ? hearing.getHearingMode().getDisplayValue() : DEFAULT_HEARING_MODE;
-    }
-
-    private String getFormattedDateTime(Hearing hearing) {
-        return getFormattedDateTime(hearing.getHearingDate(), hearing.getHearingTime());
     }
 
     private String getConfidentialParties(Hearing hearing) {
@@ -89,10 +93,6 @@ public class HearingTabDataMapper {
             .map(DynamicMultiSelectListElement::getLabel)
             .collect(Collectors.joining(", "))
             : DEFAULT_CONFIDENTIAL_PARTIES;
-    }
-
-    private String getAdditionalInformation(Hearing hearing) {
-        return getAdditionalInformation(hearing.getAdditionalHearingInformation());
     }
 
     /**
