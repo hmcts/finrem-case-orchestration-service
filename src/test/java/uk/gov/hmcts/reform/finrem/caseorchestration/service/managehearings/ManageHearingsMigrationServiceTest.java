@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,59 +85,65 @@ class ManageHearingsMigrationServiceTest {
 
     @Test
     void givenNonMigratedCaseDataWithListForHearingDataShouldPopulateToHearingTabItem() {
-        // Arrange
-        LocalDate hearingDate = LocalDate.of(2025, 7, 1);
-        String hearingTime = "10:00";
-        String additionalInfo = "Some notes";
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
 
-        String expectedCourtName = "London FR Court";
-        String expectedDateTime = "01 Jul 2025 10:00";
-        String expectedAdditionalInfo = "Formatted notes";
+            // Arrange
+            LocalDate hearingDate = LocalDate.of(2025, 7, 1);
+            String hearingTime = "10:00";
+            String additionalInfo = "Some notes";
 
-        HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
-        Court court = mock(Court.class);
+            String expectedCourtName = "London FR Court";
+            String expectedDateTime = "01 Jul 2025 10:00";
+            String expectedAdditionalInfo = "Formatted notes";
 
-        when(hearingRegionWrapper.toCourt()).thenReturn(court);
-        when(hearingTabDataMapper.getCourtName(court)).thenReturn(expectedCourtName);
-        when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn(expectedDateTime);
-        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn(expectedAdditionalInfo);
+            HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
+            Court court = mock(Court.class);
 
-        ListForHearingWrapper listForHearingWrapper = ListForHearingWrapper.builder()
-            .hearingType(HearingTypeDirection.FH)
-            .hearingDate(hearingDate)
-            .hearingTime(hearingTime)
-            .timeEstimate("45 minutes")
-            .additionalInformationAboutHearing(additionalInfo)
-            .hearingRegionWrapper(hearingRegionWrapper)
-            .build();
+            when(hearingRegionWrapper.toCourt()).thenReturn(court);
+            when(hearingTabDataMapper.getCourtName(court)).thenReturn(expectedCourtName);
+            when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn(expectedDateTime);
+            when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn(expectedAdditionalInfo);
 
-        MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
-            .isListForHearingsMigrated(YesOrNo.NO)
-            .build();
+            ListForHearingWrapper listForHearingWrapper = ListForHearingWrapper.builder()
+                .hearingType(HearingTypeDirection.FH)
+                .hearingDate(hearingDate)
+                .hearingTime(hearingTime)
+                .timeEstimate("45 minutes")
+                .additionalInformationAboutHearing(additionalInfo)
+                .hearingRegionWrapper(hearingRegionWrapper)
+                .build();
 
-        FinremCaseData caseData = FinremCaseData.builder()
-            .listForHearingWrapper(listForHearingWrapper)
-            .mhMigrationWrapper(mhMigrationWrapper)
-            .build();
+            MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
+                .isListForHearingsMigrated(YesOrNo.NO)
+                .build();
 
-        // Act
-        underTest.populateListForHearingWrapper(caseData);
+            FinremCaseData caseData = FinremCaseData.builder()
+                .listForHearingWrapper(listForHearingWrapper)
+                .mhMigrationWrapper(mhMigrationWrapper)
+                .build();
 
-        // Assert
-        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
-        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
-            .containsExactly(HearingTabCollectionItem.builder()
-                .value(HearingTabItem.builder()
-                    .tabHearingType("Final Hearing (FH)")
-                    .tabCourtSelection(expectedCourtName)
-                    .tabDateTime(expectedDateTime)
-                    .tabTimeEstimate("45 minutes")
-                    //.tabConfidentialParties(getConfidentialParties(hearing))
-                    .tabAdditionalInformation(expectedAdditionalInfo)
-                    //.tabHearingDocuments(mapHearingDocumentsToTabData(
-                    // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
-                    .build())
-                .build());
+            // Act
+            underTest.populateListForHearingWrapper(caseData);
+
+            // Assert
+            assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
+            assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
+                .containsExactly(HearingTabCollectionItem.builder()
+                    .value(HearingTabItem.builder()
+                        .tabHearingMigratedDate(fixedDateTime)
+                        .tabHearingType("Final Hearing (FH)")
+                        .tabCourtSelection(expectedCourtName)
+                        .tabDateTime(expectedDateTime)
+                        .tabTimeEstimate("45 minutes")
+                        //.tabConfidentialParties(getConfidentialParties(hearing))
+                        .tabAdditionalInformation(expectedAdditionalInfo)
+                        //.tabHearingDocuments(mapHearingDocumentsToTabData(
+                        // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+                        .build())
+                    .build());
+        }
     }
 
 }
