@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
@@ -74,7 +75,8 @@ public class ManageHearingsMigrationService {
                 .tabAdditionalInformation(hearingTabDataMapper
                     .getAdditionalInformation(additionalInformationAboutHearing))
                 //.tabHearingDocuments(mapHearingDocumentsToTabData(
-                // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
+                // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing)
+                .tabHearingMigratedDate(LocalDateTime.now())
                 .build();
 
             appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
