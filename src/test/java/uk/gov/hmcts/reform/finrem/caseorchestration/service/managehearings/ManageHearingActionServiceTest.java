@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -155,8 +157,9 @@ class ManageHearingActionServiceTest {
         );
     }
 
-    @Test
-    void shouldAddHearingToTabCollectionInCorrectOrder() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldAddHearingToTabCollectionInCorrectOrder(boolean hearingTabItemExists) {
         // Arrange
         Hearing hearing1 = Hearing.builder()
             .hearingType(HearingType.DIR)
@@ -172,6 +175,7 @@ class ManageHearingActionServiceTest {
 
         ManageHearingsWrapper hearingWrapper = ManageHearingsWrapper.builder()
             .workingHearing(hearing1)
+            .hearingTabItems(hearingTabItemExists ? List.of(HearingTabCollectionItem.builder().build()) : null)
             .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
                 .id(UUID.randomUUID())
                 .value(hearing2)
@@ -207,9 +211,10 @@ class ManageHearingActionServiceTest {
         assertThat(capturedHearings.get(1).getValue()).isEqualTo(hearing1);
 
         List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        assertThat(hearingTabItems).hasSize(2);
-        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
-        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
+        int offset = hearingTabItemExists ? 1 : 0;
+        assertThat(hearingTabItems).hasSize(2 + offset);
+        assertThat(hearingTabItems.get(0 + offset).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1 + offset).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 
     @Test

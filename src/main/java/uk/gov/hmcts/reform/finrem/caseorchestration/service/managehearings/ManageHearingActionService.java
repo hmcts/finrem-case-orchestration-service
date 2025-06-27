@@ -23,9 +23,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
@@ -90,7 +91,7 @@ public class ManageHearingActionService {
      */
     private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
 
-        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = ofNullable(
                         hearingsWrapper.getHearings())
                 .orElseGet(ArrayList::new);
 
@@ -117,7 +118,7 @@ public class ManageHearingActionService {
      */
     private void addDocumentsToCollection(Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap,
                                           ManageHearingsWrapper hearingsWrapper) {
-        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
+        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = ofNullable(
                 hearingsWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
@@ -161,7 +162,11 @@ public class ManageHearingActionService {
                 .build())
             .toList();
 
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
+        List<HearingTabCollectionItem> existingHearingTabItems =
+            new ArrayList<>(ofNullable(caseData.getManageHearingsWrapper().getHearingTabItems())
+                .orElse(emptyList()));
+        existingHearingTabItems.addAll(hearingTabItems);
+        caseData.getManageHearingsWrapper().setHearingTabItems(existingHearingTabItems);
     }
 
     /**
