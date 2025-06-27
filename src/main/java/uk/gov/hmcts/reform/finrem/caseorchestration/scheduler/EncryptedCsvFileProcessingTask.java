@@ -27,7 +27,7 @@ public abstract class EncryptedCsvFileProcessingTask extends CsvFileProcessingTa
         String caseListFileName = getCaseListFileName();
         log.info("Getting case references from {}", caseListFileName);
 
-        log.info("Starting AmendGeneralEmailTask Cron....\n"
+        log.info("Starting Cron....\n"
                 + "TASK_NAME: {}\n"
                 + "SUMMARY: {}\n"
                 + "CSV_FILE: {}\n"
@@ -35,7 +35,7 @@ public abstract class EncryptedCsvFileProcessingTask extends CsvFileProcessingTa
             getTaskName(),
             getSummary(),
             getCaseListFileName(),
-            secret);
+            secret != null && !secret.isEmpty());
 
 
         List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
