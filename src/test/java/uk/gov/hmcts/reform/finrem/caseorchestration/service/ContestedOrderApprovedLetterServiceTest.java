@@ -115,7 +115,8 @@ class ContestedOrderApprovedLetterServiceTest {
             eq("contestedOrderApprovedCoverLetter.pdf"));
 
         verifyTemplateVariablesArePopulated();
-        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
+        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetterList().getLast()).isEqualTo(expectedCaseDocument);
+//        assertThat(finremCaseDetails.getData().getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
     }
 
     @Test
@@ -142,7 +143,8 @@ class ContestedOrderApprovedLetterServiceTest {
             eq("contestedOrderApprovedCoverLetter.pdf"));
 
         verifyTemplateVariablesArePopulatedIfJudgeDetailsProvided();
-        assertThat(finremCaseData.getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
+        assertThat(finremCaseData.getOrderApprovedCoverLetterList().getLast()).isEqualTo(expectedCaseDocument);
+//        assertThat(finremCaseData.getOrderApprovedCoverLetter()).isEqualTo(expectedCaseDocument);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

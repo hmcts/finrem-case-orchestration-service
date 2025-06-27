@@ -204,7 +204,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
-        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf")));
+//        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
         List<CaseDocument> legacyDocs = new ArrayList<>();
         legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
 
@@ -254,7 +255,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument("http://fakeurl/additionalDocument", "additionalDocument.pdf"));
-        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
+        data.setOrderApprovedCoverLetterList(List.of((caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"))));
+//        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "coverLetter.pdf"));
         List<CaseDocument> legacyDocs = new ArrayList<>();
         legacyDocs.add(caseDocument("http://fakeurl/legacyDoc1", "legacyDoc1.pdf"));
 
@@ -302,7 +304,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
 
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(caseDocument());
-        data.setOrderApprovedCoverLetter(caseDocument());
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument()));
+//        data.setOrderApprovedCoverLetter(caseDocument());
         List<CaseDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(caseDocument());
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
@@ -411,7 +414,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         CaseDocument additionalDocument = null;
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.docx"));
-        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf")));
+//        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
         CaseDocument legacyApprovedOrder = null;
@@ -453,7 +457,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .orderDateTime(LocalDateTime.now()).isOrderStamped(YesOrNo.YES).build()).build();
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
-        data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument("http://abc/coversheet", "coversheet.pdf")));
+//        data.setOrderApprovedCoverLetter(caseDocument("http://abc/coversheet", "coversheet.pdf"));
 
         OrderToShare selected1 = OrderToShare.builder().documentId("legacyDoc").documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
@@ -502,7 +507,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
-        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/coversheet", "coversheet"));
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument("http://fakeurl/coversheet", "coversheet")));
+//        data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/coversheet", "coversheet"));
         data.setPartiesOnCase(getParties());
         List<DirectionOrderCollection> orderList = new ArrayList<>();
         CaseDocument caseDocument = caseDocument();
@@ -574,7 +580,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         data.getOrderWrapper().setIntv1OrderCollections(mutableList);
         String coverLetterDocumentFilename = "contestedOrderApprovedCoverLetter.pdf";
         String coverLetterUrl = "http://dm-store:8080/documents/129456-654321-123456-654321";
-        data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
+        data.setOrderApprovedCoverLetterList(List.of(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary")));
+//      data.setOrderApprovedCoverLetter(caseDocument(coverLetterUrl, coverLetterDocumentFilename, "http://dm-store:8080/documents/129456-654321-123456-654321/binary"));
 
         OrderToShare selected1 = OrderToShare.builder().documentId(UUID_1).documentName("app_docs.pdf").documentToShare(YesOrNo.YES).build();
         OrdersToSend ordersToSend = OrdersToSend.builder()
@@ -698,7 +705,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         orderList.add(order);
         data.setUploadHearingOrder(orderList);
         data.getSendOrderWrapper().setOrdersToSend(OrdersToSend.builder().build());
-        data.setOrderApprovedCoverLetter(null);
+        data.setOrderApprovedCoverLetterList(null);
+//        data.setOrderApprovedCoverLetter(null);
 
         when(generalOrderService.hearingOrdersToShare(any(FinremCaseDetails.class), anyList()))
             .thenReturn(Triple.of(List.of(caseDocument()), List.of(), Map.of()));
@@ -714,7 +722,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
-        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
+        finremCaseDataBuilder.orderApprovedCoverLetterList(List.of(caseDocument()));
+//        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
         finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToSend(OrdersToSend.builder().build()).build());
         finremCaseDataBuilder.draftOrdersWrapper(DraftOrdersWrapper.builder()
             .agreedDraftOrderCollection(new ArrayList<>(of(
@@ -772,7 +781,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
-        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
+        finremCaseDataBuilder.orderApprovedCoverLetterList(List.of(caseDocument()));
+        //        finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
         finremCaseDataBuilder.sendOrderWrapper(SendOrderWrapper.builder().ordersToSend(OrdersToSend.builder().build()).build());
 
         List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection = new ArrayList<>(of(
