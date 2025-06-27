@@ -11,12 +11,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -71,15 +73,17 @@ public class ManageHearingsMigrationService {
                 .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
                 .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
                 .tabTimeEstimate(timeEstimate)
-                //.tabConfidentialParties(getConfidentialParties(hearing))
                 .tabAdditionalInformation(hearingTabDataMapper
                     .getAdditionalInformation(additionalInformationAboutHearing))
-                //.tabHearingDocuments(mapHearingDocumentsToTabData(
-                // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing)
                 .tabHearingMigratedDate(LocalDateTime.now())
                 .build();
 
+            // court-admin hearing tab
             appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+            // applicants hearing tab
+            appendToApplicantHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+            // respondent hearing tab
+            appendToRespondentHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
             caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
         }
     }
@@ -110,12 +114,38 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
-    private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem hearingTabCollectionItem) {
-        ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-        if (manageHearingsWrapper.getHearingTabItems() == null) {
-            manageHearingsWrapper.setHearingTabItems(new ArrayList<>());
+    private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
+        appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
+                caseData.getManageHearingsWrapper()::setHearingTabItems, item);
+    }
+
+    // TODO: Available after DFR-3831's release
+    private void appendToApplicantHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
+        /*
+        appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
+                caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
+        */
+    }
+
+    // TODO: Available after DFR-3831's release
+    private void appendToRespondentHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
+        /*
+        appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
+                caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
+         */
+    }
+
+    private void appendToList(
+            Supplier<List<HearingTabCollectionItem>> getter,
+            Consumer<List<HearingTabCollectionItem>> setter,
+            HearingTabCollectionItem item
+    ) {
+        List<HearingTabCollectionItem> list = getter.get();
+        if (list == null) {
+            list = new ArrayList<>();
+            setter.accept(list);
         }
-        manageHearingsWrapper.getHearingTabItems().add(hearingTabCollectionItem);
+        list.add(item);
     }
 
 }
