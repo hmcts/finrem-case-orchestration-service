@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
@@ -163,8 +163,7 @@ public class ManageHearingActionService {
             .toList();
 
         List<HearingTabCollectionItem> existingHearingTabItems =
-            new ArrayList<>(ofNullable(caseData.getManageHearingsWrapper().getHearingTabItems())
-                .orElse(emptyList()));
+            new ArrayList<>(emptyIfNull(caseData.getManageHearingsWrapper().getHearingTabItems()));
         existingHearingTabItems.addAll(hearingTabItems);
         caseData.getManageHearingsWrapper().setHearingTabItems(existingHearingTabItems);
     }
