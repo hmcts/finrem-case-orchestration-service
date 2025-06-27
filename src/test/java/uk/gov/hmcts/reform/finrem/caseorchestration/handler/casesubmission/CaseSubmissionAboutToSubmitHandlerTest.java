@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -101,7 +100,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
         assertThat(caseData.getState()).isNull();
-        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(pbaPaymentService).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -119,7 +118,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
         assertThat(caseData.getState()).isNull();
-        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(pbaPaymentService).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -137,7 +136,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
         assertThat(caseData.getState()).isNull();
-        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(pbaPaymentService).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -155,7 +154,7 @@ class CaseSubmissionAboutToSubmitHandlerTest {
         assertThat(caseData.getPaymentDetailsWrapper().getAmountToPay()).isEqualTo(BigDecimal.valueOf(31350));
         assertThat(caseData.getPaymentDetailsWrapper().getOrderSummary()).isNotNull();
         assertThat(caseData.getState()).isNull();
-        verify(pbaPaymentService, times(1)).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(pbaPaymentService).makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     private FinremCallbackRequest buildCallbackRequest(YesOrNo helpWithFees, String pbaPaymentReference) {
