@@ -66,7 +66,7 @@ public class ManageHearingsMigrationService {
             HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
 
             HearingTabItem newHearingTabItem = HearingTabItem.builder()
-                .tabHearingType(hearingType != null ? hearingType.getId() : "Unknown")
+                .tabHearingType(hearingType.getId())
                 .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
                 .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
                 .tabTimeEstimate(timeEstimate)
@@ -102,7 +102,7 @@ public class ManageHearingsMigrationService {
      */
     private boolean shouldPopulateListForHearingWrapper(MhMigrationWrapper mhMigrationWrapper,
                                                         ListForHearingWrapper listForHearingWrapper) {
-        if (YesOrNo.isNoOrNull(mhMigrationWrapper.getIsListForHearingsMigrated())) {
+        if (YesOrNo.isYes(mhMigrationWrapper.getIsListForHearingsMigrated())) {
             return false;
         }
         return listForHearingWrapper.getHearingType() != null;

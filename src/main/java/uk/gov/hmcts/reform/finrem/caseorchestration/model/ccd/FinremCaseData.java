@@ -401,7 +401,7 @@ public class FinremCaseData implements HasCaseDocument {
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
-    private MhMigrationWrapper mnMigrationWrapper;
+    private MhMigrationWrapper mhMigrationWrapper;
 
     private YesOrNo isNocFixAppliedFlag;
 
@@ -1006,11 +1006,11 @@ public class FinremCaseData implements HasCaseDocument {
 
     @JsonIgnore
     public MhMigrationWrapper getMhMigrationWrapper() {
-        if (mnMigrationWrapper == null) {
-            this.mnMigrationWrapper = new MhMigrationWrapper();
+        if (mhMigrationWrapper == null) {
+            this.mhMigrationWrapper = new MhMigrationWrapper();
         }
 
-        return mnMigrationWrapper;
+        return mhMigrationWrapper;
     }
 
     @JsonIgnore
