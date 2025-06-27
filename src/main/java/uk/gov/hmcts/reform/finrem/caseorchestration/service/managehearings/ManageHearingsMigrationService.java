@@ -34,6 +34,19 @@ public class ManageHearingsMigrationService {
         caseData.getMhMigrationWrapper().setMhMigrationVersion(mhMigrationVersion);
     }
 
+    /**
+     * Populates a new {@link HearingTabItem} in the hearing tab of the case if the hearing
+     * details have not already been migrated.
+     * <p>
+     * This method checks if the {@code ListForHearingWrapper} needs to be processed by evaluating
+     * both the {@code MhMigrationWrapper} and the current state of the wrapper itself.
+     * If migration is needed, it extracts hearing-related fields such as type, date, time,
+     * time estimate, court information, and additional information.
+     * These are used to build a new {@code HearingTabItem}, which is then added to the case data.
+     * Once added, the migration flag is set to {@code YES}.
+     *
+     * @param caseData the {@link FinremCaseData} containing the hearing details and wrappers
+     */
     public void populateListForHearingWrapper(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
