@@ -7,7 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -58,18 +59,20 @@ public class ManageHearingsMigrationService {
             // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
             HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
 
-            Hearing newHearing = Hearing.builder()
-                .hearingMode(null) // no Hearing attendance field
-                .hearingDate(hearingDate)
-                .hearingTime(hearingTime)
-                .hearingType(hearingType.toHearingType())
-                .additionalHearingInformation(additionalInformationAboutHearing)
-                .hearingTimeEstimate(timeEstimate)
-                .hearingCourtSelection(hearingRegionWrapper.toCourt())
-                //.partiesOnCaseMultiSelectList(listForHearingWrapper)
+            HearingTabItem newHearingTabItem = HearingTabItem.builder()
+                .tabHearingType(hearingType != null ? hearingType.getId() : "Unknown")
+                .tabAdditionalInformation(additionalInformationAboutHearing)
+//                .hearingMode(null) // no Hearing attendance field
+//                .hearingDate(hearingDate)
+//                .hearingTime(hearingTime)
+//                .hearingType(hearingType.toHearingType())
+//                .additionalHearingInformation(additionalInformationAboutHearing)
+//                .hearingTimeEstimate(timeEstimate)
+//                .hearingCourtSelection(hearingRegionWrapper.toCourt())
+//                //.partiesOnCaseMultiSelectList(listForHearingWrapper)
                 .build();
 
-            appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(newHearing).build());
+            appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
             caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
         }
     }
@@ -100,19 +103,12 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
-    /**
-     * Appends a new hearing entry to the Manage Hearings collection. If the collection is not yet initialised,
-     * it is created.
-     *
-     * @param caseData                     the case data to update
-     * @param newManageHearingsCollectionItem the hearing item to add
-     */
-    private void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem newManageHearingsCollectionItem) {
+    private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem hearingTabCollectionItem) {
         ManageHearingsWrapper manageHearingsWrapper = caseData.getManageHearingsWrapper();
-        if (manageHearingsWrapper.getHearings() == null) {
-            manageHearingsWrapper.setHearings(new ArrayList<>());
+        if (manageHearingsWrapper.getHearingTabItems() == null) {
+            manageHearingsWrapper.setHearingTabItems(new ArrayList<>());
         }
-        manageHearingsWrapper.getHearings().add(newManageHearingsCollectionItem);
+        manageHearingsWrapper.getHearingTabItems().add(hearingTabCollectionItem);
     }
 
 }
