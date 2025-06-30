@@ -37,7 +37,6 @@ public abstract class EncryptedCsvFileProcessingTask extends CsvFileProcessingTa
             getCaseListFileName(),
             secret != null && !secret.isEmpty());
 
-
         List<CaseReference> caseReferences = csvLoader.loadCaseReferenceList(caseListFileName, secret);
 
         log.info("{} cases read from {}", caseReferences.size(), caseListFileName);
