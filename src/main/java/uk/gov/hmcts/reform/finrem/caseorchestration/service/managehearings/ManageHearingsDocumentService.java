@@ -159,11 +159,9 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Retrieves the hearing notice document for the case's current working hearing.
+     * Retrieves the hearing notice document for the case's current working hearing, using Id.
      * Assumes that the hearing notice is stored in the case's hearing documents collection.
      * If no notice is found, returns an empty list.
-     *
-     * Todo needs test
      *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a {@link CaseDocument}

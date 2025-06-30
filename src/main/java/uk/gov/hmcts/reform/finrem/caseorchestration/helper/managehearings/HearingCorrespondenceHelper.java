@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -87,6 +88,18 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
+     * Work in progress. Intervener bug means interveners never on the party list.
+     * @return true if the intervener should receive an email notification.
+     */
+    public boolean shouldEmailToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
+        log.debug("Temporary log; shouldEmailToIntervener called for case role: {} on case id: {}",
+                caseRole,
+                finremCaseDetails.getId());
+        return true;
+    }
+
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
      * @return true if the applicant should receive hearing documents by post.
      */
     public boolean shouldPostToApplicant(FinremCaseDetails finremCaseDetails) {
@@ -99,6 +112,18 @@ public class HearingCorrespondenceHelper {
      */
     public boolean shouldPostToRespondent(FinremCaseDetails finremCaseDetails) {
         return paperNotificationService.shouldPrintForRespondent(finremCaseDetails);
+    }
+
+    /**
+     * Wraps {@link PaperNotificationService} logic for readability.
+     * Work in progress. Intervener bug means interveners never on the party list.
+     * @return true if the ***** should receive hearing documents by post.
+     */
+    public boolean shouldPostToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
+        log.debug("Temporary log; shouldPostToIntervener called for case role: {} on case id: {}",
+                caseRole,
+                finremCaseDetails.getId());
+        return true;
     }
 
     /**

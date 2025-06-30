@@ -85,34 +85,31 @@ public class HearingTabDataMapper {
      * - Retrieves additional documents from the `Hearing` object and maps them to `DocumentCollectionItem` objects.
      * - Concatenates the two streams of documents into a single list.
      *
-     * Todo: when merging tabs work from master, check the indentation on the additionalDocs builder is correct.
-     *
      * @param hearingDocumentsCollection the collection of hearing documents to filter and process
      * @param hearingId                  the unique identifier of the hearing to match documents against
      * @param hearing                    the `Hearing` object containing additional documents
      * @return a list of `DocumentCollectionItem` objects representing all documents associated with the hearing
      */
     private List<DocumentCollectionItem> mapHearingDocumentsToTabData(
-        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
-        UUID hearingId,
-        Hearing hearing) {
+            List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+            UUID hearingId, Hearing hearing) {
 
         List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
-            ? hearingDocumentsCollection.stream()
-            .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
-            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
-            .toList()
-            : List.of();
+                ? hearingDocumentsCollection.stream()
+                .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
+                .toList()
+                : List.of();
 
         List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
-            ? hearing.getAdditionalHearingDocs().stream()
-            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
-            .toList()
-            : List.of();
+                ? hearing.getAdditionalHearingDocs().stream()
+                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
+                .toList()
+                : List.of();
 
         return Stream.concat(
-            hearingDocuments.stream(),
-            additionalDocs.stream()
+                hearingDocuments.stream(),
+                additionalDocs.stream()
         ).toList();
     }
 }

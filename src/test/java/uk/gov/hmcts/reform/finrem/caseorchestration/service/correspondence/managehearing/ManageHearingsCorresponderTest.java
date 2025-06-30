@@ -209,7 +209,38 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
-        assertThat(logs.getInfos()).contains("Posting notice to applicant solicitor. Request sent for case ID: 123");
+        assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the APP_SOLICITOR party. Request sent for case ID: 123");
+    }
+
+    /**
+     * Checks that sendHearingNotificationToRespondent is called when:
+     * - CaseRole is RESP_SOLICITOR
+     * - shouldNotSendNotification returns false
+     * - postingToApplicant returns true
+     * - shouldSendHearingNoticeOnly returns true
+     */
+    @Test
+    void shouldSendPaperNoticeToRespondent() {
+        // Setup
+        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        Hearing hearing = mock(Hearing.class);
+        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+
+        // act
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
+        assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post notice to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
 
     /**
@@ -242,6 +273,38 @@ class ManageHearingsCorresponderTest {
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent for case ID: 123");
     }
+
+    /**
+     * Checks that sendHearingNotificationToRespondent handles a missing notice:
+     * - CaseRole is RESP_SOLICITOR
+     * - shouldNotSendNotification returns false
+     * - postingToApplicant returns true
+     * - shouldSendHearingNoticeOnly returns true
+     * - Hearing is intentionally missing the notice document.
+     */
+    @Test
+    void sendPaperNoticeToRespondentShouldHandleMissingNotice() {
+        // Setup
+        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        Hearing hearing = mock(Hearing.class);
+        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+
+        // act
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent for case ID: 123");
+    }
+
 
     /**
      * Checks that sendHearingNotificationToApplicant throws IllegalStateException when illegal CaseRole is provided:

@@ -20,14 +20,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCasePartici
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -291,5 +298,62 @@ class ManageHearingsDocumentServiceTest {
         // Assert
         assertEquals(expectedDocument, actualDocument);
         verify(staticHearingDocumentService).uploadOutOfCourtResolutionDocument(CASE_ID, AUTH_TOKEN);
+    }
+
+    @Test
+    void shouldReturnHearingNoticeWhenCorrectHearingIdUsed() {
+        // Arrange
+        UUID hearingId = UUID.randomUUID();
+        CaseDocument expectedDoc = CaseDocument.builder().documentUrl(HEARING_NOTICE_FILE_NAME).build();
+        ManageHearingDocument doc = ManageHearingDocument.builder()
+                .hearingId(hearingId)
+                .hearingDocument(expectedDoc)
+                .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(hearingId)
+                .hearingDocumentsCollection(List.of(
+                        ManageHearingDocumentsCollectionItem.builder().value(doc).build()
+                ))
+                .build();
+
+        FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
+        FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();
+
+        // Act
+        CaseDocument result = manageHearingsDocumentService.getHearingNotice(details);
+
+        // Assert
+        assertNotNull(result);
+        assertThat(result.getDocumentUrl()).isEqualTo(expectedDoc.getDocumentUrl());
+    }
+
+    @Test
+    void shouldReturnNullWhenIncorrectHearingIdUsed() {
+        // Arrange
+        UUID correctHearingId = UUID.randomUUID();
+        UUID incorrectHearingId = UUID.randomUUID();
+
+        CaseDocument someDoc = CaseDocument.builder().documentUrl(HEARING_NOTICE_FILE_NAME).build();
+        ManageHearingDocument doc = ManageHearingDocument.builder()
+                .hearingId(incorrectHearingId)
+                .hearingDocument(someDoc)
+                .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+                .workingHearingId(correctHearingId)
+                .hearingDocumentsCollection(List.of(
+                        ManageHearingDocumentsCollectionItem.builder().value(doc).build()
+                ))
+                .build();
+
+        FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
+        FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();
+
+        // Act
+        CaseDocument result = manageHearingsDocumentService.getHearingNotice(details);
+
+        // Assert
+        assertNull(result);
     }
 }
