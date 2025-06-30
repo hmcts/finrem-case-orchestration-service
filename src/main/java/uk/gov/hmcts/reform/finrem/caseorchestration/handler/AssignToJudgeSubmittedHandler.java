@@ -19,8 +19,7 @@ import java.util.List;
 public class AssignToJudgeSubmittedHandler extends FinremCallbackHandler {
 
     private final List<EventType> assignToJudgeEvents =
-        List.of(EventType.ISSUE_APPLICATION,
-            EventType.REFER_TO_JUDGE,
+        List.of(EventType.REFER_TO_JUDGE,
             EventType.REFER_TO_JUDGE_FROM_ORDER_MADE,
             EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED,
             EventType.REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE,
@@ -48,10 +47,7 @@ public class AssignToJudgeSubmittedHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
+        log.info(CallbackHandlerLogger.submitted(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, userAuthorisation);
