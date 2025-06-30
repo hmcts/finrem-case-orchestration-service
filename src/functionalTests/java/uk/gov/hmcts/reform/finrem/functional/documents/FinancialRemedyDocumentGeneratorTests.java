@@ -94,7 +94,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedDraftUrl, contestedDir);
     }
 
-    @Ignore("Skipping this due to pipeline issue")
     @Test
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
 
@@ -118,7 +117,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(jsonPathEvaluator1.get("originalDocumentName").toString().contains("GeneralOrder"));
     }
 
-    @Ignore("Skipping this due to pipeline issue")
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
@@ -130,7 +128,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
     }
 
-    @Ignore("Skipping this due to pipeline issue")
     @Test
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
