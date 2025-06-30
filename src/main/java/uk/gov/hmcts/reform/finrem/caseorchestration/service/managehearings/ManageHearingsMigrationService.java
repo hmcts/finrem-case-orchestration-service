@@ -73,6 +73,7 @@ public class ManageHearingsMigrationService {
                 .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
                 .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
                 .tabTimeEstimate(timeEstimate)
+                .tabConfidentialParties("Unknown")
                 .tabAdditionalInformation(hearingTabDataMapper
                     .getAdditionalInformation(additionalInformationAboutHearing))
                 .tabHearingMigratedDate(LocalDateTime.now())
