@@ -137,7 +137,7 @@ class ManageHearingsMigrationServiceTest {
                         .tabCourtSelection(expectedCourtName)
                         .tabDateTime(expectedDateTime)
                         .tabTimeEstimate("45 minutes")
-                        //.tabConfidentialParties(getConfidentialParties(hearing))
+                        .tabConfidentialParties("Unknown")
                         .tabAdditionalInformation(expectedAdditionalInfo)
                         //.tabHearingDocuments(mapHearingDocumentsToTabData(
                         // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
