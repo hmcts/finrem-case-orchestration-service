@@ -348,6 +348,7 @@ class FinremAssignToJudgeCorresponderTest {
         // Act
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
 
+
         // Assert
         verify(notificationService, never())
             .sendAssignToJudgeConfirmationEmailToIntervenerSolicitor(caseDetails, expectedSolicitorCaseDataKeysWrapper);
