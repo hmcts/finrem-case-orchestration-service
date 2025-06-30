@@ -247,5 +247,4 @@ class IssueApplicationConsentCorresponderTest {
     private CaseDocument unexpectedCaseDocument() {
         return CaseDocument.builder().documentFilename("unexpected").build();
     }
-
 }
