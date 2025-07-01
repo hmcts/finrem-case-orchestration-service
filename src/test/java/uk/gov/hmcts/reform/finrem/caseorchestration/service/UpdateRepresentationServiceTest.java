@@ -336,7 +336,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowNoticeOfChangeInvalidRequestException() throws Exception {
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
+        throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
@@ -354,7 +355,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
                 .getCaseDetails();
-            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData()
+                .get("changeOrganisationRequestField");
             changeOrganisationRequestField.put("CaseRoleId", null);
         }
 
@@ -367,7 +369,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowNoticeOfChangeInvalidRequestException()
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowException()
         throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
