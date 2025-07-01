@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -40,6 +39,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
@@ -224,7 +224,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void givenNonMigratedListForInterimHearingData_thenPopulateToHearingTabItems() {
+    void givenNonMigratedSingleListForInterimHearingData_thenPopulateToHearingTabItems() {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -332,9 +332,7 @@ class ManageHearingsMigrationServiceTest {
         return Arrays.stream(interimHearingItems)
             .map(item -> InterimHearingBulkPrintDocumentsData.builder()
                 .value(InterimHearingBulkPrintDocument.builder()
-                    .caseDocument(TestSetUpUtils.caseDocument(
-                        String.valueOf(index.get()),
-                        index.getAndIncrement() + ".pdf"))
+                    .caseDocument(caseDocument(String.valueOf(index.get()), index.getAndIncrement() + ".pdf"))
                     .build())
                 .build())
             .toList();
