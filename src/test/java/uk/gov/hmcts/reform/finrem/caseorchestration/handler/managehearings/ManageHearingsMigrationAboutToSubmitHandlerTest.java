@@ -46,5 +46,6 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
         underTest.handle(request, AUTH_TOKEN);
 
         verify(manageHearingsMigrationService).populateListForHearingWrapper(caseData);
+        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseData);
     }
 }
