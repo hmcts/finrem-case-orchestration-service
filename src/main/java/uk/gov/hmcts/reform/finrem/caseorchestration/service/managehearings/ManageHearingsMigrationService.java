@@ -116,6 +116,25 @@ public class ManageHearingsMigrationService {
         return mhMigrationWrapper.getMhMigrationVersion()  != null;
     }
 
+    /**
+     * Populates the hearing tab lists in the given {@link FinremCaseData} object based on the interim hearings data.
+     *
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *   <li>Checks if the list for interim hearing wrapper should be populated using migration criteria.</li>
+     *   <li>Validates if the interim hearing documents count matches the expected number.</li>
+     *   <li>Maps interim hearing items and their associated hearing documents into hearing tab items.</li>
+     *   <li>Appends the created hearing tab items to the applicant, respondent, and general hearing tab collections.</li>
+     *   <li>Sets the migration flag {@code isListForInterimHearingsMigrated} in {@link MhMigrationWrapper} to YES if successful,
+     *       or NO if migration is skipped or fails due to document count mismatch.</li>
+     * </ul>
+     *
+     * <p>
+     * Logs warnings when migration is skipped or fails due to insufficient documents.
+     *
+     * @param caseData the {@link FinremCaseData} containing interim hearing and migration wrappers; must not be {@code null}
+     */
     public void populateListForInterimHearingWrapper(FinremCaseData caseData) {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
