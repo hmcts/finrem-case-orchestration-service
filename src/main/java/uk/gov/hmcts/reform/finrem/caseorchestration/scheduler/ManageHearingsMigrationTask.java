@@ -73,6 +73,7 @@ public class ManageHearingsMigrationTask extends BaseTask {
         FinremCaseData caseData = finremCaseDetails.getData();
         if (!manageHearingsMigrationService.wasMigrated(caseData)) {
             manageHearingsMigrationService.populateListForHearingWrapper(finremCaseDetails.getData());
+            manageHearingsMigrationService.populateListForInterimHearingWrapper(finremCaseDetails.getData());
             manageHearingsMigrationService.markCaseDataMigrated(finremCaseDetails.getData(), mhMigrationVersion);
         }
     }

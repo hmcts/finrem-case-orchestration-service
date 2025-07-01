@@ -42,6 +42,7 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
         manageHearingsMigrationService.populateListForHearingWrapper(finremCaseData);
+        manageHearingsMigrationService.populateListForInterimHearingWrapper(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
