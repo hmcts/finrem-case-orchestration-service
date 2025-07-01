@@ -157,4 +157,28 @@ class ManageHearingsMigrationServiceTest {
         }
     }
 
+    @Test
+    void givenMigratedCaseDataWithListForInterimHearingDataShouldDoNothing() {
+        // Arrange
+        MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
+            .isListForInterimHearingsMigrated(YesOrNo.YES)
+            .mhMigrationVersion("1")
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
+            .mhMigrationWrapper(mhMigrationWrapper)
+            .build();
+
+        // Act
+        underTest.populateListForInterimHearingWrapper(caseData);
+
+        // Assert
+        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
+        assertThat(logs.getWarns()).contains(CASE_ID + " - List for Interim Hearing migration skipped.");
+
+        verifyNoInteractions(hearingTabDataMapper);
+    }
+
 }
