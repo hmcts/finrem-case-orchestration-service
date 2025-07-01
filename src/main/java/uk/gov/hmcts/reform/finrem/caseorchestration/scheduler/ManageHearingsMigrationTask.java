@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,8 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
 import java.util.List;
 import java.util.function.Predicate;
-
-import static java.util.Optional.ofNullable;
 
 @Component
 @Slf4j
@@ -92,30 +89,39 @@ public class ManageHearingsMigrationTask extends BaseTask {
         return extractCaseReferences(searchResult, filter);
     }
 
+    /**
+     * Builds an Elasticsearch search query to retrieve case records that:
+     *
+     * <ul>
+     *   <li>Do not have a migration version set (i.e. <code>mhMigrationVersion</code> is null), or</li>
+     *   <li>Have a migration version less than the provided <code>currentMigrationVersion</code>.</li>
+     * </ul>
+     *
+     * <p>The resulting query is used for batch processing of cases that require migration based on their version.</p>
+     *
+     * @param currentMigrationVersion the current migration version used as a threshold for filtering.
+     *                                Records with a lower version or no version are selected.
+     * @return the JSON string representation of the Elasticsearch search query.
+     */
     private String getSearchQuery(String currentMigrationVersion) {
         // Clause 1: mhMigrationVersion does NOT exist (null)
         QueryBuilder mhMigrationVersionIsNull = QueryBuilders.boolQuery()
             .mustNot(QueryBuilders.existsQuery("data.mhMigrationVersion"));
 
-        // Clause 2: mhMigrationVersion is NOT equal to "1"
-        QueryBuilder mhMigrationVersionNotOne = QueryBuilders.boolQuery()
-            .mustNot(new TermQueryBuilder("data.mhMigrationVersion.keyword", ofNullable(currentMigrationVersion)
-                .orElse("1")));
+        // Clause 2: mhMigrationVersion is less than currentMigrationVersion
+        QueryBuilder mhMigrationVersionLessThanCurrent = QueryBuilders
+            .rangeQuery("data.mhMigrationVersion")
+            .lt(currentMigrationVersion);
 
-        // Combine with OR (should)
+        // Combine Clause 1 and 2 with OR
         BoolQueryBuilder mhMigrationVersionCondition = QueryBuilders.boolQuery()
             .should(mhMigrationVersionIsNull)
-            .should(mhMigrationVersionNotOne)
-            .minimumShouldMatch(1); // At least one condition must match
+            .should(mhMigrationVersionLessThanCurrent)
+            .minimumShouldMatch(1);
 
-        // Exclude cases in state = "close"
-        BoolQueryBuilder stateQuery = QueryBuilders.boolQuery()
-            .mustNot(new TermQueryBuilder("state.keyword", "close"));
-
-        // Combine all queries
+        // Final query builder (no state filtering)
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-            .must(mhMigrationVersionCondition)
-            .must(stateQuery);
+            .must(mhMigrationVersionCondition);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
             .size(batchSize)
