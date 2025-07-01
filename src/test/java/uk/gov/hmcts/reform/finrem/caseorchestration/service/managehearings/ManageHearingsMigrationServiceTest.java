@@ -270,6 +270,54 @@ class ManageHearingsMigrationServiceTest {
         }
     }
 
+    @Test
+    void givenNonMigratedMultipleListForInterimHearingData_thenPopulateToHearingTabItems() {
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            // Arrange
+            MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder().build();
+
+            InterimHearingItem interimHearingItem1 = stubInterimHearingOne();
+            InterimHearingItem interimHearingItem2 = stubInterimHearingTwo();
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .ccdCaseId(CASE_ID)
+                .mhMigrationWrapper(mhMigrationWrapper)
+                .interimWrapper(InterimWrapper.builder()
+                    .interimHearings(toInterimHearings(interimHearingItem1, interimHearingItem2))
+                    .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1, interimHearingItem2))
+                    .build())
+                .build();
+
+            // Act
+            underTest.populateListForInterimHearingWrapper(caseData);
+
+            // Assert
+            assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+            List<HearingTabItem> tabItems = assertAndGetHearingTabItems(caseData);
+            assertAllTabItemWithMigratedDate(tabItems, fixedDateTime);
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabHearingType)
+                .containsExactly("First Directions Appointment (FDA)", "Directions (DIR)");
+//            assertThat(tabItems)
+//                .extracting(HearingTabItem::getTabCourtSelection)
+//                .containsExactly("COURT ONE NAME");
+//            assertThat(tabItems)
+//                .extracting(HearingTabItem::getTabDateTime)
+//                .containsExactly("2025-06-04 10:00");
+//            assertThat(tabItems)
+//                .extracting(HearingTabItem::getTabTimeEstimate)
+//                .containsExactly("1.11 hour");
+//            assertThat(tabItems)
+//                .extracting(HearingTabItem::getTabConfidentialParties)
+//                .containsExactly("Unknown");
+//            assertThat(tabItems)
+//                .extracting(HearingTabItem::getTabAdditionalInformation)
+//                .containsExactly("<p>Some notes (1)</p>");
+        }
+    }
+
     private List<HearingTabItem> getTargetHearingTabItems(FinremCaseData caseData) {
         return caseData.getManageHearingsWrapper().getHearingTabItems().stream()
             .map(HearingTabCollectionItem::getValue)
