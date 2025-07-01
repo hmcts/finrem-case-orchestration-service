@@ -151,20 +151,27 @@ class ManageHearingsMigrationServiceTest {
 
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
-            assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
-                .containsExactly(HearingTabCollectionItem.builder()
-                    .value(HearingTabItem.builder()
-                        .tabHearingMigratedDate(fixedDateTime)
-                        .tabHearingType("Final Hearing (FH)")
-                        .tabCourtSelection(expectedCourtName)
-                        .tabDateTime(expectedDateTime)
-                        .tabTimeEstimate("45 minutes")
-                        .tabConfidentialParties("Unknown")
-                        .tabAdditionalInformation(expectedAdditionalInfo)
-                        //.tabHearingDocuments(mapHearingDocumentsToTabData(
-                        // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
-                        .build())
-                    .build());
+
+            List<HearingTabItem> tabItems = assertAndGetHearingTabItems(caseData);
+            assertAllTabItemWithMigratedDate(tabItems, fixedDateTime);
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabHearingType)
+                .containsExactly("Final Hearing (FH)");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabCourtSelection)
+                .containsExactly(expectedCourtName);
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabDateTime)
+                .containsExactly(expectedDateTime);
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabTimeEstimate)
+                .containsExactly("45 minutes");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabConfidentialParties)
+                .containsExactly("Unknown");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabAdditionalInformation)
+                .containsExactly(expectedAdditionalInfo);
         }
     }
 
@@ -240,7 +247,27 @@ class ManageHearingsMigrationServiceTest {
 
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+            List<HearingTabItem> tabItems = assertAndGetHearingTabItems(caseData);
+            assertAllTabItemWithMigratedDate(tabItems, fixedDateTime);
         }
+    }
+
+    private List<HearingTabItem> getTargetHearingTabItems(FinremCaseData caseData) {
+        return caseData.getManageHearingsWrapper().getHearingTabItems().stream()
+            .map(HearingTabCollectionItem::getValue)
+            .toList();
+    }
+
+    private List<HearingTabItem> assertAndGetHearingTabItems(FinremCaseData caseData) {
+        assertThat(caseData.getManageHearingsWrapper()).isNotNull();
+        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNotNull();
+        return getTargetHearingTabItems(caseData);
+    }
+
+    private void assertAllTabItemWithMigratedDate(List<HearingTabItem> tabItems, LocalDateTime fixedDateTime) {
+        assertThat(tabItems)
+            .extracting(HearingTabItem::getTabHearingMigratedDate)
+            .allMatch(date -> date.equals(fixedDateTime));
     }
 
     private InterimHearingItem stubInterimHearingOne() {
