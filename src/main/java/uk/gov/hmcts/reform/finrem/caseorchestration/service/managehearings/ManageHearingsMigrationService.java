@@ -55,41 +55,44 @@ public class ManageHearingsMigrationService {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
 
-        if (shouldPopulateListForHearingWrapper(mhMigrationWrapper, listForHearingWrapper)) {
-            // Type of Hearing
-            HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
-            // Hearing Date
-            LocalDate hearingDate = listForHearingWrapper.getHearingDate();
-            // Hearing Time
-            String hearingTime = listForHearingWrapper.getHearingTime();
-            // Time Estimate
-            String timeEstimate = listForHearingWrapper.getTimeEstimate();
-            // Additional information about the hearing
-            String additionalInformationAboutHearing = listForHearingWrapper.getAdditionalInformationAboutHearing();
-            // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
-            HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
-
-            // We cannot migrate the "Who has received this notice" field from the List for Hearing event,
-            // as the partiesOnCase field changes depending on the event.
-            // Therefore, we default to "Unknown" for tabConfidentialParties in the Hearing tab.
-            HearingTabItem newHearingTabItem = HearingTabItem.builder()
-                .tabHearingType(hearingType.getId())
-                .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
-                .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
-                .tabTimeEstimate(timeEstimate)
-                .tabConfidentialParties("Unknown")
-                .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
-                .tabHearingMigratedDate(LocalDateTime.now())
-                .build();
-
-            // court-admin hearing tab
-            appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
-            // applicants hearing tab
-            appendToApplicantHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
-            // respondent hearing tab
-            appendToRespondentHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
-            caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
+        if (!shouldPopulateListForHearingWrapper(mhMigrationWrapper, listForHearingWrapper)) {
+            log.warn("{} - List for Hearing migration skipped.", caseData.getCcdCaseId());
+            return;
         }
+
+        // Type of Hearing
+        HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
+        // Hearing Date
+        LocalDate hearingDate = listForHearingWrapper.getHearingDate();
+        // Hearing Time
+        String hearingTime = listForHearingWrapper.getHearingTime();
+        // Time Estimate
+        String timeEstimate = listForHearingWrapper.getTimeEstimate();
+        // Additional information about the hearing
+        String additionalInformationAboutHearing = listForHearingWrapper.getAdditionalInformationAboutHearing();
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
+
+        // We cannot migrate the "Who has received this notice" field from the List for Hearing event,
+        // as the partiesOnCase field changes depending on the event.
+        // Therefore, we default to "Unknown" for tabConfidentialParties in the Hearing tab.
+        HearingTabItem newHearingTabItem = HearingTabItem.builder()
+            .tabHearingType(hearingType.getId())
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
+            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
+            .tabTimeEstimate(timeEstimate)
+            .tabConfidentialParties("Unknown")
+            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
+            .tabHearingMigratedDate(LocalDateTime.now())
+            .build();
+
+        // court-admin hearing tab
+        appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+        // applicants hearing tab
+        appendToApplicantHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+        // respondent hearing tab
+        appendToRespondentHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+        caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
 
     /**
