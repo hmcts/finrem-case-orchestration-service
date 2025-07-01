@@ -109,7 +109,7 @@ public class ManageHearingsNotificationRequestMapper {
 
         // Todo - fix this.  Always returns birmingham.  Need to look
         // at what is captured as part of manage hearings, and map that to the right FRC email details
-        String selectedFRC  = CourtHelper.getSelectedFrc(finremCaseDetails);
+        String selectedFRC  = CourtHelper.getCourtForHearing(hearing);
 
         return NotificationRequest.builder()
                 .notificationEmail(partySpecificDetails.recipientEmailAddress)

@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 
 import java.util.Map;
 import java.util.Objects;
@@ -630,6 +631,45 @@ public class CourtHelper {
         }
         if (HIGHCOURT.equalsIgnoreCase(region.getValue())) {
             return caseData.getRegionWrapper().getAllocatedRegionWrapper().getHighCourtFrcList().getValue();
+        }
+        return EMPTY;
+    }
+
+    /**
+     * Returns the FRC, Financial Remedies Court, for the provided hearing.
+     * Each FRC selected by a User in Manage Cases will be stored against the hearing.
+     * So the result of this method is qualified by region.
+     *
+     * @param hearing for which the FRC is required.
+     * @return The financial remedies court as a String.
+     */
+    public static String getCourtForHearing(Hearing hearing) {
+
+        String regionString = hearing.getHearingCourtSelection().getRegion().getValue();
+
+        if (MIDLANDS.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getMidlandsList().getValue();
+        }
+        if (LONDON.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getLondonList().getValue();
+        }
+        if (NORTHWEST.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getNorthWestList().getValue();
+        }
+        if (NORTHEAST.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getNorthEastList().getValue();
+        }
+        if (SOUTHEAST.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getSouthEastList().getValue();
+        }
+        if (SOUTHWEST.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getSouthWestList().getValue();
+        }
+        if (WALES.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getWalesList().getValue();
+        }
+        if (HIGHCOURT.equalsIgnoreCase(regionString)) {
+            return hearing.getHearingCourtSelection().getHcCourtList().getValue();
         }
         return EMPTY;
     }
