@@ -249,6 +249,24 @@ class ManageHearingsMigrationServiceTest {
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
             List<HearingTabItem> tabItems = assertAndGetHearingTabItems(caseData);
             assertAllTabItemWithMigratedDate(tabItems, fixedDateTime);
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabHearingType)
+                .containsExactly("First Directions Appointment (FDA)");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabCourtSelection)
+                .containsExactly("COURT ONE NAME");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabDateTime)
+                .containsExactly("2025-06-04 10:00");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabTimeEstimate)
+                .containsExactly("1.11 hour");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabConfidentialParties)
+                .containsExactly("Unknown");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabAdditionalInformation)
+                .containsExactly("<p>Some notes (1)</p>");
         }
     }
 
@@ -271,23 +289,42 @@ class ManageHearingsMigrationServiceTest {
     }
 
     private InterimHearingItem stubInterimHearingOne() {
-        LocalDate hearingDate1 = LocalDate.of(2025, 6, 4);
-        String hearingTime1 = "10:00";
-        String additionalInfo1 = "Some notes";
+        LocalDate hearingDate = LocalDate.of(2025, 6, 4);
+        String hearingTime = "10:00";
+        String additionalInfo = "Some notes";
 
-        InterimHearingItem interimHearingItem1 = spy(InterimHearingItem.class);
-        interimHearingItem1.setInterimHearingTime(hearingTime1);
-        interimHearingItem1.setInterimHearingType(InterimTypeOfHearing.FH);
-        interimHearingItem1.setInterimHearingDate(hearingDate1);
-        interimHearingItem1.setInterimAdditionalInformationAboutHearing(additionalInfo1);
+        InterimHearingItem interimHearingItem = spy(InterimHearingItem.class);
+        interimHearingItem.setInterimHearingTime(hearingTime);
+        interimHearingItem.setInterimHearingType(InterimTypeOfHearing.FDA);
+        interimHearingItem.setInterimHearingDate(hearingDate);
+        interimHearingItem.setInterimHearingTimeEstimate("1.11 hour");
+        interimHearingItem.setInterimAdditionalInformationAboutHearing(additionalInfo);
 
-        Court court1 = mock(Court.class);
+        Court court = mock(Court.class);
+        when(interimHearingItem.toCourt()).thenReturn(court);
+        when(hearingTabDataMapper.getCourtName(court)).thenReturn("COURT ONE NAME");
+        when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn("2025-06-04 10:00");
+        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn("<p>Some notes (1)</p>");
+        return interimHearingItem;
+    }
 
-        when(interimHearingItem1.toCourt()).thenReturn(court1);
-        when(hearingTabDataMapper.getCourtName(court1)).thenReturn("COURT 1 NAME");
-        when(hearingTabDataMapper.getFormattedDateTime(hearingDate1, hearingTime1)).thenReturn("2025-06-04 10:00");
-        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo1)).thenReturn("<p>Some notes</p>");
-        return interimHearingItem1;
+    private InterimHearingItem stubInterimHearingTwo() {
+        LocalDate hearingDate = LocalDate.of(2025, 6, 9);
+        String hearingTime = "11:00";
+        String additionalInfo = "Some notes";
+
+        InterimHearingItem interimHearingItem = spy(InterimHearingItem.class);
+        interimHearingItem.setInterimHearingTime(hearingTime);
+        interimHearingItem.setInterimHearingType(InterimTypeOfHearing.DIR);
+        interimHearingItem.setInterimHearingDate(hearingDate);
+        interimHearingItem.setInterimAdditionalInformationAboutHearing(additionalInfo);
+
+        Court court = mock(Court.class);
+        when(interimHearingItem.toCourt()).thenReturn(court);
+        when(hearingTabDataMapper.getCourtName(court)).thenReturn("COURT TWO NAME");
+        when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn("2025-06-09 11:00");
+        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn("<p>Some notes (2)</p>");
+        return interimHearingItem;
     }
 
     private static List<InterimHearingBulkPrintDocumentsData> toInterimHearingDocuments(InterimHearingItem... interimHearingItems) {
