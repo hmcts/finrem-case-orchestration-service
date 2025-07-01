@@ -90,18 +90,18 @@ public class ManageHearingsMigrationTask extends BaseTask {
     }
 
     /**
-     * Builds an Elasticsearch search query to retrieve case records that:
+     * Builds an Elasticsearch search query to retrieve case records for migration processing.
      *
+     * <p>
+     * The query targets records that meet either of the following conditions:
      * <ul>
-     *   <li>Do not have a migration version set (i.e. <code>mhMigrationVersion</code> is null), or</li>
-     *   <li>Have a migration version less than the provided <code>currentMigrationVersion</code>.</li>
+     *   <li>The field <code>data.mhMigrationVersion</code> does not exist (i.e., null), or</li>
+     *   <li>The <code>data.mhMigrationVersion</code> is less than the specified <code>currentMigrationVersion</code>.</li>
      * </ul>
+     * This allows identifying records that are either unmigrated or require migration to a newer version.
      *
-     * <p>The resulting query is used for batch processing of cases that require migration based on their version.</p>
-     *
-     * @param currentMigrationVersion the current migration version used as a threshold for filtering.
-     *                                Records with a lower version or no version are selected.
-     * @return the JSON string representation of the Elasticsearch search query.
+     * @param currentMigrationVersion the current migration version to compare against
+     * @return the JSON-formatted search query string for Elasticsearch
      */
     private String getSearchQuery(String currentMigrationVersion) {
         // Clause 1: mhMigrationVersion does NOT exist (null)
