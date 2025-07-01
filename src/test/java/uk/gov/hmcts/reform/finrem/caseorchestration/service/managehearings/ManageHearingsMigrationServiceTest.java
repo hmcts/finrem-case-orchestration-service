@@ -7,14 +7,21 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -22,10 +29,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -181,4 +192,93 @@ class ManageHearingsMigrationServiceTest {
         verifyNoInteractions(hearingTabDataMapper);
     }
 
+    @Test
+    void givenNonMigratedListForInterimHearingData_whenInterimHearingDocumentMissing_thenDoNothing() {
+        // Arrange
+        MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder().build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
+            .mhMigrationWrapper(mhMigrationWrapper)
+            .interimWrapper(InterimWrapper.builder()
+                .interimHearings(toInterimHearings(mock(InterimHearingItem.class)))
+                .build())
+            .build();
+
+        // Act
+        underTest.populateListForInterimHearingWrapper(caseData);
+
+        // Assert
+        assertEquals(YesOrNo.NO, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
+        assertThat(logs.getWarns()).contains(CASE_ID + " - List for Interim Hearing migration fails. Insufficient interim hearing documents.");
+
+        verifyNoInteractions(hearingTabDataMapper);
+    }
+
+    @Test
+    void givenNonMigratedListForInterimHearingData_thenPopulateToHearingTabItems() {
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            // Arrange
+            MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder().build();
+
+            InterimHearingItem interimHearingItem1 = stubInterimHearingOne();
+
+            FinremCaseData caseData = FinremCaseData.builder()
+                .ccdCaseId(CASE_ID)
+                .mhMigrationWrapper(mhMigrationWrapper)
+                .interimWrapper(InterimWrapper.builder()
+                    .interimHearings(toInterimHearings(interimHearingItem1))
+                    .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1))
+                    .build())
+                .build();
+
+            // Act
+            underTest.populateListForInterimHearingWrapper(caseData);
+
+            // Assert
+            assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+        }
+    }
+
+    private InterimHearingItem stubInterimHearingOne() {
+        LocalDate hearingDate1 = LocalDate.of(2025, 6, 4);
+        String hearingTime1 = "10:00";
+        String additionalInfo1 = "Some notes";
+
+        InterimHearingItem interimHearingItem1 = spy(InterimHearingItem.class);
+        interimHearingItem1.setInterimHearingTime(hearingTime1);
+        interimHearingItem1.setInterimHearingType(InterimTypeOfHearing.FH);
+        interimHearingItem1.setInterimHearingDate(hearingDate1);
+        interimHearingItem1.setInterimAdditionalInformationAboutHearing(additionalInfo1);
+
+        Court court1 = mock(Court.class);
+
+        when(interimHearingItem1.toCourt()).thenReturn(court1);
+        when(hearingTabDataMapper.getCourtName(court1)).thenReturn("COURT 1 NAME");
+        when(hearingTabDataMapper.getFormattedDateTime(hearingDate1, hearingTime1)).thenReturn("2025-06-04 10:00");
+        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo1)).thenReturn("<p>Some notes</p>");
+        return interimHearingItem1;
+    }
+
+    private static List<InterimHearingBulkPrintDocumentsData> toInterimHearingDocuments(InterimHearingItem... interimHearingItems) {
+        AtomicInteger index = new AtomicInteger(1);
+        return Arrays.stream(interimHearingItems)
+            .map(item -> InterimHearingBulkPrintDocumentsData.builder()
+                .value(InterimHearingBulkPrintDocument.builder()
+                    .caseDocument(TestSetUpUtils.caseDocument(
+                        String.valueOf(index.get()),
+                        index.getAndIncrement() + ".pdf"))
+                    .build())
+                .build())
+            .toList();
+    }
+
+    private static List<InterimHearingCollection> toInterimHearings(InterimHearingItem... interimHearingItems) {
+        return Arrays.stream(interimHearingItems)
+            .map(item -> InterimHearingCollection.builder().value(item).build())
+            .toList();
+    }
 }
