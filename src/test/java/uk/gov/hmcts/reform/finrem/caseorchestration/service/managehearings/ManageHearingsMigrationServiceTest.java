@@ -89,8 +89,9 @@ class ManageHearingsMigrationServiceTest {
         // Assert
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
-        verifyNoInteractions(hearingTabDataMapper);
         assertThat(logs.getWarns()).contains(CASE_ID + " - List for Hearing migration skipped.");
+
+        verifyNoInteractions(hearingTabDataMapper);
     }
 
     @Test
