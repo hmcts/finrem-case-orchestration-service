@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,10 +26,15 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(ManageHearingsMigrationService.class);
 
     @Mock
     private HearingTabDataMapper hearingTabDataMapper;
@@ -72,6 +79,7 @@ class ManageHearingsMigrationServiceTest {
             .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
+            .ccdCaseId(CASE_ID)
             .mhMigrationWrapper(mhMigrationWrapper)
             .build();
 
@@ -81,6 +89,8 @@ class ManageHearingsMigrationServiceTest {
         // Assert
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
+        verifyNoInteractions(hearingTabDataMapper);
+        assertThat(logs.getWarns()).contains(CASE_ID + " - List for Hearing migration skipped.");
     }
 
     @Test
