@@ -40,6 +40,7 @@ public class ManageHearingsMigrationService {
     /**
      * Populates a new {@link HearingTabItem} in the hearing tab of the case if the hearing
      * details have not already been migrated.
+     *
      * <p>
      * This method checks if the {@code ListForHearingWrapper} needs to be processed by evaluating
      * both the {@code MhMigrationWrapper} and the current state of the wrapper itself.
@@ -68,14 +69,16 @@ public class ManageHearingsMigrationService {
             // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
             HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
 
+            // We cannot migrate the "Who has received this notice" field from the List for Hearing event,
+            // as the partiesOnCase field changes depending on the event.
+            // Therefore, we default to "Unknown" for tabConfidentialParties in the Hearing tab.
             HearingTabItem newHearingTabItem = HearingTabItem.builder()
                 .tabHearingType(hearingType.getId())
                 .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
                 .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
                 .tabTimeEstimate(timeEstimate)
                 .tabConfidentialParties("Unknown")
-                .tabAdditionalInformation(hearingTabDataMapper
-                    .getAdditionalInformation(additionalInformationAboutHearing))
+                .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
                 .tabHearingMigratedDate(LocalDateTime.now())
                 .build();
 
