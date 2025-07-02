@@ -150,9 +150,11 @@ public class ManageHearingsMigrationService {
         List<HearingTabCollectionItem> list = getter.get();
         if (list == null) {
             list = new ArrayList<>();
-            setter.accept(list);
+        } else {
+            list = new ArrayList<>(list); // in case it is Immutable
         }
         list.add(item);
+        setter.accept(list);
     }
 
 }

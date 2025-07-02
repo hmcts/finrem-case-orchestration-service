@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -12,10 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
@@ -29,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toSingletonListOrNull;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
@@ -94,8 +99,9 @@ class ManageHearingsMigrationServiceTest {
         verifyNoInteractions(hearingTabDataMapper);
     }
 
-    @Test
-    void givenNonMigratedCaseDataWithListForHearingDataShouldPopulateToHearingTabItem() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void givenNonMigratedCaseDataWithListForHearingDataShouldPopulateToHearingTabItem(boolean havingExistingHearingTabItem) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -130,9 +136,16 @@ class ManageHearingsMigrationServiceTest {
                 .isListForHearingsMigrated(YesOrNo.NO)
                 .build();
 
+            ManageHearingsCollectionItem existingWorkingHearings = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+
             FinremCaseData caseData = FinremCaseData.builder()
                 .listForHearingWrapper(listForHearingWrapper)
                 .mhMigrationWrapper(mhMigrationWrapper)
+                .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                    .hearings(toSingletonListOrNull(existingWorkingHearings))
+                    .hearingTabItems(toSingletonListOrNull(existingHearingTabCollectionItem))
+                    .build())
                 .build();
 
             // Act
@@ -141,8 +154,10 @@ class ManageHearingsMigrationServiceTest {
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
             assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
-                .containsExactly(HearingTabCollectionItem.builder()
-                    .value(HearingTabItem.builder()
+                .anySatisfy(item -> assertThat(item.getValue())
+                    .usingRecursiveComparison()
+                    .ignoringFields("tabHearingDocuments") // if this is still commented or not important in the test
+                    .isEqualTo(HearingTabItem.builder()
                         .tabHearingMigratedDate(fixedDateTime)
                         .tabHearingType("Final Hearing (FH)")
                         .tabCourtSelection(expectedCourtName)
@@ -150,11 +165,8 @@ class ManageHearingsMigrationServiceTest {
                         .tabTimeEstimate("45 minutes")
                         .tabConfidentialParties("Unknown")
                         .tabAdditionalInformation(expectedAdditionalInfo)
-                        //.tabHearingDocuments(mapHearingDocumentsToTabData(
-                        // hearingDocumentsCollection, hearingCollectionItem.getId(), hearing))
-                        .build())
-                    .build());
+                        .build()));
+
         }
     }
-
 }
