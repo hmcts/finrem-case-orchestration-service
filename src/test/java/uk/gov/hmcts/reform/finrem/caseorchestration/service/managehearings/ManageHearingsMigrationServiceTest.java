@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -114,7 +116,7 @@ class ManageHearingsMigrationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedCaseDataWithListForHearingDataShouldPopulateToHearingTabItem(boolean havingExistingHearingTabItem) {
+    void givenNonMigratedCaseData_whenPopulateListForHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearings) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -149,14 +151,14 @@ class ManageHearingsMigrationServiceTest {
                 .isListForHearingsMigrated(YesOrNo.NO)
                 .build();
 
-            ManageHearingsCollectionItem existingWorkingHearings = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
-            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingHearings = havingExistingHearings ? mock(ManageHearingsCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearings ? mock(HearingTabCollectionItem.class) : null;
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .listForHearingWrapper(listForHearingWrapper)
                 .mhMigrationWrapper(mhMigrationWrapper)
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toSingletonListOrNull(existingWorkingHearings))
+                    .hearings(toSingletonListOrNull(existingHearings))
                     .hearingTabItems(toSingletonListOrNull(existingHearingTabCollectionItem))
                     .build())
                 .build();
@@ -167,27 +169,63 @@ class ManageHearingsMigrationServiceTest {
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
 
-            List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
-            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 2 : 1);
-            assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItem);
-            List<HearingTabCollectionItem> migratedItems = actualItems.stream()
-                .filter(item -> !item.equals(existingHearingTabCollectionItem))
-                .toList();
+            // Assert Hearing Tab Items
+            {
+                List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
+                assertThat(actualItems).hasSize(havingExistingHearings ? 2 : 1);
 
-            HearingTabItem expectedItem = HearingTabItem.builder()
-                .tabHearingMigratedDate(fixedDateTime)
-                .tabHearingType("Final Hearing (FH)")
-                .tabCourtSelection(expectedCourtName)
-                .tabDateTime(expectedDateTime)
-                .tabTimeEstimate("45 minutes")
-                .tabConfidentialParties("Unknown")
-                .tabAdditionalInformation(expectedAdditionalInfo)
-                .build();
+                if (havingExistingHearings) {
+                    assertThat(actualItems).contains(existingHearingTabCollectionItem);
+                }
 
-            assertThat(migratedItems)
-                .anySatisfy(item -> assertThat(item.getValue())
-                    .usingRecursiveComparison()
-                    .isEqualTo(expectedItem));
+                List<HearingTabCollectionItem> migratedTabItems = actualItems.stream()
+                    .filter(item -> !item.equals(existingHearingTabCollectionItem))
+                    .toList();
+
+                HearingTabItem expectedTabItem = HearingTabItem.builder()
+                    .tabHearingMigratedDate(fixedDateTime)
+                    .tabHearingType("Final Hearing (FH)")
+                    .tabCourtSelection(expectedCourtName)
+                    .tabDateTime(expectedDateTime)
+                    .tabTimeEstimate("45 minutes")
+                    .tabConfidentialParties("Unknown")
+                    .tabAdditionalInformation(expectedAdditionalInfo)
+                    .build();
+
+                assertThat(migratedTabItems)
+                    .anySatisfy(tabItem -> assertThat(tabItem.getValue())
+                        .usingRecursiveComparison()
+                        .isEqualTo(expectedTabItem));
+            }
+
+            // Assert Hearings
+            {
+                List<ManageHearingsCollectionItem> actualHearings = caseData.getManageHearingsWrapper().getHearings();
+                assertThat(actualHearings).hasSize(havingExistingHearings ? 2 : 1);
+
+                if (havingExistingHearings) {
+                    assertThat(actualHearings).contains(existingHearings);
+                }
+
+                List<ManageHearingsCollectionItem> migratedHearings = actualHearings.stream()
+                    .filter(item -> !item.equals(existingHearings))
+                    .toList();
+
+                Hearing expectedHearing = Hearing.builder()
+                    .hearingDate(hearingDate)
+                    .hearingType(HearingType.FH)
+                    .hearingTimeEstimate("45 minutes")
+                    .hearingTime(hearingTime)
+                    .hearingCourtSelection(court)
+                    .additionalHearingInformation(additionalInfo)
+                    .wasMigrated(YesOrNo.YES)
+                    .build();
+
+                assertThat(migratedHearings)
+                    .anySatisfy(item -> assertThat(item.getValue())
+                        .usingRecursiveComparison()
+                        .isEqualTo(expectedHearing));
+            }
         }
     }
 

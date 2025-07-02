@@ -231,7 +231,7 @@ public class ManageHearingsMigrationService {
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingRegionWrapper.toCourt())
-            //.hearingMode(null) // TODO
+            //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             //.additionalHearingDocs // No additional hearing in existing List for Hearing event
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.

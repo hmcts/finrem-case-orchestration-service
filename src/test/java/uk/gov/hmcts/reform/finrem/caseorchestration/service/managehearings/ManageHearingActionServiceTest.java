@@ -411,8 +411,7 @@ class ManageHearingActionServiceTest {
     /**
      * Builds a map of PFD NCDR CaseDocuments.
      *
-     * @return a map containing PFD NCDR documents with their filenames and their CaseDocumentTypes.
-     * Used by test class setup.
+     * @return a map containing PFD NCDR documents with their filenames and their CaseDocumentTypes. (Used by test class setup)
      */
     private Map<String, Pair<CaseDocument, CaseDocumentType>> buildPfdNcdrDocumentsMap() {
         CaseDocument coverLetter = CaseDocument.builder()
