@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearing
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -62,6 +64,7 @@ public class ManageHearingsMigrationService {
         }
 
         appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(toHearingTabItem(listForHearingWrapper)).build());
+        appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(toHearing(listForHearingWrapper)).build());
 
         caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
@@ -117,6 +120,34 @@ public class ManageHearingsMigrationService {
     private void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
         appendToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
+    }
+
+    private Hearing toHearing(ListForHearingWrapper listForHearingWrapper) {
+        // Type of Hearing
+        HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
+        // Hearing Date
+        LocalDate hearingDate = listForHearingWrapper.getHearingDate();
+        // Hearing Time
+        String hearingTime = listForHearingWrapper.getHearingTime();
+        // Time Estimate
+        String timeEstimate = listForHearingWrapper.getTimeEstimate();
+        // Additional information about the hearing
+        String additionalInformationAboutHearing = listForHearingWrapper.getAdditionalInformationAboutHearing();
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
+
+        return Hearing.builder()
+            .hearingDate(hearingDate)
+            .hearingType(HearingType.valueOf(hearingType.name()))
+            .hearingTimeEstimate(timeEstimate)
+            .hearingTime(hearingTime)
+            .hearingCourtSelection(hearingRegionWrapper.toCourt())
+            //.hearingMode(null) // TODO
+            .additionalHearingInformation(additionalInformationAboutHearing)
+            //.additionalHearingDocs // No additional hearing in existing List for Hearing event
+            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
+            .wasMigrated(YesOrNo.YES)
+            .build();
     }
 
     private HearingTabItem toHearingTabItem(ListForHearingWrapper listForHearingWrapper) {
