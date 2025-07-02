@@ -153,8 +153,7 @@ public class ManageHearingActionService {
      */
     private void updateTabData(FinremCaseData caseData) {
         // migrated working hearing has been added directly to hearing tab item.
-        List<ManageHearingsCollectionItem> hearings = nonMigratedHearings
-            (caseData.getManageHearingsWrapper().getHearings());
+        List<ManageHearingsCollectionItem> hearings = nonMigratedHearings(caseData.getManageHearingsWrapper().getHearings());
 
         List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
             .sorted(Comparator.comparing(hearingCollectionItem ->
