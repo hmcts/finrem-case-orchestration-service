@@ -218,6 +218,7 @@ class HearingCorrespondenceHelperTest {
     }
 
     /**
+     * Confirms that shouldSendHearingNoticeOnly returns false for the passes arguments.
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
@@ -265,89 +266,4 @@ class HearingCorrespondenceHelperTest {
                         .build())
                 .build();
     }
-
-//    /**
-//     * Required for Sonar Coverage. Replace with proper test when RESP_SOLICITOR switch case is implemented.
-//     * Also write test for when RESP_SOLICITOR should not receive a notification.
-//     */
-//    @Test
-//    void shouldSendCorrectNotificationForRespSolicitorParty() {
-//        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
-//        party.setCode(CaseRole.RESP_SOLICITOR.getCcdCode());
-//
-//        FinremCaseDetails caseDetails = new FinremCaseDetails();
-//        Hearing hearing = new Hearing();
-//
-//        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
-//
-//        assertThat(logs.getInfos()).contains("Handling case: RESP_SOLICITOR, work to follow");
-//    }
-
-//    /**
-//     * Required for Sonar Coverage. Replace with proper test when INTVR_SOLICITOR_1 switch case is implemented.
-//     * Also write test for when INTVR_SOLICITOR_1 should not receive a notification.
-//     */
-//    @Test
-//    void shouldSendCorrectNotificationForIntervener1Party() {
-//        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
-//        party.setCode(CaseRole.INTVR_SOLICITOR_1.getCcdCode());
-//
-//        FinremCaseDetails caseDetails = new FinremCaseDetails();
-//        Hearing hearing = new Hearing();
-//
-//        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
-//
-//        assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_1, work to follow");
-//    }
-
-//    /**
-//     * Required for Sonar Coverage. Replace with proper test when INTVR_SOLICITOR_2 switch case is implemented.
-//     * Also write test for when INTVR_SOLICITOR_2 should not receive a notification.
-//     */
-//    @Test
-//    void shouldSendCorrectNotificationForIntervener2Party() {
-//        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
-//        party.setCode(CaseRole.INTVR_SOLICITOR_2.getCcdCode());
-//
-//        FinremCaseDetails caseDetails = new FinremCaseDetails();
-//        Hearing hearing = new Hearing();
-//
-//        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
-//
-//        assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_2, work to follow");
-//    }
-
-//    /**
-//     * Required for Sonar Coverage. Replace with proper test when INTVR_SOLICITOR_3 switch case is implemented.
-//     * Also write test for when INTVR_SOLICITOR_3 should not receive a notification.
-//     */
-//    @Test
-//    void shouldSendCorrectNotificationForIntervener3Party() {
-//        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
-//        party.setCode(CaseRole.INTVR_SOLICITOR_3.getCcdCode());
-//
-//        FinremCaseDetails caseDetails = new FinremCaseDetails();
-//        Hearing hearing = new Hearing();
-//
-//        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
-//
-//        assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_3, work to follow");
-//    }
-
-//    /**
-//     * Required for Sonar Coverage. Replace with proper test when INTVR_SOLICITOR_4 switch case is implemented.
-//     * Also write test for when INTVR_SOLICITOR_4 should not receive a notification.
-//     */
-//    @Test
-//    void shouldSendCorrectNotificationForIntervener4Party() {
-//        DynamicMultiSelectListElement party = new DynamicMultiSelectListElement();
-//        party.setCode(CaseRole.INTVR_SOLICITOR_4.getCcdCode());
-//
-//        FinremCaseDetails caseDetails = new FinremCaseDetails();
-//        Hearing hearing = new Hearing();
-//
-//        helper.sendHearingCorrespondenceByParty(party, caseDetails, hearing, AUTH_TOKEN);
-//
-//        assertThat(logs.getInfos()).contains("Handling case: INTVR_SOLICITOR_4, work to follow");
-//    }
 }

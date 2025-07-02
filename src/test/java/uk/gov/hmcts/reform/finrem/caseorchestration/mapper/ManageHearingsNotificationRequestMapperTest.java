@@ -57,7 +57,7 @@ class ManageHearingsNotificationRequestMapperTest {
             // When
             contactDetails.setApplicantSolicitorEmail("applicantsolicitor@example.com");
             contactDetails.setApplicantSolicitorName("The applicant solicitor name");
-            mocked.when(() -> CourtHelper.getSelectedFrc(caseDetails)).thenReturn("MockedCourt");
+            mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
             NotificationRequest result = mapper.buildHearingNotificationForApplicantSolicitor(caseDetails, hearing);
 
             // AssertThat
@@ -78,7 +78,7 @@ class ManageHearingsNotificationRequestMapperTest {
             // When
             contactDetails.setRespondentSolicitorEmail("respondentsolicitor@example.com");
             contactDetails.setRespondentSolicitorName("The respondent solicitor name");
-            mocked.when(() -> CourtHelper.getSelectedFrc(caseDetails)).thenReturn("MockedCourt");
+            mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
             NotificationRequest result = mapper.buildHearingNotificationForRespondentSolicitor(caseDetails, hearing);
 
             // AssertThat
@@ -95,5 +95,6 @@ class ManageHearingsNotificationRequestMapperTest {
         assertThat(result.getRespondentName()).isEqualTo("Respondent last name");
         assertThat(result.getCaseType()).isEqualTo(EmailService.CONTESTED);
         assertThat(result.getHearingType()).isEqualTo(HearingType.FDA.getId());
+        assertThat(result.getSelectedCourt()).isEqualTo("MockedCourt");
     }
 }

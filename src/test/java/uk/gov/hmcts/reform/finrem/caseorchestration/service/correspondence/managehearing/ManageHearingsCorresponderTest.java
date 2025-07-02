@@ -117,7 +117,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that sendHearingNotificationToParty is called with the right role:
+     * Checks that sendHearingNotificationToParty is called with the right role.
      * - CaseRole is APP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - emailingToApplicantSolicitor returns true
@@ -152,8 +152,7 @@ class ManageHearingsCorresponderTest {
      * - CaseRole is RESP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - emailingToApplicantSolicitor returns true
-     *
-     * When fixed, see if this a and apploicant test can be refactored to avoid code duplication.
+     * When fixed, see if this a and applicant test can be refactored to avoid code duplication.
      *
      */
     @Test
@@ -182,7 +181,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that sendHearingNotificationToApplicant is called when:
+     * Checks that sendHearingNotificationToApplicant is called when.
      * - CaseRole is APP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - postingToApplicant returns true
@@ -213,7 +212,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that sendHearingNotificationToRespondent is called when:
+     * Checks that sendHearingNotificationToRespondent is called when.
      * - CaseRole is RESP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - postingToApplicant returns true
@@ -307,7 +306,7 @@ class ManageHearingsCorresponderTest {
 
 
     /**
-     * Checks that sendHearingNotificationToApplicant throws IllegalStateException when illegal CaseRole is provided:
+     * Checks that sendHearingNotificationToApplicant throws IllegalStateException when illegal CaseRole is provided.
      * - CaseRole is CASEWORKER (which is not appropriate for hearing notifications)
      * - shouldNotSendNotification returns false
      */
@@ -342,6 +341,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
+     * Reusable test setup method to create a FinremCallbackRequest with a case ID and empty case data.
      * @return a FinremCallbackRequest with a case ID and empty case data.
      */
     private FinremCallbackRequest callbackRequest() {
@@ -353,7 +353,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Reusable test setup method to build a DynamicMultiSelectList from a set of CaseRoles
+     * Reusable test setup method to build a DynamicMultiSelectList from a set of CaseRoles.
      */
     private DynamicMultiSelectList buildPartiesList(Set<CaseRole> caseRoles) {
 
