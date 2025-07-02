@@ -178,8 +178,6 @@ public class ManageHearingsMigrationService {
                 .build();
 
             appendToHearingTabItems(caseData, collectionItem);
-            appendToApplicantHearingTabItems(caseData, collectionItem);
-            appendToRespondentHearingTabItems(caseData, collectionItem);
         });
 
         mhMigrationWrapper.setIsListForInterimHearingsMigrated(YesOrNo.YES);
@@ -206,6 +204,21 @@ public class ManageHearingsMigrationService {
             return false;
         }
         return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
+    }
+
+    private void appendToList(
+        Supplier<List<HearingTabCollectionItem>> getter,
+        Consumer<List<HearingTabCollectionItem>> setter,
+        HearingTabCollectionItem item
+    ) {
+        List<HearingTabCollectionItem> list = getter.get();
+        if (list == null) {
+            list = new ArrayList<>();
+        } else {
+            list = new ArrayList<>(list); // in case it is Immutable
+        }
+        list.add(item);
+        setter.accept(list);
     }
 
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
@@ -235,21 +248,6 @@ public class ManageHearingsMigrationService {
             .value(interimHearingNotice)
             .build());
         return hearingDocuments;
-    }
-
-    private void appendToList(
-            Supplier<List<HearingTabCollectionItem>> getter,
-            Consumer<List<HearingTabCollectionItem>> setter,
-            HearingTabCollectionItem item
-    ) {
-        List<HearingTabCollectionItem> list = getter.get();
-        if (list == null) {
-            list = new ArrayList<>();
-        } else {
-            list = new ArrayList<>(list); // in case it is Immutable
-        }
-        list.add(item);
-        setter.accept(list);
     }
 
 }
