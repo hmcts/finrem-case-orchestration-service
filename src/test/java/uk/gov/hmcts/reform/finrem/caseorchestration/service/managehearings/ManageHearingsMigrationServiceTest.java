@@ -167,7 +167,6 @@ class ManageHearingsMigrationServiceTest {
             assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
                 .anySatisfy(item -> assertThat(item.getValue())
                     .usingRecursiveComparison()
-                    .ignoringFields("tabHearingDocuments") // if this is still commented or not important in the test
                     .isEqualTo(HearingTabItem.builder()
                         .tabHearingMigratedDate(fixedDateTime)
                         .tabHearingType("Final Hearing (FH)")
