@@ -58,7 +58,8 @@ public class ContestedOrderApprovedLetterService {
      * @param judgeDetails       the details of the judge approving the order. It can be null.
      * @param authorisationToken the authorisation token for document generation service
      */
-    public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+    public CaseDocument generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+        // Ensure the order approved date is set for the cover letter
         updateOrderApprovedDateForCoverLetter(finremCaseDetails);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -69,17 +70,24 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
-        List<CaseDocument> orderApprovedCoverLetterList = ofNullable(finremCaseDetails.getData().getOrderApprovedCoverLetterList())
-                .orElseGet(() -> new LinkedList<>());
-        orderApprovedCoverLetterList.add(approvedOrderCoverLetter);
-        if( finremCaseDetails.getData().getOrderApprovedCoverLetterList() != null) {
-            finremCaseDetails.getData().getOrderApprovedCoverLetterList().add(approvedOrderCoverLetter);
-        } else {
-            finremCaseDetails.getData().setOrderApprovedCoverLetterList(orderApprovedCoverLetterList);
-        }
-//        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+        finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+
+        //TODO: Return the cover letter document for the approval process for EACH draft order
+        log.info("Generated contested order approved cover letter for case ID: {}", finremCaseDetails.getId());
+        return approvedOrderCoverLetter;
     }
 
+    //TODO: Get this date from the Court order date form input (which is prepopulated with the current date)
+    /**
+     * NEW:
+     * Updates the order approved date in the case details for the cover letter.
+     *
+     * <p>
+     * This method retrieves the last finalised order from the case details and sets the order approved date
+     * to the approval date of that order. If no finalised orders are present, it defaults to the current date.
+     *
+     * @param finremCaseDetails the case details containing draft orders
+     */
     private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
         List<FinalisedOrderCollection> finalisedOrders =
             ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of());
@@ -115,6 +123,7 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        // Set the orderApprovedDate for the cover letter Docmosis template
         caseData.put("orderApprovedDate", caseData.get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }

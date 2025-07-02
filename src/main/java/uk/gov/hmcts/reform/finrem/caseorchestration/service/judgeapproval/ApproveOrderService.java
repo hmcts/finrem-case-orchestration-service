@@ -3,15 +3,27 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 
@@ -21,6 +33,9 @@ import static java.util.Optional.ofNullable;
 public class ApproveOrderService {
 
     private final JudgeApprovalResolver judgeApprovalResolver;
+
+    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    private final IdamService idamService;
 
     private static final String ORDERS_APPROVED_CONFIRMATION_BODY_FORMAT =
         "<br>The draft orders (%s) for the case have been approved. "
@@ -71,6 +86,12 @@ public class ApproveOrderService {
                 hasApprovedDecision |= decision.isApproved();
                 hasRefusedDecision |= decision.isRefused();
             }
+
+            //TODO: Generate cover sheet assign it the JudgeApproval1-5
+            CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+                buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
+            approval.setCoverLetter(coverLetter);
+            log.info("Generated coversheet for JudgeApproval{} for case {} document filename {}", i, finremCaseDetails.getId(), coverLetter.getDocumentFilename());
         }
 
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
@@ -190,5 +211,34 @@ public class ApproveOrderService {
             case REVIEW_LATER -> ordersReviewLater.add(fileName);
             default -> throw new IllegalStateException("Unhandled judge decision for document:" + fileName);
         }
+    }
+
+    //TODO: METHODS MOVE FROM ApproveDraftOrdersAboutToSubmitHandler
+    private String buildJudgeDetails(String judgeType, String judgeName) {
+        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new), " ");
+    }
+
+    private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
+        return Boolean.TRUE.equals(statuses.getLeft());
+    }
+
+    private String readJudgeType(FinremCaseDetails finremCaseDetails) {
+        String judgeType = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput())
+            .map(ExtraReportFieldsInput::getJudgeType)
+            .map(JudgeType::getValue)
+            .orElse("");
+        if (judgeType.isEmpty()) {
+            log.warn("{} - Judge type was not captured and an empty string will be shown in the cover letter.", finremCaseDetails.getId());
+        }
+        return judgeType;
+    }
+
+    public void generateAndStoreCoverLetter(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
+        Pair<Boolean, Boolean> statuses = populateJudgeDecisions(finremCaseDetails, draftOrdersWrapper, userAuthorisation);
+        if (containsApprovalStatus(statuses)) {
+            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+                buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
+        }
+        log.info("Cover letter generated and stored for case {}", finremCaseDetails.getId());
     }
 }

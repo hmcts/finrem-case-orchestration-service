@@ -270,8 +270,7 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate orderApprovedDate;
-    private List<CaseDocument> orderApprovedCoverLetterList;
-//    private CaseDocument orderApprovedCoverLetter;
+    private CaseDocument orderApprovedCoverLetter;
     private String hearingDetails;
     private YesOrNo applicantShareDocs;
     private YesOrNo respondentShareDocs;

@@ -66,39 +66,49 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         // The ids are handled in the submitted callback so can't be removed
         // and clearing them in the about to start callback doesn't work with CCD
         draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
-        Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
-        if (containsApprovalStatus(statuses)) {
-            generateAndStoreCoverLetter(caseDetails, userAuthorisation);
-        }
+
+        //TODO: Move below into populateJudgeDecisions method
+//        Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
+//        if (containsApprovalStatus(statuses)) {
+//            generateAndStoreCoverLetter(caseDetails, userAuthorisation);
+//        }
+
+        // NEW: Populate judge decisions and generate cover letter
+        approveOrderService.generateAndStoreCoverLetter(caseDetails, draftOrdersWrapper, userAuthorisation);
+
         clearInputFields(draftOrdersWrapper);
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
 
-    private String readJudgeType(FinremCaseDetails finremCaseDetails) {
-        String judgeType = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput())
-            .map(ExtraReportFieldsInput::getJudgeType)
-            .map(JudgeType::getValue)
-            .orElse("");
-        if (judgeType.isEmpty()) {
-            log.warn("{} - Judge type was not captured and an empty string will be shown in the cover letter.", finremCaseDetails.getId());
-        }
-        return judgeType;
-    }
+//    @Deprecated
+//    private String readJudgeType(FinremCaseDetails finremCaseDetails) {
+//        String judgeType = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput())
+//            .map(ExtraReportFieldsInput::getJudgeType)
+//            .map(JudgeType::getValue)
+//            .orElse("");
+//        if (judgeType.isEmpty()) {
+//            log.warn("{} - Judge type was not captured and an empty string will be shown in the cover letter.", finremCaseDetails.getId());
+//        }
+//        return judgeType;
+//    }
 
-    private void generateAndStoreCoverLetter(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
-            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-    }
+//    @Deprecated
+//    private void generateAndStoreCoverLetter(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
+//        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+//            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
+//    }
 
-    private String buildJudgeDetails(String judgeType, String judgeName) {
-        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new), " ");
-    }
+//    @Deprecated
+//    private String buildJudgeDetails(String judgeType, String judgeName) {
+//        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new), " ");
+//    }
 
-    private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
-        return Boolean.TRUE.equals(statuses.getLeft());
-    }
+//    @Deprecated
+//    private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
+//        return Boolean.TRUE.equals(statuses.getLeft());
+//    }
 
     private void clearInputFields(DraftOrdersWrapper draftOrdersWrapper) {
         draftOrdersWrapper.setJudgeApproval1(null);

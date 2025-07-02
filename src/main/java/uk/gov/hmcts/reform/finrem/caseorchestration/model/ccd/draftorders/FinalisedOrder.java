@@ -40,4 +40,9 @@ public class FinalisedOrder implements HasCaseDocument, WithAttachments {
 
     private YesOrNo finalOrder;
 
+    private CaseDocument coverLetter;
+
+
+    //TODO: Add Coverletter field. If not present, it will be take FinremCaseData.coverLetter as a default value.
+
 }

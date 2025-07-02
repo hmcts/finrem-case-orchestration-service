@@ -330,19 +330,12 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Creating hearing document pack for caseId {}", getCaseId(caseDetails));
         FinremCaseData caseData = caseDetails.getData();
 
+        // TODO: CHECK cover letter is not null
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
-
-        // Iterate of list of approved orders cover letters and add attachments to the orders
-        List<CaseDocument> approvedOrdersCoverLettersList = caseData.getOrderApprovedCoverLetterList();
-        if (approvedOrdersCoverLettersList != null && !approvedOrdersCoverLettersList.isEmpty()) {
-            orders.addAll(approvedOrdersCoverLettersList);
-        } else{
+        if (caseData.getOrderApprovedCoverLetter() == null) {
             throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
         }
-//        if (caseData.getOrderApprovedCoverLetter() == null) {
-//            throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
-//        }
-//        orders.add(caseData.getOrderApprovedCoverLetter());
+        orders.add(caseData.getOrderApprovedCoverLetter());
 
         if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);

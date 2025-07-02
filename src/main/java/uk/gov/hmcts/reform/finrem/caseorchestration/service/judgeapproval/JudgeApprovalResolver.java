@@ -103,7 +103,9 @@ class JudgeApprovalResolver {
                     approvable.replaceDocument(judgeApproval.getAmendedDocument());
                 }
                 approvable.setOrderStatus(APPROVED_BY_JUDGE);
-                approvable.setApprovalDate(judgeApproval.getOrderApprovedDate().atStartOfDay());
+                //TODO: Set Court order date from judge approval input - revert below.
+                // approvable.setCourtOrderDate(court order date);
+                approvable.setApprovalDate(LocalDateTime.now());
             }
             if (refused) {
                 approvable.setOrderStatus(REFUSED);
@@ -111,6 +113,8 @@ class JudgeApprovalResolver {
                     refusalOrderConvertible.setRefusedDate(LocalDateTime.now());
                 }
             }
+
+            //TODO: Set cover letter for both approved and refused orders
         }
     }
 

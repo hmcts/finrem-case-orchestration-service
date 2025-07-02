@@ -60,9 +60,12 @@ public class JudgeApproval {
     @JsonProperty("changesRequestedByJudge")
     private String changesRequestedByJudge;
 
-    @JsonProperty("orderApprovedDate")
+    @JsonProperty("courtOrderDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate orderApprovedDate;
+    private LocalDate courtOrderDate;
+
+    @JsonProperty("coverLetter")
+    private CaseDocument coverLetter;
 
     @JsonIgnore
     private SortKey sortKey;
