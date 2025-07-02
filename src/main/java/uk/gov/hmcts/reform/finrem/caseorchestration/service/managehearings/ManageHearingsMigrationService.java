@@ -117,22 +117,10 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
-
-    private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
-        appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
-                caseData.getManageHearingsWrapper()::setHearingTabItems, item);
-        /*
-        appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
-            caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
-        appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
-                caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
-         */
-    }
-
     private void appendToList(
-            Supplier<List<HearingTabCollectionItem>> getter,
-            Consumer<List<HearingTabCollectionItem>> setter,
-            HearingTabCollectionItem item
+        Supplier<List<HearingTabCollectionItem>> getter,
+        Consumer<List<HearingTabCollectionItem>> setter,
+        HearingTabCollectionItem item
     ) {
         List<HearingTabCollectionItem> list = getter.get();
         if (list == null) {
@@ -144,4 +132,14 @@ public class ManageHearingsMigrationService {
         setter.accept(list);
     }
 
+    private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
+        appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
+            caseData.getManageHearingsWrapper()::setHearingTabItems, item);
+        /*
+        appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
+            caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
+        appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
+                caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
+         */
+    }
 }
