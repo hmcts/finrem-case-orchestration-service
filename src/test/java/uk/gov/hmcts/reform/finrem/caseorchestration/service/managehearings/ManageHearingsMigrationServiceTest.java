@@ -318,24 +318,6 @@ class ManageHearingsMigrationServiceTest {
         }
     }
 
-    private List<HearingTabItem> getTargetHearingTabItems(FinremCaseData caseData) {
-        return caseData.getManageHearingsWrapper().getHearingTabItems().stream()
-            .map(HearingTabCollectionItem::getValue)
-            .toList();
-    }
-
-    private List<HearingTabItem> assertAndGetHearingTabItems(FinremCaseData caseData) {
-        assertThat(caseData.getManageHearingsWrapper()).isNotNull();
-        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNotNull();
-        return getTargetHearingTabItems(caseData);
-    }
-
-    private void assertAllTabItemWithMigratedDate(List<HearingTabItem> tabItems, LocalDateTime fixedDateTime) {
-        assertThat(tabItems)
-            .extracting(HearingTabItem::getTabHearingMigratedDate)
-            .allMatch(date -> date.equals(fixedDateTime));
-    }
-
     private InterimHearingItem stubInterimHearingOne() {
         LocalDate hearingDate = LocalDate.of(2025, 6, 4);
         String hearingTime = "10:00";
@@ -391,5 +373,23 @@ class ManageHearingsMigrationServiceTest {
         return Arrays.stream(interimHearingItems)
             .map(item -> InterimHearingCollection.builder().value(item).build())
             .toList();
+    }
+
+    private static List<HearingTabItem> getTargetHearingTabItems(FinremCaseData caseData) {
+        return caseData.getManageHearingsWrapper().getHearingTabItems().stream()
+            .map(HearingTabCollectionItem::getValue)
+            .toList();
+    }
+
+    private static List<HearingTabItem> assertAndGetHearingTabItems(FinremCaseData caseData) {
+        assertThat(caseData.getManageHearingsWrapper()).isNotNull();
+        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNotNull();
+        return getTargetHearingTabItems(caseData);
+    }
+
+    private static void assertAllTabItemWithMigratedDate(List<HearingTabItem> tabItems, LocalDateTime fixedDateTime) {
+        assertThat(tabItems)
+            .extracting(HearingTabItem::getTabHearingMigratedDate)
+            .allMatch(date -> date.equals(fixedDateTime));
     }
 }
