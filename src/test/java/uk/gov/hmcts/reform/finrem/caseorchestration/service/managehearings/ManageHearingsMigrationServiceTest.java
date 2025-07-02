@@ -300,21 +300,21 @@ class ManageHearingsMigrationServiceTest {
             assertThat(tabItems)
                 .extracting(HearingTabItem::getTabHearingType)
                 .containsExactly("First Directions Appointment (FDA)", "Directions (DIR)");
-//            assertThat(tabItems)
-//                .extracting(HearingTabItem::getTabCourtSelection)
-//                .containsExactly("COURT ONE NAME");
-//            assertThat(tabItems)
-//                .extracting(HearingTabItem::getTabDateTime)
-//                .containsExactly("2025-06-04 10:00");
-//            assertThat(tabItems)
-//                .extracting(HearingTabItem::getTabTimeEstimate)
-//                .containsExactly("1.11 hour");
-//            assertThat(tabItems)
-//                .extracting(HearingTabItem::getTabConfidentialParties)
-//                .containsExactly("Unknown");
-//            assertThat(tabItems)
-//                .extracting(HearingTabItem::getTabAdditionalInformation)
-//                .containsExactly("<p>Some notes (1)</p>");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabCourtSelection)
+                .containsExactly("COURT ONE NAME", "COURT TWO NAME");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabDateTime)
+                .containsExactly("2025-06-04 10:00", "2025-06-09 11:00");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabTimeEstimate)
+                .containsExactly("1.11 hour", "1.12 hour");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabConfidentialParties)
+                .containsExactly("Unknown", "Unknown");
+            assertThat(tabItems)
+                .extracting(HearingTabItem::getTabAdditionalInformation)
+                .containsExactly("<p>Some notes (1)</p>", "<p>Some notes (2)</p>");
         }
     }
 
@@ -359,12 +359,13 @@ class ManageHearingsMigrationServiceTest {
     private InterimHearingItem stubInterimHearingTwo() {
         LocalDate hearingDate = LocalDate.of(2025, 6, 9);
         String hearingTime = "11:00";
-        String additionalInfo = "Some notes";
+        String additionalInfo = "Some notes 2";
 
         InterimHearingItem interimHearingItem = spy(InterimHearingItem.class);
         interimHearingItem.setInterimHearingTime(hearingTime);
         interimHearingItem.setInterimHearingType(InterimTypeOfHearing.DIR);
         interimHearingItem.setInterimHearingDate(hearingDate);
+        interimHearingItem.setInterimHearingTimeEstimate("1.12 hour");
         interimHearingItem.setInterimAdditionalInformationAboutHearing(additionalInfo);
 
         Court court = mock(Court.class);
