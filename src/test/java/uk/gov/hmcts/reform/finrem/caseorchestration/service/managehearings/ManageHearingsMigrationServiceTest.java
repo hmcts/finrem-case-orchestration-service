@@ -230,7 +230,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void givenMigratedCaseDataWithListForInterimHearingDataShouldDoNothing() {
+    void givenMigratedCaseData_whenPopulateListForInterimHearing_thenSkipProcess() {
         // Arrange
         MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
             .isListForInterimHearingsMigrated(YesOrNo.YES)
@@ -254,7 +254,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void givenNonMigratedListForInterimHearingData_whenInterimHearingDocumentMissing_thenDoNothing() {
+    void givenNonMigratedCaseDataWithInsufficientHearingNotice_whenPopulateListForInterimHearing_thenStopProcess() {
         // Arrange
         MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder().build();
 
@@ -279,7 +279,7 @@ class ManageHearingsMigrationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedSingleListForInterimHearingData_thenPopulateToHearingTabItems(boolean havingExistingHearingTabItem) {
+    void givenNonMigratedWithSingleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -288,8 +288,8 @@ class ManageHearingsMigrationServiceTest {
 
             InterimHearingItem interimHearingItem1 = stubInterimHearingOne();
 
-            ManageHearingsCollectionItem existingWorkingHearings = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
-            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingHearing = havingExistingHearing ? mock(ManageHearingsCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearing ? mock(HearingTabCollectionItem.class) : null;
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
@@ -299,7 +299,7 @@ class ManageHearingsMigrationServiceTest {
                     .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1))
                     .build())
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toSingletonListOrNull(existingWorkingHearings))
+                    .hearings(toSingletonListOrNull(existingHearing))
                     .hearingTabItems(toSingletonListOrNull(existingHearingTabCollectionItem))
                     .build())
                 .build();
@@ -310,36 +310,47 @@ class ManageHearingsMigrationServiceTest {
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
 
-            List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
-            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 2 : 1);
-            assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItem);
+            // Assert Hearing Tab Item
+            {
+                List<HearingTabCollectionItem> actualTabItems = caseData.getManageHearingsWrapper().getHearingTabItems();
+                assertThat(actualTabItems).hasSize(havingExistingHearing ? 2 : 1);
+                assertExistingHearingTabItemRetained(actualTabItems, existingHearingTabCollectionItem);
 
-            List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItem);
-            assertAllTabItemWithMigratedDate(migratedTabItems, fixedDateTime);
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabHearingType)
-                .containsExactly("First Directions Appointment (FDA)");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabCourtSelection)
-                .containsExactly("COURT ONE NAME");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabDateTime)
-                .containsExactly("2025-06-04 10:00");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabTimeEstimate)
-                .containsExactly("1.11 hour");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabConfidentialParties)
-                .containsExactly("Unknown");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabAdditionalInformation)
-                .containsExactly("<p>Some notes (1)</p>");
+                List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItem);
+                assertAllTabItemWithMigratedDate(migratedTabItems, fixedDateTime);
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabHearingType)
+                    .containsExactly("First Directions Appointment (FDA)");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabCourtSelection)
+                    .containsExactly("COURT ONE NAME");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabDateTime)
+                    .containsExactly("2025-06-04 10:00");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabTimeEstimate)
+                    .containsExactly("1.11 hour");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabConfidentialParties)
+                    .containsExactly("Unknown");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabAdditionalInformation)
+                    .containsExactly("<p>Some notes (1)</p>");
+            }
+            // Assert Hearings TODO
+            {
+                List<ManageHearingsCollectionItem> actualHearings = caseData.getManageHearingsWrapper().getHearings();
+                assertThat(actualHearings).hasSize(havingExistingHearing ? 2 : 1);
+                if (havingExistingHearing) {
+                    assertThat(actualHearings).contains(existingHearing);
+                }
+            }
         }
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedMultipleListForInterimHearingData_thenPopulateToHearingTabItems(boolean havingExistingHearingTabItem) {
+    void givenNonMigratedWithMultipleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -349,10 +360,10 @@ class ManageHearingsMigrationServiceTest {
             InterimHearingItem interimHearingItem1 = stubInterimHearingOne();
             InterimHearingItem interimHearingItem2 = stubInterimHearingTwo();
 
-            ManageHearingsCollectionItem existingWorkingHearings = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
-            ManageHearingsCollectionItem existingWorkingHearings2 = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
-            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
-            HearingTabCollectionItem existingHearingTabCollectionItem2 = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingHearing = havingExistingHearing ? mock(ManageHearingsCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingHearing2 = havingExistingHearing ? mock(ManageHearingsCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearing ? mock(HearingTabCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem2 = havingExistingHearing ? mock(HearingTabCollectionItem.class) : null;
             HearingTabCollectionItem[] existingHearingTabCollectionItems = {existingHearingTabCollectionItem, existingHearingTabCollectionItem2};
 
             FinremCaseData caseData = FinremCaseData.builder()
@@ -363,7 +374,7 @@ class ManageHearingsMigrationServiceTest {
                     .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1, interimHearingItem2))
                     .build())
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toNonNullList(existingWorkingHearings, existingWorkingHearings2))
+                    .hearings(toNonNullList(existingHearing, existingHearing2))
                     .hearingTabItems(toNonNullList(existingHearingTabCollectionItems))
                     .build())
                 .build();
@@ -374,30 +385,33 @@ class ManageHearingsMigrationServiceTest {
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
 
-            List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
-            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 4 : 2);
-            assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItems);
+            // Assert Hearing Tab Item
+            {
+                List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
+                assertThat(actualItems).hasSize(havingExistingHearing ? 4 : 2);
+                assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItems);
 
-            List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItems);
-            assertAllTabItemWithMigratedDate(migratedTabItems, fixedDateTime);
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabHearingType)
-                .containsExactly("First Directions Appointment (FDA)", "Directions (DIR)");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabCourtSelection)
-                .containsExactly("COURT ONE NAME", "COURT TWO NAME");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabDateTime)
-                .containsExactly("2025-06-04 10:00", "2025-06-09 11:00");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabTimeEstimate)
-                .containsExactly("1.11 hour", "1.12 hour");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabConfidentialParties)
-                .containsExactly("Unknown", "Unknown");
-            assertThat(migratedTabItems)
-                .extracting(HearingTabItem::getTabAdditionalInformation)
-                .containsExactly("<p>Some notes (1)</p>", "<p>Some notes (2)</p>");
+                List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItems);
+                assertAllTabItemWithMigratedDate(migratedTabItems, fixedDateTime);
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabHearingType)
+                    .containsExactly("First Directions Appointment (FDA)", "Directions (DIR)");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabCourtSelection)
+                    .containsExactly("COURT ONE NAME", "COURT TWO NAME");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabDateTime)
+                    .containsExactly("2025-06-04 10:00", "2025-06-09 11:00");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabTimeEstimate)
+                    .containsExactly("1.11 hour", "1.12 hour");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabConfidentialParties)
+                    .containsExactly("Unknown", "Unknown");
+                assertThat(migratedTabItems)
+                    .extracting(HearingTabItem::getTabAdditionalInformation)
+                    .containsExactly("<p>Some notes (1)</p>", "<p>Some notes (2)</p>");
+            }
         }
     }
 

@@ -148,6 +148,7 @@ public class ManageHearingsMigrationService {
                 .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
                     hearingItem.getInterimAdditionalInformationAboutHearing()))
                 .tabHearingMigratedDate(LocalDateTime.now())
+                // TODO Do we need hearing notice?
                 .tabHearingDocuments(prepareInterimHearingDocuments(hearingNotice, hearingItem))
                 .build();
 
