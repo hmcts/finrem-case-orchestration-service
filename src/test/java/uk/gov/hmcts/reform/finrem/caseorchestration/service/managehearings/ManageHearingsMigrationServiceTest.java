@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -153,23 +154,32 @@ class ManageHearingsMigrationServiceTest {
 
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
-            assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).hasSize(havingExistingHearingTabItem ? 2: 1);
+
+            List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
+            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 2 : 1);
+
             if (havingExistingHearingTabItem) {
-                assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).contains(existingHearingTabCollectionItem);
+                assertThat(actualItems).contains(existingHearingTabCollectionItem);
             }
-            assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
+
+            List<HearingTabCollectionItem> migratedItems = actualItems.stream()
+                .filter(item -> !item.equals(existingHearingTabCollectionItem))
+                .toList();
+
+            HearingTabItem expectedItem = HearingTabItem.builder()
+                .tabHearingMigratedDate(fixedDateTime)
+                .tabHearingType("Final Hearing (FH)")
+                .tabCourtSelection(expectedCourtName)
+                .tabDateTime(expectedDateTime)
+                .tabTimeEstimate("45 minutes")
+                .tabConfidentialParties("Unknown")
+                .tabAdditionalInformation(expectedAdditionalInfo)
+                .build();
+
+            assertThat(migratedItems)
                 .anySatisfy(item -> assertThat(item.getValue())
                     .usingRecursiveComparison()
-                    .isEqualTo(HearingTabItem.builder()
-                        .tabHearingMigratedDate(fixedDateTime)
-                        .tabHearingType("Final Hearing (FH)")
-                        .tabCourtSelection(expectedCourtName)
-                        .tabDateTime(expectedDateTime)
-                        .tabTimeEstimate("45 minutes")
-                        .tabConfidentialParties("Unknown")
-                        .tabAdditionalInformation(expectedAdditionalInfo)
-                        .build()));
-
+                    .isEqualTo(expectedItem));
         }
     }
 }
