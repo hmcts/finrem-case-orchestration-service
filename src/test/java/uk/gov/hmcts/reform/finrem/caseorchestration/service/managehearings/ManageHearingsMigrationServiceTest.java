@@ -44,6 +44,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toSingletonListOrNull;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
@@ -396,9 +397,5 @@ class ManageHearingsMigrationServiceTest {
         assertThat(tabItems)
             .extracting(HearingTabItem::getTabHearingMigratedDate)
             .allMatch(date -> date.equals(fixedDateTime));
-    }
-
-    public static <T> List<T> toSingletonListOrNull(T item) {
-        return item == null ? null : List.of(item);
     }
 }
