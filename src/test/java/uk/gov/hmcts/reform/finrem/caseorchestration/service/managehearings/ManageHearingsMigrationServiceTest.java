@@ -180,7 +180,6 @@ class ManageHearingsMigrationServiceTest {
         }
     }
 
-
     @Test
     void givenMigratedCaseDataWithListForInterimHearingDataShouldDoNothing() {
         // Arrange
