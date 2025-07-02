@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulk
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -70,33 +71,7 @@ public class ManageHearingsMigrationService {
             return;
         }
 
-        // Type of Hearing
-        HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
-        // Hearing Date
-        LocalDate hearingDate = listForHearingWrapper.getHearingDate();
-        // Hearing Time
-        String hearingTime = listForHearingWrapper.getHearingTime();
-        // Time Estimate
-        String timeEstimate = listForHearingWrapper.getTimeEstimate();
-        // Additional information about the hearing
-        String additionalInformationAboutHearing = listForHearingWrapper.getAdditionalInformationAboutHearing();
-        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
-        HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
-
-        // We cannot migrate the "Who has received this notice" field from the List for Hearing event,
-        // as the partiesOnCase field changes depending on the event.
-        // Therefore, we default to "Unknown" for tabConfidentialParties in the Hearing tab.
-        HearingTabItem newHearingTabItem = HearingTabItem.builder()
-            .tabHearingType(hearingType.getId())
-            .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
-            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
-            .tabTimeEstimate(timeEstimate)
-            .tabConfidentialParties("Unknown")
-            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
-            .tabHearingMigratedDate(LocalDateTime.now())
-            .build();
-
-        appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+        appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(toHearingTabItem(listForHearingWrapper)).build());
 
         caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
@@ -206,12 +181,8 @@ public class ManageHearingsMigrationService {
         return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
     }
 
-    private void appendToList(
-        Supplier<List<HearingTabCollectionItem>> getter,
-        Consumer<List<HearingTabCollectionItem>> setter,
-        HearingTabCollectionItem item
-    ) {
-        List<HearingTabCollectionItem> list = getter.get();
+    private <T> void appendToList(Supplier<List<T>> getter, Consumer<List<T>> setter, T item) {
+        List<T> list = getter.get();
         if (list == null) {
             list = new ArrayList<>();
         } else {
@@ -230,6 +201,36 @@ public class ManageHearingsMigrationService {
         appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
                 caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
          */
+    }
+
+    private void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
+        appendToList(caseData.getManageHearingsWrapper()::getHearings,
+            caseData.getManageHearingsWrapper()::setHearings, item);
+    }
+
+    private HearingTabItem toHearingTabItem(ListForHearingWrapper listForHearingWrapper) {
+        // Type of Hearing
+        HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
+        // Hearing Date
+        LocalDate hearingDate = listForHearingWrapper.getHearingDate();
+        // Hearing Time
+        String hearingTime = listForHearingWrapper.getHearingTime();
+        // Time Estimate
+        String timeEstimate = listForHearingWrapper.getTimeEstimate();
+        // Additional information about the hearing
+        String additionalInformationAboutHearing = listForHearingWrapper.getAdditionalInformationAboutHearing();
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
+
+        return HearingTabItem.builder()
+            .tabHearingType(hearingType.getId())
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
+            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
+            .tabTimeEstimate(timeEstimate)
+            .tabConfidentialParties("Unknown")
+            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
+            .tabHearingMigratedDate(LocalDateTime.now())
+            .build();
     }
 
     private boolean doesInterimHearingDocumentCountMatch(InterimWrapper interimWrapper) {
