@@ -79,7 +79,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void givenMigratedCaseDataWithListForHearingDataShouldDoNothing() {
+    void givenNonMigratedCaseData_whenPopulateListForHearing_thenDoNothing() {
         // Arrange
         MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
             .isListForHearingsMigrated(YesOrNo.YES)
