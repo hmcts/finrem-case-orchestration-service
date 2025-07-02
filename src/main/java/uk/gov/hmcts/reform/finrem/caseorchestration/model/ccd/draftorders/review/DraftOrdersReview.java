@@ -39,7 +39,7 @@ public class DraftOrdersReview implements HasCaseDocument {
     private String hearingJudge;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate orderApprovedDate;
+    private LocalDate courtOrderDate;
 
     @JsonProperty("draftOrderDocReviewCollection")
     private List<DraftOrderDocReviewCollection> draftOrderDocReviewCollection;
