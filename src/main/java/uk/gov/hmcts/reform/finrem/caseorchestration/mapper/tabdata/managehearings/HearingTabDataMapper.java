@@ -102,6 +102,7 @@ public class HearingTabDataMapper {
 
     /**
      * Retrieves the additional hearing information from the given {@link Hearing} object.
+     *
      * <p>
      * This method delegates to {@link #getAdditionalInformation(String)} using the
      * value from {@code hearing.getAdditionalHearingInformation()}.
