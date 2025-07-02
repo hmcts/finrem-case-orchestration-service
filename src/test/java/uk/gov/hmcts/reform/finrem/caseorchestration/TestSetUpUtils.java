@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -41,9 +40,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -529,11 +530,45 @@ public class TestSetUpUtils {
             .build();
     }
 
+    /**
+     * Returns a singleton immutable list containing the given item,
+     * or {@code null} if the item is {@code null}.
+     *
+     * @param <T>  the type of the item
+     * @param item the item to wrap into a list, may be {@code null}
+     * @return a singleton list containing {@code item}, or {@code null} if {@code item} is {@code null}
+     */
     public static <T> List<T> toSingletonListOrNull(T item) {
         return item == null ? null : List.of(item);
     }
 
-    public static boolean hasNonNullFirstElement(HearingTabCollectionItem... items) {
+    /**
+     * Returns an immutable list containing the non-null items from the given varargs array.
+     * If the input is {@code null} or contains no non-null items, returns an empty list.
+     *
+     * @param <T>   the type of the items
+     * @param items the varargs array of items, may be {@code null} or contain {@code null} elements
+     * @return a non-null immutable list containing all non-null items, or an empty list if none exist
+     */
+    public static <T> List<T> toNonNullList(T... items) {
+        if (items == null || items.length == 0) {
+            return List.of();
+        }
+        return Arrays.stream(items)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    /**
+     * Checks whether the given varargs array has a non-null first element.
+     *
+     * @param <T>   the type of the elements in the array
+     * @param items the varargs array to check; may be null or empty
+     * @return {@code true} if {@code items} is not null, has at least one element,
+     *         and the first element is not null; {@code false} otherwise
+     */
+    @SafeVarargs
+    public static <T> boolean hasNonNullFirstElement(T... items) {
         return items != null && items.length > 0 && items[0] != null;
     }
 }

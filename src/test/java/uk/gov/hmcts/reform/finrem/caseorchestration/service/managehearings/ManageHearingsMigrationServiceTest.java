@@ -45,6 +45,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hasNonNullFirstElement;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toNonNullList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toSingletonListOrNull;
 
 @ExtendWith(MockitoExtension.class)
@@ -311,7 +312,10 @@ class ManageHearingsMigrationServiceTest {
             InterimHearingItem interimHearingItem2 = stubInterimHearingTwo();
 
             ManageHearingsCollectionItem existingWorkingHearings = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingWorkingHearings2 = havingExistingHearingTabItem ? mock(ManageHearingsCollectionItem.class) : null;
             HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem2 = havingExistingHearingTabItem ? mock(HearingTabCollectionItem.class) : null;
+            HearingTabCollectionItem[] existingHearingTabCollectionItems = {existingHearingTabCollectionItem, existingHearingTabCollectionItem2};
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .ccdCaseId(CASE_ID)
@@ -321,8 +325,8 @@ class ManageHearingsMigrationServiceTest {
                     .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1, interimHearingItem2))
                     .build())
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toSingletonListOrNull(existingWorkingHearings))
-                    .hearingTabItems(toSingletonListOrNull(existingHearingTabCollectionItem))
+                    .hearings(toNonNullList(existingWorkingHearings, existingWorkingHearings2))
+                    .hearingTabItems(toNonNullList(existingHearingTabCollectionItems))
                     .build())
                 .build();
 
@@ -333,10 +337,10 @@ class ManageHearingsMigrationServiceTest {
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
 
             List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
-            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 3 : 2);
-            assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItem);
+            assertThat(actualItems).hasSize(havingExistingHearingTabItem ? 4 : 2);
+            assertExistingHearingTabItemRetained(actualItems, existingHearingTabCollectionItems);
 
-            List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItem);
+            List<HearingTabItem> migratedTabItems = assertAndGetHearingTabItems(caseData, existingHearingTabCollectionItems);
             assertAllTabItemWithMigratedDate(migratedTabItems, fixedDateTime);
             assertThat(migratedTabItems)
                 .extracting(HearingTabItem::getTabHearingType)
