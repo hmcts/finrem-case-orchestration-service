@@ -223,7 +223,7 @@ public class ManageHearingsMigrationService {
 
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
-                caseData.getManageHearingsWrapper()::setHearingTabItems, item);
+            caseData.getManageHearingsWrapper()::setHearingTabItems, item);
         /*
         appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
