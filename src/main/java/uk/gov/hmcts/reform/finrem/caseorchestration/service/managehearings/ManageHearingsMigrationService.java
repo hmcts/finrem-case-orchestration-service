@@ -86,12 +86,8 @@ public class ManageHearingsMigrationService {
             .tabHearingMigratedDate(LocalDateTime.now())
             .build();
 
-        // court-admin hearing tab
         appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
-        // applicants hearing tab
-        appendToApplicantHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
-        // respondent hearing tab
-        appendToRespondentHearingTabItems(caseData, HearingTabCollectionItem.builder().value(newHearingTabItem).build());
+
         caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
 
@@ -121,22 +117,13 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
+
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
                 caseData.getManageHearingsWrapper()::setHearingTabItems, item);
-    }
-
-    // TODO: Available after DFR-3831's release
-    private void appendToApplicantHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         /*
         appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
-                caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
-        */
-    }
-
-    // TODO: Available after DFR-3831's release
-    private void appendToRespondentHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
-        /*
+            caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
         appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
                 caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
          */
