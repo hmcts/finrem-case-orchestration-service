@@ -243,11 +243,11 @@ public class ManageHearingsMigrationService {
             hearingDocuments.add(DocumentCollectionItem.builder()
                 .value(interimHearingItem.getInterimUploadAdditionalDocument())
                 .build());
+
         }
         hearingDocuments.add(DocumentCollectionItem.builder()
             .value(interimHearingNotice)
             .build());
         return hearingDocuments;
     }
-
 }
