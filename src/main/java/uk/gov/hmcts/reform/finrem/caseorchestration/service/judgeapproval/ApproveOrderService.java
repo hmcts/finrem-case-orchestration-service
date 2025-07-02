@@ -88,10 +88,15 @@ public class ApproveOrderService {
             }
 
             //TODO: Generate cover sheet assign it the JudgeApproval1-5
-            CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
-                buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-            approval.setCoverLetter(coverLetter);
-            log.info("Generated coversheet for JudgeApproval{} for case {} document filename {}", i, finremCaseDetails.getId(), coverLetter.getDocumentFilename());
+            if(hasApprovedDecision) {
+                CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+                    buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
+                approval.setCoverLetter(coverLetter);
+                log.info("Generated coversheet for JudgeApproval{} for case {} document filename {}", i, finremCaseDetails.getId(), coverLetter.getDocumentFilename());
+            } else if (hasRefusedDecision) {
+                approval.setCoverLetter(null);
+                log.info("No coversheet generated for JudgeApproval{} for case {} as it was refused", i, finremCaseDetails.getId());
+            }
         }
 
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
@@ -235,10 +240,6 @@ public class ApproveOrderService {
 
     public void generateAndStoreCoverLetter(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, String userAuthorisation) {
         Pair<Boolean, Boolean> statuses = populateJudgeDecisions(finremCaseDetails, draftOrdersWrapper, userAuthorisation);
-        if (containsApprovalStatus(statuses)) {
-            contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
-                buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-        }
-        log.info("Cover letter generated and stored for case {}", finremCaseDetails.getId());
+        log.info("Populated Judges Decision for case {} decision Pair(approved : refused) {}", finremCaseDetails.getId(), statuses);
     }
 }
