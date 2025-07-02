@@ -550,6 +550,7 @@ public class TestSetUpUtils {
      * @param items the varargs array of items, may be {@code null} or contain {@code null} elements
      * @return a non-null immutable list containing all non-null items, or an empty list if none exist
      */
+    @SafeVarargs
     public static <T> List<T> toNonNullList(T... items) {
         if (items == null || items.length == 0) {
             return List.of();
