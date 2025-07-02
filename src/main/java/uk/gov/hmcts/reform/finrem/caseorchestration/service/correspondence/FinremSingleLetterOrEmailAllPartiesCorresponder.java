@@ -20,6 +20,7 @@ import java.util.List;
 public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase<FinremCaseDetails> {
 
     protected final NotificationService notificationService;
+
     protected final BulkPrintService bulkPrintService;
 
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
@@ -30,17 +31,22 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         }
     }
 
+    public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
+                                                    DocumentHelper.PaperNotificationRecipient recipient);
+
     protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
-        } else {
+        } else if (shouldSendApplicantLetter(caseDetails)) {
             log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
                     DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, CCDConfigConstant.APPLICANT, authorisationToken);
+        } else {
+            log.info("Nothing is sent to applicant for Case ID: {}", caseDetails.getId());
         }
     }
 
@@ -48,13 +54,15 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for Case ID: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
-        } else {
+        } else if (shouldSendRespondentLetter(caseDetails)) {
             log.info("Sending letter correspondence to respondent for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
                     DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, CCDConfigConstant.RESPONDENT, authorisationToken);
+        } else {
+            log.info("Nothing is sent to respondent for Case ID: {}", caseDetails.getId());
         }
     }
 
@@ -77,6 +85,8 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
                         authorisationToken,
                         intervenerWrapper.getPaperNotificationRecipient()), caseDetails,
                     intervenerWrapper.getIntervenerType().getTypeValue(), authorisationToken);
+            } else {
+                log.info("Nothing is sent to intervener for Case ID: {}", caseDetails.getId());
             }
         });
     }
@@ -93,10 +103,15 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
 
-    protected abstract boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper);
+    protected boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
+        return true;
+    }
 
-    public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
-                                                    DocumentHelper.PaperNotificationRecipient recipient);
+    protected boolean shouldSendRespondentLetter(FinremCaseDetails caseDetails) {
+        return true;
+    }
+
+    protected abstract boolean shouldSendIntervenerLetter(IntervenerWrapper intervenerWrapper);
 
     protected abstract void emailApplicantSolicitor(FinremCaseDetails caseDetails);
 

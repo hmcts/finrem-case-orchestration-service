@@ -10,11 +10,11 @@ public abstract class CorresponderBase<D> {
 
     protected abstract boolean shouldSendRespondentSolicitorEmail(D caseDetails);
 
-    protected final ContactDetailsWrapper getContactDetailsWrapper(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getContactDetailsWrapper();
-    }
-
     protected final boolean isNotInternationalParty(YesOrNo resideOutsideUK) {
         return !YesOrNo.YES.equals(resideOutsideUK);
+    }
+
+    protected final ContactDetailsWrapper getContactDetailsWrapper(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getContactDetailsWrapper();
     }
 }
