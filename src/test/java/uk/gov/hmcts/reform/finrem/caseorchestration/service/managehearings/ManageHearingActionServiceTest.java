@@ -97,8 +97,9 @@ class ManageHearingActionServiceTest {
         pfdNcdrDocuments = buildPfdNcdrDocumentsMap();
     }
 
-    @Test
-    void shouldAddHearingAndGenerateHearingNotice() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldAddHearingAndGenerateHearingNotice(boolean migratedHearingExists) {
         // Arrange
         CaseDocument hearingNotice = CaseDocument.builder()
             .documentFilename("HearingNotice.pdf")
@@ -124,6 +125,21 @@ class ManageHearingActionServiceTest {
                 .build()))
             .build();
 
+        // Override
+        if (migratedHearingExists) {
+            this.hearingWrapper = ManageHearingsWrapper.builder()
+                .workingHearing(hearing)
+                .hearingTabItems(List.of(HearingTabCollectionItem.builder()
+                    .value(HearingTabItem.builder().tabHearingMigratedDate(LocalDateTime.now()).build())
+                    .build()))
+                .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
+                    .id(UUID.randomUUID())
+                    .value(Hearing.builder().wasMigrated(YesOrNo.YES).build())
+                    .build())))
+                .build();
+            finremCaseDetails.getData().setManageHearingsWrapper(hearingWrapper);
+        }
+
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
@@ -134,11 +150,17 @@ class ManageHearingActionServiceTest {
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertThat(hearingWrapper.getHearings()).hasSize(1);
-        assertThat(hearingWrapper.getHearingTabItems()).hasSize(1);
+        int offset = migratedHearingExists ? 1 : 0;
+        assertThat(hearingWrapper.getHearings()).hasSize(1 + offset);
+        assertThat(hearingWrapper.getHearingTabItems()).hasSize(1 + offset);
         UUID hearingId = hearingWrapper.getWorkingHearingId();
-        assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
-        assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
+        if (migratedHearingExists) {
+            assertThat(hearingWrapper.getHearings().getLast().getId()).isEqualTo(hearingId);
+            assertThat(hearingWrapper.getHearings().getLast().getValue()).isEqualTo(hearing);
+        } else {
+            assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
+            assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
+        }
 
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
