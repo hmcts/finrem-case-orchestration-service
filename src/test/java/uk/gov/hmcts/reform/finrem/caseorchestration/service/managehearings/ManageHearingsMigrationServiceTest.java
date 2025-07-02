@@ -104,7 +104,7 @@ class ManageHearingsMigrationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedCaseData_whenPopulateListForHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearings) {
+    void givenNonMigratedCaseData_whenPopulateListForHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -139,14 +139,14 @@ class ManageHearingsMigrationServiceTest {
                 .isListForHearingsMigrated(YesOrNo.NO)
                 .build();
 
-            ManageHearingsCollectionItem existingHearings = havingExistingHearings ? mock(ManageHearingsCollectionItem.class) : null;
-            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearings ? mock(HearingTabCollectionItem.class) : null;
+            ManageHearingsCollectionItem existingHearing = havingExistingHearing ? mock(ManageHearingsCollectionItem.class) : null;
+            HearingTabCollectionItem existingHearingTabCollectionItem = havingExistingHearing ? mock(HearingTabCollectionItem.class) : null;
 
             FinremCaseData caseData = FinremCaseData.builder()
                 .listForHearingWrapper(listForHearingWrapper)
                 .mhMigrationWrapper(mhMigrationWrapper)
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toSingletonListOrNull(existingHearings))
+                    .hearings(toSingletonListOrNull(existingHearing))
                     .hearingTabItems(toSingletonListOrNull(existingHearingTabCollectionItem))
                     .build())
                 .build();
@@ -160,9 +160,9 @@ class ManageHearingsMigrationServiceTest {
             // Assert Hearing Tab Items
             {
                 List<HearingTabCollectionItem> actualItems = caseData.getManageHearingsWrapper().getHearingTabItems();
-                assertThat(actualItems).hasSize(havingExistingHearings ? 2 : 1);
+                assertThat(actualItems).hasSize(havingExistingHearing ? 2 : 1);
 
-                if (havingExistingHearings) {
+                if (havingExistingHearing) {
                     assertThat(actualItems).contains(existingHearingTabCollectionItem);
                 }
 
@@ -189,14 +189,14 @@ class ManageHearingsMigrationServiceTest {
             // Assert Hearings
             {
                 List<ManageHearingsCollectionItem> actualHearings = caseData.getManageHearingsWrapper().getHearings();
-                assertThat(actualHearings).hasSize(havingExistingHearings ? 2 : 1);
+                assertThat(actualHearings).hasSize(havingExistingHearing ? 2 : 1);
 
-                if (havingExistingHearings) {
-                    assertThat(actualHearings).contains(existingHearings);
+                if (havingExistingHearing) {
+                    assertThat(actualHearings).contains(existingHearing);
                 }
 
                 List<ManageHearingsCollectionItem> migratedHearings = actualHearings.stream()
-                    .filter(item -> !item.equals(existingHearings))
+                    .filter(item -> !item.equals(existingHearing))
                     .toList();
 
                 Hearing expectedHearing = Hearing.builder()
