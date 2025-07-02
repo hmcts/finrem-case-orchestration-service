@@ -153,6 +153,10 @@ class ManageHearingsMigrationServiceTest {
 
             // Assert
             assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
+            assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).hasSize(havingExistingHearingTabItem ? 2: 1);
+            if (havingExistingHearingTabItem) {
+                assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).contains(existingHearingTabCollectionItem);
+            }
             assertThat(caseData.getManageHearingsWrapper().getHearingTabItems())
                 .anySatisfy(item -> assertThat(item.getValue())
                     .usingRecursiveComparison()
