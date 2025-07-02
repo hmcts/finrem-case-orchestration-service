@@ -44,6 +44,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hasNonNullFirstElement;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toSingletonListOrNull;
 
 @ExtendWith(MockitoExtension.class)
@@ -441,9 +442,5 @@ class ManageHearingsMigrationServiceTest {
         if (hasNonNullFirstElement(existingHearingTabCollectionItems)) {
             assertThat(actualItems).containsAll(Arrays.asList(existingHearingTabCollectionItems));
         }
-    }
-
-    private static boolean hasNonNullFirstElement(HearingTabCollectionItem... items) {
-        return items != null && items.length > 0 && items[0] != null;
     }
 }

@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -530,5 +531,9 @@ public class TestSetUpUtils {
 
     public static <T> List<T> toSingletonListOrNull(T item) {
         return item == null ? null : List.of(item);
+    }
+
+    public static boolean hasNonNullFirstElement(HearingTabCollectionItem... items) {
+        return items != null && items.length > 0 && items[0] != null;
     }
 }
