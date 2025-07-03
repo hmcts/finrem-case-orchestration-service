@@ -251,8 +251,7 @@ public class ManageHearingsMigrationService {
     }
 
     private List<DocumentCollectionItem> prepareInterimHearingDocuments(InterimHearingItem interimHearingItem) {
-        return toSingletonListOrNull(DocumentCollectionItem.builder()
-            .value(interimHearingItem.getInterimUploadAdditionalDocument())
-            .build());
+        CaseDocument doc = interimHearingItem.getInterimUploadAdditionalDocument();
+        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
     }
 }
