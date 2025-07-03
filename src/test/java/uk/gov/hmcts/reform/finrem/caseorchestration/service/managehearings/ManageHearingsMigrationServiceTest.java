@@ -314,13 +314,13 @@ class ManageHearingsMigrationServiceTest {
     void givenMigratedCaseDataWithoutInterimHearings_whenPopulateListForInterimHearing_thenMarkMigrated() {
         // Arrange
         MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
-                .mhMigrationVersion("1")
-                .build();
+            .mhMigrationVersion("1")
+            .build();
 
         FinremCaseData caseData = FinremCaseData.builder()
-                .ccdCaseId(CASE_ID)
-                .mhMigrationWrapper(mhMigrationWrapper)
-                .build();
+            .ccdCaseId(CASE_ID)
+            .mhMigrationWrapper(mhMigrationWrapper)
+            .build();
 
         // Act
         underTest.populateListForInterimHearingWrapper(caseData);
