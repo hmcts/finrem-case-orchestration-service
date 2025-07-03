@@ -129,6 +129,12 @@ configurations {
     cftlibRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'commons-fileupload:commons-fileupload:1.6'
+    }
+}
+
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
