@@ -527,8 +527,4 @@ public class TestSetUpUtils {
             .documentBinaryUrl(BINARY_URL)
             .build();
     }
-
-    public static <T> List<T> toSingletonListOrNull(T item) {
-        return item == null ? null : List.of(item);
-    }
 }
