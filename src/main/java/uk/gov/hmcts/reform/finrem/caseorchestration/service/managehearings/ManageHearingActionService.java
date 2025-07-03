@@ -44,9 +44,6 @@ public class ManageHearingActionService {
      * Adds a new hearing to the case and generates associated documents.
      * Updates the hearings collection and generates documents based on the hearing type
      * and case configuration. Adds the generated documents to the hearing documents collection.
-     *
-     * Todo: when merging tabs work from master, check that the generatePfdNcdrDocuments parts live in private methods
-     *
      * @param finremCaseDetails case details containing hearing and case data
      * @param authToken         authorization token for secure resource access
      */

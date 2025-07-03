@@ -93,8 +93,8 @@ public class HearingCorrespondenceHelper {
      */
     public boolean shouldEmailToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
         log.debug("Temporary log; shouldEmailToIntervener called for case role: {} on case id: {}",
-                caseRole,
-                finremCaseDetails.getId());
+            caseRole,
+            finremCaseDetails.getId());
         return true;
     }
 
@@ -121,8 +121,8 @@ public class HearingCorrespondenceHelper {
      */
     public boolean shouldPostToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
         log.debug("Temporary log; shouldPostToIntervener called for case role: {} on case id: {}",
-                caseRole,
-                finremCaseDetails.getId());
+            caseRole,
+            finremCaseDetails.getId());
         return true;
     }
 
@@ -136,30 +136,29 @@ public class HearingCorrespondenceHelper {
      * @return true if the hearing should only send a notice, false otherwise
      */
     public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
-
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
-                HearingType.MPS,
-                HearingType.FH,
-                HearingType.DIR,
-                HearingType.MENTION,
-                HearingType.PERMISSION_TO_APPEAL,
-                HearingType.APPEAL_HEARING,
-                HearingType.RETRIAL_HEARING,
-                HearingType.PTR
+            HearingType.MPS,
+            HearingType.FH,
+            HearingType.DIR,
+            HearingType.MENTION,
+            HearingType.PERMISSION_TO_APPEAL,
+            HearingType.APPEAL_HEARING,
+            HearingType.RETRIAL_HEARING,
+            HearingType.PTR
         );
 
         ManageHearingsAction actionSelection = Optional.ofNullable(finremCaseDetails)
-                .map(FinremCaseDetails::getData)
-                .map(FinremCaseData::getManageHearingsWrapper)
-                .map(ManageHearingsWrapper::getManageHearingsActionSelection)
-                .orElse(null);
+            .map(FinremCaseDetails::getData)
+            .map(FinremCaseData::getManageHearingsWrapper)
+            .map(ManageHearingsWrapper::getManageHearingsActionSelection)
+            .orElse(null);
 
         boolean isAddHearingEvent = ManageHearingsAction.ADD_HEARING.equals(actionSelection);
 
         boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
-                .map(Hearing::getHearingType)
-                .map(noticeOnlyHearingTypes::contains)
-                .orElse(false);
+            .map(Hearing::getHearingType)
+            .map(noticeOnlyHearingTypes::contains)
+            .orElse(false);
 
         return isAddHearingEvent && isNoticeOnlyHearingType;
     }

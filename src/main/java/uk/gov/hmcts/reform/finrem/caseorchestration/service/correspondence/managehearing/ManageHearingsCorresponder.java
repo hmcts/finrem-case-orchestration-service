@@ -63,10 +63,10 @@ public class ManageHearingsCorresponder {
 
         for (DynamicMultiSelectListElement party : partyList.getValue()) {
             sendHearingCorrespondenceByParty(
-                    party,
-                    finremCaseDetails,
-                    hearing,
-                    userAuthorisation
+                party,
+                finremCaseDetails,
+                hearing,
+                userAuthorisation
             );
         }
     }
@@ -173,20 +173,16 @@ public class ManageHearingsCorresponder {
             () -> hearingCorrespondenceHelper.shouldEmailToIntervener(finremCaseDetails, caseRole),
             () -> hearingCorrespondenceHelper.shouldPostToIntervener(finremCaseDetails, caseRole),
             () -> notificationRequestMapper.buildHearingNotificationForIntervenerSolicitor(
-                    finremCaseDetails,
-                    hearing,
-                    caseRole)
+                finremCaseDetails,
+                hearing,
+                caseRole)
         );
     }
 
     /**
-     * Builds and sends a hearing notification to the applicant's solicitor.
-     * If applicantSolicitorShouldGetEmailNotification is true.
-     *
-     * <p>This method uses the {@link ManageHearingsNotificationRequestMapper} to create a {@link NotificationRequest}
-     * based on the case details and hearing provided. It then delegates the actual sending of the notification
-     * to the {@link NotificationService}.</p>
-     *
+     * Common logic to send hearing correspondence to parties.
+     * Party-specific logic is determined by the calling method.
+     * Determines whether to send email notifications post documents.
      * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
      * @param hearing the hearing for which the notification is being sent
      *
@@ -194,6 +190,7 @@ public class ManageHearingsCorresponder {
      */
     private void processCorrespondenceForParty(
         FinremCaseDetails finremCaseDetails,
+        // If FDA or FDR, follow up by emailing certain docs.  Future planned work will address this.
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
@@ -206,7 +203,6 @@ public class ManageHearingsCorresponder {
                 notificationRequestSupplier.get(),
                 caseRole.toString()
             );
-            // If FDA or FDR, follow up by emailing certain docs.  DFR-3820 to follow.
         }
 
         if (shouldPostToParty.get()) {
@@ -236,7 +232,7 @@ public class ManageHearingsCorresponder {
                     log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
                 }
             }
-            // else send hearing docs too.  Logic to follow.
+            // Else send hearing docs too.  Future planned work will address this.
         }
     }
 

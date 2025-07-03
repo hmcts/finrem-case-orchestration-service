@@ -31,8 +31,8 @@ public class ManageHearingsNotificationRequestMapper {
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and applicant/solicitor info
-     * @param hearing the hearing information, specifically used for the hearing type
-     * @return a fully constructed {@link NotificationRequest} ready for dispatch
+     * @param hearing the hearing information
+     * @return a fully constructed {@link NotificationRequest}
      */
     public NotificationRequest buildHearingNotificationForApplicantSolicitor(
             FinremCaseDetails finremCaseDetails,
@@ -53,8 +53,8 @@ public class ManageHearingsNotificationRequestMapper {
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and party solicitor info
-     * @param hearing the hearing information, specifically used for the hearing type
-     * @return a fully constructed {@link NotificationRequest} ready for dispatch
+     * @param hearing the hearing information
+     * @return a fully constructed {@link NotificationRequest}
      */
     public NotificationRequest buildHearingNotificationForRespondentSolicitor(
             FinremCaseDetails finremCaseDetails,
@@ -109,8 +109,6 @@ public class ManageHearingsNotificationRequestMapper {
         String emailServiceCaseType = CaseType.CONTESTED.equals(finremCaseDetails.getCaseType())
             ? EmailService.CONTESTED : EmailService.CONSENTED;
 
-        // Todo - fix this.  Always returns birmingham.  Need to look
-        // at what is captured as part of manage hearings, and map that to the right FRC email details
         String selectedFRC  = CourtHelper.getFRCForHearing(hearing);
 
         return NotificationRequest.builder()

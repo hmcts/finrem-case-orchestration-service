@@ -26,8 +26,8 @@ class ManageHearingsNotificationRequestMapperTest {
     /**
      * Data setup here should be common to all Manage Hearing Notifications.
      * Things to note:
-     *      * - The NotificationRequest.CaseType is compared with an EmailService CaseType.
-     *      * - Only last names are passed as names for the applicant and respondent.
+     * - The NotificationRequest.CaseType is compared with an EmailService CaseType.
+     * - Only last names are passed as names for the applicant and respondent.
      */
     @BeforeEach
     void setUp() {
