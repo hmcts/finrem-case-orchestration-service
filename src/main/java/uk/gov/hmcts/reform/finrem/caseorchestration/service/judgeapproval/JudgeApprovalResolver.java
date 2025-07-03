@@ -114,7 +114,7 @@ class JudgeApprovalResolver {
                 approvable.setOrderStatus(APPROVED_BY_JUDGE);
                 approvable.setApprovalDate(LocalDateTime.now());
                 //TODO: Set Court order date from judge approval input - revert below.
-//                approvable.setCourtOrderDate(judgeApproval.getCourtOrderDate());
+                approvable.setCourtOrderDate(judgeApproval.getCourtOrderDate());
             }
             if (refused) {
                 approvable.setOrderStatus(REFUSED);
@@ -127,7 +127,7 @@ class JudgeApprovalResolver {
             if(approved) {
                 CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
                     buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-                //approvable.setCoverLetter(coverLetter);
+                approvable.setCoverLetter(coverLetter);
                 log.info("Generated coversheet for JudgeApproval on Case id {} with document filename {}", finremCaseDetails.getId(), coverLetter.getDocumentFilename());
             }
         }

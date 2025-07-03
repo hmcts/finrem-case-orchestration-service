@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.OrderFiledBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.RefusalOrderConvertible;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,18 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
     private LocalDateTime refusedDate;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime notificationSentDate;
+
+    @JsonIgnore
+    @Override
+    public LocalDate getCourtOrderDate() {
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
+    public CaseDocument getCoverLetter() {
+        return null;
+    }
 
     @JsonIgnore
     @Override
