@@ -288,6 +288,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalisedDocument(draftOrderDocumentReview.getTargetDocument())
                 .finalOrder(draftOrderDocumentReview.getFinalOrder())
                 .approvalDate(draftOrderDocumentReview.getApprovalDate())
+                .courtOrderDate(draftOrderDocumentReview.getCourtOrderDate())
                 .approvalJudge(draftOrderDocumentReview.getApprovalJudge())
                 .build())
             .build();
@@ -330,6 +331,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         log.info("Creating hearing document pack for caseId {}", getCaseId(caseDetails));
         FinremCaseData caseData = caseDetails.getData();
 
+        // TODO: CHECK cover letter is not null
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
         if (caseData.getOrderApprovedCoverLetter() == null) {
             throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");

@@ -11,12 +11,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
@@ -52,7 +58,9 @@ public class ContestedOrderApprovedLetterService {
      * @param judgeDetails       the details of the judge approving the order. It can be null.
      * @param authorisationToken the authorisation token for document generation service
      */
-    public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+    public CaseDocument generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String judgeDetails, String authorisationToken) {
+        // Ensure the order approved date is set for the cover letter
+        updateOrderApprovedDateForCoverLetter(finremCaseDetails);
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
@@ -63,6 +71,33 @@ public class ContestedOrderApprovedLetterService {
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
+
+        //TODO: Return the cover letter document for the approval process for EACH draft order
+        log.info("Generated contested order approved cover letter for case ID: {}", finremCaseDetails.getId());
+        return approvedOrderCoverLetter;
+    }
+
+    //TODO: Get this date from the Court order date form input (which is prepopulated with the current date)
+    /**
+     * NEW:
+     * Updates the order approved date in the case details for the cover letter.
+     *
+     * <p>
+     * This method retrieves the last finalised order from the case details and sets the order approved date
+     * to the approval date of that order. If no finalised orders are present, it defaults to the current date.
+     *
+     * @param finremCaseDetails the case details containing draft orders
+     */
+    private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
+        List<FinalisedOrderCollection> finalisedOrders =
+            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of());
+        FinalisedOrderCollection lastOrder = new LinkedList<>(finalisedOrders).peekLast();
+
+        LocalDate orderApprovedDate = LocalDate.from(ofNullable(lastOrder)
+            .map(FinalisedOrderCollection::getValue)
+            .map(FinalisedOrder::getApprovalDate)
+            .orElse(LocalDate.now().atStartOfDay()));
+            finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
     }
 
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
@@ -88,5 +123,7 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        // Set the orderApprovedDate for the cover letter Docmosis template
+        caseData.put("orderApprovedDate", caseData.get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }

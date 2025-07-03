@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.HasSub
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.WithAttachments;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -94,6 +95,19 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
                     + "Ensure the document to be amended corresponds to a valid existing document."
             );
         }
+    }
+
+    @JsonIgnore
+    @Override
+    public LocalDate getCourtOrderDate() {
+        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
+    public CaseDocument getCoverLetter() {
+        return null;
     }
 
 }
