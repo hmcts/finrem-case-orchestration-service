@@ -337,23 +337,23 @@ class ManageHearingsMigrationServiceTest {
                 }
 
                 List<ManageHearingsCollectionItem> migratedHearings = actualHearings.stream()
-                        .filter(item -> !item.equals(existingHearing))
-                        .toList();
+                    .filter(item -> !item.equals(existingHearing))
+                    .toList();
 
                 Hearing expectedHearing = Hearing.builder()
-                        .hearingDate(interimHearingDateOne)
-                        .hearingType(interimHearingTypeeOne)
-                        .hearingTimeEstimate(interimHearingTimeEstimateOne)
-                        .hearingTime(interimHearingTimeOne)
-                        .hearingCourtSelection(interimHearingCourtOne)
-                        .additionalHearingInformation(interimHearingAdditionalInfoOne)
-                        .wasMigrated(YesOrNo.YES)
-                        .build();
+                    .hearingDate(interimHearingDateOne)
+                    .hearingType(interimHearingTypeeOne)
+                    .hearingTimeEstimate(interimHearingTimeEstimateOne)
+                    .hearingTime(interimHearingTimeOne)
+                    .hearingCourtSelection(interimHearingCourtOne)
+                    .additionalHearingInformation(interimHearingAdditionalInfoOne)
+                    .wasMigrated(YesOrNo.YES)
+                    .build();
 
                 assertThat(migratedHearings)
-                        .anySatisfy(item -> assertThat(item.getValue())
-                            .usingRecursiveComparison()
-                            .isEqualTo(expectedHearing));
+                    .anySatisfy(item -> assertThat(item.getValue())
+                        .usingRecursiveComparison()
+                        .isEqualTo(expectedHearing));
             }
         }
     }
