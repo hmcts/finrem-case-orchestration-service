@@ -288,6 +288,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalisedDocument(draftOrderDocumentReview.getTargetDocument())
                 .finalOrder(draftOrderDocumentReview.getFinalOrder())
                 .approvalDate(draftOrderDocumentReview.getApprovalDate())
+                .courtOrderDate(draftOrderDocumentReview.getCourtOrderDate())
                 .approvalJudge(draftOrderDocumentReview.getApprovalJudge())
                 .build())
             .build();
