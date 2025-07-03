@@ -34,6 +34,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 @Service
 @RequiredArgsConstructor
@@ -312,9 +313,5 @@ public class ManageHearingsMigrationService {
             .value(interimHearingNotice)
             .build());
         return hearingDocuments;
-    }
-
-    private static <T> List<T> toSingletonListOrNull(T item) {
-        return item == null ? null : List.of(item);
     }
 }
