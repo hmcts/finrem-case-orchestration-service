@@ -292,7 +292,6 @@ public class ManageHearingsMigrationService {
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
                 interimHearingItem.getInterimAdditionalInformationAboutHearing()))
             .tabHearingMigratedDate(LocalDateTime.now())
-            // TODO Do we need hearing notice?
             .tabHearingDocuments(prepareInterimHearingDocuments(hearingNotice, interimHearingItem))
             .build();
     }
