@@ -45,6 +45,7 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate courtOrderDate;
+    private CaseDocument coverLetter;
     private YesOrNo anotherHearingToBeListed;
     private String hearingType;
     private String hearingTimeEstimate;

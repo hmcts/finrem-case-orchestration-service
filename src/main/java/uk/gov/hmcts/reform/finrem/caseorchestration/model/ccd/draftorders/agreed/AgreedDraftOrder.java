@@ -80,6 +80,13 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
 
     @JsonIgnore
     @Override
+    public CaseDocument getCoverLetter() {
+        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
     public CaseDocument getTargetDocument() {
         if (draftOrder != null) {
             return draftOrder;

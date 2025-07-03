@@ -67,9 +67,6 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         // and clearing them in the about to start callback doesn't work with CCD
         draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
         Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
-        if (containsApprovalStatus(statuses)) {
-            generateAndStoreCoverLetter(caseDetails, userAuthorisation);
-        }
         clearInputFields(draftOrdersWrapper);
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
 
@@ -85,15 +82,6 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
             log.warn("{} - Judge type was not captured and an empty string will be shown in the cover letter.", finremCaseDetails.getId());
         }
         return judgeType;
-    }
-
-    private void generateAndStoreCoverLetter(FinremCaseDetails finremCaseDetails, String userAuthorisation) {
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
-            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-    }
-
-    private String buildJudgeDetails(String judgeType, String judgeName) {
-        return StringUtils.join(Stream.of(judgeType, judgeName).filter(StringUtils::isNotBlank).toArray(String[]::new), " ");
     }
 
     private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {

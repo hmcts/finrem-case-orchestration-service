@@ -20,6 +20,8 @@ public interface Approvable extends DocumentMatcher {
 
     LocalDate getCourtOrderDate();
 
+    CaseDocument getCoverLetter();
+
     /**
      * Retrieves the target document from the available options.
      *
@@ -50,5 +52,8 @@ public interface Approvable extends DocumentMatcher {
     void replaceDocument(CaseDocument amendedDocument);
 
     default void setCourtOrderDate(LocalDate courtOrderDate) {
+    }
+
+    default void setCoverLetter(CaseDocument coverLetter) {
     }
 }
