@@ -174,17 +174,6 @@ public class ManageHearingsMigrationService {
         return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
     }
 
-    private <T> void appendToList(Supplier<List<T>> getter, Consumer<List<T>> setter, T item) {
-        List<T> list = getter.get();
-        if (list == null) {
-            list = new ArrayList<>();
-        } else {
-            list = new ArrayList<>(list); // in case it is Immutable
-        }
-        list.add(item);
-        setter.accept(list);
-    }
-
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
