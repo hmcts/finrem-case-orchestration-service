@@ -95,5 +95,4 @@ public abstract class FinremMultiLetterOnlyAllPartiesCorresponder extends MultiL
     protected boolean shouldSendIntervenerSolicitorEmail(IntervenerWrapper intervenerWrapper, FinremCaseDetails caseDetails) {
         return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(intervenerWrapper, caseDetails);
     }
-
 }
