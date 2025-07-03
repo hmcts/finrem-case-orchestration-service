@@ -648,34 +648,66 @@ public class CourtHelper {
     public static String getFRCForHearing(Hearing hearing) {
 
         String regionString = Optional.ofNullable(hearing)
-                .map(Hearing::getHearingCourtSelection)
-                .map(Court::getRegion)
-                .map(Region::getValue)
-                .orElse(null);
+            .map(Hearing::getHearingCourtSelection)
+            .map(Court::getRegion)
+            .map(Region::getValue)
+            .orElse(null);
 
         if (MIDLANDS.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getMidlandsList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getMidlandsList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (LONDON.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getLondonList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getLondonList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (NORTHWEST.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getNorthWestList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getNorthWestList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (NORTHEAST.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getNorthEastList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getNorthEastList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (SOUTHEAST.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getSouthEastList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getSouthEastList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (SOUTHWEST.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getSouthWestList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getSouthWestList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (WALES.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getWalesList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getWalesList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         if (HIGHCOURT.equalsIgnoreCase(regionString)) {
-            return hearing.getHearingCourtSelection().getHcCourtList().getValue();
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getHcCourtList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
         }
         return EMPTY;
     }
