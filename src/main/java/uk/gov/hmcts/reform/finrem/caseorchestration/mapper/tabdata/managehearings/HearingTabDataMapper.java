@@ -91,26 +91,25 @@ public class HearingTabDataMapper {
      * @return a list of `DocumentCollectionItem` objects representing all documents associated with the hearing
      */
     private List<DocumentCollectionItem> mapHearingDocumentsToTabData(
-        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
-        UUID hearingId,
-        Hearing hearing) {
+            List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+            UUID hearingId, Hearing hearing) {
 
         List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
-            ? hearingDocumentsCollection.stream()
-            .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
-            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
-            .toList()
-            : List.of();
+                ? hearingDocumentsCollection.stream()
+                .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
+                .toList()
+                : List.of();
 
         List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
-            ? hearing.getAdditionalHearingDocs().stream()
-            .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
-            .toList()
-            : List.of();
-        
+                ? hearing.getAdditionalHearingDocs().stream()
+                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
+                .toList()
+                : List.of();
+
         return Stream.concat(
-            hearingDocuments.stream(),
-            additionalDocs.stream()
+                hearingDocuments.stream(),
+                additionalDocs.stream()
         ).toList();
     }
 }

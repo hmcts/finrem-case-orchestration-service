@@ -52,7 +52,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestDat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultConsentedFinremCaseData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.TestData.getDefaultContestedFinremCaseData;
 
-
 @ExtendWith(MockitoExtension.class)
 class FinremNotificationRequestMapperTest {
 

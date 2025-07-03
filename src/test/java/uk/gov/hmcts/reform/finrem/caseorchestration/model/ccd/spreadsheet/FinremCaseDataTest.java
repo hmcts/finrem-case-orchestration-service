@@ -3,13 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 
@@ -22,32 +23,34 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @Slf4j
-public class FinremCaseDataTest {
+class FinremCaseDataTest {
 
-    public static final String CCD_CONFIG_AAT_CONTESTED_XLSX = "ccd-config-aat-contested";
-    public static final String CCD_CONFIG_AAT_CONSENTED_XLSX = "ccd-config-aat-consented";
+    static final String CCD_CONFIG_AAT_CONTESTED_XLSX = "ccd-config-aat-contested";
+    static final String CCD_CONFIG_AAT_CONSENTED_XLSX = "ccd-config-aat-consented";
 
-    public static final String CCD_CONFIG_PREVIEW_CONTESTED_XLSX = "ccd-config-preview-contested";
-    public static final String CCD_CONFIG_PREVIEW_CONSENTED_XLSX = "ccd-config-preview-consented";
-    public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
-    public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
-    public static final String CCD_CONFIG_LOCAL_CONSENTED_XLSX = "ccd-config-local-consented-base.xlsx";
-    public static final String CCD_CONFIG_LOCAL_CONTESTED_XLSX = "ccd-config-local-contested-base.xlsx";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
+    static final String CCD_CONFIG_PREVIEW_CONTESTED_XLSX = "ccd-config-preview-contested";
+    static final String CCD_CONFIG_PREVIEW_CONSENTED_XLSX = "ccd-config-preview-consented";
+    static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
+    static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
+    static final String CCD_CONFIG_LOCAL_CONSENTED_XLSX = "ccd-config-local-consented-base.xlsx";
+    static final String CCD_CONFIG_LOCAL_CONTESTED_XLSX = "ccd-config-local-contested-base.xlsx";
+    static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
+    static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
 
-    private String consentedFileNameWithPath = null;
-    private String contestedFileNameWithPath = null;
-    private final boolean localMode = System.getenv("JENKINS_BRANCH") == null;
-    private boolean testEnabled = true;
+    String consentedFileNameWithPath = null;
+    String contestedFileNameWithPath = null;
+    final boolean localMode = System.getenv("JENKINS_BRANCH") == null;
+    boolean testEnabled = true;
 
-    @Before
-    public void setUpDefinitionFiles() {
+    @BeforeEach
+    void setUpDefinitionFiles() {
         String branch = System.getenv("JENKINS_BRANCH");
         if (isMaster(branch)) {
             testEnabled = false;
@@ -95,16 +98,17 @@ public class FinremCaseDataTest {
         Path dirPath = Paths.get(filePath).toAbsolutePath();
         File directoryPath = dirPath.toFile();
         String[] list = directoryPath.list();
-        for (int i = 0; i < list.length; i++) {
-            if (list[i].startsWith(filePrefix)) {
-                return filePath + "/" + list[i];
+        assertNotNull(list);
+        for (String s : list) {
+            if (s.startsWith(filePrefix)) {
+                return filePath + "/" + s;
             }
         }
         return null;
     }
 
     @Test
-    public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
+    void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
         List<File> configFiles = Arrays.asList(getFile(contestedFileNameWithPath),
             getFile(consentedFileNameWithPath));
@@ -112,7 +116,7 @@ public class FinremCaseDataTest {
     }
 
     @Test
-    public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
+    void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
         List<File> configFiles = Arrays.asList(getFile(consentedFileNameWithPath),
             getFile(contestedFileNameWithPath));
@@ -120,21 +124,21 @@ public class FinremCaseDataTest {
     }
 
     @Test
-    public void testConsentedStateData() throws IOException, InvalidFormatException {
+    void testConsentedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
         File configFile = getFile(consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
-    public void testContestedStateData() throws IOException, InvalidFormatException {
+    void testContestedStateData() throws IOException, InvalidFormatException {
         assumeTrue(testEnabled);
         File configFile = getFile(contestedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
-    public void testAllFieldsWithWrapperShouldHaveJsonIncludeNonNull() {
+    void testAllFieldsWithWrapperShouldHaveJsonIncludeNonNull() {
         List<Field> allFields = getAllFields(FinremCaseData.class);
         List<Field> wrapperFields = allFields.stream()
             .filter(field -> field.getName().contains("Wrapper"))
@@ -151,7 +155,7 @@ public class FinremCaseDataTest {
     }
 
     @Test
-    public void testGetSelectedAllocatedCourt() {
+    void testGetSelectedAllocatedCourt() {
         DefaultCourtListWrapper courtListWrapper = DefaultCourtListWrapper.builder()
             .cleavelandCourtList(ClevelandCourt.FR_CLEVELAND_HC_LIST_1)
             .build();
@@ -167,6 +171,21 @@ public class FinremCaseDataTest {
             .build();
 
         assertEquals(ClevelandCourt.FR_CLEVELAND_HC_LIST_1.getSelectedCourtId(), data.getSelectedAllocatedCourt());
+    }
+
+    /**
+     * Checks that getRespondentSolicitorEmailForContested get the email correctly.
+     * Checks that a blank email string us returned when no email is set.
+     */
+    @Test
+    void testGetRespondentSolicitorEmail() {
+
+        FinremCaseData finremCaseData = new FinremCaseData();
+        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("");
+
+        ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder().respondentSolicitorEmail("respondent@testemail.com").build();
+        finremCaseData.setContactDetailsWrapper(wrapper);
+        assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("respondent@testemail.com");
     }
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {

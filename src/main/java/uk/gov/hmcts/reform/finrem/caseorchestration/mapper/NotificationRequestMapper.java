@@ -183,7 +183,6 @@ public class NotificationRequestMapper {
             .build();
     }
 
-
     private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(CaseDetails caseDetails) {
         return getLastRepresentationUpdate(caseDetails).getParty().equals(RESPONDENT);
     }

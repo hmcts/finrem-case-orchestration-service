@@ -53,6 +53,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -163,6 +165,8 @@ class NotificationServiceTest {
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-old-two-new-collections.json";
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
+    @TestLogs
+    private final TestLogger logs = new TestLogger(NotificationService.class);
     @InjectMocks
     private NotificationService notificationService;
     @Mock
@@ -1666,11 +1670,13 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testSendHearingNotificationToApplicant() {
+    void testSendHearingNotificationToSolicitor() {
         NotificationRequest nr = NotificationRequest.builder()
                 .notificationEmail("test@test.com")
+                .caseReferenceNumber("123")
                 .build();
-        notificationService.sendHearingNotificationToApplicant(nr);
+        notificationService.sendHearingNotificationToSolicitor(nr, CaseRole.APP_SOLICITOR.toString());
+        assertTrue(logs.getInfos().contains("123 - Sending hearing notification to solicitor with role APP_SOLICITOR"));
         verify(emailService).sendConfirmationEmail(nr, FR_CONTESTED_HEARING_NOTIFICATION_SOLICITOR);
     }
 

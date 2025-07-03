@@ -2,12 +2,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALDERSHOT;
@@ -634,6 +637,81 @@ public class CourtHelper {
         return EMPTY;
     }
 
+    /**
+     * Returns the FRC, Financial Remedies Region, for the provided hearing.
+     * Each FRC selected by a User in Manage Cases will be stored against the hearing.
+     * So the result of this method is qualified by region.
+     *
+     * @param hearing for which the FRC is required.
+     * @return The financial remedies court as a String.
+     */
+    public static String getFRCForHearing(Hearing hearing) {
+
+        String regionString = Optional.ofNullable(hearing)
+            .map(Hearing::getHearingCourtSelection)
+            .map(Court::getRegion)
+            .map(Region::getValue)
+            .orElse(null);
+
+        if (MIDLANDS.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getMidlandsList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (LONDON.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getLondonList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (NORTHWEST.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getNorthWestList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (NORTHEAST.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getNorthEastList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (SOUTHEAST.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getSouthEastList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (SOUTHWEST.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getSouthWestList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (WALES.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getWalesList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        if (HIGHCOURT.equalsIgnoreCase(regionString)) {
+            return Optional.of(hearing)
+                .map(Hearing::getHearingCourtSelection)
+                .map(Court::getHcCourtList)
+                .map(regionFRC -> regionFRC.getValue())
+                .orElse(EMPTY);
+        }
+        return EMPTY;
+    }
+
     private static String getWalesFRC(Map<String, Object> mapOfCaseData) {
         String walesList = (String) mapOfCaseData.get(WALES_FRC_LIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
@@ -709,7 +787,6 @@ public class CourtHelper {
         }
         return EMPTY;
     }
-
 
     private static String getMidlandFRC(Map<String, Object> mapOfCaseData) {
         String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
