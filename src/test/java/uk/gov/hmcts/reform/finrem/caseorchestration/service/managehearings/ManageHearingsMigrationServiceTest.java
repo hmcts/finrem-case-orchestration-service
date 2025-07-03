@@ -262,7 +262,32 @@ class ManageHearingsMigrationServiceTest {
         // Assert
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
         assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
+        assertThat(caseData.getManageHearingsWrapper().getHearings()).isNull();
         assertThat(logs.getWarns()).contains(CASE_ID + " - List for Interim Hearing migration skipped.");
+
+        verifyNoInteractions(hearingTabDataMapper);
+    }
+
+    @Test
+    void givenMigratedCaseDataWithoutInterimHearings_whenPopulateListForInterimHearing_thenMarkMigrated() {
+        // Arrange
+        MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
+                .mhMigrationVersion("1")
+                .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+                .ccdCaseId(CASE_ID)
+                .mhMigrationWrapper(mhMigrationWrapper)
+                .build();
+
+        // Act
+        underTest.populateListForInterimHearingWrapper(caseData);
+
+        // Assert
+        assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
+        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
+        assertThat(caseData.getManageHearingsWrapper().getHearings()).isNull();
+        assertThat(logs.getWarns()).doesNotContain(CASE_ID + " - List for Interim Hearing migration skipped.");
 
         verifyNoInteractions(hearingTabDataMapper);
     }

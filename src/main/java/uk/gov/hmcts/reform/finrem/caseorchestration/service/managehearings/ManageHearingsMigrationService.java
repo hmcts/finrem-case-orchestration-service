@@ -92,12 +92,12 @@ public class ManageHearingsMigrationService {
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
 
         // Validation
-        if (!shouldPopulateListForInterimHearingWrapper(mhMigrationWrapper, interimWrapper)) {
+        if (!shouldPopulateListForInterimHearingWrapper(mhMigrationWrapper)) {
             log.warn("{} - List for Interim Hearing migration skipped.", caseData.getCcdCaseId());
             return;
         }
 
-        List<InterimHearingItem> interimHearingItems = interimWrapper.getInterimHearings().stream()
+        List<InterimHearingItem> interimHearingItems = emptyIfNull(interimWrapper.getInterimHearings()).stream()
             .map(InterimHearingCollection::getValue)
             .toList();
 
@@ -125,18 +125,14 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
-    private boolean shouldPopulateListForInterimHearingWrapper(MhMigrationWrapper mhMigrationWrapper,
-                                                               InterimWrapper interimWrapper) {
-        if (YesOrNo.isYes(mhMigrationWrapper.getIsListForInterimHearingsMigrated())) {
-            return false;
-        }
-        return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
+    private boolean shouldPopulateListForInterimHearingWrapper(MhMigrationWrapper mhMigrationWrapper) {
+        return !YesOrNo.isYes(mhMigrationWrapper.getIsListForInterimHearingsMigrated());
     }
 
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
-        /*
+        /* Requires DFR-3831 and DFR-3587
         addItemToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
         addItemToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
