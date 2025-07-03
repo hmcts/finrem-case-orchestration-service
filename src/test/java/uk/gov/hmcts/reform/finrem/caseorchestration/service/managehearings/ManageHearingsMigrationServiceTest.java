@@ -238,10 +238,22 @@ class ManageHearingsMigrationServiceTest {
                     .build();
 
                 assertThat(migratedHearings)
-                    .anySatisfy(item -> assertThat(item.getValue())
-                        .usingRecursiveComparison()
-                        .ignoringFields("additionalHearingDocs")
-                        .isEqualTo(expectedHearing));
+                    .anySatisfy(item -> {
+                        assertThat(item.getValue())
+                            .usingRecursiveComparison()
+                            .ignoringFields("additionalHearingDocs")
+                            .isEqualTo(expectedHearing);
+
+                        if (withAdditionalDocument) {
+                            assertThat(item.getValue())
+                                .extracting(Hearing::getAdditionalHearingDocs)
+                                .satisfies(documents ->
+                                    assertThat(documents).isNotNull().hasSize(1)
+                                        .extracting(DocumentCollectionItem::getValue)
+                                        .containsExactly(additionalCaseDocument)
+                                );
+                        }
+                    });
             }
         }
     }
