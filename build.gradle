@@ -131,7 +131,7 @@ configurations {
 
 configurations.all {
     resolutionStrategy {
-        force 'commons-fileupload:commons-fileupload:1.6'
+        force 'commons-fileupload:commons-fileupload:1.6.0'
     }
 }
 
