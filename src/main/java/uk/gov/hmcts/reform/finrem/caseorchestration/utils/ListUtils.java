@@ -1,12 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static java.util.Optional.ofNullable;
 
 public class ListUtils {
 
     private ListUtils() {
+    }
+
+    /**
+     * Adds an item to a list property accessed via getter and setter.
+     *
+     * <p>
+     * This method retrieves the list using the given getter. If the list is null,
+     * it creates a new empty list. If the list exists, it makes a new mutable copy
+     * (to avoid mutating immutable lists). It then adds the specified item and
+     * sets the updated list using the setter.
+     *
+     * @param <T>    the type of elements in the list
+     * @param getter a supplier function that returns the current list or null
+     * @param setter a consumer function that accepts and sets the updated list
+     * @param item   the item to add to the list
+     */
+    public static <T> void addItemToList(Supplier<List<T>> getter, Consumer<List<T>> setter, T item) {
+        List<T> list = ofNullable(getter.get()).map(ArrayList::new).orElseGet(ArrayList::new);
+        list.add(item);
+        setter.accept(list);
     }
 
     /**

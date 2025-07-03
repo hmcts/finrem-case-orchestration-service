@@ -18,10 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 
 @Service
 @RequiredArgsConstructor
@@ -95,30 +93,19 @@ public class ManageHearingsMigrationService {
         return listForHearingWrapper.getHearingType() != null;
     }
 
-    private <T> void appendToList(Supplier<List<T>> getter, Consumer<List<T>> setter, T item) {
-        List<T> list = getter.get();
-        if (list == null) {
-            list = new ArrayList<>();
-        } else {
-            list = new ArrayList<>(list); // in case it is Immutable
-        }
-        list.add(item);
-        setter.accept(list);
-    }
-
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
-        appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
         /*
-        appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
-        appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
                 caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
          */
     }
 
     private void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
-        appendToList(caseData.getManageHearingsWrapper()::getHearings,
+        addItemToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
     }
 
