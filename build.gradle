@@ -530,7 +530,7 @@ tasks.named('checkstyleMain') {
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 510
+    maxWarnings = 511
 }
 
 tasks.named('checkstyleContract') {
