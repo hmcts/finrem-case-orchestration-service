@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -231,9 +232,8 @@ public class ManageHearingsMigrationService {
     }
   
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
-        return safeListWithoutNulls(listForHearingWrapper.getAdditionalListOfHearingDocuments()).stream()
-            .map(caseDocument -> DocumentCollectionItem.builder().value(caseDocument).build())
-            .toList();
+        CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
+        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
     }
 
     private HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem) {
