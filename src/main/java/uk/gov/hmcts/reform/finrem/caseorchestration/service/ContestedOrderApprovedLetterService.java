@@ -66,8 +66,7 @@ public class ContestedOrderApprovedLetterService {
         generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, null, authorisationToken);
     }
 
-
-    //OLD WAY OF SETTING COVER LETTER
+    //Used by FR_uploadApprovedOrder event. Redundant now, but kept for reference.
     /**
      * Generates and stores the contested order approved cover letter for a given case.
      *
@@ -98,7 +97,7 @@ public class ContestedOrderApprovedLetterService {
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
-    //Judges uploaded orders
+    //Used by FR_judgeDraftDirectionOrder event. Not redundant.
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         populateTemplateVariables(caseDetailsCopy, null);
