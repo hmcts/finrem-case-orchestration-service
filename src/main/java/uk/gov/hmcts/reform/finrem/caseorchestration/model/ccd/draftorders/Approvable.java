@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentMatcher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface Approvable extends DocumentMatcher {
@@ -16,6 +17,8 @@ public interface Approvable extends DocumentMatcher {
     String getApprovalJudge();
 
     YesOrNo getFinalOrder();
+
+    LocalDate getCourtOrderDate();
 
     /**
      * Retrieves the target document from the available options.
@@ -45,4 +48,7 @@ public interface Approvable extends DocumentMatcher {
     }
 
     void replaceDocument(CaseDocument amendedDocument);
+
+    default void setCourtOrderDate(LocalDate courtOrderDate) {
+    }
 }

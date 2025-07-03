@@ -99,6 +99,7 @@ class JudgeApprovalResolver {
             approvable.setApprovalJudge(idamService.getIdamFullName(userAuthorisation));
             if (approved) {
                 approvable.setFinalOrder(YesOrNo.forValue(isFinalOrderSelected(judgeApproval)));
+                approvable.setCourtOrderDate(judgeApproval.getCourtOrderDate());
                 if (judgeApproval.getJudgeDecision() == JUDGE_NEEDS_TO_MAKE_CHANGES) {
                     approvable.replaceDocument(judgeApproval.getAmendedDocument());
                 }
