@@ -32,7 +32,7 @@ public class InterimHearingContestedMidHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.INTERIM_HEARING.equals(eventType));
+            && EventType.INTERIM_HEARING.equals(eventType);
     }
 
     @Override
