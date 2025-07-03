@@ -248,9 +248,9 @@ public class ManageHearingsMigrationService {
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)
-            //.hearingMode(null) // TODO Ignore it because existing List for Interim Hearing doesn't capture hearing mode
+            //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
-            .additionalHearingDocs(toSingletonListOrNull(additionalDocument)) // TODO Ask if HearingNotice is required in this field.
+            .additionalHearingDocs(toSingletonListOrNull(additionalDocument))
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
