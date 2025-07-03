@@ -253,30 +253,6 @@ class ManageHearingsMigrationServiceTest {
         verifyNoInteractions(hearingTabDataMapper);
     }
 
-    @Test
-    void givenNonMigratedCaseDataWithInsufficientHearingNotice_whenPopulateListForInterimHearing_thenStopProcess() {
-        // Arrange
-        MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder().build();
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .ccdCaseId(CASE_ID)
-            .mhMigrationWrapper(mhMigrationWrapper)
-            .interimWrapper(InterimWrapper.builder()
-                .interimHearings(toInterimHearings(mock(InterimHearingItem.class)))
-                .build())
-            .build();
-
-        // Act
-        underTest.populateListForInterimHearingWrapper(caseData);
-
-        // Assert
-        assertEquals(YesOrNo.NO, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
-        assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).isNull();
-        assertThat(logs.getWarns()).contains(CASE_ID + " - List for Interim Hearing migration fails. Insufficient interim hearing documents.");
-
-        verifyNoInteractions(hearingTabDataMapper);
-    }
-
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void givenNonMigratedWithSingleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(

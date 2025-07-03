@@ -4,13 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
@@ -27,16 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 @Service
 @RequiredArgsConstructor
@@ -95,25 +87,6 @@ public class ManageHearingsMigrationService {
         return mhMigrationWrapper.getMhMigrationVersion()  != null;
     }
 
-    /**
-     * Populates the hearing tab lists in the given {@link FinremCaseData} object based on the interim hearings data.
-     *
-     * <p>
-     * This method performs the following steps:
-     * <ul>
-     *   <li>Checks if the list for interim hearing wrapper should be populated using migration criteria.</li>
-     *   <li>Validates if the interim hearing documents count matches the expected number.</li>
-     *   <li>Maps interim hearing items and their associated hearing documents into hearing tab items.</li>
-     *   <li>Appends the created hearing tab items to the applicant, respondent, and general hearing tab collections.</li>
-     *   <li>Sets the migration flag {@code isListForInterimHearingsMigrated} in {@link MhMigrationWrapper} to YES if successful,
-     *       or NO if migration is skipped or fails due to document count mismatch.</li>
-     * </ul>
-     *
-     * <p>
-     * Logs warnings when migration is skipped or fails due to insufficient documents.
-     *
-     * @param caseData the {@link FinremCaseData} containing interim hearing and migration wrappers; must not be {@code null}
-     */
     public void populateListForInterimHearingWrapper(FinremCaseData caseData) {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
@@ -123,28 +96,14 @@ public class ManageHearingsMigrationService {
             log.warn("{} - List for Interim Hearing migration skipped.", caseData.getCcdCaseId());
             return;
         }
-        if (!doesInterimHearingDocumentCountMatch(interimWrapper)) {
-            log.warn("{} - List for Interim Hearing migration fails. Insufficient interim hearing documents.",
-                caseData.getCcdCaseId());
-            mhMigrationWrapper.setIsListForInterimHearingsMigrated(YesOrNo.NO);
-            return;
-        }
 
         List<InterimHearingItem> interimHearingItems = interimWrapper.getInterimHearings().stream()
             .map(InterimHearingCollection::getValue)
             .toList();
 
-        List<CaseDocument> interimHearingNotices = interimWrapper.getInterimHearingDocuments().stream()
-            .map(InterimHearingBulkPrintDocumentsData::getValue)
-            .map(InterimHearingBulkPrintDocument::getCaseDocument)
-            .toList();
-
-        IntStream.range(0, interimHearingItems.size()).forEach(i -> {
-            InterimHearingItem interimHearingItem = interimHearingItems.get(i);
-            CaseDocument hearingNotice = interimHearingNotices.get(i);
-
+        interimHearingItems.forEach(interimHearingItem -> {
             appendToHearingTabItems(caseData, HearingTabCollectionItem.builder()
-                .value(toHearingTabItem(interimHearingItem, hearingNotice)).build());
+                .value(toHearingTabItem(interimHearingItem)).build());
             appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(toHearing(interimHearingItem)).build());
         });
 
@@ -273,7 +232,7 @@ public class ManageHearingsMigrationService {
             .build();
     }
 
-    private HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem, CaseDocument hearingNotice) {
+    private HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem) {
         return HearingTabItem.builder()
             .tabHearingType(interimHearingItem.getInterimHearingType().getId())
             .tabCourtSelection(hearingTabDataMapper.getCourtName(interimHearingItem.toCourt()))
@@ -284,25 +243,13 @@ public class ManageHearingsMigrationService {
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
                 interimHearingItem.getInterimAdditionalInformationAboutHearing()))
             .tabHearingMigratedDate(LocalDateTime.now())
-            .tabHearingDocuments(prepareInterimHearingDocuments(hearingNotice, interimHearingItem))
+            .tabHearingDocuments(prepareInterimHearingDocuments(interimHearingItem))
             .build();
     }
 
-    private boolean doesInterimHearingDocumentCountMatch(InterimWrapper interimWrapper) {
-        return emptyIfNull(interimWrapper.getInterimHearings()).size() == emptyIfNull(interimWrapper.getInterimHearingDocuments()).size();
-    }
-
-    private List<DocumentCollectionItem> prepareInterimHearingDocuments(CaseDocument interimHearingNotice,
-                                                                        InterimHearingItem interimHearingItem) {
-        List<DocumentCollectionItem> hearingDocuments = new ArrayList<>();
-        if (interimHearingItem.getInterimUploadAdditionalDocument() != null) {
-            hearingDocuments.add(DocumentCollectionItem.builder()
-                .value(interimHearingItem.getInterimUploadAdditionalDocument())
-                .build());
-        }
-        hearingDocuments.add(DocumentCollectionItem.builder()
-            .value(interimHearingNotice)
+    private List<DocumentCollectionItem> prepareInterimHearingDocuments(InterimHearingItem interimHearingItem) {
+        return toSingletonListOrNull(DocumentCollectionItem.builder()
+            .value(interimHearingItem.getInterimUploadAdditionalDocument())
             .build());
-        return hearingDocuments;
     }
 }
