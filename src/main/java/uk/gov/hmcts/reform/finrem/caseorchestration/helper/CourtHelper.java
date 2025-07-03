@@ -756,7 +756,6 @@ public class CourtHelper {
         return EMPTY;
     }
 
-
     private static String getMidlandFRC(Map<String, Object> mapOfCaseData) {
         String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
         return getMidlandsCourtName(midlandsList);

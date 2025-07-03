@@ -130,14 +130,14 @@ public class HearingCorrespondenceHelper {
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
      * - the Action must be ADD_HEARING
-     * - the HearingType must appear in the NOTICE_ONLY_HEARING_TYPES set
+     * - the HearingType must appear in the noticeOnlyHearingTypes set
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
     public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
 
-        Set<HearingType> NOTICE_ONLY_HEARING_TYPES = Set.of(
+        Set<HearingType> noticeOnlyHearingTypes = Set.of(
                 HearingType.MPS,
                 HearingType.FH,
                 HearingType.DIR,
@@ -158,7 +158,7 @@ public class HearingCorrespondenceHelper {
 
         boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
                 .map(Hearing::getHearingType)
-                .map(NOTICE_ONLY_HEARING_TYPES::contains)
+                .map(noticeOnlyHearingTypes::contains)
                 .orElse(false);
 
         return isAddHearingEvent && isNoticeOnlyHearingType;

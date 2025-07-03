@@ -26,7 +26,8 @@ public class ManageHearingsNotificationRequestMapper {
 
     /**
      * Constructs a {@link NotificationRequest} for sending a hearing notification to the applicant's solicitor.
-     * <p> Gets party specific details for an applicant, then passes to
+     *
+     * <p>Gets party specific details for an applicant, then passes to
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and applicant/solicitor info
@@ -47,7 +48,8 @@ public class ManageHearingsNotificationRequestMapper {
 
     /**
      * Constructs a {@link NotificationRequest} for sending a hearing notification to the respondent's solicitor.
-     * <p> Gets party specific details, then passes to
+     *
+     * <p>Gets party specific details, then passes to
      * buildHearingNotificationForParty to fill in the rest from data common to parties. </p>
      *
      * @param finremCaseDetails the case details including case ID, type, and party solicitor info
@@ -94,7 +96,7 @@ public class ManageHearingsNotificationRequestMapper {
      * @param partySpecificDetails include details for a specific party (applicant, respondent, or intervener).
      * @return NotificationRequest to the calling public method.
      */
-    private NotificationRequest buildHearingNotificationForParty (
+    private NotificationRequest buildHearingNotificationForParty(
             FinremCaseDetails finremCaseDetails,
             Hearing hearing,
             PartySpecificDetails partySpecificDetails) {
