@@ -57,5 +57,4 @@ public class CaseSubmissionPbaValidateMidEventHandler extends FinremCallbackHand
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseDetails.getData()).build();
     }
-
 }
