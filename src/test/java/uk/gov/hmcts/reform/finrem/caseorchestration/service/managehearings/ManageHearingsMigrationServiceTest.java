@@ -46,7 +46,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
