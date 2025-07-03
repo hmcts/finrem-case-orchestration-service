@@ -129,7 +129,7 @@ configurations {
     cftlibRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy {
         force 'commons-fileupload:commons-fileupload:1.6.0'
     }
