@@ -1,15 +1,50 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 class ListUtilsTest {
+
+    @Setter
+    @Getter
+    static class Holder<T> {
+        private List<T> list;
+    }
+
+    @Test
+    void testAddItemToList() {
+        Holder<String> holder = new Holder<>();
+
+        // Case 1: list is null initially
+        assertThat(holder.getList()).isNull();
+        ListUtils.addItemToList(holder::getList, holder::setList, "first");
+        assertThat(holder.getList()).isNotNull()
+            .hasSize(1)
+            .containsExactly("first");
+
+        // Case 2: add to existing mutable list
+        ListUtils.addItemToList(holder::getList, holder::setList, "second");
+        assertThat(holder.getList()).containsExactly("first", "second");
+
+        // Case 3: add to immutable list
+        holder.setList(List.of("immutable"));
+        ListUtils.addItemToList(holder::getList, holder::setList, "added");
+        assertThat(holder.getList()).containsExactly("immutable", "added");
+
+        // Case 4: add null item
+        ListUtils.addItemToList(holder::getList, holder::setList, null);
+        assertThat(holder.getList()).hasSize(3);
+        assertThat(holder.getList().get(2)).isNull();
+    }
 
     @Test
     void testToSingletonListOrNullEdgeCases() {

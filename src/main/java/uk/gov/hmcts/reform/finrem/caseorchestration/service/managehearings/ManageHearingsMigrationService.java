@@ -36,6 +36,8 @@ import java.util.stream.IntStream;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -184,18 +186,18 @@ public class ManageHearingsMigrationService {
     }
 
     private void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
-        appendToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
         /*
-        appendToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
-        appendToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
+        addItemToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
                 caseData.getManageHearingsWrapper()::setRespondentHHearingTabItems, item);
          */
     }
 
     private void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
-        appendToList(caseData.getManageHearingsWrapper()::getHearings,
+        addItemToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
     }
 
