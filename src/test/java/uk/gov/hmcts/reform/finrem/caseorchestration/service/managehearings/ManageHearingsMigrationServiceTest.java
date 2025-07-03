@@ -3,14 +3,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
@@ -37,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,9 +132,19 @@ class ManageHearingsMigrationServiceTest {
         verifyNoInteractions(hearingTabDataMapper);
     }
 
+    private static Stream<Arguments> listForHearingTestConfigurations() {
+        return Stream.of(
+            Arguments.of(true, true),
+            Arguments.of(true, false),
+            Arguments.of(false, true),
+            Arguments.of(false, false)
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenNonMigratedCaseData_whenPopulateListForHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
+    @MethodSource("listForHearingTestConfigurations")
+    void givenNonMigratedCaseData_whenPopulateListForHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing,
+                                                                                                     boolean withAdditionalDocument) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -146,6 +160,7 @@ class ManageHearingsMigrationServiceTest {
 
             HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
             Court court = mock(Court.class);
+            CaseDocument additionalCaseDocument = mock(CaseDocument.class);
 
             when(hearingRegionWrapper.toCourt()).thenReturn(court);
             when(hearingTabDataMapper.getCourtName(court)).thenReturn(expectedCourtName);
@@ -159,6 +174,7 @@ class ManageHearingsMigrationServiceTest {
                 .timeEstimate("45 minutes")
                 .additionalInformationAboutHearing(additionalInfo)
                 .hearingRegionWrapper(hearingRegionWrapper)
+                .additionalListOfHearingDocuments(withAdditionalDocument ? additionalCaseDocument : null)
                 .build();
 
             MhMigrationWrapper mhMigrationWrapper = MhMigrationWrapper.builder()
@@ -207,9 +223,21 @@ class ManageHearingsMigrationServiceTest {
                     .build();
 
                 assertThat(migratedTabItems)
-                    .anySatisfy(tabItem -> assertThat(tabItem.getValue())
-                        .usingRecursiveComparison()
-                        .isEqualTo(expectedTabItem));
+                    .anySatisfy(tabItem -> {
+                        assertThat(tabItem.getValue())
+                            .usingRecursiveComparison()
+                            .ignoringFields("tabHearingDocuments")
+                            .isEqualTo(expectedTabItem);
+                        if (withAdditionalDocument) {
+                            assertThat(tabItem.getValue())
+                                .extracting(HearingTabItem::getTabHearingDocuments)
+                                .satisfies(documents -> {
+                                    assertThat(documents).isNotNull().hasSize(1)
+                                        .extracting(DocumentCollectionItem::getValue)
+                                            .containsExactly(additionalCaseDocument);
+                                });
+                        }
+                    });
             }
 
             // Assert Hearings
@@ -238,6 +266,7 @@ class ManageHearingsMigrationServiceTest {
                 assertThat(migratedHearings)
                     .anySatisfy(item -> assertThat(item.getValue())
                         .usingRecursiveComparison()
+                        .ignoringFields("additionalHearingDocs")
                         .isEqualTo(expectedHearing));
             }
         }
