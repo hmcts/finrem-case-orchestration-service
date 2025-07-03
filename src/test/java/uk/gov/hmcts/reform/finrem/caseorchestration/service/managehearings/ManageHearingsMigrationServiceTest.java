@@ -279,7 +279,8 @@ class ManageHearingsMigrationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedWithSingleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
+    void givenNonMigratedWithSingleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(
+            boolean havingExistingHearing) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -350,7 +351,8 @@ class ManageHearingsMigrationServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void givenNonMigratedWithMultipleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(boolean havingExistingHearing) {
+    void givenNonMigratedWithMultipleInterimHearings_whenPopulateListForInterimHearing_thenHearingsAndHearingTabItemsPopulated(
+            boolean havingExistingHearing) {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
         try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
             mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
@@ -494,9 +496,9 @@ class ManageHearingsMigrationServiceTest {
 
     private static void assertExistingHearingTabItemRetained(List<HearingTabCollectionItem> actualItems,
                                                              HearingTabCollectionItem... existingHearingTabCollectionItems) {
-       List<HearingTabCollectionItem> a = safeListWithoutNulls(existingHearingTabCollectionItems);
-       if (!a.isEmpty()) {
-           assertThat(actualItems).containsAll(a);
-       }
+        List<HearingTabCollectionItem> a = safeListWithoutNulls(existingHearingTabCollectionItems);
+        if (!a.isEmpty()) {
+            assertThat(actualItems).containsAll(a);
+        }
     }
 }
