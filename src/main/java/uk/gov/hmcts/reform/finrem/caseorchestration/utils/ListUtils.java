@@ -65,4 +65,23 @@ public class ListUtils {
         List<T> result = Arrays.stream(items).filter(Objects::nonNull).toList();
         return result.isEmpty() ? null : result;
     }
+
+    /**
+     * Creates a {@link List} from the given varargs, excluding any {@code null} elements.
+     * If the input array is {@code null}, empty, or contains only {@code null} values,
+     * an empty list is returned.
+     *
+     * <p>This method never returns {@code null}.
+     *
+     * @param <T>   the type of the elements
+     * @param items the elements to be included in the list, may be {@code null} or contain {@code null} values
+     * @return a list containing only the non-{@code null} elements of {@code items}, or an empty list if none
+     */
+    @SafeVarargs
+    public static <T> List<T> safeListWithoutNulls(T... items) {
+        if (items == null || items.length == 0) {
+            return List.of();
+        }
+        return Arrays.stream(items).filter(Objects::nonNull).toList();
+    }
 }

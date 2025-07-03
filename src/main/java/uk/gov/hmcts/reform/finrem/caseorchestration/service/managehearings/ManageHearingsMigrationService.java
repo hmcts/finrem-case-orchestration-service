@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -18,8 +19,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
 
 @Service
 @RequiredArgsConstructor
@@ -131,7 +134,7 @@ public class ManageHearingsMigrationService {
             .hearingCourtSelection(hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
-            //.additionalHearingDocs // No additional hearing in existing List for Hearing event
+            .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
@@ -159,6 +162,13 @@ public class ManageHearingsMigrationService {
             .tabConfidentialParties("Unknown")
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
             .tabHearingMigratedDate(LocalDateTime.now())
+            .tabHearingDocuments(toAdditionalHearingDocs(listForHearingWrapper))
             .build();
+    }
+
+    private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
+        return safeListWithoutNulls(listForHearingWrapper.getAdditionalListOfHearingDocuments()).stream()
+            .map(caseDocument -> DocumentCollectionItem.builder().value(caseDocument).build())
+            .toList();
     }
 }
