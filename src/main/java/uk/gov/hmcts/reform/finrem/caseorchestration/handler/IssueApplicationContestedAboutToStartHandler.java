@@ -29,7 +29,6 @@ public class IssueApplicationContestedAboutToStartHandler extends FinremCallback
             && (EventType.ISSUE_APPLICATION.equals(eventType));
     }
 
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {

@@ -29,11 +29,9 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
             && (EventType.ISSUE_APPLICATION.equals(eventType));
     }
 
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Received request to send email for contested 'Application Issued' for Case ID: {}", caseId);
 

@@ -27,7 +27,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,6 +51,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.Inte
 
 @ExtendWith(MockitoExtension.class)
 class FinremAssignToJudgeCorresponderTest {
+
+    @TestLogs
+    private final TestLogger logs = new TestLogger(FinremSingleLetterOrEmailAllPartiesCorresponder.class);
 
     FinremAssignToJudgeCorresponder assignToJudgeCorresponder;
 
@@ -264,14 +272,13 @@ class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    void givenContestedCase_whenEmailNotPopulated_thenSendLetterToApplicantAndRespondentAndIntervenerSolicitor() {
+    void givenContestedCase_whenEmailNotPopulated_thenSendLetterToApplicantRespondentAndIntervener() {
         // Arrange
         FinremCaseDetails caseDetails = buildCaseDetails(CONTESTED, FinremCaseData.builder()
             .intervenerOne(IntervenerOne.builder().intervenerName("intervenerName").build()).build());
 
         when(notificationService.isApplicantSolicitorEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailPopulated(caseDetails)).thenReturn(false);
-
         when(notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(any(IntervenerWrapper.class),
             eq(caseDetails))).thenReturn(false);
 
@@ -313,7 +320,7 @@ class FinremAssignToJudgeCorresponderTest {
     }
 
     @Test
-    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenSendLetter() {
+    void givenConsentedCase_whenRespondentSolicitorEmailNotPopulatedAndRespondentResidesOutsideUK_thenNotSendingLetter() {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .contactDetailsWrapper(ContactDetailsWrapper.builder()
@@ -328,7 +335,8 @@ class FinremAssignToJudgeCorresponderTest {
 
         // Assert
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        verify(bulkPrintService, never()).sendDocumentForPrint(expectedRespondentCaseDocument, caseDetails, CCDConfigConstant.RESPONDENT, AUTH_TOKEN);
+        assertThat(logs.getInfos()).contains(format("Nothing is sent to respondent for Case ID: %s", CASE_ID));
     }
 
     @Test
@@ -339,6 +347,7 @@ class FinremAssignToJudgeCorresponderTest {
 
         // Act
         assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTH_TOKEN);
+
 
         // Assert
         verify(notificationService, never())
