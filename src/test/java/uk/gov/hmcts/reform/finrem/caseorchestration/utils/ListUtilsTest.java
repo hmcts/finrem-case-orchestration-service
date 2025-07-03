@@ -8,7 +8,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 

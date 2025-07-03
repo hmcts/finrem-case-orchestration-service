@@ -62,6 +62,20 @@ class ManageHearingsMigrationServiceTest {
     @InjectMocks
     private ManageHearingsMigrationService underTest;
 
+    private final LocalDate interimHearingDateOne = LocalDate.of(2025, 6, 4);
+    private final HearingType interimHearingTypeeOne = HearingType.FDA;
+    private final String interimHearingTimeOne = "10:00";
+    private final String interimHearingTimeEstimateOne = "1.11 hour";
+    private final String interimHearingAdditionalInfoOne = "Some notes";
+    private final Court interimHearingCourtOne = mock(Court.class);
+
+    private final LocalDate interimHearingDateTwo = LocalDate.of(2025, 6, 9);
+    private final HearingType interimHearingTypeeTwo = HearingType.DIR;
+    private final String interimHearingTimeTwo = "11:00";
+    private final String interimHearingTimeEstimateTwo = "1.12 hour";
+    private final String interimHearingAdditionalInfoTwo = "Some notes 2";
+    private final Court interimHearingCourtTwo = mock(Court.class);
+
     @Test
     void givenNonMigratedData_thenMarkProvidedVersion() {
         // Arrange
@@ -314,13 +328,32 @@ class ManageHearingsMigrationServiceTest {
                     .extracting(HearingTabItem::getTabAdditionalInformation)
                     .containsExactly("<p>Some notes (1)</p>");
             }
-            // Assert Hearings TODO
+            // Assert Hearings
             {
                 List<ManageHearingsCollectionItem> actualHearings = caseData.getManageHearingsWrapper().getHearings();
                 assertThat(actualHearings).hasSize(havingExistingHearing ? 2 : 1);
                 if (havingExistingHearing) {
                     assertThat(actualHearings).contains(existingHearing);
                 }
+
+                List<ManageHearingsCollectionItem> migratedHearings = actualHearings.stream()
+                        .filter(item -> !item.equals(existingHearing))
+                        .toList();
+
+                Hearing expectedHearing = Hearing.builder()
+                        .hearingDate(interimHearingDateOne)
+                        .hearingType(interimHearingTypeeOne)
+                        .hearingTimeEstimate(interimHearingTimeEstimateOne)
+                        .hearingTime(interimHearingTimeOne)
+                        .hearingCourtSelection(interimHearingCourtOne)
+                        .additionalHearingInformation(interimHearingAdditionalInfoOne)
+                        .wasMigrated(YesOrNo.YES)
+                        .build();
+
+                assertThat(migratedHearings)
+                        .anySatisfy(item -> assertThat(item.getValue())
+                            .usingRecursiveComparison()
+                            .isEqualTo(expectedHearing));
             }
         }
     }
@@ -390,46 +423,74 @@ class ManageHearingsMigrationServiceTest {
                     .extracting(HearingTabItem::getTabAdditionalInformation)
                     .containsExactly("<p>Some notes (1)</p>", "<p>Some notes (2)</p>");
             }
+            // Assert Hearings
+            {
+                List<ManageHearingsCollectionItem> actualHearings = caseData.getManageHearingsWrapper().getHearings();
+                assertThat(actualHearings).hasSize(havingExistingHearing ? 4 : 2);
+                if (havingExistingHearing) {
+                    assertThat(actualHearings).contains(existingHearing);
+                }
+
+                List<ManageHearingsCollectionItem> migratedHearings = actualHearings.stream()
+                    .filter(item -> !safeListWithoutNulls(existingHearing, existingHearing2).contains(item))
+                    .toList();
+
+                Hearing expectedHearingOne = Hearing.builder()
+                    .hearingDate(interimHearingDateOne)
+                    .hearingType(interimHearingTypeeOne)
+                    .hearingTimeEstimate(interimHearingTimeEstimateOne)
+                    .hearingTime(interimHearingTimeOne)
+                    .hearingCourtSelection(interimHearingCourtOne)
+                    .additionalHearingInformation(interimHearingAdditionalInfoOne)
+                    .wasMigrated(YesOrNo.YES)
+                    .build();
+
+                Hearing expectedHearingTwo = Hearing.builder()
+                    .hearingDate(interimHearingDateTwo)
+                    .hearingType(interimHearingTypeeTwo)
+                    .hearingTimeEstimate(interimHearingTimeEstimateTwo)
+                    .hearingTime(interimHearingTimeTwo)
+                    .hearingCourtSelection(interimHearingCourtTwo)
+                    .additionalHearingInformation(interimHearingAdditionalInfoTwo)
+                    .wasMigrated(YesOrNo.YES)
+                    .build();
+
+                // Assert both expected hearings are in the migrated list
+                assertThat(migratedHearings)
+                    .extracting(ManageHearingsCollectionItem::getValue)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .containsExactlyInAnyOrder(expectedHearingOne, expectedHearingTwo);
+            }
         }
     }
 
     private InterimHearingItem stubInterimHearingOne() {
-        LocalDate hearingDate = LocalDate.of(2025, 6, 4);
-        String hearingTime = "10:00";
-        String additionalInfo = "Some notes";
-
         InterimHearingItem interimHearingItem = spy(InterimHearingItem.class);
-        interimHearingItem.setInterimHearingTime(hearingTime);
+        interimHearingItem.setInterimHearingTime(interimHearingTimeOne);
         interimHearingItem.setInterimHearingType(InterimTypeOfHearing.FDA);
-        interimHearingItem.setInterimHearingDate(hearingDate);
-        interimHearingItem.setInterimHearingTimeEstimate("1.11 hour");
-        interimHearingItem.setInterimAdditionalInformationAboutHearing(additionalInfo);
+        interimHearingItem.setInterimHearingDate(interimHearingDateOne);
+        interimHearingItem.setInterimHearingTimeEstimate(interimHearingTimeEstimateOne);
+        interimHearingItem.setInterimAdditionalInformationAboutHearing(interimHearingAdditionalInfoOne);
 
-        Court court = mock(Court.class);
-        when(interimHearingItem.toCourt()).thenReturn(court);
-        when(hearingTabDataMapper.getCourtName(court)).thenReturn("COURT ONE NAME");
-        when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn("2025-06-04 10:00");
-        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn("<p>Some notes (1)</p>");
+        when(interimHearingItem.toCourt()).thenReturn(interimHearingCourtOne);
+        when(hearingTabDataMapper.getCourtName(interimHearingCourtOne)).thenReturn("COURT ONE NAME");
+        when(hearingTabDataMapper.getFormattedDateTime(interimHearingDateOne, interimHearingTimeOne)).thenReturn("2025-06-04 10:00");
+        when(hearingTabDataMapper.getAdditionalInformation(interimHearingAdditionalInfoOne)).thenReturn("<p>Some notes (1)</p>");
         return interimHearingItem;
     }
 
     private InterimHearingItem stubInterimHearingTwo() {
-        LocalDate hearingDate = LocalDate.of(2025, 6, 9);
-        String hearingTime = "11:00";
-        String additionalInfo = "Some notes 2";
-
         InterimHearingItem interimHearingItem = spy(InterimHearingItem.class);
-        interimHearingItem.setInterimHearingTime(hearingTime);
+        interimHearingItem.setInterimHearingTime(interimHearingTimeTwo);
         interimHearingItem.setInterimHearingType(InterimTypeOfHearing.DIR);
-        interimHearingItem.setInterimHearingDate(hearingDate);
-        interimHearingItem.setInterimHearingTimeEstimate("1.12 hour");
-        interimHearingItem.setInterimAdditionalInformationAboutHearing(additionalInfo);
+        interimHearingItem.setInterimHearingDate(interimHearingDateTwo);
+        interimHearingItem.setInterimHearingTimeEstimate(interimHearingTimeEstimateTwo);
+        interimHearingItem.setInterimAdditionalInformationAboutHearing(interimHearingAdditionalInfoTwo);
 
-        Court court = mock(Court.class);
-        when(interimHearingItem.toCourt()).thenReturn(court);
-        when(hearingTabDataMapper.getCourtName(court)).thenReturn("COURT TWO NAME");
-        when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn("2025-06-09 11:00");
-        when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn("<p>Some notes (2)</p>");
+        when(interimHearingItem.toCourt()).thenReturn(interimHearingCourtTwo);
+        when(hearingTabDataMapper.getCourtName(interimHearingCourtTwo)).thenReturn("COURT TWO NAME");
+        when(hearingTabDataMapper.getFormattedDateTime(interimHearingDateTwo, interimHearingTimeTwo)).thenReturn("2025-06-09 11:00");
+        when(hearingTabDataMapper.getAdditionalInformation(interimHearingAdditionalInfoTwo)).thenReturn("<p>Some notes (2)</p>");
         return interimHearingItem;
     }
 
