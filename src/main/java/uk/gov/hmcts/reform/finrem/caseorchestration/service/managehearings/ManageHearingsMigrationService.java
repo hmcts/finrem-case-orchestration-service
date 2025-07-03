@@ -29,6 +29,7 @@ import java.util.List;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
 
 @Service
 @RequiredArgsConstructor
@@ -167,7 +168,7 @@ public class ManageHearingsMigrationService {
             .hearingCourtSelection(hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
-            //.additionalHearingDocs // No additional hearing in existing List for Hearing event
+            .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
@@ -225,7 +226,14 @@ public class ManageHearingsMigrationService {
             .tabConfidentialParties("Unknown")
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(additionalInformationAboutHearing))
             .tabHearingMigratedDate(LocalDateTime.now())
+            .tabHearingDocuments(toAdditionalHearingDocs(listForHearingWrapper))
             .build();
+    }
+  
+    private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
+        return safeListWithoutNulls(listForHearingWrapper.getAdditionalListOfHearingDocuments()).stream()
+            .map(caseDocument -> DocumentCollectionItem.builder().value(caseDocument).build())
+            .toList();
     }
 
     private HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem) {
