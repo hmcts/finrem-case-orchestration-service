@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
@@ -70,5 +71,23 @@ class ListUtilsTest {
 
         // duplicate values - just to check ordering preserved
         assertThat(toListOrNull("A", "A", null)).isEqualTo(List.of("A", "A"));
+    }
+
+    @Test
+    void testSafeListWithoutNulls() {
+        // Null input
+        assertThat(safeListWithoutNulls((String[]) null)).isEqualTo(List.of());
+
+        // Empty input
+        assertThat(safeListWithoutNulls()).isEqualTo(List.of());
+
+        // All nulls
+        assertThat(safeListWithoutNulls(null, null)).isEqualTo(List.of());
+
+        // Mixed nulls and non-nulls
+        assertThat(safeListWithoutNulls("a", null, "b", null, "c")).isEqualTo(List.of("a", "b", "c"));
+
+        // No nulls
+        assertThat(safeListWithoutNulls("a", "b", "c")).isEqualTo(List.of("a", "b", "c"));
     }
 }

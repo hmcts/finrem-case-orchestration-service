@@ -45,10 +45,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hasNonNullFirstElement;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toNonNullList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.toSingletonListOrNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.*;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationServiceTest {
@@ -374,8 +372,8 @@ class ManageHearingsMigrationServiceTest {
                     .interimHearingDocuments(toInterimHearingDocuments(interimHearingItem1, interimHearingItem2))
                     .build())
                 .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                    .hearings(toNonNullList(existingHearing, existingHearing2))
-                    .hearingTabItems(toNonNullList(existingHearingTabCollectionItems))
+                    .hearings(toListOrNull(existingHearing, existingHearing2))
+                    .hearingTabItems(toListOrNull(existingHearingTabCollectionItems))
                     .build())
                 .build();
 
@@ -473,8 +471,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     private static List<HearingTabItem> getTargetHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem... existingHearingTabItems) {
-        List<HearingTabCollectionItem> existing = hasNonNullFirstElement(existingHearingTabItems)
-            ? Arrays.asList(existingHearingTabItems) : List.of();
+        List<HearingTabCollectionItem> existing = safeListWithoutNulls(existingHearingTabItems);
         return caseData.getManageHearingsWrapper().getHearingTabItems().stream()
             .filter(item -> !existing.contains(item))
             .map(HearingTabCollectionItem::getValue)
@@ -495,8 +492,9 @@ class ManageHearingsMigrationServiceTest {
 
     private static void assertExistingHearingTabItemRetained(List<HearingTabCollectionItem> actualItems,
                                                              HearingTabCollectionItem... existingHearingTabCollectionItems) {
-        if (hasNonNullFirstElement(existingHearingTabCollectionItems)) {
-            assertThat(actualItems).containsAll(Arrays.asList(existingHearingTabCollectionItems));
-        }
+       List<HearingTabCollectionItem> a = safeListWithoutNulls(existingHearingTabCollectionItems);
+       if (!a.isEmpty()) {
+           assertThat(actualItems).containsAll(a);
+       }
     }
 }
