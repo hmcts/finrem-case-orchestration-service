@@ -18,29 +18,6 @@ public class AssignedToJudgeDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
 
-    /**
-     * Do not expect any return.
-     *
-     * <p>Please use @{@link #generateAssignedToJudgeNotificationLetter(FinremCaseDetails, String, DocumentHelper.PaperNotificationRecipient )}</p>
-     * @param caseDetails instance of CaseDetails
-     * @param authToken instance of String
-     * @param recipient instance of DocumentHelper.PaperNotificationRecipient
-     * @deprecated Use {@link CaseDetails caseDetails, String authToken,
-     *                                                                   DocumentHelper.PaperNotificationRecipient recipient}
-     */
-    @Deprecated(since = "15-june-2023")
-    @SuppressWarnings("java:S1133")
-    public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
-                                                                  DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print for {}",
-            documentConfiguration.getAssignedToJudgeNotificationTemplate(),
-            documentConfiguration.getAssignedToJudgeNotificationFileName(),
-            recipient);
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
-        return getCaseDocument(authToken, caseDetailsForBulkPrint);
-    }
-
     public CaseDocument generateAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print for {}",

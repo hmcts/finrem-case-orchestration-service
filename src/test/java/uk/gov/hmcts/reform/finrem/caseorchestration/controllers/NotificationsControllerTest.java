@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
@@ -73,7 +72,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(NotificationsController.class)
 @ContextConfiguration(classes = {
     AssignedToJudgeDocumentService.class,
-    AssignToJudgeCorresponder.class,
     HwfCorrespondenceService.class,
     HwfConsentedApplicantCorresponder.class,
     HwfContestedApplicantCorresponder.class,
@@ -168,31 +166,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class));
         verifyNoMoreInteractions(notificationService);
         verify(bulkPrintService).sendDocumentForPrint(any(), any(FinremCaseDetails.class), anyString(), any());
-    }
-
-    @Test
-    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() {
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any(CaseDetails.class));
     }
 
     @Test
@@ -310,15 +283,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendEmailToRespSolicitor() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any(CaseDetails.class));
     }
 
     @Test
