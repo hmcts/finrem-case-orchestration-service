@@ -27,7 +27,7 @@ public class SolicitorAndCaseWorkerDraftOrderAboutToSubmitHandler extends Finrem
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CW_DRAFT_ORDER.equals(eventType));
+            && EventType.SOLICITOR_CW_DRAFT_ORDER.equals(eventType);
     }
 
     @Override

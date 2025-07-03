@@ -21,5 +21,4 @@ public class FinRemBulkScanFormTransformerFactory extends BulkScanFormTransforme
         bulkScanFormTransformerMap = new HashMap<>();
         bulkScanFormTransformerMap.put(FORM_A, formAToCaseTransformer);
     }
-
 }
