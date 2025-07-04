@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tab
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +97,9 @@ class ManageHearingActionServiceTest {
         pfdNcdrDocuments = buildPfdNcdrDocumentsMap();
     }
 
-    @Test
-    void shouldAddHearingAndGenerateHearingNotice() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldAddHearingAndGenerateHearingNotice(boolean migratedHearingExists) {
         // Arrange
         CaseDocument hearingNotice = CaseDocument.builder()
             .documentFilename("HearingNotice.pdf")
@@ -121,6 +125,21 @@ class ManageHearingActionServiceTest {
                 .build()))
             .build();
 
+        // Override
+        if (migratedHearingExists) {
+            this.hearingWrapper = ManageHearingsWrapper.builder()
+                .workingHearing(hearing)
+                .hearingTabItems(List.of(HearingTabCollectionItem.builder()
+                    .value(HearingTabItem.builder().tabHearingMigratedDate(LocalDateTime.now()).build())
+                    .build()))
+                .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
+                    .id(UUID.randomUUID())
+                    .value(Hearing.builder().wasMigrated(YesOrNo.YES).build())
+                    .build())))
+                .build();
+            finremCaseDetails.getData().setManageHearingsWrapper(hearingWrapper);
+        }
+
         when(manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, AUTH_TOKEN))
             .thenReturn(hearingNotice);
 
@@ -131,11 +150,17 @@ class ManageHearingActionServiceTest {
         manageHearingActionService.performAddHearing(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertThat(hearingWrapper.getHearings()).hasSize(1);
-        assertThat(hearingWrapper.getHearingTabItems()).hasSize(1);
+        int offset = migratedHearingExists ? 1 : 0;
+        assertThat(hearingWrapper.getHearings()).hasSize(1 + offset);
+        assertThat(hearingWrapper.getHearingTabItems()).hasSize(1 + offset);
         UUID hearingId = hearingWrapper.getWorkingHearingId();
-        assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
-        assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
+        if (migratedHearingExists) {
+            assertThat(hearingWrapper.getHearings().getLast().getId()).isEqualTo(hearingId);
+            assertThat(hearingWrapper.getHearings().getLast().getValue()).isEqualTo(hearing);
+        } else {
+            assertThat(hearingWrapper.getHearings().getFirst().getId()).isEqualTo(hearingId);
+            assertThat(hearingWrapper.getHearings().getFirst().getValue()).isEqualTo(hearing);
+        }
 
         assertThat(hearingWrapper.getHearingDocumentsCollection()).hasSize(1);
         assertThat(hearingWrapper.getHearingDocumentsCollection().getFirst().getValue().getHearingId())
@@ -155,8 +180,9 @@ class ManageHearingActionServiceTest {
         );
     }
 
-    @Test
-    void shouldAddHearingToTabCollectionInCorrectOrder() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldAddHearingToTabCollectionInCorrectOrder(boolean migratedHearingTabItemExists) {
         // Arrange
         Hearing hearing1 = Hearing.builder()
             .hearingType(HearingType.DIR)
@@ -170,8 +196,18 @@ class ManageHearingActionServiceTest {
             .hearingTime("11:00")
             .build();
 
+        List<HearingTabCollectionItem> hearingTabItems = migratedHearingTabItemExists ? List.of(
+            HearingTabCollectionItem.builder().value(
+                HearingTabItem.builder().tabHearingMigratedDate(LocalDateTime.now()).build()
+            ).build(), // migrated hearingTabItem will be kept
+            HearingTabCollectionItem.builder().value(
+                HearingTabItem.builder().build()
+            ).build() // previous existing hearingTabItem
+        ) : null;
+
         ManageHearingsWrapper hearingWrapper = ManageHearingsWrapper.builder()
             .workingHearing(hearing1)
+            .hearingTabItems(hearingTabItems)
             .hearings(new ArrayList<>(List.of(ManageHearingsCollectionItem.builder()
                 .id(UUID.randomUUID())
                 .value(hearing2)
@@ -206,10 +242,11 @@ class ManageHearingActionServiceTest {
         assertThat(capturedHearings.get(0).getValue()).isEqualTo(hearing2);
         assertThat(capturedHearings.get(1).getValue()).isEqualTo(hearing1);
 
-        List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        assertThat(hearingTabItems).hasSize(2);
-        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
-        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
+        List<HearingTabCollectionItem> actualHearingTabItems = hearingWrapper.getHearingTabItems();
+        int offset = migratedHearingTabItemExists ? 1 : 0;
+        assertThat(actualHearingTabItems).hasSize(2 + offset);
+        assertThat(actualHearingTabItems.get(offset).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(actualHearingTabItems.get(1 + offset).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 
     @Test
@@ -374,8 +411,7 @@ class ManageHearingActionServiceTest {
     /**
      * Builds a map of PFD NCDR CaseDocuments.
      *
-     * @return a map containing PFD NCDR documents with their filenames and their CaseDocumentTypes.
-     * Used by test class setup.
+     * @return a map containing PFD NCDR documents with their filenames and their CaseDocumentTypes. (Used by test class setup)
      */
     private Map<String, Pair<CaseDocument, CaseDocumentType>> buildPfdNcdrDocumentsMap() {
         CaseDocument coverLetter = CaseDocument.builder()

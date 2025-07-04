@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -25,4 +26,5 @@ public class HearingTabItem {
     private String tabConfidentialParties;
     private String tabAdditionalInformation;
     private List<DocumentCollectionItem> tabHearingDocuments;
+    private LocalDateTime tabHearingMigratedDate;
 }
