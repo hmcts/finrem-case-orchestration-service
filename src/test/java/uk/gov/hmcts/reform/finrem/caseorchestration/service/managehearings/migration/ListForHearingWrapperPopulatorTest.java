@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -38,15 +39,21 @@ class ListForHearingWrapperPopulatorTest {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
             .isEqualTo(false);
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(true);
-        assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
-                .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
-            .build()))
-            .isEqualTo(true);
+            .isEqualTo(false);
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.YES).build())
             .build()))
             .isEqualTo(false);
+        assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
+            .build()))
+            .isEqualTo(false);
+        HearingTypeDirection mockedHearingTypeDirection = mock(HearingTypeDirection.class);
+        assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
+            .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
+            .listForHearingWrapper(ListForHearingWrapper.builder().hearingType(mockedHearingTypeDirection).build())
+            .build()))
+            .isEqualTo(true);
     }
 
     @Test
