@@ -88,8 +88,8 @@ public class HearingTabItemsAppender {
     }
 
     private List<DocumentCollectionItem> toAdditionalHearingDocs(InterimHearingItem interimHearingItem) {
-        CaseDocument doc = interimHearingItem.getInterimUploadAdditionalDocument();
-        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
+        CaseDocument caseDocument = interimHearingItem.getInterimUploadAdditionalDocument();
+        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
 
 }
