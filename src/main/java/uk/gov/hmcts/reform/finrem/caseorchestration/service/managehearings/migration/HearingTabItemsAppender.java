@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 @Component
 @Slf4j
@@ -65,9 +66,11 @@ public class HearingTabItemsAppender {
             .build();
     }
 
-    private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
-        CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
-        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
+    private DocumentCollectionItem toDocumentCollectionItem(CaseDocument caseDocument) {
+        return caseDocument == null ? null : DocumentCollectionItem.builder().value(caseDocument).build();
     }
 
+    private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
+        return toSingletonListOrNull(toDocumentCollectionItem(listForHearingWrapper.getAdditionalListOfHearingDocuments()));
+    }
 }

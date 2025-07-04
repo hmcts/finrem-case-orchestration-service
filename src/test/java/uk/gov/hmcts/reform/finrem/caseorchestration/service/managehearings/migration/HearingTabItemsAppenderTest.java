@@ -49,6 +49,8 @@ public class HearingTabItemsAppenderTest {
         assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).containsExactly(item);
     }
 
+    // TODO Interim Hearing
+
     @Test
     void shouldAppendToHearingTabItemsWhenHearingTabItemExists() {
         // Arrange
