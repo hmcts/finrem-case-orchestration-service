@@ -43,6 +43,18 @@ public class HearingsAppender {
             caseData.getManageHearingsWrapper()::setHearings, item);
     }
 
+    /**
+     * Converts a {@link ListForHearingWrapper} instance into a {@link Hearing} domain object.
+     *
+     * <p>
+     * Extracts and maps hearing details such as type, date, time, time estimate,
+     * court region, additional information, and associated hearing documents.
+     * Marks the hearing as migrated.
+     * </p>
+     *
+     * @param listForHearingWrapper the hearing data wrapper to convert
+     * @return the constructed {@code Hearing} object
+     */
     public Hearing toHearing(ListForHearingWrapper listForHearingWrapper) {
         // Type of Hearing
         HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
@@ -71,6 +83,18 @@ public class HearingsAppender {
             .build();
     }
 
+    /**
+     * Converts an {@link InterimHearingItem} instance into a {@link Hearing} domain object.
+     *
+     * <p>
+     * Extracts and maps interim hearing details including type, date, time, time estimate,
+     * court region, additional information, and associated hearing documents.
+     * Marks the hearing as migrated.
+     * </p>
+     *
+     * @param interimHearingItem the interim hearing item to convert
+     * @return the constructed {@code Hearing} object
+     */
     public Hearing toHearing(InterimHearingItem interimHearingItem) {
         // Type of Hearing
         InterimTypeOfHearing hearingType = interimHearingItem.getInterimHearingType();
