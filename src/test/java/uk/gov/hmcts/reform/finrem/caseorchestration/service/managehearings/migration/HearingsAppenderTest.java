@@ -153,8 +153,8 @@ public class HearingsAppenderTest {
         assertEquals(YesOrNo.YES, result.getWasMigrated());
         if (withAdditionDoc) {
             assertThat(result.getAdditionalHearingDocs())
-                    .extracting(DocumentCollectionItem::getValue)
-                    .containsExactly(additionalDoc);
+                .extracting(DocumentCollectionItem::getValue)
+                .containsExactly(additionalDoc);
         } else {
             assertThat(result.getAdditionalHearingDocs()).isNull();
         }
