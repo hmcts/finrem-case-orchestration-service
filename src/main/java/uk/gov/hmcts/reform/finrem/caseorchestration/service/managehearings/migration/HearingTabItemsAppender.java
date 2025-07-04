@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 @Component
 @Slf4j
@@ -32,7 +33,7 @@ public class HearingTabItemsAppender {
     public void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
-        /* Requires DFR-3831 and DFR-3587
+        /* TODO Requires DFR-3831 and DFR-3587
         addItemToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
         addItemToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
@@ -82,8 +83,8 @@ public class HearingTabItemsAppender {
     }
 
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
-        CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
-        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
+        CaseDocument caseDocument = listForHearingWrapper.getAdditionalListOfHearingDocuments();
+        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
 
     private List<DocumentCollectionItem> toAdditionalHearingDocs(InterimHearingItem interimHearingItem) {
