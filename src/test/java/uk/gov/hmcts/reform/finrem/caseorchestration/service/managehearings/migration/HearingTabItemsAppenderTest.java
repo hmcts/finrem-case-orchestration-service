@@ -33,13 +33,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingTabItemAppenderTest {
+public class HearingTabItemsAppenderTest {
 
     @Mock
     private HearingTabDataMapper hearingTabDataMapper;
 
     @InjectMocks
-    private HearingTabItemAppender underTest;
+    private HearingTabItemsAppender underTest;
 
     @Test
     void shouldAppendToHearingTabItems() {

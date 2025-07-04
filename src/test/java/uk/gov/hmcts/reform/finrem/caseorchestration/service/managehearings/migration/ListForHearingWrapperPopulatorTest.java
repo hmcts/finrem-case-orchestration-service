@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class ListForHearingWrapperPopulatorTest {
 
     @Mock
-    private HearingTabItemAppender hearingTabItemAppender;
+    private HearingTabItemsAppender hearingTabItemsAppender;
 
     @InjectMocks
     private ListForHearingWrapperPopulator underTest;
@@ -67,15 +67,15 @@ class ListForHearingWrapperPopulatorTest {
         HearingTabItem hearingTabItem = mock(HearingTabItem.class);
         Hearing hearing = mock(Hearing.class);
 
-        when(hearingTabItemAppender.toHearingTabItem(listForHearingWrapper)).thenReturn(hearingTabItem);
-        when(hearingTabItemAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
+        when(hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).thenReturn(hearingTabItem);
+        when(hearingTabItemsAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
 
         // Act
         underTest.populate(caseData);
 
         // Assert
-        verify(hearingTabItemAppender).appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem).build()));
-        verify(hearingTabItemAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(hearing).build()));
+        verify(hearingTabItemsAppender).appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem).build()));
+        verify(hearingTabItemsAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(hearing).build()));
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
     }
 }

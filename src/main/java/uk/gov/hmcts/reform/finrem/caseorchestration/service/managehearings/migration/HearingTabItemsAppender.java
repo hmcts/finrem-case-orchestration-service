@@ -24,11 +24,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addIt
 
 @Component
 @Slf4j
-public class HearingTabItemAppender {
+public class HearingTabItemsAppender {
 
     private final HearingTabDataMapper hearingTabDataMapper;
 
-    public HearingTabItemAppender(HearingTabDataMapper hearingTabDataMapper) {
+    public HearingTabItemsAppender(HearingTabDataMapper hearingTabDataMapper) {
         this.hearingTabDataMapper = hearingTabDataMapper;
     }
 
