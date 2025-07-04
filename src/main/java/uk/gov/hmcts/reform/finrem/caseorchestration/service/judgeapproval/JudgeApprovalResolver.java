@@ -58,12 +58,17 @@ class JudgeApprovalResolver {
      */
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
+
+        CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(finremCaseDetails,
+            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
+            userAuthorisation, judgeApproval.getCourtOrderDate());
+
         // Process objects under Draft Order Tab
-        processDraftOrderDocReviewCollection(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
-        processPsaDocReviewCollection(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
+        processDraftOrderDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
+        processPsaDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
 
         // Process objects under Case Documents Tab
-        processAgreedDraftOrderCollection(finremCaseDetails, draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation);
+        processAgreedDraftOrderCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
 
         if (isJudgeApproved(judgeApproval)) {
             processHearingInstruction(draftOrdersWrapper);
@@ -81,15 +86,15 @@ class JudgeApprovalResolver {
      * @param judgeApproval the judge's approval information containing the decision
      * @param userAuthorisation the user authorization string to get the judge's full name
      */
-    void processApprovableCollection(FinremCaseDetails finremCaseDetails, List<? extends Approvable> approvables,
+    void processApprovableCollection(List<? extends Approvable> approvables,
                                      CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                     String userAuthorisation) {
+                                     String userAuthorisation, CaseDocument coverLetter) {
         ofNullable(approvables)
             .ifPresent(list ->
                 list.forEach(el -> ofNullable(el)
                     .filter(approvable -> approvable.match(targetDoc))
-                    .ifPresent(approvable -> handleApprovable(finremCaseDetails, approvable,
-                        judgeApproval, userAuthorisation))
+                    .ifPresent(approvable -> handleApprovable(approvable,
+                        judgeApproval, userAuthorisation, coverLetter))
                 )
             );
     }
@@ -103,7 +108,7 @@ class JudgeApprovalResolver {
      * @param judgeApproval the judge's approval information containing the decision
      * @param userAuthorisation the user authorization string to get the judge's full name
      */
-    void handleApprovable(FinremCaseDetails finremCaseDetails, Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation) {
+    void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation, CaseDocument coverLetter) {
         boolean approved = isJudgeApproved(judgeApproval);
         boolean refused = isJudgeRefused(judgeApproval);
         if (approved || refused) {
@@ -116,14 +121,7 @@ class JudgeApprovalResolver {
                 }
                 approvable.setOrderStatus(APPROVED_BY_JUDGE);
                 approvable.setApprovalDate(LocalDateTime.now());
-
-                CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(finremCaseDetails,
-                    buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
-                    userAuthorisation, judgeApproval.getCourtOrderDate());
                 approvable.setCoverLetter(coverLetter);
-                log.info("Generated coversheet on case id {} with document filename {}", finremCaseDetails.getId(),
-                    coverLetter.getDocumentFilename());
-
             }
             if (refused) {
                 approvable.setOrderStatus(REFUSED);
@@ -169,32 +167,32 @@ class JudgeApprovalResolver {
         return ofNullable(judgeApproval).map(JudgeApproval::getJudgeDecision).map(JudgeDecision::isRefused).orElse(false);
     }
 
-    private void processDraftOrderDocReviewCollection(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
-                                                      CaseDocument targetDoc, JudgeApproval judgeApproval, String userAuthorisation) {
+    private void processDraftOrderDocReviewCollection(DraftOrdersWrapper draftOrdersWrapper,
+                                                      CaseDocument targetDoc, JudgeApproval judgeApproval, String userAuthorisation, CaseDocument coverLetter) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> processApprovableCollection(finremCaseDetails, collection.stream()
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
-                .toList(), targetDoc, judgeApproval, userAuthorisation));
+                .toList(), targetDoc, judgeApproval, userAuthorisation, coverLetter));
     }
 
-    private void processPsaDocReviewCollection(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                               String userAuthorisation) {
+    private void processPsaDocReviewCollection(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                               String userAuthorisation, CaseDocument coverLetter) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
-            .ifPresent(collection -> processApprovableCollection(finremCaseDetails, collection.stream()
+            .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getPsaDocReviewCollection().stream().map(PsaDocReviewCollection::getValue))
-                .toList(), targetDoc, judgeApproval, userAuthorisation));
+                .toList(), targetDoc, judgeApproval, userAuthorisation, coverLetter));
     }
 
-    private void processAgreedDraftOrderCollection(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
-                                                   String userAuthorisation) {
+    private void processAgreedDraftOrderCollection(DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc, JudgeApproval judgeApproval,
+                                                   String userAuthorisation, CaseDocument coverLetter) {
         ofNullable(draftOrdersWrapper.getAgreedDraftOrderCollection())
             .ifPresent(agreedDraftOrderCollections ->
-                processApprovableCollection(finremCaseDetails, agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
-                    judgeApproval, userAuthorisation));
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
+                    judgeApproval, userAuthorisation, coverLetter));
         ofNullable(draftOrdersWrapper.getIntvAgreedDraftOrderCollection())
             .ifPresent(agreedDraftOrderCollections ->
-                processApprovableCollection(finremCaseDetails, agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
-                    judgeApproval, userAuthorisation));
+                processApprovableCollection(agreedDraftOrderCollections.stream().map(AgreedDraftOrderCollection::getValue).toList(), targetDoc,
+                    judgeApproval, userAuthorisation, coverLetter));
     }
 
     private void processHearingInstruction(DraftOrdersWrapper draftOrdersWrapper) {
