@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
-
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

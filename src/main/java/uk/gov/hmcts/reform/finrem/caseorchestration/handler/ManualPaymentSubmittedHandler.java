@@ -35,9 +35,8 @@ public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.MANUAL_PAYMENT.equals(eventType));
+            && EventType.MANUAL_PAYMENT.equals(eventType);
     }
-
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,

@@ -32,7 +32,7 @@ public class SolicitorAndCaseWorkerDraftOrderMidHandler extends FinremCallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CW_DRAFT_ORDER.equals(eventType));
+            && EventType.SOLICITOR_CW_DRAFT_ORDER.equals(eventType);
     }
 
     @Override

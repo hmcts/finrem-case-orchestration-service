@@ -18,7 +18,6 @@ import java.util.List;
 @Service
 public class ManageCaseDocumentsContestedAboutToStartHandler extends FinremCallbackHandler {
 
-
     private final LegacyConfidentialDocumentsService legacyConfidentialDocumentsService;
 
     public ManageCaseDocumentsContestedAboutToStartHandler(FinremCaseDetailsMapper mapper,
