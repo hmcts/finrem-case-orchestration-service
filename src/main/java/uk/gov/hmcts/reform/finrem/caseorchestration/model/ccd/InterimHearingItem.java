@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 
 import java.time.LocalDate;
 
@@ -84,4 +85,39 @@ public class InterimHearingItem implements HasCaseDocument {
     private NorthWalesCourt interimNorthWalesCourtList;
     @JsonProperty("interim_highCourtList")
     private HighCourt interimHighCourtList;
+
+    public Court toCourt() {
+        return Court.builder()
+            .region(interimRegionList)
+            .midlandsList(interimMidlandsFrcList)
+            .londonList(interimLondonFrcList)
+            .northWestList(interimNorthWestFrcList)
+            .northEastList(interimNorthEastFrcList)
+            .southEastList(interimSouthEastFrcList)
+            .southWestList(interimSouthWestFrcList)
+            .walesList(interimWalesFrcList)
+            .hcCourtList(interimHighCourtFrcList)
+            .courtListWrapper(DefaultCourtListWrapper.builder()
+                .nottinghamCourtList(interimNottinghamCourtList)
+                .cfcCourtList(interimCfcCourtList)
+                .birminghamCourtList(interimBirminghamCourtList)
+                .liverpoolCourtList(interimLiverpoolCourtList)
+                .manchesterCourtList(interimManchesterCourtList)
+                .lancashireCourtList(interimLancashireCourtList)
+                .clevelandCourtList(interimClevelandCourtList)
+                .nwYorkshireCourtList(interimNwYorkshireCourtList)
+                .humberCourtList(interimHumberCourtList)
+                .kentSurreyCourtList(interimKentSurreyCourtList)
+                .bedfordshireCourtList(interimBedfordshireCourtList)
+                .thamesValleyCourtList(interimThamesValleyCourtList)
+                .devonCourtList(interimDevonCourtList)
+                .dorsetCourtList(interimDorsetCourtList)
+                .bristolCourtList(interimBristolCourtList)
+                .newportCourtList(interimNewportCourtList)
+                .swanseaCourtList(interimSwanseaCourtList)
+                .northWalesCourtList(interimNorthWalesCourtList)
+                .highCourtList(interimHighCourtList)
+                .build())
+            .build();
+    }
 }

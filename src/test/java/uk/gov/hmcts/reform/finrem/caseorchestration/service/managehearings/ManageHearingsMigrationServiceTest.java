@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
@@ -29,6 +30,9 @@ class ManageHearingsMigrationServiceTest {
 
     @Mock
     private ListForHearingWrapperPopulator listForHearingWrapperPopulator;
+
+    @Mock
+    private ListForInterimHearingWrapperPopulator listForInterimHearingWrapperPopulator;
 
     @InjectMocks
     private ManageHearingsMigrationService underTest;
@@ -62,7 +66,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void shouldSkipPopulationWhenShouldPopulateReturnsFalse() {
+    void shouldSkipListForHearingPopulationWhenShouldPopulateReturnsFalse() {
         FinremCaseData caseData = spy(FinremCaseData.class);
         caseData.setCcdCaseId(CASE_ID);
 
@@ -77,7 +81,7 @@ class ManageHearingsMigrationServiceTest {
     }
 
     @Test
-    void shouldPopulateWhenShouldPopulateReturnsTrue() {
+    void shouldPopulateListForHearingWhenShouldPopulateReturnsTrue() {
         FinremCaseData caseData = mock(FinremCaseData.class);
 
         when(listForHearingWrapperPopulator.shouldPopulate(caseData)).thenReturn(true);
@@ -85,5 +89,31 @@ class ManageHearingsMigrationServiceTest {
         underTest.populateListForHearingWrapper(caseData);
 
         verify(listForHearingWrapperPopulator).populate(caseData);
+    }
+
+    @Test
+    void shouldSkipListForInterimHearingPopulationWhenShouldPopulateReturnsFalse() {
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        caseData.setCcdCaseId(CASE_ID);
+
+        when(listForInterimHearingWrapperPopulator.shouldPopulate(caseData)).thenReturn(false);
+
+        // Act
+        underTest.populateListForInterimHearingWrapper(caseData);
+
+        // Assert
+        assertThat(logs.getWarns()).contains(CASE_ID + " - List for Interim Hearing migration skipped.");
+        verify(listForInterimHearingWrapperPopulator, never()).populate(any(FinremCaseData.class));
+    }
+
+    @Test
+    void shouldPopulateListForInterimHearingWhenShouldPopulateReturnsTrue() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(listForInterimHearingWrapperPopulator.shouldPopulate(caseData)).thenReturn(true);
+
+        underTest.populateListForInterimHearingWrapper(caseData);
+
+        verify(listForInterimHearingWrapperPopulator).populate(caseData);
     }
 }

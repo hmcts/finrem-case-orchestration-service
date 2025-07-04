@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -92,6 +93,33 @@ public class HearingTabItemsAppender {
     }
 
     /**
+     * Converts an {@link InterimHearingItem} instance into a {@link HearingTabItem}.
+     *
+     * <p>
+     * Extracts and formats interim hearing details including type, date, time, time estimate,
+     * court region, additional information, and associated hearing documents for display.
+     * Confidential parties data cannot be migrated and is set as "Unknown".
+     * </p>
+     *
+     * @param interimHearingItem the interim hearing item to convert
+     * @return the constructed hearing tab item
+     */
+    public HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem) {
+        return HearingTabItem.builder()
+            .tabHearingType(interimHearingItem.getInterimHearingType().getId())
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(interimHearingItem.toCourt()))
+            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
+                interimHearingItem.getInterimHearingDate(), interimHearingItem.getInterimHearingTime()))
+            .tabTimeEstimate(interimHearingItem.getInterimHearingTimeEstimate())
+            .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
+            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
+                interimHearingItem.getInterimAdditionalInformationAboutHearing()))
+            .tabHearingMigratedDate(LocalDateTime.now())
+            .tabHearingDocuments(toAdditionalHearingDocs(interimHearingItem))
+            .build();
+    }
+
+    /**
      * Converts the additional list of hearing documents from the {@link ListForHearingWrapper}
      * into a singleton list of {@link DocumentCollectionItem}, or returns {@code null} if none exist.
      *
@@ -102,4 +130,18 @@ public class HearingTabItemsAppender {
         CaseDocument caseDocument = listForHearingWrapper.getAdditionalListOfHearingDocuments();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
+
+    /**
+     * Converts the additional hearing documents from an {@link InterimHearingItem}
+     * into a singleton list of {@link DocumentCollectionItem}, or returns {@code null}
+     * if no document is present.
+     *
+     * @param interimHearingItem the interim hearing item containing documents
+     * @return a singleton list containing the document collection item, or {@code null} if no document is present
+     */
+    private List<DocumentCollectionItem> toAdditionalHearingDocs(InterimHearingItem interimHearingItem) {
+        CaseDocument caseDocument = interimHearingItem.getInterimUploadAdditionalDocument();
+        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
+    }
+
 }

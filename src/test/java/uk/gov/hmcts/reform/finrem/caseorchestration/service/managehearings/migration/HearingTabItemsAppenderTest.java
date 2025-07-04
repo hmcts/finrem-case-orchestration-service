@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
@@ -25,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,8 +51,6 @@ public class HearingTabItemsAppenderTest {
         // Assert
         assertThat(caseData.getManageHearingsWrapper().getHearingTabItems()).containsExactly(item);
     }
-
-    // TODO Interim Hearing
 
     @Test
     void shouldAppendToHearingTabItemsWhenHearingTabItemExists() {
@@ -126,15 +127,76 @@ public class HearingTabItemsAppenderTest {
                     "Unknown",
                     expectedAdditionalInfo
                 );
-
+            assertThat(result).extracting(HearingTabItem::getTabHearingMigratedDate).isNotNull();
             assertThat(result.getTabHearingDocuments())
                 .isNotNull()
                 .hasSize(1)
                 .extracting(DocumentCollectionItem::getValue)
                 .containsExactly(additionalDoc);
-
             assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
         }
     }
 
+    @Test
+    void shouldConvertInterimHearingItemToHearingTabItem() {
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            // Arrange
+            LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+            String hearingTime = "10:00 AM";
+            String timeEstimate = "1 hour";
+            String additionalInfo = "Details for tab";
+            InterimTypeOfHearing typeOfHearing = InterimTypeOfHearing.FH;
+            Court court = mock(Court.class);
+
+            String expectedCourtName = "Birmingham FRC";
+            String expectedDateTime = "03 Jul 2025 10:00 AM";
+            String expectedAdditionalInfo = "Processed details";
+
+            CaseDocument additionalDoc = mock(CaseDocument.class);
+
+            InterimHearingItem interimHearingItem = spy(InterimHearingItem.builder()
+                .interimHearingDate(hearingDate)
+                .interimHearingTime(hearingTime)
+                .interimHearingTimeEstimate(timeEstimate)
+                .interimAdditionalInformationAboutHearing(additionalInfo)
+                .interimHearingType(typeOfHearing)
+                .interimUploadAdditionalDocument(additionalDoc)
+                .build());
+
+            when(interimHearingItem.toCourt()).thenReturn(court);
+            when(hearingTabDataMapper.getCourtName(court)).thenReturn(expectedCourtName);
+            when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn(expectedDateTime);
+            when(hearingTabDataMapper.getAdditionalInformation(additionalInfo)).thenReturn(expectedAdditionalInfo);
+
+            // Act
+            HearingTabItem result = underTest.toHearingTabItem(interimHearingItem);
+
+            // Assert
+            assertThat(result)
+                    .extracting(
+                        HearingTabItem::getTabHearingType,
+                        HearingTabItem::getTabCourtSelection,
+                        HearingTabItem::getTabDateTime,
+                        HearingTabItem::getTabTimeEstimate,
+                        HearingTabItem::getTabConfidentialParties,
+                        HearingTabItem::getTabAdditionalInformation
+                    )
+                    .containsExactly(
+                        typeOfHearing.getId(),
+                        expectedCourtName,
+                        expectedDateTime,
+                        timeEstimate,
+                        "Unknown",
+                        expectedAdditionalInfo
+                    );
+            assertThat(result.getTabHearingDocuments())
+                    .isNotNull()
+                    .hasSize(1)
+                    .extracting(DocumentCollectionItem::getValue)
+                    .containsExactly(additionalDoc);
+            assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
+        }
+    }
 }

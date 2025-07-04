@@ -18,6 +18,8 @@ public class MhMigrationWrapper {
 
     private YesOrNo isListForHearingsMigrated;
 
+    private YesOrNo isListForInterimHearingsMigrated;
+
     private String mhMigrationVersion;
 
 }
