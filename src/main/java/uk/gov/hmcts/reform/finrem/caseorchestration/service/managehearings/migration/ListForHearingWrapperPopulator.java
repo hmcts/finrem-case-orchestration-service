@@ -25,8 +25,8 @@ public class ListForHearingWrapperPopulator implements Populator {
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         return caseData.isContestedApplication()
-            && (!YesOrNo.isYes(mhMigrationWrapper.getIsListForHearingsMigrated())
-            || listForHearingWrapper.getHearingType() != null);
+            && !YesOrNo.isYes(mhMigrationWrapper.getIsListForHearingsMigrated())
+            && listForHearingWrapper.getHearingType() != null;
     }
 
     /**
