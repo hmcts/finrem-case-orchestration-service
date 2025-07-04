@@ -19,6 +19,10 @@ import java.util.List;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
+/**
+ * Component responsible for appending hearing tab items to a case's hearing data wrapper
+ * and converting hearing wrapper data to {@link HearingTabItem} instances.
+ */
 @Component
 @Slf4j
 public class HearingTabItemsAppender {
@@ -29,6 +33,18 @@ public class HearingTabItemsAppender {
         this.hearingTabDataMapper = hearingTabDataMapper;
     }
 
+    /**
+     * Appends a {@link HearingTabCollectionItem} to the list of hearing tab items
+     * within the {@code ManageHearingsWrapper} inside the provided {@link FinremCaseData}.
+     *
+     * <p>
+     * Note: Additional appending to applicant and respondent hearing tab lists
+     * is planned but currently commented out, pending tasks DFR-3831 and DFR-3587.
+     * </p>
+     *
+     * @param caseData the case data to update
+     * @param item     the hearing tab collection item to append
+     */
     public void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
@@ -40,6 +56,15 @@ public class HearingTabItemsAppender {
          */
     }
 
+    /**
+     * Converts a {@link ListForHearingWrapper} instance into a {@link HearingTabItem}.
+     * This involves extracting hearing type, date, time, time estimate, additional information,
+     * court region, and associated hearing documents, formatting these details suitably
+     * for display in the hearing tab.
+     *
+     * @param listForHearingWrapper the hearing data wrapper to convert
+     * @return the constructed hearing tab item
+     */
     public HearingTabItem toHearingTabItem(ListForHearingWrapper listForHearingWrapper) {
         // Type of Hearing
         HearingTypeDirection hearingType = listForHearingWrapper.getHearingType();
@@ -66,6 +91,13 @@ public class HearingTabItemsAppender {
             .build();
     }
 
+    /**
+     * Converts the additional list of hearing documents from the {@link ListForHearingWrapper}
+     * into a singleton list of {@link DocumentCollectionItem}, or returns {@code null} if none exist.
+     *
+     * @param listForHearingWrapper the hearing data wrapper containing documents
+     * @return a singleton list containing the document collection item, or {@code null} if no document is present
+     */
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
         CaseDocument caseDocument = listForHearingWrapper.getAdditionalListOfHearingDocuments();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));

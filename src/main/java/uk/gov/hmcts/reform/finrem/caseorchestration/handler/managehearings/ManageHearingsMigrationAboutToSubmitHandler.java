@@ -14,6 +14,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
+/**
+ * Handler for the "Manage Hearings Migration" event during the ABOUT_TO_SUBMIT callback phase.
+ *
+ * <p>
+ * This handler is temporarily implemented to support Playwright test automation or QA testing via the User Interface.
+ * It populates the {@code ListForHearingWrapper} field in the {@link FinremCaseData} to simulate migrated hearing data.
+ * </p>
+ */
 @Slf4j
 @Service
 public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackHandler {
