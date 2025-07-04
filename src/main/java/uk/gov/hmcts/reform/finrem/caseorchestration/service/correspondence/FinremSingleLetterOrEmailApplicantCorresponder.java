@@ -20,11 +20,10 @@ public abstract class FinremSingleLetterOrEmailApplicantCorresponder extends Sin
 
     @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
-
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for Case ID: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
-        } else {
+        } else if (shouldSendApplicantLetter(caseDetails)) {
             log.info("Sending letter correspondence to applicant for Case ID: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, APPLICANT, authToken);
         }
@@ -34,11 +33,21 @@ public abstract class FinremSingleLetterOrEmailApplicantCorresponder extends Sin
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    public boolean shouldSendRespondentSolicitorEmail(FinremCaseDetails caseDetails) {
+    public final boolean shouldSendRespondentSolicitorEmail(FinremCaseDetails caseDetails) {
         return Boolean.FALSE;
     }
 
     public abstract CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken);
 
     protected abstract void emailApplicantSolicitor(FinremCaseDetails caseDetails);
+
+    /**
+     * Determines whether a letter should be sent to the applicant for the given case.
+     *
+     * @param caseDetails the case details containing applicant and case information
+     * @return {@code true} if the letter should be sent to the applicant; {@code false} otherwise
+     */
+    public boolean shouldSendApplicantLetter(FinremCaseDetails caseDetails) {
+        return true;
+    }
 }
