@@ -57,6 +57,10 @@ public class JudgeApproval {
     @JsonProperty("isFinalOrder")
     private DynamicMultiSelectList isFinalOrder;
 
+    @JsonProperty("courtOrderDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate courtOrderDate;
+
     @JsonProperty("changesRequestedByJudge")
     private String changesRequestedByJudge;
 
