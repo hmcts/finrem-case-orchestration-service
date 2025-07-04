@@ -71,7 +71,7 @@ class ListForHearingWrapperPopulatorTest {
         Hearing hearing = mock(Hearing.class);
 
         when(hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).thenReturn(hearingTabItem);
-        when(hearingsAppender.toHearing(caseData)).thenReturn(hearing);
+        when(hearingsAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
 
         // Act
         underTest.populate(caseData);

@@ -55,7 +55,7 @@ public class ListForHearingWrapperPopulator implements Populator {
         hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
             hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).build());
         hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-            hearingsAppender.toHearing(caseData)).build());
+            hearingsAppender.toHearing(listForHearingWrapper)).build());
 
         mhMigrationWrapper.setIsListForHearingsMigrated(YesOrNo.YES);
     }

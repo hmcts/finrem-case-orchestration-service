@@ -16,10 +16,14 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Slf4j
 public class ListForInterimHearingWrapperPopulator implements Populator {
 
-    private final HearingTabItemAppender hearingTabItemAppender;
+    private final HearingTabItemsAppender hearingTabItemsAppender;
 
-    public ListForInterimHearingWrapperPopulator(HearingTabItemAppender hearingTabItemAppender) {
-        this.hearingTabItemAppender = hearingTabItemAppender;
+    private final HearingsAppender hearingsAppender;
+
+    public ListForInterimHearingWrapperPopulator(HearingsAppender hearingsAppender,
+                                                 HearingTabItemsAppender hearingTabItemsAppender) {
+        this.hearingsAppender = hearingsAppender;
+        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
@@ -36,10 +40,10 @@ public class ListForInterimHearingWrapperPopulator implements Populator {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         interimWrapper.getInterimHearings().stream().map(InterimHearingCollection::getValue).forEach(interimHearing -> {
-            hearingTabItemAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-                hearingTabItemAppender.toHearingTabItem(interimHearing)).build());
-            hearingTabItemAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-                hearingTabItemAppender.toHearing(interimHearing)).build());
+            hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
+                    hearingTabItemsAppender.toHearingTabItem(interimHearing)).build());
+            hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
+                    hearingsAppender.toHearing(interimHearing)).build());
         });
 
         mhMigrationWrapper.setIsListForInterimHearingsMigrated(YesOrNo.YES);

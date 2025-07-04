@@ -91,7 +91,7 @@ public class HearingsAppenderTest {
         FinremCaseData caseData = FinremCaseData.builder().listForHearingWrapper(listForHearingWrapper).build();
 
         // Act
-        Hearing result = underTest.toHearing(caseData);
+        Hearing result = underTest.toHearing(listForHearingWrapper);
 
         // Assert
         assertEquals(hearingDate, result.getHearingDate());
