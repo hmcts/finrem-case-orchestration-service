@@ -14,10 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 @Slf4j
 public class ListForHearingWrapperPopulator implements Populator {
 
-    private final HearingTabItemAppender hearingTabItemAppender;
+    private final HearingTabItemsAppender hearingTabItemsAppender;
 
-    public ListForHearingWrapperPopulator(HearingTabItemAppender hearingTabItemAppender) {
-        this.hearingTabItemAppender = hearingTabItemAppender;
+    public ListForHearingWrapperPopulator(HearingTabItemsAppender hearingTabItemsAppender) {
+        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
@@ -48,10 +48,10 @@ public class ListForHearingWrapperPopulator implements Populator {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
 
-        hearingTabItemAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-            hearingTabItemAppender.toHearingTabItem(listForHearingWrapper)).build());
-        hearingTabItemAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-            hearingTabItemAppender.toHearing(listForHearingWrapper)).build());
+        hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
+            hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).build());
+        hearingTabItemsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
+            hearingTabItemsAppender.toHearing(listForHearingWrapper)).build());
 
         mhMigrationWrapper.setIsListForHearingsMigrated(YesOrNo.YES);
     }
