@@ -144,7 +144,7 @@ public class HearingsAppenderTest {
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
         assertThat(result.getAdditionalHearingDocs())
-                .extracting(DocumentCollectionItem::getValue)
-                .containsExactly(additionalDoc);
+            .extracting(DocumentCollectionItem::getValue)
+            .containsExactly(additionalDoc);
     }
 }
