@@ -16,4 +16,8 @@ import java.util.UUID;
 public class DocumentCollectionItem implements HasCaseDocument {
     private UUID id;
     private CaseDocument value;
+
+    public static DocumentCollectionItem fromCaseDocument(CaseDocument caseDocument) {
+        return caseDocument == null ? null : DocumentCollectionItem.builder().value(caseDocument).build();
+    }
 }

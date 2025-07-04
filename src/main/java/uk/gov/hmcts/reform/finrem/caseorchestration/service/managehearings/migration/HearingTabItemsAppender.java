@@ -66,11 +66,8 @@ public class HearingTabItemsAppender {
             .build();
     }
 
-    private DocumentCollectionItem toDocumentCollectionItem(CaseDocument caseDocument) {
-        return caseDocument == null ? null : DocumentCollectionItem.builder().value(caseDocument).build();
-    }
-
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
-        return toSingletonListOrNull(toDocumentCollectionItem(listForHearingWrapper.getAdditionalListOfHearingDocuments()));
+        CaseDocument caseDocument = listForHearingWrapper.getAdditionalListOfHearingDocuments();
+        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
 }
