@@ -130,6 +130,7 @@ public class HearingTabItemsAppender {
         CaseDocument caseDocument = listForHearingWrapper.getAdditionalListOfHearingDocuments();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
+
     /**
      * Converts the additional hearing documents from an {@link InterimHearingItem}
      * into a singleton list of {@link DocumentCollectionItem}, or returns {@code null}
