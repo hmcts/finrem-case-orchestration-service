@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migr
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -65,8 +67,9 @@ public class HearingsAppenderTest {
         assertThat(caseData.getManageHearingsWrapper().getHearings()).containsExactly(existing, item);
     }
 
-    @Test
-    void shouldConvertListForHearingWrapperToHearing() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void shouldConvertListForHearingWrapperToHearing(boolean withAdditionDoc) {
         // Arrange
         LocalDate hearingDate = LocalDate.of(2025, 7, 3);
         String hearingTime = "10:30 AM";
@@ -80,7 +83,7 @@ public class HearingsAppenderTest {
         HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
         when(hearingRegionWrapper.toCourt()).thenReturn(expectedCourt);
 
-        CaseDocument additionalDoc = mock(CaseDocument.class);
+        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
 
         ListForHearingWrapper listForHearingWrapper = ListForHearingWrapper.builder()
             .hearingDate(hearingDate)
@@ -103,13 +106,18 @@ public class HearingsAppenderTest {
         assertEquals(additionalInfo, result.getAdditionalHearingInformation());
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
-        assertThat(result.getAdditionalHearingDocs())
-            .extracting(DocumentCollectionItem::getValue)
-            .containsExactly(additionalDoc);
+        if (withAdditionDoc) {
+            assertThat(result.getAdditionalHearingDocs())
+                    .extracting(DocumentCollectionItem::getValue)
+                    .containsExactly(additionalDoc);
+        } else {
+            assertThat(result.getAdditionalHearingDocs()).isNull();
+        }
     }
 
-    @Test
-    void shouldConvertInterimHearingItemToHearing() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void shouldConvertInterimHearingItemToHearing(boolean withAdditionDoc) {
         // Arrange
         LocalDate hearingDate = LocalDate.of(2025, 7, 3);
         String hearingTime = "10:30 AM";
@@ -120,7 +128,7 @@ public class HearingsAppenderTest {
         HearingType expectedHearingType = HearingType.FH;
         Court expectedCourt = mock(Court.class);
 
-        CaseDocument additionalDoc = mock(CaseDocument.class);
+        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
 
         InterimHearingItem interimHearingItem = spy(InterimHearingItem.builder()
             .interimHearingDate(hearingDate)
@@ -143,8 +151,12 @@ public class HearingsAppenderTest {
         assertEquals(additionalInfo, result.getAdditionalHearingInformation());
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
-        assertThat(result.getAdditionalHearingDocs())
-            .extracting(DocumentCollectionItem::getValue)
-            .containsExactly(additionalDoc);
+        if (withAdditionDoc) {
+            assertThat(result.getAdditionalHearingDocs())
+                    .extracting(DocumentCollectionItem::getValue)
+                    .containsExactly(additionalDoc);
+        } else {
+            assertThat(result.getAdditionalHearingDocs()).isNull();
+        }
     }
 }
