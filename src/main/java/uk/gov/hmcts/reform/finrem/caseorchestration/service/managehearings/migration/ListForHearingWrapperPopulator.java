@@ -6,10 +6,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
+/**
+ * Populator component responsible for migrating hearing details from the
+ * {@link ListForHearingWrapper} into both hearing tab items and hearings collections
+ * within {@link FinremCaseData}, if migration has not yet occurred.
+ *
+ * <p>
+ * This class uses {@link HearingsAppender} and {@link HearingTabItemsAppender}
+ * to perform the actual appending and conversion logic.
+ * </p>
+ */
 @Component
 @Slf4j
 public class ListForHearingWrapperPopulator implements Populator {
@@ -24,6 +33,17 @@ public class ListForHearingWrapperPopulator implements Populator {
         this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
+    /**
+     * Determines whether the hearing list should be populated for the given case data.
+     *
+     * <p>
+     * The population occurs only if the application is contested, the list for hearings
+     * has not already been migrated, and the hearing type is set.
+     * </p>
+     *
+     * @param caseData the case data to evaluate
+     * @return {@code true} if the hearing list should be populated, {@code false} otherwise
+     */
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
@@ -34,18 +54,14 @@ public class ListForHearingWrapperPopulator implements Populator {
     }
 
     /**
-     * Populates a new {@link HearingTabItem} in the hearing tab of the case if the hearing
-     * details have not already been migrated.
+     * Populates the hearing data into the case data.
      *
      * <p>
-     * This method checks if the {@code ListForHearingWrapper} needs to be processed by evaluating
-     * both the {@code MhMigrationWrapper} and the current state of the wrapper itself.
-     * If migration is needed, it extracts hearing-related fields such as type, date, time,
-     * time estimate, court information, and additional information.
-     * These are used to build a new {@code HearingTabItem}, which is then added to the case data.
-     * Once added, the migration flag is set to {@code YES}.
+     * This method appends a hearing tab item and a hearing entry based on the current
+     * state of the case data, and marks the list for hearings as migrated.
+     * </p>
      *
-     * @param caseData the {@link FinremCaseData} containing the hearing details and wrappers
+     * @param caseData the case data to populate
      */
     @Override
     public void populate(FinremCaseData caseData) {

@@ -22,10 +22,22 @@ import java.util.List;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
+/**
+ * Spring component responsible for appending hearing items to the hearings collection
+ * in {@link FinremCaseData} and converting hearing-related wrapper data
+ * into {@link Hearing} domain objects.
+ */
 @Component
 @Slf4j
 public class HearingsAppender {
 
+    /**
+     * Appends a {@link ManageHearingsCollectionItem} to the hearings list
+     * contained within the {@code ManageHearingsWrapper} of the provided {@link FinremCaseData}.
+     *
+     * @param caseData the case data containing the hearings wrapper
+     * @param item     the hearing collection item to append
+     */
     public void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
@@ -89,9 +101,19 @@ public class HearingsAppender {
             .build();
     }
 
+    /**
+     * Converts any additional hearing documents present in the {@link ListForHearingWrapper}
+     * to a list of {@link DocumentCollectionItem}.
+     *
+     * <p>
+     * Returns {@code null} if no documents exist.
+     * </p>
+     *
+     * @param listForHearingWrapper the wrapper containing additional hearing documents
+     * @return singleton list with the document collection item or {@code null} if none found
+     */
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
         CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
         return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
     }
-
 }
