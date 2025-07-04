@@ -31,7 +31,7 @@ public class HearingTabItemsAppender {
     public void appendToHearingTabItems(FinremCaseData caseData, HearingTabCollectionItem item) {
         addItemToList(caseData.getManageHearingsWrapper()::getHearingTabItems,
             caseData.getManageHearingsWrapper()::setHearingTabItems, item);
-        /* Requires DFR-3831 and DFR-3587
+        /* TODO Requires DFR-3831 and DFR-3587
         addItemToList(caseData.getManageHearingsWrapper()::getApplicantHHearingTabItems,
             caseData.getManageHearingsWrapper()::setApplicantHHearingTabItems, item);
         addItemToList(caseData.getManageHearingsWrapper()::getRespondentHHearingTabItems,
