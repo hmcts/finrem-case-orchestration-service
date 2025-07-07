@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -33,6 +34,9 @@ class ManageHearingsMigrationServiceTest {
 
     @Mock
     private ListForInterimHearingWrapperPopulator listForInterimHearingWrapperPopulator;
+
+    @Mock
+    private GeneralApplicationWrapperPopulator generalApplicationWrapperPopulator;
 
     @InjectMocks
     private ManageHearingsMigrationService underTest;
@@ -115,5 +119,31 @@ class ManageHearingsMigrationServiceTest {
         underTest.populateListForInterimHearingWrapper(caseData);
 
         verify(listForInterimHearingWrapperPopulator).populate(caseData);
+    }
+
+    @Test
+    void shouldSkipListForGeneralApplicationWrapperPopulationWhenShouldPopulateReturnsFalse() {
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        caseData.setCcdCaseId(CASE_ID);
+
+        when(generalApplicationWrapperPopulator.shouldPopulate(caseData)).thenReturn(false);
+
+        // Act
+        underTest.populateGeneralApplicationWrapper(caseData);
+
+        // Assert
+        assertThat(logs.getWarns()).contains(CASE_ID + " - Existing hearings created with General Application Directions migration skipped.");
+        verify(generalApplicationWrapperPopulator, never()).populate(any(FinremCaseData.class));
+    }
+
+    @Test
+    void shouldPopulateGeneralApplicationWrapperWhenShouldPopulateReturnsTrue() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(generalApplicationWrapperPopulator.shouldPopulate(caseData)).thenReturn(true);
+
+        underTest.populateGeneralApplicationWrapper(caseData);
+
+        verify(generalApplicationWrapperPopulator).populate(caseData);
     }
 }
