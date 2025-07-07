@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
@@ -54,6 +56,7 @@ public class NotificationsController extends BaseController {
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -70,7 +73,8 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        hwfNotificationsService.sendCorrespondence(caseDetails, authToken);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        hwfNotificationsService.sendCorrespondence(finremCaseDetails, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

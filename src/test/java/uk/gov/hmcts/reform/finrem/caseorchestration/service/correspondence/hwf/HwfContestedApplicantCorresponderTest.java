@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static org.mockito.Mockito.verify;
@@ -20,16 +20,14 @@ public class HwfContestedApplicantCorresponderTest {
     @Mock
     NotificationService notificationService;
 
-    private CaseDetails caseDetails;
-
     @Before
     public void setUp() throws Exception {
         hwfContestedApplicantCorresponder = new HwfContestedApplicantCorresponder(notificationService);
-        caseDetails = CaseDetails.builder().build();
     }
 
     @Test
     public void shouldEmailApplicant() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().build();
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
@@ -38,6 +36,7 @@ public class HwfContestedApplicantCorresponderTest {
 
     @Test
     public void shouldNotEmailApplicant() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().build();
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
