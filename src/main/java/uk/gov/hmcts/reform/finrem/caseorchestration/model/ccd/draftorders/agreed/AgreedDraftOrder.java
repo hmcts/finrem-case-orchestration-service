@@ -31,6 +31,7 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     private OrderStatus orderStatus;
     private CaseDocument draftOrder;
     private CaseDocument pensionSharingAnnex;
+    private CaseDocument coverLetter;
     private String submittedBy;
     private String submittedByEmail;
     private String uploadedOnBehalfOf;
@@ -74,13 +75,6 @@ public class AgreedDraftOrder implements HasCaseDocument, HasSubmittedInfo, Appr
     @JsonIgnore
     @Override
     public LocalDate getCourtOrderDate() {
-        // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
-        return null;
-    }
-
-    @JsonIgnore
-    @Override
-    public CaseDocument getCoverLetter() {
         // @JsonIgnore is necessary, as it ensures the property is not visible in AgreedDraftOrder
         return null;
     }
