@@ -1,9 +1,26 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BedfordshireCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BirminghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BristolCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DevonCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DorsetCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HighCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HumberCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LancashireCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LiverpoolCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ManchesterCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NewportCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NorthWalesCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NwYorkshireCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SwanseaCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
