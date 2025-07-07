@@ -12,7 +12,6 @@ class GeneralApplicationCourtListWrapperTest {
 
     private GeneralApplicationCourtListWrapper generalApplicationCourtListWrapper;
 
-    // Sample test data objects for each court list
     private final NottinghamCourt nottinghamCourtList = mock(NottinghamCourt.class);
     private final CfcCourt cfcCourtList = mock(CfcCourt.class);
     private final BirminghamCourt birminghamCourtList = mock(BirminghamCourt.class);
