@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
@@ -120,6 +122,34 @@ public class HearingsAppender {
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toSingletonListOrNull(additionalDocument))
+            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
+            .wasMigrated(YesOrNo.YES)
+            .build();
+    }
+
+    public Hearing toHearing(GeneralApplicationWrapper generalApplicationWrapper,
+                             GeneralApplicationRegionWrapper generalApplicationRegionWrapper) {
+        // Type of Hearing is not captured
+        // Hearing Date
+        LocalDate hearingDate = generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate();
+        // Hearing Time
+        String hearingTime = generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime();
+        // Time Estimate
+        String timeEstimate = generalApplicationWrapper.getGeneralApplicationTimeEstimate();
+        // Additional information about the hearing
+        String additionalInformationAboutHearing = generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation();
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        Court hearingCourtSelection = generalApplicationRegionWrapper.toCourt();
+
+        return Hearing.builder()
+            .hearingDate(hearingDate)
+            //.hearingType() // Not captured
+            .hearingTimeEstimate(timeEstimate)
+            .hearingTime(hearingTime)
+            .hearingCourtSelection(hearingCourtSelection)
+            //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
+            .additionalHearingInformation(additionalInformationAboutHearing)
+            //.additionalHearingDocs(toSingletonListOrNull(additionalDocument))
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();

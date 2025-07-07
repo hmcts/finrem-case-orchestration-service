@@ -20,6 +20,8 @@ public class MhMigrationWrapper {
 
     private YesOrNo isListForInterimHearingsMigrated;
 
+    private YesOrNo isGeneralApplicationMigrated;
+
     private String mhMigrationVersion;
 
 }

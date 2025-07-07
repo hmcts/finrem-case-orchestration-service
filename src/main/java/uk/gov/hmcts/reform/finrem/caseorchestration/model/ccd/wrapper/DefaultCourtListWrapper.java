@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 import java.util.Arrays;
 import java.util.Optional;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -40,6 +39,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DefaultCourtListWrapper implements CourtListWrapper {
+
     private NottinghamCourt nottinghamCourtList;
     private CfcCourt cfcCourtList;
     private BirminghamCourt birminghamCourtList;
@@ -62,7 +62,6 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     private NewportCourt newportCourtList;
     private SwanseaCourt swanseaCourtList;
     private NorthWalesCourt northWalesCourtList;
-
     private HighCourt highCourtList;
 
     @JsonIgnore
@@ -173,13 +172,11 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
         return northWalesCourtList;
     }
 
-
     @JsonIgnore
     @Override
     public HighCourt getHighCourt() {
         return highCourtList;
     }
-
 
     public void setCourt(String courtId, Boolean isConsented) {
         if (Arrays.stream(NottinghamCourt.values())

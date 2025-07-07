@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirecti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 
@@ -117,6 +119,23 @@ public class HearingTabItemsAppender {
             .tabHearingMigratedDate(LocalDateTime.now())
             .tabHearingDocuments(toAdditionalHearingDocs(interimHearingItem))
             .build();
+    }
+
+    public HearingTabItem toHearingTabItem(GeneralApplicationWrapper generalApplicationWrapper,
+                                           GeneralApplicationRegionWrapper generalApplicationRegionWrapper) {
+        return HearingTabItem.builder()
+                //.tabHearingType() hearing type is not captured
+                .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
+                .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
+                        generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
+                        generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime()))
+                .tabTimeEstimate(generalApplicationWrapper.getGeneralApplicationTimeEstimate())
+                .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
+                .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
+                        generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
+                .tabHearingMigratedDate(LocalDateTime.now())
+                //.tabHearingDocuments() document is not captured
+                .build();
     }
 
     /**
