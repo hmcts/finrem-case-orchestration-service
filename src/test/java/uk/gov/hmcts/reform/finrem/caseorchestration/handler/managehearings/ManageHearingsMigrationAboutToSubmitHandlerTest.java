@@ -47,5 +47,6 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
 
         verify(manageHearingsMigrationService).populateListForHearingWrapper(caseData);
         verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseData);
+        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseData);
     }
 }
