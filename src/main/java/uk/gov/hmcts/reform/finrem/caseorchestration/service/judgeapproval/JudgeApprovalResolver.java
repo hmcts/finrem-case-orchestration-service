@@ -63,6 +63,10 @@ class JudgeApprovalResolver {
             buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
             userAuthorisation, judgeApproval.getCourtOrderDate());
 
+        String baseFileName = targetDoc.getDocumentFilename().substring(0, targetDoc.getDocumentFilename().lastIndexOf('.'));
+        String updatedFileName = baseFileName + " - cover letter.pdf";
+        coverLetter.setDocumentFilename(updatedFileName);
+
         // Process objects under Draft Order Tab
         processDraftOrderDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
         processPsaDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
