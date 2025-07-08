@@ -375,6 +375,7 @@ public class GeneralApplicationHelper {
             builder.generalApplicationDraftOrder(draftCaseDocument);
             log.info("General Application Draft Document after converting to Pdf {} for Case ID: {}", draftCaseDocument, caseId);
         }
+        // TODO Look like it's always null
         CaseDocument directionDocument = convertToCaseDocument(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsDocument());
         if (directionDocument != null) {
             log.info("General Application Direction Document before converting to Pdf {} for Case ID: {}", directionDocument, caseId);

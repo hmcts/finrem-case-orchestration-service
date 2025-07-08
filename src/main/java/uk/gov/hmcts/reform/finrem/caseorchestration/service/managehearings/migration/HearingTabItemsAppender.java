@@ -135,7 +135,6 @@ public class HearingTabItemsAppender {
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
                 generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
             .tabHearingMigratedDate(LocalDateTime.now())
-            .tabHearingDocuments(toAdditionalHearingDocs(generalApplicationWrapper))
             .build();
     }
 
@@ -161,11 +160,6 @@ public class HearingTabItemsAppender {
      */
     private List<DocumentCollectionItem> toAdditionalHearingDocs(InterimHearingItem interimHearingItem) {
         CaseDocument caseDocument = interimHearingItem.getInterimUploadAdditionalDocument();
-        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
-    }
-
-    private List<DocumentCollectionItem> toAdditionalHearingDocs(GeneralApplicationWrapper generalApplicationWrapper) {
-        CaseDocument caseDocument = generalApplicationWrapper.getGeneralApplicationDirectionsDocument();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
 }

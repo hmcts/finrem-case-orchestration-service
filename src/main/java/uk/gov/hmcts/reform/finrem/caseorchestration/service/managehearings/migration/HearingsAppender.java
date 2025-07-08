@@ -140,8 +140,6 @@ public class HearingsAppender {
         String additionalInformationAboutHearing = generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation();
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
         Court hearingCourtSelection = generalApplicationRegionWrapper.toCourt();
-        DocumentCollectionItem additionalDocument = generalApplicationWrapper.getGeneralApplicationDirectionsDocument() == null ? null :
-            DocumentCollectionItem.builder().value(generalApplicationWrapper.getGeneralApplicationDirectionsDocument()).build();
 
         return Hearing.builder()
             .hearingDate(hearingDate)
@@ -151,7 +149,6 @@ public class HearingsAppender {
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
-            .additionalHearingDocs(toSingletonListOrNull(additionalDocument))
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();

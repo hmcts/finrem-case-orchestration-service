@@ -162,9 +162,8 @@ public class HearingsAppenderTest {
         }
     }
 
-    @ValueSource(booleans = {true, false})
-    @ParameterizedTest
-    void shouldConvertGeneralApplicationWrapperToHearing(boolean withAdditionDoc) {
+    @Test
+    void shouldConvertGeneralApplicationWrapperToHearing() {
         // Arrange
         LocalDate hearingDate = LocalDate.of(2025, 7, 3);
         String hearingTime = "10:45 AM";
@@ -174,14 +173,11 @@ public class HearingsAppenderTest {
         HearingType expectedHearingType = HearingType.APPLICATION_HEARING;
         Court expectedCourt = mock(Court.class);
 
-        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
-
         GeneralApplicationWrapper generalApplicationWrapper = spy(GeneralApplicationWrapper.builder()
             .generalApplicationDirectionsHearingDate(hearingDate)
             .generalApplicationDirectionsHearingTime(hearingTime)
             .generalApplicationDirectionsHearingTimeEstimate(timeEstimate)
             .generalApplicationDirectionsAdditionalInformation(additionalInfo)
-            .generalApplicationDirectionsDocument(additionalDoc)
             .build());
         GeneralApplicationRegionWrapper generalApplicationRegionWrapper = spy(GeneralApplicationRegionWrapper.builder()
             .build());
@@ -198,12 +194,6 @@ public class HearingsAppenderTest {
         assertEquals(additionalInfo, result.getAdditionalHearingInformation());
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
-        if (withAdditionDoc) {
-            assertThat(result.getAdditionalHearingDocs())
-                .extracting(DocumentCollectionItem::getValue)
-                .containsExactly(additionalDoc);
-        } else {
-            assertThat(result.getAdditionalHearingDocs()).isNull();
-        }
+        assertThat(result.getAdditionalHearingDocs()).isNull();
     }
 }
