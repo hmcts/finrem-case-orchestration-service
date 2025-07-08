@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -12,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
 
 @Component
 @Slf4j
-public class GeneralApplicationWrapperPopulator implements Populator {
+public class GeneralApplicationWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
@@ -20,18 +21,20 @@ public class GeneralApplicationWrapperPopulator implements Populator {
 
     public GeneralApplicationWrapperPopulator(HearingsAppender hearingsAppender,
                                               HearingTabItemsAppender hearingTabItemsAppender) {
+        super(MhMigrationWrapper::getIsGeneralApplicationMigrated);
         this.hearingsAppender = hearingsAppender;
         this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
 
-        return caseData.isContestedApplication()
-            && !YesOrNo.isYes(mhMigrationWrapper.getIsGeneralApplicationMigrated())
-            && generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate() != null;
+        if (prePopulationChecksFailed(caseData)) {
+            return false;
+        }
+
+        return generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate() != null;
     }
 
     @Override
@@ -47,5 +50,10 @@ public class GeneralApplicationWrapperPopulator implements Populator {
             hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
 
         mhMigrationWrapper.setIsGeneralApplicationMigrated(YesOrNo.YES);
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
 }

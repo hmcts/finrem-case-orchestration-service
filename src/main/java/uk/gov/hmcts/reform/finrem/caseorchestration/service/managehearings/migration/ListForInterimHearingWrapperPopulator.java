@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
@@ -14,7 +15,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @Slf4j
-public class ListForInterimHearingWrapperPopulator implements Populator {
+public class ListForInterimHearingWrapperPopulator extends BasePopulator {
 
     private final HearingTabItemsAppender hearingTabItemsAppender;
 
@@ -22,17 +23,20 @@ public class ListForInterimHearingWrapperPopulator implements Populator {
 
     public ListForInterimHearingWrapperPopulator(HearingsAppender hearingsAppender,
                                                  HearingTabItemsAppender hearingTabItemsAppender) {
+        super(MhMigrationWrapper::getIsListForInterimHearingsMigrated);
         this.hearingsAppender = hearingsAppender;
         this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
-        return caseData.isContestedApplication()
-            && !YesOrNo.isYes(mhMigrationWrapper.getIsListForInterimHearingsMigrated())
-            && !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
+
+        if (prePopulationChecksFailed(caseData)) {
+            return false;
+        }
+
+        return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
     }
 
     @Override
@@ -47,5 +51,10 @@ public class ListForInterimHearingWrapperPopulator implements Populator {
         });
 
         mhMigrationWrapper.setIsListForInterimHearingsMigrated(YesOrNo.YES);
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
 }

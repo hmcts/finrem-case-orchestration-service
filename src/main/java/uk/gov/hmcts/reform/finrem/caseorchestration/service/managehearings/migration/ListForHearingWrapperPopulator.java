@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -21,7 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
  */
 @Component
 @Slf4j
-public class ListForHearingWrapperPopulator implements Populator {
+public class ListForHearingWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
@@ -29,6 +30,7 @@ public class ListForHearingWrapperPopulator implements Populator {
 
     public ListForHearingWrapperPopulator(HearingsAppender hearingsAppender,
                                           HearingTabItemsAppender hearingTabItemsAppender) {
+        super(MhMigrationWrapper::getIsListForHearingsMigrated);
         this.hearingsAppender = hearingsAppender;
         this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
@@ -46,11 +48,13 @@ public class ListForHearingWrapperPopulator implements Populator {
      */
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-        return caseData.isContestedApplication()
-            && !YesOrNo.isYes(mhMigrationWrapper.getIsListForHearingsMigrated())
-            && listForHearingWrapper.getHearingType() != null;
+
+        if (prePopulationChecksFailed(caseData)) {
+            return false;
+        }
+
+        return listForHearingWrapper.getHearingType() != null;
     }
 
     /**
@@ -74,5 +78,10 @@ public class ListForHearingWrapperPopulator implements Populator {
             hearingsAppender.toHearing(listForHearingWrapper)).build());
 
         mhMigrationWrapper.setIsListForHearingsMigrated(YesOrNo.YES);
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
 }
