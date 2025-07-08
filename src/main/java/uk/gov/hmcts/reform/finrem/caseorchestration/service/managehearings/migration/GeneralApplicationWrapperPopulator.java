@@ -28,28 +28,29 @@ public class GeneralApplicationWrapperPopulator extends BasePopulator {
 
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
-
         if (prePopulationChecksFailed(caseData)) {
             return false;
         }
 
-        return generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate() != null;
+        GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
+        if (generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate() == null) {
+            logReasonToSkip(caseData, "hearing date is null.");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public void populate(FinremCaseData caseData) {
         GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
-        // Court Selected
         GeneralApplicationRegionWrapper generalApplicationRegionWrapper = caseData.getRegionWrapper().getGeneralApplicationRegionWrapper();
-
         hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
             hearingTabItemsAppender.toHearingTabItem(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
         hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
             hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
 
-        mhMigrationWrapper.setIsGeneralApplicationMigrated(YesOrNo.YES);
+        caseData.getMhMigrationWrapper().setIsGeneralApplicationMigrated(YesOrNo.YES);
     }
 
     @Override
