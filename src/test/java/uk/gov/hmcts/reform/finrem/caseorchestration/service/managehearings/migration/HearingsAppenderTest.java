@@ -162,22 +162,26 @@ public class HearingsAppenderTest {
         }
     }
 
-    @Test
-    void shouldConvertGeneralApplicationWrapperToHearing() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void shouldConvertGeneralApplicationWrapperToHearing(boolean withAdditionDoc) {
         // Arrange
         LocalDate hearingDate = LocalDate.of(2025, 7, 3);
         String hearingTime = "10:45 AM";
         String timeEstimate = "1 hour";
         String additionalInfo = "Judge prefers early hearing";
 
-        HearingType expectedHearingType = HearingType.DIR;
+        HearingType expectedHearingType = HearingType.APPLICATION_HEARING;
         Court expectedCourt = mock(Court.class);
+
+        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
 
         GeneralApplicationWrapper generalApplicationWrapper = spy(GeneralApplicationWrapper.builder()
             .generalApplicationDirectionsHearingDate(hearingDate)
             .generalApplicationDirectionsHearingTime(hearingTime)
             .generalApplicationDirectionsHearingTimeEstimate(timeEstimate)
             .generalApplicationDirectionsAdditionalInformation(additionalInfo)
+            .generalApplicationDirectionsDocument(additionalDoc)
             .build());
         GeneralApplicationRegionWrapper generalApplicationRegionWrapper = spy(GeneralApplicationRegionWrapper.builder()
             .build());
@@ -194,6 +198,12 @@ public class HearingsAppenderTest {
         assertEquals(additionalInfo, result.getAdditionalHearingInformation());
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
-        assertThat(result.getAdditionalHearingDocs()).isNull();
+        if (withAdditionDoc) {
+            assertThat(result.getAdditionalHearingDocs())
+                .extracting(DocumentCollectionItem::getValue)
+                .containsExactly(additionalDoc);
+        } else {
+            assertThat(result.getAdditionalHearingDocs()).isNull();
+        }
     }
 }

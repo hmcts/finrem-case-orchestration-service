@@ -219,11 +219,14 @@ public class HearingTabItemsAppenderTest {
             String expectedDateTime = "03 Jul 2025 10:00 AM";
             String expectedAdditionalInfo = "Processed details";
 
+            CaseDocument additionalDoc = mock(CaseDocument.class);
+
             GeneralApplicationWrapper generalApplicationWrapper = spy(GeneralApplicationWrapper.builder()
                 .generalApplicationDirectionsHearingDate(hearingDate)
                 .generalApplicationDirectionsHearingTime(hearingTime)
                 .generalApplicationDirectionsHearingTimeEstimate(timeEstimate)
                 .generalApplicationDirectionsAdditionalInformation(additionalInfo)
+                .generalApplicationDirectionsDocument(additionalDoc)
                 .build());
             GeneralApplicationRegionWrapper generalApplicationRegionWrapper = spy(GeneralApplicationRegionWrapper.builder()
                 .build());
@@ -247,14 +250,18 @@ public class HearingTabItemsAppenderTest {
                     HearingTabItem::getTabAdditionalInformation
                 )
                 .containsExactly(
-                    HearingType.DIR.getId(),
+                    HearingType.APPLICATION_HEARING.getId(),
                     expectedCourtName,
                     expectedDateTime,
                     timeEstimate,
                     "Unknown",
                     expectedAdditionalInfo
                 );
-            assertThat(result.getTabHearingDocuments()).isNull();
+            assertThat(result.getTabHearingDocuments())
+                .isNotNull()
+                .hasSize(1)
+                .extracting(DocumentCollectionItem::getValue)
+                .containsExactly(additionalDoc);
             assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
         }
     }

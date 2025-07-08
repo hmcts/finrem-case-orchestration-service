@@ -125,7 +125,7 @@ public class HearingTabItemsAppender {
     public HearingTabItem toHearingTabItem(GeneralApplicationWrapper generalApplicationWrapper,
                                            GeneralApplicationRegionWrapper generalApplicationRegionWrapper) {
         return HearingTabItem.builder()
-            .tabHearingType(HearingType.DIR.getId()) // TODO To be confirmed by Jon
+            .tabHearingType(HearingType.APPLICATION_HEARING.getId())
             .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
             .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
                 generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
@@ -135,7 +135,7 @@ public class HearingTabItemsAppender {
             .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
                 generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
             .tabHearingMigratedDate(LocalDateTime.now())
-            //.tabHearingDocuments() document is not captured
+            .tabHearingDocuments(toAdditionalHearingDocs(generalApplicationWrapper))
             .build();
     }
 
@@ -161,6 +161,11 @@ public class HearingTabItemsAppender {
      */
     private List<DocumentCollectionItem> toAdditionalHearingDocs(InterimHearingItem interimHearingItem) {
         CaseDocument caseDocument = interimHearingItem.getInterimUploadAdditionalDocument();
+        return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
+    }
+
+    private List<DocumentCollectionItem> toAdditionalHearingDocs(GeneralApplicationWrapper generalApplicationWrapper) {
+        CaseDocument caseDocument = generalApplicationWrapper.getGeneralApplicationDirectionsDocument();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
 }
