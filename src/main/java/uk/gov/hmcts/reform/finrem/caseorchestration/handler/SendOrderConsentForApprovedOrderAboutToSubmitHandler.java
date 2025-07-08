@@ -27,7 +27,7 @@ public class SendOrderConsentForApprovedOrderAboutToSubmitHandler extends Finrem
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType));
+            && EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType);
     }
 
     @Override

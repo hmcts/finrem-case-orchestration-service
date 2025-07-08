@@ -26,7 +26,7 @@ public class SendOrderConsentForApprovedOrderAboutToStartHandler extends FinremC
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType));
+            && EventType.CONSENT_SEND_ORDER_FOR_APPROVED_ORDER.equals(eventType);
     }
 
     @Override

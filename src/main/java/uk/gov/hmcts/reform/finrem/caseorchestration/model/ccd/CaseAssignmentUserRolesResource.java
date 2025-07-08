@@ -18,4 +18,5 @@ public class CaseAssignmentUserRolesResource {
 
     @JsonProperty("case_users")
     private List<CaseAssignmentUserRole> caseAssignmentUserRoles;
+
 }
