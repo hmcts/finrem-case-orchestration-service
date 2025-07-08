@@ -59,13 +59,8 @@ class JudgeApprovalResolver {
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
 
-        CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(finremCaseDetails,
-            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
-            userAuthorisation, judgeApproval.getCourtOrderDate());
-
-        String baseFileName = targetDoc.getDocumentFilename().substring(0, targetDoc.getDocumentFilename().lastIndexOf('.'));
-        String updatedFileName = baseFileName + " - cover letter.pdf";
-        coverLetter.setDocumentFilename(updatedFileName);
+        //Handle cover letter generation for order
+        CaseDocument coverLetter = handleOrderCoverLetter(finremCaseDetails, judgeApproval, userAuthorisation, targetDoc);
 
         // Process objects under Draft Order Tab
         processDraftOrderDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
@@ -79,6 +74,19 @@ class JudgeApprovalResolver {
 
         }
         refusedOrderProcessor.processRefusedOrders(finremCaseDetails, draftOrdersWrapper, judgeApproval, userAuthorisation);
+    }
+
+    private CaseDocument handleOrderCoverLetter(FinremCaseDetails finremCaseDetails, JudgeApproval judgeApproval, String userAuthorisation,
+                                                CaseDocument targetDoc) {
+        CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(finremCaseDetails,
+            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
+            userAuthorisation, judgeApproval.getCourtOrderDate());
+
+        String baseFileName = targetDoc.getDocumentFilename().substring(0, targetDoc.getDocumentFilename().lastIndexOf('.'));
+        String updatedFileName = baseFileName + " - cover letter.pdf";
+        coverLetter.setDocumentFilename(updatedFileName);
+
+        return coverLetter;
     }
 
     /**
