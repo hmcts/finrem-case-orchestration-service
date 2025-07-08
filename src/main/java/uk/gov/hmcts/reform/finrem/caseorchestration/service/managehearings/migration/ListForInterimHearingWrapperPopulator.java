@@ -30,19 +30,20 @@ public class ListForInterimHearingWrapperPopulator extends BasePopulator {
 
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        InterimWrapper interimWrapper = caseData.getInterimWrapper();
-
         if (prePopulationChecksFailed(caseData)) {
             return false;
         }
-
-        return !emptyIfNull(interimWrapper.getInterimHearings()).isEmpty();
+        InterimWrapper interimWrapper = caseData.getInterimWrapper();
+        if (emptyIfNull(interimWrapper.getInterimHearings()).isEmpty()) {
+            logReasonToSkip(caseData, "collection \"interimHearings\" is empty.");
+            return false;
+        }
+        return true;
     }
 
     @Override
     public void populate(FinremCaseData caseData) {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         interimWrapper.getInterimHearings().stream().map(InterimHearingCollection::getValue).forEach(interimHearing -> {
             hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
                     hearingTabItemsAppender.toHearingTabItem(interimHearing)).build());
@@ -50,7 +51,7 @@ public class ListForInterimHearingWrapperPopulator extends BasePopulator {
                     hearingsAppender.toHearing(interimHearing)).build());
         });
 
-        mhMigrationWrapper.setIsListForInterimHearingsMigrated(YesOrNo.YES);
+        caseData.getMhMigrationWrapper().setIsListForInterimHearingsMigrated(YesOrNo.YES);
     }
 
     @Override

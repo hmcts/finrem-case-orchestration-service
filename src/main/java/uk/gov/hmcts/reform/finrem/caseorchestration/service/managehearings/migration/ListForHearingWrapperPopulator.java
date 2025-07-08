@@ -48,13 +48,15 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
      */
     @Override
     public boolean shouldPopulate(FinremCaseData caseData) {
-        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-
         if (prePopulationChecksFailed(caseData)) {
             return false;
         }
-
-        return listForHearingWrapper.getHearingType() != null;
+        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
+        if (listForHearingWrapper.getHearingType() == null) {
+            logReasonToSkip(caseData, "hearing type is null.");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -70,14 +72,12 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
     @Override
     public void populate(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-        MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
-
         hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
             hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).build());
         hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
             hearingsAppender.toHearing(listForHearingWrapper)).build());
 
-        mhMigrationWrapper.setIsListForHearingsMigrated(YesOrNo.YES);
+        caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
 
     @Override
