@@ -58,7 +58,6 @@ public class ContestedOrderApprovedLetterService {
             caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
-        // Set the orderApprovedDate for the cover letter Docmosis template
         caseData.put("orderApprovedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(courtOrderDate));
     }
 
