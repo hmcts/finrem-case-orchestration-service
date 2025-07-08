@@ -13,6 +13,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.FinalisedOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocReviewCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrderDocumentReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -88,15 +94,17 @@ public class ContestedOrderApprovedLetterService {
      *
      * @param finremCaseDetails the case details containing draft orders
      */
+    //TODO: Which date should be used for the cover letter?
     private void updateOrderApprovedDateForCoverLetter(FinremCaseDetails finremCaseDetails) {
-        List<FinalisedOrderCollection> finalisedOrders =
-            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getFinalisedOrdersCollection()).orElse(List.of());
-        FinalisedOrderCollection lastOrder = new LinkedList<>(finalisedOrders).peekLast();
+        List<AgreedDraftOrderCollection> agreedDraftOrderCollection =
+            ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getAgreedDraftOrderCollection()).orElse(List.of());
+        AgreedDraftOrderCollection lastOrder = new LinkedList<>(agreedDraftOrderCollection).peekLast();
 
         LocalDate orderApprovedDate = LocalDate.from(ofNullable(lastOrder)
-            .map(FinalisedOrderCollection::getValue)
-            .map(FinalisedOrder::getApprovalDate)
-            .orElse(LocalDate.now().atStartOfDay()));
+            .map(AgreedDraftOrderCollection::getValue)
+            .map(AgreedDraftOrder::getCourtOrderDate)
+            .orElse(LocalDate.now()));
+            //TODO: Find a better place to store this for Template variables in Cover letter
             finremCaseDetails.getData().setOrderApprovedDate(orderApprovedDate);
     }
 
@@ -123,7 +131,7 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
-        // Set the orderApprovedDate for the cover letter Docmosis template
+        // TODO: Set the orderApprovedDate for the cover letter Docmosis template
         caseData.put("orderApprovedDate", caseData.get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }

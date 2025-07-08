@@ -113,8 +113,15 @@ class JudgeApprovalResolver {
                 }
                 approvable.setOrderStatus(APPROVED_BY_JUDGE);
                 approvable.setApprovalDate(LocalDateTime.now());
-                //TODO: Set Court order date from judge approval input - revert below.
+                //TODO: Set Court order date from judge approval input - DONE
                 approvable.setCourtOrderDate(judgeApproval.getCourtOrderDate());
+                //TODO: Find a better way to pass this to populateTemplateVariables
+                finremCaseDetails.getData().setOrderApprovedDate(judgeApproval.getCourtOrderDate());
+                //TODO: Set cover letter for both approved and refused orders - move in from ApproveOrderService - DONE
+                CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+                    buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
+                approvable.setCoverLetter(coverLetter);
+                log.info("Generated coversheet for JudgeApproval on Case id {} court order date {} with document filename {}", finremCaseDetails.getId(), judgeApproval.getCourtOrderDate(), coverLetter.getDocumentFilename());
             }
             if (refused) {
                 approvable.setOrderStatus(REFUSED);
@@ -123,13 +130,6 @@ class JudgeApprovalResolver {
                 }
             }
 
-            //TODO: Set cover letter for both approved and refused orders - move in from ApproveOrderService
-            if(approved) {
-                CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
-                    buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
-                approvable.setCoverLetter(coverLetter);
-                log.info("Generated coversheet for JudgeApproval on Case id {} with document filename {}", finremCaseDetails.getId(), coverLetter.getDocumentFilename());
-            }
         }
     }
 

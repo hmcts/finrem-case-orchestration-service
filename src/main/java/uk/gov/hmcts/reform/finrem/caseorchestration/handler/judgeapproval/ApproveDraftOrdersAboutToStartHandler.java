@@ -132,6 +132,7 @@ public class ApproveDraftOrdersAboutToStartHandler extends FinremCallbackHandler
                 String hearingInfo = buildHearingInfoFromDraftOrdersReview(draftOrdersReview);
 
                 // Determine the court order date, defaulting to hearing date or current date if not available
+                //TODO: Get Hearing Date or manually set court order date
                 LocalDate courtOrderDate = ofNullable(draftOrdersReview.getCourtOrderDate())
                     .map(LocalDate::from)
                     .orElse(ofNullable(draftOrdersReview.getHearingDate())

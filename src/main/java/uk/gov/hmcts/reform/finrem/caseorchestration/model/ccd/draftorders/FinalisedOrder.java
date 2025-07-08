@@ -45,7 +45,7 @@ public class FinalisedOrder implements HasCaseDocument, WithAttachments {
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate courtOrderDate;
 
-//    private CaseDocument coverLetter;
+    private CaseDocument coverLetter;
     //TODO: Add Coverletter field. If not present, it will be take FinremCaseData.coverLetter as a default value.
 
 }

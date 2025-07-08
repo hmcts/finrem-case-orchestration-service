@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -52,18 +53,13 @@ public class DraftOrderDocumentReview implements HasCaseDocument, Reviewable, Re
     private LocalDateTime notificationSentDate;
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate courtOrderDate;
+    private CaseDocument coverLetter;
 
-    @JsonIgnore
     @Override
-    public LocalDate getCourtOrderDate() {
-        return null;
-    }
+    public LocalDate getCourtOrderDate() { return Optional.ofNullable(courtOrderDate).orElse(null);}
 
-    @JsonIgnore
     @Override
-    public CaseDocument getCoverLetter() {
-        return null;
-    }
+    public CaseDocument getCoverLetter() {return Optional.ofNullable(coverLetter).orElse(null);}
 
     @JsonIgnore
     @Override
