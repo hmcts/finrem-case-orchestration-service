@@ -143,7 +143,7 @@ public class HearingsAppender {
 
         return Hearing.builder()
             .hearingDate(hearingDate)
-            //.hearingType() // Not captured
+            .hearingType(HearingType.DIR) // TODO To be confirmed by Jon
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)

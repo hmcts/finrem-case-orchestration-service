@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
@@ -124,18 +125,18 @@ public class HearingTabItemsAppender {
     public HearingTabItem toHearingTabItem(GeneralApplicationWrapper generalApplicationWrapper,
                                            GeneralApplicationRegionWrapper generalApplicationRegionWrapper) {
         return HearingTabItem.builder()
-                //.tabHearingType() hearing type is not captured
-                .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
-                .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
-                        generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
-                        generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime()))
-                .tabTimeEstimate(generalApplicationWrapper.getGeneralApplicationTimeEstimate())
-                .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
-                .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
-                        generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
-                .tabHearingMigratedDate(LocalDateTime.now())
-                //.tabHearingDocuments() document is not captured
-                .build();
+            .tabHearingType(HearingType.DIR.getId()) // TODO To be confirmed by Jon
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
+            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
+                generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
+                generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime()))
+            .tabTimeEstimate(generalApplicationWrapper.getGeneralApplicationDirectionsHearingTimeEstimate())
+            .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
+            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
+                generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
+            .tabHearingMigratedDate(LocalDateTime.now())
+            //.tabHearingDocuments() document is not captured
+            .build();
     }
 
     /**
@@ -162,5 +163,4 @@ public class HearingTabItemsAppender {
         CaseDocument caseDocument = interimHearingItem.getInterimUploadAdditionalDocument();
         return toSingletonListOrNull(DocumentCollectionItem.fromCaseDocument(caseDocument));
     }
-
 }
