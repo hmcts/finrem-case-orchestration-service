@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.HearingRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -158,5 +160,40 @@ public class HearingsAppenderTest {
         } else {
             assertThat(result.getAdditionalHearingDocs()).isNull();
         }
+    }
+
+    @Test
+    void shouldConvertGeneralApplicationWrapperToHearing() {
+        // Arrange
+        LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+        String hearingTime = "10:45 AM";
+        String timeEstimate = "1 hour";
+        String additionalInfo = "Judge prefers early hearing";
+
+        HearingType expectedHearingType = HearingType.DIR;
+        Court expectedCourt = mock(Court.class);
+
+        GeneralApplicationWrapper generalApplicationWrapper = spy(GeneralApplicationWrapper.builder()
+            .generalApplicationDirectionsHearingDate(hearingDate)
+            .generalApplicationDirectionsHearingTime(hearingTime)
+            .generalApplicationDirectionsHearingTimeEstimate(timeEstimate)
+            .generalApplicationDirectionsAdditionalInformation(additionalInfo)
+            .build());
+        GeneralApplicationRegionWrapper generalApplicationRegionWrapper = spy(GeneralApplicationRegionWrapper.builder()
+            .build());
+        when(generalApplicationRegionWrapper.toCourt()).thenReturn(expectedCourt);
+
+        // Act
+        Hearing result = underTest.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper);
+
+        // Assert
+        assertEquals(hearingDate, result.getHearingDate());
+        assertEquals(expectedHearingType, result.getHearingType());
+        assertEquals(hearingTime, result.getHearingTime());
+        assertEquals(timeEstimate, result.getHearingTimeEstimate());
+        assertEquals(additionalInfo, result.getAdditionalHearingInformation());
+        assertEquals(expectedCourt, result.getHearingCourtSelection());
+        assertEquals(YesOrNo.YES, result.getWasMigrated());
+        assertThat(result.getAdditionalHearingDocs()).isNull();
     }
 }

@@ -135,7 +135,7 @@ public class HearingsAppender {
         // Hearing Time
         String hearingTime = generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime();
         // Time Estimate
-        String timeEstimate = generalApplicationWrapper.getGeneralApplicationTimeEstimate();
+        String timeEstimate = generalApplicationWrapper.getGeneralApplicationDirectionsHearingTimeEstimate();
         // Additional information about the hearing
         String additionalInformationAboutHearing = generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation();
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
