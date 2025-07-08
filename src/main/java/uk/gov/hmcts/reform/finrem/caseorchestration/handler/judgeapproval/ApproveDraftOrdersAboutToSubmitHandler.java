@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.judgeapproval;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -13,17 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DraftOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval.ApproveOrderService;
-
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -33,19 +25,11 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
 
     private final DraftOrderService draftOrderService;
 
-    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-
-    private final IdamService idamService;
-
     public ApproveDraftOrdersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ApproveOrderService approveOrderService,
-                                                  DraftOrderService draftOrderService,
-                                                  ContestedOrderApprovedLetterService contestedOrderApprovedLetterService,
-                                                  IdamService idamService) {
+                                                  DraftOrderService draftOrderService) {
         super(finremCaseDetailsMapper);
         this.approveOrderService = approveOrderService;
         this.draftOrderService = draftOrderService;
-        this.contestedOrderApprovedLetterService = contestedOrderApprovedLetterService;
-        this.idamService = idamService;
     }
 
     @Override
@@ -66,26 +50,11 @@ public class ApproveDraftOrdersAboutToSubmitHandler extends FinremCallbackHandle
         // The ids are handled in the submitted callback so can't be removed
         // and clearing them in the about to start callback doesn't work with CCD
         draftOrdersWrapper.setRefusalOrderIdsToBeSent(null);
-        Pair<Boolean, Boolean> statuses = approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
+        approveOrderService.populateJudgeDecisions(caseDetails, draftOrdersWrapper, userAuthorisation);
         clearInputFields(draftOrdersWrapper);
         draftOrderService.clearEmptyOrdersInDraftOrdersReviewCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
-    }
-
-    private String readJudgeType(FinremCaseDetails finremCaseDetails) {
-        String judgeType = ofNullable(finremCaseDetails.getData().getDraftOrdersWrapper().getExtraReportFieldsInput())
-            .map(ExtraReportFieldsInput::getJudgeType)
-            .map(JudgeType::getValue)
-            .orElse("");
-        if (judgeType.isEmpty()) {
-            log.warn("{} - Judge type was not captured and an empty string will be shown in the cover letter.", finremCaseDetails.getId());
-        }
-        return judgeType;
-    }
-
-    private boolean containsApprovalStatus(Pair<Boolean, Boolean> statuses) {
-        return Boolean.TRUE.equals(statuses.getLeft());
     }
 
     private void clearInputFields(DraftOrdersWrapper draftOrdersWrapper) {

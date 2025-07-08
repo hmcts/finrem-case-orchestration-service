@@ -3,11 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 
 import java.util.ArrayList;
@@ -48,17 +46,13 @@ public class ApproveOrderService {
      *   <li>Updates the draft orders and PSA documents in the provided {@link DraftOrdersWrapper} based on the judge's decision.</li>
      * </ol>
      *
-     * <p>After processing, the method builds a confirmation body reflecting the decisions made and returns a pair indicating
-     * whether any draft order was approved or refused.</p>
+     * <p>After processing, the method builds a confirmation body reflecting the decisions made</p>
      *
      * @param draftOrdersWrapper the wrapper object containing draft orders and PSA document collections to be updated
      * @param userAuthorisation  the authorisation token of the user, used to fetch the approving judge's details
-     * @return a {@link Pair} where the first value indicates if any draft order was approved, and the second value indicates if any was refused
      */
-    public Pair<Boolean, Boolean> populateJudgeDecisions(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
-                                                         String userAuthorisation) {
-        boolean hasApprovedDecision = false;
-        boolean hasRefusedDecision = false;
+    public void populateJudgeDecisions(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper,
+                                       String userAuthorisation) {
 
         for (int i = 1; i <= 5; i++) {
             JudgeApproval approval = resolveJudgeApproval(draftOrdersWrapper, i);
@@ -66,15 +60,8 @@ public class ApproveOrderService {
                 continue;
             }
             processJudgeDecision(finremCaseDetails, draftOrdersWrapper, approval, userAuthorisation);
-            JudgeDecision decision = approval.getJudgeDecision();
-            if (decision != null) {
-                hasApprovedDecision |= decision.isApproved();
-                hasRefusedDecision |= decision.isRefused();
-            }
         }
-
         buildConfirmationBody(finremCaseDetails, draftOrdersWrapper);
-        return Pair.of(hasApprovedDecision, hasRefusedDecision);
     }
 
     private void processJudgeDecision(FinremCaseDetails caseDetails, DraftOrdersWrapper wrapper, JudgeApproval approval, String authToken) {
@@ -97,7 +84,7 @@ public class ApproveOrderService {
      * </ul>
      *
      * @param draftOrdersWrapper the {@link DraftOrdersWrapper} containing judge approval fields.
-     * @param index the index specifying which judge approval field to retrieve (1-5).
+     * @param index              the index specifying which judge approval field to retrieve (1-5).
      * @return the corresponding {@link JudgeApproval} object, or null if the index is out of range.
      */
     public JudgeApproval resolveJudgeApproval(DraftOrdersWrapper draftOrdersWrapper, int index) {
@@ -141,7 +128,7 @@ public class ApproveOrderService {
 
             ofNullable(judgeApproval).map(JudgeApproval::getDocument)
                 .ifPresent(targetDoc -> captureFilenames(judgeApproval, ordersApproved, ordersRepresentativeChanges,
-                        ordersChanged, ordersReviewLater));
+                    ordersChanged, ordersReviewLater));
         }
 
         StringBuilder body = new StringBuilder();
@@ -171,16 +158,15 @@ public class ApproveOrderService {
     /**
      * Categorizes the filename of a document based on the judge's decision and adds it to the appropriate list.
      *
-     * @param judgeApproval             the {@link JudgeApproval} object containing the document and the judge's decision.
-     * @param ordersApproved            the list to which filenames of documents marked as "Ready to be sealed" will be added.
+     * @param judgeApproval               the {@link JudgeApproval} object containing the document and the judge's decision.
+     * @param ordersApproved              the list to which filenames of documents marked as "Ready to be sealed" will be added.
      * @param ordersRepresentativeChanges the list to which filenames of documents requiring changes by the legal representative will be added.
-     * @param ordersChanged             the list to which filenames of documents requiring changes by the judge will be added.
-     * @param ordersReviewLater         the list to which filenames of documents marked for review later will be added.
-     *
+     * @param ordersChanged               the list to which filenames of documents requiring changes by the judge will be added.
+     * @param ordersReviewLater           the list to which filenames of documents marked for review later will be added.
      * @throws IllegalStateException if the judge's decision is not handled.
      */
     private void captureFilenames(JudgeApproval judgeApproval, List<String> ordersApproved, List<String> ordersRepresentativeChanges,
-                          List<String> ordersChanged, List<String> ordersReviewLater) {
+                                  List<String> ordersChanged, List<String> ordersReviewLater) {
         String fileName = judgeApproval.getDocument().getDocumentFilename();
 
         switch (judgeApproval.getJudgeDecision()) {
