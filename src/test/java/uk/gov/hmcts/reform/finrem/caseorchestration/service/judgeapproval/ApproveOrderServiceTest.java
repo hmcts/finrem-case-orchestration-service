@@ -38,8 +38,7 @@ class ApproveOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("providePopulateJudgeDecisionsData")
-    void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked,
-                                    Boolean hasApprovedDecision, Boolean hasRefusedDecision) {
+    void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked) {
         underTest.populateJudgeDecisions(FinremCaseDetails.builder().build(), draftOrdersWrapper, AUTH_TOKEN);
 
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
