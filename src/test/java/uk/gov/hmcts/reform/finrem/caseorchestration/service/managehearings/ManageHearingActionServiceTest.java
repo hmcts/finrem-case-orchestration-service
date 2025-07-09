@@ -308,8 +308,8 @@ class ManageHearingActionServiceTest {
                 createHearingTabItem("Applicant Hearing 3", "1 Jul 2025 10:00", INTERVENER1)
             );
         // migrated hearing will not be populated to hearing tab item, therefore `lenient()` is needed.
-        lenient().
-            when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(migratedHearing1)), any()))
+        lenient()
+            .when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(migratedHearing1)), any()))
             .thenReturn(
                 createHearingTabItem("Applicant Hearing 3", "10 Jul 2025 10:00", null, true)
             );
