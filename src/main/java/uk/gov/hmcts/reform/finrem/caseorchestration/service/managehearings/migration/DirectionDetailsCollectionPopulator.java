@@ -3,10 +3,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migr
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+
+import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 /**
  * Populator component responsible for migrating hearing details from the
@@ -50,12 +57,14 @@ public class DirectionDetailsCollectionPopulator extends BasePopulator {
      */
     @Override
     public void populate(FinremCaseData caseData) {
-        // TODO
-//        ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-//        hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-//            hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).build());
-//        hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-//            hearingsAppender.toHearing(listForHearingWrapper)).build());
+        List<DirectionDetailCollection> directionDetailsCollection = emptyIfNull(caseData.getDirectionDetailsCollection());
+        log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailsCollection);
+        directionDetailsCollection.stream().map(DirectionDetailCollection::getValue).forEach(directionDetails -> {
+            hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
+                    hearingTabItemsAppender.toHearingTabItem(directionDetails)).build());
+            hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
+                hearingsAppender.toHearing(directionDetails)).build());
+        });
 
         caseData.getMhMigrationWrapper().setIsDirectionDetailsCollectionMigrated(YesOrNo.YES);
     }

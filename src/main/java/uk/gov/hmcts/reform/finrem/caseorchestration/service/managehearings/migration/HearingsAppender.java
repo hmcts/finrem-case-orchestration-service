@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -144,6 +145,33 @@ public class HearingsAppender {
         return Hearing.builder()
             .hearingDate(hearingDate)
             .hearingType(HearingType.APPLICATION_HEARING)
+            .hearingTimeEstimate(timeEstimate)
+            .hearingTime(hearingTime)
+            .hearingCourtSelection(hearingCourtSelection)
+            //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
+            .additionalHearingInformation(additionalInformationAboutHearing)
+            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
+            .wasMigrated(YesOrNo.YES)
+            .build();
+    }
+
+    public Hearing toHearing(DirectionDetail directionDetail) {
+        // Type of Hearing
+        HearingTypeDirection hearingType = directionDetail.getTypeOfHearing();
+        // Hearing Date
+        LocalDate hearingDate = directionDetail.getDateOfHearing();
+        // Hearing Time
+        String hearingTime = directionDetail.getHearingTime();
+        // Time Estimate
+        String timeEstimate = directionDetail.getTimeEstimate();
+        // Additional information about the hearing is not captured
+        String additionalInformationAboutHearing = null;
+        // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
+        Court hearingCourtSelection = null; //TODO directionDetail.toCourt();
+
+        return Hearing.builder()
+            .hearingDate(hearingDate)
+            .hearingType(hearingType != null ? HearingType.valueOf(hearingType.name()) : null)
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)

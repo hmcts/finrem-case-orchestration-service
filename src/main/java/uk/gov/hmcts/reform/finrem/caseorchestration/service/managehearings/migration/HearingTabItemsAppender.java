@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -122,6 +123,21 @@ public class HearingTabItemsAppender {
 
     public HearingTabItem toHearingTabItem(GeneralApplicationWrapper generalApplicationWrapper,
                                            GeneralApplicationRegionWrapper generalApplicationRegionWrapper) {
+        return HearingTabItem.builder()
+            .tabHearingType(HearingType.APPLICATION_HEARING.getId())
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
+            .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
+                generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
+                generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime()))
+            .tabTimeEstimate(generalApplicationWrapper.getGeneralApplicationDirectionsHearingTimeEstimate())
+            .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
+            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
+                generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
+            .tabHearingMigratedDate(LocalDateTime.now())
+            .build();
+    }
+
+    public HearingTabItem toHearingTabItem(DirectionDetail directionDetail) {
         return HearingTabItem.builder()
             .tabHearingType(HearingType.APPLICATION_HEARING.getId())
             .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
