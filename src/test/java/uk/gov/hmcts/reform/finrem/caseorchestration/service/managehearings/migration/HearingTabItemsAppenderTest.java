@@ -178,27 +178,27 @@ public class HearingTabItemsAppenderTest {
 
             // Assert
             assertThat(result)
-                    .extracting(
-                        HearingTabItem::getTabHearingType,
-                        HearingTabItem::getTabCourtSelection,
-                        HearingTabItem::getTabDateTime,
-                        HearingTabItem::getTabTimeEstimate,
-                        HearingTabItem::getTabConfidentialParties,
-                        HearingTabItem::getTabAdditionalInformation
-                    )
-                    .containsExactly(
-                        typeOfHearing.getId(),
-                        expectedCourtName,
-                        expectedDateTime,
-                        timeEstimate,
-                        "Unknown",
-                        expectedAdditionalInfo
-                    );
+                .extracting(
+                    HearingTabItem::getTabHearingType,
+                    HearingTabItem::getTabCourtSelection,
+                    HearingTabItem::getTabDateTime,
+                    HearingTabItem::getTabTimeEstimate,
+                    HearingTabItem::getTabConfidentialParties,
+                    HearingTabItem::getTabAdditionalInformation
+                )
+                .containsExactly(
+                    typeOfHearing.getId(),
+                    expectedCourtName,
+                    expectedDateTime,
+                    timeEstimate,
+                    "Unknown",
+                    expectedAdditionalInfo
+                );
             assertThat(result.getTabHearingDocuments())
-                    .isNotNull()
-                    .hasSize(1)
-                    .extracting(DocumentCollectionItem::getValue)
-                    .containsExactly(additionalDoc);
+                .isNotNull()
+                .hasSize(1)
+                .extracting(DocumentCollectionItem::getValue)
+                .containsExactly(additionalDoc);
             assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
         }
     }
