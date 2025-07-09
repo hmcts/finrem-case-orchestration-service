@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimTypeOfHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -83,8 +84,8 @@ public class HearingTabItemsAppender {
         HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
 
         return HearingTabItem.builder()
-            .tabHearingType(hearingType.getId())
-            .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
+            .tabHearingType(hearingType == null ? null : hearingType.getId())
+            .tabCourtSelection(hearingRegionWrapper == null ? null : hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
             .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
             .tabTimeEstimate(timeEstimate)
             .tabConfidentialParties("Unknown")
@@ -107,8 +108,10 @@ public class HearingTabItemsAppender {
      * @return the constructed hearing tab item
      */
     public HearingTabItem toHearingTabItem(InterimHearingItem interimHearingItem) {
+        InterimTypeOfHearing hearingType = interimHearingItem.getInterimHearingType();
+
         return HearingTabItem.builder()
-            .tabHearingType(interimHearingItem.getInterimHearingType().getId())
+            .tabHearingType(hearingType == null ? null : hearingType.getId())
             .tabCourtSelection(hearingTabDataMapper.getCourtName(interimHearingItem.toCourt()))
             .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
                 interimHearingItem.getInterimHearingDate(), interimHearingItem.getInterimHearingTime()))
