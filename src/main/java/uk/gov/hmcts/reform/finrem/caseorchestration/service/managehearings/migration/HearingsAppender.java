@@ -165,7 +165,6 @@ public class HearingsAppender {
         // Time Estimate
         String timeEstimate = directionDetail.getTimeEstimate();
         // Additional information about the hearing is not captured
-        String additionalInformationAboutHearing = null;
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
         Court hearingCourtSelection = directionDetail.getLocalCourt();
 
@@ -176,7 +175,6 @@ public class HearingsAppender {
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
-            .additionalHearingInformation(additionalInformationAboutHearing)
             //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
