@@ -12,13 +12,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.Approvable;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.AnotherHearingRequestCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.ExtraReportFieldsInput;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.HearingInstruction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeApproval;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.judgeapproval.JudgeDecision;
@@ -30,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.test.LocalDateTimeExtension;
 
@@ -63,7 +67,7 @@ class JudgeApprovalResolverTest {
 
     private static final String APPROVED_JUDGE_NAME = "Mary Chapman";
     private static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2024, 11, 4, 9, 0, 0);
-    private static final CaseDocument TARGET_DOCUMENT = CaseDocument.builder().documentUrl("targetUrl").build();
+    private static final CaseDocument TARGET_DOCUMENT = CaseDocument.builder().documentFilename("Order name.pdf").documentUrl("targetUrl").build();
 
     @InjectMocks
     private JudgeApprovalResolver judgeApprovalResolver;
@@ -77,13 +81,27 @@ class JudgeApprovalResolverTest {
     @Mock
     private RefusedOrderProcessor refusedOrderProcessor;
 
+    @Mock
+    private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+
     @ParameterizedTest
     @MethodSource("provideShouldInvokeProcessHearingInstructionData")
     void shouldInvokeProcessHearingInstruction(DraftOrdersWrapper draftOrdersWrapper, int expectHearingInvocationCount) {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(draftOrdersWrapper)
+                .build())
+            .build();
+
+        // Mocking cover letter generation
+        CaseDocument coverLetter = CaseDocument.builder().documentUrl("coverLetterUrl").documentFilename("document.pdf").build();
+        lenient().when(contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(any(), any(), any(), any()))
+            .thenReturn(coverLetter);
+
         // Execute the method being tested
-        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
+        judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
             draftOrdersWrapper,
-            CaseDocument.builder().build(),
+            TARGET_DOCUMENT,
             JudgeApproval.builder().judgeDecision(READY_TO_BE_SEALED).build(),
             AUTH_TOKEN
         );
@@ -98,6 +116,7 @@ class JudgeApprovalResolverTest {
             // No hearing requests
             Arguments.of(
                 DraftOrdersWrapper.builder()
+                    .extraReportFieldsInput(ExtraReportFieldsInput.builder().judgeType(JudgeType.DISTRICT_JUDGE).build())
                     .hearingInstruction(HearingInstruction.builder().build())
                     .build(),
                 0 // No hearing request means no invocation
@@ -105,6 +124,7 @@ class JudgeApprovalResolverTest {
             // Single hearing request
             Arguments.of(
                 DraftOrdersWrapper.builder()
+                    .extraReportFieldsInput(ExtraReportFieldsInput.builder().judgeType(JudgeType.DISTRICT_JUDGE).build())
                     .hearingInstruction(HearingInstruction.builder()
                         .requireAnotherHearing(YesOrNo.YES)
                         .anotherHearingRequestCollection(List.of(
@@ -117,6 +137,7 @@ class JudgeApprovalResolverTest {
             // Multiple hearing requests
             Arguments.of(
                 DraftOrdersWrapper.builder()
+                    .extraReportFieldsInput(ExtraReportFieldsInput.builder().judgeType(JudgeType.DISTRICT_JUDGE).build())
                     .hearingInstruction(HearingInstruction.builder()
                         .requireAnotherHearing(YesOrNo.YES)
                         .anotherHearingRequestCollection(List.of(
@@ -172,11 +193,21 @@ class JudgeApprovalResolverTest {
                                                          JudgeApproval judgeApproval,
                                                          CaseDocument expectedAmendedDocument,
                                                          YesOrNo expectedFinalOrder) {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(draftOrdersWrapper)
+                .build())
+            .build();
 
         // Mocking IDAM service for getting judge's full name
         lenient().when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APPROVED_JUDGE_NAME);
 
-        judgeApprovalResolver.populateJudgeDecision(FinremCaseDetails.builder().build(),
+        // Mocking cover letter generation
+        CaseDocument coverLetter = CaseDocument.builder().documentUrl("coverLetterUrl").build();
+        lenient().when(contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(any(), any(), any(), any()))
+            .thenReturn(coverLetter);
+
+        judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
             draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
 
         boolean approvedDocument = false;
@@ -188,6 +219,7 @@ class JudgeApprovalResolverTest {
                         assertEquals(FIXED_DATE_TIME, approvable.getApprovalDate());
                         assertEquals(APPROVED_JUDGE_NAME, approvable.getApprovalJudge());
                         assertEquals(expectedFinalOrder, approvable.getFinalOrder());
+                        assertEquals(coverLetter, approvable.getCoverLetter());
                     } else {
                         assertNull(approvable.getApprovalDate());
                         assertNull(approvable.getApprovalJudge());

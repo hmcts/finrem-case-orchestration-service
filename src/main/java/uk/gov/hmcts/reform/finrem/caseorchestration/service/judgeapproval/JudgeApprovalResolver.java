@@ -58,9 +58,11 @@ class JudgeApprovalResolver {
      */
     void populateJudgeDecision(FinremCaseDetails finremCaseDetails, DraftOrdersWrapper draftOrdersWrapper, CaseDocument targetDoc,
                                JudgeApproval judgeApproval, String userAuthorisation) {
-
-        //Handle cover letter generation for order
-        CaseDocument coverLetter = handleOrderCoverLetter(finremCaseDetails, judgeApproval, userAuthorisation, targetDoc);
+        CaseDocument coverLetter = null;
+        if (isJudgeApproved(judgeApproval)) {
+            //Handle cover letter generation for order
+            coverLetter = handleOrderCoverLetter(finremCaseDetails, judgeApproval, userAuthorisation, targetDoc);
+        }
 
         // Process objects under Draft Order Tab
         processDraftOrderDocReviewCollection(draftOrdersWrapper, targetDoc, judgeApproval, userAuthorisation, coverLetter);
@@ -97,6 +99,7 @@ class JudgeApprovalResolver {
      * @param targetDoc the target document to match the approvable items against
      * @param judgeApproval the judge's approval information containing the decision
      * @param userAuthorisation the user authorization string to get the judge's full name
+     * @param coverLetter the cover letter document generated for the approval
      */
     void processApprovableCollection(List<? extends Approvable> approvables,
                                      CaseDocument targetDoc, JudgeApproval judgeApproval,
@@ -119,6 +122,7 @@ class JudgeApprovalResolver {
      * @param approvable the approvable item to be handled
      * @param judgeApproval the judge's approval information containing the decision
      * @param userAuthorisation the user authorization string to get the judge's full name
+     * @param coverLetter the cover letter document generated for the approval
      */
     void handleApprovable(Approvable approvable, JudgeApproval judgeApproval, String userAuthorisation, CaseDocument coverLetter) {
         boolean approved = isJudgeApproved(judgeApproval);
