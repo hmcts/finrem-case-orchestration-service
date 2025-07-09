@@ -55,6 +55,6 @@ public class ManageHearingsMigrationService {
      */
     public boolean wasMigrated(FinremCaseData caseData) {
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
-        return mhMigrationWrapper.getMhMigrationVersion()  != null;
+        return mhMigrationWrapper.getMhMigrationVersion() != null;
     }
 }
