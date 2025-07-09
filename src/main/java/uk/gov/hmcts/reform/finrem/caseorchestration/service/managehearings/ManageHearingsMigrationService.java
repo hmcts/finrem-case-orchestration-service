@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
@@ -20,6 +21,8 @@ public class ManageHearingsMigrationService {
     private final ListForInterimHearingWrapperPopulator listForInterimHearingWrapperPopulator;
 
     private final GeneralApplicationWrapperPopulator generalApplicationWrapperPopulator;
+
+    private final DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
 
     /**
      * Marks the case data as migrated to a specified Manage Hearings migration version.
@@ -65,6 +68,15 @@ public class ManageHearingsMigrationService {
     public void populateGeneralApplicationWrapper(FinremCaseData caseData) {
         if (!generalApplicationWrapperPopulator.shouldPopulate(caseData)) {
             log.warn("{} - Existing hearings created with General Application Directions migration skipped.", caseData.getCcdCaseId());
+            return;
+        }
+
+        generalApplicationWrapperPopulator.populate(caseData);
+    }
+
+    public void populateDirectionDetailsCollection(FinremCaseData caseData) {
+        if (!directionDetailsCollectionPopulator.shouldPopulate(caseData)) {
+            log.warn("{} - Existing hearings created with Process Order migration skipped.", caseData.getCcdCaseId());
             return;
         }
 

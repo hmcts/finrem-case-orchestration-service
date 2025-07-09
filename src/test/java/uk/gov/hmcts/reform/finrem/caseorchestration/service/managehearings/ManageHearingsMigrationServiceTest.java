@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
@@ -37,6 +38,9 @@ class ManageHearingsMigrationServiceTest {
 
     @Mock
     private GeneralApplicationWrapperPopulator generalApplicationWrapperPopulator;
+
+    @Mock
+    private DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
 
     @InjectMocks
     private ManageHearingsMigrationService underTest;
@@ -145,5 +149,31 @@ class ManageHearingsMigrationServiceTest {
         underTest.populateGeneralApplicationWrapper(caseData);
 
         verify(generalApplicationWrapperPopulator).populate(caseData);
+    }
+
+    @Test
+    void shouldSkipDirectionDetailsCollectionPopulationWhenShouldPopulateReturnsFalse() {
+        FinremCaseData caseData = spy(FinremCaseData.class);
+        caseData.setCcdCaseId(CASE_ID);
+
+        when(directionDetailsCollectionPopulator.shouldPopulate(caseData)).thenReturn(false);
+
+        // Act
+        underTest.populateDirectionDetailsCollection(caseData);
+
+        // Assert
+        assertThat(logs.getWarns()).contains(CASE_ID + " - Existing hearings created with Process Order migration skipped.");
+        verify(directionDetailsCollectionPopulator, never()).populate(any(FinremCaseData.class));
+    }
+
+    @Test
+    void shouldPopulateDirectionDetailsCollectionWhenShouldPopulateReturnsTrue() {
+        FinremCaseData caseData = mock(FinremCaseData.class);
+
+        when(directionDetailsCollectionPopulator.shouldPopulate(caseData)).thenReturn(true);
+
+        underTest.populateDirectionDetailsCollection(caseData);
+
+        verify(directionDetailsCollectionPopulator).populate(caseData);
     }
 }

@@ -22,6 +22,8 @@ public class MhMigrationWrapper {
 
     private YesOrNo isGeneralApplicationMigrated;
 
+    private YesOrNo isDirectionDetailsCollectionMigrated;
+
     private String mhMigrationVersion;
 
 }
