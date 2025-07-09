@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -253,6 +254,60 @@ public class HearingTabItemsAppenderTest {
                     timeEstimate,
                     "Unknown",
                     expectedAdditionalInfo
+                );
+            assertThat(result.getTabHearingDocuments())
+                .isNull();
+            assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
+        }
+    }
+
+    @Test
+    void shouldConvertDirectionDetailToHearingTabItem() {
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 6, 25, 10, 0);
+        try (MockedStatic<LocalDateTime> mockedStatic = Mockito.mockStatic(LocalDateTime.class)) {
+            mockedStatic.when(LocalDateTime::now).thenReturn(fixedDateTime);
+            // Arrange
+            LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+            String hearingTime = "10:00 AM";
+            String timeEstimate = "1 hour";
+            Court court = mock(Court.class);
+            HearingTypeDirection hearingType = HearingTypeDirection.FDR;
+
+
+            String expectedCourtName = "Birmingham FRC";
+            String expectedDateTime = "03 Jul 2025 10:00 AM";
+            String expectedHearingTypeString = hearingType.getId();
+
+            DirectionDetail directionDetail = spy(DirectionDetail.class);
+            directionDetail.setTypeOfHearing(hearingType);
+            directionDetail.setDateOfHearing(hearingDate);
+            directionDetail.setHearingTime(hearingTime);
+            directionDetail.setTimeEstimate(timeEstimate);
+            directionDetail.setLocalCourt(court);
+
+            when(hearingTabDataMapper.getCourtName(court)).thenReturn(expectedCourtName);
+            when(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime)).thenReturn(expectedDateTime);
+
+            // Act
+            HearingTabItem result = underTest.toHearingTabItem(directionDetail);
+
+            // Assert
+            assertThat(result)
+                .extracting(
+                    HearingTabItem::getTabHearingType,
+                    HearingTabItem::getTabCourtSelection,
+                    HearingTabItem::getTabDateTime,
+                    HearingTabItem::getTabTimeEstimate,
+                    HearingTabItem::getTabConfidentialParties,
+                    HearingTabItem::getTabAdditionalInformation
+                )
+                .containsExactly(
+                    expectedHearingTypeString,
+                    expectedCourtName,
+                    expectedDateTime,
+                    timeEstimate,
+                    "Unknown",
+                    null
                 );
             assertThat(result.getTabHearingDocuments())
                 .isNull();

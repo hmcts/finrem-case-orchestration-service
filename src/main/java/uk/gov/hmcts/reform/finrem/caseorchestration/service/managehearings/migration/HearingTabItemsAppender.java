@@ -141,16 +141,15 @@ public class HearingTabItemsAppender {
     }
 
     public HearingTabItem toHearingTabItem(DirectionDetail directionDetail) {
+        HearingTypeDirection hearingType = directionDetail.getTypeOfHearing();
         return HearingTabItem.builder()
-            .tabHearingType(HearingType.APPLICATION_HEARING.getId())
-            .tabCourtSelection(hearingTabDataMapper.getCourtName(generalApplicationRegionWrapper.toCourt()))
+            .tabHearingType(hearingType == null ? null : hearingType.getId())
+            .tabCourtSelection(hearingTabDataMapper.getCourtName(directionDetail.getLocalCourt()))
             .tabDateTime(hearingTabDataMapper.getFormattedDateTime(
-                generalApplicationWrapper.getGeneralApplicationDirectionsHearingDate(),
-                generalApplicationWrapper.getGeneralApplicationDirectionsHearingTime()))
-            .tabTimeEstimate(generalApplicationWrapper.getGeneralApplicationDirectionsHearingTimeEstimate())
+                directionDetail.getDateOfHearing(),
+                directionDetail.getHearingTime()))
+            .tabTimeEstimate(directionDetail.getTimeEstimate())
             .tabConfidentialParties("Unknown")  // Cannot migrate "Who has received this notice"
-            .tabAdditionalInformation(hearingTabDataMapper.getAdditionalInformation(
-                generalApplicationWrapper.getGeneralApplicationDirectionsAdditionalInformation()))
             .tabHearingMigratedDate(LocalDateTime.now())
             .build();
     }
