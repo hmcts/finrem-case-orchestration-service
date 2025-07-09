@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migr
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -57,9 +58,12 @@ public class DirectionDetailsCollectionPopulator extends BasePopulator {
      */
     @Override
     public void populate(FinremCaseData caseData) {
-        List<DirectionDetailCollection> directionDetailsCollection = emptyIfNull(caseData.getDirectionDetailsCollection());
-        log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailsCollection);
-        directionDetailsCollection.stream().map(DirectionDetailCollection::getValue).forEach(directionDetails -> {
+        List<DirectionDetail> directionDetailStream = emptyIfNull(caseData.getDirectionDetailsCollection()).stream()
+                .map(DirectionDetailCollection::getValue)
+                .filter(d -> YesOrNo.isYes(d.getIsAnotherHearingYN()))
+                .toList();
+        log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailStream.size());
+        directionDetailStream.forEach(directionDetails -> {
             hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
                     hearingTabItemsAppender.toHearingTabItem(directionDetails)).build());
             hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(

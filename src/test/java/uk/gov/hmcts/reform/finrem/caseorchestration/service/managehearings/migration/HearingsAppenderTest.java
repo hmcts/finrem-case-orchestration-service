@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
@@ -192,6 +193,38 @@ public class HearingsAppenderTest {
         assertEquals(hearingTime, result.getHearingTime());
         assertEquals(timeEstimate, result.getHearingTimeEstimate());
         assertEquals(additionalInfo, result.getAdditionalHearingInformation());
+        assertEquals(expectedCourt, result.getHearingCourtSelection());
+        assertEquals(YesOrNo.YES, result.getWasMigrated());
+        assertThat(result.getAdditionalHearingDocs()).isNull();
+    }
+
+    @Test
+    void shouldConvertDirectionDetailToHearing() {
+        // Arrange
+        LocalDate hearingDate = LocalDate.of(2025, 7, 3);
+        String hearingTime = "10:45 AM";
+        String timeEstimate = "1 hour";
+
+        HearingType expectedHearingType = HearingType.FH;
+        Court expectedCourt = mock(Court.class);
+
+        DirectionDetail directionDetail = spy(DirectionDetail.builder()
+            .typeOfHearing(HearingTypeDirection.FH)
+            .dateOfHearing(hearingDate)
+            .hearingTime(hearingTime)
+            .timeEstimate(timeEstimate)
+            .localCourt(expectedCourt)
+            .build());
+
+        // Act
+        Hearing result = underTest.toHearing(directionDetail);
+
+        // Assert
+        assertEquals(hearingDate, result.getHearingDate());
+        assertEquals(expectedHearingType, result.getHearingType());
+        assertEquals(hearingTime, result.getHearingTime());
+        assertEquals(timeEstimate, result.getHearingTimeEstimate());
+        assertThat(result.getAdditionalHearingInformation()).isNull();
         assertEquals(expectedCourt, result.getHearingCourtSelection());
         assertEquals(YesOrNo.YES, result.getWasMigrated());
         assertThat(result.getAdditionalHearingDocs()).isNull();

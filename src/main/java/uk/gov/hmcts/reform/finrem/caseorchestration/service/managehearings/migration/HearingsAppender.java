@@ -167,7 +167,7 @@ public class HearingsAppender {
         // Additional information about the hearing is not captured
         String additionalInformationAboutHearing = null;
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
-        Court hearingCourtSelection = null; //TODO directionDetail.toCourt();
+        Court hearingCourtSelection = directionDetail.getLocalCourt();
 
         return Hearing.builder()
             .hearingDate(hearingDate)
