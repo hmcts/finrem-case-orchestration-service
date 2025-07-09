@@ -165,8 +165,8 @@ public class ManageHearingActionService {
      */
     public void updateTabData(FinremCaseData caseData) {
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
-        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
-            .orElseGet(ArrayList::new);
+        List<ManageHearingsCollectionItem> hearings = nonMigratedHearings(Optional.ofNullable(hearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new));
 
         List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
 
@@ -179,16 +179,24 @@ public class ManageHearingActionService {
             INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4)
         );
 
-        hearingsWrapper.setHearingTabItems(hearingTabItems);
-        hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
-        hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
-        hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
-        hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
-        hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
-        hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+        caseData.getManageHearingsWrapper().setHearingTabItems(mergeMigratedHearingTabItems(caseData, hearingTabItems));
+
+        hearingsWrapper.setApplicantHearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(APPLICANT)));
+        hearingsWrapper.setRespondentHearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(RESPONDENT)));
+        hearingsWrapper.setInt1HearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(INTERVENER1)));
+        hearingsWrapper.setInt2HearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(INTERVENER2)));
+        hearingsWrapper.setInt3HearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(INTERVENER3)));
+        hearingsWrapper.setInt4HearingTabItems(mergeMigratedHearingTabItems(caseData, partyTabItems.get(INTERVENER4)));
 
         manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings,
             hearingsWrapper.getHearingDocumentsCollection());
+    }
+
+    private List<HearingTabCollectionItem> mergeMigratedHearingTabItems(FinremCaseData caseData,
+                                                                        List<HearingTabCollectionItem> hearingToBeAdded) {
+        List<HearingTabCollectionItem> migratedHearingTabItems = getMigratedHearingTabItems(caseData);
+        migratedHearingTabItems.addAll(hearingToBeAdded);
+        return migratedHearingTabItems;
     }
 
     private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
