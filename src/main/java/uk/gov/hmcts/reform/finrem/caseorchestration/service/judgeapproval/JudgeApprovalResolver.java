@@ -184,7 +184,8 @@ class JudgeApprovalResolver {
     }
 
     private void processDraftOrderDocReviewCollection(DraftOrdersWrapper draftOrdersWrapper,
-                                                      CaseDocument targetDoc, JudgeApproval judgeApproval, String userAuthorisation, CaseDocument coverLetter) {
+                                                      CaseDocument targetDoc, JudgeApproval judgeApproval, String userAuthorisation,
+                                                      CaseDocument coverLetter) {
         ofNullable(draftOrdersWrapper.getDraftOrdersReviewCollection())
             .ifPresent(collection -> processApprovableCollection(collection.stream()
                 .flatMap(c -> c.getValue().getDraftOrderDocReviewCollection().stream().map(DraftOrderDocReviewCollection::getValue))
