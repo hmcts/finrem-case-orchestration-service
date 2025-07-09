@@ -79,8 +79,8 @@ public class HearingTabItemsAppender {
         HearingRegionWrapper hearingRegionWrapper = listForHearingWrapper.getHearingRegionWrapper();
 
         return HearingTabItem.builder()
-            .tabHearingType(hearingType.getId())
-            .tabCourtSelection(hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
+            .tabHearingType(hearingType == null ? null : hearingType.getId())
+            .tabCourtSelection(hearingRegionWrapper == null ? null : hearingTabDataMapper.getCourtName(hearingRegionWrapper.toCourt()))
             .tabDateTime(hearingTabDataMapper.getFormattedDateTime(hearingDate, hearingTime))
             .tabTimeEstimate(timeEstimate)
             .tabConfidentialParties("Unknown")
