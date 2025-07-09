@@ -44,7 +44,6 @@ public class InterimHearingHelper {
             .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
     }
 
-
     public List<InterimHearingCollection> convertToInterimHearingDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
