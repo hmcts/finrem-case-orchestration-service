@@ -241,7 +241,7 @@ class ManageHearingActionServiceTest {
         List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
         assertThat(hearingTabItems)
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("15 Jul 2025 10:00", "20 Jul 2025 10:00");
+            .containsExactly("15 Jul 2025 11:00", "20 Jul 2025 10:00");
     }
 
     @Test
