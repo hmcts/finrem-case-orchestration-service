@@ -301,7 +301,7 @@ class JudgeApprovalResolverTest {
         } else {
             judgeApproval = judgeApprovalBuilder
                 .isFinalOrder(DynamicMultiSelectList.builder()
-                    .value(TRUE.equals(isFinalOrder)
+                    .value(isFinalOrder
                         ? List.of(
                             DynamicMultiSelectListElement.builder()
                                 .code(YesOrNo.YES.getYesOrNo())
