@@ -32,12 +32,12 @@ public class ContestedOrderApprovedLetterService {
     private final DocumentConfiguration documentConfiguration;
     private final FinremCaseDetailsMapper mapper;
 
-    public CaseDocument generateAndStoreContestedApprovedCoverLetter(FinremCaseDetails finremCaseDetails, String judgeDetails,
+    public CaseDocument generateAndStoreApprovedOrderCoverLetter(FinremCaseDetails finremCaseDetails, String judgeDetails,
                                                                      String authorisationToken, LocalDate courtOrderDate) {
         CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        populateTemplateVariablesNew(caseDetailsCopy, judgeDetails, courtOrderDate);
+        populateTemplateVariablesWithNewFormat(caseDetailsCopy, judgeDetails, courtOrderDate);
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
@@ -46,7 +46,7 @@ public class ContestedOrderApprovedLetterService {
         return approvedOrderCoverLetter;
     }
 
-    private void populateTemplateVariablesNew(CaseDetails caseDetails, String judgeDetails, LocalDate courtOrderDate) {
+    private void populateTemplateVariablesWithNewFormat(CaseDetails caseDetails, String judgeDetails, LocalDate courtOrderDate) {
         Map<String, Object> caseData = caseDetails.getData();
 
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));

@@ -95,7 +95,7 @@ class JudgeApprovalResolverTest {
 
         // Mocking cover letter generation
         CaseDocument coverLetter = CaseDocument.builder().documentUrl("coverLetterUrl").documentFilename("document.pdf").build();
-        lenient().when(contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(any(), any(), any(), any()))
+        lenient().when(contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(any(), any(), any(), any()))
             .thenReturn(coverLetter);
 
         // Execute the method being tested
@@ -204,7 +204,7 @@ class JudgeApprovalResolverTest {
 
         // Mocking cover letter generation
         CaseDocument coverLetter = CaseDocument.builder().documentUrl("coverLetterUrl").build();
-        lenient().when(contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(any(), any(), any(), any()))
+        lenient().when(contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(any(), any(), any(), any()))
             .thenReturn(coverLetter);
 
         judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,

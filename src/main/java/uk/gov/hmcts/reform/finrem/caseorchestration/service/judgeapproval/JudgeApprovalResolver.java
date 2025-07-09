@@ -80,7 +80,7 @@ class JudgeApprovalResolver {
 
     private CaseDocument handleOrderCoverLetter(FinremCaseDetails finremCaseDetails, JudgeApproval judgeApproval, String userAuthorisation,
                                                 CaseDocument targetDoc) {
-        CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreContestedApprovedCoverLetter(finremCaseDetails,
+        CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(finremCaseDetails,
             buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
             userAuthorisation, judgeApproval.getCourtOrderDate());
 
