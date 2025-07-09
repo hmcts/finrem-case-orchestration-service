@@ -273,10 +273,9 @@ public class HearingTabItemsAppenderTest {
             Court court = mock(Court.class);
             HearingTypeDirection hearingType = HearingTypeDirection.FDR;
 
-
-            String expectedCourtName = "Birmingham FRC";
-            String expectedDateTime = "03 Jul 2025 10:00 AM";
-            String expectedHearingTypeString = hearingType.getId();
+            final String expectedCourtName = "Birmingham FRC";
+            final String expectedDateTime = "03 Jul 2025 10:00 AM";
+            final String expectedHearingTypeString = hearingType.getId();
 
             DirectionDetail directionDetail = spy(DirectionDetail.class);
             directionDetail.setTypeOfHearing(hearingType);
