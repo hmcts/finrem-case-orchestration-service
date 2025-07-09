@@ -73,10 +73,10 @@ public class HearingsAppender {
 
         return Hearing.builder()
             .hearingDate(hearingDate)
-            .hearingType(HearingType.valueOf(hearingType.name()))
+            .hearingType(hearingType == null ? null : HearingType.valueOf(hearingType.name()))
             .hearingTimeEstimate(timeEstimate)
             .hearingTime(hearingTime)
-            .hearingCourtSelection(hearingRegionWrapper.toCourt())
+            .hearingCourtSelection(hearingRegionWrapper == null ? null : hearingRegionWrapper.toCourt())
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
