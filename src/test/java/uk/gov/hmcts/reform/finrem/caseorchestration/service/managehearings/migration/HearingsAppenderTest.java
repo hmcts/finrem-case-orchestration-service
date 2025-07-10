@@ -34,7 +34,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HearingsAppenderTest {
+class HearingsAppenderTest {
 
     @InjectMocks
     private HearingsAppender underTest;
