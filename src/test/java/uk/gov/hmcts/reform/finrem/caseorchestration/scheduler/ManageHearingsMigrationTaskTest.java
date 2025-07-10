@@ -4,79 +4,108 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
-import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE_CRON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
+@ExtendWith(MockitoExtension.class)
 class ManageHearingsMigrationTaskTest {
+
+    private static final String ENCRYPTED_CSV_FILENAME = "updateConsentOrderFRCName-encrypted.csv";
+
+    private static final String DUMMY_SECRET = "dummySecret";
+
+    @Mock
+    private CcdService ccdService;
+
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private CaseReferenceCsvLoader caseReferenceCsvLoader;
 
     private ManageHearingsMigrationTask underTest;
 
-    private CcdService ccdService;
-
-    private SystemUserService systemUserService;
-
     private ManageHearingsMigrationService manageHearingsMigrationService;
 
-    private final FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(
-        new ObjectMapper().registerModule(new JavaTimeModule()));
+    private final FinremCaseDetailsMapper spyFinremCaesDetailsMapper = spy(new FinremCaseDetailsMapper(
+        new ObjectMapper().registerModule(new JavaTimeModule())));
 
     @BeforeEach
     void setup() {
-        ccdService = mock(CcdService.class);
-        systemUserService = mock(SystemUserService.class);
         manageHearingsMigrationService = mock(ManageHearingsMigrationService.class);
 
-        underTest = new ManageHearingsMigrationTask(ccdService, systemUserService,
-            finremCaseDetailsMapper, manageHearingsMigrationService);
-        underTest.setTaskEnabled(true);
+        underTest = new ManageHearingsMigrationTask(caseReferenceCsvLoader, ccdService, systemUserService,
+            spyFinremCaesDetailsMapper,  manageHearingsMigrationService);
+        ReflectionTestUtils.setField(underTest, "taskEnabled", true);
+        ReflectionTestUtils.setField(underTest, "csvFile", ENCRYPTED_CSV_FILENAME);
+        ReflectionTestUtils.setField(underTest, "secret", DUMMY_SECRET);
     }
 
     @Test
     void givenTaskNotEnabledWhenRunThenDoesNothing() {
-        underTest.setTaskEnabled(false);
+        ReflectionTestUtils.setField(underTest, "taskEnabled", false);
         underTest.run();
 
         verifyNoInteractions(ccdService);
+        verifyNoInteractions(caseReferenceCsvLoader);
         verifyNoInteractions(systemUserService);
         verifyNoInteractions(manageHearingsMigrationService);
     }
 
     @Test
-    void givenNoCasesNeedUpdatingWhenRunThenNoUpdatesExecuted() {
+    void givenTaskEnabledWhenRunThenShouldInvokePopulatingMethods() {
+        CaseDetails caseDetailsOne = mock(CaseDetails.class);
+        FinremCaseData caseDataOne = mock(FinremCaseData.class);
+        FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
+            .from(CASE_ID, CONTESTED, caseDataOne).build();
+
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(caseReferenceCsvLoader.loadCaseReferenceList(ENCRYPTED_CSV_FILENAME, DUMMY_SECRET))
+            .thenReturn(List.of(CaseReference.builder().caseReference(CASE_ID).build()));
+        when(ccdService.getCaseByCaseId(CASE_ID, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(
+            SearchResult.builder().cases(List.of(caseDetailsOne)).total(1).build()
+        );
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, CASE_ID, CONTESTED.getCcdType(),
+            AMEND_CASE_CRON.getCcdType())).thenReturn(StartEventResponse.builder()
+            .caseDetails(caseDetailsOne)
+            .build());
+        doReturn(finremCaseDetailsOne).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
 
-        SearchResult searchResult = createSearchResult(Collections.emptyList());
-        when(ccdService.esSearchCases(any(CaseType.class), anyString(), anyString())).thenReturn(searchResult);
-
+        // Act
         underTest.run();
 
-        verify(ccdService, times(1)).esSearchCases(any(CaseType.class), anyString(), anyString());
-        verifyNoMoreInteractions(ccdService);
-        verifyNoInteractions(manageHearingsMigrationService);
-    }
-
-    private SearchResult createSearchResult(List<CaseDetails> cases) {
-        return SearchResult.builder()
-            .cases(cases)
-            .total(cases.size())
-            .build();
+        // Assert
+        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataOne);
     }
 }
