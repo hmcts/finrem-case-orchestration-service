@@ -129,7 +129,6 @@ public class HearingTabItemsAppenderTest {
                 );
             assertThat(result.getTabHearingDocuments())
                 .isNotNull()
-                .hasSize(1)
                 .extracting(DocumentCollectionItem::getValue)
                 .containsExactly(additionalDoc);
             assertThat(result.getTabHearingMigratedDate()).isEqualTo(fixedDateTime);
