@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller.helper;
 
 import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc;
@@ -14,8 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.Matchers.is;
@@ -148,10 +154,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WREXHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YEOVIL;
 
-public class CourtHelperTest {
+class CourtHelperTest {
 
     @Test
-    public void northWalesCourts() {
+    void northWalesCourts() {
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
             WREXHAM, "Wrexham County Court and Family Court");
 
@@ -175,7 +181,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void thamesvalleyCourts() {
+    void thamesvalleyCourts() {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
             OXFORD, "Oxford Combined Court Centre");
 
@@ -196,7 +202,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void bristolCourts() {
+    void bristolCourts() {
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
             BRISTOL, "Bristol Civil and Family Justice Centre");
 
@@ -223,7 +229,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void devonCourts() {
+    void devonCourts() {
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
             PLYMOUTH, "Plymouth Combined Court");
 
@@ -256,7 +262,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void dorsetCourts() {
+    void dorsetCourts() {
         verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
             BOURNEMOUTH, "Bournemouth and Poole County Court and Family Court");
 
@@ -289,7 +295,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void bedfordshireCourts() {
+    void bedfordshireCourts() {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
             PETERBOROUGH, "Peterborough Combined Court Centre");
 
@@ -331,7 +337,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void lancashireCourtList() {
+    void lancashireCourtList() {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
             PRESTON, "Preston Designated Family Court");
 
@@ -367,7 +373,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void newportCourts() {
+    void newportCourts() {
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_1", "Newport Civil and Family Court");
 
@@ -394,7 +400,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void swanseaCourts() {
+    void swanseaCourts() {
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_1", "Swansea Civil and Family Justice Centre");
 
@@ -424,7 +430,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void kentCourts() {
+    void kentCourts() {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
 
@@ -472,7 +478,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void cleavelandCourts() {
+    void cleavelandCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_1", "Newcastle Civil and Family Courts and Tribunals Centre");
 
@@ -511,7 +517,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void nwYorkshireCourts() {
+    void nwYorkshireCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST,
             "FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre");
 
@@ -547,7 +553,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void hsYorkshireCourts() {
+    void hsYorkshireCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_1", "Sheffield Family Hearing Centre");
 
@@ -574,7 +580,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void liverpoolCourtList() {
+    void liverpoolCourtList() {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURTLIST,
             "FR_liverpool_hc_list_1", "Liverpool Civil and Family Court");
 
@@ -601,7 +607,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void manchesterCourtList() {
+    void manchesterCourtList() {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
             "FR_manchester_hc_list_1", "Manchester County and Family Court");
 
@@ -622,7 +628,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void londonCourtListTest() {
+    void londonCourtListTest() {
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_1", "Bromley County Court and Family Court");
 
@@ -670,7 +676,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void birminghamCourtListTest() {
+    void birminghamCourtListTest() {
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
             "FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre");
 
@@ -712,7 +718,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void nottinghamCourtListTest() {
+    void nottinghamCourtListTest() {
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "FR_s_NottinghamList_1", "Nottingham County Court and Family Court");
@@ -749,7 +755,7 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void highCourtListTest() {
+    void highCourtListTest() {
         verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
             "FR_highCourtList_1", "High Court Family Division");
 
@@ -781,53 +787,53 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void interim_walesFRCCourts() {
+    void interim_walesFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, NEWPORT);
         verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, SWANSEA);
         verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, NORTHWALES);
     }
 
     @Test
-    public void interim_southWestFRCCourts() {
+    void interim_southWestFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, DEVON);
         verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, DORSET);
         verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, BRISTOLFRC);
     }
 
     @Test
-    public void interim_southEastFRCCourts() {
+    void interim_southEastFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, KENT);
         verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
         verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, THAMESVALLEY);
     }
 
     @Test
-    public void interim_northEastFRCCourts() {
+    void interim_northEastFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, CLEAVELAND);
         verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, NWYORKSHIRE);
         verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, HSYORKSHIRE);
     }
 
     @Test
-    public void interim_northWestFRCCourts() {
+    void interim_northWestFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, LIVERPOOL);
         verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, MANCHESTER);
         verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, LANCASHIRE);
     }
 
     @Test
-    public void interim_londonFRCCourts() {
+    void interim_londonFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(LONDON, INTERIM_LONDON_FRC_LIST, CFC);
     }
 
     @Test
-    public void interim_midlandsFRCCourts() {
+    void interim_midlandsFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(MIDLANDS, INTERIM_MIDLANDS_FRC_LIST, NOTTINGHAM);
         verifyCorrectInterimHearingCourtReturned(MIDLANDS, INTERIM_MIDLANDS_FRC_LIST, BIRMINGHAM);
     }
 
     @Test
-    public void interim_highCourtFRCCourts() {
+    void interim_highCourtFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(HIGHCOURT, INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectInterimHearingCourtReturned("highCourt", INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectInterimHearingCourtReturned("invalid", INTERIM_HIGHCOURT_FRC_LIST, EMPTY);
@@ -846,16 +852,15 @@ public class CourtHelperTest {
         return details.getData();
     }
 
-
     @Test
-    public void walesFRCCourts() {
+    void walesFRCCourts() {
         verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, NEWPORT);
         verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, SWANSEA);
         verifyCorrectHearingCourtReturned(WALES, HEARING_WALES_FRC_LIST, NORTHWALES);
     }
 
     @Test
-    public void verifyFinremWalesCourtFRCCourts() {
+    void verifyFinremWalesCourtFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.WALES);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setWalesFrcList(RegionWalesFrc.NORTH_WALES);
@@ -867,14 +872,14 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void southWestFRCCourts() {
+    void southWestFRCCourts() {
         verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, DEVON);
         verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, DORSET);
         verifyCorrectHearingCourtReturned(SOUTHWEST, HEARING_SOUTHWEST_FRC_LIST, BRISTOLFRC);
     }
 
     @Test
-    public void verifyFinremSouthWestFRCCourts() {
+    void verifyFinremSouthWestFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHWEST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthWestFrcList(RegionSouthWestFrc.DEVON);
@@ -886,14 +891,14 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void southEastFRCCourts() {
+    void southEastFRCCourts() {
         verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, KENT);
         verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
         verifyCorrectHearingCourtReturned(SOUTHEAST, HEARING_SOUTHEAST_FRC_LIST, THAMESVALLEY);
     }
 
     @Test
-    public void verifyFinremSouthEastFRCCourts() {
+    void verifyFinremSouthEastFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.SOUTHEAST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.KENT_FRC);
@@ -905,14 +910,14 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void northEastFRCCourts() {
+    void northEastFRCCourts() {
         verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, CLEAVELAND);
         verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, NWYORKSHIRE);
         verifyCorrectHearingCourtReturned(NORTHEAST, HEARING_NORTHEAST_FRC_LIST, HSYORKSHIRE);
     }
 
     @Test
-    public void verifyFinremNorthEastFRCCourts() {
+    void verifyFinremNorthEastFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHEAST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEAVELAND);
@@ -924,14 +929,14 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void northWestFRCCourts() {
+    void northWestFRCCourts() {
         verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, LIVERPOOL);
         verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, MANCHESTER);
         verifyCorrectHearingCourtReturned(NORTHWEST, HEARING_NORTHWEST_FRC_LIST, LANCASHIRE);
     }
 
     @Test
-    public void verifyFinremNorthWestFRCCourts() {
+    void verifyFinremNorthWestFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.NORTHWEST);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LANCASHIRE);
@@ -943,12 +948,12 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void londonFRCCourts() {
+    void londonFRCCourts() {
         verifyCorrectHearingCourtReturned(LONDON, HEARING_LONDON_FRC_LIST, CFC);
     }
 
     @Test
-    public void verifyFinremLondonFRCCourts() {
+    void verifyFinremLondonFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.LONDON);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
@@ -956,13 +961,13 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void midlandsFRCCourts() {
+    void midlandsFRCCourts() {
         verifyCorrectHearingCourtReturned(MIDLANDS, HEARING_MIDLANDS_FRC_LIST, NOTTINGHAM);
         verifyCorrectHearingCourtReturned(MIDLANDS, HEARING_MIDLANDS_FRC_LIST, BIRMINGHAM);
     }
 
     @Test
-    public void verifyMidlandsFRCCourts() {
+    void verifyMidlandsFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.MIDLANDS);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
@@ -972,20 +977,124 @@ public class CourtHelperTest {
     }
 
     @Test
-    public void highCourtFRCCourts() {
+    void highCourtFRCCourts() {
         verifyCorrectHearingCourtReturned(HIGHCOURT, HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectHearingCourtReturned("highCourt", HEARING_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectHearingCourtReturned("invalid", HEARING_HIGHCOURT_FRC_LIST, EMPTY);
     }
 
     @Test
-    public void verifyFinremHighCourtFRCCourts() {
+    void verifyFinremHighCourtFRCCourts() {
         FinremCaseDetails finremCaseDetails = defaultConsentedFinremCaseDetails();
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setRegionList(Region.HIGHCOURT);
         finremCaseDetails.getData().getRegionWrapper().getAllocatedRegionWrapper().setHighCourtFrcList(RegionHighCourtFrc.HIGHCOURT);
         MatcherAssert.assertThat(CourtHelper.getSelectedFrc(finremCaseDetails), is(HIGHCOURT));
     }
 
+    /**
+     * This test verifies that getFrcCourtForHearing returns the correct FRC for a hearing.
+     * Doesn't test all FRC permutations, tests for an example from each region list, so that
+     * the getFRCForHearing is covered correctly, not the downstream logic for enums and getters.
+     * @param hearing the Hearing object with the court selection
+     * @param expectedFrc the expected FRC string value
+     */
+    @ParameterizedTest
+    @MethodSource("regionArguments")
+    void getFrcCourtForHearingShouldReturnCorrectFrc(Hearing hearing, String expectedFrc) {
+        String frcCourtString = CourtHelper.getFRCForHearing(hearing);
+        MatcherAssert.assertThat(frcCourtString, is(expectedFrc));
+    }
+
+    /**
+     * Used by getFrcCourtForHearingShouldReturnCorrectFrc to create a stream of arguments.
+     * @return Stream of Arguments containing region and corresponding FRC enum.
+     */
+    static Stream<Arguments> regionArguments() {
+        return Stream.of(
+                Arguments.of(buildLondonHearing(), RegionLondonFrc.LONDON.getValue()),
+                Arguments.of(buildMidlandsHearing(), RegionMidlandsFrc.BIRMINGHAM.getValue()),
+                Arguments.of(buildMidlandsHearing(), RegionMidlandsFrc.BIRMINGHAM.getValue()),
+                Arguments.of(buildNorthEastHearing(), RegionNorthEastFrc.CLEAVELAND.getValue()),
+                Arguments.of(buildNorthWestHearing(), RegionNorthWestFrc.LIVERPOOL.getValue()),
+                Arguments.of(buildSouthEastHearing(), RegionSouthEastFrc.KENT_FRC.getValue()),
+                Arguments.of(buildSouthWestHearing(), RegionSouthWestFrc.DEVON.getValue()),
+                Arguments.of(buildWalesHearing(), RegionWalesFrc.NEWPORT.getValue()),
+                Arguments.of(buildHighCourtHearing(), RegionHighCourtFrc.HIGHCOURT.getValue()),
+                Arguments.of(Hearing.builder().build(), EMPTY)
+        );
+    }
+
+    private static Hearing buildLondonHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.LONDON)
+                        .londonList(RegionLondonFrc.LONDON)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildMidlandsHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.MIDLANDS)
+                        .midlandsList(RegionMidlandsFrc.BIRMINGHAM)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildNorthEastHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.NORTHEAST)
+                        .northEastList(RegionNorthEastFrc.CLEAVELAND)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildNorthWestHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.NORTHWEST)
+                        .northWestList(RegionNorthWestFrc.LIVERPOOL)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildSouthEastHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.SOUTHEAST)
+                        .southEastList(RegionSouthEastFrc.KENT_FRC)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildSouthWestHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.SOUTHWEST)
+                        .southWestList(RegionSouthWestFrc.DEVON)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildWalesHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.WALES)
+                        .walesList(RegionWalesFrc.NEWPORT)
+                        .build())
+                .build();
+    }
+
+    private static Hearing buildHighCourtHearing() {
+        return Hearing.builder()
+                .hearingCourtSelection(Court.builder()
+                        .region(Region.HIGHCOURT)
+                        .hcCourtList(RegionHighCourtFrc.HIGHCOURT)
+                        .build())
+                .build();
+    }
 
     private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
         Map<String, Object> caseData = getCaseDetailsWithAllocatedValuesForHearing(region, subRegionListName, subRegion);
