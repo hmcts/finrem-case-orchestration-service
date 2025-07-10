@@ -159,7 +159,7 @@ public class ManageHearingActionService {
      * Maps each hearing to its corresponding tab data representation, sorts the data
      * by hearing date in ascending order, and categorizes it by party. The updated
      * tab data is then stored in the case data. The resulting tab data is then merged
-     *      * with any existing migrated tab items and updated in the case data.
+     * with any existing migrated tab items and updated in the case data.
      *
      * @param caseData the case data containing the hearings and hearing documents
      */
