@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionFRC;
 
 import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum RegionLondonFrc implements RegionFRC {
+public enum RegionLondonFrc {
     LONDON("cfc"),
     LONDON_CONSENTED_COURT("london");
 
