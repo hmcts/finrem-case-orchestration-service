@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.AMEND_CASE_CRON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -81,7 +82,7 @@ class ManageHearingsMigrationTaskTest {
     }
 
     @Test
-    void givenTaskEnabledWhenRunThenShouldInvokePopulatingMethods() {
+    void givenTaskEnabled_whenSingleCaseIsRead_thenShouldPopulateCaseDetails() {
         CaseDetails caseDetailsOne = mock(CaseDetails.class);
         FinremCaseData caseDataOne = mock(FinremCaseData.class);
         FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
@@ -89,7 +90,10 @@ class ManageHearingsMigrationTaskTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(caseReferenceCsvLoader.loadCaseReferenceList(ENCRYPTED_CSV_FILENAME, DUMMY_SECRET))
-            .thenReturn(List.of(CaseReference.builder().caseReference(CASE_ID).build()));
+            .thenReturn(List.of(
+                // Single case
+                CaseReference.builder().caseReference(CASE_ID).build()
+            ));
         when(ccdService.getCaseByCaseId(CASE_ID, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(
             SearchResult.builder().cases(List.of(caseDetailsOne)).total(1).build()
         );
@@ -107,5 +111,55 @@ class ManageHearingsMigrationTaskTest {
         verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataOne);
         verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataOne);
         verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataOne);
+    }
+
+    @Test
+    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateCaseDetails() {
+        CaseDetails caseDetailsOne = mock(CaseDetails.class);
+        FinremCaseData caseDataOne = mock(FinremCaseData.class);
+        FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
+            .from(CASE_ID, CONTESTED, caseDataOne).build();
+
+        CaseDetails caseDetailsTwo = mock(CaseDetails.class);
+        FinremCaseData caseDataTwo = mock(FinremCaseData.class);
+        FinremCaseDetails finremCaseDetailsTwo = FinremCaseDetailsBuilderFactory
+            .from(CASE_ID_TWO, CONTESTED, caseDataTwo).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(caseReferenceCsvLoader.loadCaseReferenceList(ENCRYPTED_CSV_FILENAME, DUMMY_SECRET))
+            .thenReturn(List.of(
+                // Multiple cases
+                CaseReference.builder().caseReference(CASE_ID).build(),
+                CaseReference.builder().caseReference(CASE_ID_TWO).build()
+            ));
+        when(ccdService.getCaseByCaseId(CASE_ID, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(
+            SearchResult.builder().cases(List.of(caseDetailsOne)).total(1).build()
+        );
+        when(ccdService.getCaseByCaseId(CASE_ID_TWO, CaseType.CONTESTED, AUTH_TOKEN)).thenReturn(
+            SearchResult.builder().cases(List.of(caseDetailsTwo)).total(1).build()
+        );
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, CASE_ID, CONTESTED.getCcdType(),
+            AMEND_CASE_CRON.getCcdType())).thenReturn(StartEventResponse.builder()
+            .caseDetails(caseDetailsOne)
+            .build());
+        when(ccdService.startEventForCaseWorker(AUTH_TOKEN, CASE_ID_TWO, CONTESTED.getCcdType(),
+            AMEND_CASE_CRON.getCcdType())).thenReturn(StartEventResponse.builder()
+            .caseDetails(caseDetailsTwo)
+            .build());
+        doReturn(finremCaseDetailsOne).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
+        doReturn(finremCaseDetailsTwo).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsTwo);
+
+        // Act
+        underTest.run();
+
+        // Assert
+        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataTwo);
+        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataTwo);
+        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataOne);
+        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataTwo);
+        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataOne);
+        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataTwo);
     }
 }
