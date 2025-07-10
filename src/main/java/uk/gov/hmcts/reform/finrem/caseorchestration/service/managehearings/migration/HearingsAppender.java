@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHea
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
@@ -42,6 +43,7 @@ public class HearingsAppender {
      * @param item     the hearing collection item to append
      */
     public void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
+        item.setId(UUID.randomUUID());
         addItemToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
     }
