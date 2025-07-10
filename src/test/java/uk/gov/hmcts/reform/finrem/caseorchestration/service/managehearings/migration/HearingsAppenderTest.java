@@ -50,6 +50,8 @@ class HearingsAppenderTest {
 
         // Assert
         assertThat(caseData.getManageHearingsWrapper().getHearings()).containsExactly(item);
+        assertThat(caseData.getManageHearingsWrapper().getHearings()).extracting(ManageHearingsCollectionItem::getId)
+            .isNotNull();
     }
 
     @Test
