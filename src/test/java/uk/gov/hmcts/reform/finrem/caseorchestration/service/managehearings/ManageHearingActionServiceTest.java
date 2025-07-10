@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -286,12 +285,14 @@ class ManageHearingActionServiceTest {
             createHearingCollectionItem(hearing1)
         )));
 
-        HearingTabItem migratgedHearingTabItem = spy(HearingTabItem.class);
-        migratgedHearingTabItem.setTabDateTime("10 Jul 2025 10:00");
-        migratgedHearingTabItem.setTabWasMigrated(YesOrNo.YES);
+        HearingTabItem migratgedHearingTabItem = HearingTabItem.builder()
+            .tabDateTime("10 Jul 2025 10:00")
+            .tabWasMigrated(YesOrNo.YES)
+            .build();
         hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder().value(migratgedHearingTabItem).build()));
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.setManageHearingsWrapper(hearingWrapper);
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(hearingWrapper)
+            .build();
 
         when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(hearing1)), any()))
             .thenReturn(
