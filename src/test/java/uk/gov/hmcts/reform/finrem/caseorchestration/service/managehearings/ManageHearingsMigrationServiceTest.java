@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
@@ -81,8 +80,7 @@ class ManageHearingsMigrationServiceTest {
 
     @Test
     void shouldSkipListForHearingPopulationWhenShouldPopulateReturnsFalse() {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.setCcdCaseId(CASE_ID);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
 
         when(listForHearingWrapperPopulator.shouldPopulate(caseData)).thenReturn(false);
 
@@ -107,8 +105,7 @@ class ManageHearingsMigrationServiceTest {
 
     @Test
     void shouldSkipListForInterimHearingPopulationWhenShouldPopulateReturnsFalse() {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.setCcdCaseId(CASE_ID);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
 
         when(listForInterimHearingWrapperPopulator.shouldPopulate(caseData)).thenReturn(false);
 
@@ -133,8 +130,7 @@ class ManageHearingsMigrationServiceTest {
 
     @Test
     void shouldSkipListForGeneralApplicationWrapperPopulationWhenShouldPopulateReturnsFalse() {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.setCcdCaseId(CASE_ID);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
 
         when(generalApplicationWrapperPopulator.shouldPopulate(caseData)).thenReturn(false);
 
@@ -159,8 +155,7 @@ class ManageHearingsMigrationServiceTest {
 
     @Test
     void shouldSkipDirectionDetailsCollectionPopulationWhenShouldPopulateReturnsFalse() {
-        FinremCaseData caseData = spy(FinremCaseData.class);
-        caseData.setCcdCaseId(CASE_ID);
+        FinremCaseData caseData = FinremCaseData.builder().ccdCaseId(CASE_ID).build();
 
         when(directionDetailsCollectionPopulator.shouldPopulate(caseData)).thenReturn(false);
 

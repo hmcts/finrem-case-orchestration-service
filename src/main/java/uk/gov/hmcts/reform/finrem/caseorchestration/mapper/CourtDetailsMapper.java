@@ -108,7 +108,8 @@ public class CourtDetailsMapper {
      *     <li>Changes to the structure of the {@link CourtListWrapper} class (e.g., renaming fields) can break this method
      *         without any compile-time errors.</li>
      * </ul>
-     * <p> This method is intended as a temporary solution to retrieve the  court details;
+     *
+     * <p>This method is intended as a temporary solution to retrieve the  court details;
      * it lacks the appropriate accessors and is brittle to changes in the underlying interface implementation.
      * The goal is to refactor the {@link Court} object and its associated classes to provide explicit accessors
      * for retrieving the selected court, eliminating the need for this reflective method.
