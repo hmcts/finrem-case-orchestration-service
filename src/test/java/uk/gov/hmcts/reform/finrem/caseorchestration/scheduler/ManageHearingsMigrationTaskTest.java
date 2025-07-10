@@ -63,7 +63,7 @@ class ManageHearingsMigrationTaskTest {
 
     private ManageHearingsMigrationTask underTest;
 
-    private ManageHearingsMigrationService manageHearingsMigrationService;
+    private ManageHearingsMigrationService spyManageHearingsMigrationService;
 
     private final FinremCaseDetailsMapper spyFinremCaseDetailsMapper = spy(new FinremCaseDetailsMapper(
         new ObjectMapper().registerModule(new JavaTimeModule())));
@@ -85,13 +85,13 @@ class ManageHearingsMigrationTaskTest {
 
     @BeforeEach
     void setup() {
-        manageHearingsMigrationService = spy(new ManageHearingsMigrationService(
+        spyManageHearingsMigrationService = spy(new ManageHearingsMigrationService(
             listForHearingWrapperPopulator, listForInterimHearingWrapperPopulator, generalApplicationWrapperPopulator,
             directionDetailsCollectionPopulator, manageHearingActionService
         ));
 
         underTest = new ManageHearingsMigrationTask(caseReferenceCsvLoader, ccdService, systemUserService,
-            spyFinremCaseDetailsMapper,  manageHearingsMigrationService);
+            spyFinremCaseDetailsMapper, spyManageHearingsMigrationService);
         ReflectionTestUtils.setField(underTest, "taskEnabled", true);
         ReflectionTestUtils.setField(underTest, "csvFile", ENCRYPTED_CSV_FILENAME);
         ReflectionTestUtils.setField(underTest, "secret", DUMMY_SECRET);
@@ -106,7 +106,7 @@ class ManageHearingsMigrationTaskTest {
         verifyNoInteractions(ccdService);
         verifyNoInteractions(caseReferenceCsvLoader);
         verifyNoInteractions(systemUserService);
-        verifyNoInteractions(manageHearingsMigrationService);
+        verifyNoInteractions(spyManageHearingsMigrationService);
     }
 
     @Test
@@ -129,7 +129,7 @@ class ManageHearingsMigrationTaskTest {
         underTest.run();
 
         // Assert
-        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
     }
 
     @Test
@@ -160,8 +160,8 @@ class ManageHearingsMigrationTaskTest {
         underTest.run();
 
         // Assert
-        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
-        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
     }
 
     @Test
@@ -191,8 +191,8 @@ class ManageHearingsMigrationTaskTest {
         underTest.run();
 
         // Assert
-        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
-        verify(manageHearingsMigrationService, never()).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
+        verify(spyManageHearingsMigrationService, never()).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
     }
 
     private void stubCaseDetails(Arguments... caseDetailsPairs) {
@@ -216,7 +216,7 @@ class ManageHearingsMigrationTaskTest {
                     .build());
 
             doReturn(finremCaseDetails).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(caseDetails);
-            doReturn(wasMigrated).when(manageHearingsMigrationService).wasMigrated(finremCaseDetails.getData());
+            doReturn(wasMigrated).when(spyManageHearingsMigrationService).wasMigrated(finremCaseDetails.getData());
         }
     }
 }
