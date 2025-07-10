@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,9 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
 
     @Mock
     private ManageHearingsMigrationService manageHearingsMigrationService;
+
+    @Mock
+    private ManageHearingActionService manageHearingActionService;
 
     @Test
     void testCanHandle() {
@@ -49,5 +53,6 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
         verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseData);
         verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseData);
         verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseData);
+        verify(manageHearingActionService).updateTabData(caseData);
     }
 }

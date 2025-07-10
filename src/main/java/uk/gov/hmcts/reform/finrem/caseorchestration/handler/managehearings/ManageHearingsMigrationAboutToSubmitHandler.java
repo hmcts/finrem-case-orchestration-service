@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
 /**
@@ -28,10 +29,14 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
 
     private final ManageHearingsMigrationService manageHearingsMigrationService;
 
+    private final ManageHearingActionService manageHearingActionService;
+
     public ManageHearingsMigrationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       ManageHearingsMigrationService manageHearingsMigrationService) {
+                                                       ManageHearingsMigrationService manageHearingsMigrationService,
+                                                       ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsMigrationService = manageHearingsMigrationService;
+        this.manageHearingActionService = manageHearingActionService;
     }
 
     @Override
@@ -53,6 +58,7 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
         manageHearingsMigrationService.populateListForInterimHearingWrapper(finremCaseData);
         manageHearingsMigrationService.populateGeneralApplicationWrapper(finremCaseData);
         manageHearingsMigrationService.populateDirectionDetailsCollection(finremCaseData);
+        manageHearingActionService.updateTabData(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
