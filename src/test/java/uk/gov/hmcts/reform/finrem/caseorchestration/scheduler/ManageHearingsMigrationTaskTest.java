@@ -49,6 +49,7 @@ class ManageHearingsMigrationTaskTest {
     private static final String ENCRYPTED_CSV_FILENAME = "updateConsentOrderFRCName-encrypted.csv";
 
     private static final String DUMMY_SECRET = "dummySecret";
+
     private static final String MH_MIGRATION_VERSION = "1";
 
     @Mock
