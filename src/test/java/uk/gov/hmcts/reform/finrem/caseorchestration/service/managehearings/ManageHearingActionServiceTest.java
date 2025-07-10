@@ -286,9 +286,10 @@ class ManageHearingActionServiceTest {
             createHearingCollectionItem(hearing1)
         )));
 
-        HearingTabItem migratgedHearingTabItem = spy(HearingTabItem.class);
-        migratgedHearingTabItem.setTabDateTime("10 Jul 2025 10:00");
-        migratgedHearingTabItem.setTabWasMigrated(YesOrNo.YES);
+        HearingTabItem migratgedHearingTabItem = HearingTabItem.builder()
+            .tabDateTime("10 Jul 2025 10:00")
+            .tabWasMigrated(YesOrNo.YES)
+            .build();
         hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder().value(migratgedHearingTabItem).build()));
         FinremCaseData caseData = spy(FinremCaseData.class);
         caseData.setManageHearingsWrapper(hearingWrapper);
