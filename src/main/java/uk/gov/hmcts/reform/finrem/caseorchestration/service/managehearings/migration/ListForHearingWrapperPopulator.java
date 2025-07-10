@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
@@ -16,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigratio
  * within {@link FinremCaseData}, if migration has not yet occurred.
  *
  * <p>
- * This class uses {@link HearingsAppender} and {@link HearingTabItemsAppender}
+ * This class uses {@link HearingsAppender}
  * to perform the actual appending and conversion logic.
  * </p>
  */
@@ -26,13 +25,9 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
-    private final HearingTabItemsAppender hearingTabItemsAppender;
-
-    public ListForHearingWrapperPopulator(HearingsAppender hearingsAppender,
-                                          HearingTabItemsAppender hearingTabItemsAppender) {
+    public ListForHearingWrapperPopulator(HearingsAppender hearingsAppender) {
         super(MhMigrationWrapper::getIsListForHearingsMigrated);
         this.hearingsAppender = hearingsAppender;
-        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     /**
@@ -72,8 +67,6 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
     @Override
     public void populate(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-        hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-            hearingTabItemsAppender.toHearingTabItem(listForHearingWrapper)).build());
         hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
             hearingsAppender.toHearing(listForHearingWrapper)).build());
 

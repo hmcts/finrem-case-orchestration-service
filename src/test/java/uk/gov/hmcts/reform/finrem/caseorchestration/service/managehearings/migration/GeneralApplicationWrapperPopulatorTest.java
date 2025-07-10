@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
@@ -37,9 +35,6 @@ class GeneralApplicationWrapperPopulatorTest {
 
     @Mock
     private HearingsAppender hearingsAppender;
-
-    @Mock
-    private HearingTabItemsAppender hearingTabItemAppender;
 
     @InjectMocks
     private GeneralApplicationWrapperPopulator underTest;
@@ -94,18 +89,14 @@ class GeneralApplicationWrapperPopulatorTest {
             .regionWrapper(RegionWrapper.builder().generalApplicationRegionWrapper(generalApplicationRegionWrapper).build())
             .build();
 
-        HearingTabItem hearingTabItem = mock(HearingTabItem.class);
         Hearing hearing = mock(Hearing.class);
 
-        when(hearingTabItemAppender.toHearingTabItem(generalApplicationWrapper, generalApplicationRegionWrapper))
-            .thenReturn(hearingTabItem);
         when(hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper)).thenReturn(hearing);
 
         // Act
         underTest.populate(caseData);
 
         // Assert
-        verify(hearingTabItemAppender).appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem).build()));
         verify(hearingsAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(hearing).build()));
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsGeneralApplicationMigrated());
     }

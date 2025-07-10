@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -289,8 +287,8 @@ class ManageHearingActionServiceTest {
         )));
 
         HearingTabItem migratgedHearingTabItem = spy(HearingTabItem.class);
-        migratgedHearingTabItem.setTabDateTime("date time from migrated");
-        migratgedHearingTabItem.setTabHearingMigratedDate(mock(LocalDateTime.class));
+        migratgedHearingTabItem.setTabDateTime("10 Jul 2025 10:00");
+        migratgedHearingTabItem.setTabWasMigrated(YesOrNo.YES);
         hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder().value(migratgedHearingTabItem).build()));
         FinremCaseData caseData = spy(FinremCaseData.class);
         caseData.setManageHearingsWrapper(hearingWrapper);
@@ -319,25 +317,25 @@ class ManageHearingActionServiceTest {
 
         assertThat(hearingWrapper.getHearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated", "1 Jul 2025 10:00", "15 Jul 2025 10:00", "20 Jul 2025 10:00");
+            .containsExactly("1 Jul 2025 10:00", "10 Jul 2025 10:00", "15 Jul 2025 10:00", "20 Jul 2025 10:00");
         assertThat(hearingWrapper.getApplicantHearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated", "20 Jul 2025 10:00");
+            .containsExactly("10 Jul 2025 10:00", "20 Jul 2025 10:00");
         assertThat(hearingWrapper.getRespondentHearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated", "15 Jul 2025 10:00");
+            .containsExactly("10 Jul 2025 10:00", "15 Jul 2025 10:00");
         assertThat(hearingWrapper.getInt1HearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated", "1 Jul 2025 10:00");
+            .containsExactly("1 Jul 2025 10:00", "10 Jul 2025 10:00");
         assertThat(hearingWrapper.getInt2HearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated");
+            .containsExactly("10 Jul 2025 10:00");
         assertThat(hearingWrapper.getInt3HearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated");
+            .containsExactly("10 Jul 2025 10:00");
         assertThat(hearingWrapper.getInt4HearingTabItems())
             .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("date time from migrated");
+            .containsExactly("10 Jul 2025 10:00");
     }
 
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
@@ -381,7 +379,7 @@ class ManageHearingActionServiceTest {
             .tabHearingType(type)
             .tabDateTime(dateTime)
             .tabConfidentialParties(parties)
-            .tabHearingMigratedDate(migrated ? LocalDateTime.now() : null)
+            .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
 }

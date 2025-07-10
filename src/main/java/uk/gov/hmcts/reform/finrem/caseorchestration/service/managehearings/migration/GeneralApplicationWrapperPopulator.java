@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
@@ -17,13 +16,9 @@ public class GeneralApplicationWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
-    private final HearingTabItemsAppender hearingTabItemsAppender;
-
-    public GeneralApplicationWrapperPopulator(HearingsAppender hearingsAppender,
-                                              HearingTabItemsAppender hearingTabItemsAppender) {
+    public GeneralApplicationWrapperPopulator(HearingsAppender hearingsAppender) {
         super(MhMigrationWrapper::getIsGeneralApplicationMigrated);
         this.hearingsAppender = hearingsAppender;
-        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
@@ -45,8 +40,6 @@ public class GeneralApplicationWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
         GeneralApplicationRegionWrapper generalApplicationRegionWrapper = caseData.getRegionWrapper().getGeneralApplicationRegionWrapper();
-        hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-            hearingTabItemsAppender.toHearingTabItem(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
         hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
             hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
 

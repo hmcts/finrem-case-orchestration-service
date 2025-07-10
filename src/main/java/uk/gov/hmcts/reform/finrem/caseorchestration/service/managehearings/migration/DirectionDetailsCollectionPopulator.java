@@ -8,37 +8,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
-/**
- * Populator component responsible for migrating hearing details from the
- * {@link ListForHearingWrapper} into both hearing tab items and hearings collections
- * within {@link FinremCaseData}, if migration has not yet occurred.
- *
- * <p>
- * This class uses {@link HearingsAppender} and {@link HearingTabItemsAppender}
- * to perform the actual appending and conversion logic.
- * </p>
- */
 @Component
 @Slf4j
 public class DirectionDetailsCollectionPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
-    private final HearingTabItemsAppender hearingTabItemsAppender;
-
-    public DirectionDetailsCollectionPopulator(HearingsAppender hearingsAppender,
-                                               HearingTabItemsAppender hearingTabItemsAppender) {
+    public DirectionDetailsCollectionPopulator(HearingsAppender hearingsAppender) {
         super(MhMigrationWrapper::getIsDirectionDetailsCollectionMigrated);
         this.hearingsAppender = hearingsAppender;
-        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
@@ -64,8 +48,6 @@ public class DirectionDetailsCollectionPopulator extends BasePopulator {
                 .toList();
         log.info("{} - Number of direction details to be migrated: {}", caseData.getCcdCaseId(), directionDetailStream.size());
         directionDetailStream.forEach(directionDetails -> {
-            hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-                    hearingTabItemsAppender.toHearingTabItem(directionDetails)).build());
             hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
                 hearingsAppender.toHearing(directionDetails)).build());
         });

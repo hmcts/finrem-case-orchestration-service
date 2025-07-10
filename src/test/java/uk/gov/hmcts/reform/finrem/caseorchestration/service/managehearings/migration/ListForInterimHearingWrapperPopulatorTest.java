@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -37,9 +35,6 @@ class ListForInterimHearingWrapperPopulatorTest {
 
     @Mock
     private HearingsAppender hearingsAppender;
-
-    @Mock
-    private HearingTabItemsAppender hearingTabItemAppender;
 
     @InjectMocks
     private ListForInterimHearingWrapperPopulator underTest;
@@ -96,17 +91,14 @@ class ListForInterimHearingWrapperPopulatorTest {
                 .build())
             .build();
 
-        HearingTabItem hearingTabItem = mock(HearingTabItem.class);
         Hearing hearing = mock(Hearing.class);
 
-        when(hearingTabItemAppender.toHearingTabItem(interimHearingItem)).thenReturn(hearingTabItem);
         when(hearingsAppender.toHearing(interimHearingItem)).thenReturn(hearing);
 
         // Act
         underTest.populate(caseData);
 
         // Assert
-        verify(hearingTabItemAppender).appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem).build()));
         verify(hearingsAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(hearing).build()));
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForInterimHearingsMigrated());
     }

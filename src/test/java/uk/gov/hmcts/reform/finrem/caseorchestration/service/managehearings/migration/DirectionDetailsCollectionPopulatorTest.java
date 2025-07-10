@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
@@ -41,9 +39,6 @@ class DirectionDetailsCollectionPopulatorTest {
 
     @Mock
     private HearingsAppender hearingsAppender;
-
-    @Mock
-    private HearingTabItemsAppender hearingTabItemAppender;
 
     @InjectMocks
     private DirectionDetailsCollectionPopulator underTest;
@@ -92,17 +87,10 @@ class DirectionDetailsCollectionPopulatorTest {
         DirectionDetail hearing2 = DirectionDetail.builder().isAnotherHearingYN(YesOrNo.NO).build();
         DirectionDetail hearing3 = DirectionDetail.builder().isAnotherHearingYN(null).build();
 
-        HearingTabItem hearingTabItem1 = mock(HearingTabItem.class);
-        HearingTabItem hearingTabItem2 = mock(HearingTabItem.class);
-        HearingTabItem hearingTabItem3 = mock(HearingTabItem.class);
-
         Hearing newHearing1 = mock(Hearing.class);
         Hearing newHearing2 = mock(Hearing.class);
         Hearing newHearing3 = mock(Hearing.class);
 
-        when(hearingTabItemAppender.toHearingTabItem(hearing1)).thenReturn(hearingTabItem1);
-        lenient().when(hearingTabItemAppender.toHearingTabItem(hearing2)).thenReturn(hearingTabItem2);
-        lenient().when(hearingTabItemAppender.toHearingTabItem(hearing3)).thenReturn(hearingTabItem3);
         when(hearingsAppender.toHearing(hearing1)).thenReturn(newHearing1);
         lenient().when(hearingsAppender.toHearing(hearing2)).thenReturn(newHearing2);
         lenient().when(hearingsAppender.toHearing(hearing3)).thenReturn(newHearing3);
@@ -119,13 +107,6 @@ class DirectionDetailsCollectionPopulatorTest {
         underTest.populate(caseData);
 
         // Assert
-        verify(hearingTabItemAppender)
-            .appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem1).build()));
-        verify(hearingTabItemAppender, never())
-            .appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem2).build()));
-        verify(hearingTabItemAppender, never())
-            .appendToHearingTabItems(eq(caseData), eq(HearingTabCollectionItem.builder().value(hearingTabItem3).build()));
-
         verify(hearingsAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(newHearing1).build()));
         verify(hearingsAppender, never()).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(newHearing2).build()));
         verify(hearingsAppender, never()).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(newHearing3).build()));

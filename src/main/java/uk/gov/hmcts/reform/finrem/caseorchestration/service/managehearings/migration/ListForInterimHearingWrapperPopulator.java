@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 
@@ -17,15 +16,11 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Slf4j
 public class ListForInterimHearingWrapperPopulator extends BasePopulator {
 
-    private final HearingTabItemsAppender hearingTabItemsAppender;
-
     private final HearingsAppender hearingsAppender;
 
-    public ListForInterimHearingWrapperPopulator(HearingsAppender hearingsAppender,
-                                                 HearingTabItemsAppender hearingTabItemsAppender) {
+    public ListForInterimHearingWrapperPopulator(HearingsAppender hearingsAppender) {
         super(MhMigrationWrapper::getIsListForInterimHearingsMigrated);
         this.hearingsAppender = hearingsAppender;
-        this.hearingTabItemsAppender = hearingTabItemsAppender;
     }
 
     @Override
@@ -45,8 +40,6 @@ public class ListForInterimHearingWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
         interimWrapper.getInterimHearings().stream().map(InterimHearingCollection::getValue).forEach(interimHearing -> {
-            hearingTabItemsAppender.appendToHearingTabItems(caseData, HearingTabCollectionItem.builder().value(
-                    hearingTabItemsAppender.toHearingTabItem(interimHearing)).build());
             hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
                     hearingsAppender.toHearing(interimHearing)).build());
         });
