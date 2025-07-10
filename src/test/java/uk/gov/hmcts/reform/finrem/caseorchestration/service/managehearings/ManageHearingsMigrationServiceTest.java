@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -42,6 +44,10 @@ class ManageHearingsMigrationServiceTest {
     @Mock
     private DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
 
+    @Mock
+    private ManageHearingActionService manageHearingActionService;
+
+    @Spy
     @InjectMocks
     private ManageHearingsMigrationService underTest;
 
@@ -175,5 +181,30 @@ class ManageHearingsMigrationServiceTest {
         underTest.populateDirectionDetailsCollection(caseData);
 
         verify(directionDetailsCollectionPopulator).populate(caseData);
+    }
+
+    @Test
+    void shouldRunManageHearingMigrationSuccessfully() {
+        // Given
+        FinremCaseData caseData = mock(FinremCaseData.class);
+        String migrationVersion = "1";
+
+        // Spy only the method under test so we can verify internal calls
+        doNothing().when(underTest).populateListForHearingWrapper(caseData);
+        doNothing().when(underTest).populateListForInterimHearingWrapper(caseData);
+        doNothing().when(underTest).populateGeneralApplicationWrapper(caseData);
+        doNothing().when(underTest).populateDirectionDetailsCollection(caseData);
+        doNothing().when(underTest).markCaseDataMigrated(caseData, migrationVersion);
+
+        // When
+        underTest.runManageHearingMigration(caseData, migrationVersion);
+
+        // Then
+        verify(underTest).populateListForHearingWrapper(caseData);
+        verify(underTest).populateListForInterimHearingWrapper(caseData);
+        verify(underTest).populateGeneralApplicationWrapper(caseData);
+        verify(underTest).populateDirectionDetailsCollection(caseData);
+        verify(underTest).markCaseDataMigrated(caseData, migrationVersion);
+        verify(manageHearingActionService).updateTabData(caseData);
     }
 }

@@ -42,11 +42,7 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
         if (!manageHearingsMigrationService.wasMigrated(caseData)) {
-            manageHearingsMigrationService.populateListForHearingWrapper(caseData);
-            manageHearingsMigrationService.populateListForInterimHearingWrapper(caseData);
-            manageHearingsMigrationService.populateGeneralApplicationWrapper(caseData);
-            manageHearingsMigrationService.populateDirectionDetailsCollection(caseData);
-            manageHearingsMigrationService.markCaseDataMigrated(caseData, mhMigrationVersion);
+            manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
         }
     }
 

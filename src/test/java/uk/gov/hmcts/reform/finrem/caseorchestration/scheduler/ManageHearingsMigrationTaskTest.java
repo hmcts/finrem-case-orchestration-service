@@ -42,6 +42,7 @@ class ManageHearingsMigrationTaskTest {
     private static final String ENCRYPTED_CSV_FILENAME = "updateConsentOrderFRCName-encrypted.csv";
 
     private static final String DUMMY_SECRET = "dummySecret";
+    private static final String MH_MIGRATION_VERSION = "1";
 
     @Mock
     private CcdService ccdService;
@@ -68,6 +69,7 @@ class ManageHearingsMigrationTaskTest {
         ReflectionTestUtils.setField(underTest, "taskEnabled", true);
         ReflectionTestUtils.setField(underTest, "csvFile", ENCRYPTED_CSV_FILENAME);
         ReflectionTestUtils.setField(underTest, "secret", DUMMY_SECRET);
+        ReflectionTestUtils.setField(underTest, "mhMigrationVersion", MH_MIGRATION_VERSION);
     }
 
     @Test
@@ -107,10 +109,7 @@ class ManageHearingsMigrationTaskTest {
         underTest.run();
 
         // Assert
-        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataOne);
+        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
     }
 
     @Test
@@ -153,13 +152,7 @@ class ManageHearingsMigrationTaskTest {
         underTest.run();
 
         // Assert
-        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateListForHearingWrapper(caseDataTwo);
-        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateListForInterimHearingWrapper(caseDataTwo);
-        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataOne);
-        verify(manageHearingsMigrationService).populateGeneralApplicationWrapper(caseDataTwo);
-        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataOne);
-        verify(manageHearingsMigrationService).populateDirectionDetailsCollection(caseDataTwo);
+        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataOne, MH_MIGRATION_VERSION);
+        verify(manageHearingsMigrationService).runManageHearingMigration(caseDataTwo, MH_MIGRATION_VERSION);
     }
 }
