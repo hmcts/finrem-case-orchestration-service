@@ -230,7 +230,32 @@ public class GeneralOrderService {
         return addressTo != null ? addressTo.getText() : "";
     }
 
-    //Sets order list in send order about to start event
+    /**
+     * Sets the list of orders to share in the `OrdersToSend` field of the case data.
+     * Called by the Send Order About To Start event
+     *
+     * <p>This method processes various types of orders, including:
+     * <ul>
+     *   <li>Contested general orders</li>
+     *   <li>Hearing orders</li>
+     *   <li>Processed agreed draft orders</li>
+     *   <li>Finalised orders</li>
+     * </ul>
+     * It collects these orders, along with their associated cover letters and attachments,
+     * and populates them into the `OrdersToSend` field in the case data.</p>
+     *
+     * <p>The method performs the following steps:
+     * <ol>
+     *   <li>Processes contested general orders and adds them to the order list.</li>
+     *   <li>Processes hearing orders and their attachments, adding them to the order list.</li>
+     *   <li>Processes agreed draft orders marked as "processed" and adds them to the order list.</li>
+     *   <li>Processes finalised orders and their attachments, adding them to the order list.</li>
+     *   <li>Populates the `OrdersToSend` field in the case data with the collected orders.</li>
+     * </ol>
+     * </p>
+     *
+     * @param caseDetails the case details containing the data to process and populate
+     */
     public void setOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         List<OrderToShareCollection> orderToShareCollection = new ArrayList<>();
