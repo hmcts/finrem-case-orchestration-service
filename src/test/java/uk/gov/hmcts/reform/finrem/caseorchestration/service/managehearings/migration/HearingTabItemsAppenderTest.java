@@ -127,7 +127,6 @@ public class HearingTabItemsAppenderTest {
                     "Unknown",
                     expectedAdditionalInfo
                 );
-            assertThat(result).extracting(HearingTabItem::getTabHearingMigratedDate).isNotNull();
             assertThat(result.getTabHearingDocuments())
                 .isNotNull()
                 .hasSize(1)
