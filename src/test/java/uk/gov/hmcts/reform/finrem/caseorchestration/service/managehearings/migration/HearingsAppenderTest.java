@@ -210,13 +210,13 @@ class HearingsAppenderTest {
         HearingType expectedHearingType = HearingType.FH;
         Court expectedCourt = mock(Court.class);
 
-        DirectionDetail directionDetail = spy(DirectionDetail.builder()
+        DirectionDetail directionDetail = DirectionDetail.builder()
             .typeOfHearing(HearingTypeDirection.FH)
             .dateOfHearing(hearingDate)
             .hearingTime(hearingTime)
             .timeEstimate(timeEstimate)
             .localCourt(expectedCourt)
-            .build());
+            .build();
 
         // Act
         Hearing result = underTest.toHearing(directionDetail);
