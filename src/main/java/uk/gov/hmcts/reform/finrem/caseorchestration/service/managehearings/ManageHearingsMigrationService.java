@@ -80,7 +80,7 @@ public class ManageHearingsMigrationService {
             return;
         }
 
-        generalApplicationWrapperPopulator.populate(caseData);
+        directionDetailsCollectionPopulator.populate(caseData);
     }
 
     /**
