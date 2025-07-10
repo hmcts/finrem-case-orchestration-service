@@ -16,10 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLo
 @Slf4j
 public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask {
 
-    private static final String TASK_NAME = "ManageHearingsMigrationTask";
-
-    private static final String SUMMARY = "Manage Hearings migration";
-
     @Value("${cron.manageHearingsMigration.enabled:false}")
     private boolean taskEnabled;
 
@@ -53,7 +49,7 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
 
     @Override
     protected String getTaskName() {
-        return TASK_NAME;
+        return "ManageHearingsMigrationTask";
     }
 
     @Override
@@ -68,6 +64,6 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
 
     @Override
     protected String getSummary() {
-        return SUMMARY;
+        return "Manage Hearings migration";
     }
 }
