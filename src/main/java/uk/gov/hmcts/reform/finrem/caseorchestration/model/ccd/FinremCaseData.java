@@ -800,6 +800,17 @@ public class FinremCaseData implements HasCaseDocument {
             : getContactDetailsWrapper().getApplicantSolicitorFirm();
     }
 
+    /**
+     * For consented cases ONLY.
+     * Checks if the respondent solicitor email communication is enabled.
+     * This is true if:
+     * - The case is not a paper case
+     * - The respondent is represented by a solicitor
+     * - The respondent solicitor email is not null
+     * - The respondent solicitor has agreed to receive emails
+     * Needs enhancement for contested cases.
+     * @return true if the respondent solicitor email communication is enabled, false otherwise.
+     */
     @JsonIgnore
     public boolean isRespondentSolicitorEmailCommunicationEnabled() {
         return !isPaperCase()
@@ -816,6 +827,11 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     public boolean isRespondentSolicitorPopulated() {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
+    }
+
+    @JsonIgnore
+    public String getRespondentSolicitorEmailForContested() {
+        return nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail());
     }
 
     @JsonIgnore
