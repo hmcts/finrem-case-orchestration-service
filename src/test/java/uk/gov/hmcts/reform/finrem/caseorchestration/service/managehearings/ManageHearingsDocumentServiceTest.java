@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -348,6 +350,7 @@ class ManageHearingsDocumentServiceTest {
         ManageHearingDocument doc = ManageHearingDocument.builder()
             .hearingId(hearingId)
             .hearingDocument(expectedDoc)
+            .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
             .build();
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
@@ -358,10 +361,10 @@ class ManageHearingsDocumentServiceTest {
             .build();
 
         FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
-        FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();
+        finremCaseDetails.setData(data);
 
         // Act
-        CaseDocument result = manageHearingsDocumentService.getHearingNotice(details);
+        CaseDocument result = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         // Assert
         assertNotNull(result);
@@ -388,12 +391,53 @@ class ManageHearingsDocumentServiceTest {
             .build();
 
         FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
-        FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();
+        finremCaseDetails.setData(data);
 
         // Act
-        CaseDocument result = manageHearingsDocumentService.getHearingNotice(details);
+        CaseDocument result = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
         // Assert
         assertNull(result);
+    }
+
+    @Test
+    void determineFormCTemplateShouldReturnExpressFormC() {
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
+        when(documentConfiguration.getManageHearingExpressFormCTemplate()).thenReturn("an express template");
+
+        Pair<CaseDocumentType, String> result = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C_EXPRESS, result.getLeft());
+        assertEquals("an express template", result.getRight());
+    }
+
+    @Test
+    void determineFormCTemplateShouldReturnFastTrackFormC() {
+        FinremCaseData someCaseData = FinremCaseData.builder()
+            .fastTrackDecision(YesOrNo.YES)
+            .build();
+        finremCaseDetails.setData(someCaseData);
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        when(documentConfiguration.getFormCFastTrackTemplate(finremCaseDetails)).thenReturn("a fast track template");
+
+        Pair<CaseDocumentType, String> result = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C_FAST_TRACK, result.getLeft());
+        assertEquals("a fast track template", result.getRight());
+    }
+
+    @Test
+    void determineFormCTemplateShouldReturnStandardFormC() {
+        FinremCaseData someCaseData = FinremCaseData.builder()
+            .fastTrackDecision(YesOrNo.NO)
+            .build();
+        finremCaseDetails.setData(someCaseData);
+        when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        when(documentConfiguration.getFormCStandardTemplate(finremCaseDetails)).thenReturn("a standard form C template");
+
+        Pair<CaseDocumentType, String> result = manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails);
+
+        assertEquals(CaseDocumentType.FORM_C, result.getLeft());
+        assertEquals("a standard form C template", result.getRight());
     }
 }

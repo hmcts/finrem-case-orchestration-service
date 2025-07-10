@@ -190,7 +190,6 @@ public class ManageHearingsCorresponder {
      */
     private void processCorrespondenceForParty(
         FinremCaseDetails finremCaseDetails,
-        // If FDA or FDR, follow up by emailing certain docs.  Future planned work will address this.
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
@@ -232,7 +231,12 @@ public class ManageHearingsCorresponder {
                     log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
                 }
             }
-            // Else send hearing docs too.  Future planned work will address this.
+            if (hearingCorrespondenceHelper.shouldSendAllHearingDocuments()) {
+                List<CaseDocument> hearingDocuments = manageHearingsDocumentService
+                    .getHearingDocuments(finremCaseDetails);
+
+                // todo: send the hearing documents - as above. Then tidy and refactor all this.
+            }
         }
     }
 

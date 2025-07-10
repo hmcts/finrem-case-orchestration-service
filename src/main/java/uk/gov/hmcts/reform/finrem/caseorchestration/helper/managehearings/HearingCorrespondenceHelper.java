@@ -162,4 +162,13 @@ public class HearingCorrespondenceHelper {
 
         return isAddHearingEvent && isNoticeOnlyHearingType;
     }
+
+    /**
+     * Todo: write this. write test.  List what the docs are.
+     */
+    public boolean shouldSendAllHearingDocuments() {
+
+        return true;
+
+    }
 }

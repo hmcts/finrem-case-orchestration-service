@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -186,6 +188,34 @@ class FinremCaseDataTest {
         ContactDetailsWrapper wrapper = ContactDetailsWrapper.builder().respondentSolicitorEmail("respondent@testemail.com").build();
         finremCaseData.setContactDetailsWrapper(wrapper);
         assertThat(finremCaseData.getRespondentSolicitorEmailForContested()).isEqualTo("respondent@testemail.com");
+    }
+
+
+    @Test
+    void isFastTrackApplicationShouldReturnCorrectValues() {
+        // Setup base data
+        FinremCaseData finremCaseData = new FinremCaseData();
+
+        //Case allocation and fast track decision are both null.  Return false.
+        assertFalse(finremCaseData.isFastTrackApplication());
+
+        // Case allocation set to NO. Fast track decision ignored. Return false.
+        finremCaseData.setCaseAllocatedTo(YesOrNo.NO);
+        assertFalse(finremCaseData.isFastTrackApplication());
+
+        // Case allocation YES. Fast track decision ignored. Return true.
+        finremCaseData.setCaseAllocatedTo(YesOrNo.YES);
+        assertTrue(finremCaseData.isFastTrackApplication());
+
+        // Case allocation ignored when null.  Fast track decision set to NO. Return false.
+        finremCaseData.setCaseAllocatedTo(null);
+        finremCaseData.setFastTrackDecision(YesOrNo.NO);
+        assertFalse(finremCaseData.isFastTrackApplication());
+
+        // Case allocation ignored when null. Fast track decision set to YES. Return true.
+        finremCaseData.setCaseAllocatedTo(null);
+        finremCaseData.setFastTrackDecision(YesOrNo.YES);
+        assertTrue(finremCaseData.isFastTrackApplication());
     }
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {

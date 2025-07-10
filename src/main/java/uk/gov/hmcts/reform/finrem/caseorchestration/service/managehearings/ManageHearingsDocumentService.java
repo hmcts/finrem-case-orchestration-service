@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
@@ -76,7 +78,7 @@ public class ManageHearingsDocumentService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
-                determineFormCTemplate(finremCaseDetails),
+                determineFormCTemplate(finremCaseDetails).getRight(),
                 documentConfiguration.getFormCFileName(),
                 finremCaseDetails.getId().toString()
         );
@@ -170,34 +172,89 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Retrieves the hearing notice document for the case's current working hearing, using Id.
-     * Assumes that the hearing notice is stored in the case's hearing documents collection.
-     * If no notice is found, returns an empty list.
+     * Get the hearing notice document, or return null if not found.
      *
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a {@link CaseDocument}
      */
     public CaseDocument getHearingNotice(FinremCaseDetails finremCaseDetails) {
+        return getByTypeAndHearingId(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
+    }
 
+    /**
+     * These hearing documents should be posted for all cases.
+     * - Hearing Notice
+     * - Form A
+     * - Out of Court Resolution
+     * - PDF NCDR Compliance Letter
+     * - PDF NCDR Cover Letter
+     * For FDA hearings, add these documents:
+     * - Form C
+     * - Form G
+     * For FDA fast-track Hearings, add these documents:
+     * - Fast-track Form C
+     * For FDR hearings, add these documents:
+     * - Form C
+     * - Form G
+     * For FDR, express Hearings, add these documents:
+     * - Express Form C
+     * - Form G
+     * @param finremCaseDetails the case details containing the hearing documents
+     * @return a {@link CaseDocument}
+     */
+    public List<CaseDocument> getHearingDocuments(FinremCaseDetails finremCaseDetails) {
+        // todo - these are categorised now - so that you can get them.
+
+        return null;
+    }
+
+    /**
+     * Determines the appropriate Form C template to use for a given case and
+     * returns it along with the corresponding {@link CaseDocumentType}.
+     *
+     * @param caseDetails the details of the case
+     * @return a pair containing the {@link CaseDocumentType} and the string for the template
+     */
+    public Pair<CaseDocumentType, String> determineFormCTemplate(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        if (expressCaseService.isExpressCase(caseData)) {
+            return Pair.of(
+                CaseDocumentType.FORM_C_EXPRESS,
+                documentConfiguration.getManageHearingExpressFormCTemplate()
+            );
+        } else if (caseData.isFastTrackApplication()) {
+            return Pair.of(
+                CaseDocumentType.FORM_C_FAST_TRACK,
+                documentConfiguration.getFormCFastTrackTemplate(caseDetails)
+            );
+        } else {
+            return Pair.of(
+                CaseDocumentType.FORM_C,
+                documentConfiguration.getFormCStandardTemplate(caseDetails)
+            );
+        }
+    }
+
+    /**
+     * Retrieves a document for the case's current working hearing id.
+     * Then filter that by the passed CaseDocumentType argument.
+     * If no notice is found, returns an empty list.
+     * @param finremCaseDetails the case details containing the hearing documents.
+     * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.
+     * @return a {@link CaseDocument}
+     */
+    private CaseDocument getByTypeAndHearingId(FinremCaseDetails finremCaseDetails,
+                                               CaseDocumentType documentType) {
         ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
         UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
         return manageHearingsWrapper.getHearingDocumentsCollection().stream()
             .map(ManageHearingDocumentsCollectionItem::getValue)
             .filter(value -> hearingId.equals(value.getHearingId()))
+            .filter(value -> documentType.equals(value.getHearingCaseDocumentType()))
             .map(ManageHearingDocument::getHearingDocument)
             .findFirst()
             .orElse(null);
-    }
-
-    private String determineFormCTemplate(FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
-        if (expressCaseService.isExpressCase(caseData)) {
-            return documentConfiguration.getManageHearingExpressFormCTemplate();
-        } else if (caseData.isFastTrackApplication()) {
-            return documentConfiguration.getFormCFastTrackTemplate(caseDetails);
-        } else {
-            return documentConfiguration.getFormCStandardTemplate(caseDetails);
-        }
     }
 }
