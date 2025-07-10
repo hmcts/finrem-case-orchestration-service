@@ -232,7 +232,6 @@ public class GeneralOrderService {
 
     /**
      * Sets the list of orders to share in the `OrdersToSend` field of the case data.
-     * Called by the Send Order About To Start event
      *
      * <p>This method processes various types of orders, including:
      * <ul>
