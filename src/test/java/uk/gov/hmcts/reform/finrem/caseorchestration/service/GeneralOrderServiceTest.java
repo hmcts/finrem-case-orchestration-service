@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CoverLetterToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
@@ -697,6 +698,123 @@ class GeneralOrderServiceTest {
     }
 
     @Test
+    void givenFinalisedOrderWithAttachmentWithCoverLetter_whenHearingOrdersToShareIsCalled_shouldReturnCorrectListOfDocuments() {
+        CaseDocument finalisedOrder1 = caseDocument(
+            "http://document-management-store:8080/documents/00000000-c524-4614-86e5-c569f82c718d",
+            "Finalised Order 1.pdf");
+        CaseDocument finalisedOrderAttachment1 = caseDocument(
+            "http://document-management-store:8080/documents/44444444-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_1.pdf");
+        CaseDocument finalisedCoverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .finalisedOrdersCollection(List.of(
+                        FinalisedOrderCollection.builder().value(FinalisedOrder.builder()
+                            .finalisedDocument(finalisedOrder1)
+                                .attachments(List.of(DocumentCollectionItem.builder().value(finalisedOrderAttachment1).build()))
+                            .build()).build()
+                    ))
+                    .build())
+                .build())
+            .build();
+
+        Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> actual = generalOrderService
+            .hearingOrdersToShare(caseDetails, List.of(
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("00000000-c524-4614-86e5-c569f82c718d")
+                    .coverLetterToShare(CoverLetterToShare.builder()
+                        .documentId("55555555-c524-4614-86e5-c569f82c718d")
+                        .coverLetterName("Cover Letter 1.pdf")
+                        .coverLetterDocument(finalisedCoverLetter1)
+                        .build())
+                    .includeSupportingDocument(List.of(Yes.YES))
+                    .attachmentsToShare(List.of(
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("44444444-c524-4614-86e5-c569f82c718d").build())
+                            .build()
+                    ))
+                    .build()
+            ));
+
+        assertThat(actual.getLeft())
+            .isEmpty();
+        assertThat(actual.getMiddle())
+            .containsExactly(finalisedOrder1);
+        assertThat(actual.getRight()).containsExactlyInAnyOrderEntriesOf(
+            Map.of(finalisedOrder1, List.of(finalisedCoverLetter1, finalisedOrderAttachment1)));
+    }
+
+    @Test
+    void givenAgreedOrderWithAttachmentsWithCoverLetter_whenHearingOrdersToShareIsCalled_shouldReturnCorrectListOfDocuments() {
+        CaseDocument agreedOrder1 = caseDocument(
+            "http://document-management-store:8080/documents/11111111-c524-4614-86e5-c569f82c718d",
+            "Agreed Order 1.pdf");
+        CaseDocument agreedOrderAttachment1 = caseDocument(
+            "http://document-management-store:8080/documents/44444444-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_1.pdf");
+        CaseDocument agreedOrderAttachment2 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "ATTACHMENT_2.pdf");
+        CaseDocument agreedOrderCoverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/66666666-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
+
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                    .agreedDraftOrderCollection(List.of(
+                        AgreedDraftOrderCollection.builder()
+                            .value(AgreedDraftOrder.builder()
+                                .attachments(List.of(
+                                    DocumentCollectionItem.builder().value(agreedOrderAttachment1).build(),
+                                    DocumentCollectionItem.builder().value(agreedOrderAttachment2).build()))
+                                .draftOrder(agreedOrder1)
+                                .coverLetter(agreedOrderCoverLetter1)
+                                .orderStatus(PROCESSED)
+                                .build())
+                            .build() // agreedDraftOrder with attachment selected
+                    ))
+                    .build())
+                .build())
+            .build();
+
+        Triple<List<CaseDocument>, List<CaseDocument>, Map<CaseDocument, List<CaseDocument>>> actual = generalOrderService
+            .hearingOrdersToShare(caseDetails, List.of(
+                OrderToShare.builder().documentToShare(YesOrNo.YES)
+                    .documentId("11111111-c524-4614-86e5-c569f82c718d")
+                    .coverLetterToShare(CoverLetterToShare.builder()
+                        .documentId("66666666-c524-4614-86e5-c569f82c718d")
+                        .coverLetterName("Cover Letter 1.pdf")
+                        .coverLetterDocument(agreedOrderCoverLetter1)
+                        .build())
+                    .includeSupportingDocument(List.of(Yes.YES))
+                    .attachmentsToShare(List.of(
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("44444444-c524-4614-86e5-c569f82c718d").build())
+                            .build(),
+                        AttachmentToShareCollection.builder()
+                            .value(
+                                AttachmentToShare.builder().documentToShare(YesOrNo.YES).documentId("55555555-c524-4614-86e5-c569f82c718d").build())
+                            .build()
+                    ))
+                    .build()
+            ));
+
+        assertThat(actual.getLeft())
+            .isEmpty();
+        assertThat(actual.getMiddle())
+            .containsExactly(agreedOrder1);
+        assertThat(actual.getRight()).containsExactlyInAnyOrderEntriesOf(
+            Map.of(agreedOrder1, List.of(agreedOrderCoverLetter1, agreedOrderAttachment1, agreedOrderAttachment2)));
+    }
+
+    @Test
     void shouldPopulateProcessedApprovedDocumentsToOrdersToShareList() {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder()
             .data(FinremCaseData.builder()
@@ -733,26 +851,42 @@ class GeneralOrderServiceTest {
     }
 
     @Test
-    void shouldPopulateProcessedApprovedDocumentsWithAttachmentToOrdersToShareList() {
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
-            .data(FinremCaseData.builder()
-                .draftOrdersWrapper(DraftOrdersWrapper.builder()
-                    .agreedDraftOrderCollection(List.of(
-                        AgreedDraftOrderCollection.builder()
-                            .value(AgreedDraftOrder.builder()
-                                .orderStatus(PROCESSED)
-                                .attachments(List.of(DocumentCollectionItem.builder()
-                                    .value(caseDocument("https://fakeurl/attachment1", "attachment1.pdf", "attachment1"))
-                                    .build()))
-                                .draftOrder(caseDocument("https://fakeurl/documentUrl", "processedFileName.pdf", "binaryUrl")).build())
-                            .build(),
-                        agreedDraftOrderCollection(TO_BE_REVIEWED),
-                        agreedDraftOrderCollection(APPROVED_BY_JUDGE),
-                        agreedDraftOrderCollection(REFUSED)
-                    ))
-                    .build())
+    void givenAgreedOrderWithAttachmentWithCoverLetter_whenSetOrderListIsCalled_shouldPopulateOrdersToSend() {
+        CaseDocument coverLetter = caseDocument(
+            "https://fakeurl/coverLetter1",
+            "Cover Letter 1.pdf");
+        CaseDocument attachment1 = caseDocument(
+            "https://fakeurl/attachment1",
+            "attachment1.pdf",
+            "attachment1");
+        CaseDocument draftOrder = caseDocument(
+            "https://fakeurl/documentUrl",
+            "processedFileName.pdf",
+            "binaryUrl");
+
+        FinremCaseDetails.FinremCaseDetailsBuilder builder = FinremCaseDetails.builder();
+        builder.data(FinremCaseData.builder()
+            .draftOrdersWrapper(DraftOrdersWrapper.builder()
+                .agreedDraftOrderCollection(List.of(
+                    AgreedDraftOrderCollection.builder()
+                        .value(AgreedDraftOrder.builder()
+                            .orderStatus(PROCESSED)
+                            .coverLetter(coverLetter)
+                            .attachments(List.of(DocumentCollectionItem.builder()
+                                .value(attachment1)
+                                .build()))
+                            .draftOrder(draftOrder)
+                            .build())
+                        .build(),
+                    agreedDraftOrderCollection(TO_BE_REVIEWED),
+                    agreedDraftOrderCollection(APPROVED_BY_JUDGE),
+                    agreedDraftOrderCollection(REFUSED)
+                ))
                 .build())
+            .build());
+        FinremCaseDetails caseDetails = builder
             .build();
+
         generalOrderService.setOrderList(caseDetails);
 
         assertThat(caseDetails.getData().getSendOrderWrapper().getOrdersToSend())
@@ -767,14 +901,22 @@ class GeneralOrderServiceTest {
                         .hasSupportingDocuments(YesOrNo.YES)
                         .attachmentsToShare(List.of(
                             AttachmentToShareCollection.builder()
-                                .value(AttachmentToShare.builder()
-                                    .attachment(caseDocument("https://fakeurl/attachment1", "attachment1.pdf", "attachment1"))
-                                    .attachmentName("attachment1.pdf")
-                                    .documentId("attachment1")
-                                    .documentToShare(YesOrNo.NO)
-                                    .build())
+                                .value(
+                                    AttachmentToShare.builder()
+                                        .documentToShare(YesOrNo.YES)
+                                        .documentId("attachment1")
+                                        .attachment(attachment1)
+                                        .attachmentName("attachment1.pdf")
+                                        .documentToShare(YesOrNo.NO)
+                                        .build()
+                                )
                                 .build()
                         ))
+                        .coverLetterToShare(CoverLetterToShare.builder()
+                            .coverLetterDocument(coverLetter)
+                            .documentId("coverLetter1")
+                            .coverLetterName(coverLetter.getDocumentFilename())
+                            .build())
                         .build())
                     .build())
             );
