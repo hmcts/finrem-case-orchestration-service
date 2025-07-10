@@ -188,7 +188,7 @@ class GeneralOrderServiceTest {
 
         assertThat(generalOrders).hasSize(2);
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.getFirst().getValue().getAdditionalDocument().getDocumentUrl());
-        assertEquals("app_docs.pdf", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename());
+        assertEquals("app_docs.pdf", generalOrders.getFirst().getValue().getAdditionalDocument().getDocumentFilename());
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary",
             generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl());
 

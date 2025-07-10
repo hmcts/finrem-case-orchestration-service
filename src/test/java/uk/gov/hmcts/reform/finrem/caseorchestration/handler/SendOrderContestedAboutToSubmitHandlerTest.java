@@ -603,8 +603,8 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size());
-        assertEquals("app_docs.pdf", caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().getFirst()
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().getFirst().getValue().getApproveOrders().size());
+        assertEquals("app_docs.pdf", caseData.getOrderWrapper().getIntv1OrderCollections().getFirst().getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
         assertEquals("AdditionalHearingDocument.pdf",
             caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().getFirst()
