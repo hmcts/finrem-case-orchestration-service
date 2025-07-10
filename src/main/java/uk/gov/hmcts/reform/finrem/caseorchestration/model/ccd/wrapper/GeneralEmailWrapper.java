@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HasCaseDocument;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,6 +23,7 @@ public class GeneralEmailWrapper implements HasCaseDocument {
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
     private String generalEmailBody;
+    private LocalDateTime generalEmailDateSent;
     private CaseDocument generalEmailUploadedDocument;
     private List<GeneralEmailCollection> generalEmailCollection;
 
@@ -35,5 +37,6 @@ public class GeneralEmailWrapper implements HasCaseDocument {
         this.setGeneralEmailCreatedBy(null);
         this.setGeneralEmailUploadedDocument(null);
         this.setGeneralEmailBody(null);
+        this.setGeneralEmailDateSent(null);
     }
 }

@@ -33,6 +33,7 @@ public class GeneralEmailService {
             .generalEmailCreatedBy(generalEmailWrapper.getGeneralEmailCreatedBy())
             .generalEmailRecipient(generalEmailWrapper.getGeneralEmailRecipient())
             .generalEmailUploadedDocument(createNewCaseDocumentObject(generalEmailWrapper))
+            .generalEmailDateSent(generalEmailWrapper.getGeneralEmailDateSent())
             .build()).build();
         generalEmailCollection.add(collection);
 
