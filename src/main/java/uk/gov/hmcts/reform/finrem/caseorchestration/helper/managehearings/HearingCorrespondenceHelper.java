@@ -54,7 +54,7 @@ public class HearingCorrespondenceHelper {
         }
 
         return manageHearingsWrapper.getHearings().stream()
-                .filter(h -> h.getId().equals(hearingId))
+                .filter(h -> hearingId.equals(h.getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Hearing not found for the given ID: " + hearingId))
                 .getValue();
@@ -67,7 +67,7 @@ public class HearingCorrespondenceHelper {
      * @return true if notification is required, false otherwise.
      */
     public boolean shouldNotSendNotification(Hearing hearing) {
-        return !YesOrNo.YES.equals(hearing.getHearingNoticePrompt());
+        return YesOrNo.isNoOrNull(hearing.getHearingNoticePrompt());
     }
 
     /**

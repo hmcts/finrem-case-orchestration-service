@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearin
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.HEARING_NOTICES;
 
 @Component
 @RequiredArgsConstructor
@@ -91,25 +94,44 @@ public class HearingTabDataMapper {
      * @return a list of `DocumentCollectionItem` objects representing all documents associated with the hearing
      */
     private List<DocumentCollectionItem> mapHearingDocumentsToTabData(
-            List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
-            UUID hearingId, Hearing hearing) {
+        List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection,
+        UUID hearingId,
+        Hearing hearing) {
 
         List<DocumentCollectionItem> hearingDocuments = hearingDocumentsCollection != null
-                ? hearingDocumentsCollection.stream()
-                .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
-                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue().getHearingDocument()).build())
-                .toList()
-                : List.of();
+            ? hearingDocumentsCollection.stream()
+            .filter(doc -> hearingId.equals(doc.getValue().getHearingId()))
+            .map(doc -> DocumentCollectionItem.builder()
+                .value(CaseDocument
+                    .builder()
+                    .documentUrl(doc.getValue().getHearingDocument().getDocumentUrl())
+                    .documentFilename(doc.getValue().getHearingDocument().getDocumentFilename())
+                    .uploadTimestamp(doc.getValue().getHearingDocument().getUploadTimestamp())
+                    .documentBinaryUrl(doc.getValue().getHearingDocument().getDocumentBinaryUrl())
+                    .categoryId(HEARING_NOTICES.getDocumentCategoryId())
+                    .build())
+                .build())
+            .toList()
+            : List.of();
 
         List<DocumentCollectionItem> additionalDocs = hearing.getAdditionalHearingDocs() != null
-                ? hearing.getAdditionalHearingDocs().stream()
-                .map(doc -> DocumentCollectionItem.builder().value(doc.getValue()).build())
-                .toList()
-                : List.of();
-
+            ? hearing.getAdditionalHearingDocs().stream()
+            .map(doc -> DocumentCollectionItem.builder()
+                    .value(CaseDocument
+                            .builder()
+                            .documentUrl(doc.getValue().getDocumentUrl())
+                            .documentFilename(doc.getValue().getDocumentFilename())
+                            .uploadTimestamp(doc.getValue().getUploadTimestamp())
+                            .documentBinaryUrl(doc.getValue().getDocumentBinaryUrl())
+                            .categoryId(HEARING_NOTICES.getDocumentCategoryId())
+                            .build()
+                    ).build())
+            .toList()
+            : List.of();
+        
         return Stream.concat(
-                hearingDocuments.stream(),
-                additionalDocs.stream()
+            hearingDocuments.stream(),
+            additionalDocs.stream()
         ).toList();
     }
 }

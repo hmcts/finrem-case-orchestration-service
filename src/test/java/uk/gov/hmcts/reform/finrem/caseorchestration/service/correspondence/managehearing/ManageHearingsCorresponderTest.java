@@ -304,7 +304,6 @@ class ManageHearingsCorresponderTest {
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent for case ID: 123");
     }
 
-
     /**
      * Checks that sendHearingNotificationToApplicant throws IllegalStateException when illegal CaseRole is provided.
      * - CaseRole is CASEWORKER (which is not appropriate for hearing notifications)

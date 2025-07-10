@@ -2,29 +2,30 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.HearingNoticeLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @Service
 @RequiredArgsConstructor
@@ -51,17 +52,13 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object>  documentDataMap = hearingNoticeLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        CaseDocument hearingDoc = genericDocumentService.generateDocumentFromPlaceholdersMap(
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
                 documentConfiguration.getManageHearingNoticeTemplate(finremCaseDetails),
                 documentConfiguration.getManageHearingNoticeFileName(),
                 finremCaseDetails.getId().toString()
         );
-
-        hearingDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
-
-        return hearingDoc;
     }
 
     /**
@@ -76,17 +73,13 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object>  documentDataMap = manageHearingFormCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        CaseDocument formC = genericDocumentService.generateDocumentFromPlaceholdersMap(
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
                 determineFormCTemplate(finremCaseDetails),
                 documentConfiguration.getFormCFileName(),
                 finremCaseDetails.getId().toString()
         );
-
-        formC.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
-
-        return formC;
     }
 
     /**
@@ -101,17 +94,13 @@ public class ManageHearingsDocumentService {
 
         Map<String, Object>  documentDataMap = formGLetterDetailsMapper.getDocumentTemplateDetailsAsMap(finremCaseDetails);
 
-        CaseDocument formG = genericDocumentService.generateDocumentFromPlaceholdersMap(
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(
                 authorisationToken,
                 documentDataMap,
                 documentConfiguration.getFormGTemplate(finremCaseDetails),
                 documentConfiguration.getFormGFileName(),
                 finremCaseDetails.getId().toString()
         );
-
-        formG.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
-
-        return formG;
     }
 
     /**
@@ -121,26 +110,20 @@ public class ManageHearingsDocumentService {
      * @param authorisationToken the authorisation token for document generation
      * @return a map containing the generated PFD NCDR documents
      */
-    public Map<String, Pair<CaseDocument, CaseDocumentType>> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+    public Map<String, CaseDocument> generatePfdNcdrDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId().toString();
 
-        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap = new HashMap<>();
+        Map<String, CaseDocument>  documentMap = new HashMap<>();
 
         documentMap.put(
-                PFD_NCDR_COMPLIANCE_LETTER,
-                Pair.of(
-                        staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken),
-                        CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER
-                )
+            PFD_NCDR_COMPLIANCE_LETTER,
+            staticHearingDocumentService.uploadPfdNcdrComplianceLetter(caseId, authorisationToken)
         );
 
         if (staticHearingDocumentService.isPdfNcdrCoverSheetRequired(caseDetails)) {
             documentMap.put(
                     PFD_NCDR_COVER_LETTER,
-                    Pair.of(
-                            staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken),
-                            CaseDocumentType.PFD_NCDR_COVER_LETTER
-                    )
+                    staticHearingDocumentService.uploadPfdNcdrCoverLetter(caseId, authorisationToken)
             );
         }
 
@@ -155,7 +138,35 @@ public class ManageHearingsDocumentService {
      * @return the generated Out Of Court Resolution document as a {@link CaseDocument}
      */
     public CaseDocument generateOutOfCourtResolutionDoc(FinremCaseDetails caseDetails, String authToken) {
-        return staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        CaseDocument outOfCourtDoc = staticHearingDocumentService.uploadOutOfCourtResolutionDocument(caseDetails.getId().toString(), authToken);
+        outOfCourtDoc.setCategoryId(DocumentCategory.HEARING_NOTICES.getDocumentCategoryId());
+        return  outOfCourtDoc;
+    }
+
+    /**
+     * Categorizes system duplicate documents by setting their category ID to SYSTEM_DUPLICATES.
+     * This method processes both hearings and hearing documents collections, ensuring that
+     * any additional hearing documents or hearing document values are appropriately marked.
+     *
+     * @param hearings         the list of hearing collection items to process
+     * @param hearingDocuments the list of hearing document collection items to process
+     */
+    public void categoriseSystemDuplicateDocs(List<ManageHearingsCollectionItem> hearings,
+                                              List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
+        if (hearings != null) {
+            hearings.stream()
+                .map(ManageHearingsCollectionItem::getValue)
+                .filter(hearing -> hearing.getAdditionalHearingDocs() != null)
+                .flatMap(hearing -> hearing.getAdditionalHearingDocs().stream())
+                .forEach(document -> document.getValue().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
+
+        if (hearingDocuments != null) {
+            hearingDocuments.stream()
+                .map(ManageHearingDocumentsCollectionItem::getValue)
+                .filter(value -> value != null && value.getHearingDocument() != null)
+                .forEach(value -> value.getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
+        }
     }
 
     /**
@@ -172,11 +183,11 @@ public class ManageHearingsDocumentService {
         UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
 
         return manageHearingsWrapper.getHearingDocumentsCollection().stream()
-                .map(ManageHearingDocumentsCollectionItem::getValue)
-                .filter(value -> hearingId.equals(value.getHearingId()))
-                .map(ManageHearingDocument::getHearingDocument)
-                .findFirst()
-                .orElse(null);
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(value -> hearingId.equals(value.getHearingId()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .findFirst()
+            .orElse(null);
     }
 
     private String determineFormCTemplate(FinremCaseDetails caseDetails) {

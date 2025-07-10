@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
-import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,9 +33,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HearingCorrespondenceHelperTest {
-
-    @TestLogs
-    private final TestLogger logs = new TestLogger(HearingCorrespondenceHelper.class);
 
     @Mock
     PaperNotificationService paperNotificationService;
@@ -89,7 +84,7 @@ class HearingCorrespondenceHelperTest {
         caseData.setManageHearingsWrapper(wrapper);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-                helper.getHearingInContext(caseData));
+            helper.getHearingInContext(caseData));
 
         assertTrue(exception.getMessage().contains("Hearing not found for the given ID"));
     }
@@ -105,11 +100,11 @@ class HearingCorrespondenceHelperTest {
         caseData.setManageHearingsWrapper(wrapper);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-                helper.getHearingInContext(caseData));
+            helper.getHearingInContext(caseData));
 
         assertTrue(exception.getMessage().contains(
-                String.format("No hearings available to search for. Working hearing ID is: %s",
-                        hearingId)));
+            String.format("No hearings available to search for. Working hearing ID is: %s",
+                hearingId)));
     }
 
     /**
@@ -186,34 +181,35 @@ class HearingCorrespondenceHelperTest {
 
     /**
      * Used by shouldSendHearingNoticeOnlyReturnsTrue.
+     *
      * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return True
      */
     static Stream<Arguments> provideNoticeOnlyCases() {
         return Stream.of(
-                arguments(
-                        Hearing.builder().hearingType(HearingType.MPS).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.FH).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.DIR).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.MENTION).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.PERMISSION_TO_APPEAL).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.APPEAL_HEARING).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.RETRIAL_HEARING).build()
-                ),
-                arguments(
-                        Hearing.builder().hearingType(HearingType.PTR).build()
-                )
+            arguments(
+                Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.FH).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.DIR).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.MENTION).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.PERMISSION_TO_APPEAL).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.APPEAL_HEARING).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.RETRIAL_HEARING).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.PTR).build()
+            )
         );
     }
 
@@ -231,39 +227,40 @@ class HearingCorrespondenceHelperTest {
 
     /**
      * Used by shouldSendHearingNoticeOnlyReturnsFalse.
+     *
      * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return False
      */
     static Stream<Arguments> provideInvalidNoticeOnlyCases() {
         return Stream.of(
-                // Case: null ManageHearingsAction, hearing type is in list
-                arguments(
-                        finremCaseDetails(null),
-                        Hearing.builder().hearingType(HearingType.MPS).build()
-                ),
-                // Case: action is ADD_HEARING, which is valid. However, hearing type is wrong.
-                arguments(
-                        finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                        Hearing.builder().hearingType(HearingType.FDR).build()
-                ),
-                arguments(
-                        finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                        Hearing.builder().hearingType(HearingType.FDA).build()
-                ),
-                // Case: valid action, but hearing is null
-                arguments(
-                        finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                        null
-                )
+            // Case: null ManageHearingsAction, hearing type is in list
+            arguments(
+                finremCaseDetails(null),
+                Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            // Case: action is ADD_HEARING, which is valid. However, hearing type is wrong.
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
+                Hearing.builder().hearingType(HearingType.FDR).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
+                Hearing.builder().hearingType(HearingType.FDA).build()
+            ),
+            // Case: valid action, but hearing is null
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
+                null
+            )
         );
     }
 
     private static FinremCaseDetails finremCaseDetails(ManageHearingsAction action) {
         return FinremCaseDetails.builder()
-                .data(FinremCaseData.builder()
-                        .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                                .manageHearingsActionSelection(action)
-                                .build())
-                        .build())
-                .build();
+            .data(FinremCaseData.builder()
+                .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                    .manageHearingsActionSelection(action)
+                    .build())
+                .build())
+            .build();
     }
 }

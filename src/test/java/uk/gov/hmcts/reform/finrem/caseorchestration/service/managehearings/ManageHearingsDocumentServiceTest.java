@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,13 +14,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormCLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.managehearings.ManageHearingFormGLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory.SYSTEM_DUPLICATES;
 
 @ExtendWith(MockitoExtension.class)
 class ManageHearingsDocumentServiceTest {
@@ -243,12 +245,12 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(coverLetter);
 
         // Act
-        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap =
+        Map<String, CaseDocument> documentMap =
             manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER).getLeft());
-        assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER).getLeft());
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
+        assertEquals(coverLetter, documentMap.get(PFD_NCDR_COVER_LETTER));
 
         verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
         verify(staticHearingDocumentService).isPdfNcdrCoverSheetRequired(eq(finremCaseDetails));
@@ -269,11 +271,11 @@ class ManageHearingsDocumentServiceTest {
             .thenReturn(false);
 
         // Act
-        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap =
+        Map<String, CaseDocument> documentMap =
             manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, AUTH_TOKEN);
 
         // Assert
-        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER).getLeft());
+        assertEquals(complianceLetter, documentMap.get(PFD_NCDR_COMPLIANCE_LETTER));
         assertNull(documentMap.get(PFD_NCDR_COVER_LETTER));
 
         verify(staticHearingDocumentService).uploadPfdNcdrComplianceLetter(eq(CASE_ID), eq(AUTH_TOKEN));
@@ -282,7 +284,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     @Test
-    void shouldGenerateOutOfCourtResolutionDoc() {
+    void categoriseSystemDuplicateDocs_shouldGenerateOutOfCourtResolutionDoc() {
         // Arrange
         CaseDocument expectedDocument = CaseDocument.builder()
             .documentFilename(OUT_OF_COURT_RESOLUTION)
@@ -301,21 +303,59 @@ class ManageHearingsDocumentServiceTest {
     }
 
     @Test
+    void shouldCategoriseSystemDuplicateDocs() {
+        // Arrange
+        String expectedCategoryId = SYSTEM_DUPLICATES.getDocumentCategoryId();
+
+        ManageHearingsCollectionItem hearingItem = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder()
+                .additionalHearingDocs(List.of(
+                    DocumentCollectionItem
+                        .builder()
+                        .value(CaseDocument
+                                .builder()
+                                .categoryId(null)
+                                .build())
+                            .build()))
+                .build())
+            .build();
+
+        ManageHearingDocumentsCollectionItem hearingDocumentItem = ManageHearingDocumentsCollectionItem.builder()
+            .value(ManageHearingDocument.builder()
+                .hearingDocument(CaseDocument
+                    .builder()
+                    .categoryId(null)
+                    .build())
+                .build())
+            .build();
+
+        List<ManageHearingsCollectionItem> hearings = List.of(hearingItem);
+        List<ManageHearingDocumentsCollectionItem> hearingDocuments = List.of(hearingDocumentItem);
+
+        // Act
+        manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings, hearingDocuments);
+
+        // Assert
+        assertEquals(expectedCategoryId, hearingItem.getValue().getAdditionalHearingDocs().getFirst().getValue().getCategoryId());
+        assertEquals(expectedCategoryId, hearingDocumentItem.getValue().getHearingDocument().getCategoryId());
+    }
+
+    @Test
     void shouldReturnHearingNoticeWhenCorrectHearingIdUsed() {
         // Arrange
         UUID hearingId = UUID.randomUUID();
         CaseDocument expectedDoc = CaseDocument.builder().documentUrl(HEARING_NOTICE_FILE_NAME).build();
         ManageHearingDocument doc = ManageHearingDocument.builder()
-                .hearingId(hearingId)
-                .hearingDocument(expectedDoc)
-                .build();
+            .hearingId(hearingId)
+            .hearingDocument(expectedDoc)
+            .build();
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
-                .workingHearingId(hearingId)
-                .hearingDocumentsCollection(List.of(
-                        ManageHearingDocumentsCollectionItem.builder().value(doc).build()
-                ))
-                .build();
+            .workingHearingId(hearingId)
+            .hearingDocumentsCollection(List.of(
+                ManageHearingDocumentsCollectionItem.builder().value(doc).build()
+            ))
+            .build();
 
         FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
         FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();
@@ -336,16 +376,16 @@ class ManageHearingsDocumentServiceTest {
 
         CaseDocument someDoc = CaseDocument.builder().documentUrl(HEARING_NOTICE_FILE_NAME).build();
         ManageHearingDocument doc = ManageHearingDocument.builder()
-                .hearingId(incorrectHearingId)
-                .hearingDocument(someDoc)
-                .build();
+            .hearingId(incorrectHearingId)
+            .hearingDocument(someDoc)
+            .build();
 
         ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
-                .workingHearingId(correctHearingId)
-                .hearingDocumentsCollection(List.of(
-                        ManageHearingDocumentsCollectionItem.builder().value(doc).build()
-                ))
-                .build();
+            .workingHearingId(correctHearingId)
+            .hearingDocumentsCollection(List.of(
+                ManageHearingDocumentsCollectionItem.builder().value(doc).build()
+            ))
+            .build();
 
         FinremCaseData data = FinremCaseData.builder().manageHearingsWrapper(wrapper).build();
         FinremCaseDetails details = FinremCaseDetails.builder().data(data).build();

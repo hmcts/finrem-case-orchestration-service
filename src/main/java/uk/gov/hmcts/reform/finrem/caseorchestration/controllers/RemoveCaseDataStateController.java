@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class RemoveCaseDataStateController extends BaseController {
 
     @SuppressWarnings("unchecked")
-    @PostMapping(path = "/remove-case-data-state", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/remove-case-data-state", consumes =
+        MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Remove state from a given case")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,

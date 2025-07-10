@@ -281,7 +281,6 @@ class ValidateHearingServiceTest {
         assertThat(errors).containsExactly(DATE_BETWEEN_16_AND_20_WEEKS);
     }
 
-
     @Test
     void manageHearingHearingExpressPilotDatesNoWarningFdr() {
         caseData.setIssueDate(LocalDate.now());
@@ -367,7 +366,6 @@ class ValidateHearingServiceTest {
             .getWorkingHearing().getHearingType());
         assertThat(errors).isEmpty();
     }
-
 
     private List<String> doTestWarnings() {
         return service.validateHearingWarnings(caseDetails);
