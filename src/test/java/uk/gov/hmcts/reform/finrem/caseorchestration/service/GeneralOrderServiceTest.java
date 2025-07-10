@@ -155,7 +155,7 @@ class GeneralOrderServiceTest {
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrders();
         assertThat(generalOrders).hasSize(2);
-        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.getFirst().getValue().getAdditionalDocument().getDocumentUrl());
         assertEquals("generalOrder.pdf", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename());
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl());
 
@@ -187,7 +187,7 @@ class GeneralOrderServiceTest {
         List<ContestedGeneralOrderCollection> generalOrders = generalOrderWrapper.getGeneralOrdersConsent();
 
         assertThat(generalOrders).hasSize(2);
-        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentUrl());
+        assertEquals("http://dm-store/lhjbyuivu87y989hijbb", generalOrders.getFirst().getValue().getAdditionalDocument().getDocumentUrl());
         assertEquals("app_docs.pdf", generalOrders.get(0).getValue().getAdditionalDocument().getDocumentFilename());
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary",
             generalOrders.get(0).getValue().getAdditionalDocument().getDocumentBinaryUrl());
@@ -220,9 +220,9 @@ class GeneralOrderServiceTest {
         GeneralOrderWrapper generalOrderWrapper = caseDetails.getData().getGeneralOrderWrapper();
         List<GeneralOrderCollectionItem> generalOrders = generalOrderWrapper.getGeneralOrderCollection();
         assertThat(generalOrders).hasSize(2);
-        assertEquals("1234", generalOrders.get(0).getId());
+        assertEquals("1234", generalOrders.getFirst().getId());
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb",
-            generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl());
+            generalOrders.getFirst().getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentUrl());
         assertEquals("app_docs.pdf",
             generalOrders.get(0).getGeneralOrder().getGeneralOrderDocumentUpload().getDocumentFilename());
         assertEquals("http://dm-store/lhjbyuivu87y989hijbb/binary",
