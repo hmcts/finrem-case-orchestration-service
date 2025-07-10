@@ -56,7 +56,7 @@ class ManageHearingsMigrationTaskTest {
 
     private ManageHearingsMigrationService manageHearingsMigrationService;
 
-    private final FinremCaseDetailsMapper spyFinremCaesDetailsMapper = spy(new FinremCaseDetailsMapper(
+    private final FinremCaseDetailsMapper spyFinremCaseDetailsMapper = spy(new FinremCaseDetailsMapper(
         new ObjectMapper().registerModule(new JavaTimeModule())));
 
     @BeforeEach
@@ -64,7 +64,7 @@ class ManageHearingsMigrationTaskTest {
         manageHearingsMigrationService = mock(ManageHearingsMigrationService.class);
 
         underTest = new ManageHearingsMigrationTask(caseReferenceCsvLoader, ccdService, systemUserService,
-            spyFinremCaesDetailsMapper,  manageHearingsMigrationService);
+            spyFinremCaseDetailsMapper,  manageHearingsMigrationService);
         ReflectionTestUtils.setField(underTest, "taskEnabled", true);
         ReflectionTestUtils.setField(underTest, "csvFile", ENCRYPTED_CSV_FILENAME);
         ReflectionTestUtils.setField(underTest, "secret", DUMMY_SECRET);
@@ -101,7 +101,7 @@ class ManageHearingsMigrationTaskTest {
             AMEND_CASE_CRON.getCcdType())).thenReturn(StartEventResponse.builder()
             .caseDetails(caseDetailsOne)
             .build());
-        doReturn(finremCaseDetailsOne).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
+        doReturn(finremCaseDetailsOne).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
 
         // Act
         underTest.run();
@@ -146,8 +146,8 @@ class ManageHearingsMigrationTaskTest {
             AMEND_CASE_CRON.getCcdType())).thenReturn(StartEventResponse.builder()
             .caseDetails(caseDetailsTwo)
             .build());
-        doReturn(finremCaseDetailsOne).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
-        doReturn(finremCaseDetailsTwo).when(spyFinremCaesDetailsMapper).mapToFinremCaseDetails(caseDetailsTwo);
+        doReturn(finremCaseDetailsOne).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(caseDetailsOne);
+        doReturn(finremCaseDetailsTwo).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(caseDetailsTwo);
 
         // Act
         underTest.run();
