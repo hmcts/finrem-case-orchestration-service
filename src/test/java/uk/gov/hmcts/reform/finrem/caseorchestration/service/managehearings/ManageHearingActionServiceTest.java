@@ -284,15 +284,11 @@ class ManageHearingActionServiceTest {
             createHearingCollectionItem(hearing2),
             createHearingCollectionItem(hearing1)
         )));
-
-        HearingTabItem migratgedHearingTabItem = HearingTabItem.builder()
-            .tabDateTime("10 Jul 2025 10:00")
-            .tabWasMigrated(YesOrNo.YES)
-            .build();
-        hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder().value(migratgedHearingTabItem).build()));
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(hearingWrapper)
-            .build();
+        hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder()
+            .value(HearingTabItem.builder()
+                .tabDateTime("10 Jul 2025 10:00")
+                .tabWasMigrated(YesOrNo.YES)
+                .build()).build()));
 
         when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(hearing1)), any()))
             .thenReturn(
@@ -312,6 +308,9 @@ class ManageHearingActionServiceTest {
             .thenReturn(
                 createHearingTabItem("Applicant Hearing 3", "10 Jul 2025 10:00", null, true)
             );
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(hearingWrapper)
+            .build();
 
         // Act
         manageHearingActionService.updateTabData(caseData);
