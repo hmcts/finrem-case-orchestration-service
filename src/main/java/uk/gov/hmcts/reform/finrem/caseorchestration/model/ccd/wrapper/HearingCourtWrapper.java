@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ThamesValleyCourt;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HearingCourtWrapper implements CourtListWrapper {
+
     @JsonProperty("hearing_nottinghamCourtList")
     private NottinghamCourt hearingNottinghamCourtList;
     @JsonProperty("hearing_cfcCourtList")
@@ -71,7 +72,6 @@ public class HearingCourtWrapper implements CourtListWrapper {
     private SwanseaCourt hearingSwanseaCourtList;
     @JsonProperty("hearing_northWalesCourtList")
     private NorthWalesCourt hearingNorthWalesCourtList;
-
     @JsonProperty("hearing_highCourtList")
     private HighCourt hearingHighCourtList;
 
@@ -187,5 +187,29 @@ public class HearingCourtWrapper implements CourtListWrapper {
     @Override
     public HighCourt getHighCourt() {
         return hearingHighCourtList;
+    }
+
+    public DefaultCourtListWrapper toDefaultCourtListWrapper() {
+        return DefaultCourtListWrapper.builder()
+            .nottinghamCourtList(hearingNottinghamCourtList)
+            .cfcCourtList(hearingCfcCourtList)
+            .birminghamCourtList(hearingBirminghamCourtList)
+            .liverpoolCourtList(hearingLiverpoolCourtList)
+            .manchesterCourtList(hearingManchesterCourtList)
+            .lancashireCourtList(hearingLancashireCourtList)
+            .clevelandCourtList(hearingClevelandCourtList)
+            .nwYorkshireCourtList(hearingNwYorkshireCourtList)
+            .humberCourtList(hearingHumberCourtList)
+            .kentSurreyCourtList(hearingKentSurreyCourtList)
+            .bedfordshireCourtList(hearingBedfordshireCourtList)
+            .thamesValleyCourtList(hearingThamesValleyCourtList)
+            .devonCourtList(hearingDevonCourtList)
+            .dorsetCourtList(hearingDorsetCourtList)
+            .bristolCourtList(hearingBristolCourtList)
+            .newportCourtList(hearingNewportCourtList)
+            .swanseaCourtList(hearingSwanseaCourtList)
+            .northWalesCourtList(hearingNorthWalesCourtList)
+            .highCourtList(hearingHighCourtList)
+            .build();
     }
 }

@@ -49,10 +49,10 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
 
         String caseId = finremCaseDetails.getId().toString();
-        log.info("About to Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
 

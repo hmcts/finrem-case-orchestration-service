@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -100,7 +101,7 @@ public class ManageHearingActionService {
      */
     private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
 
-        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
+        List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = ofNullable(
                         hearingsWrapper.getHearings())
                 .orElseGet(ArrayList::new);
 
@@ -127,7 +128,7 @@ public class ManageHearingActionService {
      */
     private void addDocumentsToCollection(Map<String, DocumentRecord> documentMap,
                                           ManageHearingsWrapper hearingsWrapper) {
-        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
+        List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = ofNullable(
                 hearingsWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
@@ -154,7 +155,8 @@ public class ManageHearingActionService {
      * Updates the hearing tab data for the case by processing the hearings collection.
      * Maps each hearing to its corresponding tab data representation, sorts the data
      * by hearing date in ascending order, and categorizes it by party. The updated
-     * tab data is then stored in the case data.
+     * tab data is then stored in the case data. The resulting tab data is then merged
+     * with any existing migrated tab items and updated in the case data.
      *
      * @param caseData the case data containing the hearings and hearing documents
      */
@@ -174,7 +176,8 @@ public class ManageHearingActionService {
             INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4)
         );
 
-        hearingsWrapper.setHearingTabItems(hearingTabItems);
+        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
+
         hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
         hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
         hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
@@ -199,7 +202,8 @@ public class ManageHearingActionService {
 
     private List<HearingTabCollectionItem> filterHearingTabItems(List<HearingTabCollectionItem> hearingTabItems, String party) {
         return hearingTabItems.stream()
-            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
+                || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
             .toList();
     }
 

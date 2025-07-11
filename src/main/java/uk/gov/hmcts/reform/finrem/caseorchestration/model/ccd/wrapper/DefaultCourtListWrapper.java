@@ -39,6 +39,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DefaultCourtListWrapper implements CourtListWrapper {
+
     private NottinghamCourt nottinghamCourtList;
     private CfcCourt cfcCourtList;
     private BirminghamCourt birminghamCourtList;
@@ -61,7 +62,6 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     private NewportCourt newportCourtList;
     private SwanseaCourt swanseaCourtList;
     private NorthWalesCourt northWalesCourtList;
-
     private HighCourt highCourtList;
 
     @JsonIgnore

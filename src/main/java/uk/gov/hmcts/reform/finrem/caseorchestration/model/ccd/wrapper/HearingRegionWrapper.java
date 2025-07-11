@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
@@ -56,5 +57,20 @@ public class HearingRegionWrapper {
             this.courtListWrapper = new HearingCourtWrapper();
         }
         return courtListWrapper;
+    }
+
+    public Court toCourt() {
+        return Court.builder()
+            .region(hearingRegionList)
+            .midlandsList(hearingMidlandsFrcList)
+            .londonList(hearingLondonFrcList)
+            .northWestList(hearingNorthWestFrcList)
+            .northEastList(hearingNorthEastFrcList)
+            .southEastList(hearingSouthEastFrcList)
+            .southWestList(hearingSouthWestFrcList)
+            .walesList(hearingWalesFrcList)
+            .hcCourtList(hearingHighCourtFrcList)
+            .courtListWrapper(courtListWrapper.toDefaultCourtListWrapper())
+            .build();
     }
 }
