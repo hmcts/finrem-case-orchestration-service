@@ -331,6 +331,9 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         FinremCaseData caseData = caseDetails.getData();
 
         List<CaseDocument> orders = new ArrayList<>(hearingOrders);
+        if (caseData.getOrderApprovedCoverLetter() == null) {
+            throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
+        }
 
         if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
