@@ -37,8 +37,13 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
     @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
+        // It's weird caseData.ccdCaseId is null
+        caseData.setCcdCaseId(finremCaseDetails.getId().toString());
         if (!manageHearingsMigrationService.wasMigrated(caseData)) {
+            log.info("{} - performing manage hearings migration.", caseData.getCcdCaseId());
             manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
+        } else {
+            log.info("{} - case data was migrated.", caseData.getCcdCaseId());
         }
     }
 
