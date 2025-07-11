@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseNotes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseNotesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
@@ -111,6 +112,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolicitorToDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
@@ -128,6 +130,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderDocumen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
@@ -162,6 +165,20 @@ class FinremCaseDetailMapperTest {
     void testSetUp() {
         objectMapper = new ObjectMapper();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper.registerModule(new JavaTimeModule()));
+    }
+
+    @Test
+    void shouldDeleteProperty() {
+        FinremCaseData data = null;
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .state(State.APPLICATION_ISSUED)
+            .caseType(CaseType.CONTESTED)
+            .data(
+                data = FinremCaseData.builder().mhMigrationWrapper(MhMigrationWrapper.builder().mhMigrationVersion("v1").build()).build()
+            ).build();
+        data.getMhMigrationWrapper().setMhMigrationVersion(null);
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        System.out.println(caseDetails.getData());
     }
 
     @Test

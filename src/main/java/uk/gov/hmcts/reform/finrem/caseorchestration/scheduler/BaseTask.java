@@ -16,7 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -48,6 +52,7 @@ public abstract class BaseTask implements Runnable {
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
                 count++;
+                final String caseId = caseReference.getCaseReference();
                 try {
                     RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
@@ -57,42 +62,62 @@ public abstract class BaseTask implements Runnable {
                         batchCount++;
                     }
                     String systemUserToken = getSystemUserToken();
-                    log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
+                    log.info("Process case reference {}, batch {}, count {}", caseId, batchCount, count);
 
                     SearchResult searchResult =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), systemUserToken);
+                        ccdService.getCaseByCaseId(caseId, getCaseType(), systemUserToken);
                     log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         if (!isUpdatedRequired(searchResult.getCases().getFirst())) {
-                            log.info("No update required for case reference {}", caseReference.getCaseReference());
+                            log.info("No update required for case reference {}", caseId);
                             continue;
                         }
 
                         StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(systemUserToken,
-                            caseReference.getCaseReference(), getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
+                            caseId, getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-                        log.info("Updating {} for Case ID: {}", getTaskName(), caseDetails.getId());
+                        log.info("Updating {} for Case ID: {}", getTaskName(), caseId);
                         executeTask(finremCaseDetails);
                         String description = getDescription(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-                        startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
+                        startEventResponse.getCaseDetails().setData(
+                            mergeCaseDetailsData(caseDetails, updatedCaseDetails)
+                        );
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
-                            caseDetails.getId().toString(),
+                            caseId,
                             getCaseType().getCcdType(),
                             EventType.AMEND_CASE_CRON.getCcdType(),
                             getSummary(),
                             description);
-                        log.info("Updated {} for Case ID: {}", getTaskName(), caseDetails.getId());
+                        log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
                     }
                 } catch (InterruptedException | RuntimeException e) {
-                    log.error("Cron task {}: Error processing case {}", getTaskName(), caseReference.getCaseReference(), e);
+                    log.error("Cron task {}: Error processing case {}", getTaskName(), caseId, e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
             }
         }
+    }
+
+    private static Map<String, Object> mergeCaseDetailsData(CaseDetails a, CaseDetails b) {
+        Map<String, Object> aData = a.getData();
+        Map<String, Object> bData = b.getData();
+
+        Map<String, Object> result = new HashMap<>();
+
+        Set<String> allKeys = new HashSet<>();
+        allKeys.addAll(aData.keySet());
+        allKeys.addAll(bData.keySet());
+
+        for (String key : allKeys) {
+            Object value = bData.get(key);
+            result.put(key, value);
+        }
+
+        return result;
     }
 
     protected String getSystemUserToken() {

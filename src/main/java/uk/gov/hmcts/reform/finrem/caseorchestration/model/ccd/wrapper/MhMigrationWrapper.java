@@ -26,4 +26,11 @@ public class MhMigrationWrapper {
 
     private String mhMigrationVersion;
 
+    public void clearAll() {
+        isListForHearingsMigrated = null;
+        isListForInterimHearingsMigrated = null;
+        isGeneralApplicationMigrated = null;
+        isDirectionDetailsCollectionMigrated = null;
+        mhMigrationVersion = null;
+    }
 }

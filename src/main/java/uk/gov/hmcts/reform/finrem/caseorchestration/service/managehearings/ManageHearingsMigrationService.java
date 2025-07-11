@@ -4,11 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
+
+import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -142,6 +149,32 @@ public class ManageHearingsMigrationService {
         populateDirectionDetailsCollection(caseData);
         markCaseDataMigrated(caseData, mhMigrationVersion);
         // updates the hearing tab data accordingly.
+        manageHearingActionService.updateTabData(caseData);
+    }
+
+    /**
+     * Rolls back Manage Hearings migration data in the given case data.
+     *
+     * <p>This method clears all data in the {@code MhMigrationWrapper}.</p>
+     *
+     * <p>It then removes all hearings from the {@code ManageHearingsWrapper} where {@code wasMigrated} is {@code YES},
+     * retaining only those hearings where {@code wasMigrated} is {@code NO} or {@code null}.
+     * If no hearings remain after filtering, the hearings list is set to {@code null}.</p>
+     *
+     * <p>Finally, it updates the hearing tab data to reflect the rolled-back state.</p>
+     *
+     * @param caseData the financial remedy case data to roll back
+     */
+
+    public void revertManageHearingMigration(FinremCaseData caseData) {
+        caseData.getMhMigrationWrapper().clearAll();
+        List<ManageHearingsCollectionItem> hearings = caseData.getManageHearingsWrapper().getHearings();
+
+        List<ManageHearingsCollectionItem> filteredHearings = emptyIfNull(hearings).stream()
+            .filter(item -> item.getValue() != null && item.getValue().getWasMigrated() != YesOrNo.YES)
+            .toList();
+        caseData.getManageHearingsWrapper().setHearings(nullIfEmpty(filteredHearings));
+
         manageHearingActionService.updateTabData(caseData);
     }
 }
