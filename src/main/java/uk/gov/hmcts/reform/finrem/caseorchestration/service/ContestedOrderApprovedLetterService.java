@@ -65,7 +65,6 @@ public class ContestedOrderApprovedLetterService {
         generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, null, authorisationToken);
     }
 
-    //Used by FR_uploadApprovedOrder event. Redundant now, but kept for reference.
     /**
      * Generates and stores the contested order approved cover letter for a given case.
      *

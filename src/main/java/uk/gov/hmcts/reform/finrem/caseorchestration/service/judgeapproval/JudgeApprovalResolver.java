@@ -80,6 +80,7 @@ class JudgeApprovalResolver {
 
     private CaseDocument handleOrderCoverLetter(FinremCaseDetails finremCaseDetails, JudgeApproval judgeApproval, String userAuthorisation,
                                                 CaseDocument targetDoc) {
+        //Set individual cover letters for approved orders
         CaseDocument coverLetter = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(finremCaseDetails,
             buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)),
             userAuthorisation, judgeApproval.getCourtOrderDate());
@@ -87,6 +88,10 @@ class JudgeApprovalResolver {
         String baseFileName = targetDoc.getDocumentFilename().substring(0, targetDoc.getDocumentFilename().lastIndexOf('.'));
         String updatedFileName = baseFileName + " - cover letter.pdf";
         coverLetter.setDocumentFilename(updatedFileName);
+
+        //Set default cover letter in Case Documents
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails,
+            buildJudgeDetails(readJudgeType(finremCaseDetails), idamService.getIdamFullName(userAuthorisation)), userAuthorisation);
 
         return coverLetter;
     }

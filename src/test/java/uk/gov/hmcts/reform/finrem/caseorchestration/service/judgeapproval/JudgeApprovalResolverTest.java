@@ -210,6 +210,10 @@ class JudgeApprovalResolverTest {
         judgeApprovalResolver.populateJudgeDecision(finremCaseDetails,
             draftOrdersWrapper, TARGET_DOCUMENT, judgeApproval, AUTH_TOKEN);
 
+        //Verify cover letter generation
+        verify(contestedOrderApprovedLetterService).generateAndStoreApprovedOrderCoverLetter(any(), any(), any(), any());
+        verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(), any(), any());
+
         boolean approvedDocument = false;
         if (approvablesToBeExamined != null) {
             for (Approvable approvable : approvablesToBeExamined) {
