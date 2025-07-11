@@ -20,12 +20,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
@@ -38,6 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -162,19 +164,17 @@ public class ManageHearingActionService {
      */
     public void updateTabData(FinremCaseData caseData) {
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
-        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
-            .orElseGet(ArrayList::new);
+        List<ManageHearingsCollectionItem> hearings = hearingsWrapper.getHearings();
 
         List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
 
-        Map<String, List<HearingTabCollectionItem>> partyTabItems = Map.of(
-            APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT),
-            RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT),
-            INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1),
-            INTERVENER2, filterHearingTabItems(hearingTabItems, INTERVENER2),
-            INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3),
-            INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4)
-        );
+        Map<String, List<HearingTabCollectionItem>> partyTabItems = new LinkedHashMap<>();
+        partyTabItems.put(APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT));
+        partyTabItems.put(RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT));
+        partyTabItems.put(INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1));
+        partyTabItems.put(INTERVENER2, filterHearingTabItems(hearingTabItems, INTERVENER2));
+        partyTabItems.put(INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3));
+        partyTabItems.put(INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4));
 
         caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
 
@@ -190,21 +190,21 @@ public class ManageHearingActionService {
     }
 
     private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
-        return hearings.stream()
+        return nullIfEmpty(emptyIfNull(hearings).stream()
             .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
             .map(hearing -> HearingTabCollectionItem.builder()
                 .value(hearingTabDataMapper.mapHearingToTabData(
                     hearing,
                     caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
                 .build())
-            .toList();
+            .toList());
     }
 
     private List<HearingTabCollectionItem> filterHearingTabItems(List<HearingTabCollectionItem> hearingTabItems, String party) {
-        return hearingTabItems.stream()
+        return nullIfEmpty(emptyIfNull(hearingTabItems).stream()
             .filter(hearingTabItem -> YesOrNo.isYes(hearingTabItem.getValue().getTabWasMigrated())
                 || hearingTabItem.getValue().getTabConfidentialParties().contains(party))
-            .toList();
+            .toList());
     }
 
     private void generateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {

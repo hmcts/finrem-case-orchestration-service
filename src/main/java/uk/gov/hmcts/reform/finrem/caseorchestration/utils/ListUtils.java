@@ -84,4 +84,16 @@ public class ListUtils {
         }
         return Arrays.stream(items).filter(Objects::nonNull).toList();
     }
+
+    /**
+     * Returns the given list if it is not null and not empty,
+     * or {@code null} if the list is null or empty.
+     *
+     * @param <T>  the type of elements in the list
+     * @param list the input list
+     * @return the input list if not null and not empty, otherwise {@code null}
+     */
+    public static <T> List<T> nullIfEmpty(List<T> list) {
+        return (list == null || list.isEmpty()) ? null : list;
+    }
 }

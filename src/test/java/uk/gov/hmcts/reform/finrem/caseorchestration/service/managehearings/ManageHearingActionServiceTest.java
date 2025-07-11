@@ -338,6 +338,26 @@ class ManageHearingActionServiceTest {
             .containsExactly("10 Jul 2025 10:00");
     }
 
+    @Test
+    void updateTabData_shouldNotPopulateHearingTabItemsIfEmptyHearingsProvided() {
+        hearingWrapper.setHearings(null);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(hearingWrapper)
+            .build();
+
+        // Act
+        manageHearingActionService.updateTabData(caseData);
+
+        assertThat(hearingWrapper.getHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getApplicantHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getRespondentHearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt1HearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt2HearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt3HearingTabItems()).isNull();
+        assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
+    }
+
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
         return entry -> entry != null && expected.equals(entry.getValue());
     }

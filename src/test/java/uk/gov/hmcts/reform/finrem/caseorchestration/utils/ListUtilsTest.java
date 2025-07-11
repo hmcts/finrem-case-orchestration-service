@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
@@ -123,5 +127,20 @@ class ListUtilsTest {
 
         // No nulls
         assertThat(safeListWithoutNulls("a", "b", "c")).isEqualTo(List.of("a", "b", "c"));
+    }
+
+    @Test
+    void testNullIfEmpty() {
+        // null input
+        assertThat(nullIfEmpty(null)).isNull();
+
+        // empty list
+        assertNull(nullIfEmpty(List.of()));
+
+        // non-empty list
+        List<String> input = List.of("a", "b");
+        List<String> result = nullIfEmpty(input);
+        assertNotNull(result);
+        assertEquals(List.of("a", "b"), result);
     }
 }
