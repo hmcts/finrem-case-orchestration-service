@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
@@ -52,15 +53,19 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private final GenericDocumentService genericDocumentService;
 
+    private final ContestedOrderApprovedLetterService letterService;
+
+
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AdditionalHearingDocumentService additionalHearingDocumentService,
                                                     HasApprovableCollectionReader hasApprovableCollectionReader,
-                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService) {
+                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService, ContestedOrderApprovedLetterService letterService) {
         super(finremCaseDetailsMapper);
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
+        this.letterService = letterService;
     }
 
     @Override
@@ -78,6 +83,10 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
         // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
         handleNewDocumentInUnprocessedApprovedDocuments(caseData);
+
+        if (caseData.getOrderApprovedCoverLetter() == null) {
+            letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
+        }
 
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);

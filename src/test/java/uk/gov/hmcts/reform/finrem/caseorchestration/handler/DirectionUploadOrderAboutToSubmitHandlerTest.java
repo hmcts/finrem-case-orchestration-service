@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.PsaDocumentReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.draftorders.HasApprovableCollectionReader;
@@ -85,6 +86,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
     private GenericDocumentService genericDocumentService;
     @Mock
     private DocumentHelper documentHelper;
+    @Mock
+    private ContestedOrderApprovedLetterService letterService;
 
     @Test
     void testCanHandle() {
@@ -188,6 +191,8 @@ class DirectionUploadOrderAboutToSubmitHandlerTest {
         assertThat(res.getData().getDraftOrdersWrapper().getUnprocessedApprovedDocuments()).isNull();
         assertThat(res.getData().getDraftOrdersWrapper().getIsLegacyApprovedOrderPresent()).isNull();
         assertThat(res.getData().getDraftOrdersWrapper().getIsUnprocessedApprovedDocumentPresent()).isNull();
+        verify(letterService).generateAndStoreContestedOrderApprovedLetter(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+
     }
 
     @Test
