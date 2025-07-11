@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.manageh
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseS
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
@@ -148,7 +151,8 @@ public class ManageHearingsDocumentService {
      * @param hearings         the list of hearing collection items to process
      * @param hearingDocuments the list of hearing document collection items to process
      */
-    public void categoriseSystemDuplicateDocs(List<ManageHearingsCollectionItem> hearings, List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
+    public void categoriseSystemDuplicateDocs(List<ManageHearingsCollectionItem> hearings,
+                                              List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
         if (hearings != null) {
             hearings.stream()
                 .map(ManageHearingsCollectionItem::getValue)
@@ -163,6 +167,27 @@ public class ManageHearingsDocumentService {
                 .filter(value -> value != null && value.getHearingDocument() != null)
                 .forEach(value -> value.getHearingDocument().setCategoryId(SYSTEM_DUPLICATES.getDocumentCategoryId()));
         }
+    }
+
+    /**
+     * Retrieves the hearing notice document for the case's current working hearing, using Id.
+     * Assumes that the hearing notice is stored in the case's hearing documents collection.
+     * If no notice is found, returns an empty list.
+     *
+     * @param finremCaseDetails the case details containing the hearing documents
+     * @return a {@link CaseDocument}
+     */
+    public CaseDocument getHearingNotice(FinremCaseDetails finremCaseDetails) {
+
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseDetails.getData().getManageHearingsWrapper();
+        UUID hearingId = manageHearingsWrapper.getWorkingHearingId();
+
+        return manageHearingsWrapper.getHearingDocumentsCollection().stream()
+            .map(ManageHearingDocumentsCollectionItem::getValue)
+            .filter(value -> hearingId.equals(value.getHearingId()))
+            .map(ManageHearingDocument::getHearingDocument)
+            .findFirst()
+            .orElse(null);
     }
 
     private String determineFormCTemplate(FinremCaseDetails caseDetails) {
