@@ -53,19 +53,15 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
     private final GenericDocumentService genericDocumentService;
 
-    private final ContestedOrderApprovedLetterService letterService;
-
-
     public DirectionUploadOrderAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                     AdditionalHearingDocumentService additionalHearingDocumentService,
                                                     HasApprovableCollectionReader hasApprovableCollectionReader,
-                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService, ContestedOrderApprovedLetterService letterService) {
+                                                    DocumentHelper documentHelper, GenericDocumentService genericDocumentService) {
         super(finremCaseDetailsMapper);
         this.additionalHearingDocumentService = additionalHearingDocumentService;
         this.hasApprovableCollectionReader = hasApprovableCollectionReader;
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
-        this.letterService = letterService;
     }
 
     @Override
@@ -83,10 +79,6 @@ public class DirectionUploadOrderAboutToSubmitHandler extends FinremCallbackHand
 
         // handleNewDocument must be handled before storeAdditionalHearingDocuments in order to stamp the newly uploaded document.
         handleNewDocumentInUnprocessedApprovedDocuments(caseData);
-
-        if (caseData.getOrderApprovedCoverLetter() == null) {
-            letterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
-        }
 
         List<String> errors = new ArrayList<>();
         log.info("Storing Additional Hearing Document for Case ID: {}", caseId);
