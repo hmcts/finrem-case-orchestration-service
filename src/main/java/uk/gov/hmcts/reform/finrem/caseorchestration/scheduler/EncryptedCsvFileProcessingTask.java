@@ -29,10 +29,12 @@ public abstract class EncryptedCsvFileProcessingTask extends CsvFileProcessingTa
 
         log.info("""
                 Starting Cron....
+                
                 TASK_NAME: {}
                 SUMMARY: {}
                 CSV_FILE: {}
-                SECRET KEY EXIST: {}""",
+                SECRET KEY EXIST: {}
+                """,
             getTaskName(),
             getSummary(),
             getCaseListFileName(),
