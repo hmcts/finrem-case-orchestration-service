@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
@@ -30,6 +31,35 @@ public class ContestedOrderApprovedLetterService {
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
     private final FinremCaseDetailsMapper mapper;
+
+    public CaseDocument generateAndStoreApprovedOrderCoverLetter(FinremCaseDetails finremCaseDetails, String judgeDetails,
+                                                                     String authorisationToken, LocalDate courtOrderDate) {
+        CaseDetails caseDetails = mapper.mapToCaseDetails(finremCaseDetails);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+
+        populateTemplateVariablesWithNewFormat(caseDetailsCopy, judgeDetails, courtOrderDate);
+        CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+            documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
+            documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
+
+        log.info("Generated contested order approved cover letter for case ID: {}", finremCaseDetails.getId());
+        return approvedOrderCoverLetter;
+    }
+
+    private void populateTemplateVariablesWithNewFormat(CaseDetails caseDetails, String judgeDetails, LocalDate courtOrderDate) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
+        caseData.put("Court", CourtHelper.getSelectedCourt(caseDetails));
+        caseData.put("JudgeDetails", judgeDetails == null
+            ? StringUtils.joinWith(" ",
+            caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_TYPE),
+            caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
+            : judgeDetails);
+        caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        caseData.put("orderApprovedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(courtOrderDate));
+    }
 
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, null, authorisationToken);
@@ -65,6 +95,7 @@ public class ContestedOrderApprovedLetterService {
         finremCaseDetails.getData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }
 
+    //Used by FR_judgeDraftDirectionOrder event. Not redundant.
     public void generateAndStoreContestedOrderApprovedLetter(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         populateTemplateVariables(caseDetailsCopy, null);
@@ -88,5 +119,7 @@ public class ContestedOrderApprovedLetterService {
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME))
             : judgeDetails);
         caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        // Set the orderApprovedDate for the cover letter Docmosis template
+        caseData.put("orderApprovedDate", caseData.get(CONTESTED_ORDER_APPROVED_DATE));
     }
 }

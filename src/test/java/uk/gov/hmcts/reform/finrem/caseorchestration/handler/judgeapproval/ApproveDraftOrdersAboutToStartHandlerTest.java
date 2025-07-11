@@ -173,6 +173,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
                         ? new String[] {"sortKey", "isFinalOrder"}
                         : new String[] {"sortKey", "isFinalOrder", "attachments"})
                     .isEqualTo(expected);
+                assertEquals(expected.getCourtOrderDate(), actual.getCourtOrderDate()); // New assertion for courtOrderDate
             } else {
                 assertEquals(expected, actual);
             }
@@ -285,6 +286,7 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
             .document(document)
             .attachments(ofNullable(attachments).filter(a -> !a.isEmpty()).orElse(List.of()))
             .hasAttachment(YesOrNo.forValue(attachments != null && !attachments.isEmpty()))
+            .courtOrderDate(LocalDate.of(2024, "hearingServiceFormattedString1".equals(hearingInfo) ? 10 : 11, 30)) // New field
             .build();
     }
 
@@ -641,3 +643,4 @@ class ApproveDraftOrdersAboutToStartHandlerTest {
         );
     }
 }
+

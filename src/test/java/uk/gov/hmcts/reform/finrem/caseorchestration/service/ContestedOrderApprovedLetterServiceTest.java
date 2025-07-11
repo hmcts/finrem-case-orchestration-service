@@ -71,6 +71,64 @@ class ContestedOrderApprovedLetterServiceTest {
     private static final LocalDate FIXED_DATE = LocalDate.of(2024, 11, 4);
 
     @Test
+    void whenJudgeApprovesOrder_whenGenerateAndStoreContestedApprovedCoverLetterIsCalled_thenTemplateVarsPopulatedAndDocumentCreated() {
+        CaseDocument expectedCaseDocument = caseDocument();
+        CaseDetails caseDetails = testCaseDetails();
+
+        when(mapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class ), any(String.class), any(String.class)))
+            .thenReturn(expectedCaseDocument);
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails))
+            .thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName())
+            .thenReturn("contestedOrderApprovedCoverLetter.pdf");
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().build();
+        CaseDocument document = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(finremCaseDetails, "District Judge Peter Chapman",
+            AUTH_TOKEN, FIXED_DATE);
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq("FL-FRM-LET-ENG-HC-00666.docx"),
+            eq("contestedOrderApprovedCoverLetter.pdf"));
+
+        verifyTemplateVariablesArePopulatedIfJudgeDetailsProvided();
+
+        assertThat(document).isEqualTo(expectedCaseDocument);
+    }
+
+    @Test
+    void whenJudgeApprovesOrderWithNoDetails_whenGenerateAndStoreContestedApprovedCoverLetterIsCalled_thenTemplateVarsPopulatedAndDocumentCreated() {
+        CaseDocument expectedCaseDocument = caseDocument();
+        CaseDetails caseDetails = testCaseDetails();
+
+        when(mapper.mapToCaseDetails(any(FinremCaseDetails.class))).thenReturn(caseDetails);
+        when(documentHelper.deepCopy(any(), any())).thenReturn(caseDetails);
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn("Contested Applicant Name");
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn("Contested Respondent Name");
+        when(genericDocumentService.generateDocument(eq(AUTH_TOKEN), any(CaseDetails.class ), any(String.class), any(String.class)))
+            .thenReturn(expectedCaseDocument);
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails))
+            .thenReturn("FL-FRM-LET-ENG-HC-00666.docx");
+        when(documentConfiguration.getContestedOrderApprovedCoverLetterFileName())
+            .thenReturn("contestedOrderApprovedCoverLetter.pdf");
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().build();
+        CaseDocument document = contestedOrderApprovedLetterService.generateAndStoreApprovedOrderCoverLetter(finremCaseDetails, null,
+            AUTH_TOKEN, FIXED_DATE);
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq("FL-FRM-LET-ENG-HC-00666.docx"),
+            eq("contestedOrderApprovedCoverLetter.pdf"));
+
+        verifyTemplateVariablesArePopulated();
+
+        assertThat(document).isEqualTo(expectedCaseDocument);
+    }
+
+    @Test
     void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {
         CaseDocument expectedCaseDocument = caseDocument();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
