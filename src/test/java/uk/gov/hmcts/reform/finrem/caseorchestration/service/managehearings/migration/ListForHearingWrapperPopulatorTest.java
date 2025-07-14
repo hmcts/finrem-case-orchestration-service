@@ -6,24 +6,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.anySupplier;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.hearing;
 
 @ExtendWith(MockitoExtension.class)
 class ListForHearingWrapperPopulatorTest {
@@ -33,6 +38,9 @@ class ListForHearingWrapperPopulatorTest {
 
     @Mock
     private HearingsAppender hearingsAppender;
+
+    @Mock
+    private PartyService partyService;
 
     @InjectMocks
     private ListForHearingWrapperPopulator underTest;
@@ -86,16 +94,23 @@ class ListForHearingWrapperPopulatorTest {
             .listForHearingWrapper(listForHearingWrapper)
             .build();
 
-        HearingTabItem hearingTabItem = mock(HearingTabItem.class);
-        Hearing hearing = mock(Hearing.class);
-
+        Hearing hearing = hearing("10:00");
+        DynamicMultiSelectList allActivePartyList = mock(DynamicMultiSelectList.class);
+        when(partyService.getAllActivePartyList(caseData)).thenReturn(allActivePartyList);
         when(hearingsAppender.toHearing(listForHearingWrapper)).thenReturn(hearing);
+        doCallRealMethod().when(hearingsAppender).appendToHearings(eq(caseData), anySupplier());
 
         // Act
         underTest.populate(caseData);
 
         // Assert
-        verify(hearingsAppender).appendToHearings(eq(caseData), eq(ManageHearingsCollectionItem.builder().value(hearing).build()));
+        verify(partyService).getAllActivePartyList(caseData);
+
         assertEquals(YesOrNo.YES, caseData.getMhMigrationWrapper().getIsListForHearingsMigrated());
+        assertThat(caseData.getManageHearingsWrapper().getHearings())
+            .hasSize(1)
+            .extracting(ManageHearingsCollectionItem::getValue)
+            .extracting(Hearing::getWasMigrated, Hearing::getPartiesOnCaseMultiSelectList, Hearing::getHearingTime)
+            .containsOnly(tuple(YesOrNo.YES, allActivePartyList, "10:00"));
     }
 }

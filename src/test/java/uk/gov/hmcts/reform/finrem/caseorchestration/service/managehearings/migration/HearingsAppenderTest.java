@@ -46,7 +46,7 @@ class HearingsAppenderTest {
         FinremCaseData caseData = FinremCaseData.builder().build();
 
         // Act
-        underTest.appendToHearings(caseData, item);
+        underTest.appendToHearings(caseData, () -> item);
 
         // Assert
         assertThat(caseData.getManageHearingsWrapper().getHearings()).containsExactly(item);
@@ -66,7 +66,7 @@ class HearingsAppenderTest {
             .build();
 
         // Act
-        underTest.appendToHearings(caseData, item);
+        underTest.appendToHearings(caseData, () -> item);
 
         // Assert
         assertThat(caseData.getManageHearingsWrapper().getHearings()).containsExactly(existing, item);
