@@ -27,7 +27,6 @@ public class EvidenceManagementClientController {
 
     private final EvidenceManagementUploadService evidenceManagementUploadService;
 
-
     @Operation(summary = "Handles file upload to Evidence Management Document Store")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Files uploaded successfully"),
