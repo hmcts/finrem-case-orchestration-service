@@ -29,7 +29,7 @@ public class HearingTabDataMapper {
 
     private static final String DEFAULT_HEARING_MODE = "Hearing mode not specified";
     private static final String DEFAULT_DATE_TIME = "Date and time not provided";
-    private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Confidential parties not specified";
+    private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Parties not specified";
 
     public HearingTabItem mapHearingToTabData(ManageHearingsCollectionItem hearingCollectionItem,
                                               List<ManageHearingDocumentsCollectionItem> hearingDocumentsCollection) {
