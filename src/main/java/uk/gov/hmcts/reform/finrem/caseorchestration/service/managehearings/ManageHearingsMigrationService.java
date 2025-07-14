@@ -127,6 +127,7 @@ public class ManageHearingsMigrationService {
 
     /**
      * Executes the Manage Hearings data migration process on the given case data.
+     *
      * <p>
      * The migration populates the necessary wrappers and collections required
      * for hearings and general applications, marks the migration version,
