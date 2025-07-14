@@ -230,12 +230,12 @@ class ManageHearingsMigrationTaskTest {
         loadedCaseDetailsTwo.getData().put("valueRetained", "1");
         loadedCaseDetailsTwo.getData().put("valueModified", "X");
         loadedCaseDetailsTwo.getData().put("hearingTabItems", List.of(1L));
-        loadedCaseDetailsTwo.getData().put("nested", Map.of("nestedKey", "value1"));
+        loadedCaseDetailsTwo.getData().put("address", Map.of("street", "High St", "city", "London"));
         loadedCaseDetailsTwo.getData().put("mhMigrationVersion", "1");
         updatedCaseDetailsTwo.getData().put("valueRetained", "1");
         updatedCaseDetailsTwo.getData().put("valueModified", "Z");
         updatedCaseDetailsTwo.getData().put("hearingTabItems", List.of(2L));
-        updatedCaseDetailsTwo.getData().put("nested", Map.of("nestedKey", "value1"));
+        updatedCaseDetailsTwo.getData().put("address", Map.of("city", "Manchester"));
         updatedCaseDetailsTwo.getData().put("valueInserted", "NEW FIELD");
         if (updatedMapHavingNull) {
             updatedCaseDetailsTwo.getData().put("mhMigrationVersion", null);
@@ -279,10 +279,18 @@ class ManageHearingsMigrationTaskTest {
                 eq("Manage Hearings migration"));
 
         // verify mhMigrationVersion should be set to null
-        assertThat(startEventCaptorTwo.getValue().getCaseDetails().getData())
-            .extracting("mhMigrationVersion", "valueRetained", "valueModified", "hearingTabItems",
-                "nested", "valueInserted")
-            .containsExactly(null, "1", "Z", List.of(2L), Map.of("nestedKey", "value1"), "NEW FIELD");
+        Map<String, Object> actualData = startEventCaptorTwo.getValue().getCaseDetails().getData();
+
+        assertThat(actualData.get("mhMigrationVersion")).isNull();
+        assertThat(actualData.get("valueRetained")).isEqualTo("1");
+        assertThat(actualData.get("valueModified")).isEqualTo("Z");
+        assertThat(actualData.get("hearingTabItems")).isEqualTo(List.of(2L));
+        assertThat(actualData.get("valueInserted")).isEqualTo("NEW FIELD");
+
+        assertThat(actualData.get("address")).isInstanceOf(Map.class);
+        Map<String, Object> address = (Map<String, Object>) actualData.get("address");
+        assertThat(address.get("city")).isEqualTo("Manchester");
+        assertThat(address.get("street")).isNull();
     }
 
     private void stubCaseDetails(Arguments... caseDetailsPairs) {
