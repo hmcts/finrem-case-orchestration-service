@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration;
 
 import org.slf4j.Logger;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.function.Function;
 
@@ -13,7 +16,10 @@ public abstract class BasePopulator implements Populator {
 
     Function<MhMigrationWrapper, YesOrNo> migrationFlagExtractor;
 
-    public BasePopulator(Function<MhMigrationWrapper, YesOrNo> migrationFlagExtractor) {
+    protected final PartyService partyService;
+
+    public BasePopulator(PartyService partyService, Function<MhMigrationWrapper, YesOrNo> migrationFlagExtractor) {
+        this.partyService = partyService;
         this.migrationFlagExtractor = migrationFlagExtractor;
     }
 
@@ -31,5 +37,15 @@ public abstract class BasePopulator implements Populator {
 
     protected void logReasonToSkip(FinremCaseData caseData, String reason) {
         getLogger().info("{} - Skip populate because {}", caseData.getCcdCaseId(), reason);
+    }
+
+    protected Hearing applyCommonMigratedValues(FinremCaseData caseData, Hearing hearing) {
+        return applyCommonMigratedValues(partyService.getAllActivePartyList(caseData), hearing);
+    }
+
+    protected Hearing applyCommonMigratedValues(DynamicMultiSelectList partiesOnCaseMultiSelectList, Hearing hearing) {
+        hearing.setPartiesOnCaseMultiSelectList(partiesOnCaseMultiSelectList);
+        hearing.setWasMigrated(YesOrNo.YES);
+        return hearing;
     }
 }

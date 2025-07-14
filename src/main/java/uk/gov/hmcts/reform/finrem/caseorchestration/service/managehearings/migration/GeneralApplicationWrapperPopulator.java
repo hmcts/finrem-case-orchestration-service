@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 @Component
 @Slf4j
@@ -16,8 +17,8 @@ public class GeneralApplicationWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
-    public GeneralApplicationWrapperPopulator(HearingsAppender hearingsAppender) {
-        super(MhMigrationWrapper::getIsGeneralApplicationMigrated);
+    public GeneralApplicationWrapperPopulator(PartyService partyService, HearingsAppender hearingsAppender) {
+        super(partyService, MhMigrationWrapper::getIsGeneralApplicationMigrated);
         this.hearingsAppender = hearingsAppender;
     }
 
@@ -40,8 +41,8 @@ public class GeneralApplicationWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         GeneralApplicationWrapper generalApplicationWrapper = caseData.getGeneralApplicationWrapper();
         GeneralApplicationRegionWrapper generalApplicationRegionWrapper = caseData.getRegionWrapper().getGeneralApplicationRegionWrapper();
-        hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-            hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper)).build());
+        hearingsAppender.appendToHearings(caseData, () -> ManageHearingsCollectionItem.builder().value(
+            applyCommonMigratedValues(caseData, hearingsAppender.toHearing(generalApplicationWrapper, generalApplicationRegionWrapper))).build());
 
         caseData.getMhMigrationWrapper().setIsGeneralApplicationMigrated(YesOrNo.YES);
     }

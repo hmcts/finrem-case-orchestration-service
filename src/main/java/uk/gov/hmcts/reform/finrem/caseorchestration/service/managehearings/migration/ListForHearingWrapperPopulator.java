@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHearingWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 /**
  * Populator component responsible for migrating hearing details from the
@@ -25,8 +26,8 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
 
     private final HearingsAppender hearingsAppender;
 
-    public ListForHearingWrapperPopulator(HearingsAppender hearingsAppender) {
-        super(MhMigrationWrapper::getIsListForHearingsMigrated);
+    public ListForHearingWrapperPopulator(PartyService partyService, HearingsAppender hearingsAppender) {
+        super(partyService, MhMigrationWrapper::getIsListForHearingsMigrated);
         this.hearingsAppender = hearingsAppender;
     }
 
@@ -67,8 +68,8 @@ public class ListForHearingWrapperPopulator extends BasePopulator {
     @Override
     public void populate(FinremCaseData caseData) {
         ListForHearingWrapper listForHearingWrapper = caseData.getListForHearingWrapper();
-        hearingsAppender.appendToHearings(caseData, ManageHearingsCollectionItem.builder().value(
-            hearingsAppender.toHearing(listForHearingWrapper)).build());
+        hearingsAppender.appendToHearings(caseData, () -> ManageHearingsCollectionItem.builder().value(
+            applyCommonMigratedValues(caseData, hearingsAppender.toHearing(listForHearingWrapper))).build());
 
         caseData.getMhMigrationWrapper().setIsListForHearingsMigrated(YesOrNo.YES);
     }
