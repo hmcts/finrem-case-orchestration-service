@@ -20,7 +20,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class ManageHearingsWrapper {
 
     private ManageHearingsAction manageHearingsActionSelection;

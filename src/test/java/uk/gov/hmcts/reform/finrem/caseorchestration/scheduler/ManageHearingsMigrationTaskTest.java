@@ -5,9 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -211,11 +209,8 @@ class ManageHearingsMigrationTaskTest {
         verify(spyManageHearingsMigrationService, never()).revertManageHearingMigration(caseDataTwo);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails(
-        boolean updatedMapHavingNull
-    ) {
+    @Test
+    void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails() {
         ReflectionTestUtils.setField(underTest, "rollback", true);
         CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
         CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
@@ -225,21 +220,6 @@ class ManageHearingsMigrationTaskTest {
 
         CaseDetails loadedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
         CaseDetails updatedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
-
-        // simulate data has been deleted
-        loadedCaseDetailsTwo.getData().put("valueRetained", "1");
-        loadedCaseDetailsTwo.getData().put("valueModified", "X");
-        loadedCaseDetailsTwo.getData().put("hearingTabItems", List.of(1L));
-        loadedCaseDetailsTwo.getData().put("address", Map.of("street", "High St", "city", "London"));
-        loadedCaseDetailsTwo.getData().put("mhMigrationVersion", "1");
-        updatedCaseDetailsTwo.getData().put("valueRetained", "1");
-        updatedCaseDetailsTwo.getData().put("valueModified", "Z");
-        updatedCaseDetailsTwo.getData().put("hearingTabItems", List.of(2L));
-        updatedCaseDetailsTwo.getData().put("address", Map.of("city", "Manchester"));
-        updatedCaseDetailsTwo.getData().put("valueInserted", "NEW FIELD");
-        if (updatedMapHavingNull) {
-            updatedCaseDetailsTwo.getData().put("mhMigrationVersion", null);
-        }
 
         FinremCaseData caseDataTwo = spy(FinremCaseData.builder().build()); // spy is used to differentiate it.
         FinremCaseDetails finremCaseDetailsTwo = FinremCaseDetailsBuilderFactory
@@ -280,17 +260,7 @@ class ManageHearingsMigrationTaskTest {
 
         // verify mhMigrationVersion should be set to null
         Map<String, Object> actualData = startEventCaptorTwo.getValue().getCaseDetails().getData();
-
-        assertThat(actualData.get("mhMigrationVersion")).isNull();
-        assertThat(actualData.get("valueRetained")).isEqualTo("1");
-        assertThat(actualData.get("valueModified")).isEqualTo("Z");
-        assertThat(actualData.get("hearingTabItems")).isEqualTo(List.of(2L));
-        assertThat(actualData.get("valueInserted")).isEqualTo("NEW FIELD");
-
-        assertThat(actualData.get("address")).isInstanceOf(Map.class);
-        Map<String, Object> address = (Map<String, Object>) actualData.get("address");
-        assertThat(address.get("city")).isEqualTo("Manchester");
-        assertThat(address.get("street")).isNull();
+        assertThat(actualData).isEqualTo(updatedCaseDetailsTwo.getData());
     }
 
     private void stubCaseDetails(Arguments... caseDetailsPairs) {

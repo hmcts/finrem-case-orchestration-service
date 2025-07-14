@@ -16,11 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -82,9 +78,7 @@ public abstract class BaseTask implements Runnable {
                         executeTask(finremCaseDetails);
                         String description = getDescription(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-                        startEventResponse.getCaseDetails().setData(
-                            mergeCaseDataWithNullsForRemovedKeys(caseDetails, updatedCaseDetails)
-                        );
+                        startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseId,
                             getCaseType().getCcdType(),
@@ -100,52 +94,6 @@ public abstract class BaseTask implements Runnable {
                 }
             }
         }
-    }
-
-    /**
-     * Recursively merges the data maps from two {@link CaseDetails} objects.
-     *
-     * <p>
-     * For each key in either the source (a) or target (b), the merged map uses the value from the target (b).
-     * If a key is present in the source but missing in the target, it is treated as deleted
-     * and added to the result with a {@code null} value.
-     *
-     * <p>
-     * If both source and target values are maps, they are merged recursively using the same rules.
-     *
-     * @param a the original {@code CaseDetails} containing the source case data
-     * @param b the updated {@code CaseDetails} containing the target case data
-     * @return a merged {@code Map<String, Object>} where removed properties are explicitly set to {@code null}
-     */
-    private static Map<String, Object> mergeCaseDataWithNullsForRemovedKeys(CaseDetails a, CaseDetails b) {
-        return mergeMapsRecursively(a.getData(), b.getData());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> mergeMapsRecursively(Map<String, Object> aMap, Map<String, Object> bMap) {
-        Map<String, Object> result = new HashMap<>();
-
-        Set<String> allKeys = new HashSet<>();
-        allKeys.addAll(aMap.keySet());
-        allKeys.addAll(bMap.keySet());
-
-        for (String key : allKeys) {
-            Object aVal = aMap.get(key);
-            Object bVal = bMap.get(key);
-
-            if (aVal instanceof Map && bVal instanceof Map) {
-                // Both are maps, so merge recursively
-                result.put(key, mergeMapsRecursively((Map<String, Object>) aVal, (Map<String, Object>) bVal));
-            } else if (bMap.containsKey(key)) {
-                // Use value from b, even if it's null
-                result.put(key, bVal);
-            } else {
-                // Key deleted from b — mark as null
-                result.put(key, null);
-            }
-        }
-
-        return result;
     }
 
     protected String getSystemUserToken() {
