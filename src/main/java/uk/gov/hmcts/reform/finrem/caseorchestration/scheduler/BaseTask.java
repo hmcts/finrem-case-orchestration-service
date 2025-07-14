@@ -105,27 +105,34 @@ public abstract class BaseTask implements Runnable {
     }
 
     /**
-     * It's an alternative way to make for adding @JsonInclude(JsonInclude.Include.ALWAYS) to POJO classes.
+     * Provides an alternative approach to adding {@code @JsonInclude(JsonInclude.Include.ALWAYS)}
+     * to POJO classes by explicitly setting removed properties to {@code null} in merged maps.
      *
-     * <p>
-     * Recursively merges the data maps from two {@link CaseDetails} objects.
+     * <p>Recursively merges the data maps from two {@link CaseDetails} instances.
      *
-     * <p>
-     * For each key in either the source (a) or target (b), the merged map uses the value from the target (b).
-     * If a key is present in the source but missing in the target, it is treated as deleted
-     * and added to the result with a {@code null} value.
-     *
-     * <p>
-     * If both source and target values are maps, they are merged recursively using the same rules.
+     * <p>For each key present in either the source ({@code a}) or the target ({@code b}):
+     * If the key exists in the target, its value is used in the merged result.
+     * If the key exists in the source but is missing in the target, it is considered deleted
+     * and included in the result with a {@code null} value.
+     * If both values are maps, they are recursively merged using the same logic.
+     * If both values are lists, the lists are merged element-wise by index, recursively merging
+     * elements if they are maps.
      *
      * @param a the original {@code CaseDetails} containing the source case data
      * @param b the updated {@code CaseDetails} containing the target case data
-     * @return a merged {@code Map<String, Object>} where removed properties are explicitly set to {@code null}
+     * @return a merged {@code Map<String, Object>} where keys removed in {@code b} are explicitly set to {@code null}
      */
     private static Map<String, Object> mergeCaseDataWithNullsForRemovedKeys(CaseDetails a, CaseDetails b) {
         return mergeMapsRecursively(a.getData(), b.getData());
     }
 
+    /**
+     * Recursively merges two maps according to the rules described in {@link #mergeCaseDataWithNullsForRemovedKeys(CaseDetails, CaseDetails)}.
+     *
+     * @param mapA the original source map
+     * @param mapB the updated target map
+     * @return a merged map containing all keys from both maps; keys only in {@code mapA} have {@code null} values in the result
+     */
     @SuppressWarnings("unchecked")
     private static Map<String, Object> mergeMapsRecursively(Map<String, Object> mapA, Map<String, Object> mapB) {
         Map<String, Object> result = new HashMap<>();
@@ -152,6 +159,14 @@ public abstract class BaseTask implements Runnable {
         return result;
     }
 
+    /**
+     * Merges two lists element-wise by index. If elements at the same index are maps,
+     * they are merged recursively; otherwise, the element from the target list is used.
+     *
+     * @param listA the original source list
+     * @param listB the updated target list
+     * @return a merged list combining elements from both lists
+     */
     @SuppressWarnings("unchecked")
     private static List<Object> mergeListOfMapsByIndex(List<Object> listA, List<Object> listB) {
         List<Object> result = new ArrayList<>();
