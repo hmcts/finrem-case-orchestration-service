@@ -33,15 +33,12 @@ public class IssueApplicationContestedAboutToSubmitHandler extends FinremCallbac
             && (EventType.ISSUE_APPLICATION.equals(eventType));
     }
 
-
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         Long caseId = callbackRequest.getCaseDetails().getId();
         log.info("Invoking contested {} about to submit callback for Case ID: {}",
             callbackRequest.getEventType(), caseId);
-
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 

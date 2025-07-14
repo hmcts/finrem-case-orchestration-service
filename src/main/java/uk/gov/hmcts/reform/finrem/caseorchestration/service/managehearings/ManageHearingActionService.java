@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -26,10 +25,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor
@@ -40,11 +47,12 @@ public class ManageHearingActionService {
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
 
+    private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {}
+
     /**
      * Adds a new hearing to the case and generates associated documents.
      * Updates the hearings collection and generates documents based on the hearing type
      * and case configuration. Adds the generated documents to the hearing documents collection.
-     *
      * @param finremCaseDetails case details containing hearing and case data
      * @param authToken         authorization token for secure resource access
      */
@@ -56,7 +64,7 @@ public class ManageHearingActionService {
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
 
-        Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap = new HashMap<>();
+        Map<String, DocumentRecord> documentMap = new HashMap<>();
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
@@ -72,13 +80,15 @@ public class ManageHearingActionService {
                 generateFormG(finremCaseDetails, authToken, documentMap);
             }
 
-            documentMap.putAll(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, authToken));
+            Map<String, CaseDocument> pfdDocs = manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails, authToken);
+            documentMap.put(PFD_NCDR_COVER_LETTER, new DocumentRecord(pfdDocs.get(PFD_NCDR_COVER_LETTER), CaseDocumentType.PFD_NCDR_COVER_LETTER));
+            documentMap.put(PFD_NCDR_COMPLIANCE_LETTER, new DocumentRecord(pfdDocs.get(PFD_NCDR_COMPLIANCE_LETTER),
+                CaseDocumentType.PFD_NCDR_COMPLIANCE_LETTER));
 
             generateOutOfCourtResolution(finremCaseDetails, authToken, documentMap);
         }
 
         addDocumentsToCollection(documentMap, hearingWrapper);
-        updateTabData(caseData);
         hearingWrapper.setWorkingHearing(null);
     }
 
@@ -107,33 +117,33 @@ public class ManageHearingActionService {
 
     /**
      * Adds generated documents to the hearing documents collection in the wrapper.
-     * Takes a map containing documents and descriptive information about them.
+     * Takes a map containing documents and descriptive information encapsulated in `DocumentRecord`.
      * Adds each document to the hearing documents collection in the `ManageHearingsWrapper`.
      * Each document is associated with the current working hearing ID.
      *
-     * @param documentMap   a map containing a string describing the document against a pair with
-     *                      the corresponding CaseDocument object and CaseDocumentType.
+     * @param documentMap   a map containing a string describing the document against a `DocumentRecord`
+     *                      containing the corresponding `CaseDocument` object and `CaseDocumentType`.
      * @param hearingsWrapper the wrapper containing hearing-related data
      */
-    private void addDocumentsToCollection(Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap,
+    private void addDocumentsToCollection(Map<String, DocumentRecord> documentMap,
                                           ManageHearingsWrapper hearingsWrapper) {
         List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = Optional.ofNullable(
                 hearingsWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
-        documentMap.forEach((key, pair) -> {
+        documentMap.forEach((key, documentRecord) -> {
 
-            CaseDocument caseDocument = pair.getLeft();
-            CaseDocumentType caseDocumentType = pair.getRight();
+            CaseDocument caseDocument = documentRecord.caseDocument();
+            CaseDocumentType caseDocumentType = documentRecord.caseDocumentType();
 
             manageHearingDocuments.add(
-                    ManageHearingDocumentsCollectionItem.builder()
-                            .value(ManageHearingDocument.builder()
-                                    .hearingId(hearingsWrapper.getWorkingHearingId())
-                                    .hearingDocument(caseDocument)
-                                    .hearingCaseDocumentType(caseDocumentType)
-                                    .build())
-                            .build()
+                ManageHearingDocumentsCollectionItem.builder()
+                    .value(ManageHearingDocument.builder()
+                        .hearingId(hearingsWrapper.getWorkingHearingId())
+                        .hearingDocument(caseDocument)
+                        .hearingCaseDocumentType(caseDocumentType)
+                        .build())
+                    .build()
             );
         });
 
@@ -141,94 +151,95 @@ public class ManageHearingActionService {
     }
 
     /**
-     * Regenerates the hearing tab data for the case.
-     * This method processes the hearings collection and maps each hearing to its corresponding
-     * tab data representation ordered by hearing date ASC. The resulting tab data is then updated in the case data.
+     * Updates the hearing tab data for the case by processing the hearings collection.
+     * Maps each hearing to its corresponding tab data representation, sorts the data
+     * by hearing date in ascending order, and categorizes it by party. The updated
+     * tab data is then stored in the case data.
      *
      * @param caseData the case data containing the hearings and hearing documents
      */
-    private void updateTabData(FinremCaseData caseData) {
-        List<ManageHearingsCollectionItem> hearings =
-            caseData.getManageHearingsWrapper().getHearings();
+    public void updateTabData(FinremCaseData caseData) {
+        ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
+        List<ManageHearingsCollectionItem> hearings = Optional.ofNullable(hearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new);
 
-        List<HearingTabCollectionItem> hearingTabItems = hearings.stream()
-            .sorted(Comparator.comparing(hearingCollectionItem ->
-                hearingCollectionItem.getValue().getHearingDate()))
-            .map(hearingCollectionItem -> HearingTabCollectionItem.builder()
+        List<HearingTabCollectionItem> hearingTabItems = mapAndSortHearings(hearings, caseData);
+
+        Map<String, List<HearingTabCollectionItem>> partyTabItems = Map.of(
+            APPLICANT, filterHearingTabItems(hearingTabItems, APPLICANT),
+            RESPONDENT, filterHearingTabItems(hearingTabItems, RESPONDENT),
+            INTERVENER1, filterHearingTabItems(hearingTabItems, INTERVENER1),
+            INTERVENER2, filterHearingTabItems(hearingTabItems, INTERVENER2),
+            INTERVENER3, filterHearingTabItems(hearingTabItems, INTERVENER3),
+            INTERVENER4, filterHearingTabItems(hearingTabItems, INTERVENER4)
+        );
+
+        hearingsWrapper.setHearingTabItems(hearingTabItems);
+        hearingsWrapper.setApplicantHearingTabItems(partyTabItems.get(APPLICANT));
+        hearingsWrapper.setRespondentHearingTabItems(partyTabItems.get(RESPONDENT));
+        hearingsWrapper.setInt1HearingTabItems(partyTabItems.get(INTERVENER1));
+        hearingsWrapper.setInt2HearingTabItems(partyTabItems.get(INTERVENER2));
+        hearingsWrapper.setInt3HearingTabItems(partyTabItems.get(INTERVENER3));
+        hearingsWrapper.setInt4HearingTabItems(partyTabItems.get(INTERVENER4));
+
+        manageHearingsDocumentService.categoriseSystemDuplicateDocs(hearings,
+            hearingsWrapper.getHearingDocumentsCollection());
+    }
+
+    private List<HearingTabCollectionItem> mapAndSortHearings(List<ManageHearingsCollectionItem> hearings, FinremCaseData caseData) {
+        return hearings.stream()
+            .sorted(Comparator.comparing(hearing -> hearing.getValue().getHearingDate()))
+            .map(hearing -> HearingTabCollectionItem.builder()
                 .value(hearingTabDataMapper.mapHearingToTabData(
-                    hearingCollectionItem,
+                    hearing,
                     caseData.getManageHearingsWrapper().getHearingDocumentsCollection()))
                 .build())
             .toList();
-
-        caseData.getManageHearingsWrapper().setHearingTabItems(hearingTabItems);
     }
 
-    /**
-     * Generates a hearing notice.
-     * Adds it to the passed document map.
-     */
-    private void generateHearingNotice(
-            FinremCaseDetails finremCaseDetails,
-            String authToken,
-            Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap) {
+    private List<HearingTabCollectionItem> filterHearingTabItems(List<HearingTabCollectionItem> hearingTabItems, String party) {
+        return hearingTabItems.stream()
+            .filter(hearingTabItem -> hearingTabItem.getValue().getTabConfidentialParties().contains(party))
+            .toList();
+    }
+
+    private void generateHearingNotice(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
-                HEARING_NOTICE_DOCUMENT,
-                Pair.of(
-                        manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken),
-                        CaseDocumentType.HEARING_NOTICE
-                )
+            HEARING_NOTICE_DOCUMENT,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateHearingNotice(finremCaseDetails, authToken),
+                CaseDocumentType.HEARING_NOTICE
+            )
         );
     }
 
-    /**
-     * Generates a Form C.
-     * Adds it to the passed document map.
-     */
-    private void generateFormC(
-            FinremCaseDetails finremCaseDetails,
-            String authToken,
-            Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap) {
+    private void generateFormC(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
-                FORM_C,
-                Pair.of(
-                        manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
-                        CaseDocumentType.FORM_C
-                )
+            FORM_C,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateFormC(finremCaseDetails, authToken),
+                CaseDocumentType.FORM_C
+            )
         );
     }
 
-    /**
-     * Generates a Form G.
-     * Adds it to the passed document map.
-     */
-    private void generateFormG(
-            FinremCaseDetails finremCaseDetails,
-            String authToken,
-            Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap) {
+    private void generateFormG(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
-                FORM_G,
-                Pair.of(
-                        manageHearingsDocumentService.generateFormG(finremCaseDetails, authToken),
-                        CaseDocumentType.FORM_G
-                )
+            FORM_G,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateFormG(finremCaseDetails, authToken),
+                CaseDocumentType.FORM_G
+            )
         );
     }
 
-    /**
-     * Generates Out of court resolution.
-     * Adds it to the passed document map.
-     */
-    private void generateOutOfCourtResolution(
-            FinremCaseDetails finremCaseDetails,
-            String authToken,
-            Map<String, Pair<CaseDocument, CaseDocumentType>> documentMap) {
+    private void generateOutOfCourtResolution(FinremCaseDetails finremCaseDetails, String authToken, Map<String, DocumentRecord> documentMap) {
         documentMap.put(
-                OUT_OF_COURT_RESOLUTION,
-                Pair.of(
-                        manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, authToken),
-                        CaseDocumentType.OUT_OF_COURT_RESOLUTION
-                )
+            OUT_OF_COURT_RESOLUTION,
+            new DocumentRecord(
+                manageHearingsDocumentService.generateOutOfCourtResolutionDoc(finremCaseDetails, authToken),
+                CaseDocumentType.OUT_OF_COURT_RESOLUTION
+            )
         );
     }
 }

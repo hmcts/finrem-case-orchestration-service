@@ -187,7 +187,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
-
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourney() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
@@ -517,7 +516,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("1234", result.getBarristerReferenceNumber());
     }
 
-
     private Barrister createBarrister() {
         Organisation organisation = Organisation.builder()
             .organisationID("1234")
@@ -572,7 +570,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("Applicant test", notificationRequest.getApplicantName());
     }
 
-
     @SneakyThrows
     private List<Element<RepresentationUpdate>> getChangeOfRepresentationListJson(String party,
                                                                                   String latestSolicitorName,
@@ -614,6 +611,4 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .build())
         ).collect(Collectors.toList());
     }
-
-
 }
