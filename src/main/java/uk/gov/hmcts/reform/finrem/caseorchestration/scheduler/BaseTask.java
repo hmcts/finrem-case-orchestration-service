@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -125,7 +126,6 @@ public abstract class BaseTask implements Runnable {
         return mergeMapsRecursively(a.getData(), b.getData());
     }
 
-    @SuppressWarnings("unchecked")
     private static Map<String, Object> mergeMapsRecursively(Map<String, Object> aMap, Map<String, Object> bMap) {
         Map<String, Object> result = new HashMap<>();
 
@@ -138,14 +138,35 @@ public abstract class BaseTask implements Runnable {
             Object bVal = bMap.get(key);
 
             if (aVal instanceof Map && bVal instanceof Map) {
-                // Both are maps, so merge recursively
                 result.put(key, mergeMapsRecursively((Map<String, Object>) aVal, (Map<String, Object>) bVal));
+            } else if (aVal instanceof List && bVal instanceof List) {
+                result.put(key, mergeListOfMapsByIndex((List<Object>) aVal, (List<Object>) bVal));
             } else if (bMap.containsKey(key)) {
-                // Use value from b, even if it's null
-                result.put(key, bVal);
+                result.put(key, bVal); // use value from bMap (even if null)
             } else {
-                // Key deleted from b — mark as null
-                result.put(key, null);
+                result.put(key, null); // key deleted
+            }
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Object> mergeListOfMapsByIndex(List<Object> aList, List<Object> bList) {
+        List<Object> result = new ArrayList<>();
+
+        int maxSize = Math.max(aList.size(), bList.size());
+
+        for (int i = 0; i < maxSize; i++) {
+            Object aElem = i < aList.size() ? aList.get(i) : null;
+            Object bElem = i < bList.size() ? bList.get(i) : null;
+
+            if (aElem instanceof Map && bElem instanceof Map) {
+                result.add(mergeMapsRecursively((Map<String, Object>) aElem, (Map<String, Object>) bElem));
+            } else if (bElem != null) {
+                result.add(bElem); // use from bList
+            } else {
+                result.add(null); // missing in bList, keep null
             }
         }
 

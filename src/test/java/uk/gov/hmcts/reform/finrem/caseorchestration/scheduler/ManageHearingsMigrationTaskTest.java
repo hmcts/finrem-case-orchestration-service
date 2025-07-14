@@ -221,8 +221,20 @@ class ManageHearingsMigrationTaskTest {
         CaseDetails loadedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
         CaseDetails updatedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
 
+        // Prepare loadedCaseDetails
         loadedCaseDetailsTwo.getData().put("mhMigrationVersion", "v1");
-        loadedCaseDetailsTwo.getData().put("hearingTabItems", List.of(Map.of("value", Map.of("tabHearingType", "Final Hearing"))));
+        loadedCaseDetailsTwo.getData().put("hearingTabItems", List.of(Map.of("value",
+            Map.of("tabHearingType", "Final Hearing"))));
+        loadedCaseDetailsTwo.getData().put("hearings", List.of(Map.of("value",
+            Map.of("hearingTimeEstimate", "10 hours",
+                "hearingTime", "09:00")
+        )));
+
+        // Prepare updatedCaseDetailsTwo
+        updatedCaseDetailsTwo.getData().put("hearings", List.of(Map.of("value",
+            Map.of("hearingTimeEstimate", "10 hours") // updating hearingTimeEstimate to 10 hours
+            // and removing hearingTime
+        )));
 
         FinremCaseData caseDataTwo = spy(FinremCaseData.builder().build()); // spy is used to differentiate it.
         FinremCaseDetails finremCaseDetailsTwo = FinremCaseDetailsBuilderFactory
@@ -263,8 +275,17 @@ class ManageHearingsMigrationTaskTest {
 
         // verify mhMigrationVersion should be set to null
         Map<String, Object> actualData = startEventCaptorTwo.getValue().getCaseDetails().getData();
-        assertThat(actualData).containsKey("mhMigrationVersion").extracting("mhMigrationVersion").isNull();
-        assertThat(actualData).containsKey("hearingTabItems").extracting("hearingTabItems").isNull();
+        assertThat(actualData).extracting("mhMigrationVersion").isNull(); // removed mhMigrationVersion
+        assertThat(actualData).extracting("hearingTabItems").isNull(); // removed hearingTabItems
+        // removing hearings[0].hearingTime and updating hearings[0].hearingTimeEstimate
+        assertThat(actualData)
+            .extracting("hearings")
+            .satisfies(hearings -> {
+                List<Map<String, Object>> hearingList = (List<Map<String, Object>>) hearings;
+                Map<String, Object> valueMap = (Map<String, Object>) hearingList.getFirst().get("value");
+                assertThat(valueMap.get("hearingTimeEstimate")).isEqualTo("10 hours");
+                assertThat(valueMap).extracting("hearingTime").isNull();
+            });
     }
 
     private void stubCaseDetails(Arguments... caseDetailsPairs) {
