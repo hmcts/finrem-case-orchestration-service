@@ -84,6 +84,7 @@ public abstract class BaseTask implements Runnable {
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(
                             mergeCaseDataWithNullsForRemovedKeys(caseDetails, updatedCaseDetails)
+                            //updatedCaseDetails.getData()
                         );
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseId,
@@ -103,6 +104,9 @@ public abstract class BaseTask implements Runnable {
     }
 
     /**
+     * It's an alternative way to make for adding @JsonInclude(JsonInclude.Include.ALWAYS) to POJO classes.
+     *
+     * <p>
      * Recursively merges the data maps from two {@link CaseDetails} objects.
      *
      * <p>
