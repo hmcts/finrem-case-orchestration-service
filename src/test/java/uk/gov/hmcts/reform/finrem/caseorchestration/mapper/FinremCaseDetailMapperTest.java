@@ -168,20 +168,6 @@ class FinremCaseDetailMapperTest {
     }
 
     @Test
-    void shouldDeleteProperty() {
-        FinremCaseData data = null;
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
-            .state(State.APPLICATION_ISSUED)
-            .caseType(CaseType.CONTESTED)
-            .data(
-                data = FinremCaseData.builder().mhMigrationWrapper(MhMigrationWrapper.builder().mhMigrationVersion("v1").build()).build()
-            ).build();
-        data.getMhMigrationWrapper().setMhMigrationVersion(null);
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-        System.out.println(caseDetails.getData());
-    }
-
-    @Test
     void mapBasicCaseDetails() {
         caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
