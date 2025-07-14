@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ListForHea
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.addItemToList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
@@ -35,14 +36,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSin
 @Slf4j
 public class HearingsAppender {
 
-    /**
-     * Appends a {@link ManageHearingsCollectionItem} to the hearings list
-     * contained within the {@code ManageHearingsWrapper} of the provided {@link FinremCaseData}.
-     *
-     * @param caseData the case data containing the hearings wrapper
-     * @param item     the hearing collection item to append
-     */
-    public void appendToHearings(FinremCaseData caseData, ManageHearingsCollectionItem item) {
+    public void appendToHearings(FinremCaseData caseData,
+                                 Supplier<ManageHearingsCollectionItem> hearingSupplier) {
+        ManageHearingsCollectionItem item = hearingSupplier.get();
         item.setId(UUID.randomUUID());
         addItemToList(caseData.getManageHearingsWrapper()::getHearings,
             caseData.getManageHearingsWrapper()::setHearings, item);
@@ -83,7 +79,6 @@ public class HearingsAppender {
             //.hearingMode(null) // Ignore it because existing List for Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
             .additionalHearingDocs(toAdditionalHearingDocs(listForHearingWrapper))
-            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
     }
@@ -152,7 +147,6 @@ public class HearingsAppender {
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
             .additionalHearingInformation(additionalInformationAboutHearing)
-            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
     }
@@ -177,7 +171,6 @@ public class HearingsAppender {
             .hearingTime(hearingTime)
             .hearingCourtSelection(hearingCourtSelection)
             //.hearingMode(null) // Ignore it because existing List for Interim Hearing doesn't capture hearing mode
-            //.partiesOnCaseMultiSelectList() // Unknown as partiesOnCase is updated by multiple events.
             .wasMigrated(YesOrNo.YES)
             .build();
     }
