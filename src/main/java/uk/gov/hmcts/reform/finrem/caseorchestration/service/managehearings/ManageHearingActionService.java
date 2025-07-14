@@ -106,11 +106,11 @@ public class ManageHearingActionService {
                 .orElseGet(ArrayList::new);
 
         manageHearingsCollectionItemList.add(
-                ManageHearingsCollectionItem
-                        .builder()
-                        .id(hearingId)
-                        .value(hearingsWrapper.getWorkingHearing())
-                        .build()
+            ManageHearingsCollectionItem
+                .builder()
+                .id(hearingId)
+                .value(hearingsWrapper.getWorkingHearing())
+                .build()
         );
         hearingsWrapper.setWorkingHearingId(hearingId);
         hearingsWrapper.setHearings(manageHearingsCollectionItemList);
