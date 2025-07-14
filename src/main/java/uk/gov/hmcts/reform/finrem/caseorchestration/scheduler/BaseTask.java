@@ -84,8 +84,8 @@ public abstract class BaseTask implements Runnable {
                         String description = getDescription(finremCaseDetails);
                         CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
                         startEventResponse.getCaseDetails().setData(
+                            // Comment original code: updatedCaseDetails.getData()
                             mergeCaseDataWithNullsForRemovedKeys(caseDetails, updatedCaseDetails)
-                            //updatedCaseDetails.getData()
                         );
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseId,
@@ -126,23 +126,24 @@ public abstract class BaseTask implements Runnable {
         return mergeMapsRecursively(a.getData(), b.getData());
     }
 
-    private static Map<String, Object> mergeMapsRecursively(Map<String, Object> aMap, Map<String, Object> bMap) {
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> mergeMapsRecursively(Map<String, Object> mapA, Map<String, Object> mapB) {
         Map<String, Object> result = new HashMap<>();
 
         Set<String> allKeys = new HashSet<>();
-        allKeys.addAll(aMap.keySet());
-        allKeys.addAll(bMap.keySet());
+        allKeys.addAll(mapA.keySet());
+        allKeys.addAll(mapB.keySet());
 
         for (String key : allKeys) {
-            Object aVal = aMap.get(key);
-            Object bVal = bMap.get(key);
+            Object valA = mapA.get(key);
+            Object valB = mapB.get(key);
 
-            if (aVal instanceof Map && bVal instanceof Map) {
-                result.put(key, mergeMapsRecursively((Map<String, Object>) aVal, (Map<String, Object>) bVal));
-            } else if (aVal instanceof List && bVal instanceof List) {
-                result.put(key, mergeListOfMapsByIndex((List<Object>) aVal, (List<Object>) bVal));
-            } else if (bMap.containsKey(key)) {
-                result.put(key, bVal); // use value from bMap (even if null)
+            if (valA instanceof Map && valB instanceof Map) {
+                result.put(key, mergeMapsRecursively((Map<String, Object>) valA, (Map<String, Object>) valB));
+            } else if (valA instanceof List && valB instanceof List) {
+                result.put(key, mergeListOfMapsByIndex((List<Object>) valA, (List<Object>) valB));
+            } else if (mapB.containsKey(key)) {
+                result.put(key, valB); // use value from bMap (even if null)
             } else {
                 result.put(key, null); // key deleted
             }
@@ -152,21 +153,20 @@ public abstract class BaseTask implements Runnable {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Object> mergeListOfMapsByIndex(List<Object> aList, List<Object> bList) {
+    private static List<Object> mergeListOfMapsByIndex(List<Object> listA, List<Object> listB) {
         List<Object> result = new ArrayList<>();
 
-        int maxSize = Math.max(aList.size(), bList.size());
+        int maxSize = Math.max(listA.size(), listB.size());
 
         for (int i = 0; i < maxSize; i++) {
-            Object aElem = i < aList.size() ? aList.get(i) : null;
-            Object bElem = i < bList.size() ? bList.get(i) : null;
+            Object elementA = i < listA.size() ? listA.get(i) : null;
+            Object elementB = i < listB.size() ? listB.get(i) : null;
 
-            if (aElem instanceof Map && bElem instanceof Map) {
-                result.add(mergeMapsRecursively((Map<String, Object>) aElem, (Map<String, Object>) bElem));
-            } else if (bElem != null) {
-                result.add(bElem); // use from bList
+            // missing in bList, keep null
+            if (elementA instanceof Map && elementB instanceof Map) {
+                result.add(mergeMapsRecursively((Map<String, Object>) elementA, (Map<String, Object>) elementB));
             } else {
-                result.add(null); // missing in bList, keep null
+                result.add(elementB); // use from bList
             }
         }
 

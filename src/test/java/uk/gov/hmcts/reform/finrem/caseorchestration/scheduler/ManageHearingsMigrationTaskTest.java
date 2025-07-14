@@ -212,10 +212,10 @@ class ManageHearingsMigrationTaskTest {
     @Test
     void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails() {
         ReflectionTestUtils.setField(underTest, "rollback", true);
-        CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
-        CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
-        FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
-        FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
+        final CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
+        final CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
+        final FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
+        final FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
             .from(CASE_ID, CONTESTED, caseDataOne).build();
 
         CaseDetails loadedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
@@ -232,8 +232,7 @@ class ManageHearingsMigrationTaskTest {
 
         // Prepare updatedCaseDetailsTwo
         updatedCaseDetailsTwo.getData().put("hearings", List.of(Map.of("value",
-            Map.of("hearingTimeEstimate", "10 hours") // updating hearingTimeEstimate to 10 hours
-            // and removing hearingTime
+            Map.of("hearingTimeEstimate", "10 hours") // updating hearingTimeEstimate to 10 hours and removing hearingTime
         )));
 
         FinremCaseData caseDataTwo = spy(FinremCaseData.builder().build()); // spy is used to differentiate it.
