@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managehearings;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,7 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.MANAGE_HEARINGS_MIGRATION;
@@ -32,19 +36,20 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
         assertCanHandle(underTest, ABOUT_TO_SUBMIT, CONTESTED, MANAGE_HEARINGS_MIGRATION);
     }
 
-    @Test
-    void shouldInvokeManageHearingsMigrationService() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void shouldInvokeManageHearingsMigrationService(boolean wasMigrated) {
         // Arrange
         String caseReference = TestConstants.CASE_ID;
-
         FinremCaseData caseData = FinremCaseData.builder().build();
-
         FinremCallbackRequest request = FinremCallbackRequestFactory.from(Long.parseLong(caseReference),
             CONTESTED, caseData);
+        when(manageHearingsMigrationService.wasMigrated(caseData)).thenReturn(wasMigrated);
 
         // Act
         underTest.handle(request, AUTH_TOKEN);
 
-        verify(manageHearingsMigrationService).runManageHearingMigration(caseData, "ui");
+        verify(manageHearingsMigrationService, times(wasMigrated ? 0 : 1)).runManageHearingMigration(caseData, "ui");
+        verify(manageHearingsMigrationService, times(wasMigrated ? 1 : 0)).revertManageHearingMigration(caseData);
     }
 }
