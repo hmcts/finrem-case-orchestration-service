@@ -59,7 +59,8 @@ public class ManageHearingActionService {
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
-        HearingType hearingType = hearingWrapper.getWorkingHearing().getHearingType();
+        String selectedHearingTypeLabel = hearingWrapper.getWorkingHearing().getHearingType().getValue().getLabel();
+        HearingType selectedHearingType = HearingType.getManageHearingType(selectedHearingTypeLabel);
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
@@ -68,8 +69,8 @@ public class ManageHearingActionService {
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
-        boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
-            || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
+        boolean shouldGenerateFormC = HearingType.FDA.equals(selectedHearingType)
+            || (HearingType.FDR.equals(selectedHearingType) && expressCaseService.isExpressCase(caseData));
 
         boolean isNotFastTrack = YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
 

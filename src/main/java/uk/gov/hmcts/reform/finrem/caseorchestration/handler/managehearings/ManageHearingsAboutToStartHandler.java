@@ -10,13 +10,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.List;
+
+import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE;
 
 @Slf4j
 @Service
@@ -62,10 +70,27 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
         finremCaseData.getManageHearingsWrapper().setWorkingHearing(
             Hearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
+                .hearingType(generateHearingTypeList())
                 .build());
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
             .build();
     }
+
+    private DynamicList generateHearingTypeList() {
+        List<HearingType> hearingTypes = List.of(HearingType.values());
+
+        List<DynamicListElement> listElements = hearingTypes.stream()
+            .map(hearingType -> DynamicListElement.builder()
+                .code(hearingType.name())
+                .label(hearingType.getId())
+                .build())
+            .toList();
+
+        return DynamicList.builder()
+            .listItems(listElements)
+            .build();
+    }
+
 }

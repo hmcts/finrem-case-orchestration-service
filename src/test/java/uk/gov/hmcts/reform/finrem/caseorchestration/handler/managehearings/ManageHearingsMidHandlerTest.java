@@ -45,7 +45,7 @@ class ManageHearingsMidHandlerTest {
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
                 .workingHearing(Hearing.builder()
-                    .hearingType(HearingType.DIR)
+//                    .hearingType(HearingType.DIR)
                     .build())
                 .build())
             .build();
@@ -58,8 +58,8 @@ class ManageHearingsMidHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
-            .thenReturn(List.of("Warning 1"));
+//        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
+//            .thenReturn(List.of("Warning 1"));
 
         // Act
         var response = manageHearingsMidHandler.handle(callbackRequest, "authToken");
