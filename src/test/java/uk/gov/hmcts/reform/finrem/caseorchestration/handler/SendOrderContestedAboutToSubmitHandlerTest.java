@@ -708,6 +708,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
+        CaseDocument coverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
@@ -734,6 +737,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                                     .approvalJudge("Mr Judge A")
+                                    .coverLetter(coverLetter1)
                                     .build())
                                 .build()))
                         ).build())
@@ -759,6 +763,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
+                    .coverLetter(coverLetter1)
                 .build()).build());
     }
 
@@ -766,6 +771,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenSendingPsaDocumentReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
         CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
+        CaseDocument coverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
@@ -779,6 +787,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
+                    .coverLetter(coverLetter1)
                     .build())
                 .build()
         ));
@@ -800,6 +809,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                     .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                                     .approvalJudge("Mr Judge B")
+                                    .coverLetter(coverLetter1)
                                     .build())
                                 .build()
                         )))
@@ -830,6 +840,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                             .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                             .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                             .approvalJudge("Mr Judge A")
+                            .coverLetter(coverLetter1)
                             .build())
                         .build()
                 )).build());
@@ -840,6 +851,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
+                .coverLetter(coverLetter1)
                 .build()).build());
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }
