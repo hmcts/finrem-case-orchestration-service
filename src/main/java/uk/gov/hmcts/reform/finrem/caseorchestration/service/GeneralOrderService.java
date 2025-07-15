@@ -304,14 +304,14 @@ public class GeneralOrderService {
     }
 
     private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
-        CaseDocument coverLetter = data.getOrderApprovedCoverLetter();
-
         emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).stream()
             .map(FinalisedOrderCollection::getValue)
-            .forEach(finalisedOrder ->
+            .forEach(finalisedOrder -> {
+                CaseDocument coverLetter = finalisedOrder.getCoverLetter() != null ? finalisedOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
                 appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s", coverLetter,
                     emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
-                ));
+                );
+            });
     }
 
     private void appendOrderToShareCollection(List<OrderToShareCollection> orderToShareCollection,

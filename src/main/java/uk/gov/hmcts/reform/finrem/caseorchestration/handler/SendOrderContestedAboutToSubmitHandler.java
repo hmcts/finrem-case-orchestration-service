@@ -275,6 +275,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalOrder(psaDocumentReview.getFinalOrder())
                 .approvalDate(psaDocumentReview.getApprovalDate())
                 .approvalJudge(psaDocumentReview.getApprovalJudge())
+                .coverLetter(psaDocumentReview.getCoverLetter())
                 .build())
             .build();
     }
@@ -289,6 +290,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalOrder(draftOrderDocumentReview.getFinalOrder())
                 .approvalDate(draftOrderDocumentReview.getApprovalDate())
                 .approvalJudge(draftOrderDocumentReview.getApprovalJudge())
+                .coverLetter(draftOrderDocumentReview.getCoverLetter())
                 .build())
             .build();
     }
