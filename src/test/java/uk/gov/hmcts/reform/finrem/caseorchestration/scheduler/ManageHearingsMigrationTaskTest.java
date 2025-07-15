@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCaseDetailsBuilderFact
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
@@ -28,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migra
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReferenceCsvLoader;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +118,8 @@ class ManageHearingsMigrationTaskTest {
     }
 
     @Test
-    void givenTaskEnabled_whenSingleCaseIsRead_thenShouldPopulateCaseDetails() {
+    void givenTaskEnabled_whenSingleCaseIsRead_thenShouldPopulateCaseDetails()
+        throws JsonProcessingException {
         CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
         CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
         FinremCaseData caseDataOne = FinremCaseData.builder().build();
@@ -140,7 +144,8 @@ class ManageHearingsMigrationTaskTest {
     }
 
     @Test
-    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateCaseDetails() {
+    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateCaseDetails()
+        throws JsonProcessingException {
         CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
         CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
         FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
@@ -175,7 +180,8 @@ class ManageHearingsMigrationTaskTest {
     }
 
     @Test
-    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateNonMigratedCaseDetails() {
+    void givenTaskEnabled_whenMultipleCasesAreRead_thenShouldPopulateNonMigratedCaseDetails()
+        throws JsonProcessingException {
         CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
         CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
         FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
@@ -210,34 +216,21 @@ class ManageHearingsMigrationTaskTest {
     }
 
     @Test
-    void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails() {
+    void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails()
+        throws JsonProcessingException {
         ReflectionTestUtils.setField(underTest, "rollback", true);
-        final CaseDetails loadedCaseDetailsOne = mock(CaseDetails.class);
-        final CaseDetails updatedCaseDetailsOne = mock(CaseDetails.class);
+        final CaseDetails loadedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "loaded")).build();;
+        final CaseDetails updatedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "updated")).build();;
         final FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
         final FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
-            .from(CASE_ID, CONTESTED, caseDataOne).build();
+            .from(CASE_ID, CONTESTED, caseDataOne, State.CASE_ADDED).build();
 
-        CaseDetails loadedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
-        CaseDetails updatedCaseDetailsTwo = CaseDetails.builder().data(new HashMap<>()).build();
-
-        // Prepare loadedCaseDetails
-        loadedCaseDetailsTwo.getData().put("mhMigrationVersion", "v1");
-        loadedCaseDetailsTwo.getData().put("hearingTabItems", List.of(Map.of("value",
-            Map.of("tabHearingType", "Final Hearing"))));
-        loadedCaseDetailsTwo.getData().put("hearings", List.of(Map.of("value",
-            Map.of("hearingTimeEstimate", "10 hours",
-                "hearingTime", "09:00")
-        )));
-
-        // Prepare updatedCaseDetailsTwo
-        updatedCaseDetailsTwo.getData().put("hearings", List.of(Map.of("value",
-            Map.of("hearingTimeEstimate", "10 hours") // updating hearingTimeEstimate to 10 hours and removing hearingTime
-        )));
+        CaseDetails loadedCaseDetailsTwo = CaseDetails.builder().data(Map.of("Two", "loaded")).build();
+        CaseDetails updatedCaseDetailsTwo = CaseDetails.builder().data(Map.of("Two", "updated")).build();
 
         FinremCaseData caseDataTwo = spy(FinremCaseData.builder().build()); // spy is used to differentiate it.
         FinremCaseDetails finremCaseDetailsTwo = FinremCaseDetailsBuilderFactory
-            .from(CASE_ID_TWO, CONTESTED, caseDataTwo).build();
+            .from(CASE_ID_TWO, CONTESTED, caseDataTwo, State.CASE_ADDED).build();
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(caseReferenceCsvLoader.loadCaseReferenceList(ENCRYPTED_CSV_FILENAME, DUMMY_SECRET))
@@ -265,29 +258,18 @@ class ManageHearingsMigrationTaskTest {
                 eq(AUTH_TOKEN), eq(CASE_ID), eq(CONTESTED.getCcdType()), eq(AMEND_CASE_CRON.getCcdType()),
                 eq("Manage Hearings migration"),
                 eq("Manage Hearings migration"));
+        assertThat(startEventCaptor.getValue().getCaseDetails()).isEqualTo(updatedCaseDetailsOne);
+
         ArgumentCaptor<StartEventResponse> startEventCaptorTwo = ArgumentCaptor.forClass(StartEventResponse.class);
         verify(ccdService)
             .submitEventForCaseWorker(startEventCaptorTwo.capture(),
                 eq(AUTH_TOKEN), eq(CASE_ID_TWO), eq(CONTESTED.getCcdType()), eq(AMEND_CASE_CRON.getCcdType()),
                 eq("Manage Hearings migration"),
                 eq("Manage Hearings migration"));
-
-        // verify mhMigrationVersion should be set to null
-        Map<String, Object> actualData = startEventCaptorTwo.getValue().getCaseDetails().getData();
-        assertThat(actualData).extracting("mhMigrationVersion").isNull(); // removed mhMigrationVersion
-        assertThat(actualData).extracting("hearingTabItems").isNull(); // removed hearingTabItems
-        // removing hearings[0].hearingTime and updating hearings[0].hearingTimeEstimate
-        assertThat(actualData)
-            .extracting("hearings")
-            .satisfies(hearings -> {
-                List<Map<String, Object>> hearingList = (List<Map<String, Object>>) hearings;
-                Map<String, Object> valueMap = (Map<String, Object>) hearingList.getFirst().get("value");
-                assertThat(valueMap.get("hearingTimeEstimate")).isEqualTo("10 hours");
-                assertThat(valueMap).extracting("hearingTime").isNull();
-            });
+        assertThat(startEventCaptorTwo.getValue().getCaseDetails()).isEqualTo(updatedCaseDetailsTwo);
     }
 
-    private void stubCaseDetails(Arguments... caseDetailsPairs) {
+    private void stubCaseDetails(Arguments... caseDetailsPairs) throws JsonProcessingException {
         for (Arguments args : caseDetailsPairs) {
             Object[] values = args.get();
             String caseId = (String) values[0];
@@ -308,7 +290,8 @@ class ManageHearingsMigrationTaskTest {
                     .build());
 
             doReturn(finremCaseDetails).when(spyFinremCaseDetailsMapper).mapToFinremCaseDetails(loadedCaseDetails);
-            doReturn(updatedCaseDetails).when(spyFinremCaseDetailsMapper).mapToCaseDetails(finremCaseDetails);
+            doReturn(updatedCaseDetails).when(spyFinremCaseDetailsMapper)
+                .mapToCaseDetailsIncludingNulls(finremCaseDetails, MhMigrationWrapper.class, ManageHearingsWrapper.class);
             doReturn(wasMigrated).when(spyManageHearingsMigrationService).wasMigrated(finremCaseDetails.getData());
         }
     }

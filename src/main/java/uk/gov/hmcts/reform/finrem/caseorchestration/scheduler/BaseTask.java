@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,12 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.utils.csv.CaseReference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -82,11 +78,9 @@ public abstract class BaseTask implements Runnable {
                         log.info("Updating {} for Case ID: {}", getTaskName(), caseId);
                         executeTask(finremCaseDetails);
                         String description = getDescription(finremCaseDetails);
-                        CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
-                        startEventResponse.getCaseDetails().setData(
-                            // Comment original code: updatedCaseDetails.getData()
-                            mergeCaseDataWithNullsForRemovedKeys(caseDetails, updatedCaseDetails)
-                        );
+                        CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails,
+                            classesToOverrideJsonInclude());
+                        startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
                             caseId,
                             getCaseType().getCcdType(),
@@ -95,97 +89,13 @@ public abstract class BaseTask implements Runnable {
                             description);
                         log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
                     }
-                } catch (InterruptedException | RuntimeException e) {
+                } catch (InterruptedException | RuntimeException | JsonProcessingException e) {
                     log.error("Cron task {}: Error processing case {}", getTaskName(), caseId, e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
             }
         }
-    }
-
-    /**
-     * Provides an alternative approach to adding {@code @JsonInclude(JsonInclude.Include.ALWAYS)}
-     * to POJO classes by explicitly setting removed properties to {@code null} in merged maps.
-     *
-     * <p>Recursively merges the data maps from two {@link CaseDetails} instances.
-     *
-     * <p>For each key present in either the source ({@code a}) or the target ({@code b}):
-     * If the key exists in the target, its value is used in the merged result.
-     * If the key exists in the source but is missing in the target, it is considered deleted
-     * and included in the result with a {@code null} value.
-     * If both values are maps, they are recursively merged using the same logic.
-     * If both values are lists, the lists are merged element-wise by index, recursively merging
-     * elements if they are maps.
-     *
-     * @param a the original {@code CaseDetails} containing the source case data
-     * @param b the updated {@code CaseDetails} containing the target case data
-     * @return a merged {@code Map<String, Object>} where keys removed in {@code b} are explicitly set to {@code null}
-     */
-    private static Map<String, Object> mergeCaseDataWithNullsForRemovedKeys(CaseDetails a, CaseDetails b) {
-        return mergeMapsRecursively(a.getData(), b.getData());
-    }
-
-    /**
-     * Recursively merges two maps according to the rules described in {@link #mergeCaseDataWithNullsForRemovedKeys(CaseDetails, CaseDetails)}.
-     *
-     * @param mapA the original source map
-     * @param mapB the updated target map
-     * @return a merged map containing all keys from both maps; keys only in {@code mapA} have {@code null} values in the result
-     */
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> mergeMapsRecursively(Map<String, Object> mapA, Map<String, Object> mapB) {
-        Map<String, Object> result = new HashMap<>();
-
-        Set<String> allKeys = new HashSet<>();
-        allKeys.addAll(mapA.keySet());
-        allKeys.addAll(mapB.keySet());
-
-        for (String key : allKeys) {
-            Object valA = mapA.get(key);
-            Object valB = mapB.get(key);
-
-            if (valA instanceof Map && valB instanceof Map) {
-                result.put(key, mergeMapsRecursively((Map<String, Object>) valA, (Map<String, Object>) valB));
-            } else if (valA instanceof List && valB instanceof List) {
-                result.put(key, mergeListOfMapsByIndex((List<Object>) valA, (List<Object>) valB));
-            } else if (mapB.containsKey(key)) {
-                result.put(key, valB); // use value from bMap (even if null)
-            } else {
-                result.put(key, null); // key deleted
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Merges two lists element-wise by index. If elements at the same index are maps,
-     * they are merged recursively; otherwise, the element from the target list is used.
-     *
-     * @param listA the original source list
-     * @param listB the updated target list
-     * @return a merged list combining elements from both lists
-     */
-    @SuppressWarnings("unchecked")
-    private static List<Object> mergeListOfMapsByIndex(List<Object> listA, List<Object> listB) {
-        List<Object> result = new ArrayList<>();
-
-        int maxSize = Math.max(listA.size(), listB.size());
-
-        for (int i = 0; i < maxSize; i++) {
-            Object elementA = i < listA.size() ? listA.get(i) : null;
-            Object elementB = i < listB.size() ? listB.get(i) : null;
-
-            // missing in bList, keep null
-            if (elementA instanceof Map && elementB instanceof Map) {
-                result.add(mergeMapsRecursively((Map<String, Object>) elementA, (Map<String, Object>) elementB));
-            } else {
-                result.add(elementB); // use from bList
-            }
-        }
-
-        return result;
     }
 
     protected String getSystemUserToken() {
@@ -213,6 +123,23 @@ public abstract class BaseTask implements Runnable {
     protected abstract String getSummary();
 
     protected abstract void executeTask(FinremCaseDetails finremCaseDetails);
+
+    /**
+     * Specifies the classes for which null values should be included during mapping.
+     *
+     * <p>
+     * This is useful when you want to explicitly delete values by setting properties to {@code null}.
+     * For example, if your service sets {@code propertyA} to {@code null}, you must pass
+     * {@code "propertyA": null} in the map sent to the CCD API to perform a delete operation.
+     *
+     * <p>
+     * Override this method to declare the classes that require null value inclusion during the mapping process.
+     *
+     * @return an array of classes for which null values should be included; defaults to an empty array.
+     */
+    protected Class[] classesToOverrideJsonInclude() {
+        return new Class[0];
+    }
 
     /**
      * Get a description to be used in the update event submission.
