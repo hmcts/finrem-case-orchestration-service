@@ -41,3 +41,4 @@ pacts/
 
 lib/applicationinsights-agent-*.jar
 lib/applicationinsights.log
+/src/main/resources/manageHearingsMigration.csv

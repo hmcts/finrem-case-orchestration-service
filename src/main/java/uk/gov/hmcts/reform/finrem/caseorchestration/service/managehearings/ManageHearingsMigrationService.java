@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
@@ -24,6 +23,8 @@ public class ManageHearingsMigrationService {
 
     private final DirectionDetailsCollectionPopulator directionDetailsCollectionPopulator;
 
+    private final ManageHearingActionService manageHearingActionService;
+
     /**
      * Marks the case data as migrated to a specified Manage Hearings migration version.
      *
@@ -35,19 +36,17 @@ public class ManageHearingsMigrationService {
     }
 
     /**
-     * Populates a new {@link HearingTabItem} in the hearing tab of the case if the hearing
-     * details have not already been migrated.
+     * Populates the {@code ListForHearingWrapper} with hearing details if they have not already been migrated.
      *
      * <p>
-     * This method checks if the {@code ListForHearingWrapper} needs to be processed by evaluating
-     * both the {@code MhMigrationWrapper} and the current state of the wrapper itself.
-     * If migration is needed, it extracts hearing-related fields such as type, date, time,
-     * time estimate, court information, and additional information.
-     * These are used to build a new {@code HearingTabItem}, which is then added to the case data.
-     * Once added, the migration flag is set to {@code YES}.
+     * This method checks whether migration is necessary by calling {@code shouldPopulate()} on the
+     * {@code listForHearingWrapperPopulator}. If migration is required, it extracts hearing information such as
+     * hearing type, date, time, duration, court, and additional notes, and populates a new hearing entry into
+     * the case data. Once completed, the migration flag in {@code MhMigrationWrapper} is updated to indicate success.
      *
-     * @param caseData the {@link FinremCaseData} containing the hearing details and wrappers
+     * @param caseData the {@link FinremCaseData} containing hearing information and migration flags
      */
+
     public void populateListForHearingWrapper(FinremCaseData caseData) {
         if (!listForHearingWrapperPopulator.shouldPopulate(caseData)) {
             log.warn("{} - List for Hearing migration skipped.", caseData.getCcdCaseId());
@@ -56,6 +55,16 @@ public class ManageHearingsMigrationService {
         listForHearingWrapperPopulator.populate(caseData);
     }
 
+    /**
+     * Populates the {@code ListForInterimHearingWrapper} with interim hearing details if they have not already been migrated.
+     *
+     * <p>
+     * This method determines whether interim hearing migration is required by calling {@code shouldPopulate()} on
+     * the {@code listForInterimHearingWrapperPopulator}. If so, it maps the relevant interim hearing fields into
+     * the appropriate wrapper structure in {@link FinremCaseData}, and updates the migration flag accordingly.
+     *
+     * @param caseData the {@link FinremCaseData} containing interim hearing data and migration state
+     */
     public void populateListForInterimHearingWrapper(FinremCaseData caseData) {
         if (!listForInterimHearingWrapperPopulator.shouldPopulate(caseData)) {
             log.warn("{} - List for Interim Hearing migration skipped.", caseData.getCcdCaseId());
@@ -65,6 +74,17 @@ public class ManageHearingsMigrationService {
         listForInterimHearingWrapperPopulator.populate(caseData);
     }
 
+    /**
+     * Populates the general application wrapper with hearing details created through General Application Directions,
+     * if they have not already been migrated.
+     *
+     * <p>
+     * This method checks whether any hearing data created from General Application Directions events require migration
+     * by invoking {@code shouldPopulate()} on the {@code generalApplicationWrapperPopulator}. If so, it migrates the
+     * relevant data into the general application section of the case and sets the migration flag in {@code MhMigrationWrapper}.
+     *
+     * @param caseData the {@link FinremCaseData} containing general application and hearing data
+     */
     public void populateGeneralApplicationWrapper(FinremCaseData caseData) {
         if (!generalApplicationWrapperPopulator.shouldPopulate(caseData)) {
             log.warn("{} - Existing hearings created with General Application Directions migration skipped.", caseData.getCcdCaseId());
@@ -74,6 +94,17 @@ public class ManageHearingsMigrationService {
         generalApplicationWrapperPopulator.populate(caseData);
     }
 
+    /**
+     * Populates the {@code directionDetailsCollection} with hearing-related information extracted from Process Order events,
+     * if they have not already been migrated.
+     *
+     * <p>
+     * The method checks if migration is needed by calling {@code shouldPopulate()} on the
+     * {@code directionDetailsCollectionPopulator}. If migration is necessary, it transforms Process Order-related hearing
+     * data into direction details entries and adds them to the case data. It also marks the migration flag as complete.
+     *
+     * @param caseData the {@link FinremCaseData} containing direction order information and migration markers
+     */
     public void populateDirectionDetailsCollection(FinremCaseData caseData) {
         if (!directionDetailsCollectionPopulator.shouldPopulate(caseData)) {
             log.warn("{} - Existing hearings created with Process Order migration skipped.", caseData.getCcdCaseId());
@@ -92,5 +123,26 @@ public class ManageHearingsMigrationService {
     public boolean wasMigrated(FinremCaseData caseData) {
         MhMigrationWrapper mhMigrationWrapper = caseData.getMhMigrationWrapper();
         return mhMigrationWrapper.getMhMigrationVersion() != null;
+    }
+
+    /**
+     * Executes the Manage Hearings data migration process on the given case data.
+     *
+     * <p>
+     * The migration populates the necessary wrappers and collections required
+     * for hearings and general applications, marks the migration version,
+     * and updates the hearing tab data accordingly.
+     *
+     * @param caseData the case data to be migrated
+     * @param mhMigrationVersion the version string indicating the migration applied
+     */
+    public void runManageHearingMigration(FinremCaseData caseData, String mhMigrationVersion) {
+        populateListForHearingWrapper(caseData);
+        populateListForInterimHearingWrapper(caseData);
+        populateGeneralApplicationWrapper(caseData);
+        populateDirectionDetailsCollection(caseData);
+        markCaseDataMigrated(caseData, mhMigrationVersion);
+        // updates the hearing tab data accordingly.
+        manageHearingActionService.updateTabData(caseData);
     }
 }
