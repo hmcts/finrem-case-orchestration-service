@@ -133,7 +133,7 @@ class HearingsAppenderTest {
         HearingType expectedHearingType = HearingType.FH;
         Court expectedCourt = mock(Court.class);
 
-        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
+        CaseDocument additionalDoc = withAdditionDoc ? spy(CaseDocument.class) : null;
 
         InterimHearingItem interimHearingItem = spy(InterimHearingItem.builder()
             .interimHearingDate(hearingDate)

@@ -109,7 +109,7 @@ public class HearingsAppender {
         // Hearing Court - Please state in which Financial Remedies Court Zone the applicant resides
         Court hearingCourtSelection = interimHearingItem.toCourt();
         DocumentCollectionItem additionalDocument = interimHearingItem.getInterimUploadAdditionalDocument() == null ? null :
-            DocumentCollectionItem.builder().value(interimHearingItem.getInterimUploadAdditionalDocument()).build();
+            DocumentCollectionItem.builder().value(interimHearingItem.getInterimUploadAdditionalDocument().toBuilder().build()).build();
 
         return Hearing.builder()
             .hearingDate(hearingDate)
