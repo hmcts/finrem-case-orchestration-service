@@ -163,6 +163,8 @@ public class ManageHearingActionService {
      * @param caseData the case data containing the hearings and hearing documents
      */
     public void updateTabData(FinremCaseData caseData) {
+        // !!! Changes to this method may affect the manage hearing !!!
+        // see ManageHearingsMigrationTask.classesToOverrideJsonInclude.
         ManageHearingsWrapper hearingsWrapper = caseData.getManageHearingsWrapper();
         List<ManageHearingsCollectionItem> hearings = hearingsWrapper.getHearings();
 

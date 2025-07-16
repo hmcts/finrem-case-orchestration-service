@@ -7,6 +7,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.DirectionDetailsCollectionPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.GeneralApplicationWrapperPopulator;
@@ -14,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migra
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.migration.ListForInterimHearingWrapperPopulator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -200,6 +206,72 @@ class ManageHearingsMigrationServiceTest {
         verify(underTest).populateGeneralApplicationWrapper(caseData);
         verify(underTest).populateDirectionDetailsCollection(caseData);
         verify(underTest).markCaseDataMigrated(caseData, migrationVersion);
+        verify(manageHearingActionService).updateTabData(caseData);
+    }
+
+    @Test
+    void shouldRevertManageHearingMigrationMigrationAndRemoveOnlyMigratedHearings() {
+        // Given
+        ManageHearingsCollectionItem hearingWithYes = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder().wasMigrated(YesOrNo.YES).build())
+            .build();
+
+        ManageHearingsCollectionItem hearingWithNo = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder().wasMigrated(YesOrNo.NO).build())
+            .build();
+
+        ManageHearingsCollectionItem hearingWithNull = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder().wasMigrated(null).build())
+            .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .hearings(List.of(hearingWithYes, hearingWithNo, hearingWithNull))
+            .build();
+
+        MhMigrationWrapper mhMigrationWrapper = mock(MhMigrationWrapper.class);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .mhMigrationWrapper(mhMigrationWrapper)
+            .manageHearingsWrapper(wrapper)
+            .build();
+
+        // When
+        underTest.revertManageHearingMigration(caseData);
+
+        // Then
+        verify(mhMigrationWrapper).clearAll();
+        assertThat(caseData.getManageHearingsWrapper().getHearings()).containsExactly(hearingWithNo, hearingWithNull);
+        verify(manageHearingActionService).updateTabData(caseData);
+    }
+
+    @Test
+    void shouldRevertManageHearingMigrationMigrationAndRemoveAllHearings() {
+        // Given
+        ManageHearingsCollectionItem hearingWithYes1 = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder().wasMigrated(YesOrNo.YES).build())
+            .build();
+
+        ManageHearingsCollectionItem hearingWithYes2 = ManageHearingsCollectionItem.builder()
+            .value(Hearing.builder().wasMigrated(YesOrNo.YES).build())
+            .build();
+
+        ManageHearingsWrapper wrapper = ManageHearingsWrapper.builder()
+            .hearings(List.of(hearingWithYes1, hearingWithYes2))
+            .build();
+
+        MhMigrationWrapper mhMigrationWrapper = mock(MhMigrationWrapper.class);
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .mhMigrationWrapper(mhMigrationWrapper)
+            .manageHearingsWrapper(wrapper)
+            .build();
+
+        // When
+        underTest.revertManageHearingMigration(caseData);
+
+        // Then
+        verify(mhMigrationWrapper).clearAll();
+        assertThat(caseData.getManageHearingsWrapper().getHearings()).isNull();
         verify(manageHearingActionService).updateTabData(caseData);
     }
 }

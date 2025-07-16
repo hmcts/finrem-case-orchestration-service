@@ -26,4 +26,19 @@ public class MhMigrationWrapper {
 
     private String mhMigrationVersion;
 
+    /**
+     * Clears all Manage Hearings migration flags and version tracking.
+     *
+     * <p>
+     * This method resets all migration-related fields to {@code null}, effectively
+     * indicating that no migration has been applied or tracked. It is typically used
+     * to reset the state before reapplying or verifying migration.
+     */
+    public void clearAll() {
+        isListForHearingsMigrated = null;
+        isListForInterimHearingsMigrated = null;
+        isGeneralApplicationMigrated = null;
+        isDirectionDetailsCollectionMigrated = null;
+        mhMigrationVersion = null;
+    }
 }

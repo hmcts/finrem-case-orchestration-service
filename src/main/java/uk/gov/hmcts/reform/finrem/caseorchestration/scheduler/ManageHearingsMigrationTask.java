@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
@@ -18,6 +20,9 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
 
     @Value("${cron.manageHearingsMigration.enabled:false}")
     private boolean taskEnabled;
+
+    @Value("${cron.manageHearingsMigration.rollback:false}")
+    private boolean rollback;
 
     @Value("${cron.manageHearingsMigration.caseListFileName:updateConsentOrderFRCName-encrypted.csv}")
     private String csvFile;
@@ -35,15 +40,30 @@ public class ManageHearingsMigrationTask extends EncryptedCsvFileProcessingTask 
     }
 
     @Override
+    protected Class[] classesToOverrideJsonInclude() {
+        return new Class[] {MhMigrationWrapper.class, ManageHearingsWrapper.class};
+    }
+
+    @Override
     protected void executeTask(FinremCaseDetails finremCaseDetails) {
         FinremCaseData caseData = finremCaseDetails.getData();
         // It's weird caseData.ccdCaseId is null
         caseData.setCcdCaseId(finremCaseDetails.getId().toString());
-        if (!manageHearingsMigrationService.wasMigrated(caseData)) {
-            log.info("{} - performing manage hearings migration.", caseData.getCcdCaseId());
-            manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
+
+        if (rollback) {
+            if (manageHearingsMigrationService.wasMigrated(caseData)) {
+                log.info("{} - Rolling back Manage Hearings migration.", caseData.getCcdCaseId());
+                manageHearingsMigrationService.revertManageHearingMigration(caseData);
+            } else {
+                log.info("{} - Manage Hearings migration not detected. Rollback skipped.", caseData.getCcdCaseId());
+            }
         } else {
-            log.info("{} - case data was migrated.", caseData.getCcdCaseId());
+            if (!manageHearingsMigrationService.wasMigrated(caseData)) {
+                log.info("{} - Starting Manage Hearings migration.", caseData.getCcdCaseId());
+                manageHearingsMigrationService.runManageHearingMigration(caseData, mhMigrationVersion);
+            } else {
+                log.info("{} - Manage Hearings migration already applied. Skipping.", caseData.getCcdCaseId());
+            }
         }
     }
 
