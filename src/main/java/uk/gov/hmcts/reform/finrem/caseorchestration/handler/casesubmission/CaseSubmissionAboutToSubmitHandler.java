@@ -67,15 +67,15 @@ public class CaseSubmissionAboutToSubmitHandler extends FinremCallbackHandler {
         List<String> errors = new ArrayList<>();
         if (isPbaPaymentRequired) {
             PaymentResponse paymentResponse = pbaPaymentService.makePayment(userAuthorisation, caseDetails);
-            if (paymentResponse.isDuplicatePayment()) {
-                // No payment reference is supplied with a duplicate payment response
-                log.error("Case ID: {} - Duplicate payment", caseDetails.getId());
-            } else if (paymentResponse.isPaymentSuccess()) {
+            if (paymentResponse.isPaymentSuccess()) {
                 log.info("Case ID: {} - Payment successful", caseDetails.getId());
                 caseData.getPaymentDetailsWrapper().setPbaPaymentReference(paymentResponse.getReference());
+            } else if (paymentResponse.isDuplicatePayment()) {
+                log.info("Case ID: {} - Duplicate payment", caseDetails.getId());
+                errors.add(paymentResponse.getMessage());
             } else {
                 log.info("Case ID: {} - Payment failed", caseDetails.getId());
-                errors.add(paymentResponse.getError());
+                errors.add(paymentResponse.getMessage());
             }
         }
 
