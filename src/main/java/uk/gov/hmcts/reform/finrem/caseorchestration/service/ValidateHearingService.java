@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SelectablePartiesCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
@@ -92,15 +94,11 @@ public class ValidateHearingService {
      * @return a list of warning messages if the hearing date is outside the expected timeline,
      *         otherwise an empty list
      */
-    public List<String> validateManageHearingWarnings(FinremCaseData caseData, DynamicList hearingType) {
+    public List<String> validateManageHearingWarnings(FinremCaseData caseData, HearingType hearingType) {
         Optional<LocalDate> issueDate = Optional.ofNullable(caseData.getIssueDate());
         LocalDate hearingDate = caseData.getManageHearingsWrapper().getWorkingHearing().getHearingDate();
 
-        String selectedHearingTypeLabel = hearingType.getValue().getLabel();
-        HearingType selectedHearingType = HearingType.getManageHearingType(selectedHearingTypeLabel);
-
-
-        if (issueDate.isEmpty() || !(selectedHearingType.equals(HearingType.FDA) || selectedHearingType.equals(HearingType.FDR))) {
+        if (issueDate.isEmpty() || !(hearingType.equals(HearingType.FDA) || hearingType.equals(HearingType.FDR))) {
             return List.of();
         }
 

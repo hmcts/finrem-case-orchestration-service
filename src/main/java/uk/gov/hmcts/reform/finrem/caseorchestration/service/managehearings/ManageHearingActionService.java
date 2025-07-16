@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -59,8 +60,11 @@ public class ManageHearingActionService {
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
-        String selectedHearingTypeLabel = hearingWrapper.getWorkingHearing().getHearingType().getValue().getLabel();
-        HearingType selectedHearingType = HearingType.getManageHearingType(selectedHearingTypeLabel);
+
+        DynamicList hearingTypeDynamicList = hearingWrapper.getWorkingHearing().getHearingTypeDynamicList();
+        String selectedCode = hearingTypeDynamicList.getValue().getCode();
+        HearingType hearingType = HearingType.getManageHearingType(selectedCode);
+
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
@@ -69,8 +73,8 @@ public class ManageHearingActionService {
 
         generateHearingNotice(finremCaseDetails, authToken, documentMap);
 
-        boolean shouldGenerateFormC = HearingType.FDA.equals(selectedHearingType)
-            || (HearingType.FDR.equals(selectedHearingType) && expressCaseService.isExpressCase(caseData));
+        boolean shouldGenerateFormC = HearingType.FDA.equals(hearingType)
+            || (HearingType.FDR.equals(hearingType) && expressCaseService.isExpressCase(caseData));
 
         boolean isNotFastTrack = YesOrNo.isNoOrNull(caseData.getFastTrackDecision());
 

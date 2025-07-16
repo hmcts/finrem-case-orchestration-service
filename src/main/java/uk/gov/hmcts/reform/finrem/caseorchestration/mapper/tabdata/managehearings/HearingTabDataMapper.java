@@ -48,7 +48,7 @@ public class HearingTabDataMapper {
     }
 
     private String getHearingType(Hearing hearing) {
-        return hearing.getHearingType().getValue().getLabel();
+        return hearing.getHearingType().getId();
     }
 
     private String getCourtName(Hearing hearing) {

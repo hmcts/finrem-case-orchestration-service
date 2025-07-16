@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -68,10 +69,11 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             .setManageHearingsActionSelection(null);
 
         finremCaseData.getManageHearingsWrapper().setWorkingHearing(
-            Hearing.builder()
+            HearingWithDynamicList.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
-                .hearingType(generateHearingTypeList())
-                .build());
+                .hearingTypeDynamicList(generateHearingTypeList())
+                .build()
+        );
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData)
@@ -92,5 +94,4 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             .listItems(listElements)
             .build();
     }
-
 }

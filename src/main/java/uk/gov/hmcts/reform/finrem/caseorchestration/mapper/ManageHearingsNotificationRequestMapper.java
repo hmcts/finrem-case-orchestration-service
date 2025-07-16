@@ -114,7 +114,7 @@ public class ManageHearingsNotificationRequestMapper {
         return NotificationRequest.builder()
                 .notificationEmail(partySpecificDetails.recipientEmailAddress)
                 .caseReferenceNumber(String.valueOf(finremCaseDetails.getId()))
-                .hearingType(hearing.getHearingType().getValue().getLabel())
+                .hearingType(hearing.getHearingType().getId())
                 .solicitorReferenceNumber(nullToEmpty(finremCaseData.getContactDetailsWrapper().getSolicitorReference()))
                 .applicantName(applicantSurname)
                 .respondentName(respondentSurname)
