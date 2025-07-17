@@ -2,11 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -27,6 +25,12 @@ import java.net.URI;
 @Slf4j
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class PBAPaymentClient {
+
+    /** Error message to be returned when the payment service encounters a client error such as invalid PBA account. */
+    public static final String CLIENT_PAYMENT_ERROR_MESSAGE = "Payment failed. Please review your account.";
+    /** Error message to be returned when the payment service encounters an error. */
+    public static final String SERVER_PAYMENT_ERROR_MESSAGE = "An error occurred while processing the payment. Please try again later.";
+
     private final PBAPaymentServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
@@ -91,25 +95,16 @@ public class PBAPaymentClient {
             return get400ErrorResponse(httpClientErrorException);
         } else {
             return PaymentResponse.builder()
-                .error("An error occurred while processing the payment.")
+                .error(e.getMessage())
+                .message(SERVER_PAYMENT_ERROR_MESSAGE)
                 .build();
         }
     }
 
     private PaymentResponse get400ErrorResponse(HttpClientErrorException e) {
-        if (isDuplicatePaymentException(e)) {
-            return PaymentResponse.builder()
-                .error(PaymentResponse.DUPLICATE_PAYMENT_MESSAGE)
-                .build();
-        } else {
-            return PaymentResponse.builder()
-                .error("Payment failed. Please review your account.")
-                .build();
-        }
-    }
-
-    private boolean isDuplicatePaymentException(HttpClientErrorException e) {
-        return e.getStatusCode() == HttpStatus.BAD_REQUEST
-            && StringUtils.contains(e.getResponseBodyAsString(), PaymentResponse.DUPLICATE_PAYMENT_MESSAGE);
+        return PaymentResponse.builder()
+            .error(e.getResponseBodyAsString())
+            .message(CLIENT_PAYMENT_ERROR_MESSAGE)
+            .build();
     }
 }

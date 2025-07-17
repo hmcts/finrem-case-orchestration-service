@@ -38,7 +38,7 @@ public class UpdateFrcInformationAboutToSubmitHandler extends FinremCallbackHand
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        CallbackHandlerLogger.aboutToSubmit(callbackRequest);
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         caseData.getRegionWrapper()

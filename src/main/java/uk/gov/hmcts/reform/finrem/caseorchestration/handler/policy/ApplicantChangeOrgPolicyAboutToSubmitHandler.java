@@ -34,7 +34,6 @@ public class ApplicantChangeOrgPolicyAboutToSubmitHandler extends FinremCallback
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         String caseId = String.valueOf(caseDetails.getId());
         log.info("Received callback {} request for event {} for given Case ID: {}", CallbackType.ABOUT_TO_SUBMIT,

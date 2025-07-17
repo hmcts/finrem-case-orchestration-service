@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Service
 public class IssueApplicationConsentedAboutToStartHandler extends FinremCallbackHandler {
 
-
     private final OnStartDefaultValueService service;
 
     public IssueApplicationConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
@@ -29,7 +28,6 @@ public class IssueApplicationConsentedAboutToStartHandler extends FinremCallback
             && CaseType.CONSENTED.equals(caseType)
             && (EventType.ISSUE_APPLICATION.equals(eventType));
     }
-
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
