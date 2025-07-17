@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.judgeapproval;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,17 +38,14 @@ class ApproveOrderServiceTest {
 
     @ParameterizedTest
     @MethodSource("providePopulateJudgeDecisionsData")
-    void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked,
-                                    Boolean hasApprovedDecision, Boolean hasRefusedDecision) {
-        Pair<Boolean, Boolean> ret = underTest.populateJudgeDecisions(FinremCaseDetails.builder().build(), draftOrdersWrapper, AUTH_TOKEN);
+    void testPopulateJudgeDecisions(DraftOrdersWrapper draftOrdersWrapper, int expectedPopulateJudgeDecisionInvoked) {
+        underTest.populateJudgeDecisions(FinremCaseDetails.builder().build(), draftOrdersWrapper, AUTH_TOKEN);
 
         verify(judgeApprovalResolver, times(expectedPopulateJudgeDecisionInvoked))
             .populateJudgeDecision(any(FinremCaseDetails.class), eq(draftOrdersWrapper), any(CaseDocument.class), any(JudgeApproval.class),
                 eq(AUTH_TOKEN));
-      
+
         assertNotNull(draftOrdersWrapper.getApproveOrdersConfirmationBody());
-        assertThat(ret).extracting(Pair::getLeft).isEqualTo(hasApprovedDecision);
-        assertThat(ret).extracting(Pair::getRight).isEqualTo(hasRefusedDecision);
     }
 
     static Stream<Arguments> providePopulateJudgeDecisionsData() {
