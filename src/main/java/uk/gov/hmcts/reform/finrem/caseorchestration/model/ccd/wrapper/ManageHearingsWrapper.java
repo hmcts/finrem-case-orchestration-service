@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,4 +38,19 @@ public class ManageHearingsWrapper {
     private List<HearingTabCollectionItem> int2HearingTabItems;
     private List<HearingTabCollectionItem> int3HearingTabItems;
     private List<HearingTabCollectionItem> int4HearingTabItems;
+
+    /**
+     * Test and docs for this
+     * @param requiredId
+     * @return
+     */
+    public ManageHearingsCollectionItem getManageHearingsCollectionItemById(UUID requiredId) {
+        return Optional.ofNullable(hearings)
+            .orElseGet(Collections::emptyList)
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(item -> requiredId != null && requiredId.equals(item.getId()))
+            .findFirst()
+            .orElse(null);
+    }
 }

@@ -88,7 +88,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
-     * Work in progress. Intervener bug means interveners never on the party list.
+     * Todo. Work in progress. Intervener logic to be done next.
      * @return true if the intervener should receive an email notification.
      */
     public boolean shouldEmailToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
@@ -116,7 +116,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
-     * Work in progress. Intervener bug means interveners never on the party list.
+     * Todo. Work in progress. Intervener's to be coded next.
      * @return true if the ***** should receive hearing documents by post.
      */
     public boolean shouldPostToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
@@ -135,7 +135,7 @@ public class HearingCorrespondenceHelper {
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
             HearingType.MPS,
             HearingType.FH,
@@ -147,28 +147,62 @@ public class HearingCorrespondenceHelper {
             HearingType.PTR
         );
 
-        ManageHearingsAction actionSelection = Optional.ofNullable(finremCaseDetails)
-            .map(FinremCaseDetails::getData)
-            .map(FinremCaseData::getManageHearingsWrapper)
-            .map(ManageHearingsWrapper::getManageHearingsActionSelection)
-            .orElse(null);
-
-        boolean isAddHearingEvent = ManageHearingsAction.ADD_HEARING.equals(actionSelection);
-
         boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
             .map(Hearing::getHearingType)
             .map(noticeOnlyHearingTypes::contains)
             .orElse(false);
 
-        return isAddHearingEvent && isNoticeOnlyHearingType;
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+
+        return isAddHearingAction(actionSelection) && isNoticeOnlyHearingType;
     }
 
     /**
-     * Todo: write this. write test.  List what the docs are.
+     * Kept as a small set of hearings to be extensible.
+     * Determines if a hearing should send a full set of hearing documents (not just a notice).
+     * To return true:
+     * - the Action must be ADD_HEARING
+     * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set
+     * @param finremCaseDetails case details
+     * @param hearing the hearing to check
+     * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldSendAllHearingDocuments() {
+    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        Set<HearingType> hearingTypesThatNeedDocumentsPosted = Set.of(
+            HearingType.FDR,
+            HearingType.FDA
+        );
 
-        return true;
+        boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
+            .map(Hearing::getHearingType)
+            .map(hearingTypesThatNeedDocumentsPosted::contains)
+            .orElse(false);
 
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+
+        return isAddHearingAction(actionSelection) && allDocumentsNeedPosting;
     }
+
+    /**
+     * Retrieves the action selection, e.g. ADD_HEARING, from the Manage Hearings Wrapper in the case details.
+     * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
+     * @return the ManageHearingsAction or null if not present
+     */
+    private ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
+        return Optional.ofNullable(finremCaseDetails)
+            .map(FinremCaseDetails::getData)
+            .map(FinremCaseData::getManageHearingsWrapper)
+            .map(ManageHearingsWrapper::getManageHearingsActionSelection)
+            .orElse(null);
+    }
+
+    /**
+     * Determines if the action selection is to add a hearing.
+     * @param actionSelection the action selection to check
+     * @return true if the action selection is ADD_HEARING, false otherwise
+     */
+    private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
+        return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
+    }
+
 }

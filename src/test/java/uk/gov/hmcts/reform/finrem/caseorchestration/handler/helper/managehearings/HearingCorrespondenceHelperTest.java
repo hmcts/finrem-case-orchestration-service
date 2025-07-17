@@ -170,11 +170,11 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideNoticeOnlyCases")
-    void shouldSendHearingNoticeOnlyReturnsTrue(Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsTrue(Hearing hearing) {
         // Arrange case
         FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
         // Act
-        boolean result = helper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing);
+        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
         // Assert
         assertTrue(result);
     }
@@ -218,9 +218,37 @@ class HearingCorrespondenceHelperTest {
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldSendHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         // Act
-        boolean result = helper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing);
+        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
+        // Assert
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldPostAllHearingDocumentsReturnsTrue() {
+        // Arrange case
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
+        Hearing fdaHearing = Hearing.builder().hearingType(HearingType.FDA).build();
+        Hearing fdrHearing = Hearing.builder().hearingType(HearingType.FDR).build();
+
+        // Act
+        boolean fdaResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdaHearing);
+        boolean fdrResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdrHearing);
+
+        // Assert
+        assertTrue(fdaResult);
+        assertTrue(fdrResult);
+    }
+
+    /**
+     * Confirms that shouldSendHearingNoticeOnly returns false for the passes arguments.
+     */
+    @ParameterizedTest
+    @MethodSource("provideInvalidAllHearingDocumentCases")
+    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // Act
+        boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
         // Assert
         assertFalse(result);
     }
@@ -250,6 +278,52 @@ class HearingCorrespondenceHelperTest {
             arguments(
                 finremCaseDetails(ManageHearingsAction.ADD_HEARING),
                 null
+            )
+        );
+    }
+
+    /**
+     * Used by shouldPostAllHearingDocumentsReturnsFalse.
+     *
+     * @return Stream of Arguments all of which should cause shouldPostAllHearingDocumentsReturnsFalse to return False
+     */
+    static Stream<Arguments> provideInvalidAllHearingDocumentCases() {
+        return Stream.of(
+            // ManageHearingsAction is null, so a failing condition. Hearing type is correct
+            arguments(
+                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.FDA).build()
+            ),
+            // Action is ADD_HEARING, which is valid. However, hearing types are wrong.
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FH).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.DIR).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MENTION).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.PERMISSION_TO_APPEAL).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.APPEAL_HEARING).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.RETRIAL_HEARING).build()
+            ),
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.PTR).build()
+            ),
+            // The action is valid, but hearing is null
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
             )
         );
     }
