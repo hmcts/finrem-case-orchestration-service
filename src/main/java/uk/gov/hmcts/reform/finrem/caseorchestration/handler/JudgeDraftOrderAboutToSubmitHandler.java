@@ -50,11 +50,8 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
+        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
-        String caseId = String.valueOf(finremCaseDetails.getId());
-        log.info("Invoking contested event {} about to submit callback for Case ID: {}",
-            callbackRequest.getEventType(), caseId);
         validateCaseData(callbackRequest);
         convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
         CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
