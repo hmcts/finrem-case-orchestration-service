@@ -88,7 +88,7 @@ class HearingsAppenderTest {
         HearingRegionWrapper hearingRegionWrapper = mock(HearingRegionWrapper.class);
         when(hearingRegionWrapper.toCourt()).thenReturn(expectedCourt);
 
-        CaseDocument additionalDoc = withAdditionDoc ? mock(CaseDocument.class) : null;
+        CaseDocument additionalDoc = withAdditionDoc ? spy(CaseDocument.class) : null;
 
         ListForHearingWrapper listForHearingWrapper = ListForHearingWrapper.builder()
             .hearingDate(hearingDate)

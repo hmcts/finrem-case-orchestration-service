@@ -188,6 +188,6 @@ public class HearingsAppender {
      */
     private List<DocumentCollectionItem> toAdditionalHearingDocs(ListForHearingWrapper listForHearingWrapper) {
         CaseDocument doc = listForHearingWrapper.getAdditionalListOfHearingDocuments();
-        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc).build());
+        return doc == null ? null : List.of(DocumentCollectionItem.builder().value(doc.toBuilder().build()).build());
     }
 }
