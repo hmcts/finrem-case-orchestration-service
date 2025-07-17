@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.GeneralApplicationsCategoriser;
 
 import java.io.InputStream;
@@ -72,6 +73,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
     private GeneralApplicationsCategoriser generalApplicationsCategoriser;
+    @Mock
+    private PartyService partyService;
 
     private ObjectMapper objectMapper;
 
@@ -82,7 +85,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
     public void setup() {
         objectMapper = new ObjectMapper();
         startHandler = new GeneralApplicationDirectionsAboutToStartHandler(
-            assignCaseAccessService, finremCaseDetailsMapper, helper, service);
+            assignCaseAccessService, finremCaseDetailsMapper, helper, service, partyService);
         submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(
             finremCaseDetailsMapper, helper, service, gaService, generalApplicationsCategoriser);
     }

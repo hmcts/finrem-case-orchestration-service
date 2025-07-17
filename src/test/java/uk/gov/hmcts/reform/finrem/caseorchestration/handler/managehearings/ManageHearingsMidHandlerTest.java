@@ -9,10 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -44,8 +46,13 @@ class ManageHearingsMidHandlerTest {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
                 .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
-                .workingHearing(Hearing.builder()
-//                    .hearingType(HearingType.DIR)
+                .workingHearing(HearingWithDynamicList.builder()
+                    .hearingTypeDynamicList(DynamicList.builder()
+                        .value(DynamicListElement.builder()
+                            .code(HearingType.DIR.name())
+                            .label(HearingType.DIR.getId())
+                            .build())
+                        .build())
                     .build())
                 .build())
             .build();
@@ -58,8 +65,8 @@ class ManageHearingsMidHandlerTest {
             .caseDetails(caseDetails)
             .build();
 
-//        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
-//            .thenReturn(List.of("Warning 1"));
+        when(validateHearingService.validateManageHearingWarnings(finremCaseData, HearingType.DIR))
+            .thenReturn(List.of("Warning 1"));
 
         // Act
         var response = manageHearingsMidHandler.handle(callbackRequest, "authToken");

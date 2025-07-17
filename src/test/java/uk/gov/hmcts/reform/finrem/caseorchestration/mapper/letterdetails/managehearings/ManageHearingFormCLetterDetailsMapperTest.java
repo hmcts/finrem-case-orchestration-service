@@ -15,13 +15,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -54,7 +56,7 @@ class ManageHearingFormCLetterDetailsMapperTest {
     @ParameterizedTest
     @MethodSource("provideFormCDetails")
     void shouldBuildDocumentTemplateDetails(HearingMode hearingMode, String additionalHearingInfo,
-                                            String expectedAttendance, String expectedAdditionalInfo)  {
+                                            String expectedAttendance, String expectedAdditionalInfo) {
         // Arrange
         FinremCaseData caseData = FinremCaseData.builder()
             .ccdCaseType(CaseType.CONTESTED)
@@ -69,23 +71,26 @@ class ManageHearingFormCLetterDetailsMapperTest {
                 .build())
             .manageHearingsWrapper(
                 ManageHearingsWrapper.builder()
-                    .workingHearing(Hearing.builder()
-                        .hearingType(HearingType.FDR)
+                    .workingHearing(HearingWithDynamicList.builder()
+                        .hearingTypeDynamicList(DynamicList.builder()
+                            .value(DynamicListElement.builder()
+                                .code(HearingType.FDR.name())
+                                .label(HearingType.FDR.getId())
+                                .build())
+                            .build())
                         .hearingDate(LocalDate.of(2025, 8, 1))
                         .hearingTime("10:00 AM")
                         .hearingTimeEstimate("2 hours")
                         .hearingMode(hearingMode)
                         .additionalHearingInformation(additionalHearingInfo)
                         .hearingCourtSelection(
-                            Court
-                            .builder()
-                            .region(Region.LONDON)
-                            .londonList(RegionLondonFrc.LONDON)
-                            .courtListWrapper(DefaultCourtListWrapper
-                                .builder()
-                                .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                            Court.builder()
+                                .region(Region.LONDON)
+                                .londonList(RegionLondonFrc.LONDON)
+                                .courtListWrapper(DefaultCourtListWrapper.builder()
+                                    .cfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT)
+                                    .build())
                                 .build())
-                            .build())
                         .build())
                     .build())
             .build();

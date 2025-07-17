@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
@@ -60,7 +63,7 @@ class HearingsAboutToSubmitHandlerTest {
     void givenValidCaseData_whenHandleAdd_thenHearingAddedToManageHearingsList() {
         // Arrange
         String caseReference = TestConstants.CASE_ID;
-        Hearing hearingToAdd = createHearingToAdd();
+        HearingWithDynamicList hearingToAdd = createHearingToAdd();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
@@ -76,7 +79,7 @@ class HearingsAboutToSubmitHandlerTest {
             UUID workingHearingID = UUID.randomUUID();
             ManageHearingsCollectionItem manageHearingsCollectionItem = ManageHearingsCollectionItem.builder()
                 .id(workingHearingID)
-                .value(hearingToAdd)
+                .value(transformHearingInputsToHearing(hearingToAdd))
                 .build();
 
             ManageHearingDocumentsCollectionItem manageHearingDocumentsCollectionItem = ManageHearingDocumentsCollectionItem
@@ -91,7 +94,7 @@ class HearingsAboutToSubmitHandlerTest {
                         .documentBinaryUrl("documentBinaryUrl")
                         .uploadTimestamp(LocalDateTime.now())
                         .build())
-                        .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
+                    .hearingCaseDocumentType(CaseDocumentType.HEARING_NOTICE)
                     .build())
                 .build();
 
@@ -144,7 +147,7 @@ class HearingsAboutToSubmitHandlerTest {
         //Assert perform add
         assertThat(responseManageHearingsWrapper.getHearings())
             .extracting(ManageHearingsCollectionItem::getValue)
-            .contains(hearingToAdd);
+            .contains(transformHearingInputsToHearing(hearingToAdd));
         assertThat(hearingDocumentAdded.getValue().getHearingId()).isEqualTo(hearingId);
         assertThat(hearingDocumentAdded.getValue().getHearingDocument().getDocumentFilename())
             .isEqualTo("HearingNotice.pdf");
@@ -157,11 +160,16 @@ class HearingsAboutToSubmitHandlerTest {
             .contains(hearingTabItem);
     }
 
-    private Hearing createHearingToAdd() {
-        return Hearing
+    private HearingWithDynamicList createHearingToAdd() {
+        return HearingWithDynamicList
             .builder()
             .hearingDate(LocalDate.now())
-            .hearingType(HearingType.DIR)
+            .hearingTypeDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(HearingType.DIR.name())
+                    .label(HearingType.DIR.getId())
+                    .build())
+                .build())
             .hearingTimeEstimate("30mins")
             .hearingTime("10:00")
             .hearingMode(HearingMode.IN_PERSON)
@@ -194,6 +202,22 @@ class HearingsAboutToSubmitHandlerTest {
                     .code("Party1")
                     .build()))
                 .build())
+            .build();
+    }
+
+    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+        return Hearing.builder()
+            .hearingDate(workingHearing.getHearingDate())
+            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
+            .hearingTime(workingHearing.getHearingTime())
+            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
+            .hearingMode(workingHearing.getHearingMode())
+            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
+            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
             .build();
     }
 }
