@@ -19,7 +19,7 @@ def versions = [
         bspCommonLib         : '0.1.2',
         ccdClient            : '5.1.1',
         commonsIo            : '2.19.0',
-        commonsLang3         : '3.17.0',
+        commonsLang3         : '3.18.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.38',
