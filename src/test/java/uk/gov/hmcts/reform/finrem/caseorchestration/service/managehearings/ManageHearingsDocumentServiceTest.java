@@ -88,7 +88,6 @@ class ManageHearingsDocumentServiceTest {
     private static final String FORM_G_FILE_NAME = "formGFileName";
     private static final String FORM_G_URL = "formGURL";
 
-
     private static final String PFD_NCDR_COMPLIANCE_LETTER = "pfdNcdrComplianceLetter";
     private static final String PFD_NCDR_COMPLIANCE_LETTER_FILE_NAME = "pfdNcdrComplianceLetterFileName";
     private static final String PFD_NCDR_COMPLIANCE_LETTER_URL = "pfdNcdrComplianceLetterURL";
@@ -473,7 +472,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     /**
-     * For FDA hearings, check that correct documents returned by getHearingDocumentsToPost
+     * For FDA hearings, check that correct documents returned by getHearingDocumentsToPost.
      * Form C, Form G, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
@@ -507,7 +506,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     /**
-     * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost
+     * For FDA hearings on fast track cases, check that correct documents returned by getHearingDocumentsToPost.
      * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
@@ -540,7 +539,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     /**
-     * For FDR hearings, check that correct documents returned by getHearingDocumentsToPost
+     * For FDR hearings, check that correct documents returned by getHearingDocumentsToPost.
      * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
      */
     @Test
@@ -573,7 +572,7 @@ class ManageHearingsDocumentServiceTest {
     }
 
     /**
-     * For FDR hearings on express cases, check that correct documents returned by getHearingDocumentsToPost
+     * For FDR hearings on express cases, check that correct documents returned by getHearingDocumentsToPost.
      */
     @Test
     void getHearingDocumentsToPostShouldReturnFdrExpressDocuments() {

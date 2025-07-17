@@ -40,9 +40,13 @@ public class ManageHearingsWrapper {
     private List<HearingTabCollectionItem> int4HearingTabItems;
 
     /**
-     * Test and docs for this
-     * @param requiredId
-     * @return
+     * Retrieves a {@link ManageHearingsCollectionItem} from the hearings list by its UUID.
+     * <p>
+     * If the hearings list is {@code null} or no item matches the provided ID, this method returns {@code null}.
+     * </p>
+     *
+     * @param requiredId the UUID of the hearing item to retrieve
+     * @return the matching {@link ManageHearingsCollectionItem}, or {@code null} if not found
      */
     public ManageHearingsCollectionItem getManageHearingsCollectionItemById(UUID requiredId) {
         return Optional.ofNullable(hearings)

@@ -274,7 +274,8 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         verify(bulkPrintService).printApplicantDocuments((FinremCaseDetails) any(), any(), any());
-        assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post hearing documents to the APP_SOLICITOR party. Request sent for case ID: 123");
+        assertThat(logs.getInfos())
+            .contains("Request sent to Bulk Print to post hearing documents to the APP_SOLICITOR party. Request sent for case ID: 123");
     }
 
     /**
@@ -308,7 +309,8 @@ class ManageHearingsCorresponderTest {
         // Verify
         verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
         verify(bulkPrintService).printRespondentDocuments((FinremCaseDetails) any(), any(), any());
-        assertThat(logs.getInfos()).contains("Request sent to Bulk Print to post hearing documents to the RESP_SOLICITOR party. Request sent for case ID: 123");
+        assertThat(logs.getInfos())
+            .contains("Request sent to Bulk Print to post hearing documents to the RESP_SOLICITOR party. Request sent for case ID: 123");
     }
 
     /**

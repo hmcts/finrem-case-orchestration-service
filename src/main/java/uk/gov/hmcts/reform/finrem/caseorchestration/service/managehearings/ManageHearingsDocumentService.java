@@ -189,7 +189,6 @@ public class ManageHearingsDocumentService {
         return getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.HEARING_NOTICE);
     }
 
-    // todo needs test
     /**
      * Retrieves all hearing documents that need to be posted for the current working hearing.
      * @param finremCaseDetails the case details containing the hearing documents
@@ -295,6 +294,8 @@ public class ManageHearingsDocumentService {
     }
 
     /**
+     * Todo: Waiting for BA clarification.  In practice, a non-express FDR case only.
+     * Todo: generates a Hearing Notice.  This method handles missing docs, but probably needs amending.
      * Post for FDR Hearings always includes a Form G.
      * The Form C posted depends on whether the case is express or not.
      * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.

@@ -273,7 +273,6 @@ public class ManageHearingsCorresponder {
             caseRole, finremCaseDetails.getId());
     }
 
-
     /**
      * Prints documents for the specified case role.
      * Uses the {@link BulkPrintService} to send the documents for printing.
