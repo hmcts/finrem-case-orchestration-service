@@ -1,14 +1,53 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.safeListWithoutNulls;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toListOrNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.toSingletonListOrNull;
 
 class ListUtilsTest {
+
+    @Setter
+    @Getter
+    static class Holder<T> {
+        private List<T> list;
+    }
+
+    @Test
+    void testAddItemToList() {
+        Holder<String> holder = new Holder<>();
+
+        // Case 1: list is null initially
+        assertThat(holder.getList()).isNull();
+        ListUtils.addItemToList(holder::getList, holder::setList, "first");
+        assertThat(holder.getList()).isNotNull()
+            .hasSize(1)
+            .containsExactly("first");
+
+        // Case 2: add to existing mutable list
+        ListUtils.addItemToList(holder::getList, holder::setList, "second");
+        assertThat(holder.getList()).containsExactly("first", "second");
+
+        // Case 3: add to immutable list
+        holder.setList(List.of("immutable"));
+        ListUtils.addItemToList(holder::getList, holder::setList, "added");
+        assertThat(holder.getList()).containsExactly("immutable", "added");
+
+        // Case 4: add null item
+        ListUtils.addItemToList(holder::getList, holder::setList, null);
+        assertThat(holder.getList()).hasSize(3);
+        assertThat(holder.getList().get(2)).isNull();
+    }
 
     @Test
     void testToSingletonListOrNullEdgeCases() {
@@ -70,5 +109,38 @@ class ListUtilsTest {
 
         // duplicate values - just to check ordering preserved
         assertThat(toListOrNull("A", "A", null)).isEqualTo(List.of("A", "A"));
+    }
+
+    @Test
+    void testSafeListWithoutNulls() {
+        // Null input
+        assertThat(safeListWithoutNulls((String[]) null)).isEqualTo(List.of());
+
+        // Empty input
+        assertThat(safeListWithoutNulls()).isEqualTo(List.of());
+
+        // All nulls
+        assertThat(safeListWithoutNulls(null, null)).isEqualTo(List.of());
+
+        // Mixed nulls and non-nulls
+        assertThat(safeListWithoutNulls("a", null, "b", null, "c")).isEqualTo(List.of("a", "b", "c"));
+
+        // No nulls
+        assertThat(safeListWithoutNulls("a", "b", "c")).isEqualTo(List.of("a", "b", "c"));
+    }
+
+    @Test
+    void testNullIfEmpty() {
+        // null input
+        assertThat(nullIfEmpty(null)).isNull();
+
+        // empty list
+        assertNull(nullIfEmpty(List.of()));
+
+        // non-empty list
+        List<String> input = List.of("a", "b");
+        List<String> result = nullIfEmpty(input);
+        assertNotNull(result);
+        assertEquals(List.of("a", "b"), result);
     }
 }

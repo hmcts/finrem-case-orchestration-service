@@ -35,7 +35,7 @@ class HearingTabDataMapperTest {
 
     private static final String DEFAULT_HEARING_MODE = "Hearing mode not specified";
     private static final String DEFAULT_DATE_TIME = "Date and time not provided";
-    private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Confidential parties not specified";
+    private static final String DEFAULT_CONFIDENTIAL_PARTIES = "Parties not specified";
 
     private static final String COURT_NAME = "courtName";
     private static final String HEARING_TYPE = "Financial Dispute Resolution (FDR)";

@@ -40,6 +40,10 @@ public class GeneralApplicationWrapper implements HasCaseDocument {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate generalApplicationDirectionsCourtOrderDate;
     private String generalApplicationDirectionsTextFromJudge;
+    /**
+     * @deprecated This field is unused and is not set anywhere.
+     */
+    @Deprecated
     private CaseDocument generalApplicationDirectionsDocument;
     private List<GeneralApplicationsCollection> generalApplicationIntvrOrders;
     private String generalApplicationNotApprovedReason;

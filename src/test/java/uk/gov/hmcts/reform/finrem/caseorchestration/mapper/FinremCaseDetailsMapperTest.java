@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseNotes;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseNotesCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
@@ -111,6 +113,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentC
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SolicitorToDraftOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
@@ -128,6 +131,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadOrderDocumen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.PaymentDetailsWrapper;
@@ -139,11 +144,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FinremCaseDetailMapperTest {
+class FinremCaseDetailsMapperTest {
 
     FinremCaseDetailsMapper finremCaseDetailsMapper;
 
@@ -252,6 +258,56 @@ class FinremCaseDetailMapperTest {
         assertEquals("25500", feeValue.getFeeAmount());
         assertEquals("3", feeValue.getFeeVersion());
         assertEquals("Application for a financial order", feeValue.getFeeDescription());
+    }
+
+    @Test
+    void shouldReturnMapWithNull_() throws JsonProcessingException {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .state(State.CASE_ADDED)
+            .data(FinremCaseData.builder()
+                // Set empty objects to ensure JSON output despite @JsonIgnore on getMhMigrationWrapper and getManageHearingsWrapper
+                .mhMigrationWrapper(MhMigrationWrapper.builder().build())
+                .manageHearingsWrapper(ManageHearingsWrapper.builder().build())
+                .build())
+            .build();
+
+        String[] mhMigrationWrapperClassJsonProperties = new String[] {
+            "mhMigrationVersion",
+            "isListForHearingsMigrated",
+            "isListForInterimHearingsMigrated",
+            "isGeneralApplicationMigrated",
+            "isDirectionDetailsCollectionMigrated"
+        };
+        String[] manageHearingsWrapperClassJsonProperties = new String[] {
+            "manageHearingsActionSelection",
+            "workingHearing",
+            "hearings",
+            "hearingDocumentsCollection",
+            "workingHearingId",
+            "hearingTabItems",
+            "applicantHearingTabItems",
+            "respondentHearingTabItems",
+            "int1HearingTabItems",
+            "int2HearingTabItems",
+            "int3HearingTabItems",
+            "int4HearingTabItems"
+        };
+
+        // MhMigrationWrapper.class
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, MhMigrationWrapper.class);
+        assertThat(caseDetails.getData()).extracting(mhMigrationWrapperClassJsonProperties).containsOnlyNulls();
+        assertThat(caseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
+
+        // ManageHearingsWrapper.class
+        caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, ManageHearingsWrapper.class);
+        assertThat(caseDetails.getData()).extracting(manageHearingsWrapperClassJsonProperties).containsOnlyNulls();
+        assertThat(caseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
+
+        // Not providing classesToOverrideJsonInclude
+        caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails);
+        assertThat(caseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
+        assertThat(caseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
     }
 
     private void assertBatchThree(FinremCaseData caseData) {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,7 @@ public abstract class BaseTask implements Runnable {
             int batchCount = 1;
             for (CaseReference caseReference : caseReferences) {
                 count++;
+                final String caseId = caseReference.getCaseReference();
                 try {
                     RequestContextHolder.setRequestAttributes(new CustomRequestScopeAttr());
                     if (count == bulkPrintBatchSize) {
@@ -57,37 +59,38 @@ public abstract class BaseTask implements Runnable {
                         batchCount++;
                     }
                     String systemUserToken = getSystemUserToken();
-                    log.info("Process case reference {}, batch {}, count {}", caseReference.getCaseReference(), batchCount, count);
+                    log.info("Process case reference {}, batch {}, count {}", caseId, batchCount, count);
 
                     SearchResult searchResult =
-                        ccdService.getCaseByCaseId(caseReference.getCaseReference(), getCaseType(), systemUserToken);
+                        ccdService.getCaseByCaseId(caseId, getCaseType(), systemUserToken);
                     log.info("SearchResult count {}", searchResult.getTotal());
                     if (CollectionUtils.isNotEmpty(searchResult.getCases())) {
                         if (!isUpdatedRequired(searchResult.getCases().getFirst())) {
-                            log.info("No update required for case reference {}", caseReference.getCaseReference());
+                            log.info("No update required for case reference {}", caseId);
                             continue;
                         }
 
                         StartEventResponse startEventResponse = ccdService.startEventForCaseWorker(systemUserToken,
-                            caseReference.getCaseReference(), getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
+                            caseId, getCaseType().getCcdType(), EventType.AMEND_CASE_CRON.getCcdType());
 
                         CaseDetails caseDetails = startEventResponse.getCaseDetails();
                         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-                        log.info("Updating {} for Case ID: {}", getTaskName(), caseDetails.getId());
+                        log.info("Updating {} for Case ID: {}", getTaskName(), caseId);
                         executeTask(finremCaseDetails);
                         String description = getDescription(finremCaseDetails);
-                        CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+                        CaseDetails updatedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails,
+                            classesToOverrideJsonInclude());
                         startEventResponse.getCaseDetails().setData(updatedCaseDetails.getData());
                         ccdService.submitEventForCaseWorker(startEventResponse, systemUserToken,
-                            caseDetails.getId().toString(),
+                            caseId,
                             getCaseType().getCcdType(),
                             EventType.AMEND_CASE_CRON.getCcdType(),
                             getSummary(),
                             description);
-                        log.info("Updated {} for Case ID: {}", getTaskName(), caseDetails.getId());
+                        log.info("Updated {} for Case ID: {}", getTaskName(), caseId);
                     }
-                } catch (InterruptedException | RuntimeException e) {
-                    log.error("Cron task {}: Error processing case {}", getTaskName(), caseReference.getCaseReference(), e);
+                } catch (InterruptedException | RuntimeException | JsonProcessingException e) {
+                    log.error("Cron task {}: Error processing case {}", getTaskName(), caseId, e);
                 } finally {
                     RequestContextHolder.resetRequestAttributes();
                 }
@@ -120,6 +123,23 @@ public abstract class BaseTask implements Runnable {
     protected abstract String getSummary();
 
     protected abstract void executeTask(FinremCaseDetails finremCaseDetails);
+
+    /**
+     * Specifies the classes for which null values should be included during mapping.
+     *
+     * <p>
+     * This is useful when you want to explicitly delete values by setting properties to {@code null}.
+     * For example, if your service sets {@code propertyA} to {@code null}, you must pass
+     * {@code "propertyA": null} in the map sent to the CCD API to perform a delete operation.
+     *
+     * <p>
+     * Override this method to declare the classes that require null value inclusion during the mapping process.
+     *
+     * @return an array of classes for which null values should be included; defaults to an empty array.
+     */
+    protected Class[] classesToOverrideJsonInclude() {
+        return new Class[0];
+    }
 
     /**
      * Get a description to be used in the update event submission.
