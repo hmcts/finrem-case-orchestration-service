@@ -191,6 +191,7 @@ public class ManageHearingsDocumentService {
 
     /**
      * Retrieves all hearing documents that need to be posted for the current working hearing.
+     * Note: FDR Hearings should only reach this point for Express cases.
      * @param finremCaseDetails the case details containing the hearing documents
      * @return a {@link CaseDocument}
      */
@@ -204,7 +205,7 @@ public class ManageHearingsDocumentService {
         }
 
         if (HearingType.FDR.equals(workingHearingType)) {
-            hearingDocumentsToPost.addAll(getFdrHearingDocumentsToPost(finremCaseDetails));
+            hearingDocumentsToPost.addAll(getFdrExpressHearingDocumentsToPost(finremCaseDetails));
         }
 
         // These hearing documents are always needed, so add to the list
@@ -294,19 +295,13 @@ public class ManageHearingsDocumentService {
     }
 
     /**
-     * Todo: Waiting for BA clarification.  In practice, a non-express FDR case only.
-     * Todo: generates a Hearing Notice.  This method handles missing docs, but probably needs amending.
-     * Post for FDR Hearings always includes a Form G.
-     * The Form C posted depends on whether the case is express or not.
+     * Gets an Express Form C and Form G CaseDocument.
      * Filters out non-null case documents from the list, so exceptions are not thrown when documents are missing.
      * @param finremCaseDetails the case details containing the hearing documents
-     * @return a list of {@link CaseDocument} that are posted for FDR cases
+     * @return a list of {@link CaseDocument} that are posted for FDR Express cases
      */
-    private List<CaseDocument> getFdrHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
-        CaseDocument formC = expressCaseService.isExpressCase(finremCaseDetails.getData())
-            ? getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C_EXPRESS)
-            : getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C);
-
+    private List<CaseDocument> getFdrExpressHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
+        CaseDocument formC = getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_C_EXPRESS);
         CaseDocument formG = getByWorkingHearingAndDocumentType(finremCaseDetails, CaseDocumentType.FORM_G);
 
         return Stream.of(formC, formG)

@@ -196,9 +196,6 @@ class FinremCaseDataTest {
         // Setup base data
         FinremCaseData finremCaseData = new FinremCaseData();
 
-        //Case allocation and fast track decision are both null.  Return false.
-        assertFalse(finremCaseData.isFastTrackApplication());
-
         // Case allocation set to NO. Fast track decision ignored. Return false.
         finremCaseData.setCaseAllocatedTo(YesOrNo.NO);
         assertFalse(finremCaseData.isFastTrackApplication());

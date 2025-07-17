@@ -539,39 +539,6 @@ class ManageHearingsDocumentServiceTest {
     }
 
     /**
-     * For FDR hearings, check that correct documents returned by getHearingDocumentsToPost.
-     * Fast track Form C, Hearing Notice, Form A, Out of court resolution, PFD NCDR Compliance Letter and Cover Letter
-     */
-    @Test
-    void getHearingDocumentsToPostShouldReturnFdrDocuments() {
-        // Arrange
-        UUID hearingId = UUID.randomUUID();
-        List<ManageHearingDocumentsCollectionItem> allHearingDocuments = buildCollectionForAllHearingDocuments(hearingId);
-
-        FinremCaseData finremCaseData = buildCaseDataWithHearingDocuments(
-            hearingId,
-            allHearingDocuments,
-            YesOrNo.NO, // fast track decision
-            HearingType.FDR
-        );
-
-        finremCaseDetails.setData(finremCaseData);
-
-        // Act
-        List<CaseDocument> result = manageHearingsDocumentService.getHearingDocumentsToPost(finremCaseDetails);
-
-        // Assert
-        assertThat(result)
-            .extracting(CaseDocument::getDocumentUrl)
-            .containsExactlyInAnyOrder(FORM_C_URL, FORM_G_URL, HEARING_NOTICE_FILE_URL, FORM_A_URL,
-                OUT_OF_COURT_RESOLUTION_URL, PFD_NCDR_COMPLIANCE_LETTER_URL, PFD_NCDR_COVER_LETTER_URL);
-
-        assertThat(result)
-            .extracting(CaseDocument::getDocumentUrl)
-            .doesNotContain(FORM_C_EXPRESS_URL, FORM_C_FAST_TRACK_URL);
-    }
-
-    /**
      * For FDR hearings on express cases, check that correct documents returned by getHearingDocumentsToPost.
      */
     @Test
@@ -587,9 +554,6 @@ class ManageHearingsDocumentServiceTest {
             YesOrNo.NO, // fast track decision
             HearingType.FDR
         );
-
-        when(expressCaseService.isExpressCase(finremCaseData))
-            .thenReturn(true);
 
         finremCaseDetails.setData(finremCaseData);
 

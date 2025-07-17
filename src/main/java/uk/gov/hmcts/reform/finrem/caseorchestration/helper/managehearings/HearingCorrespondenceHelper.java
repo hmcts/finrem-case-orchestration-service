@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
+    private final ExpressCaseService expressCaseService;
 
     /**
      * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
@@ -131,6 +133,7 @@ public class HearingCorrespondenceHelper {
      * To return true:
      * - the Action must be ADD_HEARING
      * - the HearingType must appear in the noticeOnlyHearingTypes set
+     * - FDR hearings are slightly awkward, they're notice only when the case is NOT an express case
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
@@ -149,7 +152,11 @@ public class HearingCorrespondenceHelper {
 
         boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
             .map(Hearing::getHearingType)
-            .map(noticeOnlyHearingTypes::contains)
+            .map(hearingType ->
+                noticeOnlyHearingTypes.contains(hearingType)
+                    || (HearingType.FDR.equals(hearingType)
+                    && !expressCaseService.isExpressCase(finremCaseDetails.getData()))
+            )
             .orElse(false);
 
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
@@ -204,5 +211,4 @@ public class HearingCorrespondenceHelper {
     private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
         return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
     }
-
 }

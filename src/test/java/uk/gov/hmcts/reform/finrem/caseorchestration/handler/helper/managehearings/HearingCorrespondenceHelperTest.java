@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.HearingCorrespondenceHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ExpressCaseParticipation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
@@ -16,8 +17,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hea
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ExpressCaseWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +40,9 @@ class HearingCorrespondenceHelperTest {
 
     @Mock
     PaperNotificationService paperNotificationService;
+
+    @Mock
+    ExpressCaseService expressCaseService;
 
     @InjectMocks
     private HearingCorrespondenceHelper helper;
@@ -173,6 +180,7 @@ class HearingCorrespondenceHelperTest {
     void shouldPostHearingNoticeOnlyReturnsTrue(Hearing hearing) {
         // Arrange case
         FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
         // Act
         boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
         // Assert
@@ -209,6 +217,9 @@ class HearingCorrespondenceHelperTest {
             ),
             arguments(
                 Hearing.builder().hearingType(HearingType.PTR).build()
+            ),
+            arguments(
+                Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
@@ -219,6 +230,8 @@ class HearingCorrespondenceHelperTest {
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
     void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // Arrange
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
         // Act
         boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
         // Assert
@@ -265,11 +278,6 @@ class HearingCorrespondenceHelperTest {
                 finremCaseDetails(null),
                 Hearing.builder().hearingType(HearingType.MPS).build()
             ),
-            // Case: action is ADD_HEARING, which is valid. However, hearing type is wrong.
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                Hearing.builder().hearingType(HearingType.FDR).build()
-            ),
             arguments(
                 finremCaseDetails(ManageHearingsAction.ADD_HEARING),
                 Hearing.builder().hearingType(HearingType.FDA).build()
@@ -278,6 +286,11 @@ class HearingCorrespondenceHelperTest {
             arguments(
                 finremCaseDetails(ManageHearingsAction.ADD_HEARING),
                 null
+            ),
+            // Case: valid action, but FDR invalid for non-express case
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
+                Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
@@ -336,5 +349,19 @@ class HearingCorrespondenceHelperTest {
                     .build())
                 .build())
             .build();
+    }
+
+    /**
+     * Helper method to update a FinremCaseDetails object to be an express case.
+     *
+     * @param finremCaseDetails the FinremCaseDetails to modify
+     * @return modified FinremCaseDetails with express case details
+     */
+    private static FinremCaseDetails expressFinremCaseDetails(FinremCaseDetails finremCaseDetails) {
+        finremCaseDetails.getData().setExpressCaseWrapper(
+            ExpressCaseWrapper.builder()
+                .expressCaseParticipation(ExpressCaseParticipation.ENROLLED)
+            .build());
+        return finremCaseDetails;
     }
 }
