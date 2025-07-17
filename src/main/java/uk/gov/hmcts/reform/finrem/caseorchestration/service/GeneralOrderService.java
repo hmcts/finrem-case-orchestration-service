@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.agreed.AgreedDraftOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AttachmentToShareCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CoverLetterToShare;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DocumentIdProvider;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.OrderToShare;
@@ -229,6 +230,31 @@ public class GeneralOrderService {
         return addressTo != null ? addressTo.getText() : "";
     }
 
+    /**
+     * Sets the list of orders to share in the `OrdersToSend` field of the case data.
+     *
+     * <p>This method processes various types of orders, including:
+     * <ul>
+     *   <li>Contested general orders</li>
+     *   <li>Hearing orders</li>
+     *   <li>Processed agreed draft orders</li>
+     *   <li>Finalised orders</li>
+     * </ul>
+     * It collects these orders, along with their associated cover letters and attachments,
+     * and populates them into the `OrdersToSend` field in the case data.</p>
+     *
+     * <p>The method performs the following steps:
+     * <ol>
+     *   <li>Processes contested general orders and adds them to the order list.</li>
+     *   <li>Processes hearing orders and their attachments, adding them to the order list.</li>
+     *   <li>Processes agreed draft orders marked as "processed" and adds them to the order list.</li>
+     *   <li>Processes finalised orders and their attachments, adding them to the order list.</li>
+     *   <li>Populates the `OrdersToSend` field in the case data with the collected orders.</li>
+     * </ol>
+     * </p>
+     *
+     * @param caseDetails the case details containing the data to process and populate
+     */
     public void setOrderList(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getData();
         List<OrderToShareCollection> orderToShareCollection = new ArrayList<>();
@@ -240,7 +266,8 @@ public class GeneralOrderService {
             generalOrders.forEach(generalOrder -> {
                 ContestedGeneralOrder order = generalOrder.getValue();
                 if (order != null && order.getAdditionalDocument() != null) {
-                    appendOrderToShareCollection(orderToShareCollection, order.getAdditionalDocument(), "Judiciary Outcome tab - %s");
+                    appendOrderToShareCollection(orderToShareCollection, order.getAdditionalDocument(),
+                        "Judiciary Outcome tab - %s", null);
                 }
             });
         }
@@ -250,7 +277,7 @@ public class GeneralOrderService {
             Collections.reverse(hearingOrderDocuments);
             hearingOrderDocuments.stream().map(DirectionOrderCollection::getValue).forEach(directionOrder ->
                 appendOrderToShareCollection(orderToShareCollection, directionOrder.getUploadDraftDocument(),
-                    "Case documents tab [Approved Order] - %s",
+                    "Case documents tab [Approved Order] - %s", data.getOrderApprovedCoverLetter(),
                     emptyIfNull(directionOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)));
         }
 
@@ -267,23 +294,31 @@ public class GeneralOrderService {
         emptyIfNull(data.getDraftOrdersWrapper().getAgreedDraftOrderCollection()).stream()
             .map(AgreedDraftOrderCollection::getValue)
             .filter(agreedDraftOrder -> PROCESSED == agreedDraftOrder.getOrderStatus())
-            .forEach(agreedDraftOrder ->
+            .forEach(agreedDraftOrder -> {
+                CaseDocument coverLetter = agreedDraftOrder.getCoverLetter() != null ?
+                    agreedDraftOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
                 appendOrderToShareCollection(orderToShareCollection, agreedDraftOrder.getTargetDocument(), "Approved order - %s",
+                    coverLetter, // Pass the cover letter
                     emptyIfNull(agreedDraftOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
-            ));
+                );
+            });
     }
 
     private void populateFinalisedOrderToOrdersToShare(FinremCaseData data, List<OrderToShareCollection> orderToShareCollection) {
         emptyIfNull(data.getDraftOrdersWrapper().getFinalisedOrdersCollection()).stream()
             .map(FinalisedOrderCollection::getValue)
-            .forEach(finalisedOrder ->
-                appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s",
+            .forEach(finalisedOrder -> {
+                CaseDocument coverLetter = finalisedOrder.getCoverLetter() != null ?
+                    finalisedOrder.getCoverLetter() : data.getOrderApprovedCoverLetter();
+                appendOrderToShareCollection(orderToShareCollection, finalisedOrder.getFinalisedDocument(), "Finalised order - %s", coverLetter,
                     emptyIfNull(finalisedOrder.getAttachments()).stream().map(DocumentCollectionItem::getValue).toArray(CaseDocument[]::new)
-                ));
+                );
+            });
     }
 
     private void appendOrderToShareCollection(List<OrderToShareCollection> orderToShareCollection,
-                                              CaseDocument document, String format, CaseDocument... attachments) {
+                                              CaseDocument document, String format, CaseDocument coverLetter,
+                                              CaseDocument... attachments) {
         OrderToShare.OrderToShareBuilder builder = OrderToShare.builder();
         builder.hasSupportingDocuments(YesOrNo.forValue(!isEmpty(attachments)));
         if (attachments != null) {
@@ -297,8 +332,19 @@ public class GeneralOrderService {
                         .build())
                     .build())
                 .toList();
+
             builder.attachmentsToShare(attachmentElements);
         }
+
+        if (coverLetter != null) {
+            CoverLetterToShare coverLetterToShare = CoverLetterToShare.builder()
+                .documentId(getDocumentId(coverLetter))
+                .coverLetterDocument(coverLetter)
+                .coverLetterName(coverLetter.getDocumentFilename())
+                .build();
+            builder.coverLetterToShare(coverLetterToShare);
+        }
+
         orderToShareCollection.add(OrderToShareCollection.builder()
             .value(builder
                 .documentToShare(YesOrNo.NO)
@@ -463,17 +509,23 @@ public class GeneralOrderService {
                                                          Function<WithAttachmentsCollection, CaseDocument> documentExtractor, OrderToShare selected) {
         CaseDocument orderAdded = collectMatchingDocument(selected, orderCollections, documentExtractor, matchingOrders);
 
-        if (orderAdded != null && selected.shouldIncludeSupportingDocuments()) {
+        if (orderAdded != null && (selected.getCoverLetterToShare() != null || selected.shouldIncludeSupportingDocuments())) {
             matchingOrder2AttachmentMap.put(orderAdded, new ArrayList<>());
 
-            emptyIfNull(selected.getAttachmentsToShare()).stream()
-                .map(AttachmentToShareCollection::getValue)
-                .filter(this::isAttachmentSelected)
-                .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections)
-                    .stream()
-                    .map(WithAttachmentsCollection::getValue)
-                    .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollectionItem::getValue)
-                    .toList(), d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
+            if (selected.getCoverLetterToShare() != null) {
+                matchingOrder2AttachmentMap.get(orderAdded).add(selected.getCoverLetterToShare().getCoverLetterDocument());
+            }
+
+            if (selected.shouldIncludeSupportingDocuments()) {
+                emptyIfNull(selected.getAttachmentsToShare()).stream()
+                    .map(AttachmentToShareCollection::getValue)
+                    .filter(this::isAttachmentSelected)
+                    .forEach(attachmentSelected -> collectMatchingDocument(attachmentSelected, emptyIfNull(orderCollections)
+                        .stream()
+                        .map(WithAttachmentsCollection::getValue)
+                        .flatMap(d -> emptyIfNull(d.getAttachments()).stream()).map(DocumentCollectionItem::getValue)
+                        .toList(), d -> d, matchingOrder2AttachmentMap.get(orderAdded)));
+            }
         }
         return orderAdded != null;
     }

@@ -80,6 +80,7 @@ public class PaperNotificationService {
      *
      * <p>This method evaluates if the respondent requires a printed version of the case information
      * based on their legal representation status and consent to email notifications.</p>
+     * Note: Unlike the applicant method, this disregards whether the application is paper or not.
      *
      * @param caseDetails the {@link FinremCaseDetails} containing the case data
      * @return true if the case should print for the respondent, otherwise false

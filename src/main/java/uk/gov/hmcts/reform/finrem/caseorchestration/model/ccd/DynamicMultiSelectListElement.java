@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
