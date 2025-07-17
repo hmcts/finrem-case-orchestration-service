@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -25,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -56,6 +55,9 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GenericDocumentService documentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
+    private PartyService partyService;
+
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -67,7 +69,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationDirectionsAboutToStartHandler(assignCaseAccessService,
-            finremCaseDetailsMapper, helper, service);
+            finremCaseDetailsMapper, helper, service, partyService);
     }
 
     @Test
@@ -137,7 +139,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
+            = existingList.stream().map(this::updateStatus).collect(Collectors.toList());
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
@@ -177,15 +179,6 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
             FinremCaseDetails caseDetails =
                 objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
             return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private CaseDetails buildCaseDetailsFromJson(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return caseDetails;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

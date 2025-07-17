@@ -8,12 +8,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -55,16 +58,30 @@ class ManageHearingActionServiceTest {
 
     private FinremCaseDetails finremCaseDetails;
     private ManageHearingsWrapper hearingWrapper;
-    private Hearing hearing;
+    private HearingWithDynamicList workingHearing;
 
     @BeforeEach
     void setUp() {
-        hearing = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.now());
-        hearingWrapper = ManageHearingsWrapper.builder().workingHearing(hearing).build();
+        workingHearing = createWorkingHearing(LocalDate.now());
+        hearingWrapper = ManageHearingsWrapper.builder().workingHearing(workingHearing).build();
         finremCaseDetails = FinremCaseDetails.builder()
             .data(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData.builder()
                 .manageHearingsWrapper(hearingWrapper)
                 .build())
+            .build();
+    }
+
+    private HearingWithDynamicList createWorkingHearing(LocalDate date) {
+        return HearingWithDynamicList.builder()
+            .hearingTypeDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(HearingType.DIR.name())
+                    .label(HearingType.DIR.getId())
+                    .build())
+                .build())
+            .hearingDate(date)
+            .hearingTime("10:00")
+            .hearingTimeEstimate("30mins")
             .build();
     }
 
@@ -84,17 +101,22 @@ class ManageHearingActionServiceTest {
 
     @Test
     void performAddHearing_shouldGenerateAllDocumentsForStandardFdaHearingType() {
-        hearing.setHearingType(HearingType.FDA);
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDA.name())
+                .label(HearingType.FDA.getId())
+                .build())
+            .build());
 
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
         CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
         CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
             "http://example.com/OutOfCourtResolution");
 
-        Map<String, CaseDocument>  pfdNcdrDocuments = Map.of(
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
             PFD_NCDR_COMPLIANCE_LETTER, createCaseDocument("ComplianceLetter.pdf",
                 "http://example.com/compliance-letter"),
-            PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
+            PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
@@ -121,17 +143,21 @@ class ManageHearingActionServiceTest {
 
     @Test
     void performAddHearing_shouldGenerateDocumentsForFdrHearingTypeWithExpressCase() {
-        hearing.setHearingType(HearingType.FDR);
-
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDR.name())
+                .label(HearingType.FDR.getId())
+                .build())
+            .build());
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
         CaseDocument formG = createCaseDocument("FormG.pdf", "http://example.com/form-g");
         CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
             "http://example.com/OutOfCourtResolution");
 
-        Map<String, CaseDocument>  pfdNcdrDocuments = Map.of(
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
             PFD_NCDR_COMPLIANCE_LETTER, createCaseDocument("ComplianceLetter.pdf",
                 "http://example.com/compliance-letter"),
-            PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
+            PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
@@ -160,16 +186,21 @@ class ManageHearingActionServiceTest {
 
     @Test
     void performAddHearing_shouldNotGenerateFormGForFastTrackApplication() {
-        hearing.setHearingType(HearingType.FDA);
+        workingHearing.setHearingTypeDynamicList(DynamicList.builder()
+            .value(DynamicListElement.builder()
+                .code(HearingType.FDA.name())
+                .label(HearingType.FDA.getId())
+                .build())
+            .build());
         finremCaseDetails.getData().setFastTrackDecision(YesOrNo.YES);
 
         CaseDocument formC = createCaseDocument("FormC.pdf", "http://example.com/form-c");
         CaseDocument outOfCourtResolution = createCaseDocument("OutOfCourtResolution.pdf",
             "http://example.com/OutOfCourtResolution");
-        Map<String, CaseDocument>  pfdNcdrDocuments = Map.of(
+        Map<String, CaseDocument> pfdNcdrDocuments = Map.of(
             PFD_NCDR_COMPLIANCE_LETTER, createCaseDocument("ComplianceLetter.pdf",
                 "http://example.com/compliance-letter"),
-            PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
+            PFD_NCDR_COVER_LETTER, createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
