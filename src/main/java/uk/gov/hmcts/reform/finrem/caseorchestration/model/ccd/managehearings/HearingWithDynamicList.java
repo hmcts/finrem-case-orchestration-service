@@ -1,20 +1,38 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-@SuperBuilder
+import java.time.LocalDate;
+import java.util.List;
+
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class HearingWithDynamicList extends Hearing {
+public class HearingWithDynamicList {
+
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate hearingDate;
     private DynamicList hearingTypeDynamicList;
+    private String hearingTimeEstimate;
+    private String hearingTime;
+    private Court hearingCourtSelection;
+    private HearingMode hearingMode;
+    private String additionalHearingInformation;
+    private YesOrNo hearingNoticePrompt;
+    private YesOrNo additionalHearingDocPrompt;
+    private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
 }
