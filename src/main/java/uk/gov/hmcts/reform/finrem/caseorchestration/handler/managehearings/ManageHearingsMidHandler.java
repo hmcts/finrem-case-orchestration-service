@@ -25,7 +25,7 @@ import java.util.List;
 @Service
 public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
-    private final  ValidateHearingService validateHearingService;
+    private final ValidateHearingService validateHearingService;
 
     public ManageHearingsMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper, ValidateHearingService validateHearingService) {
         super(finremCaseDetailsMapper);
@@ -54,7 +54,7 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             DynamicList hearingTypeDynamicList = manageHearingsWrapper.getWorkingHearing().getHearingTypeDynamicList();
-            String selectedCode = hearingTypeDynamicList.getValue().getCode();
+            String selectedCode = hearingTypeDynamicList.getValue().getLabel();
             HearingType hearingType = HearingType.getManageHearingType(selectedCode);
 
             // Pass the converted HearingType to the validation service

@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -48,12 +50,14 @@ public class ManageHearingActionService {
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
 
-    private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {}
+    private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
+    }
 
     /**
      * Adds a new hearing to the case and generates associated documents.
      * Updates the hearings collection and generates documents based on the hearing type
      * and case configuration. Adds the generated documents to the hearing documents collection.
+     *
      * @param finremCaseDetails case details containing hearing and case data
      * @param authToken         authorization token for secure resource access
      */
@@ -62,7 +66,7 @@ public class ManageHearingActionService {
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
 
         DynamicList hearingTypeDynamicList = hearingWrapper.getWorkingHearing().getHearingTypeDynamicList();
-        String selectedCode = hearingTypeDynamicList.getValue().getCode();
+        String selectedCode = hearingTypeDynamicList.getValue().getLabel();
         HearingType hearingType = HearingType.getManageHearingType(selectedCode);
 
 
@@ -106,18 +110,34 @@ public class ManageHearingActionService {
     private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
 
         List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = Optional.ofNullable(
-                        hearingsWrapper.getHearings())
-                .orElseGet(ArrayList::new);
+                hearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new);
 
         manageHearingsCollectionItemList.add(
-                ManageHearingsCollectionItem
-                        .builder()
-                        .id(hearingId)
-                        .value(hearingsWrapper.getWorkingHearing())
-                        .build()
+            ManageHearingsCollectionItem
+                .builder()
+                .id(hearingId)
+                .value(transformHearingInputsToHearing(hearingsWrapper.getWorkingHearing()))
+                .build()
         );
         hearingsWrapper.setWorkingHearingId(hearingId);
         hearingsWrapper.setHearings(manageHearingsCollectionItemList);
+    }
+
+    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+        return Hearing.builder()
+            .hearingDate(workingHearing.getHearingDate())
+            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
+            .hearingTime(workingHearing.getHearingTime())
+            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
+            .hearingMode(workingHearing.getHearingMode())
+            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
+            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
+            .build();
     }
 
     /**
@@ -126,8 +146,8 @@ public class ManageHearingActionService {
      * Adds each document to the hearing documents collection in the `ManageHearingsWrapper`.
      * Each document is associated with the current working hearing ID.
      *
-     * @param documentMap   a map containing a string describing the document against a `DocumentRecord`
-     *                      containing the corresponding `CaseDocument` object and `CaseDocumentType`.
+     * @param documentMap     a map containing a string describing the document against a `DocumentRecord`
+     *                        containing the corresponding `CaseDocument` object and `CaseDocumentType`.
      * @param hearingsWrapper the wrapper containing hearing-related data
      */
     private void addDocumentsToCollection(Map<String, DocumentRecord> documentMap,

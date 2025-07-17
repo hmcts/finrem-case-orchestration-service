@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetailsConfigura
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -71,6 +73,23 @@ public abstract class AbstractManageHearingsLetterMapper {
     protected Hearing getWorkingHearing(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getManageHearingsWrapper())
             .map(ManageHearingsWrapper::getWorkingHearing)
+            .map(this::transformHearingInputsToHearing)
             .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
+    }
+
+    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+        return Hearing.builder()
+            .hearingDate(workingHearing.getHearingDate())
+            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
+            .hearingTime(workingHearing.getHearingTime())
+            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
+            .hearingMode(workingHearing.getHearingMode())
+            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
+            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
+            .build();
     }
 }
