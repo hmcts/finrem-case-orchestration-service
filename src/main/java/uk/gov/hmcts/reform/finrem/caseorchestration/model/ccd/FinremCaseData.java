@@ -74,6 +74,8 @@ public class FinremCaseData implements HasCaseDocument {
     @JsonIgnore
     private CaseType ccdCaseType;
 
+    // TODO: Could be added to working hearing. (Once Hamzah's change is merged)
+    private YesOrNo processOrderAddHearing;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
