@@ -104,7 +104,7 @@ public class ProcessOrderMidHandler extends FinremCallbackHandler {
                 .build();
         }
 
-        // Old process order event data setup
+        // Old Process Order hearing data setup
         if (EventType.DIRECTION_UPLOAD_ORDER.equals(callbackRequest.getEventType())) {
             // Create an empty entry if it is empty to save a click on add new button
             if (ofNullable(caseData.getDirectionDetailsCollection()).orElse(List.of()).isEmpty()) {
