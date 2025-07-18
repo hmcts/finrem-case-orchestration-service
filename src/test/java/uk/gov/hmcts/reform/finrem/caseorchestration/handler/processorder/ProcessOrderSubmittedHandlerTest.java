@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
@@ -32,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
-class DirectionUploadOrderSubmittedHandlerTest {
+class ProcessOrderSubmittedHandlerTest {
 
     @Mock
     private HearingDocumentService hearingDocumentService;
@@ -40,7 +41,7 @@ class DirectionUploadOrderSubmittedHandlerTest {
     private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @InjectMocks
-    private DirectionUploadOrderSubmittedHandler handler;
+    private ProcessOrderSubmittedHandler handler;
 
     @Test
     void testCanHandle() {
