@@ -454,6 +454,19 @@ class ProcessOrderAboutToSubmitHandlerTest {
             eq(StampType.FAMILY_COURT_STAMP), eq(String.valueOf(CASE_ID)));
     }
 
+    @Test
+    void shouldCallManageHearingServiceForProcessOrderEvent() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequestFactory.from(EventType.PROCESS_ORDER, FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .data(caseData));
+
+        underTest.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(manageHearingActionService).performAddHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(manageHearingActionService).updateTabData(caseData);
+    }
+
     private void mockDocumentStamping(CaseDocument originalDocument, CaseDocument stampedDocument) {
         when(genericDocumentService.stampDocument(originalDocument, AUTH_TOKEN, FAMILY_COURT_STAMP, String.valueOf(CASE_ID)))
             .thenReturn(stampedDocument);
