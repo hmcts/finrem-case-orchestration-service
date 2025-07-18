@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -124,7 +124,7 @@ public class ManageHearingActionService {
         hearingsWrapper.setHearings(manageHearingsCollectionItemList);
     }
 
-    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
         return Hearing.builder()
             .hearingDate(workingHearing.getHearingDate())
             .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())

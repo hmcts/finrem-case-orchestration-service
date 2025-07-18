@@ -12,20 +12,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.List;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.DraftOrdersConstants.CONFIRM_UPLOAD_DOCUMENTS_OPTION_CODE;
 
 @Slf4j
 @Service
@@ -69,7 +65,7 @@ public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
             .setManageHearingsActionSelection(null);
 
         finremCaseData.getManageHearingsWrapper().setWorkingHearing(
-            HearingWithDynamicList.builder()
+            WorkingHearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
                 .hearingTypeDynamicList(generateHearingTypeList())
                 .build()

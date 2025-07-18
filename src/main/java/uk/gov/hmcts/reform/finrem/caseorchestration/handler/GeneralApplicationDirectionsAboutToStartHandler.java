@@ -14,9 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -64,7 +63,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         FinremCaseData caseData = finremCaseDetails.getData();
 
         caseData.getManageHearingsWrapper().setWorkingHearing(
-            HearingWithDynamicList.builder()
+            WorkingHearing.builder()
                 .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
                 .hearingTypeDynamicList(generateHearingTypeList())
                 .build());

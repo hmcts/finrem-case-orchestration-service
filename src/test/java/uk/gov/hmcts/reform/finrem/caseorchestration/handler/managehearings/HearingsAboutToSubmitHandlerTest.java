@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
@@ -63,7 +63,7 @@ class HearingsAboutToSubmitHandlerTest {
     void givenValidCaseData_whenHandleAdd_thenHearingAddedToManageHearingsList() {
         // Arrange
         String caseReference = TestConstants.CASE_ID;
-        HearingWithDynamicList hearingToAdd = createHearingToAdd();
+        WorkingHearing hearingToAdd = createHearingToAdd();
 
         FinremCaseData caseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
@@ -160,8 +160,8 @@ class HearingsAboutToSubmitHandlerTest {
             .contains(hearingTabItem);
     }
 
-    private HearingWithDynamicList createHearingToAdd() {
-        return HearingWithDynamicList
+    private WorkingHearing createHearingToAdd() {
+        return WorkingHearing
             .builder()
             .hearingDate(LocalDate.now())
             .hearingTypeDynamicList(DynamicList.builder()
@@ -205,7 +205,7 @@ class HearingsAboutToSubmitHandlerTest {
             .build();
     }
 
-    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
         return Hearing.builder()
             .hearingDate(workingHearing.getHearingDate())
             .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())

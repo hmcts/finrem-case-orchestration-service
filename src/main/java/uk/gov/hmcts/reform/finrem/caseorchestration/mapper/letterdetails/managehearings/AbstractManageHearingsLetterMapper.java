@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetailsTemplateFields;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
@@ -77,7 +77,7 @@ public abstract class AbstractManageHearingsLetterMapper {
             .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
     }
 
-    private Hearing transformHearingInputsToHearing(HearingWithDynamicList workingHearing) {
+    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
         return Hearing.builder()
             .hearingDate(workingHearing.getHearingDate())
             .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())

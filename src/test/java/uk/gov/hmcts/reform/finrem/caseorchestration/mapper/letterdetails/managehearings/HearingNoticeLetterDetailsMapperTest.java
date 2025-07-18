@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingWithDynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
@@ -72,7 +72,7 @@ class HearingNoticeLetterDetailsMapperTest {
                 .build())
             .manageHearingsWrapper(
                 ManageHearingsWrapper.builder()
-                    .workingHearing(HearingWithDynamicList.builder()
+                    .workingHearing(WorkingHearing.builder()
                         .hearingTypeDynamicList(DynamicList.builder()
                             .value(DynamicListElement.builder()
                                 .code(HearingType.FDR.name())
