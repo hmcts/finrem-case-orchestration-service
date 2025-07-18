@@ -181,13 +181,4 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
             throw new RuntimeException(e);
         }
     }
-
-    private CaseDetails buildCaseDetailsFromJson(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return caseDetails;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
