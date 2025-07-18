@@ -63,7 +63,7 @@ public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
             errors.add(error);
         }
 
-        // Reset any previous Working Hearings if the event is PROCESS_ORDER
+        // Initialise Working Hearings if the event is PROCESS_ORDER
         if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
             caseData.getManageHearingsWrapper().setWorkingHearing(
                     Hearing.builder()

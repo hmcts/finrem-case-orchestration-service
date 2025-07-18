@@ -66,7 +66,7 @@ public class ProcessOrderSubmittedHandler extends FinremCallbackHandler {
                 }
             }
         } else if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
-            // Process Order notifications
+            // MH Process Order notifications
             log.info("Handling process order notifications for contested case id: {}", caseDetails.getId());
         }
 
