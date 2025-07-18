@@ -21,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 
 import java.util.List;
 
-import static java.lang.String.format;
-
 @Slf4j
 @Service
 public class ManageHearingsAboutToStartHandler extends FinremCallbackHandler {
