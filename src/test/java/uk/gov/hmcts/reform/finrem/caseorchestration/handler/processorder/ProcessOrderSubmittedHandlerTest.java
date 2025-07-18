@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,7 +46,10 @@ class ProcessOrderSubmittedHandlerTest {
 
     @Test
     void testCanHandle() {
-        assertCanHandle(handler, CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER);
+        assertCanHandle(handler,
+            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.PROCESS_ORDER),
+            Arguments.of(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
+        );
     }
 
     @Test
@@ -54,6 +58,7 @@ class ProcessOrderSubmittedHandlerTest {
         FinremCaseDetails caseDetailsBefore =
             FinremCaseDetails.builder().id(123L).data(FinremCaseData.builder().build()).build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
+        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -74,6 +79,7 @@ class ProcessOrderSubmittedHandlerTest {
                     .build())
                 .build();
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
+        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -84,6 +90,7 @@ class ProcessOrderSubmittedHandlerTest {
     @Test
     void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.setEventType(EventType.DIRECTION_UPLOAD_ORDER);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 

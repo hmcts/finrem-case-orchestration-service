@@ -98,6 +98,7 @@ class ProcessOrderAboutToSubmitHandlerTest {
             Arguments.of(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.DIRECTION_UPLOAD_ORDER)
         );
     }
+
     @Test
     void createAndStoreAdditionalHearingDocumentsHandleException() throws JsonProcessingException {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory.fromId(CASE_ID);
