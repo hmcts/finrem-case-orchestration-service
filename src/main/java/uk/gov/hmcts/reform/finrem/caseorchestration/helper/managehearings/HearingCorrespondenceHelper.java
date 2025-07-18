@@ -131,9 +131,9 @@ public class HearingCorrespondenceHelper {
     /**
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
-     * - the Action must be ADD_HEARING
-     * - the HearingType must appear in the noticeOnlyHearingTypes set
-     * - FDR hearings are slightly awkward, they're notice only when the case is NOT an express case
+     * - the Action must be ADD_HEARING.
+     * - the HearingType must appear in the noticeOnlyHearingTypes set.
+     * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
@@ -165,24 +165,23 @@ public class HearingCorrespondenceHelper {
     }
 
     /**
-     * Kept as a small set of hearings to be extensible.
      * Determines if a hearing should send a full set of hearing documents (not just a notice).
      * To return true:
-     * - the Action must be ADD_HEARING
-     * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set
+     * - the Action must be ADD_HEARING.
+     * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set.
+     * FDR hearings are an exception, all hearing documents are posted when the case is an express case only.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
     public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
-        Set<HearingType> hearingTypesThatNeedDocumentsPosted = Set.of(
-            HearingType.FDR,
-            HearingType.FDA
-        );
 
         boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
             .map(Hearing::getHearingType)
-            .map(hearingTypesThatNeedDocumentsPosted::contains)
+            .map(hearingType ->
+                hearingType == HearingType.FDA
+                    || (hearingType == HearingType.FDR && expressCaseService.isExpressCase(finremCaseDetails.getData()))
+            )
             .orElse(false);
 
         ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
