@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class HearingCorrespondenceHelper {
 
     private final PaperNotificationService paperNotificationService;
+    private final ExpressCaseService expressCaseService;
 
     /**
      * Retrieves the {@link Hearing} currently in context based on the working hearing ID from the case data.
@@ -88,7 +90,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
-     * Work in progress. Intervener bug means interveners never on the party list.
+     * Todo. Work in progress. Intervener logic to be done next.
      * @return true if the intervener should receive an email notification.
      */
     public boolean shouldEmailToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
@@ -116,7 +118,7 @@ public class HearingCorrespondenceHelper {
 
     /**
      * Wraps {@link PaperNotificationService} logic for readability.
-     * Work in progress. Intervener bug means interveners never on the party list.
+     * Todo. Work in progress. Intervener's to be coded next.
      * @return true if the ***** should receive hearing documents by post.
      */
     public boolean shouldPostToIntervener(FinremCaseDetails finremCaseDetails, CaseRole caseRole) {
@@ -129,13 +131,14 @@ public class HearingCorrespondenceHelper {
     /**
      * Determines if a hearing should only send a notice. And should NOT send additional hearing documents.
      * To return true:
-     * - the Action must be ADD_HEARING
-     * - the HearingType must appear in the noticeOnlyHearingTypes set
+     * - the Action must be ADD_HEARING.
+     * - the HearingType must appear in the noticeOnlyHearingTypes set.
+     * - FDR hearings are an exception, they're notice only when the case is NOT an express case.
      * @param finremCaseDetails case details
      * @param hearing the hearing to check
      * @return true if the hearing should only send a notice, false otherwise
      */
-    public boolean shouldSendHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    public boolean shouldPostHearingNoticeOnly(FinremCaseDetails finremCaseDetails, Hearing hearing) {
         Set<HearingType> noticeOnlyHearingTypes = Set.of(
             HearingType.MPS,
             HearingType.FH,
@@ -147,19 +150,64 @@ public class HearingCorrespondenceHelper {
             HearingType.PTR
         );
 
-        ManageHearingsAction actionSelection = Optional.ofNullable(finremCaseDetails)
+        boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
+            .map(Hearing::getHearingType)
+            .map(hearingType ->
+                noticeOnlyHearingTypes.contains(hearingType)
+                    || (HearingType.FDR.equals(hearingType)
+                    && !expressCaseService.isExpressCase(finremCaseDetails.getData()))
+            )
+            .orElse(false);
+
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+
+        return isAddHearingAction(actionSelection) && isNoticeOnlyHearingType;
+    }
+
+    /**
+     * Determines if a hearing should send a full set of hearing documents (not just a notice).
+     * To return true:
+     * - the Action must be ADD_HEARING.
+     * - the HearingType must appear in the hearingTypesThatNeedDocumentsPosted set.
+     * FDR hearings are an exception, all hearing documents are posted when the case is an express case only.
+     * @param finremCaseDetails case details
+     * @param hearing the hearing to check
+     * @return true if the hearing should only send a notice, false otherwise
+     */
+    public boolean shouldPostAllHearingDocuments(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+
+        boolean allDocumentsNeedPosting = Optional.ofNullable(hearing)
+            .map(Hearing::getHearingType)
+            .map(hearingType ->
+                hearingType == HearingType.FDA
+                    || (hearingType == HearingType.FDR && expressCaseService.isExpressCase(finremCaseDetails.getData()))
+            )
+            .orElse(false);
+
+        ManageHearingsAction actionSelection = getManageHearingsAction(finremCaseDetails);
+
+        return isAddHearingAction(actionSelection) && allDocumentsNeedPosting;
+    }
+
+    /**
+     * Retrieves the action selection, e.g. ADD_HEARING, from the Manage Hearings Wrapper in the case details.
+     * @param finremCaseDetails the case details containing the Manage Hearings Wrapper
+     * @return the ManageHearingsAction or null if not present
+     */
+    private ManageHearingsAction getManageHearingsAction(FinremCaseDetails finremCaseDetails) {
+        return Optional.ofNullable(finremCaseDetails)
             .map(FinremCaseDetails::getData)
             .map(FinremCaseData::getManageHearingsWrapper)
             .map(ManageHearingsWrapper::getManageHearingsActionSelection)
             .orElse(null);
+    }
 
-        boolean isAddHearingEvent = ManageHearingsAction.ADD_HEARING.equals(actionSelection);
-
-        boolean isNoticeOnlyHearingType = Optional.ofNullable(hearing)
-            .map(Hearing::getHearingType)
-            .map(noticeOnlyHearingTypes::contains)
-            .orElse(false);
-
-        return isAddHearingEvent && isNoticeOnlyHearingType;
+    /**
+     * Determines if the action selection is to add a hearing.
+     * @param actionSelection the action selection to check
+     * @return true if the action selection is ADD_HEARING, false otherwise
+     */
+    private boolean isAddHearingAction(ManageHearingsAction actionSelection) {
+        return ManageHearingsAction.ADD_HEARING.equals(actionSelection);
     }
 }

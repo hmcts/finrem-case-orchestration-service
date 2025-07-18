@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.tabdata.managehearings.HearingTabDataMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -97,6 +99,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
@@ -134,6 +138,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C_EXPRESS, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generateFormG(finremCaseDetails,
@@ -172,6 +178,8 @@ class ManageHearingActionServiceTest {
             PFD_NCDR_COVER_LETTER,  createCaseDocument("CoverLetter.pdf",
                 "http://example.com/cover-letter"));
 
+        when(manageHearingsDocumentService.determineFormCTemplate(finremCaseDetails)).thenReturn(
+            Pair.of(CaseDocumentType.FORM_C, "a template"));
         when(manageHearingsDocumentService.generateFormC(finremCaseDetails,
             AUTH_TOKEN)).thenReturn(formC);
         when(manageHearingsDocumentService.generatePfdNcdrDocuments(finremCaseDetails,

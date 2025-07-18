@@ -185,12 +185,9 @@ public class ManageHearingsCorresponder {
      * Determines whether to send email notifications post documents.
      * @param finremCaseDetails the case details containing relevant information about the hearing and case participants
      * @param hearing the hearing for which the notification is being sent
-     *
-     *                change javadoc
      */
     private void processCorrespondenceForParty(
         FinremCaseDetails finremCaseDetails,
-        // If FDA or FDR, follow up by emailing certain docs.  Future planned work will address this.
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
@@ -206,34 +203,74 @@ public class ManageHearingsCorresponder {
         }
 
         if (shouldPostToParty.get()) {
-
-            if (hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
-
-                CaseDocument hearingNotice = manageHearingsDocumentService
-                    .getHearingNotice(finremCaseDetails);
-
-                if (hearingNotice != null) {
-                    BulkPrintDocument hearingNoticeDocument =
-                        documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
-
-                    List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-                    bulkPrintDocuments.add(hearingNoticeDocument);
-
-                    printDocuments(
-                        finremCaseDetails,
-                        userAuthorisation,
-                        bulkPrintDocuments,
-                        caseRole
-                    );
-
-                    log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-                        caseRole, finremCaseDetails.getId());
-                } else {
-                    log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
-                }
+            if (hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing)) {
+                postHearingNoticeOnly(finremCaseDetails, caseRole, userAuthorisation);
             }
-            // Else send hearing docs too.  Future planned work will address this.
+            if (hearingCorrespondenceHelper.shouldPostAllHearingDocuments(finremCaseDetails, hearing)) {
+                postAllHearingDocuments(finremCaseDetails, caseRole, userAuthorisation);
+            }
         }
+    }
+
+    /**
+     * Gets the hearing notice then sends it to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the notice is being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postHearingNoticeOnly(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        CaseDocument hearingNotice = manageHearingsDocumentService
+            .getHearingNotice(finremCaseDetails);
+
+        if (hearingNotice == null) {
+            log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
+            return;
+        }
+
+        BulkPrintDocument hearingNoticeDocument =
+            documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(hearingNoticeDocument);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
+    }
+
+    /**
+     * Gets the correct hearing documents then sends them to the Bulk Print service.
+     * @param finremCaseDetails the case details.
+     * @param caseRole the case role of the party to whom the documents are being sent.
+     * @param userAuthorisation the user authorisation token.
+     */
+    private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
+        List<CaseDocument> hearingDocuments = manageHearingsDocumentService
+            .getHearingDocumentsToPost(finremCaseDetails);
+
+        if (hearingDocuments == null || hearingDocuments.isEmpty()) {
+            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
+            return;
+        }
+
+        List<BulkPrintDocument> bulkPrintDocuments =
+            documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
+
+        printDocuments(
+            finremCaseDetails,
+            userAuthorisation,
+            bulkPrintDocuments,
+            caseRole
+        );
+
+        log.info("Request sent to Bulk Print to post hearing documents to the {} party. Request sent for case ID: {}",
+            caseRole, finremCaseDetails.getId());
     }
 
     /**
