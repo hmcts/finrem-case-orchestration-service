@@ -14,16 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -32,17 +28,15 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
     private final AssignCaseAccessService assignCaseAccessService;
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
-    private final PartyService partyService;
 
     public GeneralApplicationDirectionsAboutToStartHandler(AssignCaseAccessService assignCaseAccessService,
                                                            FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                            GeneralApplicationHelper helper,
-                                                           GeneralApplicationDirectionsService service, PartyService partyService) {
+                                                           GeneralApplicationDirectionsService service) {
         super(finremCaseDetailsMapper);
         this.helper = helper;
         this.service = service;
         this.assignCaseAccessService = assignCaseAccessService;
-        this.partyService = partyService;
     }
 
     @Override
@@ -61,12 +55,6 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         log.info("About to Start callback event type {} for Case ID: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseId);
 
         FinremCaseData caseData = finremCaseDetails.getData();
-
-        caseData.getManageHearingsWrapper().setWorkingHearing(
-            WorkingHearing.builder()
-                .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(finremCaseDetails))
-                .hearingTypeDynamicList(generateHearingTypeList())
-                .build());
 
         String loggedInUserCaseRole = assignCaseAccessService.getActiveUser(caseId, userAuthorisation);
         log.info("Logged in user case role type {} on Case ID: {}", loggedInUserCaseRole, caseId);
@@ -113,16 +101,4 @@ public class GeneralApplicationDirectionsAboutToStartHandler extends FinremCallb
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsList(dynamicList);
     }
 
-    private DynamicList generateHearingTypeList() {
-        List<DynamicListElement> listElements = Stream.of(HearingType.APPLICATION_HEARING)
-            .map(hearingType -> DynamicListElement.builder()
-                .code(hearingType.name())
-                .label(hearingType.getId())
-                .build())
-            .toList();
-
-        return DynamicList.builder()
-            .listItems(listElements)
-            .build();
-    }
 }
