@@ -19,17 +19,65 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class OrderDateService {
+
     private final EvidenceManagementAuditService evidenceManagementAuditService;
 
+    /**
+     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
+     * Use {@link #syncCreatedDateAndMarkDocumentStamped(List, String)} instead.
+     * This method forwards the call to the new method to ensure consistent behaviour.
+     *
+     * @param orderCollections   the list of direction orders to update; may be null
+     * @param authorisationToken the authorisation token used for the document service
+     * @return a list of direction orders with the created date set and the document marked as stamped
+     */
+    @Deprecated(since = "2025-07", forRemoval = true)
     public List<DirectionOrderCollection> addCreatedDateInFinalOrder(List<DirectionOrderCollection> orderCollections,
                                                                      String authorisationToken) {
+        return syncCreatedDateAndMarkDocumentStamped(orderCollections, authorisationToken);
+    }
+
+    /**
+     * Adds the created date to each direction order in the list and marks the document as stamped.
+     * If the input list is null, it returns an empty list with no errors.
+     *
+     * @param orderCollections   the list of direction orders to update; may be null
+     * @param authorisationToken the authorisation token used for the document service
+     * @return a list of direction orders with the created date set and the document marked as stamped
+     */
+    public List<DirectionOrderCollection> syncCreatedDateAndMarkDocumentStamped(List<DirectionOrderCollection> orderCollections,
+                                                                                String authorisationToken) {
         List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
             .orElse(new ArrayList<>());
         return addCreatedDateInOrder(directionOrderCollections, authorisationToken, YesOrNo.YES);
     }
 
+    /**
+     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
+     * Use {@link #syncCreatedDateAndMarkDocumentNotStamped(List, String)} instead.
+     * This method forwards the call to the new method to ensure consistent behaviour.
+     *
+     * @param orderCollections   the list of direction orders to update; may be null
+     * @param authorisationToken the authorisation token used for the document service
+     * @return a list of direction orders with the created date set and the document marked as not stamped
+     */
+
+    @Deprecated(since = "2025-07", forRemoval = true)
     public List<DirectionOrderCollection> addCreatedDateInUploadedOrder(List<DirectionOrderCollection> orderCollections,
                                                                         String authorisationToken) {
+        return syncCreatedDateAndMarkDocumentNotStamped(orderCollections, authorisationToken);
+    }
+
+    /**
+     * Adds the created date to each direction order in the list and marks the document as not stamped.
+     * If the input list is null, it returns an empty list with no errors.
+     *
+     * @param orderCollections   the list of direction orders to update; may be null
+     * @param authorisationToken the authorisation token used for the document service
+     * @return a list of direction orders with the created date set and the document marked as not stamped
+     */
+    public List<DirectionOrderCollection> syncCreatedDateAndMarkDocumentNotStamped(List<DirectionOrderCollection> orderCollections,
+                                                                                String authorisationToken) {
         List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
             .orElse(new ArrayList<>());
         return addCreatedDateInOrder(directionOrderCollections, authorisationToken, YesOrNo.NO);
@@ -84,4 +132,3 @@ public class OrderDateService {
     }
 
 }
-

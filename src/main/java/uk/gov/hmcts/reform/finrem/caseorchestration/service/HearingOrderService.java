@@ -179,7 +179,7 @@ public class HearingOrderService {
                                                               String authorisationToken,
                                                               List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = documentHelper.getFinalOrderCollection(caseData);
-        List<DirectionOrderCollection> finalDatedCollection = orderDateService.addCreatedDateInFinalOrder(finalOrderCollection, authorisationToken);
+        List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(finalOrderCollection, authorisationToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
             DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()

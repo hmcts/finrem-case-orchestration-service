@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -67,15 +68,18 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private void convertAdditionalDocumentsToPdf(FinremCaseDetails caseDetails, String authorisation) {
         FinremCaseData caseData = caseDetails.getData();
-        List<DraftDirectionOrderCollection> directionOrderCollection = caseData.getDraftDirectionWrapper().getDraftDirectionOrderCollection();
+        List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
 
-        directionOrderCollection.stream().map(order -> order.getValue().getAdditionalDocuments())
-            .filter(CollectionUtils::isNotEmpty).forEach(additionalDocs -> additionalDocs.forEach(additionalDoc -> {
+        judgeApprovedOrderCollection.stream()
+            .map(DraftDirectionOrderCollection::getValue)
+            .map(DraftDirectionOrder::getAdditionalDocuments)
+            .filter(CollectionUtils::isNotEmpty)
+            .flatMap(List::stream)
+            .forEach(additionalDoc -> {
                 CaseDocument documentPdf = genericDocumentService.convertDocumentIfNotPdfAlready(
-                    additionalDoc.getValue(), authorisation,
-                    String.valueOf(caseDetails.getId()));
-
+                    additionalDoc.getValue(), authorisation, String.valueOf(caseDetails.getId()));
                 additionalDoc.setValue(documentPdf);
-            }));
+            });
+
     }
 }
