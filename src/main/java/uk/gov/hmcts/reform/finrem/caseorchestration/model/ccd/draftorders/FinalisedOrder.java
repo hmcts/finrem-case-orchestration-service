@@ -28,6 +28,8 @@ public class FinalisedOrder implements HasCaseDocument, WithAttachments {
 
     private List<DocumentCollectionItem> attachments;
 
+    private CaseDocument coverLetter;
+
     private String submittedBy;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)

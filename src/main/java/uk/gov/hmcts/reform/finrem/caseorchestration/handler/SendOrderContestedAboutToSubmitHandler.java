@@ -275,6 +275,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalOrder(psaDocumentReview.getFinalOrder())
                 .approvalDate(psaDocumentReview.getApprovalDate())
                 .approvalJudge(psaDocumentReview.getApprovalJudge())
+                .coverLetter(psaDocumentReview.getCoverLetter())
                 .build())
             .build();
     }
@@ -289,6 +290,7 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
                 .finalOrder(draftOrderDocumentReview.getFinalOrder())
                 .approvalDate(draftOrderDocumentReview.getApprovalDate())
                 .approvalJudge(draftOrderDocumentReview.getApprovalJudge())
+                .coverLetter(draftOrderDocumentReview.getCoverLetter())
                 .build())
             .build();
     }
@@ -334,7 +336,6 @@ public class SendOrderContestedAboutToSubmitHandler extends FinremCallbackHandle
         if (caseData.getOrderApprovedCoverLetter() == null) {
             throw new IllegalStateException("orderApprovedCoverLetter is missing unexpectedly");
         }
-        orders.add(caseData.getOrderApprovedCoverLetter());
 
         if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
