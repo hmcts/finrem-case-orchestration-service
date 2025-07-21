@@ -244,7 +244,7 @@ public class ManageHearingsDocumentService {
 
     /**
      * Retrieves the case's current working hearing.
-     * Then uses that to the most recent hearing document with the passed CaseDocumentType argument.
+     * Then uses that to get the most recent hearing document with the passed CaseDocumentType argument.
      * If no notice is found, returns an empty list.
      * @param finremCaseDetails the case details containing the hearing documents.
      * @param documentType a {@link CaseDocumentType} identifying the type of hearing document.

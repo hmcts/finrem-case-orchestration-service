@@ -37,11 +37,11 @@ public class ManageHearingsCorresponder {
     private final BulkPrintService bulkPrintService;
 
     /**
-     * Begin sending hearing correspondence to parties, included based on the callback request data.
+     * Begin sending hearing correspondence to parties, based on the callback request data.
      * No notifications, notices or documents sent if the User has specified that.
      * No notifications, notices or documents sent if the party list is empty.
      * Loops through each selected party in the hearing and sends using
-     * {@link #sendHearingCorrespondenceByParty}.</p>
+     * <p>{@link #sendHearingCorrespondenceByParty}.</p>
      * @param callbackRequest the callback request containing case and hearing data
      * @param userAuthorisation the user authorisation token
      */
@@ -155,6 +155,7 @@ public class ManageHearingsCorresponder {
     }
 
     /**
+     * Todo - when Interveners picked up, check for an implicit test
      * Processes correspondence for Interveners. Uses CaseRole to determine which Intervener.
      * Calls ProcessCorrespondenceForParty with the appropriate parameters.
      * Lambdas are passed to ProcessCorrespondenceForParty, so the information is lazy-loaded if needed.
@@ -253,11 +254,6 @@ public class ManageHearingsCorresponder {
     private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
         List<CaseDocument> hearingDocuments = manageHearingsDocumentService
             .getHearingDocumentsToPost(finremCaseDetails);
-
-        if (hearingDocuments == null || hearingDocuments.isEmpty()) {
-            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
-            return;
-        }
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
