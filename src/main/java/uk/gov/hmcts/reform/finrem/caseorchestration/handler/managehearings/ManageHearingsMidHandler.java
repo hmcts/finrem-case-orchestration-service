@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
@@ -20,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.getHearingType;
 
 @Slf4j
 @Service
@@ -53,9 +54,7 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
         List<String> warnings = new ArrayList<>();
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
-            DynamicList hearingTypeDynamicList = manageHearingsWrapper.getWorkingHearing().getHearingTypeDynamicList();
-            String selectedCode = hearingTypeDynamicList.getValue().getCode();
-            HearingType hearingType = HearingType.valueOf(selectedCode);
+            HearingType hearingType = getHearingType(manageHearingsWrapper);
 
             // Pass the converted HearingType to the validation service
             warnings = validateHearingService.validateManageHearingWarnings(finremCaseDetails.getData(), hearingType);
