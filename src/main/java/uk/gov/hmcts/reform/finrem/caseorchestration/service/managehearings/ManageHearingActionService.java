@@ -64,7 +64,7 @@ public class ManageHearingActionService {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
 
-        HearingType hearingType = getHearingType(hearingWrapper);
+        HearingType hearingType = getHearingType(hearingWrapper.getWorkingHearing().getHearingTypeDynamicList());
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);

@@ -25,10 +25,4 @@ public enum HearingType {
     public String getId() {
         return id;
     }
-
-    public static HearingType getManageHearingType(String ccdType) {
-        return Arrays.stream(HearingType.values())
-            .filter(option -> option.id.equals(ccdType))
-            .findFirst().orElseThrow(IllegalArgumentException::new);
-    }
 }

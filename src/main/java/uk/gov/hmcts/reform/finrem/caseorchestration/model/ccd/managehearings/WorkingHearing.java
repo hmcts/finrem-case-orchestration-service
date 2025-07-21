@@ -49,13 +49,11 @@ public class WorkingHearing {
             .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
             .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
-            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
+            .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
             .build();
     }
 
-    public static HearingType getHearingType(ManageHearingsWrapper hearingWrapper) {
-        DynamicList hearingTypeDynamicList = hearingWrapper.getWorkingHearing().getHearingTypeDynamicList();
-
+    public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
         return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
     }
 }
