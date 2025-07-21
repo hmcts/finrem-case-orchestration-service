@@ -39,6 +39,8 @@ public class OrderToShare implements DocumentIdProvider {
 
     private List<AttachmentToShareCollection> attachmentsToShare;
 
+    private CoverLetterToShare coverLetterToShare;
+
     /**
      * Determines if the order has attachments.
      *
@@ -47,6 +49,16 @@ public class OrderToShare implements DocumentIdProvider {
     @JsonIgnore
     public YesOrNo getHasAttachment() {
         return YesOrNo.forValue(ofNullable(attachmentsToShare).isEmpty());
+    }
+
+    /**
+     * Determines if the order has a cover letter.
+     *
+     * @return {@link YesOrNo#YES} if attachments exist, otherwise {@link YesOrNo#NO}.
+     */
+    @JsonIgnore
+    public YesOrNo getHasCoverLetter() {
+        return YesOrNo.forValue(ofNullable(coverLetterToShare).isEmpty());
     }
 
     /**
