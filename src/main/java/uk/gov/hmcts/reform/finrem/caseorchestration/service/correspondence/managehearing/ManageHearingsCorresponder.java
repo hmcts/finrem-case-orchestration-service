@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -254,6 +256,11 @@ public class ManageHearingsCorresponder {
     private void postAllHearingDocuments(FinremCaseDetails finremCaseDetails, CaseRole caseRole, String userAuthorisation) {
         List<CaseDocument> hearingDocuments = manageHearingsDocumentService
             .getHearingDocumentsToPost(finremCaseDetails);
+
+        if (isEmpty(hearingDocuments)) {
+            log.warn("No hearing documents found. No documents sent for case ID: {}", finremCaseDetails.getId());
+            return;
+        }
 
         List<BulkPrintDocument> bulkPrintDocuments =
             documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingDocuments);
