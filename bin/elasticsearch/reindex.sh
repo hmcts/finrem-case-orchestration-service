@@ -39,7 +39,7 @@ if [[ $reindexContested = true ]]; then
 
   echo
   echo "Updating case_data table"
-  docker exec -t cftlib-shared-database-pg12-1 \
+  docker exec -t cftlib-shared-database-pg-1 \
     psql -U postgres -d datastore -c "update case_data set marked_by_logstash = false where case_type_id = 'FinancialRemedyContested';"
 fi
 
@@ -56,6 +56,6 @@ if [[ $reindexConsented = true ]]; then
 
   echo
   echo "Updating case_data table"
-  docker exec -t cftlib-shared-database-pg12-1 \
+  docker exec -t cftlib-shared-database-pg-1 \
     psql -U postgres -d datastore -c "update case_data set marked_by_logstash = false where case_type_id = 'FinancialRemedyMVP2';"
 fi
