@@ -43,6 +43,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @ExtendWith(MockitoExtension.class)
 class HearingsAboutToSubmitHandlerTest {
@@ -202,22 +203,6 @@ class HearingsAboutToSubmitHandlerTest {
                     .code("Party1")
                     .build()))
                 .build())
-            .build();
-    }
-
-    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
-        return Hearing.builder()
-            .hearingDate(workingHearing.getHearingDate())
-            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
-            .hearingTime(workingHearing.getHearingTime())
-            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
-            .hearingMode(workingHearing.getHearingMode())
-            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
-            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
-            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
-            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
-            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
             .build();
     }
 }

@@ -40,6 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 
 @Service
 @RequiredArgsConstructor
@@ -66,9 +67,7 @@ public class ManageHearingActionService {
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
 
         DynamicList hearingTypeDynamicList = hearingWrapper.getWorkingHearing().getHearingTypeDynamicList();
-        String selectedCode = hearingTypeDynamicList.getValue().getLabel();
-        HearingType hearingType = HearingType.getManageHearingType(selectedCode);
-
+        HearingType hearingType = HearingType.valueOf(hearingTypeDynamicList.getValue().getLabel());
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
@@ -122,22 +121,6 @@ public class ManageHearingActionService {
         );
         hearingsWrapper.setWorkingHearingId(hearingId);
         hearingsWrapper.setHearings(manageHearingsCollectionItemList);
-    }
-
-    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
-        return Hearing.builder()
-            .hearingDate(workingHearing.getHearingDate())
-            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
-            .hearingTime(workingHearing.getHearingTime())
-            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
-            .hearingMode(workingHearing.getHearingMode())
-            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
-            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
-            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
-            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
-            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
-            .build();
     }
 
     /**

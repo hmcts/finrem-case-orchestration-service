@@ -35,4 +35,20 @@ public class WorkingHearing {
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
+
+    public static Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
+        return Hearing.builder()
+            .hearingDate(workingHearing.getHearingDate())
+            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
+            .hearingTime(workingHearing.getHearingTime())
+            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
+            .hearingMode(workingHearing.getHearingMode())
+            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
+            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
+            .build();
+    }
 }

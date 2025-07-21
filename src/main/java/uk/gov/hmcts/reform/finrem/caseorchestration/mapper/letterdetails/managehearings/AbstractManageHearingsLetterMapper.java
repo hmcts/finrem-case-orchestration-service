@@ -73,23 +73,7 @@ public abstract class AbstractManageHearingsLetterMapper {
     protected Hearing getWorkingHearing(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getManageHearingsWrapper())
             .map(ManageHearingsWrapper::getWorkingHearing)
-            .map(this::transformHearingInputsToHearing)
+            .map(WorkingHearing::transformHearingInputsToHearing)
             .orElseThrow(() -> new IllegalArgumentException("Working hearing is null"));
-    }
-
-    private Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
-        return Hearing.builder()
-            .hearingDate(workingHearing.getHearingDate())
-            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
-            .hearingTime(workingHearing.getHearingTime())
-            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
-            .hearingMode(workingHearing.getHearingMode())
-            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
-            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
-            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
-            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
-            .hearingType(HearingType.getManageHearingType(workingHearing.getHearingTypeDynamicList().getValue().getLabel()))
-            .build();
     }
 }
