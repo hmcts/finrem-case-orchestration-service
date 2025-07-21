@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 public enum HearingType {
     MPS("Maintenance Pending Suit (MPS)"),
