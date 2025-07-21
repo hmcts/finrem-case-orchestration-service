@@ -58,7 +58,4 @@ public class WorkingHearing {
 
         return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
     }
-
-
-
 }
