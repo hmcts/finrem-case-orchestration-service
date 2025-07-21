@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,6 +17,4 @@ public class GeneralEmailData {
     private String generalEmailBody;
     @JsonProperty("generalEmailUploadedDocument")
     private CaseDocument generalEmailUploadedDocument;
-    @JsonProperty("generalEmailDateSent")
-    private LocalDateTime generalEmailDateSent;
 }
