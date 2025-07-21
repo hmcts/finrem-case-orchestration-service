@@ -10,9 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
@@ -67,7 +65,7 @@ public class ManageHearingActionService {
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
 
         DynamicList hearingTypeDynamicList = hearingWrapper.getWorkingHearing().getHearingTypeDynamicList();
-        HearingType hearingType = HearingType.valueOf(hearingTypeDynamicList.getValue().getLabel());
+        HearingType hearingType = HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);

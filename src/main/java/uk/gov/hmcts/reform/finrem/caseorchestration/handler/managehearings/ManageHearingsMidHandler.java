@@ -54,7 +54,8 @@ public class ManageHearingsMidHandler extends FinremCallbackHandler {
 
         if (ManageHearingsAction.ADD_HEARING.equals(actionSelection)) {
             DynamicList hearingTypeDynamicList = manageHearingsWrapper.getWorkingHearing().getHearingTypeDynamicList();
-            HearingType hearingType = HearingType.valueOf(hearingTypeDynamicList.getValue().getLabel());
+            String selectedCode = hearingTypeDynamicList.getValue().getCode();
+            HearingType hearingType = HearingType.valueOf(selectedCode);
 
             // Pass the converted HearingType to the validation service
             warnings = validateHearingService.validateManageHearingWarnings(finremCaseDetails.getData(), hearingType);
