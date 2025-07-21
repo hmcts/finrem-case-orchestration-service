@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
@@ -137,7 +135,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(
             caseData, GENERAL_APPLICATION_COLLECTION);
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
+            = existingList.stream().map(this::updateStatus).collect(Collectors.toList());
         caseData.getGeneralApplicationWrapper().setGeneralApplications(
             helper.convertToGeneralApplicationsCollection(updatedList));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationCreatedBy(null);
