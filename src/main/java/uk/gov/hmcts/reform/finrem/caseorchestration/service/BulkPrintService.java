@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -82,6 +84,14 @@ public class BulkPrintService {
 
     public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, String recipient, List<BulkPrintDocument> documents,
                                                    boolean isInternational, String auth) {
+        log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
+        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
+    }
+
+    public UUID bulkPrintFinancialRemedyLetterPack(String recipient, List<BulkPrintDocument> documents,
+                                                   boolean isInternational, String auth) {
+        Long caseId = (Long) RequestContextHolder.currentRequestAttributes()
+            .getAttribute("caseId", RequestAttributes.SCOPE_REQUEST);
         log.info("Requesting {} letter print from bulkprint for Case ID: {}", recipient, caseId);
         return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }

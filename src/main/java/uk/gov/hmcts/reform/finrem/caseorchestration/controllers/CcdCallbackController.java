@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -77,6 +79,12 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
+
+        RequestContextHolder.currentRequestAttributes()
+            .setAttribute("caseId", callbackRequest.getCaseDetails().getId(), RequestAttributes.SCOPE_REQUEST);
+
+        RequestContextHolder.currentRequestAttributes()
+            .setAttribute("eventId", callbackRequest.getEventId(), RequestAttributes.SCOPE_REQUEST);
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
