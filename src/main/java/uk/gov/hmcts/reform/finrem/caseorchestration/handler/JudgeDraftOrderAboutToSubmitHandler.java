@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -53,17 +52,16 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = finremCaseDetails.getData();
         validateCaseData(callbackRequest);
         convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
 
-        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, userAuthorisation);
-        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, userAuthorisation);
-        FinremCaseDetails finremCaseDetailsUpdated = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-        uploadedDraftOrderCategoriser.categorise(finremCaseDetailsUpdated.getData());
+        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, userAuthorisation);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
+        uploadedDraftOrderCategoriser.categorise(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseDetailsUpdated.getData()).build();
+            .data(finremCaseData).build();
     }
 
     private void convertAdditionalDocumentsToPdf(FinremCaseDetails caseDetails, String authorisation) {

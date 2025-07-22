@@ -61,7 +61,7 @@ public class HearingOrderServiceTest extends BaseServiceTest {
     public void convertPdfDocument() {
         when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), any()))
             .thenReturn(caseDocument());
-        when(orderDateService.addCreatedDateInFinalOrder(any(), any())).thenReturn(new ArrayList<>());
+        when(orderDateService.syncCreatedDateAndMarkDocumentStamped(any(), any())).thenReturn(new ArrayList<>());
         DocumentHelper documentHelper = mock(DocumentHelper.class);
         when(documentHelper.checkIfOrderAlreadyInFinalOrderCollection(anyList(), any())).thenReturn(false);
 
