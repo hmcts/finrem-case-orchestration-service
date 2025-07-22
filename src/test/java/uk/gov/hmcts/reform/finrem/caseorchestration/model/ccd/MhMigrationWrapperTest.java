@@ -12,7 +12,7 @@ class MhMigrationWrapperTest {
         MhMigrationWrapper underTest = MhMigrationWrapper.builder()
             .mhMigrationVersion("v1")
             .isListForHearingsMigrated(YesOrNo.YES)
-            .isListForHearingsMigrated(YesOrNo.YES)
+            .isListForInterimHearingsMigrated(YesOrNo.YES)
             .isGeneralApplicationMigrated(YesOrNo.YES)
             .isDirectionDetailsCollectionMigrated(YesOrNo.YES)
             .build();
