@@ -86,6 +86,9 @@ public class CcdCallbackController {
         RequestContextHolder.currentRequestAttributes()
             .setAttribute("eventId", callbackRequest.getEventId(), RequestAttributes.SCOPE_REQUEST);
 
+        RequestContextHolder.currentRequestAttributes()
+            .setAttribute("authToken", authorisationToken, RequestAttributes.SCOPE_REQUEST);
+
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
 
