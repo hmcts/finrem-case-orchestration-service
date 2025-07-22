@@ -88,6 +88,14 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, recipient, documents, isInternational, auth);
     }
 
+    /**
+     * Compare with method above that requires caseId as a parameter.
+     * @param recipient
+     * @param documents
+     * @param isInternational
+     * @param auth
+     * @return
+     */
     public UUID bulkPrintFinancialRemedyLetterPack(String recipient, List<BulkPrintDocument> documents,
                                                    boolean isInternational, String auth) {
         Long caseId = (Long) RequestContextHolder.currentRequestAttributes()
