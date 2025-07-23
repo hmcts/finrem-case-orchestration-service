@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsAction;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -48,11 +50,11 @@ class HearingsAboutToStartHandlerTest {
     void testHandle() {
         FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder().data(
-                FinremCaseData.builder()
-                    .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                        .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                    FinremCaseData.builder()
+                        .manageHearingsWrapper(ManageHearingsWrapper.builder()
+                            .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                            .build())
                         .build())
-                    .build())
                 .build())
             .build();
 
@@ -69,8 +71,14 @@ class HearingsAboutToStartHandlerTest {
     void givenValidCaseDataWithErrors_whenHandle_thenReturnsResponseWithErrors() {
         FinremCaseData finremCaseData = FinremCaseData.builder()
             .manageHearingsWrapper(ManageHearingsWrapper.builder()
-                .workingHearing(Hearing.builder()
-                    .hearingType(HearingType.DIR)
+                .manageHearingsActionSelection(ManageHearingsAction.ADD_HEARING)
+                .workingHearing(WorkingHearing.builder()
+                    .hearingTypeDynamicList(DynamicList.builder()
+                        .value(DynamicListElement.builder()
+                            .code(HearingType.DIR.name())
+                            .label(HearingType.DIR.getId())
+                            .build())
+                        .build())
                     .build())
                 .build())
             .build();
