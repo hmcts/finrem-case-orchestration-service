@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogger;
 import uk.gov.hmcts.reform.finrem.caseorchestration.util.TestLogs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -517,7 +518,36 @@ class ManageHearingsCorresponderTest {
         assertThat(logs.getWarns()).contains("Hearing notice is null. No document sent to APP_SOLICITOR for case ID: 123");
     }
 
-    // - todo whether value in tests for missing sets of full hearings documents
+    /**
+     * Checks that missing hearing documents are handled.
+     */
+    @Test
+    void sendPaperNoticeToPartiesShouldHandleMissingHearingDocs() {
+        // Setup
+        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR, CaseRole.RESP_SOLICITOR));
+        Hearing hearing = mock(Hearing.class);
+        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        FinremCallbackRequest callbackRequest = callbackRequest();
+
+        // Arrange
+        when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
+        when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostToApplicant(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldPostToRespondent(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostHearingNoticeOnly(callbackRequest.getCaseDetails(), hearing)).thenReturn(false);
+        when(hearingCorrespondenceHelper.shouldPostAllHearingDocuments(callbackRequest.getCaseDetails(), hearing)).thenReturn(true);
+
+        // act
+        corresponder.sendHearingCorrespondence(callbackRequest, AUTH_TOKEN);
+
+        // Verify
+        verify(notificationService, never()).sendHearingNotificationToSolicitor(any(), any());
+        assertThat(Collections.frequency(
+            logs.getWarns(),
+            "No hearing documents found. No documents sent for case ID: 123")
+        ).isEqualTo(2);
+    }
 
     /**
      * Checks that postHearingNoticeOnly handles a missing notice:
