@@ -44,7 +44,6 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-//        String caseId = String.valueOf(caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         DraftDirectionWrapper draftDirectionWrapper = caseData.getDraftDirectionWrapper();
         List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = draftDirectionWrapper.getJudgeApprovedOrderCollection();
@@ -55,7 +54,6 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
                 .data(caseData).errors(errors).build();
         }
-
 
         // TODO validate the newly uploaded orders only.
 //        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
