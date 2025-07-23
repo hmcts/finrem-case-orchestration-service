@@ -92,6 +92,7 @@ public enum EventType {
     DRAFT_ORDERS("FR_draftOrders"),
     APPROVE_ORDERS("FR_approveOrders"),
     MANAGE_EXPRESS_CASE("FR_manageExpressCase"),
+    MANAGE_HEARINGS_MIGRATION("FR_manageHearingsMigration"),
     @JsonEnumDefaultValue
     NONE("");
 

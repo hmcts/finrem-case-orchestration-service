@@ -29,9 +29,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 public class PartyService {
 
     public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
-        log.info("Case ID: {} Fetching all parties solicitor case role", caseDetails.getId());
+        return getAllActivePartyList(caseDetails.getData());
+    }
 
-        FinremCaseData caseData = caseDetails.getData();
+    public DynamicMultiSelectList getAllActivePartyList(FinremCaseData caseData) {
+        log.info("Case ID: {} Fetching all parties solicitor case role", caseData.getCcdCaseId());
 
         List<DynamicMultiSelectListElement> selectedActiveCaseParties = new ArrayList<>();
         selectedActiveCaseParties.addAll(getActiveSolicitors(caseData));
