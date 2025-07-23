@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
@@ -72,7 +73,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         FinremCaseData caseData = caseDetails.getData();
         List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = caseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
 
-        judgeApprovedOrderCollection.stream()
+        emptyIfNull(judgeApprovedOrderCollection).stream()
             .map(DraftDirectionOrderCollection::getValue)
             .map(DraftDirectionOrder::getAdditionalDocuments)
             .filter(CollectionUtils::isNotEmpty)
@@ -86,6 +87,9 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
 
     private void moveJudgeUploadedOrdersToDraftDirectionOrderCollection(FinremCaseData finremCaseData) {
         DraftDirectionWrapper draftDirectionWrapper = finremCaseData.getDraftDirectionWrapper();
+        if (draftDirectionWrapper.getDraftDirectionOrderCollection() == null) {
+            draftDirectionWrapper.setDraftDirectionOrderCollection(new ArrayList<>());
+        }
         draftDirectionWrapper.getDraftDirectionOrderCollection().addAll(
             emptyIfNull(draftDirectionWrapper.getJudgeApprovedOrderCollection()
         ));

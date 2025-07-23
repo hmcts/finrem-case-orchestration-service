@@ -55,23 +55,24 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
                 .data(caseData).errors(errors).build();
         }
 
-        // TODO validate the newly uploaded orders only.
-//        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-//        FinremCaseData beforeCaseData = caseDetailsBefore.getData();
-//        DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
-//
-//        if (draftDirectionWrapperBefore != null) {
-//            List<DraftDirectionOrderCollection> draftDirectionOrderCollectionBefore
-//                = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
-//            if (draftDirectionOrderCollectionBefore != null && !draftDirectionOrderCollectionBefore.isEmpty()) {
-//                judgeApprovedOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
-//            }
-//        }
-//
-//        judgeApprovedOrderCollection.forEach(doc ->
-//            service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
-//                caseId, errors, userAuthorisation)
-//        );
+        // validate the newly uploaded orders only
+        // It does not need to verify caseDetailsBefore later as it will not show the previous uploaded orders anymore.
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData beforeCaseData = caseDetailsBefore.getData();
+        DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
+
+        if (draftDirectionWrapperBefore != null) {
+            List<DraftDirectionOrderCollection> draftDirectionOrderCollectionBefore
+                = draftDirectionWrapperBefore.getDraftDirectionOrderCollection();
+            if (draftDirectionOrderCollectionBefore != null && !draftDirectionOrderCollectionBefore.isEmpty()) {
+                judgeApprovedOrderCollection.removeAll(draftDirectionOrderCollectionBefore);
+            }
+        }
+
+        judgeApprovedOrderCollection.forEach(doc ->
+            service.validateEncryptionOnUploadedDocument(doc.getValue().getUploadDraftDocument(),
+                caseData.getCcdCaseId(), errors, userAuthorisation)
+        );
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
