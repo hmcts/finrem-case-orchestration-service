@@ -47,7 +47,12 @@ public class WorkingHearing {
             .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
             .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .partiesOnCase(workingHearing.getPartiesOnCaseMultiSelectList().getValue().stream()
+                .map(element -> PartyOnCase.builder()
+                    .role(element.getCode())
+                    .label(element.getLabel())
+                    .build())
+                .toList())
             .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
             .build();
     }
