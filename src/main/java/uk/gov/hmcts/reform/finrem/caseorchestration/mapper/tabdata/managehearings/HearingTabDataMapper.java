@@ -6,10 +6,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 
 import java.time.LocalDate;
@@ -126,9 +126,9 @@ public class HearingTabDataMapper {
     }
 
     private String getConfidentialParties(Hearing hearing) {
-        return hearing.getPartiesOnCaseMultiSelectList() != null
-            ? hearing.getPartiesOnCaseMultiSelectList().getValue().stream()
-            .map(DynamicMultiSelectListElement::getLabel)
+        return hearing.getPartiesOnCase() != null
+            ? hearing.getPartiesOnCase().stream()
+            .map(PartyOnCase::getLabel)
             .collect(Collectors.joining(", "))
             : DEFAULT_CONFIDENTIAL_PARTIES;
     }
