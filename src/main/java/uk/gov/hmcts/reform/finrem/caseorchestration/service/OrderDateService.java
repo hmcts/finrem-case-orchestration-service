@@ -31,7 +31,7 @@ public class OrderDateService {
      * @param authorisationToken the authorisation token used for the document service
      * @return a list of direction orders with the created date set and the document marked as stamped
      */
-    @Deprecated(since = "2025-07", forRemoval = true)
+    @Deprecated(since = "2025-07")
     public List<DirectionOrderCollection> addCreatedDateInFinalOrder(List<DirectionOrderCollection> orderCollections,
                                                                      String authorisationToken) {
         return syncCreatedDateAndMarkDocumentStamped(orderCollections, authorisationToken);
@@ -62,7 +62,7 @@ public class OrderDateService {
      * @return a list of direction orders with the created date set and the document marked as not stamped
      */
 
-    @Deprecated(since = "2025-07", forRemoval = true)
+    @Deprecated(since = "2025-07")
     public List<DirectionOrderCollection> addCreatedDateInUploadedOrder(List<DirectionOrderCollection> orderCollections,
                                                                         String authorisationToken) {
         return syncCreatedDateAndMarkDocumentNotStamped(orderCollections, authorisationToken);
