@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReview;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.DraftOrdersReviewCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.draftorders.review.OrderStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftOrdersWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -35,7 +35,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.Process
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -172,7 +171,7 @@ class ProcessOrderAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> result = underTest.handle(callbackRequest, AUTH_TOKEN);
 
-        Hearing workingHearing = result.getData().getManageHearingsWrapper().getWorkingHearing();
+        WorkingHearing workingHearing = result.getData().getManageHearingsWrapper().getWorkingHearing();
 
         assertThat(workingHearing).isNotNull();
         assertThat(workingHearing.getPartiesOnCaseMultiSelectList().getListItems().getFirst().getLabel()).isEqualTo("Party 1");
