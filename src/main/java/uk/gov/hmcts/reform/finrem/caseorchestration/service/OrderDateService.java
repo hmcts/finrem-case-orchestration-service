@@ -49,7 +49,7 @@ public class OrderDateService {
                                                                                 String authorisationToken) {
         List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
             .orElse(new ArrayList<>());
-        return addCreatedDateInOrder(directionOrderCollections, authorisationToken, YesOrNo.YES);
+        return syncCreatedDateWithEmService(directionOrderCollections, authorisationToken, YesOrNo.YES);
     }
 
     /**
@@ -80,26 +80,26 @@ public class OrderDateService {
                                                                                 String authorisationToken) {
         List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
             .orElse(new ArrayList<>());
-        return addCreatedDateInOrder(directionOrderCollections, authorisationToken, YesOrNo.NO);
+        return syncCreatedDateWithEmService(directionOrderCollections, authorisationToken, YesOrNo.NO);
     }
 
-    private List<DirectionOrderCollection> addCreatedDateInOrder(List<DirectionOrderCollection> orderCollections,
-                                                                 String authorisationToken,
-                                                                 YesOrNo isStamped) {
+    private List<DirectionOrderCollection> syncCreatedDateWithEmService(List<DirectionOrderCollection> orderCollections,
+                                                                        String authorisationToken,
+                                                                        YesOrNo isStamped) {
         List<DirectionOrderCollection> returnCollection = new ArrayList<>();
         if (!orderCollections.isEmpty()) {
             List<String> documentUrls = new ArrayList<>();
             orderCollections.forEach(order -> documentUrls.add(order.getValue().getUploadDraftDocument().getDocumentUrl()));
             List<FileUploadResponse> auditResponse = evidenceManagementAuditService.audit(documentUrls, authorisationToken);
-            orderCollections.forEach(order -> addCreatedDateAndUpdateStampedInformation(isStamped, returnCollection, auditResponse, order));
+            orderCollections.forEach(order -> syncCreatedDateWithAuditResponse(isStamped, returnCollection, auditResponse, order));
         }
         return returnCollection;
     }
 
-    private void addCreatedDateAndUpdateStampedInformation(YesOrNo isStamped,
-                                                           List<DirectionOrderCollection> returnCollection,
-                                                           List<FileUploadResponse> auditResponse,
-                                                           DirectionOrderCollection order) {
+    private void syncCreatedDateWithAuditResponse(YesOrNo isStamped,
+                                                  List<DirectionOrderCollection> returnCollection,
+                                                  List<FileUploadResponse> auditResponse,
+                                                  DirectionOrderCollection order) {
         if (isOrderNotStamped(order)) {
             String filename = order.getValue().getUploadDraftDocument().getDocumentFilename();
             for (FileUploadResponse fileUploadResponse : auditResponse) {
@@ -130,5 +130,4 @@ public class OrderDateService {
     private boolean isOrderNotStamped(DirectionOrderCollection order) {
         return !YesOrNo.YES.equals(order.getValue().getIsOrderStamped());
     }
-
 }
