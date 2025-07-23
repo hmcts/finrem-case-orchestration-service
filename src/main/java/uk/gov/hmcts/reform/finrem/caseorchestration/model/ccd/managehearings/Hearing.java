@@ -34,4 +34,5 @@ public class Hearing {
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
+    private YesOrNo wasMigrated;
 }

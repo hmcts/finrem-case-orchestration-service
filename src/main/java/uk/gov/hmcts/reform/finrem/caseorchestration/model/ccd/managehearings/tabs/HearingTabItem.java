@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
 
@@ -25,4 +26,5 @@ public class HearingTabItem {
     private String tabConfidentialParties;
     private String tabAdditionalInformation;
     private List<DocumentCollectionItem> tabHearingDocuments;
+    private YesOrNo tabWasMigrated;
 }
