@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
@@ -43,8 +44,8 @@ public class HearingOrderService {
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
     // Mirroring logic of convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails, ...) for FinremCaseData
-    public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
-        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(finremCaseData, authorisationToken);
+    public void convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
+        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedLastHearingOrder(finremCaseData, authorisationToken);
 
         String caseId = finremCaseData.getCcdCaseId();
         if (judgeApprovedHearingOrder.isPresent()) {
@@ -120,7 +121,7 @@ public class HearingOrderService {
     // The other uploaded orders should be processed which will be covered by DFR-3655
     public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(FinremCaseData finremCaseData, String authorisationToken) {
         List<DraftDirectionOrderCollection> draftDirectionOrders
-            = finremCaseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection();
+            = emptyIfNull(finremCaseData.getDraftDirectionWrapper().getJudgeApprovedOrderCollection());
 
         Optional<DraftDirectionOrder> draftDirectionOrder = draftDirectionOrders.isEmpty()
             ? Optional.empty()
@@ -141,7 +142,7 @@ public class HearingOrderService {
     }
 
     // Mirroring logic of getJudgeApprovedHearingOrder(CaseDetails, ...) for FinremCaseData
-    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
+    private Optional<DraftDirectionOrder> getJudgeApprovedLastHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
         Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaseData, authorisationToken);
 
         return draftDirectionOrderCollectionTail.isEmpty()

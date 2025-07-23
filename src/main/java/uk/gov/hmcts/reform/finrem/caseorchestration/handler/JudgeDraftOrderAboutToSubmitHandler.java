@@ -59,7 +59,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         validateCaseData(callbackRequest);
         convertAdditionalDocumentsToPdf(finremCaseDetails, userAuthorisation);
 
-        hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, userAuthorisation);
+        hearingOrderService.convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
         uploadedDraftOrderCategoriser.categorise(finremCaseData);
         moveJudgeUploadedOrdersToDraftDirectionOrderCollection(finremCaseData);

@@ -85,7 +85,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
+        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
         verifyNoInteractions(genericDocumentService); // Ensure no unnecessary document conversions
@@ -121,7 +121,7 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
 
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
             any(String.class), any(String.class));
-        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
+        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(CaseDetails.class), eq(AUTH_TOKEN));
     }
