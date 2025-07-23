@@ -738,17 +738,6 @@ public class DocumentHelper {
         });
     }
 
-    public List<DirectionOrderCollection> getFinalOrderCollection(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
-        });
-    }
-
-    public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
-            new TypeReference<>() {
-            });
-    }
-
     public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
             .fileName(caseDocument.getDocumentFilename())
