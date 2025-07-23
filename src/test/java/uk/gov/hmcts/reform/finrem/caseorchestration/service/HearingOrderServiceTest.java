@@ -28,6 +28,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -171,31 +172,37 @@ class HearingOrderServiceTest {
         assertEquals(caseDocument(), directionOrder.getUploadDraftDocument());
         assertEquals("Other", directionOrder.getPurposeOfDocument());
     }
-//
-//    @Test
-//    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2WhenNoDraft() {
-//        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
-//        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-//        FinremCaseData finremCaseData = caseDetails.getData();
-//
-//        underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
-//
-//        List<DraftDirectionOrderCollection> judgesAmendedOrderCollection
-//            = finremCaseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection();
-//        Assert.assertNull(judgesAmendedOrderCollection);
-//    }
-//
-//    @Test
-//    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders() {
-//        Map<String, Object> caseData = new HashMap<>();
-//        DraftDirectionOrder latestDraftDirectionOrder = makeDraftDirectionOrder();
-//        caseData.put(LATEST_DRAFT_DIRECTION_ORDER, latestDraftDirectionOrder);
-//
-//        underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails.builder().data(caseData).build());
-//
-//        assertThat(((List<CollectionElement>) caseData.get(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION)).get(0).getValue(),
-//            is(latestDraftDirectionOrder));
-//    }
+
+    @Test
+    void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrdersV2WhenNoDraft() {
+        FinremCallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData finremCaseData = caseDetails.getData();
+
+        underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+
+        List<DraftDirectionOrderCollection> judgesAmendedOrderCollection
+            = finremCaseData.getDraftDirectionWrapper().getJudgesAmendedOrderCollection();
+        assertNull(judgesAmendedOrderCollection);
+    }
+
+    @Test
+    void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders() {
+        DraftDirectionOrder latestDraftDirectionOrder = makeDraftDirectionOrder();
+
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().data(
+                FinremCaseData.builder().draftDirectionWrapper(DraftDirectionWrapper.builder()
+                    .latestDraftDirectionOrder(latestDraftDirectionOrder)
+                    .build()).build()
+            ).build();
+
+        underTest.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(finremCaseDetails);
+
+        assertThat(finremCaseDetails.getData().getDraftDirectionWrapper())
+            .extracting(DraftDirectionWrapper::getJudgesAmendedOrderCollection)
+            .extracting(List::getFirst)
+            .extracting(DraftDirectionOrderCollection::getValue).isEqualTo(latestDraftDirectionOrder);
+    }
 
     private List<DraftDirectionOrderCollection> makeDraftDirectionOrderCollectionWithOneElement() {
         List<DraftDirectionOrderCollection> draftDirectionOrderCollection = new ArrayList<>();
