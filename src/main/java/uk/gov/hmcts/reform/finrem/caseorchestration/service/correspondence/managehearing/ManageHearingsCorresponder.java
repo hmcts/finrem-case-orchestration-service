@@ -75,7 +75,6 @@ public class ManageHearingsCorresponder {
         }
     }
 
-    // todo: update tests for interverers
     /**
      * Sends a hearing notification to the party specified in parameters.
      *
@@ -296,7 +295,7 @@ public class ManageHearingsCorresponder {
             .getHearingNotice(finremCaseDetails);
 
         if (hearingNotice == null) {
-            log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
+            log.warn("Hearing notice is null. No document sent to {} for case ID: {}", caseRole, finremCaseDetails.getId());
             return;
         }
 
