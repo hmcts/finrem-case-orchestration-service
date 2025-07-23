@@ -189,4 +189,27 @@ public class GeneralApplicationCourtListWrapper implements CourtListWrapper {
         return generalApplicationDirectionsHighCourtList;
     }
 
+    public DefaultCourtListWrapper toDefaultCourtListWrapper() {
+        return DefaultCourtListWrapper.builder()
+            .nottinghamCourtList(generalApplicationDirectionsNottinghamCourtList)
+            .cfcCourtList(generalApplicationDirectionsCfcCourtList)
+            .birminghamCourtList(generalApplicationDirectionsBirminghamCourtList)
+            .liverpoolCourtList(generalApplicationDirectionsLiverpoolCourtList)
+            .manchesterCourtList(generalApplicationDirectionsManchesterCourtList)
+            .lancashireCourtList(generalApplicationDirectionsLancashireCourtList)
+            .clevelandCourtList(generalApplicationDirectionsClevelandCourtList)
+            .nwYorkshireCourtList(generalApplicationDirectionsNwYorkshireCourtList)
+            .humberCourtList(generalApplicationDirectionsHumberCourtList)
+            .kentSurreyCourtList(generalApplicationDirectionsKentSurreyCourtList)
+            .bedfordshireCourtList(generalApplicationDirectionsBedfordshireCourtList)
+            .thamesValleyCourtList(generalApplicationDirectionsThamesValleyCourtList)
+            .devonCourtList(generalApplicationDirectionsDevonCourtList)
+            .dorsetCourtList(generalApplicationDirectionsDorsetCourtList)
+            .bristolCourtList(generalApplicationDirectionsBristolCourtList)
+            .newportCourtList(generalApplicationDirectionsNewportCourtList)
+            .swanseaCourtList(generalApplicationDirectionsSwanseaCourtList)
+            .northWalesCourtList(generalApplicationDirectionsNorthWalesCourtList)
+            .highCourtList(generalApplicationDirectionsHighCourtList)
+            .build();
+    }
 }

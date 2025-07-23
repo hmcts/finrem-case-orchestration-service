@@ -153,6 +153,8 @@ public class ManageHearingsDocumentService {
      */
     public void categoriseSystemDuplicateDocs(List<ManageHearingsCollectionItem> hearings,
                                               List<ManageHearingDocumentsCollectionItem> hearingDocuments) {
+        // !!! Changes to this method may affect the manage hearing !!!
+        // see ManageHearingsMigrationTask.classesToOverrideJsonInclude.
         if (hearings != null) {
             hearings.stream()
                 .map(ManageHearingsCollectionItem::getValue)
