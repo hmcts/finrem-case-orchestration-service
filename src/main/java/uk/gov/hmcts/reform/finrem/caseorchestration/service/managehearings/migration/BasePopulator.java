@@ -5,10 +5,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class BasePopulator implements Populator {
 
@@ -44,7 +46,12 @@ public abstract class BasePopulator implements Populator {
     }
 
     protected Hearing applyCommonMigratedValues(DynamicMultiSelectList partiesOnCaseMultiSelectList, Hearing hearing) {
-        hearing.setPartiesOnCaseMultiSelectList(partiesOnCaseMultiSelectList);
+        hearing.setPartiesOnCase(partiesOnCaseMultiSelectList.getValue().stream()
+            .map(element -> PartyOnCase.builder()
+                .role(element.getCode())
+                .label(element.getLabel())
+                .build())
+            .collect(Collectors.toList()));
         hearing.setWasMigrated(YesOrNo.YES);
         return hearing;
     }
