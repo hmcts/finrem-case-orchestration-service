@@ -44,8 +44,7 @@ public class ManageHearingsCorresponder {
      * Begin sending hearing correspondence to parties, based on the callback request data.
      * No notifications, notices or documents sent if the User has specified that.
      * No notifications, notices or documents sent if the party list is empty.
-     * Loops through each selected party in the hearing and sends using
-     * <p>{@link #sendHearingCorrespondenceByParty}.</p>
+     * Loops through each selected party in the hearing and sends using {@link #sendHearingCorrespondenceByParty}.
      * @param callbackRequest the callback request containing case and hearing data
      * @param userAuthorisation the user authorisation token
      */
@@ -198,6 +197,7 @@ public class ManageHearingsCorresponder {
 
         processCorrespondenceForIntervener(finremCaseDetails, hearing, auth, role, intervenerThree);
     }
+
     /**
      * Used by processCorrespondenceForIntervener. Forwards Intervener Four data to processCorrespondenceForIntervener.
      */
@@ -216,7 +216,7 @@ public class ManageHearingsCorresponder {
     /**
      * Returns true if we can't post to, or email the intervener.
      * @param intervener the intervener wrapper containing the data for the intervener
-     * @return
+     * @return true if the intervener data is insufficient, false is an email address or postal address is available.
      */
     private boolean isIntervenerDataIncomplete(IntervenerWrapper intervener) {
         return intervener == null

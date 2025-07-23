@@ -155,7 +155,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that sendHearingNotificationToParty is called with the right role:
+     * Checks that sendHearingNotificationToParty is called with the right role.
      * - CaseRole is RESP_SOLICITOR
      * - shouldNotSendNotification returns false
      * - shouldEmailToRespondentSolicitor returns true
@@ -187,7 +187,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Checks that sendHearingNotificationToParty is called with the right Intervener role:
+     * Checks that sendHearingNotificationToParty is called with the right Intervener role.
      */
     @Test
     void shouldSendHearingNotificationsToInterveners() {
@@ -698,7 +698,7 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Just adds email and names needed for the test
+     * Just adds email and names needed for the test.
      *
      * @param finremCaseData the FinremCaseData object to which the interveners will be added
      */
