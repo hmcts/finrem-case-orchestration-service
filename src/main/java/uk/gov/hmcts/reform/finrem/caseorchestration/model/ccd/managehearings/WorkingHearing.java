@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -54,5 +55,18 @@ public class WorkingHearing {
 
     public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
         return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
+    }
+
+    public static DynamicList initialiseHearingTypeDynamicList(List<HearingType> hearingTypes) {
+        List<DynamicListElement> listElements = hearingTypes.stream()
+            .map(hearingType -> DynamicListElement.builder()
+                .code(hearingType.name())
+                .label(hearingType.getId())
+                .build())
+            .toList();
+
+        return DynamicList.builder()
+            .listItems(listElements)
+            .build();
     }
 }
