@@ -78,6 +78,5 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
                     additionalDoc.getValue(), authorisation, String.valueOf(caseDetails.getId()));
                 additionalDoc.setValue(documentPdf);
             });
-
     }
 }
