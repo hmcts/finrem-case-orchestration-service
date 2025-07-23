@@ -13,12 +13,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.documentcatergory.UploadedDraftOrderCategoriser;
 
 import java.util.List;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Slf4j
 @Service
@@ -59,6 +62,7 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(finremCaseData, userAuthorisation);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(finremCaseDetails, userAuthorisation);
         uploadedDraftOrderCategoriser.categorise(finremCaseData);
+        moveJudgeUploadedOrdersToDraftDirectionOrderCollection(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(finremCaseData).build();
@@ -78,5 +82,13 @@ public class JudgeDraftOrderAboutToSubmitHandler extends FinremCallbackHandler {
                     additionalDoc.getValue(), authorisation, String.valueOf(caseDetails.getId()));
                 additionalDoc.setValue(documentPdf);
             });
+    }
+
+    private void moveJudgeUploadedOrdersToDraftDirectionOrderCollection(FinremCaseData finremCaseData) {
+        DraftDirectionWrapper draftDirectionWrapper = finremCaseData.getDraftDirectionWrapper();
+        draftDirectionWrapper.getDraftDirectionOrderCollection().addAll(
+            emptyIfNull(draftDirectionWrapper.getJudgeApprovedOrderCollection()
+        ));
+        finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(null);
     }
 }
