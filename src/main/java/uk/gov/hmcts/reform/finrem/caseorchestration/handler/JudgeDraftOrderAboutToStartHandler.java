@@ -15,6 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.util.List;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.JUDGE_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @Slf4j
 @Service
@@ -30,9 +33,7 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && EventType.JUDGE_DRAFT_ORDER.equals(eventType);
+        return ABOUT_TO_START.equals(callbackType) && CONTESTED.equals(caseType) && JUDGE_DRAFT_ORDER.equals(eventType);
     }
 
     @Override
@@ -45,8 +46,7 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
         prepareJudgeApprovedOrderCollection(finremCaseData);
         prepareFieldsForOrderApprovedCoverLetter(finremCaseData, userAuthorisation);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseDetails.getData()).build();
     }
 
     private void prepareJudgeApprovedOrderCollection(FinremCaseData finremCaseData) {
