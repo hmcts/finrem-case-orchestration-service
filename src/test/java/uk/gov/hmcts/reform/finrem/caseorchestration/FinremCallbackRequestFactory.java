@@ -88,6 +88,4 @@ public class FinremCallbackRequestFactory {
             .caseDetails(FinremCaseDetailsBuilderFactory.from().build())
             .build();
     }
-
-
 }
