@@ -39,6 +39,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.getHearingType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.transformHearingInputsToHearing;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.ListUtils.nullIfEmpty;
 
 @Service
@@ -50,19 +52,21 @@ public class ManageHearingActionService {
     private final ExpressCaseService expressCaseService;
     private final HearingTabDataMapper hearingTabDataMapper;
 
-    private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {}
+    private record DocumentRecord(CaseDocument caseDocument, CaseDocumentType caseDocumentType) {
+    }
 
     /**
      * Adds a new hearing to the case and generates associated documents.
      * Updates the hearings collection and generates documents based on the hearing type
      * and case configuration. Adds the generated documents to the hearing documents collection.
+     *
      * @param finremCaseDetails case details containing hearing and case data
      * @param authToken         authorization token for secure resource access
      */
     public void performAddHearing(FinremCaseDetails finremCaseDetails, String authToken) {
         FinremCaseData caseData = finremCaseDetails.getData();
         ManageHearingsWrapper hearingWrapper = caseData.getManageHearingsWrapper();
-        HearingType hearingType = hearingWrapper.getWorkingHearing().getHearingType();
+        HearingType hearingType = getHearingType(hearingWrapper.getWorkingHearing().getHearingTypeDynamicList());
 
         UUID hearingId = UUID.randomUUID();
         addHearingToCollection(hearingWrapper, hearingId);
@@ -107,14 +111,14 @@ public class ManageHearingActionService {
     private void addHearingToCollection(ManageHearingsWrapper hearingsWrapper, UUID hearingId) {
 
         List<ManageHearingsCollectionItem> manageHearingsCollectionItemList = ofNullable(
-                        hearingsWrapper.getHearings())
-                .orElseGet(ArrayList::new);
+            hearingsWrapper.getHearings())
+            .orElseGet(ArrayList::new);
 
         manageHearingsCollectionItemList.add(
             ManageHearingsCollectionItem
                 .builder()
                 .id(hearingId)
-                .value(hearingsWrapper.getWorkingHearing())
+                .value(transformHearingInputsToHearing(hearingsWrapper.getWorkingHearing()))
                 .build()
         );
         hearingsWrapper.setWorkingHearingId(hearingId);
@@ -127,14 +131,14 @@ public class ManageHearingActionService {
      * Adds each document to the hearing documents collection in the `ManageHearingsWrapper`.
      * Each document is associated with the current working hearing ID.
      *
-     * @param documentMap   a map containing a string describing the document against a `DocumentRecord`
-     *                      containing the corresponding `CaseDocument` object and `CaseDocumentType`.
+     * @param documentMap     a map containing a string describing the document against a `DocumentRecord`
+     *                        containing the corresponding `CaseDocument` object and `CaseDocumentType`.
      * @param hearingsWrapper the wrapper containing hearing-related data
      */
     private void addDocumentsToCollection(Map<String, DocumentRecord> documentMap,
                                           ManageHearingsWrapper hearingsWrapper) {
         List<ManageHearingDocumentsCollectionItem> manageHearingDocuments = ofNullable(
-                hearingsWrapper.getHearingDocumentsCollection())
+            hearingsWrapper.getHearingDocumentsCollection())
             .orElseGet(ArrayList::new);
 
         documentMap.forEach((key, documentRecord) -> {

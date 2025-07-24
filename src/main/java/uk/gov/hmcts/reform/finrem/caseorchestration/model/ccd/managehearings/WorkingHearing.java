@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -19,12 +20,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Hearing {
+public class WorkingHearing {
 
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hearingDate;
-    private HearingType hearingType;
+    private DynamicList hearingTypeDynamicList;
     private String hearingTimeEstimate;
     private String hearingTime;
     private Court hearingCourtSelection;
@@ -34,5 +35,24 @@ public class Hearing {
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
     private DynamicMultiSelectList partiesOnCaseMultiSelectList;
-    private YesOrNo wasMigrated;
+
+    public static Hearing transformHearingInputsToHearing(WorkingHearing workingHearing) {
+        return Hearing.builder()
+            .hearingDate(workingHearing.getHearingDate())
+            .hearingTimeEstimate(workingHearing.getHearingTimeEstimate())
+            .hearingTime(workingHearing.getHearingTime())
+            .hearingCourtSelection(workingHearing.getHearingCourtSelection())
+            .hearingMode(workingHearing.getHearingMode())
+            .additionalHearingInformation(workingHearing.getAdditionalHearingInformation())
+            .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
+            .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
+            .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
+            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
+            .build();
+    }
+
+    public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
+        return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
+    }
 }
