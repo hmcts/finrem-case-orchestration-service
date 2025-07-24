@@ -179,8 +179,8 @@ public class AdditionalHearingDocumentService {
         log.info("Dealing with Case ID: {}", caseId);
         FinremCaseData caseData = caseDetails.getData();
 
-        List<DirectionOrderCollection> finalOrderCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(caseData.getFinalOrderCollection(),
-            authorisationToken);
+        List<DirectionOrderCollection> finalOrderCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
+            caseData.getFinalOrderCollection(), authorisationToken);
         List<DirectionOrderCollection> newFinalOrderCollection = new ArrayList<>(emptyIfNull(caseData.getFinalOrderCollection()));
         List<DirectionOrderCollection> uploadHearingOrder
             = orderDateService.syncCreatedDateAndMarkDocumentNotStamped(caseData.getUploadHearingOrder(), authorisationToken);
