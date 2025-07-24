@@ -23,13 +23,13 @@ public class OrderDateService {
     private final EvidenceManagementAuditService evidenceManagementAuditService;
 
     /**
-     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
      * Use {@link #syncCreatedDateAndMarkDocumentStamped(List, String)} instead.
      * This method forwards the call to the new method to ensure consistent behaviour.
      *
      * @param orderCollections   the list of direction orders to update; may be null
      * @param authorisationToken the authorisation token used for the document service
      * @return a list of direction orders with the created date set and the document marked as stamped
+     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
      */
     @Deprecated(since = "2025-07")
     public List<DirectionOrderCollection> addCreatedDateInFinalOrder(List<DirectionOrderCollection> orderCollections,
@@ -53,15 +53,14 @@ public class OrderDateService {
     }
 
     /**
-     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
      * Use {@link #syncCreatedDateAndMarkDocumentNotStamped(List, String)} instead.
      * This method forwards the call to the new method to ensure consistent behaviour.
      *
      * @param orderCollections   the list of direction orders to update; may be null
      * @param authorisationToken the authorisation token used for the document service
      * @return a list of direction orders with the created date set and the document marked as not stamped
+     * @deprecated Since July 2025. This method is deprecated and will be removed in a future release.
      */
-
     @Deprecated(since = "2025-07")
     public List<DirectionOrderCollection> addCreatedDateInUploadedOrder(List<DirectionOrderCollection> orderCollections,
                                                                         String authorisationToken) {
@@ -77,7 +76,7 @@ public class OrderDateService {
      * @return a list of direction orders with the created date set and the document marked as not stamped
      */
     public List<DirectionOrderCollection> syncCreatedDateAndMarkDocumentNotStamped(List<DirectionOrderCollection> orderCollections,
-                                                                                String authorisationToken) {
+                                                                                   String authorisationToken) {
         List<DirectionOrderCollection> directionOrderCollections = Optional.ofNullable(orderCollections)
             .orElse(new ArrayList<>());
         return syncCreatedDateWithEmService(directionOrderCollections, authorisationToken, YesOrNo.NO);
