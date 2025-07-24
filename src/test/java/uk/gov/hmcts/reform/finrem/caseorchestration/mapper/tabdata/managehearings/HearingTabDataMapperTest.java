@@ -9,14 +9,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollectionItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingMode;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingDocumentsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
 
 import java.time.LocalDate;
@@ -63,11 +63,14 @@ class HearingTabDataMapperTest {
             .hearingTime("10:00 AM")
             .hearingTimeEstimate(HEARING_TIME_ESTIMATE)
             .hearingMode(HearingMode.HYBRID)
-            .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
-                .value(List.of(
-                    DynamicMultiSelectListElement.builder().label("Party1").build(),
-                    DynamicMultiSelectListElement.builder().label("Party2").build()))
-                .build())
+            .partiesOnCase(List.of(
+                PartyOnCaseCollection.builder()
+                    .value(PartyOnCase.builder().role("Role1").label("Party1").build())
+                    .build(),
+                PartyOnCaseCollection.builder()
+                    .value(PartyOnCase.builder().role("Role2").label("Party2").build())
+                    .build()
+            ))
             .additionalHearingInformation(ADDITIONAL_INFO)
             .additionalHearingDocs(List.of(DocumentCollectionItem
                 .builder()
@@ -124,7 +127,7 @@ class HearingTabDataMapperTest {
             .hearingTime("10:00 AM")
             .hearingTimeEstimate(HEARING_TIME_ESTIMATE)
             .hearingMode(null)
-            .partiesOnCaseMultiSelectList(null)
+            .partiesOnCase(null)
             .additionalHearingInformation(null)
             .additionalHearingDocs(null)
             .build();
