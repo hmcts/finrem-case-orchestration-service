@@ -32,6 +32,6 @@ public class Hearing {
     private YesOrNo hearingNoticePrompt;
     private YesOrNo additionalHearingDocPrompt;
     private List<DocumentCollectionItem> additionalHearingDocs;
-    private List<PartyOnCase> partiesOnCase;
+    private List<PartyOnCaseCollection> partiesOnCase;
     private YesOrNo wasMigrated;
 }

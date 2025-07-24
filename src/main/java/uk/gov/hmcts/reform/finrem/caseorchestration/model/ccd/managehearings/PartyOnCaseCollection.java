@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartyOnCase {
-    private String role;
-    private String label;
+public class PartyOnCaseCollection {
+    private PartyOnCase value;
 }

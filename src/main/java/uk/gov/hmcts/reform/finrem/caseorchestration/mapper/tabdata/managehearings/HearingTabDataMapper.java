@@ -128,7 +128,7 @@ public class HearingTabDataMapper {
     private String getConfidentialParties(Hearing hearing) {
         return hearing.getPartiesOnCase() != null
             ? hearing.getPartiesOnCase().stream()
-            .map(PartyOnCase::getLabel)
+            .map(partyCollection -> partyCollection.getValue().getLabel())
             .collect(Collectors.joining(", "))
             : DEFAULT_CONFIDENTIAL_PARTIES;
     }

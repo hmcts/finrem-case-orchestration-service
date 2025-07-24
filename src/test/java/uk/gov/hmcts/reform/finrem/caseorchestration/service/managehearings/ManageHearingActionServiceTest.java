@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
@@ -239,17 +240,21 @@ class ManageHearingActionServiceTest {
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
         hearing1.setPartiesOnCase(List.of(
-            PartyOnCase.builder()
-                .role(APPLICANT)
-                .label("Applicant")
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
+                    .label("Applicant")
+                    .build())
                 .build()
         ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
         hearing2.setPartiesOnCase(List.of(
-            PartyOnCase.builder()
-                .role(RESPONDENT)
-                .label("Respondent")
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
+                    .label("Respondent")
+                    .build())
                 .build()
         ));
 
