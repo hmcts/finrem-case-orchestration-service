@@ -21,8 +21,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHear
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentCategory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.postalhearingdocuments.PostalHearingDocumentsProvider;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +49,7 @@ public class ManageHearingsDocumentService {
     private final ManageHearingFormGLetterDetailsMapper formGLetterDetailsMapper;
     private final ExpressCaseService expressCaseService;
     private final StaticHearingDocumentService staticHearingDocumentService;
+    private final PostalHearingDocumentsProvider postalHearingDocumentProvider;
 
     /**
      * Generates a hearing notice document for the given hearing and case details.
@@ -196,22 +197,7 @@ public class ManageHearingsDocumentService {
      * @return a {@link CaseDocument}
      */
     public List<CaseDocument> getHearingDocumentsToPost(FinremCaseDetails finremCaseDetails) {
-        HearingType workingHearingType = getLastWorkingHearingType(finremCaseDetails);
-
-        ArrayList<CaseDocument> hearingDocumentsToPost = new ArrayList<>();
-
-        if (HearingType.FDA.equals(workingHearingType)) {
-            hearingDocumentsToPost.addAll(getFdaHearingDocumentsToPost(finremCaseDetails));
-        }
-
-        if (HearingType.FDR.equals(workingHearingType)) {
-            hearingDocumentsToPost.addAll(getFdrExpressHearingDocumentsToPost(finremCaseDetails));
-        }
-
-        // These hearing documents are always needed, so add to the list
-        hearingDocumentsToPost.addAll(getHearingDocumentsThatAreAlwaysPosted(finremCaseDetails));
-
-        return hearingDocumentsToPost;
+        return postalHearingDocumentProvider.getHearingDocumentsToPost(finremCaseDetails);
     }
 
     /**
