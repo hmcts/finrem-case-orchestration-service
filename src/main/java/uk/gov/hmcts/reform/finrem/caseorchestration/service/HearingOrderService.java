@@ -98,25 +98,6 @@ public class HearingOrderService {
         }
     }
 
-    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<CollectionElement<DraftDirectionOrder>> judgesAmendedDirectionOrders = ofNullable(caseData.get(
-                JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
-            .map(this::convertToListOfDraftDirectionOrder)
-            .orElse(new ArrayList<>());
-
-        Optional<DraftDirectionOrder> latestDraftDirectionOrder = ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
-            .map(this::convertToDraftDirectionOrder);
-
-        if (latestDraftDirectionOrder.isPresent()) {
-            judgesAmendedDirectionOrders.add(CollectionElement.<DraftDirectionOrder>builder()
-                .value(latestDraftDirectionOrder.get())
-                .build());
-            caseData.put(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION, judgesAmendedDirectionOrders);
-        }
-    }
-
     // Mirroring logic of draftDirectionOrderCollectionTail(CaseDetails, ...) for FinremCaseData
     // The other uploaded orders should be processed which will be covered by DFR-3655
     public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(FinremCaseData finremCaseData, String authorisationToken) {
@@ -189,16 +170,6 @@ public class HearingOrderService {
     }
 
     private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {
-        });
-    }
-
-    private List<CollectionElement<DraftDirectionOrder>> convertToListOfDraftDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {
-        });
-    }
-
-    private List<CollectionElement<DirectionOrder>> convertToListOfDirectionOrder(Object value) {
         return objectMapper.convertValue(value, new TypeReference<>() {
         });
     }
