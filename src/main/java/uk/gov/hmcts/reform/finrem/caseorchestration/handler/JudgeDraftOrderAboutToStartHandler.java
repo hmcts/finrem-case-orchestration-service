@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
@@ -53,9 +54,13 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
         List<DraftDirectionOrderCollection> judgeApprovedOrderCollection = emptyIfNull(
             finremCaseData.getDraftDirectionWrapper().getDraftDirectionOrderCollection()
         ).stream()
-            .filter(d -> d.getValue().getPurposeOfDocument() == null)
+            .filter(isNotLegacyDraftOrder())
             .toList();
         finremCaseData.getDraftDirectionWrapper().setJudgeApprovedOrderCollection(judgeApprovedOrderCollection);
+    }
+
+    private Predicate<DraftDirectionOrderCollection> isNotLegacyDraftOrder() {
+        return d -> d.getValue().getPurposeOfDocument() == null;
     }
 
     private void prepareFieldsForOrderApprovedCoverLetter(FinremCaseData finremCaseData, String authorisationToken) {
