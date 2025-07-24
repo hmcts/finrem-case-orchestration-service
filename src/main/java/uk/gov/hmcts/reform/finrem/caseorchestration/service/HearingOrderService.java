@@ -153,7 +153,8 @@ public class HearingOrderService {
     }
 
     // Mirroring logic of appendDocumentToHearingOrderCollection(CaseDetails, ...) for FinremCaseData
-    private void appendDocumentToHearingOrderCollection(FinremCaseData finremCaseData, CaseDocument document, List<DocumentCollectionItem> additionalDocs) {
+    private void appendDocumentToHearingOrderCollection(FinremCaseData finremCaseData, CaseDocument document,
+                                                        List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
 
         DirectionOrder newDirectionOrder = DirectionOrder.builder().uploadDraftDocument(document).additionalDocuments(additionalDocs).build();
@@ -171,7 +172,8 @@ public class HearingOrderService {
                                                               String authorisationToken,
                                                               List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> finalOrderCollection = finremCaseData.getFinalOrderCollection();
-        List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(finalOrderCollection, authorisationToken);
+        List<DirectionOrderCollection> finalDatedCollection = orderDateService.syncCreatedDateAndMarkDocumentStamped(
+            finalOrderCollection, authorisationToken);
         if (!documentHelper.checkIfOrderAlreadyInFinalOrderCollection(finalDatedCollection, stampedHearingOrder)) {
             DirectionOrderCollection latestOrder = DirectionOrderCollection.builder()
                 .value(DirectionOrder.builder()
