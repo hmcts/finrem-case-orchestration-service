@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 
 @Slf4j
 public class EmailUtils {
@@ -21,6 +22,6 @@ public class EmailUtils {
      * @return {@code true} if the email address is valid; {@code false} otherwise
      */
     public static boolean isValidEmailAddress(final String email) {
-        return org.apache.commons.validator.routines.EmailValidator.getInstance().isValid(email);
+        return EmailValidator.getInstance().isValid(email);
     }
 }
