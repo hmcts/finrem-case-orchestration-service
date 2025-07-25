@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
@@ -34,10 +36,12 @@ class ManageHearingsNotificationRequestMapperTest {
         caseDetails = new FinremCaseDetails();
         caseDetails.setId(123456789L);
         caseDetails.setCaseType(CaseType.CONTESTED);
+
         contactDetails = new ContactDetailsWrapper();
         contactDetails.setApplicantLname("Applicant last name");
         contactDetails.setRespondentLname("Respondent last name");
         contactDetails.setSolicitorReference("A solicitor reference");
+
         FinremCaseData caseData = new FinremCaseData();
         caseData.setContactDetailsWrapper(contactDetails);
         caseDetails.setData(caseData);
@@ -85,6 +89,29 @@ class ManageHearingsNotificationRequestMapperTest {
             checkCommonNotificationRequestAttributes(result);
             assertThat(result.getNotificationEmail()).isEqualTo("respondentsolicitor@example.com");
             assertThat(result.getName()).isEqualTo("The respondent solicitor name");
+        }
+    }
+
+    /**
+     * Checks the specific notification request attributes for the Intervener solicitor.
+     * Creates an IntervenerOne object.  IntervenerTwo to Four use the same logic.
+     */
+    @Test
+    void shouldBuildNotificationRequestForIntervenerSolicitor() {
+
+        try (MockedStatic<CourtHelper> mocked = mockStatic(CourtHelper.class)) {
+
+            // When
+            IntervenerWrapper intervener = new IntervenerOne();
+            intervener.setIntervenerSolEmail("intervenersolicitor@example.com");
+            intervener.setIntervenerSolName("The intervener solicitor name");
+            mocked.when(() -> CourtHelper.getFRCForHearing(hearing)).thenReturn("MockedCourt");
+            NotificationRequest result = mapper.buildHearingNotificationForIntervenerSolicitor(caseDetails, hearing, intervener);
+
+            // AssertThat
+            checkCommonNotificationRequestAttributes(result);
+            assertThat(result.getNotificationEmail()).isEqualTo("intervenersolicitor@example.com");
+            assertThat(result.getName()).isEqualTo("The intervener solicitor name");
         }
     }
 

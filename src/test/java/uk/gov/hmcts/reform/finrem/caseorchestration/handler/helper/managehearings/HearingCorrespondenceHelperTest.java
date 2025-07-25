@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Man
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,9 @@ class HearingCorrespondenceHelperTest {
 
     @Mock
     PaperNotificationService paperNotificationService;
+
+    @Mock
+    ExpressCaseService expressCaseService;
 
     @InjectMocks
     private HearingCorrespondenceHelper helper;
@@ -164,17 +169,19 @@ class HearingCorrespondenceHelperTest {
     }
 
     /**
-     * Tests happy path for shouldSendHearingNoticeOnly::
+     * Tests true path for shouldSendHearingNoticeOnly::
      * - Action is ADD_HEARING
      * - Hearing type comes from a stream of arguments that should all be valid.
+     * When a case needs documents posted, shouldPostHearingNoticeOnly decides if only the notice needs posting.
      */
     @ParameterizedTest
     @MethodSource("provideNoticeOnlyCases")
-    void shouldSendHearingNoticeOnlyReturnsTrue(Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsTrue(Hearing hearing) {
         // Arrange case
         FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
         // Act
-        boolean result = helper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing);
+        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
         // Assert
         assertTrue(result);
     }
@@ -209,47 +216,118 @@ class HearingCorrespondenceHelperTest {
             ),
             arguments(
                 Hearing.builder().hearingType(HearingType.PTR).build()
+            ),
+            // Test should mock that this FDR is not an express case to pass.
+            arguments(
+                Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
 
     /**
-     * Confirms that shouldSendHearingNoticeOnly returns false for the passes arguments.
+     * Tests false path for shouldSendHearingNoticeOnly::
+     * - Action is ADD_HEARING
+     * - Hearing type comes from a stream of arguments that should all be invalid.
+     * When a case needs documents posted, shouldPostHearingNoticeOnly decides if only the notice needs posting.
      */
     @ParameterizedTest
     @MethodSource("provideInvalidNoticeOnlyCases")
-    void shouldSendHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+    void shouldPostHearingNoticeOnlyReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // Arrange case
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
         // Act
-        boolean result = helper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing);
+        boolean result = helper.shouldPostHearingNoticeOnly(finremCaseDetails, hearing);
         // Assert
         assertFalse(result);
     }
 
     /**
-     * Used by shouldSendHearingNoticeOnlyReturnsFalse.
+     * Used by shouldSendHearingNoticeOnlyReturnsTrue.
      *
-     * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return False
+     * @return Stream of Arguments all of which should cause shouldSendHearingNoticeOnly to return True
      */
     static Stream<Arguments> provideInvalidNoticeOnlyCases() {
         return Stream.of(
-            // Case: null ManageHearingsAction, hearing type is in list
+            // Case: invalid ManageHearingsAction, hearing type is OK
             arguments(
-                finremCaseDetails(null),
-                Hearing.builder().hearingType(HearingType.MPS).build()
-            ),
-            // Case: action is ADD_HEARING, which is valid. However, hearing type is wrong.
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                Hearing.builder().hearingType(HearingType.FDR).build()
-            ),
-            arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                Hearing.builder().hearingType(HearingType.FDA).build()
+                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.MPS).build()
             ),
             // Case: valid action, but hearing is null
             arguments(
-                finremCaseDetails(ManageHearingsAction.ADD_HEARING),
-                null
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
+            ),
+            // Case: Hearing type is wrong.
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDA).build()
+            ),
+            // Case: valid action, but FDR invalid for non-express case
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
+            )
+        );
+    }
+
+    /**
+     * Tests happy path for shouldPostAllHearingDocuments::
+     * - Action is ADD_HEARING
+     * - Hearing type comes from a stream of arguments that should all be valid.
+     * When a case needs documents posted, shouldPostAllHearingDocuments decides if all hearing docs need posting.
+     */
+    @Test
+    void shouldPostAllHearingDocumentsReturnsTrue() {
+        // Arrange case
+        FinremCaseDetails finremCaseDetails = finremCaseDetails(ManageHearingsAction.ADD_HEARING);
+        Hearing fdaHearing = Hearing.builder().hearingType(HearingType.FDA).build();
+        // This mock is just for the FDR case.  FDR cases that are express have all docs posted.
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(true);
+        Hearing fdrHearing = Hearing.builder().hearingType(HearingType.FDR).build();
+
+        // Act
+        boolean fdaResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdaHearing);
+        boolean fdrResult = helper.shouldPostAllHearingDocuments(finremCaseDetails, fdrHearing);
+
+        // Assert
+        assertTrue(fdaResult);
+        assertTrue(fdrResult);
+    }
+
+    /**
+     * Confirms that shouldPostAllHearingDocuments returns false for the passed arguments.
+     * When a case needs documents posted, shouldPostAllHearingDocuments decides if all hearing docs need posting.
+     */
+    @ParameterizedTest
+    @MethodSource("provideCasesSoShouldPostAllHearingDocumentsReturnsFalse")
+    void shouldPostAllHearingDocumentsReturnsFalse(FinremCaseDetails finremCaseDetails, Hearing hearing) {
+        // Arrange.  This mock is just for the FDR case.  FDR cases that are not express don't have all docs posted.
+        lenient().when(expressCaseService.isExpressCase(finremCaseDetails.getData())).thenReturn(false);
+        // Act
+        boolean result = helper.shouldPostAllHearingDocuments(finremCaseDetails, hearing);
+        // Assert
+        assertFalse(result);
+    }
+
+    /**
+     * Used by shouldPostAllHearingDocumentsReturnsFalse.
+     *
+     * @return Stream of Arguments all of which should cause shouldPostAllHearingDocuments to return False
+     */
+    static Stream<Arguments> provideCasesSoShouldPostAllHearingDocumentsReturnsFalse() {
+        return Stream.of(
+            // Case: valid action, but hearing is null
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), null
+            ),
+            // ManageHearingsAction is null, so a failing condition.
+            arguments(
+                finremCaseDetails(null), Hearing.builder().hearingType(HearingType.FDA).build()
+            ),
+            // Action is ADD_HEARING, which is valid. However, hearing types are wrong.
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.MPS).build()
+            ),
+            // Calling test must mock the express case service to return true for this Case.  Then FDR will mean false returned.
+            arguments(
+                finremCaseDetails(ManageHearingsAction.ADD_HEARING), Hearing.builder().hearingType(HearingType.FDR).build()
             )
         );
     }
