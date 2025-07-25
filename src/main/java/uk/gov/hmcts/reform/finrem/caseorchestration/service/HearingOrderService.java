@@ -38,7 +38,6 @@ public class HearingOrderService {
     private final OrderDateService orderDateService;
     private final UploadedDraftOrderCategoriser uploadedDraftOrderCategoriser;
 
-    // Mirroring logic of convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails, ...) for FinremCaseData
     public void convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
         Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedLastHearingOrder(finremCaseData, authorisationToken);
 
@@ -60,12 +59,11 @@ public class HearingOrderService {
         }
     }
 
-    // Mirroring logic of latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails, ...) for FinremCaseData
-    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(FinremCaseData finremCaeData, String authorisationToken) {
-        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaeData, authorisationToken)
+    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(FinremCaseData finremCaseData, String authorisationToken) {
+        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaseData, authorisationToken)
             .orElseThrow(IllegalArgumentException::new);
 
-        Optional<DraftDirectionOrder> latestDraftDirectionOrder = ofNullable(finremCaeData.getDraftDirectionWrapper().getLatestDraftDirectionOrder())
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder = ofNullable(finremCaseData.getDraftDirectionWrapper().getLatestDraftDirectionOrder())
             .map(this::convertToDraftDirectionOrder);
 
         return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
@@ -93,7 +91,6 @@ public class HearingOrderService {
         }
     }
 
-    // Mirroring logic of draftDirectionOrderCollectionTail(CaseDetails, ...) for FinremCaseData
     // The other uploaded orders should be processed which will be covered by DFR-3655
     public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(FinremCaseData finremCaseData, String authorisationToken) {
         List<DraftDirectionOrderCollection> draftDirectionOrders
@@ -117,7 +114,6 @@ public class HearingOrderService {
         return Optional.empty();
     }
 
-    // Mirroring logic of getJudgeApprovedHearingOrder(CaseDetails, ...) for FinremCaseData
     private Optional<DraftDirectionOrder> getJudgeApprovedLastHearingOrder(FinremCaseData finremCaseData, String authorisationToken) {
         Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(finremCaseData, authorisationToken);
 
@@ -128,7 +124,6 @@ public class HearingOrderService {
             : draftDirectionOrderCollectionTail;
     }
 
-    // Mirroring logic of appendDocumentToHearingOrderCollection(CaseDetails, ...) for FinremCaseData
     private void appendDocumentToHearingOrderCollection(FinremCaseData finremCaseData, CaseDocument document,
                                                         List<DocumentCollectionItem> additionalDocs) {
         List<DirectionOrderCollection> directionOrders = ofNullable(finremCaseData.getUploadHearingOrder()).orElse(new ArrayList<>());
