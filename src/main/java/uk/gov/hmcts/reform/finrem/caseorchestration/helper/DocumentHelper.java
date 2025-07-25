@@ -355,11 +355,6 @@ public class DocumentHelper {
         });
     }
 
-    public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
@@ -399,20 +394,6 @@ public class DocumentHelper {
         if (respondToOrderDocumentCollection.isPresent()) {
             return respondToOrderDocumentCollection.map(
                 respondToOrderDataCollection1 -> respondToOrderDocumentCollection.get().getValue().getDocumentLink());
-        }
-        return Optional.empty();
-    }
-
-    public Optional<CaseDocument> getLatestAdditionalHearingDocument(Map<String, Object> caseData) {
-        Optional<AdditionalHearingDocumentData> additionalHearingDocumentData =
-            ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
-                .map(this::convertToAdditionalHearingDocumentData)
-                .orElse(emptyList())
-                .stream()
-                .reduce((first, second) -> second);
-        if (additionalHearingDocumentData.isPresent()) {
-            return additionalHearingDocumentData
-                .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
         }
         return Optional.empty();
     }
@@ -630,34 +611,6 @@ public class DocumentHelper {
                 .fileName(caseDocument.getDocumentFilename())
                 .build())
             .toList();
-    }
-
-    public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
-        CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
-        return caseDocument != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-            .fileName(caseDocument.getDocumentFilename()).build())
-            : Optional.empty();
-    }
-
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data,
-                                                                           String authorisationToken,
-                                                                           String caseId) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<DocumentCollectionItem> pdfDocuments = new ArrayList<>();
-        List<DocumentCollectionItem> documentCollectionItems = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
-        documentCollectionItems.forEach(doc -> {
-            CaseDocument caseDocument = doc.getValue();
-            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
-            pdfDocuments.add(DocumentCollectionItem
-                .builder()
-                .value(pdfDocument)
-                .build());
-            bulkPrintDocuments.add(mapToBulkPrintDocument(pdfDocument));
-        });
-
-        data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);
-        return bulkPrintDocuments;
     }
 
     private List<DocumentCollectionItem> covertDocumentCollections(Object object) {
