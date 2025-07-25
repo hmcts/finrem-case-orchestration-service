@@ -76,7 +76,7 @@ class JudgeDraftOrderAboutToStartHandlerTest {
     }
 
     @Test
-    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateJudgeApprovedOrderCollection() {
+    void givenNoPreviousJudgesApprovedOrder_whenHandle_thenShouldPopulateEmptyJudgeApprovedOrderCollection() {
         FinremCaseData.FinremCaseDataBuilder builder = FinremCaseData.builder();
         builder.draftDirectionWrapper(DraftDirectionWrapper.builder()
             .draftDirectionOrderCollection(List.of(
