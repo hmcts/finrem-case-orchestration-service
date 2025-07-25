@@ -8,7 +8,7 @@ plugins {
     id 'uk.gov.hmcts.java' version '0.12.67'
     id 'au.com.dius.pact' version '4.6.17'
     id "info.solidsoft.pitest" version "1.15.0"
-    id 'com.github.hmcts.rse-cft-lib' version '0.19.1799'
+    id 'com.github.hmcts.rse-cft-lib' version '0.19.1810'
 }
 
 apply plugin: 'com.github.ben-manes.versions'
@@ -19,7 +19,7 @@ def versions = [
         bspCommonLib         : '0.1.2',
         ccdClient            : '5.1.1',
         commonsIo            : '2.19.0',
-        commonsLang3         : '3.17.0',
+        commonsLang3         : '3.18.0',
         hmctsNotify          : '5.2.1-RELEASE',
         junit                : '4.13.2',
         lombok               : '1.18.38',
@@ -31,7 +31,7 @@ def versions = [
         serviceTokenGenerator: '5.3.3',
         springDoc            : '1.8.0',
         wiremock             : '3.0.1',
-        apacheLogging        : '2.25.0',
+        apacheLogging        : '2.25.1',
         idamClient           : '3.0.4',
         jjwt                 : '0.12.6',
         jaxbOsgi             : '2.3.9',
@@ -40,7 +40,7 @@ def versions = [
         amClient             : '1.59.2',
         sendLetterClient     : '5.1.1',
         elasticSearch        : '7.17.29',
-        jacksonDatabind      : '2.19.1',
+        jacksonDatabind      : '2.19.2',
         retry                : '1.3.4',
         snakeyaml            : '2.4',
         loadbalancer         : '4.3.0'
@@ -526,11 +526,11 @@ tasks.withType(Zip).configureEach {
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 189
+    maxWarnings = 183
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 508
+    maxWarnings = 499
 }
 
 tasks.named('checkstyleContract') {

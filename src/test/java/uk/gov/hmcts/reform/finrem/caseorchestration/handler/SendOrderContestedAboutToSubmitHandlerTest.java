@@ -329,7 +329,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getOrderWrapper().getAppOrderCollections().size());
         assertNull(caseData.getOrderWrapper().getRespOrderCollection());
         assertEquals(1, caseData.getOrderWrapper().getRespOrderCollections().size());
-        assertEquals(3, caseData.getOrdersSentToPartiesCollection().size());
+        assertEquals(2, caseData.getOrdersSentToPartiesCollection().size());
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
             + "(d607c045-878e-475f-ab8e-b2f667d8af64|app_docs.pdf)+[],"
             + "(22222222-878e-475f-ab8e-b2f667d8af64|app_docs2.pdf)+[]"
@@ -408,13 +408,13 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             ))
             .build();
 
-        CaseDocument additionalDocument = null;
+        CaseDocument additionalDocument;
         data.getSendOrderWrapper().setOrdersToSend(ordersToSend);
         data.getSendOrderWrapper().setAdditionalDocument(additionalDocument = caseDocument("http://fakeurl/additionalDocument", "additionalDocument.docx"));
         data.setOrderApprovedCoverLetter(caseDocument("http://fakeurl/orderApprovedCoverLetter", "orderApprovedCoverLetter.pdf"));
         data.getGeneralOrderWrapper().setGeneralOrders(getGeneralOrderCollection());
 
-        CaseDocument legacyApprovedOrder = null;
+        CaseDocument legacyApprovedOrder;
         when(generalOrderService.getParties(caseDetails)).thenReturn(partyList());
         when(generalOrderService.hearingOrdersToShare(caseDetails, List.of(selected1, selected2)))
             .thenReturn(Triple.of(List.of(legacyApprovedOrder = caseDocument("http://fakeurl/1111Legacy", "111.pdf")),
@@ -433,8 +433,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
             .map(CaseDocument::getDocumentUrl)
             .containsAnyOf("http://fakeurl/additionalDocument",
                 "http://fakeurl/1111Legacy",
-                "http://fakeurl/2222NewFlow",
-                "http://fakeurl/orderApprovedCoverLetter");
+                "http://fakeurl/2222NewFlow");
         assertThat(logs.getInfos()).contains("FR_sendOrder(123) - sending orders: ("
             + "(uuid1|order1.pdf)+[uuid3|attachment1.pdf],"
             + "(uuid2|order2.pdf)+[]"
@@ -604,14 +603,11 @@ class SendOrderContestedAboutToSubmitHandlerTest {
         assertEquals(1, caseData.getFinalOrderCollection().size());
         assertNull(caseData.getOrderWrapper().getIntv1OrderCollection());
         assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().size());
-        assertEquals(2, caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().size());
-        assertEquals("app_docs.pdf", caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(0)
-            .getValue().getCaseDocument().getDocumentFilename());
-        assertEquals("contestedOrderApprovedCoverLetter.pdf",
-            caseData.getOrderWrapper().getIntv1OrderCollections().get(0).getValue().getApproveOrders().get(1)
+        assertEquals(1, caseData.getOrderWrapper().getIntv1OrderCollections().getFirst().getValue().getApproveOrders().size());
+        assertEquals("app_docs.pdf", caseData.getOrderWrapper().getIntv1OrderCollections().getFirst().getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
         assertEquals("AdditionalHearingDocument.pdf",
-            caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().get(0)
+            caseData.getOrderWrapper().getIntv1OrderCollections().get(1).getValue().getApproveOrders().getFirst()
             .getValue().getCaseDocument().getDocumentFilename());
     }
 
@@ -712,6 +708,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     void givenContestedCase_whenSendingADraftOrderDocReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
+        CaseDocument coverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
@@ -738,6 +737,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                                     .approvalJudge("Mr Judge A")
+                                    .coverLetter(coverLetter1)
                                     .build())
                                 .build()))
                         ).build())
@@ -763,6 +763,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
+                    .coverLetter(coverLetter1)
                 .build()).build());
     }
 
@@ -770,6 +771,9 @@ class SendOrderContestedAboutToSubmitHandlerTest {
     void givenContestedCase_whenSendingPsaDocumentReviewOrder_thenFinalisedOrderIsGenerated() {
         CaseDocument caseDocument1 = caseDocument("http://dm-store:8080/documents/d607c045-aaaa-475f-ab8e-b2f667d8af64", "aaa.pdf");
         CaseDocument caseDocument2 = caseDocument("http://dm-store:8080/documents/d607c045-bbbb-475f-ab8e-b2f667d8af64", "bbb.pdf");
+        CaseDocument coverLetter1 = caseDocument(
+            "http://document-management-store:8080/documents/55555555-c524-4614-86e5-c569f82c718d",
+            "Cover Letter 1.pdf");
 
         FinremCaseData.FinremCaseDataBuilder finremCaseDataBuilder = FinremCaseData.builder();
         finremCaseDataBuilder.orderApprovedCoverLetter(caseDocument());
@@ -783,6 +787,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                     .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                     .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                     .approvalJudge("Mr Judge A")
+                    .coverLetter(coverLetter1)
                     .build())
                 .build()
         ));
@@ -804,6 +809,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                                     .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                                     .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                                     .approvalJudge("Mr Judge B")
+                                    .coverLetter(coverLetter1)
                                     .build())
                                 .build()
                         )))
@@ -834,6 +840,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                             .submittedDate(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
                             .approvalDate(LocalDateTime.of(2024, 12, 31, 2, 59, 59))
                             .approvalJudge("Mr Judge A")
+                            .coverLetter(coverLetter1)
                             .build())
                         .build()
                 )).build());
@@ -844,6 +851,7 @@ class SendOrderContestedAboutToSubmitHandlerTest {
                 .submittedDate(LocalDateTime.of(2022, 12, 31, 23, 59, 59))
                 .approvalDate(LocalDateTime.of(2022, 12, 31, 2, 59, 59))
                 .approvalJudge("Mr Judge B")
+                .coverLetter(coverLetter1)
                 .build()).build());
         verify(draftOrderService).clearEmptyOrdersInDraftOrdersReviewCollection(any(FinremCaseData.class));
     }

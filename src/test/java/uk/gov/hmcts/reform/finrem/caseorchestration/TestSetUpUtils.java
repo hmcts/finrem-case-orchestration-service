@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.AllocatedRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
@@ -43,9 +44,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -526,5 +529,14 @@ public class TestSetUpUtils {
             .documentUrl(DOC_URL)
             .documentBinaryUrl(BINARY_URL)
             .build();
+    }
+
+    public static Hearing hearing(String hearingTime) {
+        return Hearing.builder().hearingTime(hearingTime).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Supplier<T> anySupplier() {
+        return any(Supplier.class);
     }
 }
