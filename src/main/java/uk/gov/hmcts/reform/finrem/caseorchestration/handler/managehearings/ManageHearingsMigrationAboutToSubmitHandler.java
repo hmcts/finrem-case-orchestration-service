@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsEditHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
 /**
@@ -27,11 +29,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ManageHearingsMigrationService manageHearingsMigrationService;
+    private final ManageHearingsEditHearingService manageHearingsEditHearingService;
 
     public ManageHearingsMigrationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       ManageHearingsMigrationService manageHearingsMigrationService) {
+                                                       ManageHearingsMigrationService manageHearingsMigrationService, ManageHearingsEditHearingService manageHearingsEditHearingService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsMigrationService = manageHearingsMigrationService;
+        this.manageHearingsEditHearingService = manageHearingsEditHearingService;
     }
 
     @Override
@@ -54,6 +58,10 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
         } else {
             manageHearingsMigrationService.runManageHearingMigration(finremCaseData, "ui");
         }
+
+        ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+        manageHearingsWrapper.setWorkingHearingId(manageHearingsWrapper.getHearings().getFirst().getId());
+        manageHearingsEditHearingService.setWorkingHearingFromWorkingHearingId(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }
