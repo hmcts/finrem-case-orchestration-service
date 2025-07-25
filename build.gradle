@@ -43,7 +43,8 @@ def versions = [
         jacksonDatabind      : '2.19.2',
         retry                : '1.3.4',
         snakeyaml            : '2.4',
-        loadbalancer         : '4.3.0'
+        loadbalancer         : '4.3.0',
+        commonsValidator     : '1.7'
 ]
 
 project.ext {
@@ -394,6 +395,7 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation group: 'commons-validator', name: 'commons-validator', version: versions.commonsValidator
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
