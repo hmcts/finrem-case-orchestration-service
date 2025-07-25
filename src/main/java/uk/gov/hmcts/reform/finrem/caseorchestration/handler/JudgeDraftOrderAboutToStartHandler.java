@@ -40,7 +40,7 @@ public class JudgeDraftOrderAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        log.info(CallbackHandlerLogger.aboutToSubmit(callbackRequest));
+        log.info(CallbackHandlerLogger.aboutToStart(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData finremCaseData = finremCaseDetails.getData();
 
