@@ -1,16 +1,21 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.processorder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.processorder.ProcessOrderService;
 
 import java.util.ArrayList;
@@ -18,24 +23,28 @@ import java.util.List;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.ABOUT_TO_START;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.DIRECTION_UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicList;
 
 @Slf4j
 @Service
-public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandler {
+public class ProcessOrderAboutToStartHandler extends FinremCallbackHandler {
 
     private final ProcessOrderService processOrderService;
+    private final PartyService partyService;
 
-    public DirectionUploadOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                   ProcessOrderService processOrderService) {
+    public ProcessOrderAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           ProcessOrderService processOrderService, PartyService partyService) {
         super(finremCaseDetailsMapper);
         this.processOrderService = processOrderService;
+        this.partyService = partyService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return ABOUT_TO_START.equals(callbackType) && CONTESTED.equals(caseType) && DIRECTION_UPLOAD_ORDER.equals(eventType);
+        return ABOUT_TO_START.equals(callbackType)
+            && CONTESTED.equals(caseType)
+            && (EventType.DIRECTION_UPLOAD_ORDER.equals(eventType) || EventType.PROCESS_ORDER.equals(eventType));
     }
 
     @Override
@@ -55,6 +64,17 @@ public class DirectionUploadOrderAboutToStartHandler extends FinremCallbackHandl
             && CollectionUtils.isEmpty(caseData.getUploadHearingOrder())) {
             errors.add(error);
         }
+
+        // Initialise Working Hearings if the event is PROCESS_ORDER
+        if (EventType.PROCESS_ORDER.equals(callbackRequest.getEventType())) {
+            caseData.getManageHearingsWrapper().setWorkingHearing(
+                WorkingHearing.builder()
+                    .partiesOnCaseMultiSelectList(partyService.getAllActivePartyList(caseDetails))
+                    .hearingTypeDynamicList(initialiseHearingTypeDynamicList(List.of(HearingType.values())))
+                    .build()
+            );
+        }
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 

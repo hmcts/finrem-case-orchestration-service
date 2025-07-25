@@ -82,7 +82,6 @@ public class PBAPaymentTest extends BaseTest {
         + "\"organisationIdentifier\":\"RG-123456789\""
         + "}";
 
-
     private static final String FEE_REGISTER_CONSENTED_URL =
         "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application"
             + "&keyword=GeneralAppWithoutNotice";

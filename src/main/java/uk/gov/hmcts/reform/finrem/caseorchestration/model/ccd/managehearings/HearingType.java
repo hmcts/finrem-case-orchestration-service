@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 
 @RequiredArgsConstructor
 public enum HearingType {
@@ -23,4 +24,9 @@ public enum HearingType {
     public String getId() {
         return id;
     }
+
+    public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
+        return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
+    }
+
 }

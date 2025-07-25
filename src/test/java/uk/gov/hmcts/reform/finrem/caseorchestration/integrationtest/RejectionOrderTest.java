@@ -19,7 +19,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 
 public class RejectionOrderTest extends AbstractDocumentTest {
 
-
     private static final String API_URL = "/case-orchestration/ccdAboutToSubmitEvent";
 
     @Override
