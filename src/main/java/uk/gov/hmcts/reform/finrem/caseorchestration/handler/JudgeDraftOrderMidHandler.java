@@ -55,8 +55,8 @@ public class JudgeDraftOrderMidHandler extends FinremCallbackHandler {
                 .data(caseData).errors(errors).build();
         }
 
-        // validate the newly uploaded orders only
-        // It does not need to verify caseDetailsBefore later as it will not show the previous uploaded orders anymore.
+        // The following validation will not be needed, as another ticket will prevent previously uploaded orders
+        // from being shown for amendment and removal.
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData beforeCaseData = caseDetailsBefore.getData();
         DraftDirectionWrapper draftDirectionWrapperBefore = beforeCaseData.getDraftDirectionWrapper();
