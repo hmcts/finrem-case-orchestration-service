@@ -219,8 +219,8 @@ class ManageHearingsMigrationTaskTest {
     void givenTaskEnabledAndRollbackIsSetToTrue_whenMultipleCasesAreRead_thenShouldRevertMigratedCaseDetails()
         throws JsonProcessingException {
         ReflectionTestUtils.setField(underTest, "rollback", true);
-        final CaseDetails loadedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "loaded")).build();;
-        final CaseDetails updatedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "updated")).build();;
+        final CaseDetails loadedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "loaded")).build();
+        final CaseDetails updatedCaseDetailsOne = CaseDetails.builder().data(Map.of("one", "updated")).build();
         final FinremCaseData caseDataOne = spy(FinremCaseData.builder().build());
         final FinremCaseDetails finremCaseDetailsOne = FinremCaseDetailsBuilderFactory
             .from(CASE_ID, CONTESTED, caseDataOne, State.CASE_ADDED).build();

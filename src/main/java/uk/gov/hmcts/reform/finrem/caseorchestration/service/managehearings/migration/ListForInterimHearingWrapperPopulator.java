@@ -42,10 +42,10 @@ public class ListForInterimHearingWrapperPopulator extends BasePopulator {
     public void populate(FinremCaseData caseData) {
         InterimWrapper interimWrapper = caseData.getInterimWrapper();
         DynamicMultiSelectList allActivePartyList = partyService.getAllActivePartyList(caseData);
-        interimWrapper.getInterimHearings().stream().map(InterimHearingCollection::getValue).forEach(interimHearing -> {
+        interimWrapper.getInterimHearings().stream().map(InterimHearingCollection::getValue).forEach(interimHearing ->
             hearingsAppender.appendToHearings(caseData, () -> ManageHearingsCollectionItem.builder().value(
-                applyCommonMigratedValues(allActivePartyList, hearingsAppender.toHearing(interimHearing))).build());
-        });
+                applyCommonMigratedValues(allActivePartyList, hearingsAppender.toHearing(interimHearing))).build())
+        );
 
         caseData.getMhMigrationWrapper().setIsListForInterimHearingsMigrated(YesOrNo.YES);
     }

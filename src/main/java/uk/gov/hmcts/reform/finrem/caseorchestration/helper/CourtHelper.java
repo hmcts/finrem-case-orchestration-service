@@ -645,6 +645,7 @@ public class CourtHelper {
      * @param hearing for which the FRC is required.
      * @return The financial remedies court as a String.
      */
+    @SuppressWarnings("java:S6201") // Sonar wants a method reference for each FRC.  But this would mean coupling to all the regionFRCs.
     public static String getFRCForHearing(Hearing hearing) {
 
         String regionString = Optional.ofNullable(hearing)

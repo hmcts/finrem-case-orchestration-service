@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.CourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -74,7 +73,7 @@ public class ManageHearingsNotificationRequestMapper {
      */
     public NotificationRequest buildHearingNotificationForIntervenerSolicitor(
             FinremCaseDetails finremCaseDetails,
-            Hearing hearing, CaseRole caseRole) {
+            Hearing hearing) {
 
         // Expect this to be something like
         // finremCaseDetails.getData().getIntervenerOne().getIntervenerSolEmail(),

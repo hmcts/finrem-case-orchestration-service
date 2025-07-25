@@ -57,6 +57,7 @@ public class ListUtils {
      * @param items the items to include in the list, may be {@code null} or contain {@code null} elements
      * @return an immutable list of non-null items, or {@code null} if none exist
      */
+    @SuppressWarnings("java:S1168") // Returning null to indicate 'no valid items' is required by design.
     @SafeVarargs
     public static <T> List<T> toListOrNull(T... items) {
         if (items == null || items.length == 0) {
