@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler.solicitorcreatecase;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.updatecasedetailssolicitor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,35 +13,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.InternationalPostalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SelectedCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.express.ExpressCaseService;
 
 import java.util.List;
 
 @Slf4j
 @Service
-public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
+public class UpdateCaseDetailsSolicitorContestedMidHandler extends FinremCallbackHandler {
 
-    private final InternationalPostalService internationalPostalService;
-    private final SelectedCourtService selectedCourtService;
-    private final ExpressCaseService expressCaseService;
-
-    public SolicitorCreateContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                              InternationalPostalService internationalPostalService,
-                                              SelectedCourtService selectedCourtService,
-                                              ExpressCaseService expressCaseService) {
+    public UpdateCaseDetailsSolicitorContestedMidHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
-        this.internationalPostalService = internationalPostalService;
-        this.selectedCourtService = selectedCourtService;
-        this.expressCaseService = expressCaseService;
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.SOLICITOR_CREATE.equals(eventType);
+            && EventType.UPDATE_CASE_DETAILS_SOLICITOR.equals(eventType);
     }
 
     @Override
@@ -54,15 +41,6 @@ public class SolicitorCreateContestedMidHandler extends FinremCallbackHandler {
         // Validating Contact Details
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseData);
         errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
-
-        selectedCourtService.setSelectedCourtDetailsIfPresent(caseData);
-
-        expressCaseService.setExpressCaseEnrollmentStatus(caseData);
-
-        if (selectedCourtService.royalCourtOrHighCourtChosen(caseData)) {
-            errors.add("You cannot select High Court or Royal Court of Justice. Please select another court.");
-        }
-        errors.addAll(internationalPostalService.validate(caseData));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }

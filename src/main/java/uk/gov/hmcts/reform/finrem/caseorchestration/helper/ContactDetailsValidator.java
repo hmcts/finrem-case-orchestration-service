@@ -9,7 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDet
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.EmailUtils.isValidEmailAddress;
 
 public class ContactDetailsValidator {
 
@@ -17,6 +19,8 @@ public class ContactDetailsValidator {
     static final String RESPONDENT_POSTCODE_ERROR = "Postcode field is required for respondent address.";
     static final String APPLICANT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for applicant solicitor address.";
     static final String RESPONDENT_SOLICITOR_POSTCODE_ERROR = "Postcode field is required for respondent solicitor address.";
+
+    static final String INVALID_EMAIL_ADDRESS_ERROR_MESSAGE = "%s is not a valid Email address.";
 
     private ContactDetailsValidator() {
     }
@@ -39,7 +43,6 @@ public class ContactDetailsValidator {
      * @param caseData the {@link FinremCaseData} containing contact details to validate
      * @return a list of validation error messages for any missing or invalid postcode fields
      */
-
     public static List<String> validateCaseDataAddresses(FinremCaseData caseData) {
         List<String> errors = new ArrayList<>();
         ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
@@ -199,5 +202,55 @@ public class ContactDetailsValidator {
         boolean addressMissingRequiredPostcode = address.isEmpty() || isBlank(address.getPostCode());
 
         return livesInUK && addressMissingRequiredPostcode;
+    }
+
+    public static List<String> validateCaseDataEmailAddresses(FinremCaseData caseData) {
+        List<String> errors = new ArrayList<>();
+        ContactDetailsWrapper wrapper = caseData.getContactDetailsWrapper();
+
+        checkForApplicantSolicitorEmailAddress(caseData, wrapper, errors);
+        checkForApplicantEmail(wrapper, errors);
+        checkForRespondentSolicitorEmail(caseData, wrapper, errors);
+        checkForRespondentEmail(caseData, wrapper, errors);
+
+        return errors;
+    }
+
+    private static void checkForApplicantSolicitorEmailAddress(FinremCaseData caseData, ContactDetailsWrapper wrapper,
+                                                               List<String> errors) {
+        if (caseData.getCcdCaseType() == CaseType.CONTESTED) {
+            if (caseData.isApplicantRepresentedByASolicitor()
+                && !isValidEmailAddress(wrapper.getApplicantSolicitorEmail())) {
+                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getApplicantSolicitorEmail()));
+            }
+        } else if (caseData.getCcdCaseType() == CaseType.CONSENTED) {
+            if (caseData.isApplicantRepresentedByASolicitor()
+                && !isValidEmailAddress(wrapper.getSolicitorEmail())) {
+                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getSolicitorEmail()));
+            }
+        }
+    }
+
+    private static void checkForApplicantEmail(ContactDetailsWrapper wrapper, List<String> errors) {
+        String applicantEmail = wrapper.getApplicantEmail();
+        if (!isValidEmailAddress(applicantEmail, true)) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, applicantEmail));
+        }
+    }
+
+    private static void checkForRespondentSolicitorEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+        if (caseData.isRespondentRepresentedByASolicitor()
+            && !isValidEmailAddress(wrapper.getRespondentSolicitorEmail(), true)) {
+            errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, wrapper.getRespondentSolicitorEmail()));
+        }
+    }
+
+    private static void checkForRespondentEmail(FinremCaseData caseData, ContactDetailsWrapper wrapper, List<String> errors) {
+        String respondentEmail = wrapper.getRespondentEmail();
+        if (!caseData.isRespondentRepresentedByASolicitor()) {
+            if (!isValidEmailAddress(respondentEmail, true)) {
+                errors.add(format(INVALID_EMAIL_ADDRESS_ERROR_MESSAGE, respondentEmail));
+            }
+        }
     }
 }

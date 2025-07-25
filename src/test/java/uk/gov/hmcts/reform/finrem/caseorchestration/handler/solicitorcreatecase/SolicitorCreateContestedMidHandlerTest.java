@@ -23,33 +23,28 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
 
     private SolicitorCreateContestedMidHandler handler;
 
     @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
     @Mock
-    private InternationalPostalService postalService;
+    private InternationalPostalService internationalPostalService;
 
     @Mock
     private SelectedCourtService selectedCourtService;
     @Mock
     private ExpressCaseService expressCaseService;
 
-
     @BeforeEach
     public void init() {
-        handler = new SolicitorCreateContestedMidHandler(
-                finremCaseDetailsMapper,
-                postalService,
-                selectedCourtService,
-                expressCaseService);
+        handler = new SolicitorCreateContestedMidHandler(finremCaseDetailsMapper, internationalPostalService,
+            selectedCourtService, expressCaseService);
     }
 
     @Test
@@ -61,7 +56,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testPostalServiceValidationCalled() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(postalService, times(1))
+        verify(internationalPostalService, times(1))
                 .validate(finremCallbackRequest.getCaseDetails().getData());
     }
 
@@ -100,7 +95,7 @@ class SolicitorCreateContestedMidHandlerTest {
     void testThatErrorsReturned() {
         FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest();
         when(selectedCourtService.royalCourtOrHighCourtChosen(any())).thenReturn(true);
-        when(postalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
+        when(internationalPostalService.validate((FinremCaseData) any())).thenReturn(Arrays.asList("post err 1", "post err 2"));
         assertThat(handler.handle(finremCallbackRequest, AUTH_TOKEN).getErrors()).contains(
                 "You cannot select High Court or Royal Court of Justice. Please select another court.",
                 "post err 1",
@@ -113,5 +108,4 @@ class SolicitorCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
-
 }
