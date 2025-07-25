@@ -48,34 +48,34 @@ class ListForHearingWrapperPopulatorTest {
     @Test
     void testShouldPopulate() {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(false);
+            .isFalse();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.YES).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because hearing type is null.");
 
         HearingTypeDirection mockedHearingTypeDirection = mock(HearingTypeDirection.class);
@@ -83,7 +83,7 @@ class ListForHearingWrapperPopulatorTest {
             .mhMigrationWrapper(MhMigrationWrapper.builder().isListForHearingsMigrated(YesOrNo.NO).build())
             .listForHearingWrapper(ListForHearingWrapper.builder().hearingType(mockedHearingTypeDirection).build())
             .build()))
-            .isEqualTo(true);
+            .isTrue();
     }
 
     @Test

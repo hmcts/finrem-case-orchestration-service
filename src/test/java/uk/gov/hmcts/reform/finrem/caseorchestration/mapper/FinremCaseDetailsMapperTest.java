@@ -295,19 +295,19 @@ class FinremCaseDetailsMapperTest {
         };
 
         // MhMigrationWrapper.class
-        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, MhMigrationWrapper.class);
-        assertThat(caseDetails.getData()).extracting(mhMigrationWrapperClassJsonProperties).containsOnlyNulls();
-        assertThat(caseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
+        CaseDetails mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, MhMigrationWrapper.class);
+        assertThat(mappedCaseDetails.getData()).extracting(mhMigrationWrapperClassJsonProperties).containsOnlyNulls();
+        assertThat(mappedCaseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
 
         // ManageHearingsWrapper.class
-        caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, ManageHearingsWrapper.class);
-        assertThat(caseDetails.getData()).extracting(manageHearingsWrapperClassJsonProperties).containsOnlyNulls();
-        assertThat(caseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
+        mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails, ManageHearingsWrapper.class);
+        assertThat(mappedCaseDetails.getData()).extracting(manageHearingsWrapperClassJsonProperties).containsOnlyNulls();
+        assertThat(mappedCaseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
 
         // Not providing classesToOverrideJsonInclude
-        caseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails);
-        assertThat(caseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
-        assertThat(caseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
+        mappedCaseDetails = finremCaseDetailsMapper.mapToCaseDetailsIncludingNulls(finremCaseDetails);
+        assertThat(mappedCaseDetails.getData()).doesNotContainKeys(manageHearingsWrapperClassJsonProperties);
+        assertThat(mappedCaseDetails.getData()).doesNotContainKeys(mhMigrationWrapperClassJsonProperties);
     }
 
     private void assertBatchThree(FinremCaseData caseData) {

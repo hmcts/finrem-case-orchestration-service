@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -174,8 +175,7 @@ public class ManageHearingsCorresponder {
             () -> hearingCorrespondenceHelper.shouldPostToIntervener(finremCaseDetails, caseRole),
             () -> notificationRequestMapper.buildHearingNotificationForIntervenerSolicitor(
                 finremCaseDetails,
-                hearing,
-                caseRole)
+                hearing)
         );
     }
 
@@ -194,45 +194,41 @@ public class ManageHearingsCorresponder {
         Hearing hearing,
         CaseRole caseRole,
         String userAuthorisation,
-        Supplier<Boolean> shouldEmailPartySolicitor,
-        Supplier<Boolean> shouldPostToParty,
+        BooleanSupplier shouldEmailPartySolicitor,
+        BooleanSupplier shouldPostToParty,
         Supplier<NotificationRequest> notificationRequestSupplier) {
 
-        if (shouldEmailPartySolicitor.get()) {
+        if (shouldEmailPartySolicitor.getAsBoolean()) {
             notificationService.sendHearingNotificationToSolicitor(
                 notificationRequestSupplier.get(),
                 caseRole.toString()
             );
         }
 
-        if (shouldPostToParty.get()) {
+        if (shouldPostToParty.getAsBoolean() && hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
 
-            if (hearingCorrespondenceHelper.shouldSendHearingNoticeOnly(finremCaseDetails, hearing)) {
+            CaseDocument hearingNotice = manageHearingsDocumentService.getHearingNotice(finremCaseDetails);
 
-                CaseDocument hearingNotice = manageHearingsDocumentService
-                    .getHearingNotice(finremCaseDetails);
-
-                if (hearingNotice != null) {
-                    BulkPrintDocument hearingNoticeDocument =
-                        documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
-
-                    List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-                    bulkPrintDocuments.add(hearingNoticeDocument);
-
-                    printDocuments(
-                        finremCaseDetails,
-                        userAuthorisation,
-                        bulkPrintDocuments,
-                        caseRole
-                    );
-
-                    log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
-                        caseRole, finremCaseDetails.getId());
-                } else {
-                    log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
-                }
+            if (hearingNotice == null) {
+                log.warn("Hearing notice is null. No document sent for case ID: {}", finremCaseDetails.getId());
+                return;
             }
-            // Else send hearing docs too.  Future planned work will address this.
+
+            BulkPrintDocument hearingNoticeDocument =
+                documentHelper.getBulkPrintDocumentFromCaseDocument(hearingNotice);
+
+            List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+            bulkPrintDocuments.add(hearingNoticeDocument);
+
+            printDocuments(
+                finremCaseDetails,
+                userAuthorisation,
+                bulkPrintDocuments,
+                caseRole
+            );
+
+            log.info("Request sent to Bulk Print to post notice to the {} party. Request sent for case ID: {}",
+                caseRole, finremCaseDetails.getId());
         }
     }
 

@@ -54,38 +54,38 @@ class DirectionDetailsCollectionPopulatorTest {
     @Test
     void testShouldPopulate() {
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONSENTED).build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("null - Skip populate because it's not a contested application.");
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONSENTED).build()))
-                .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because it's not a contested application.");
 
         // event directionDetailsCollection was not set or empty
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED).build()))
-            .isEqualTo(true);
+            .isTrue();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .directionDetailsCollection(Collections.emptyList()).build()))
-            .isEqualTo(true);
+            .isTrue();
 
         logger.reset();
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseId(CASE_ID).ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isDirectionDetailsCollectionMigrated(YesOrNo.YES).build())
             .build()))
-            .isEqualTo(false);
+            .isFalse();
         assertThat(logger.getInfos()).containsExactly("1234567890 - Skip populate because migration had been done.");
 
         assertThat(underTest.shouldPopulate(FinremCaseData.builder().ccdCaseType(CaseType.CONTESTED)
             .mhMigrationWrapper(MhMigrationWrapper.builder().isGeneralApplicationMigrated(YesOrNo.NO).build())
             .generalApplicationWrapper(GeneralApplicationWrapper.builder().generalApplicationDirectionsHearingDate(LocalDate.now()).build())
             .build()))
-            .isEqualTo(true);
+            .isTrue();
     }
 
     @Test
