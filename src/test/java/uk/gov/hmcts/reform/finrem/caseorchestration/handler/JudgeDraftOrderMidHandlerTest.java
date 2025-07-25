@@ -10,9 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.FinremCallbackRequestFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -29,6 +27,8 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType.MID_EVENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.JUDGE_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,13 +51,13 @@ class JudgeDraftOrderMidHandlerTest {
 
     @Test
     void canHandle() {
-        assertCanHandle(handler, MID_EVENT, CaseType.CONTESTED, EventType.JUDGE_DRAFT_ORDER);
+        assertCanHandle(handler, MID_EVENT, CONTESTED, JUDGE_DRAFT_ORDER);
     }
 
     @Test
     void givenMissingUploadedApprovedOrder_whenHandle_shouldGetError() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
-            .from(EventType.JUDGE_DRAFT_ORDER, FinremCaseDetails.builder().data(FinremCaseData.builder().build()));
+            .from(JUDGE_DRAFT_ORDER, FinremCaseDetails.builder().data(FinremCaseData.builder().build()));
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -68,7 +68,7 @@ class JudgeDraftOrderMidHandlerTest {
     @Test
     void givenContestedCase_whenJudgeApprovedOrderUploaded_shouldValidateFileEncryption() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
-            .from(EventType.JUDGE_DRAFT_ORDER,
+            .from(JUDGE_DRAFT_ORDER,
                 FinremCaseDetails.builder()
                     .data(FinremCaseData.builder().draftDirectionWrapper(DraftDirectionWrapper.builder()
                             .judgeApprovedOrderCollection(getDraftDirectionOrderObj())
