@@ -66,7 +66,7 @@ class JudgeDraftOrderMidHandlerTest {
     }
 
     @Test
-    void givenContestedCase_whenJudgeApprovedOrderUploadedButNonEncryptedFile_shouldNotGetError() {
+    void givenContestedCase_whenJudgeApprovedOrderUploaded_shouldValidateFileEncryption() {
         FinremCallbackRequest finremCallbackRequest = FinremCallbackRequestFactory
             .from(EventType.JUDGE_DRAFT_ORDER,
                 FinremCaseDetails.builder()
