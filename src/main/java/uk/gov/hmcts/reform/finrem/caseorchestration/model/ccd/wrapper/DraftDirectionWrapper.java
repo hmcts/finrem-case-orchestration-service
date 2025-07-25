@@ -25,4 +25,7 @@ public class DraftDirectionWrapper implements HasCaseDocument {
     private List<DraftDirectionOrderCollection> judgesAmendedOrderCollection;
     private List<DraftDirectionDetailsCollection> draftDirectionDetailsCollection;
     private List<DraftDirectionDetailsCollection> draftDirectionDetailsCollectionRO;
+
+    // temporary field for capturing judge's uploaded approved order
+    private List<DraftDirectionOrderCollection> judgeApprovedOrderCollection;
 }
