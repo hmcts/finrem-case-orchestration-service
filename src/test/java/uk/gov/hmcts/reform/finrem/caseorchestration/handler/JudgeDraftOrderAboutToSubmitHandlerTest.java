@@ -121,7 +121,8 @@ class JudgeDraftOrderAboutToSubmitHandlerTest {
         verify(genericDocumentService, times(2)).convertDocumentIfNotPdfAlready(any(CaseDocument.class),
             any(String.class), any(String.class));
         verify(uploadedDraftOrderCategoriser).categorise(any(FinremCaseData.class));
-        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(any(FinremCaseData.class), eq(AUTH_TOKEN));
+        verify(hearingOrderService).convertLastJudgeApprovedOrderToPdfAndStampAndStoreLatestDraftHearingOrder(
+            any(FinremCaseData.class), eq(AUTH_TOKEN));
         verify(contestedOrderApprovedLetterService).generateAndStoreContestedOrderApprovedLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
     }
 
