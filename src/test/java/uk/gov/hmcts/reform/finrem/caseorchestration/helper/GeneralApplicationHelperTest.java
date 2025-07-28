@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -65,12 +66,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationHelperTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
     @Mock
     private GenericDocumentService service;
-    private String caseId = "123123123";
-    private ObjectMapper objectMapper;
+    private final String caseId = "123123123";
     @Mock
     FinremCaseDetailsMapper finremCaseDetailsMapper;
 
@@ -254,14 +252,14 @@ public class GeneralApplicationHelperTest {
         FinremCaseData caseData = callbackRequest.getCaseDetailsBefore().getData();
         List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
                 .getGeneralApplications();
-        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.getFirst().getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
         helper.populateGeneralApplicationSender(caseData, collection);
-        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst()
                 .getValue().getGeneralApplicationSender().getValue().getLabel());
-        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0)
+        assertEquals(APPLICANT, caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst()
                 .getValue().getGeneralApplicationSender().getValue().getCode());
-        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().get(0).getValue()
+        assertNull(caseData.getGeneralApplicationWrapper().getAppRespGeneralApplications().getFirst().getValue()
                 .getGeneralApplicationReceivedFrom());
     }
 
@@ -274,7 +272,7 @@ public class GeneralApplicationHelperTest {
         caseData.getGeneralApplicationWrapper().setAppRespGeneralApplications(collection2);
         List<GeneralApplicationsCollection> collection = caseData.getGeneralApplicationWrapper()
                 .getGeneralApplications();
-        collection.get(0).getValue().setGeneralApplicationReceivedFrom(APPLICANT);
+        collection.getFirst().getValue().setGeneralApplicationReceivedFrom(APPLICANT);
         collection.forEach(x -> x.getValue().setGeneralApplicationSender(null));
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
         helper.populateGeneralApplicationSender(caseData, collection);
@@ -334,17 +332,17 @@ public class GeneralApplicationHelperTest {
 
         assertEquals(2, caseDetails.getData().getGeneralApplicationWrapper().getGeneralApplications().size());
         assertEquals("2023-10-04", caseDetails.getData().getGeneralApplicationWrapper()
-            .getGeneralApplications().get(0).getValue().getGeneralApplicationCreatedDate().toString());
+            .getGeneralApplications().getFirst().getValue().getGeneralApplicationCreatedDate().toString());
     }
 
     private void assertData(List<GeneralApplicationItems> resultingList) {
-        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getCode());
-        assertEquals(APPLICANT, resultingList.get(0).getGeneralApplicationSender().getValue().getLabel());
-        assertEquals("Claire Mumford", resultingList.get(0).getGeneralApplicationCreatedBy());
-        assertEquals("Yes", resultingList.get(0).getGeneralApplicationHearingRequired());
-        assertEquals("24 hours", resultingList.get(0).getGeneralApplicationTimeEstimate());
-        assertEquals("Special measure", resultingList.get(0).getGeneralApplicationSpecialMeasures());
-        assertEquals(resultingList.get(0).getGeneralApplicationCreatedDate(),
+        assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getCode());
+        assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getLabel());
+        assertEquals("Claire Mumford", resultingList.getFirst().getGeneralApplicationCreatedBy());
+        assertEquals("Yes", resultingList.getFirst().getGeneralApplicationHearingRequired());
+        assertEquals("24 hours", resultingList.getFirst().getGeneralApplicationTimeEstimate());
+        assertEquals("Special measure", resultingList.getFirst().getGeneralApplicationSpecialMeasures());
+        assertEquals(resultingList.getFirst().getGeneralApplicationCreatedDate(),
                 LocalDate.of(2022, 8, 2));
     }
 
@@ -365,7 +363,7 @@ public class GeneralApplicationHelperTest {
                 getDynamicListElement(CASE_LEVEL_ROLE, CASE_LEVEL_ROLE)
         );
         return DynamicRadioList.builder()
-                .value(dynamicListElements.get(0))
+                .value(dynamicListElements.getFirst())
                 .listItems(dynamicListElements)
                 .build();
     }
