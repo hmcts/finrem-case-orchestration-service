@@ -23,12 +23,11 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.test.Assertions.assertCanHandle;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitorCreateContestedMidHandlerTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
 
     private SolicitorCreateContestedMidHandler handler;
 
@@ -41,7 +40,6 @@ class SolicitorCreateContestedMidHandlerTest {
     private SelectedCourtService selectedCourtService;
     @Mock
     private ExpressCaseService expressCaseService;
-
 
     @BeforeEach
     public void init() {
@@ -113,5 +111,4 @@ class SolicitorCreateContestedMidHandlerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
         return FinremCallbackRequest.builder().caseDetails(caseDetails).build();
     }
-
 }
