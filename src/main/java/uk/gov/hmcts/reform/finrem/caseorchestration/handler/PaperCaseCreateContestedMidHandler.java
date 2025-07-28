@@ -40,10 +40,11 @@ public class PaperCaseCreateContestedMidHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info(CallbackHandlerLogger.midEvent(callbackRequest));
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         List<String> errors = ContactDetailsValidator.validateCaseDataAddresses(caseDetails.getData());
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseDetails.getData()));
         errors.addAll(postalService.validate(callbackRequest.getCaseDetails().getData()));
 
         expressCaseService.setExpressCaseEnrollmentStatus(caseDetails.getData());

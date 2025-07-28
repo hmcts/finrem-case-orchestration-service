@@ -46,6 +46,7 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler<Map<S
 
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(finremCaseDetails.getData()));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(finremCaseDetails.getData()));
 
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).errors(errors).build();

@@ -43,16 +43,16 @@ public class AmendApplicationConsentedMidHandler extends FinremCallbackHandler {
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+                                                                              String userAuthorisation) {
+        log.info(CallbackHandlerLogger.midEvent(callbackRequest));
         FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = finremCaseDetails.getData();
 
-        log.info("Invoking amend application mid event for caseId {}", finremCaseDetails.getId());
         List<String> errors = consentOrderService.performCheck(objectMapper.convertValue(callbackRequest, CallbackRequest.class), userAuthorisation);
         errors.addAll(postalService.validate(caseData));
         errors.addAll(ContactDetailsValidator.validateCaseDataAddresses(caseData));
+        errors.addAll(ContactDetailsValidator.validateCaseDataEmailAddresses(caseData));
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 }
