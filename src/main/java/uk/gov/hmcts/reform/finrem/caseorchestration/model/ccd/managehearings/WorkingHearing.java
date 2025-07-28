@@ -49,7 +49,14 @@ public class WorkingHearing {
             .hearingNoticePrompt(workingHearing.getHearingNoticePrompt())
             .additionalHearingDocPrompt(workingHearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(workingHearing.getAdditionalHearingDocs())
-            .partiesOnCaseMultiSelectList(workingHearing.getPartiesOnCaseMultiSelectList())
+            .partiesOnCase(workingHearing.getPartiesOnCaseMultiSelectList().getValue().stream()
+                .map(element -> PartyOnCaseCollection.builder()
+                    .value(PartyOnCase.builder()
+                        .role(element.getCode())
+                        .label(element.getLabel())
+                        .build())
+                    .build())
+                .toList())
             .hearingType(getHearingType(workingHearing.getHearingTypeDynamicList()))
             .build();
     }

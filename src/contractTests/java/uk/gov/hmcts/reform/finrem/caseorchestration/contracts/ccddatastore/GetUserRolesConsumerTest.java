@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.BDDMockito.given;
 
-
 @SpringBootTest({"ccd.data-store.api.baseurl=http://localhost:8981"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class GetUserRolesConsumerTest extends BaseTest {
