@@ -25,7 +25,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-
 @SpringBootTest({"pba.validation.url: http://localhost:8891"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class PBAValidateConsumerTest extends BaseTest {
@@ -45,7 +44,6 @@ public class PBAValidateConsumerTest extends BaseTest {
 
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("referenceData_organisationalExternalPbas", "localhost", 8891, this);
-
 
     @Pact(provider = "referenceData_organisationalExternalPbas", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePbaValidatePactFragment(PactDslWithProvider builder) throws JSONException {
@@ -73,23 +71,21 @@ public class PBAValidateConsumerTest extends BaseTest {
     }
 
     private DslPart buildOrganisationalResponsePactDsl() {
-        return newJsonBody(o -> {
-            o.object("organisationEntityResponse", ob -> ob
-                .stringType("organisationIdentifier",
-                    ORGANISATION_EMAIL)
-                .stringMatcher("status",
-                    "PENDING|ACTIVE|BLOCKED|DELETED", "ACTIVE")
-                .stringType("sraId", "sraId")
-                .booleanType("sraRegulated", true)
-                .stringType("companyNumber", "123456")
-                .stringType("companyUrl", "somecompany@org.com")
-                .array("paymentAccount", pa ->
-                    pa.stringType("paymentAccountA1"))
-                .object("superUser", su -> su
-                    .stringType("firstName", "firstName")
-                    .stringType("lastName", "lastName")
-                    .stringType("email", "emailAddress"))
-            );
-        }).build();
+        return newJsonBody(o -> o.object("organisationEntityResponse", ob -> ob
+            .stringType("organisationIdentifier",
+                ORGANISATION_EMAIL)
+            .stringMatcher("status",
+                "PENDING|ACTIVE|BLOCKED|DELETED", "ACTIVE")
+            .stringType("sraId", "sraId")
+            .booleanType("sraRegulated", true)
+            .stringType("companyNumber", "123456")
+            .stringType("companyUrl", "somecompany@org.com")
+            .array("paymentAccount", pa ->
+                pa.stringType("paymentAccountA1"))
+            .object("superUser", su -> su
+                .stringType("firstName", "firstName")
+                .stringType("lastName", "lastName")
+                .stringType("email", "emailAddress"))
+        )).build();
     }
 }
