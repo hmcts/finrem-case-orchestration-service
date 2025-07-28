@@ -35,7 +35,7 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
     private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
-    private final String someServiceAuthToken = "someServiceAuthToken";
+    private static final String someServiceAuthToken = "someServiceAuthToken";
 
     @MockitoBean
     IdamService idamService;
@@ -96,9 +96,10 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
 
     private void assertOrganisationResponse(final OrganisationsResponse response) {
         List<OrganisationContactInformation> contactInformationList = response.getContactInformation();
-        assertThat(contactInformationList.get(0).getAddressLine1(), is("addressLine1"));
-        assertThat(contactInformationList.get(0).getAddressLine2(), is("addressLine2"));
-        assertThat(contactInformationList.get(0).getCountry(), is("UK"));
-        assertThat(contactInformationList.get(0).getPostcode(), is("SM12SX"));
+        OrganisationContactInformation organisationContactInformation = contactInformationList.getFirst();
+        assertThat(organisationContactInformation.getAddressLine1(), is("addressLine1"));
+        assertThat(organisationContactInformation.getAddressLine2(), is("addressLine2"));
+        assertThat(organisationContactInformation.getCountry(), is("UK"));
+        assertThat(organisationContactInformation.getPostcode(), is("SM12SX"));
     }
 }

@@ -56,7 +56,6 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
     private final CaseDetails caseDetails =
         CaseDetails.builder().id(CASE_ID).caseTypeId(CASE_TYPE_ID).createdDate(LocalDateTime.now()).build();
 
-
     @Pact(provider = "ccdDataStoreAPI_caseAssignedUserRoles", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws IOException {
         // @formatter:off
