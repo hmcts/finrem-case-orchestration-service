@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ManageHearingsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsEditHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingActionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.ManageHearingsMigrationService;
 
 /**
@@ -29,13 +29,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.managehearings.Manag
 public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ManageHearingsMigrationService manageHearingsMigrationService;
-    private final ManageHearingsEditHearingService manageHearingsEditHearingService;
+    private final ManageHearingActionService manageHearingActionService;
 
     public ManageHearingsMigrationAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                                       ManageHearingsMigrationService manageHearingsMigrationService, ManageHearingsEditHearingService manageHearingsEditHearingService) {
+                                                       ManageHearingsMigrationService manageHearingsMigrationService, ManageHearingActionService manageHearingActionService) {
         super(finremCaseDetailsMapper);
         this.manageHearingsMigrationService = manageHearingsMigrationService;
-        this.manageHearingsEditHearingService = manageHearingsEditHearingService;
+        this.manageHearingActionService = manageHearingActionService;
     }
 
     @Override
@@ -60,8 +60,11 @@ public class ManageHearingsMigrationAboutToSubmitHandler extends FinremCallbackH
         }
 
         ManageHearingsWrapper manageHearingsWrapper = finremCaseData.getManageHearingsWrapper();
+
+        // Test to check that a hearing that has been migrated can be used as
+        // the working hearing and not throw CCD validation errors.
         manageHearingsWrapper.setWorkingHearingId(manageHearingsWrapper.getHearings().getFirst().getId());
-        manageHearingsEditHearingService.setWorkingHearingFromWorkingHearingId(finremCaseData);
+        manageHearingActionService.setWorkingHearingFromWorkingHearingId(finremCaseData);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(finremCaseData).build();
     }

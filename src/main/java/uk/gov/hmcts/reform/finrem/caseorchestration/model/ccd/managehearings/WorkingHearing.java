@@ -66,6 +66,16 @@ public class WorkingHearing {
             .build();
     }
 
+    public static DynamicList initialiseHearingTypeDynamicListWithSelection(List<HearingType> hearingTypes, HearingType selectedHearingType) {
+        DynamicList dynamicList = initialiseHearingTypeDynamicList(hearingTypes);
+        dynamicList.setValue(DynamicListElement.builder()
+            .code(selectedHearingType.name())
+            .label(selectedHearingType.getId())
+            .build());
+        return dynamicList;
+    }
+
+
     public static HearingType getHearingType(DynamicList hearingTypeDynamicList) {
         return HearingType.valueOf(hearingTypeDynamicList.getValue().getCode());
     }

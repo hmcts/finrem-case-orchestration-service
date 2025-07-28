@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import java.time.LocalDate;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing.initialiseHearingTypeDynamicListWithSelection;
 
 @Builder
 @Data
@@ -50,7 +50,7 @@ public class Hearing {
             .additionalHearingDocPrompt(hearing.getAdditionalHearingDocPrompt())
             .additionalHearingDocs(hearing.getAdditionalHearingDocs())
             .partiesOnCaseMultiSelectList(hearing.getPartiesOnCaseMultiSelectList())
-            .hearingTypeDynamicList(initialiseHearingTypeDynamicList(hearingTypes))
+            .hearingTypeDynamicList(initialiseHearingTypeDynamicListWithSelection(hearingTypes, hearing.getHearingType()))
             .build();
     }
 }

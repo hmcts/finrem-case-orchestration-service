@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
@@ -73,20 +74,6 @@ class ManageHearingActionServiceTest {
             .data(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData.builder()
                 .manageHearingsWrapper(hearingWrapper)
                 .build())
-            .build();
-    }
-
-    private WorkingHearing createWorkingHearing(LocalDate date) {
-        return WorkingHearing.builder()
-            .hearingTypeDynamicList(DynamicList.builder()
-                .value(DynamicListElement.builder()
-                    .code(HearingType.DIR.name())
-                    .label(HearingType.DIR.getId())
-                    .build())
-                .build())
-            .hearingDate(date)
-            .hearingTime("10:00")
-            .hearingTimeEstimate("30mins")
             .build();
     }
 
@@ -389,8 +376,63 @@ class ManageHearingActionServiceTest {
         assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
     }
 
+    @Test
+    void shouldSetWorkingHearingFromWorkingHearingId() {
+        // Setup
+        UUID workingHearingId = UUID.randomUUID();
+        finremCaseDetails.getData().getManageHearingsWrapper().setWorkingHearing(null);
+
+        Hearing hearingToBeWorkedOn = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
+        Hearing otherHearing = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
+
+        ManageHearingsCollectionItem hearingToBeWorkedCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(workingHearingId)
+            .value(hearingToBeWorkedOn)
+            .build();
+
+        ManageHearingsCollectionItem otherHearingCollectionItem = ManageHearingsCollectionItem.builder()
+            .id(UUID.randomUUID())
+            .value(otherHearing)
+            .build();
+
+        ManageHearingsWrapper manageHearingsWrapper = ManageHearingsWrapper.builder()
+            .workingHearingId(workingHearingId)
+            .hearings(List.of(hearingToBeWorkedCollectionItem, otherHearingCollectionItem))
+            .build();
+
+        FinremCaseData caseData = FinremCaseData.builder()
+            .manageHearingsWrapper(manageHearingsWrapper)
+            .build();
+
+        WorkingHearing epxectedWorkingHearing = createWorkingHearing(LocalDate.of(2025, 7, 20));
+
+        // Act
+        manageHearingActionService.setWorkingHearingFromWorkingHearingId(caseData);
+        WorkingHearing actualWorkingHearing = manageHearingsWrapper.getWorkingHearing();
+
+        // Assert
+        assertEquals(epxectedWorkingHearing.getHearingTypeDynamicList().getValue(), actualWorkingHearing.getHearingTypeDynamicList().getValue());
+        assertEquals(epxectedWorkingHearing.getHearingDate(), actualWorkingHearing.getHearingDate());
+        assertEquals(epxectedWorkingHearing.getHearingTime(), actualWorkingHearing.getHearingTime());
+        assertEquals(epxectedWorkingHearing.getHearingTimeEstimate(), actualWorkingHearing.getHearingTimeEstimate());
+    }
+
     private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
         return entry -> entry != null && expected.equals(entry.getValue());
+    }
+
+    private WorkingHearing createWorkingHearing(LocalDate date) {
+        return WorkingHearing.builder()
+            .hearingTypeDynamicList(DynamicList.builder()
+                .value(DynamicListElement.builder()
+                    .code(HearingType.DIR.name())
+                    .label(HearingType.DIR.getId())
+                    .build())
+                .build())
+            .hearingDate(date)
+            .hearingTime("10:00")
+            .hearingTimeEstimate("30mins")
+            .build();
     }
 
     private Hearing createHearing(HearingType type, String time, String estimate, LocalDate date) {
