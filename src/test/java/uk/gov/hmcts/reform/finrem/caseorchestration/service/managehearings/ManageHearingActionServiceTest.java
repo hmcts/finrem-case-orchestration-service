@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,12 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.HearingType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.WorkingHearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.tabs.HearingTabItem;
@@ -34,15 +34,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COMPLIANCE_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PFD_NCDR_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
@@ -85,6 +82,14 @@ class ManageHearingActionServiceTest {
                     .code(HearingType.DIR.name())
                     .label(HearingType.DIR.getId())
                     .build())
+                .build())
+            .partiesOnCaseMultiSelectList(DynamicMultiSelectList.builder()
+                .value(List.of(
+                    DynamicMultiSelectListElement.builder()
+                        .code("[APPSOLICITOR]")
+                        .label("Applicant Solicitor - Hamzah")
+                        .build()
+                ))
                 .build())
             .hearingDate(date)
             .hearingTime("10:00")
@@ -242,26 +247,24 @@ class ManageHearingActionServiceTest {
     @Test
     void updateTabData_shouldAddHearingToTabCollectionInCorrectOrder() {
         Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing1.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(APPLICANT)
                     .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
+        hearing2.setPartiesOnCase(List.of(
+            PartyOnCaseCollection.builder()
+                .value(PartyOnCase.builder()
+                    .role(RESPONDENT)
                     .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
+                    .build())
+                .build()
+        ));
 
         hearingWrapper.setHearings(new ArrayList<>(List.of(
             createHearingCollectionItem(hearing2),
@@ -275,143 +278,17 @@ class ManageHearingActionServiceTest {
         manageHearingActionService.updateTabData(finremCaseDetails.getData());
 
         List<HearingTabCollectionItem> hearingTabItems = hearingWrapper.getHearingTabItems();
-        assertThat(hearingTabItems)
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("15 Jul 2025 11:00", "20 Jul 2025 10:00");
-    }
-
-    @Test
-    void updateTabData_shouldAddHearingToTabCollectionInCorrectOrderWhenManageHearingsMigrationHadDone() {
-        Hearing hearing1 = createHearing(HearingType.DIR, "10:00", "30mins", LocalDate.of(2025, 7, 20));
-        hearing1.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
-                    .label("Applicant")
-                    .code(APPLICANT)
-                    .build()))
-            .build()
-        );
-
-        Hearing hearing2 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 15));
-        hearing2.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
-                    .label("Respondent")
-                    .code(RESPONDENT)
-                    .build()))
-            .build()
-        );
-
-        Hearing hearing3 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 1));
-        hearing3.setPartiesOnCaseMultiSelectList(DynamicMultiSelectList
-            .builder()
-            .listItems(List.of(
-                DynamicMultiSelectListElement.builder()
-                    .label("INTERVENER")
-                    .code(INTERVENER1)
-                    .build()))
-            .build()
-        );
-
-        Hearing migratedHearing1 = createHearing(HearingType.FDA, "11:00", "1hr", LocalDate.of(2025, 7, 10), true);
-
-        hearingWrapper.setHearings(new ArrayList<>(List.of(
-            createHearingCollectionItem(migratedHearing1),
-            createHearingCollectionItem(hearing3),
-            createHearingCollectionItem(hearing2),
-            createHearingCollectionItem(hearing1)
-        )));
-        hearingWrapper.setHearingTabItems(List.of(HearingTabCollectionItem.builder()
-            .value(HearingTabItem.builder()
-                .tabDateTime("10 Jul 2025 10:00")
-                .tabWasMigrated(YesOrNo.YES)
-                .build()).build()));
-
-        when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(hearing1)), any()))
-            .thenReturn(
-                createHearingTabItem("Applicant Hearing 1", "20 Jul 2025 10:00", APPLICANT)
-            );
-        when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(hearing2)), any()))
-            .thenReturn(
-                createHearingTabItem("Applicant Hearing 2", "15 Jul 2025 10:00", RESPONDENT)
-            );
-        when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(hearing3)), any()))
-            .thenReturn(
-                createHearingTabItem("Applicant Hearing 3", "1 Jul 2025 10:00", INTERVENER1)
-            );
-        // migrated hearing will not be populated to hearing tab item, therefore `lenient()` is needed.
-        lenient()
-            .when(hearingTabDataMapper.mapHearingToTabData(argThat(hasHearing(migratedHearing1)), any()))
-            .thenReturn(
-                createHearingTabItem("Applicant Hearing 3", "10 Jul 2025 10:00", null, true)
-            );
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(hearingWrapper)
-            .build();
-
-        // Act
-        manageHearingActionService.updateTabData(caseData);
-
-        assertThat(hearingWrapper.getHearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("1 Jul 2025 10:00", "10 Jul 2025 10:00", "15 Jul 2025 10:00", "20 Jul 2025 10:00");
-        assertThat(hearingWrapper.getApplicantHearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("10 Jul 2025 10:00", "20 Jul 2025 10:00");
-        assertThat(hearingWrapper.getRespondentHearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("10 Jul 2025 10:00", "15 Jul 2025 10:00");
-        assertThat(hearingWrapper.getInt1HearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("1 Jul 2025 10:00", "10 Jul 2025 10:00");
-        assertThat(hearingWrapper.getInt2HearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("10 Jul 2025 10:00");
-        assertThat(hearingWrapper.getInt3HearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("10 Jul 2025 10:00");
-        assertThat(hearingWrapper.getInt4HearingTabItems())
-            .extracting(item -> item.getValue().getTabDateTime())
-            .containsExactly("10 Jul 2025 10:00");
-    }
-
-    @Test
-    void updateTabData_shouldNotPopulateHearingTabItemsIfEmptyHearingsProvided() {
-        hearingWrapper.setHearings(null);
-
-        FinremCaseData caseData = FinremCaseData.builder()
-            .manageHearingsWrapper(hearingWrapper)
-            .build();
-
-        // Act
-        manageHearingActionService.updateTabData(caseData);
-
-        assertThat(hearingWrapper.getHearingTabItems()).isNull();
-        assertThat(hearingWrapper.getApplicantHearingTabItems()).isNull();
-        assertThat(hearingWrapper.getRespondentHearingTabItems()).isNull();
-        assertThat(hearingWrapper.getInt1HearingTabItems()).isNull();
-        assertThat(hearingWrapper.getInt2HearingTabItems()).isNull();
-        assertThat(hearingWrapper.getInt3HearingTabItems()).isNull();
-        assertThat(hearingWrapper.getInt4HearingTabItems()).isNull();
-    }
-
-    private ArgumentMatcher<ManageHearingsCollectionItem> hasHearing(Hearing expected) {
-        return entry -> entry != null && expected.equals(entry.getValue());
+        assertThat(hearingTabItems).hasSize(2);
+        assertThat(hearingTabItems.get(0).getValue().getTabDateTime()).isEqualTo("15 Jul 2025 11:00");
+        assertThat(hearingTabItems.get(1).getValue().getTabDateTime()).isEqualTo("20 Jul 2025 10:00");
     }
 
     private Hearing createHearing(HearingType type, String time, String estimate, LocalDate date) {
-        return createHearing(type, time, estimate, date, false);
-    }
-
-    private Hearing createHearing(HearingType type, String time, String estimate, LocalDate date, boolean migrated) {
         return Hearing.builder()
             .hearingType(type)
             .hearingDate(date)
             .hearingTime(time)
             .hearingTimeEstimate(estimate)
-            .wasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
 
@@ -430,15 +307,10 @@ class ManageHearingActionServiceTest {
     }
 
     private HearingTabItem createHearingTabItem(String type, String dateTime, String parties) {
-        return createHearingTabItem(type, dateTime, parties, false);
-    }
-
-    private HearingTabItem createHearingTabItem(String type, String dateTime, String parties, boolean migrated) {
         return HearingTabItem.builder()
             .tabHearingType(type)
             .tabDateTime(dateTime)
             .tabConfidentialParties(parties)
-            .tabWasMigrated(migrated ? YesOrNo.YES : null)
             .build();
     }
 }

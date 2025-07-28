@@ -11,12 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFour;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOne;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThree;
@@ -74,9 +74,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldProcessCorrespondenceWhenNotificationsRequiredAndPartiesExist() {
         // Arrange
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
@@ -107,11 +107,10 @@ class ManageHearingsCorresponderTest {
         // Arrange
         FinremCallbackRequest callbackRequest = callbackRequest();
 
-        DynamicMultiSelectList list = new DynamicMultiSelectList();
-        list.setValue(List.of());
+        List<PartyOnCaseCollection> list = new ArrayList<>(List.of());
 
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(list);
+        when(hearing.getPartiesOnCase()).thenReturn(list);
 
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
@@ -132,9 +131,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldSendHearingNotificationsToApplicant() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.buildHearingNotificationForApplicantSolicitor(callbackRequest.getCaseDetails(),
@@ -164,9 +163,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldSendHearingNotificationsToRespondent() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         NotificationRequest notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.buildHearingNotificationForRespondentSolicitor(callbackRequest.getCaseDetails(),
@@ -199,7 +198,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        DynamicMultiSelectList partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
 
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
@@ -215,7 +214,7 @@ class ManageHearingsCorresponderTest {
                 callbackRequest.getCaseDetails(), hearing, finremCaseData.getInterveners().get(i)))
                 .thenReturn(notificationRequest);
         }
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         when(hearingCorrespondenceHelper.getHearingInContext(finremCaseData)).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
@@ -245,14 +244,14 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        DynamicMultiSelectList partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
 
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         Hearing hearing = mock(Hearing.class);
 
         // Arrange
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         when(hearingCorrespondenceHelper.getHearingInContext(finremCaseData)).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
 
@@ -279,9 +278,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingNoticeToApplicant() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
 
@@ -310,9 +309,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingNoticeToRespondent() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
 
@@ -346,7 +345,7 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        DynamicMultiSelectList partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         YesOrNo doNotMakeRepresented = YesOrNo.NO;
@@ -354,7 +353,7 @@ class ManageHearingsCorresponderTest {
         Hearing hearing = mock(Hearing.class);
 
         // Arrange
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(new CaseDocument());
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
         when(hearingCorrespondenceHelper.shouldNotSendNotification(hearing)).thenReturn(false);
@@ -385,9 +384,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingDocumentsToApplicant() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(manageHearingsDocumentService.getHearingDocumentsToPost(callbackRequest.getCaseDetails())).thenReturn(List.of(new CaseDocument()));
 
@@ -419,9 +418,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldPostHearingDocumentsToRespondent() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
@@ -459,13 +458,13 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        DynamicMultiSelectList partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         YesOrNo doNotMakeRepresented = YesOrNo.NO;
         addIntervenersToCaseData(finremCaseData, doNotMakeRepresented);
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
 
         // Arrange
         when(hearingCorrespondenceHelper.getHearingInContext(callbackRequest.getCaseDetails().getData())).thenReturn(hearing);
@@ -498,9 +497,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void sendPaperNoticeToApplicantShouldHandleMissingNotice() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
@@ -524,9 +523,13 @@ class ManageHearingsCorresponderTest {
     @Test
     void sendPaperNoticeToPartiesShouldHandleMissingHearingDocs() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR, CaseRole.RESP_SOLICITOR));
+        Set<CaseRole> caseRoles = Set.of(
+            CaseRole.APP_SOLICITOR,
+            CaseRole.RESP_SOLICITOR
+        );
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
@@ -560,9 +563,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void sendPaperNoticeToRespondentShouldHandleMissingNotice() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.RESP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         when(manageHearingsDocumentService.getHearingNotice(callbackRequest.getCaseDetails())).thenReturn(null);
 
@@ -597,9 +600,9 @@ class ManageHearingsCorresponderTest {
             CaseRole.INTVR_SOLICITOR_3,
             CaseRole.INTVR_SOLICITOR_4
         );
-        DynamicMultiSelectList partyList = buildPartiesList(caseRoles);
+        List<PartyOnCaseCollection> partyList = buildPartiesList(caseRoles);
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
         FinremCaseData finremCaseData = callbackRequest.getCaseDetails().getData();
         YesOrNo makeUnrepresentedSoDocumentsPosted = YesOrNo.NO;
@@ -634,9 +637,9 @@ class ManageHearingsCorresponderTest {
     @Test
     void shouldLogWhenNoHearingDocumentsFoundToPost() {
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.APP_SOLICITOR));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
@@ -671,9 +674,9 @@ class ManageHearingsCorresponderTest {
         // Caseworker is not handled in the switch statement, so it should throw an exception
 
         // Setup
-        DynamicMultiSelectList partyList = buildPartiesList(Set.of(CaseRole.CASEWORKER));
+        List<PartyOnCaseCollection> partyList = buildPartiesList(Set.of(CaseRole.CASEWORKER));
         Hearing hearing = mock(Hearing.class);
-        when(hearing.getPartiesOnCaseMultiSelectList()).thenReturn(partyList);
+        when(hearing.getPartiesOnCase()).thenReturn(partyList);
         FinremCallbackRequest callbackRequest = callbackRequest();
 
         // Arrange
@@ -709,22 +712,23 @@ class ManageHearingsCorresponderTest {
     }
 
     /**
-     * Reusable test setup method to build a DynamicMultiSelectList from a set of CaseRoles.
+     * Reusable test setup method to build a list of PartyOnCaseCollection from a set of CaseRoles.
      */
-    private DynamicMultiSelectList buildPartiesList(Set<CaseRole> caseRoles) {
+    private List<PartyOnCaseCollection> buildPartiesList(Set<CaseRole> caseRoles) {
 
         // build the list elements from the passed set of case roles
-        List<DynamicMultiSelectListElement> elements = new ArrayList<>();
+        List<PartyOnCaseCollection> parties = new ArrayList<>();
         for (CaseRole role : caseRoles) {
-            DynamicMultiSelectListElement element = new DynamicMultiSelectListElement();
-            element.setCode(role.getCcdCode());
-            elements.add(element);
+            PartyOnCase party = PartyOnCase.builder()
+                .role(role.getCcdCode())
+                .label(role.name())
+                .build();
+            parties.add(PartyOnCaseCollection.builder()
+                .value(party)
+                .build());
         }
 
-        // create a DynamicMultiSelectList and set the value to the list of elements
-        DynamicMultiSelectList list = new DynamicMultiSelectList();
-        list.setValue(elements);
-        return list;
+        return parties;
     }
 
     /**

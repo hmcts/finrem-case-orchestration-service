@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.managehearings.Hearin
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.ManageHearingsNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.intevener.IntervenerWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -41,10 +41,11 @@ public class ManageHearingsCorresponder {
     private final BulkPrintService bulkPrintService;
 
     /**
-     * Begin sending hearing correspondence to parties, based on the callback request data.
+     * Begin sending hearing correspondence to parties, included based on the callback request data.
      * No notifications, notices or documents sent if the User has specified that.
      * No notifications, notices or documents sent if the party list is empty.
-     * Loops through each selected party in the hearing and sends using {@link #sendHearingCorrespondenceByParty}.
+     * Loops through each selected party in the hearing and sends using
+     * {@link #sendHearingCorrespondenceByParty}.</p>
      * @param callbackRequest the callback request containing case and hearing data
      * @param userAuthorisation the user authorisation token
      */
@@ -59,18 +60,21 @@ public class ManageHearingsCorresponder {
             return;
         }
 
-        DynamicMultiSelectList partyList = hearing.getPartiesOnCaseMultiSelectList();
-        if (partyList == null || partyList.getValue() == null) {
+        List<PartyOnCaseCollection> partiesOnCaseCollection = hearing.getPartiesOnCase();
+        if (partiesOnCaseCollection == null || partiesOnCaseCollection.isEmpty()) {
             return;
         }
 
-        for (DynamicMultiSelectListElement party : partyList.getValue()) {
-            sendHearingCorrespondenceByParty(
-                party,
-                finremCaseDetails,
-                hearing,
-                userAuthorisation
-            );
+        for (PartyOnCaseCollection partyCollection : partiesOnCaseCollection) {
+            PartyOnCase party = partyCollection.getValue();
+            if (party != null) {
+                sendHearingCorrespondenceByParty(
+                    party.getRole(),
+                    finremCaseDetails,
+                    hearing,
+                    userAuthorisation
+                );
+            }
         }
     }
 
@@ -78,16 +82,16 @@ public class ManageHearingsCorresponder {
      * Sends a hearing notification to the party specified in parameters.
      *
      * <p>Uses the {@link CaseRole} of the specified party to decide what to send.</p>
-     * @param party the dynamic multi-select list element for the party
+     * @param role the role of the party on the case, representing their case role
      * @param finremCaseDetails the case details with detail needed in generating the notification
      * @param hearing the hearing associated with the notification
      * @param userAuthorisation the user authorisation token
      */
-    private void sendHearingCorrespondenceByParty(DynamicMultiSelectListElement party,
-                                                 FinremCaseDetails finremCaseDetails,
-                                                 Hearing hearing,
-                                                 String userAuthorisation) {
-        CaseRole caseRole = CaseRole.forValue(party.getCode());
+    private void sendHearingCorrespondenceByParty(String role,
+                                                  FinremCaseDetails finremCaseDetails,
+                                                  Hearing hearing,
+                                                  String userAuthorisation) {
+        CaseRole caseRole = CaseRole.forValue(role);
         switch (caseRole) {
             case CaseRole.APP_SOLICITOR ->
                 processCorrespondenceForApplicant(finremCaseDetails, hearing, userAuthorisation);
