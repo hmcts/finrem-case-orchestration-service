@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.config.FeeS
 
 import static org.junit.Assert.assertEquals;
 
-
 @SpringBootTest({"fees.url: http://localhost:8889"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class FeeLookupConsumerTest extends BaseTest {
