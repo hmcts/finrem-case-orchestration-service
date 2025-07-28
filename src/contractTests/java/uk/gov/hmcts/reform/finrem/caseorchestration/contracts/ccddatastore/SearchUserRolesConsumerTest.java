@@ -30,7 +30,6 @@ import java.util.List;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.BDDMockito.given;
 
-
 @SpringBootTest({"ccd.data-store.api.baseurl=http://localhost:8982"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class SearchUserRolesConsumerTest extends BaseTest {
@@ -64,7 +63,6 @@ public class SearchUserRolesConsumerTest extends BaseTest {
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("ccdDataStoreAPI_caseAssignedUserRoles", "localhost", 8982, this);
 
-
     @Pact(provider = "ccdDataStoreAPI_caseAssignedUserRoles", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragmentForSearch(PactDslWithProvider builder) throws IOException {
         // @formatter:off
@@ -97,15 +95,11 @@ public class SearchUserRolesConsumerTest extends BaseTest {
     }
 
     private DslPart buildCaseAssignedRolesResponse() {
-        return newJsonBody(o -> {
-            o.array("case_users", a -> {
-                a.object(b -> {
-                    b.stringType("case_id", "1583841721773828");
-                    b.stringType("user_id", "0a5874a4-3f38-4bbd-ba4c");
-                    b.stringType("case_role", "[APPSOLICITOR]");
-                });
-            });
-        }).build();
+        return newJsonBody(o -> o.array("case_users", a -> a.object(b -> {
+            b.stringType("case_id", CASE_REFERENCE);
+            b.stringType("user_id", "0a5874a4-3f38-4bbd-ba4c");
+            b.stringType("case_role", "[APPSOLICITOR]");
+        }))).build();
     }
 
     private String createJsonObject(Object obj) throws IOException {

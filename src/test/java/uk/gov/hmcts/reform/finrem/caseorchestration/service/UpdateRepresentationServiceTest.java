@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerRepresentationChecker;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeInvalidRequestException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
@@ -201,8 +202,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).getFirst().getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).getFirst().getValue();
 
         assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -245,8 +246,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                 assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
                 assertNull(actualData.get(SOLICITOR_PHONE));
 
-                RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-                RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+                RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).getFirst().getValue();
+                RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).getFirst().getValue();
 
                 assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
                 assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -317,8 +318,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).getFirst().getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).getFirst().getValue();
 
         assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -335,7 +336,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowUnsupportedOperationException() throws Exception {
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsNull_thenThrowException()
+        throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
         when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
@@ -353,11 +355,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
             initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
                 .getCaseDetails();
-            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData().get("changeOrganisationRequestField");
+            Map<String, Object> changeOrganisationRequestField = (Map<String, Object>) initialDetails.getData()
+                .get("changeOrganisationRequestField");
             changeOrganisationRequestField.put("CaseRoleId", null);
         }
 
-        UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> updateRepresentationService
+        NoticeOfChangeInvalidRequestException ex = assertThrows(NoticeOfChangeInvalidRequestException.class, () -> updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe"));
 
         String expectedMessage = "12345678 - unexpected empty caseRoleId";
@@ -366,7 +369,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowUnsupportedOperationException()
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenChangeOfRequestCaseRoleIdIsUnrecognised_thenThrowException()
         throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
@@ -426,8 +429,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
         assertNull(actualData.get(RESP_SOLICITOR_PHONE));
 
-        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).getFirst().getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).getFirst().getValue();
 
         assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -488,8 +491,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
-        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
+        RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).getFirst().getValue();
+        RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).getFirst().getValue();
 
         assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -590,14 +593,15 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     private Map<String, Object> prepareSolAddressData(OrganisationsResponse organisationData) {
+        OrganisationContactInformation contactInformation = organisationData.getContactInformation().getFirst();
         return mapper.convertValue(Address.builder()
-            .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
-            .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())
-            .addressLine3(organisationData.getContactInformation().get(0).getAddressLine3())
-            .county(organisationData.getContactInformation().get(0).getCounty())
-            .country(organisationData.getContactInformation().get(0).getCountry())
-            .postTown(organisationData.getContactInformation().get(0).getTownCity())
-            .postCode(organisationData.getContactInformation().get(0).getPostcode())
+            .addressLine1(contactInformation.getAddressLine1())
+            .addressLine2(contactInformation.getAddressLine2())
+            .addressLine3(contactInformation.getAddressLine3())
+            .county(contactInformation.getCounty())
+            .country(contactInformation.getCountry())
+            .postTown(contactInformation.getTownCity())
+            .postCode(contactInformation.getPostcode())
             .build(), Map.class);
     }
 
