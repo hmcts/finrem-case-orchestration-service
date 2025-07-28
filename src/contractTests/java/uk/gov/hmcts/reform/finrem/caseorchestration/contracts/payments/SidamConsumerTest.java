@@ -22,7 +22,6 @@ import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
-
 @SpringBootTest({"idam.url: http://localhost:8888"})
 @TestPropertySource(locations = "classpath:application.properties")
 public class SidamConsumerTest extends BaseTest {
@@ -30,7 +29,6 @@ public class SidamConsumerTest extends BaseTest {
     @Autowired
     private IdamService idamService;
     private static final String AUTH_TOKEN = "Bearer someAuthorizationToken";
-
 
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("idamApi_users", "localhost", 8888, this);
@@ -58,19 +56,13 @@ public class SidamConsumerTest extends BaseTest {
         assertEquals("User is not Admin", "joe.bloggs@hmcts.net", userEmail);
     }
 
-
     private DslPart buildIdamDetailsResponseDsl() {
-        return newJsonBody((o) -> {
-            o.stringType("id",
-                    "123432")
-                .stringType("forename", "Joe")
-                .stringType("surname", "Bloggs")
-                .stringType("email", "joe.bloggs@hmcts.net")
-                .booleanType("active", true)
-                .array("roles", r -> r.stringType("caseworker"))
-            ;
-
-
-        }).build();
+        return newJsonBody(o -> o.stringType("id",
+                "123432")
+            .stringType("forename", "Joe")
+            .stringType("surname", "Bloggs")
+            .stringType("email", "joe.bloggs@hmcts.net")
+            .booleanType("active", true)
+            .array("roles", r -> r.stringType("caseworker"))).build();
     }
 }

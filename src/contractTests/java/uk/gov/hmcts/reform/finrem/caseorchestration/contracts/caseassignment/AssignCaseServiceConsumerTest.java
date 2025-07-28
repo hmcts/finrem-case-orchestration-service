@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.caseassignment;
 
-
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
@@ -40,7 +39,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
     private static final String SOME_SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
@@ -53,7 +52,6 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
 
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("acc_manageCaseAssignment", "localhost", 8889, this);
-
 
     @Pact(provider = "acc_manageCaseAssignment", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws JSONException, IOException {
@@ -73,7 +71,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
     }
 
     private DslPart buildAssignCasesResponseDsl() {
-        return newJsonBody((o) -> {
+        return newJsonBody(o -> {
             o.stringType("status_message",
                 "Roles Role1,Role2 from the organisation policies successfully assigned to the assignee.");
         }).build();
@@ -81,7 +79,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
 
     @Test
     @PactVerification()
-    public void verifyCaseAssignment() throws IOException, JSONException {
+    public void verifyCaseAssignment() throws JSONException {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
         given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl())
