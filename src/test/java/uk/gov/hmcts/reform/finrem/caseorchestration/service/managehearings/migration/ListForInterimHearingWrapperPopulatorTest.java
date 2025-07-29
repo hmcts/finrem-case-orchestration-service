@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.Hearing;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.ManageHearingsCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCase;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.managehearings.PartyOnCaseCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MhMigrationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PartyService;
@@ -124,8 +124,8 @@ class ListForInterimHearingWrapperPopulatorTest {
         underTest.populate(caseData);
 
         // Assert
-        List<PartyOnCaseCollection> expectedParties = List.of(
-            PartyOnCaseCollection.builder()
+        List<PartyOnCaseCollectionItem> expectedParties = List.of(
+            PartyOnCaseCollectionItem.builder()
                 .value(PartyOnCase.builder()
                     .role("[APPSOLICITOR]")
                     .label("Applicant Solicitor - Hamzah")
