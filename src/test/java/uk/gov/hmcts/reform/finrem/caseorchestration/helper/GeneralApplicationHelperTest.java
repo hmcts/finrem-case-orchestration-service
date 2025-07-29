@@ -367,6 +367,29 @@ class GeneralApplicationHelperTest {
             .getGeneralApplications().getFirst().getValue().getGeneralApplicationCreatedDate().toString());
     }
 
+    @Test
+    void givenGeneralApplicationWithReceivedFrom_whenPopulateGeneralApplicationSender_thenShouldSetSender() {
+        FinremCallbackRequest callbackRequest = callbackRequest();
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
+        GeneralApplicationCollectionData generalApplicationData = GeneralApplicationCollectionData.builder()
+            .generalApplicationItems(GeneralApplicationItems.builder()
+                .generalApplicationReceivedFrom("applicant")
+                .build())
+            .build();
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData = List.of(generalApplicationData);
+
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        helper.populateGeneralApplicationDataSender(caseData, generalApplicationCollectionData);
+
+        DynamicRadioList generalApplicationSender = generalApplicationCollectionData.getFirst()
+            .getGeneralApplicationItems().getGeneralApplicationSender();
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getCode());
+        assertEquals(APPLICANT, generalApplicationSender.getValue().getLabel());
+        assertEquals(3, generalApplicationSender.getListItems().size());
+    }
+
     private void assertData(List<GeneralApplicationItems> resultingList) {
         assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getCode());
         assertEquals(APPLICANT, resultingList.getFirst().getGeneralApplicationSender().getValue().getLabel());
