@@ -526,9 +526,9 @@ tasks.withType(Zip).configureEach {
 }
 
 tasks.named('checkstyleMain') {
-    maxWarnings = 185
+    maxWarnings = 183
 }
 
 tasks.named('checkstyleTest') {
-    maxWarnings = 500
+    maxWarnings = 499
 }
