@@ -70,7 +70,7 @@ class ManageHearingsMigrationAboutToSubmitHandlerTest {
                     .hearingTimeEstimate("2 hours")
                     .hearingTime("10:00 AM")
                     .hearingCourtSelection(null) // Assuming null for simplicity
-                    .hearingMode(null) // Assuming null for simplicity
+                    .hearingMode(null)
                     .wasMigrated(YesOrNo.YES)
                     .build())
                 .build());
